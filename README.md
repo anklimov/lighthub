@@ -1,8 +1,9 @@
-LightHub is Flexible, Arduino-Mega based SmartHome controller
+#LightHub 
+is Flexible, Arduino-Mega based SmartHome controller
 
 It allow to connect together:
 
-Contact sensors (switches, buttons etc)
+* Contact sensors (switches, buttons etc)
 * 1-Wire temperature sensors (up to 20 on single bus)
 * Standard nonexpensive Relay board with TTL inputs, (like this) to control AC powered lamps, floor heaters, boilers etc
 * Standard LED and AC DMX-512 dimmer boards
