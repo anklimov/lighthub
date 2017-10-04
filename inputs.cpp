@@ -121,11 +121,11 @@ void Input::Changed (int val)
 
   if (val)
             {  //send set command
-               if (scmd) client.publish(emit->valuestring,scmd->valuestring); else client.publish(emit->valuestring,"ON");
+               if (!scmd) client.publish(emit->valuestring,"ON"); else  if (strlen(scmd->valuestring)) client.publish(emit->valuestring,scmd->valuestring); 
             }
        else
             {  //send reset command
-              if (rcmd) client.publish(emit->valuestring,rcmd->valuestring); else client.publish(emit->valuestring,"OFF");   
+              if (!rcmd) client.publish(emit->valuestring,"OFF");  else  if (strlen(rcmd->valuestring)) client.publish(emit->valuestring,rcmd->valuestring);
             } 
   }
 
@@ -136,11 +136,11 @@ void Input::Changed (int val)
       {
        if (val)
             {  //send set command
-               if (scmd) it.Ctrl(txt2cmd(scmd->valuestring),0,NULL,true); else it.Ctrl(CMD_ON,0,NULL,true);
+               if (!scmd) it.Ctrl(CMD_ON,0,NULL,true); else if   (strlen(scmd->valuestring)) it.Ctrl(txt2cmd(scmd->valuestring),0,NULL,true); 
             }
        else
             {  //send reset command
-               if (rcmd) it.Ctrl(txt2cmd(scmd->valuestring),0,NULL,true); else it.Ctrl(CMD_OFF,0,NULL,true);    
+               if (!rcmd) it.Ctrl(CMD_OFF,0,NULL,true); else if  (strlen(rcmd->valuestring)) it.Ctrl(txt2cmd(rcmd->valuestring),0,NULL,true);      
             }
       }
   }

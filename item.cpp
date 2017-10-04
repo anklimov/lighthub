@@ -599,6 +599,9 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t  cmd)
   }
 int Item::SendCmd(short cmd,short n, int * Par)
  {
+
+/// ToDo: relative patches, configuration
+  
   char addrstr[32];
   //char addrbuf[17];
   char valstr[16]="";
@@ -801,12 +804,17 @@ int Item::checkModbus(int data)
             if (d)  
                 
                 { // Actually turned on
-                  SendCmd(0,1,&d); //update OH
-                  setCmd(CMD_ON); 
-                  setVal(d); //Storing
+                  if (cmd==CMD_OFF || cmd==CMD_HALT) SendCmd(CMD_ON); //update OH with ON if it was turned off before
+                  SendCmd(0,1,&d); //update OH with value
+                  setCmd(CMD_ON);  //store command
+                  setVal(d);       //store value
                   } 
               else {
-                  if (cmd!=CMD_HALT && cmd!=CMD_OFF) {setCmd(CMD_OFF); SendCmd(CMD_OFF); }
+                  if (cmd!=CMD_HALT && cmd!=CMD_OFF) 
+                 {
+                  setCmd(CMD_OFF); // store command (not value)
+                  SendCmd(CMD_OFF);// update OH
+                  }
                     }
                 } //if data changed
   }             
