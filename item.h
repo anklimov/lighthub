@@ -93,6 +93,8 @@ class Item
   int isActive();
   void Parse();
   int checkModbus();
+  int checkModbus(int data);
+
   int checkFM();
 
 };

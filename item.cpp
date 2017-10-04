@@ -26,8 +26,10 @@ e-mail    anklimov@gmail.com
 #include <PubSubClient2.h>
 
 short modbusBusy=0;
+extern aJsonObject * modbusitem; 
 
-extern int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value);
+
+int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value);
 extern PubSubClient client;
 //extern const char* outprefix;
 const char outprefix[] PROGMEM  = "/myhome/s_out/";
@@ -750,41 +752,65 @@ result = node.readHoldingRegisters(20-1, 4);
   {
   if (modbusBusy) return -1;
   modbusBusy=1;
+  
   node.begin(9600,SERIAL_8E1,13);
    
-  uint8_t result;
-  int     data;
-   
-  node.setSlave(getArg());
-  result = node.readHoldingRegisters(0, 1);
+  uint8_t   result;
   
-  // do something with data if read is successful
+  uint16_t  addr =  getArg(0);
+  uint16_t  reg  =  getArg(1);
+  short     mask  = getArg(2);
+ 
+  int       data;
+  
+  node.setSlave(addr);
+  result = node.readHoldingRegisters(reg, 1);
+
   if (result == node.ku8MBSuccess)
   { 
- 
        data=node.getResponseBuffer(0);
        Serial.print(F("Modbus Val: ")); Serial.println(data,HEX);
-       if (getArg(2)) data>>=8; data&=0xff;
-       data=map(data,0,0x3f,0,100);
-
-       if (getVal()!=data) 
-            {
-            SendCmd(0,1,&data); //update OH
-       
-            switch (getCmd()) //Save value if not turned off
-            {case CMD_OFF:
-             case CMD_HALT:
-             break;
-             default:      
-             setVal(data);  
-            } //switch
-            } //if data changed
-   
-  } else  {Serial.print(F("Modbus pooling error=")); Serial.println(result,HEX); }
+       checkModbus(data);  
+  } 
+     else  {Serial.print(F("Modbus pooling error=")); Serial.println(result,HEX); }
 
    modbusBusy=0;
-  }
 
+// Looking 1 step ahead for modbus item, which uses same register
+ Item nextItem(modbusitem->next);
+ if (modbusitem &&  nextItem.isValid() && nextItem.itemType==CH_MODBUS && nextItem.getArg(0)==addr && nextItem.getArg(1)==reg)
+ {
+  nextItem.checkModbus(data); 
+  modbusitem=modbusitem->next;
+  if (!modbusitem) modbusitem=items->child; 
+ }
+   
+}
+
+
+int Item::checkModbus(int data)
+  {
+  short     mask  = getArg(2);
+  int       d=data;
+  if (mask) d>>=8; d&=0xff;
+  d=map(d,0,0x3f,0,100);
+  int cmd=getCmd();
+   Serial.println(d);
+       if (getVal()!=d || d && cmd==CMD_OFF || d && cmd==CMD_HALT) //volume changed or turned on manualy 
+            { 
+            if (d)  
+                
+                { // Actually turned on
+                  SendCmd(0,1,&d); //update OH
+                  setCmd(CMD_ON); 
+                  setVal(d); //Storing
+                  } 
+              else {
+                  if (cmd!=CMD_HALT && cmd!=CMD_OFF) {setCmd(CMD_OFF); SendCmd(CMD_OFF); }
+                    }
+                } //if data changed
+  }             
+   
 int Item::Pool()
 {
   switch (itemType)
