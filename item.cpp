@@ -25,7 +25,7 @@ e-mail    anklimov@gmail.com
 #include <ModbusMaster.h>
 #include <PubSubClient2.h>
 
-
+short modbusBusy=0;
 
 extern int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value);
 extern PubSubClient client;
@@ -48,16 +48,20 @@ int txt2cmd (char * payload)
   return cmd;
 }
 
-Item::Item(char * name) //Constructor
+const short defval[4] = {0,0,0,0}; //Type,Arg,Val,Cmd
+
+Item::Item(aJsonObject * obj)//Constructor
+{ 
+       itemArr= obj;
+       Parse();
+}
+       
+void Item::Parse()    
 {
-  if (name) 
-       itemArr= aJson.getObjectItem(items, name);
-  else itemArr=NULL;
-    
   if (isValid())
   {
   // Todo - avoid static enlarge for every types 
-  for (int i=aJson.getArraySize(itemArr);i<4;i++) aJson.addItemToArray(itemArr,aJson.createItem(int(0))); //Enlarge item to 4 elements. VAL=int if no other definition in conf
+  for (int i=aJson.getArraySize(itemArr);i<4;i++) aJson.addItemToArray(itemArr,aJson.createItem(int(defval[i]))); //Enlarge item to 4 elements. VAL=int if no other definition in conf
               
               
   itemType = aJson.getArrayItem(itemArr,I_TYPE)->valueint;
@@ -66,9 +70,18 @@ Item::Item(char * name) //Constructor
 
   
         Serial.print(F(" Item:"));
-        Serial.println(name);
-        Serial.print(itemType);Serial.print(":");Serial.println(getArg());
+        Serial.print(itemArr->name);Serial.print(F(" T:"));
+        Serial.print(itemType);Serial.print(" =");Serial.println(getArg());
   }      
+}
+
+Item::Item(char * name) //Constructor
+{
+  if (name) 
+       itemArr= aJson.getObjectItem(items, name);
+  else itemArr=NULL;
+    
+Parse();    
 }
 
 uint8_t Item::getCmd()
@@ -87,10 +100,10 @@ void Item::setCmd(uint8_t cmd)
   t->valueint=cmd;
 }
 
-int Item::getArg() //Return arg int or first array element if Arg is array
+int Item::getArg(short n) //Return arg int or first array element if Arg is array
 { if (!itemArg) return -1;
   if (itemArg->type==aJson_Int) return itemArg->valueint;
-      else if  (itemArg->type==aJson_Array) return aJson.getArrayItem(itemArg,0)->valueint;
+      else if  (itemArg->type==aJson_Array) return aJson.getArrayItem(itemArg,n)->valueint;
            else return -2;
 }
 /*
@@ -168,17 +181,15 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
   
   int iaddr=getArg();
   HSVstore st; 
-
-
- //Store Parameter(s) into json VAL
+  //Store Parameter(s) into json VAL
 
 
 
   switch (cmd) 
   {
-  
+  int t;
    case CMD_TOGGLE: 
-    switch (getCmd())
+    switch (t=getCmd())
     {
     case CMD_ON:
     case CMD_SET:
@@ -186,19 +197,24 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
       break;
     case CMD_OFF:
     case CMD_HALT:
+    case  0:
+    case -1:       //No stored command yet
       cmd=CMD_ON;
       break;       
     }//switch old cmd
-   
+   //Serial.print("Tog/oldcmd:");Serial.print(t);Serial.print(" new ");Serial.println(cmd);
    break;
  
    case CMD_RESTORE:
-     if (itemType!=CH_GROUP) //individual threating of channels
-     switch (getCmd())
-    { case CMD_HALT:
-  //    Serial.print("LastCmd:");Serial.println(t);
-      cmd=CMD_ON;
+     if (itemType!=CH_GROUP) //individual threating of channels. Ignore restore command for groups
+     switch (t=getCmd())
+     { 
+      case CMD_HALT: //previous command was HALT ?
+      Serial.print("Restored from:");Serial.println(t);
+      cmd=CMD_ON;    //turning on
       break; 
+      default:
+      return -3;
     }//switch old cmd 
   } //switch cmd
       
@@ -210,8 +226,11 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
      
      switch (itemType)
      {
-      case CH_GROUP:
+     
       case CH_RGBW: //only if configured VAL array
+       if (!Par[1]) itemType=CH_WHITE;
+      case CH_GROUP: //Save for groups as well 
+      case CH_RGB:
           st.h=Par[0];
           st.s=Par[1];
           st.v=Par[2];
@@ -232,18 +251,54 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
      
      break;
      
-     case CMD_ON: //retrive stored values
+     case CMD_ON: 
      if (getCmd()!=CMD_ON)
-        {
-             st.aslong=getVal();//Serial.print("Returned getVal: ");Serial.println(st.aslong);
-             if (st.aslong>=0)
-                {
-                Par[0]=st.h;
-                Par[1]=st.s;
-                Par[2]=st.v;
-                }
+     
+        {    
+             short params=0;
+             //retrive stored values
+             st.aslong=getVal(); 
+             if (st.aslong>0)  //Stored smthng
+
+                switch (itemType)
+               {
+                  //case CH_GROUP: 
+                  case CH_RGBW: 
+                  case CH_RGB:
+                  Par[0]=st.h;
+                  Par[1]=st.s;
+                  Par[2]=st.v;
+                  params=3;
+                  SendCmd(0,params,Par); // Send restored triplet
+                  break;
+          
+                  case CH_DIMMER:         //Everywhere, in flat VAL
+                  case CH_MODBUS:           
+                  case CH_VC:
+                  case CH_VCTEMP:
+                  Par[0]=st.aslong;
+                  params=1;
+                  SendCmd(0,params,Par);  // Send restored parameter
+                  break;
+                  case CH_THERMO:
+                  Par[0]=st.aslong;
+                  params=0;
+                  SendCmd(CMD_ON);  // Just ON (switch)
+                  break;
+                  default:
+                  SendCmd(cmd);          // Just send ON
+               }//itemtype
+                   else 
+                      {// Default settings
+                        Serial.print(st.aslong); 
+                        Serial.println(F(": No stored values - default"));
+                        Par[0]=100;
+                        Par[1]=0;
+                        Par[2]=100;
+                      }
                 
-             for (short i=0;i<3 ;i++) 
+                               
+             for (short i=0;i<params ;i++) 
              {
               Serial.print(F("Restored: "));Serial.print(i);Serial.print("=");Serial.println(Par[i]);
               }
@@ -252,48 +307,55 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
           setCmd(cmd);
         }
        else
-        {  //Double ON - apply special preset
+        {  //Double ON - apply special preset - clean white full power
           switch (itemType)
           {
             case CH_RGBW:
-              Serial.println(F("White: "));
+              Serial.println(F("Force White"));
               itemType=CH_WHITE;
-          //    Par[2]=getVal(2); 
-            //  if (Par[2]<0) 
-              Par[2]=100;
+              Par[1]=0;   //Zero saturation
+              Par[2]=100; //Full power
+              
+              // Store
+              st.h=Par[0];
+              st.s=Par[1];
+              st.v=Par[2];
+              setVal(st.aslong);  
+              
+              //Send to OH
+              SendCmd(0,3,Par);          
               break;
-          }
-        }
+          } //itemtype
+        } //else
+
+        //Serial.print("Sa:");Serial.println(Par[1]);
+        if ((itemType==CH_RGBW) && (Par[1]==0)) itemType=CH_WHITE;
        
-     break;
+       
+     break; //CMD_ON
      
      case CMD_OFF:
      
          Par[0]=0;Par[1]=0;Par[2]=0;
          setCmd(cmd);
+         SendCmd(cmd);
      break;
 
      case CMD_HALT:
-     if (getCmd()!=CMD_OFF) 
-     {
-       Par[0]=0;Par[1]=0;Par[2]=0;
+         
+         if (isActive()>0) 
+         {
+         Par[0]=0;Par[1]=0;Par[2]=0;
          setCmd(cmd);
-         Serial.print(itemType);Serial.println(" Halted");
-     }
- 
-        
+         SendCmd(CMD_OFF);
+         Serial.println(" Halted");
+         }
+       
      
   }//switch cmd
 
-/*
- Serial.print("go: ");
-    for (short i=0;i<3 ;i++) 
-             {
-              Serial.print(i);Serial.print("=");Serial.println(Par[i]);
-              }
-  */     
+  
 
-  if (send) SendCmd(cmd,n,Par); 
   
        switch (itemType)
        {
@@ -339,7 +401,7 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
            int _reg = aJson.getArrayItem(itemArg,1)->valueint;
            int _mask= aJson.getArrayItem(itemArg,2)->valueint;
                
-          modbusSet(_addr,_reg,_mask,map(Par[0],0,100,0,0x1f));   
+          modbusSet(_addr,_reg,_mask,map(Par[0],0,100,0,0x3f));   
            }
         break;}
           
@@ -353,7 +415,7 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
             {
             Item it (i->valuestring);
 //            it.copyPar(itemVal);   
-            it.Ctrl(cmd,n,Par,true);
+            it.Ctrl(cmd,n,Par,send); //// was true
             i=i->next;
             } //while
         } //if
@@ -434,7 +496,7 @@ if (items)
   } 
 }
 
-*/
+
 void PooledItem::Idle()
 {
 if (PoolingInterval)
@@ -448,7 +510,7 @@ if (PoolingInterval)
 
 
 
- /*
+
 addr 10d
 Снять аварию 42001 (2001=7d1) =>4
 
@@ -481,12 +543,7 @@ POOL  2101x10
 
 */
 
-int Item::Pool()
-{
-  
-  }
 
-extern short modbusBusy;
 extern ModbusMaster node;
 
 int Item::VacomSetFan (int addr, int8_t  val)
@@ -541,8 +598,8 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t  cmd)
 int Item::SendCmd(short cmd,short n, int * Par)
  {
   char addrstr[32];
-  char addrbuf[17];
-  char valstr[16];
+  //char addrbuf[17];
+  char valstr[16]="";
 
   strcpy_P (addrstr,outprefix);
   strncat (addrstr,itemArr->name,sizeof(addrstr)); ////
@@ -558,16 +615,185 @@ int Item::SendCmd(short cmd,short n, int * Par)
     strcpy(valstr,"OFF");
     break;
     // TODO send Par
-    //case 0:
-    //case CMD_SET:
-    ///////////sprintf(valstr,"%d",Par[0]); 
-    default:
-    return -1;
+    case 0:
+    case CMD_SET:
+    if (Par) 
+              for (short i=0;i<n;i++) 
+                      {
+                      char num [4];  
+                      snprintf(num,sizeof(num),"%d",Par[i]);
+                      strncat(valstr,num,sizeof(valstr));
+                      if (i!=n-1)    
+                          {
+                            strcpy(num,",");
+                            strncat(valstr,num,sizeof(valstr));
+                          }
+                      }
+     break;                 
+     default:
+     return -1;
   }
   
   Serial.print(addrstr);Serial.print("->");Serial.println(valstr);
   client.publish(addrstr, valstr);
   return 0; 
  }
+
+ int Item::isActive()
+{
+  HSVstore st;
+  int val=0; 
+
+if (!isValid()) return -1;
+//Serial.print(itemArr->name);
+int cmd=getCmd();
+switch (cmd)
+{
+  case CMD_ON:
+  //Serial.println(" active");
+  return 1;
+  case CMD_OFF:
+  case CMD_HALT:
+  //Serial.println(" inactive");
+  return 0;
+}
+
+ st.aslong=getVal(); 
  
+switch (itemType)
+{
+  //case CH_GROUP: 
+   case CH_RGBW: 
+   case CH_RGB:
+                 
+   val=st.v;
+   break;
+   
+   case CH_DIMMER:         //Everywhere, in flat VAL
+   case CH_MODBUS:
+   case CH_THERMO:
+   case CH_VC:
+   case CH_VCTEMP:
+   val=st.aslong;
+} //switch 
+Serial.print(":=");Serial.println(val);
+ if (val) return 1; else return 0;
+}
+
+
+
+  int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value)
+  {
+   
+   if (modbusBusy) return -1;
+   modbusBusy=1;
+   node.begin(9600,SERIAL_8E1,13);
+   node.setSlave(addr);  
+  
+if (_mask) 
+      {value <<= 8; value |= (0xff);}
+  else {value &= 0xff; value |= (0xff00);}
+  
+  Serial.print(addr);Serial.print("=>");Serial.print(_reg,HEX);Serial.print(":");Serial.println(value,HEX);
+  
+  node.writeSingleRegister(_reg,value);
+  modbusBusy=0; 
+  }
+
+
+int Item::checkFM()
+  {
+      if (modbusBusy) return -1;
+    modbusBusy=1;
+    
+  uint8_t j, result;
+  uint16_t data[1];
+   node.begin(9600,SERIAL_8N1,13);
+
+  node.setSlave(getArg());
+  
+  result = node.readHoldingRegisters(2101-1, 10);
+  
+  // do something with data if read is successful
+  if (result == node.ku8MBSuccess)
+  { Serial.print(F(" FM Val :"));
+    for (j = 0; j < 10; j++)
+    {
+      data[j] = node.getResponseBuffer(j);
+      Serial.print(data[j],HEX);Serial.print("-");
+     
+    }
+    Serial.println();
+  } else  {Serial.print(F("Modbus pooling error=")); Serial.println(result,HEX); }
+
+result = node.readHoldingRegisters(20-1, 4);
+  
+  // do something with data if read is successful
+  if (result == node.ku8MBSuccess)
+  { Serial.print(F(" PI Val :"));
+    for (j = 0; j < 4; j++)
+    {
+      data[j] = node.getResponseBuffer(j);
+      Serial.print(data[j]);Serial.print("-");
+     
+    }
+    Serial.println();
+  } else  {Serial.print(F("Modbus pooling error=")); Serial.println(result,HEX); }
+
+  
+
+   modbusBusy=0;
+  }
+
+  
+  int Item::checkModbus()
+  {
+  if (modbusBusy) return -1;
+  modbusBusy=1;
+  node.begin(9600,SERIAL_8E1,13);
+   
+  uint8_t result;
+  int     data;
+   
+  node.setSlave(getArg());
+  result = node.readHoldingRegisters(0, 1);
+  
+  // do something with data if read is successful
+  if (result == node.ku8MBSuccess)
+  { 
+ 
+       data=node.getResponseBuffer(0);
+       Serial.print(F("Modbus Val: ")); Serial.println(data,HEX);
+       if (getArg(2)) data>>=8; data&=0xff;
+       data=map(data,0,0x3f,0,100);
+
+       if (getVal()!=data) 
+            {
+            SendCmd(0,1,&data); //update OH
+       
+            switch (getCmd()) //Save value if not turned off
+            {case CMD_OFF:
+             case CMD_HALT:
+             break;
+             default:      
+             setVal(data);  
+            } //switch
+            } //if data changed
+   
+  } else  {Serial.print(F("Modbus pooling error=")); Serial.println(result,HEX); }
+
+   modbusBusy=0;
+  }
+
+int Item::Pool()
+{
+  switch (itemType)
+          {
+            case CH_MODBUS:
+                checkModbus();
+                break;
+            case CH_VC:
+                checkFM();
+          }      
+  }
 

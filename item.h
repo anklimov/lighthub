@@ -69,9 +69,10 @@ class Item
  
 
   Item(char * name);
+  Item(aJsonObject * obj);
   boolean isValid ();
   virtual int Ctrl(short cmd, short n=0, int * Par=NULL, boolean send=false);
-  int getArg();
+  int getArg(short n=0);
   boolean getEnableCMD(int delta);
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array
@@ -89,10 +90,15 @@ class Item
   protected:  
   int VacomSetFan (int addr, int8_t  val);
   int VacomSetHeat(int addr, int8_t  val, int8_t  cmd=0);
+  int isActive();
+  void Parse();
+  int checkModbus();
+  int checkFM();
 
 };
 
 
+/*
 
 class PooledItem : public Item
 {
@@ -108,7 +114,7 @@ class PooledItem : public Item
 
 
 
-/*
+
 
 class Vacon : public Item
 {

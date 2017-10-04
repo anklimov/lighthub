@@ -59,3 +59,14 @@ void SetAddr(char * out,  uint8_t* addr) {
 }
 
 
+int getInt(char ** chan)
+{
+  int ch = atoi(*chan);
+  *chan=strchr(*chan,',');
+  
+  if (*chan) *chan+=1;
+  //Serial.print(F("Par:")); Serial.println(ch);
+  return ch;
+  
+}
+

@@ -36,31 +36,20 @@ e-mail    anklimov@gmail.com
  
 Todo
 ===
-A/C control
+A/C control/Dimmer ?
 rotary encoder local ctrl
 analog in local ctrl
-Light sensor analog in
 Smooth regulation/fading
-Phase dimmer board
 PID Termostat out
 dmx relay out
--IRDA in
--MCS 350 out ?
--HDMI sw out?
-Simple bridging (1w <-> dmx,modbus etc) ?
-
 
 */
 
 //define NOETHER
 
-
-//#include <lib_dmx.h> 
 #include <Ethernet.h>
 #include <PubSubClient2.h>
 #include <SPI.h>
-
-//#include "owSwitch.h"
 #include "utils.h"
 #include "owTerm.h"
 
@@ -68,22 +57,30 @@ Simple bridging (1w <-> dmx,modbus etc) ?
 //#include "pixeltypes.h"
 //#include  "hsv2rgb.h"
 #include <string.h>
-//#include <DMXSerial.h>
 #include <ModbusMaster.h>
 #include "aJSON.h"
 #include "HTTPClient.h"
-//#include "CommandLine.h"
 #include <Cmd.h>
 #include "stdarg.h"
 #include <avr/pgmspace.h>
-//#include <Artnet.h>
 #include <EEPROM.h>
 #include "dmx.h"
 #include "item.h"
 #include "inputs.h"
 #include <avr/wdt.h>
 
+// Hardcoded definitions
+#define GIST 2
+#define serverip "192.168.88.2"
+IPAddress server(192, 168, 88, 2); //TODO - configure it
+//char* inprefix=("/myhome/in/");
+//char* outprefix=("/myhome/s_out/");
+//char* subprefix=("/myhome/in/#");
 
+#define inprefix "/myhome/in/"
+const char outprefix[] PROGMEM  = "/myhome/s_out/";
+#define subprefix "/myhome/in/#"
+//
 
 aJsonObject *root  =  NULL;
 aJsonObject *items =  NULL;
@@ -92,6 +89,13 @@ aJsonObject *inputs =  NULL;
 aJsonObject *mqttArr =  NULL;
 aJsonObject *modbusArr = NULL;
 aJsonObject *owArr =  NULL;
+
+unsigned long modbuscheck=0;
+unsigned long incheck    =0;
+unsigned long lanCheck   =0;
+unsigned long thermocheck=0;
+
+aJsonObject * modbusitem= NULL; 
 
 
 // CommandLine instance.
@@ -104,39 +108,16 @@ int  lanStatus = 0;
 ModbusMaster node(2,0x60); //TODO dynamic alloc
 
 
-IPAddress server(192, 168, 88, 2);
 byte mac[6];
 
 EthernetClient ethClient;
 PubSubClient client(ethClient);
 
 
-//char* inprefix=("/myhome/in/");
-//char* outprefix=("/myhome/s_out/");
-//char* subprefix=("/myhome/in/#");
-
-#define inprefix "/myhome/in/"
-const char outprefix[] PROGMEM  = "/myhome/s_out/";
-#define subprefix "/myhome/in/#"
-//#define subprefix "#"
-
 int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value);
 int freeRam (void) ;
 
-int getInt(char ** chan)
-{
-  int ch = atoi(*chan);
-  *chan=strchr(*chan,',');
-  
-  if (*chan) *chan+=1;
-  //Serial.print(F("Par:")); Serial.println(ch);
-  return ch;
-  
-}
 
-
-
-////
 int itemCtrl2(char* name,int r,int g, int b, int w)
 {
   aJsonObject *itemArr= aJson.getObjectItem(items, name);    
@@ -199,16 +180,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
  // short outtopic = strncmp(topic,F(outprefix),strlen(outprefix));
 
  cmd= txt2cmd((char*) payload);
-  /*
-  // Check for command
-   if (strcmp((char*)payload,"ON")==0) cmd=CMD_ON;
-      else if  (strcmp((char*)payload,"OFF")==0) cmd=CMD_OFF;
-           else if (strcmp((char*)payload,"RESTORE")==0) cmd=CMD_RESTORE;
-                  else if  (strcmp((char*)payload,"TOGGLE")==0) cmd=CMD_TOGGLE;
-  //Serial.print("Cmd:");Serial.println(cmd);
-*/
-   char * t;
-   if (t=strrchr (topic,'/')) strncpy(subtopic,t+1 , 20);
+ char * t;
+ if (t=strrchr (topic,'/')) strncpy(subtopic,t+1 , 20);
    
    
  
@@ -279,10 +252,10 @@ void restoreState()
           client.publish("/myhome/out/RestoreState","ON");
 };
 
-unsigned long lanCheck=0;
+
 
 int getConfig (int arg_cnt, char **args);
-int  lanloop() {
+int  lanLoop() {
   static short _once=1;
 
 #ifdef NOETHER
@@ -489,7 +462,7 @@ void Changed (int i, DeviceAddress addr, int val)
 
    if (owItem) 
       {
-      thermoSetCurTemp(owItem,val);
+      thermoSetCurTemp(owItem,val);  ///TODO: Refactore using Items interface
       }
 
   
@@ -540,6 +513,7 @@ void parseConfig()
                 }
                 
             items =    aJson.getObjectItem(root,"items"); 
+            modbusitem = items->child;
             inputs =    aJson.getObjectItem(root,"in"); 
             
             modbusArr= aJson.getObjectItem(root, "modbus");
@@ -688,7 +662,7 @@ int getConfig (int arg_cnt, char **args)
     snprintf(URI, sizeof(URI), "/%02x-%02x-%02x-%02x-%02x-%02x.config.json",mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     Serial.println(F("Config URI: "));Serial.println(URI);
     
-    HTTPClient hclient("192.168.88.2",hserver,80);
+    HTTPClient hclient(serverip,hserver,80);
    
    // FILE is the return STREAM type of the HTTPClient
     result = hclient.getURI( URI);
@@ -746,7 +720,7 @@ void setup() {
   //Serial.begin(115200);
    cmdInit(115200);
 
-  Serial.println(F("\nLazyhome.ru LightHub controller v0.8"));
+  Serial.println(F("\nLazyhome.ru LightHub controller v0.9"));
   
   
   for (short i=0;i<6;i++) mac[i]=EEPROM.read(i);
@@ -783,117 +757,11 @@ void setup() {
 
 
 
-unsigned long modbus_check=0; 
-short modbusBusy=0;
-
-  int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value)
-  {
-   
-    if (modbusBusy) return -1;
-    modbusBusy=1;
-   node.begin(9600,SERIAL_8E1,13);
-  node.setSlave(addr);  
-  /*  
-    uint8_t res = node.readHoldingRegisters(_reg, 1);
-     if (res != node.ku8MBSuccess) return -1;
-    uint16_t b0=node.getResponseBuffer(0);
-    //uint8_t b1=node.getResponseBuffer(1);
-    //Serial.print(b0,HEX);Serial.println(b1,HEX);
-    delay(5);
-    
-    
-  if (_mask) 
-      {value <<= 8; value |= (b0 & 0xff);}
-  else {value &= 0xff; value |= (b0 & 0xff00);} 
-*/
-
-if (_mask) 
-      {value <<= 8; value |= (0xff);}
-  else {value &= 0xff; value |= (0xff00);}
-  
-  Serial.print(addr);Serial.print("=>");Serial.print(_reg,HEX);Serial.print(":");Serial.println(value,HEX);
-  
-  node.writeSingleRegister(_reg,value);
-  modbusBusy=0; 
-  }
+//unsigned long modbus_check=0; 
 
 
 
-int checkFMDev(int dev)
-  {
-      if (modbusBusy) return -1;
-    modbusBusy=1;
-    
-  uint8_t j, result;
-  uint16_t data[1];
-   node.begin(9600,SERIAL_8N1,13);
-
-  node.setSlave(dev);
-  
-  result = node.readHoldingRegisters(2101-1, 10);
-  
-  // do something with data if read is successful
-  if (result == node.ku8MBSuccess)
-  { Serial.print(F(" FM Val :"));
-    for (j = 0; j < 10; j++)
-    {
-      data[j] = node.getResponseBuffer(j);
-      Serial.print(data[j],HEX);Serial.print("-");
-     
-    }
-    Serial.println();
-  } else  {Serial.print(F("Modbus pooling error=")); Serial.println(result,HEX); }
-
-result = node.readHoldingRegisters(20-1, 4);
-  
-  // do something with data if read is successful
-  if (result == node.ku8MBSuccess)
-  { Serial.print(F(" PI Val :"));
-    for (j = 0; j < 4; j++)
-    {
-      data[j] = node.getResponseBuffer(j);
-      Serial.print(data[j]);Serial.print("-");
-     
-    }
-    Serial.println();
-  } else  {Serial.print(F("Modbus pooling error=")); Serial.println(result,HEX); }
-
-  
-
-   modbusBusy=0;
-  }
-
-  
-  int checkDev(int dev)
-  {
-      if (modbusBusy) return -1;
-    modbusBusy=1;
-  node.begin(9600,SERIAL_8E1,13);
-   
-  uint8_t j, result;
-  uint16_t data[1];
-
-  node.setSlave(dev);
-  result = node.readHoldingRegisters(0, 1);
-  
-  // do something with data if read is successful
-  if (result == node.ku8MBSuccess)
-  { Serial.print(F(" Modbus Val :"));
-    for (j = 0; j < 1; j++)
-    {
-      data[j] = node.getResponseBuffer(j);
-      Serial.print(data[j],HEX);Serial.print("-");
-     
-    }
-    Serial.println();
-  } else  {Serial.print(F("Modbus pooling error=")); Serial.println(result,HEX); }
-
-   modbusBusy=0;
-  }
-
-
-
-
+/*
 void modbusloop()
 {
   
@@ -910,29 +778,27 @@ void modbusloop()
   Serial.println(freeRam());
   }
 }
-
+*/
 
 void loop(){
   wdt_reset();
 
  //commandLine.update();
   cmdPoll();
-if (lanloop() >1) {client.loop();  if (artnet) artnet->read();}
+if (lanLoop() >1) {client.loop();  if (artnet) artnet->read();}
 if (owReady && owArr)      owLoop();
 
     unsigned long lastpacket = DMXSerial.noDataSince();
    // if (lastpacket && (lastpacket%10==0)) Serial.println(lastpacket);
 
  DMXCheck();
- if (modbusArr) modbusloop();
- if (items)   thermoIdle();
- if (inputs)  inputIdle();
+ if (modbusArr && items) modbusLoop();
+ if (items)   thermoLoop();
+ if (inputs)  inputLoop();
 
 }
-//int imodbus=0;
-//unsigned short modbuspoll[]={0x60,0x61};
 
-
+// Idle handlers
 void owIdle(void) 
 { if (artnet) artnet->read();
   wdt_reset();
@@ -940,10 +806,10 @@ void owIdle(void)
   return;///
   Serial.print("o");
 
-if (lanloop() == 1) client.loop();
+if (lanLoop() == 1) client.loop();
 //if (owReady) owLoop();
  DMXCheck();
- //modbusloop();
+ //modbusLoop();
  }
 
 
@@ -952,17 +818,79 @@ void modbusIdle(void)
   //Serial.print("m");
     wdt_reset();
 
-if (lanloop() > 1) {client.loop();if (artnet) artnet->read();}
+if (lanLoop() > 1) {client.loop();if (artnet) artnet->read();}
 //if (owReady) owLoop();
  DMXCheck();
  //modbusloop();
  }
 
-#define GIST 2
-unsigned long thermocheck=0;
 
 
-void thermoIdle(void)
+// Loops
+
+
+
+void inputLoop(void)
+{ 
+
+ if (millis()>incheck)
+  { 
+  
+  aJsonObject * input= inputs->child;
+
+ while (input)
+                {
+                if ((input->type==aJson_Object) )
+                  {
+                    Input in(input);
+                    in.Pool();
+                    }
+                input=input->next;
+                  }
+
+ 
+  incheck=millis()+50;
+   
+  }
+
+}
+
+
+
+void modbusLoop(void)
+{ 
+ boolean done=false;
+ if (millis()>modbuscheck)
+  {   
+     while (modbusitem && !done)
+     {
+      if (modbusitem->type==aJson_Array)
+          { 
+            switch (aJson.getArrayItem(modbusitem, 0)->valueint)
+            {
+            case CH_MODBUS:
+            //case CH_VCTEMP:
+            case CH_VC:
+              {
+              Item it(modbusitem);
+              it.Pool();
+              modbuscheck=millis()+2000;
+              done=true; 
+              break; //case;
+              }
+            } //switch
+          
+         }//if
+     modbusitem=modbusitem->next;
+     if (!modbusitem) {modbusitem=items->child;return;} //start from 1-st element
+     } //while
+  }//if
+}
+
+
+// To be refactored
+
+void thermoLoop(void)
 { 
 #define T_ATTEMPTS 20
 #define IET_TEMP     0 
@@ -987,7 +915,7 @@ void thermoIdle(void)
             if (extArr && (aJson.getArraySize(extArr)>1) )
             {
             int curtemp =   aJson.getArrayItem(extArr, IET_TEMP)->valueint;
-            if   (!aJson.getArrayItem(extArr, IET_ATTEMPTS)->valueint) {Serial.println(F("Expired"));} else aJson.getArrayItem(extArr, IET_ATTEMPTS)->valueint--;
+            if   (!aJson.getArrayItem(extArr, IET_ATTEMPTS)->valueint) {Serial.print(item->name);Serial.println(F(" Expired"));} else aJson.getArrayItem(extArr, IET_ATTEMPTS)->valueint--;
              
             Serial.print(item->name);Serial.print(F(" Set:"));Serial.print(temp); Serial.print(F(" Curtemp:"));Serial.print(curtemp); Serial.print(F( " cmd:")); Serial.print(cmd),   
 
@@ -1012,32 +940,6 @@ void thermoIdle(void)
   
 }  
 
-long int incheck =0;
-
-void inputIdle(void)
-{ 
-
- if (millis()>incheck)
-  { 
-  
-  aJsonObject * input= inputs->child;
-
- while (input)
-                {
-                if ((input->type==aJson_Object) )
-                  {
-                    Input in(input);
-                    in.Pool();
-                    }
-                input=input->next;
-                  }
-
- 
-  incheck=millis()+50;
-   
-  }
-
-}
 
 
 short thermoSetCurTemp(char * name, short t)
@@ -1072,12 +974,10 @@ if (items)
 } //proc
 
 
-
 int freeRam () 
 {
   extern int __heap_start, *__brkval; 
   int v; 
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
 }
-
 
