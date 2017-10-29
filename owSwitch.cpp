@@ -80,10 +80,10 @@ int ow2408out(DeviceAddress addr,uint8_t cur)
   net->read_bytes(buf+3, 2);     
   //net.reset();
   PrintBytes(buf, 5);
-    Serial.print(" Out: ");Serial.print(buf[1],BIN);
-    Serial.print(" In: ");Serial.println(buf[4],BIN);
+    Serial.print(F(" Out: "));Serial.print(buf[1],BIN);
+    Serial.print(F(" In: "));Serial.println(buf[4],BIN);
   if (buf[3] != 0xAA) {
-      Serial.print("Write failure in DS2408 at ");
+      Serial.print(F("Write failure in DS2408 at "));
         PrintBytes(addr, 8, true);
         return -2;
      }  
@@ -97,7 +97,7 @@ if (!net) return -1;
  
  if ((devnum=owFind(addr))<0) return -1; 
  buf=regs[devnum];
-  Serial.print("Current: ");Serial.println(buf,BIN);
+  Serial.print(F("Current: "));Serial.println(buf,BIN);
   mask=0;
   int r,f;
   switch (subchan) {
@@ -107,7 +107,7 @@ if (!net) return -1;
            if (wstat[devnum] & (SW_PULSE0|SW_PULSE_P0)) 
               {
               wstat[devnum]|=SW_CHANGED_P0;
-              Serial.println("Rollback 0");
+              Serial.println(F("Rollback 0"));
               } 
            else {
            wstat[devnum]|=SW_PULSE0;
@@ -122,7 +122,7 @@ if (!net) return -1;
            if (wstat[devnum] & (SW_PULSE1|SW_PULSE_P1)) 
               {
               wstat[devnum]|=SW_CHANGED_P1;
-              Serial.println("Rollback 1");
+              Serial.println(F("Rollback 1"));
               } 
            else {
            wstat[devnum]|=SW_PULSE1;  
@@ -156,7 +156,7 @@ int cntrl2890(uint8_t* addr, int val) {
  uint8_t buf[13];
  if (!net) return -1; 
  // case 0x2C: //Dimmer
-     Serial.print("Update dimmer ");PrintBytes(addr, 8, true);Serial.print(" = ");
+     Serial.print(F("Update dimmer "));PrintBytes(addr, 8, true);Serial.print(F(" = "));
      Serial.println(val);
   
   net->reset();
@@ -270,7 +270,7 @@ int cntrl2413(uint8_t* addr, int subchan, int val) {
  uint8_t count =10;
  if (!net) return -1;  
  // case 0x85: //Switch
-     Serial.print("Update switch ");PrintBytes(addr, 8, false); Serial.print("/");Serial.print(subchan);Serial.print(" = ");Serial.println(val);
+     Serial.print(F("Update switch "));PrintBytes(addr, 8, false); Serial.print(F("/"));Serial.print(subchan);Serial.print(F(" = "));Serial.println(val);
   while (count--)
   {
   net->reset();
@@ -281,13 +281,13 @@ int cntrl2413(uint8_t* addr, int subchan, int val) {
   net->write(cmd);
   
   results = net->read();  
-  Serial.print("Got: "); Serial.println(results,BIN);
+  Serial.print(F("Got: ")); Serial.println(results,BIN);
     //Serial.println((~results & 0x0F),BIN); Serial.println ((results >> 4),BIN);
   
   ok = (~results & 0x0F) == (results >> 4); // Compare nibbles            
   results &= 0x0F;                          // Clear inverted values      
 
-  if (ok) {Serial.println("Read ok");break;} else {Serial.println("read Error");delay(1);}
+  if (ok) {Serial.println(F("Read ok"));break;} else {Serial.println(F("read Error"));delay(1);}
   } //while
   
   if (ok && (val>=0))
@@ -309,7 +309,7 @@ int cntrl2413(uint8_t* addr, int subchan, int val) {
         if (!val) set|=DS2413_OUT_PinB; else set &= ~DS2413_OUT_PinB;
   };
    set |= 0xFC;
-   Serial.print("New: ");Serial.println(set,BIN);
+   Serial.print(F("New: "));Serial.println(set,BIN);
    cmd = DS2413_ACCESS_WRITE;   
    net->write(cmd);
   
@@ -321,17 +321,17 @@ int cntrl2413(uint8_t* addr, int subchan, int val) {
   if (ack == DS2413_ACK_SUCCESS)
   {
   results=net->read();  
-  Serial.print("Updated ok: "); Serial.println(results,BIN);
+  Serial.print(F("Updated ok: ")); Serial.println(results,BIN);
   ok = (~results & 0x0F) == (results >> 4); // Compare nibbles     
   {
   if (ok) 
-        {Serial.println("Readback ok");
+        {Serial.println(F("Readback ok"));
         break;} 
-    else {Serial.println("readback Error");delay(1);}    
+    else {Serial.println(F("readback Error"));delay(1);}    
   }     
   results &= 0x0F;                          // Clear inverted values      
   } 
-  else Serial.println ("Write failed");;
+  else Serial.println (F("Write failed"));;
  
   } //while
   } //if 
@@ -352,7 +352,7 @@ int  sensors_ext(void)
     if (wstat[si] & SW_PULSE0) {
       wstat[si]&=~SW_PULSE0;
       wstat[si]|=SW_PULSE_P0;
-      Serial.println("Pulse0 in progress");
+      Serial.println(F("Pulse0 in progress"));
   
       return 500;
     }
@@ -361,7 +361,7 @@ int  sensors_ext(void)
       wstat[si]&=~SW_PULSE0_R;
       wstat[si]|=SW_PULSE_P0;
       regs[si] =(ow2408out(term[si],(regs[si] | SW_MASK) & ~SW_OUT0) & SW_INMASK) ^ SW_STAT0; 
-      Serial.println("Pulse0 in activated");
+      Serial.println(F("Pulse0 in activated"));
   
       return 500;
     }
@@ -369,7 +369,7 @@ int  sensors_ext(void)
       if (wstat[si] & SW_PULSE1) {
       wstat[si]&=~SW_PULSE1;
       wstat[si]|=SW_PULSE_P1;
-      Serial.println("Pulse1 in progress");
+      Serial.println(F("Pulse1 in progress"));
  
       return 500;
     }
@@ -378,14 +378,14 @@ int  sensors_ext(void)
       wstat[si]&=~SW_PULSE1_R;
       wstat[si]|=SW_PULSE_P1;
       regs[si] =(ow2408out(term[si],(regs[si] | SW_MASK) & ~SW_OUT1) & SW_INMASK) ^ SW_STAT1; 
-      Serial.println("Pulse0 in activated");
+      Serial.println(F("Pulse0 in activated"));
   
       return 500;
     }
 
     if (wstat[si] & SW_PULSE_P0) {
       wstat[si]&=~SW_PULSE_P0;
-      Serial.println("Pulse0 clearing");
+      Serial.println(F("Pulse0 clearing"));
       ow2408out(term[si],regs[si] | SW_MASK | SW_OUT0);
       
       if (wstat[si] & SW_CHANGED_P0) {
@@ -397,7 +397,7 @@ int  sensors_ext(void)
 
 if (wstat[si] & SW_PULSE_P1) {
       wstat[si]&=~SW_PULSE_P1;
-      Serial.println("Pulse1 clearing");
+      Serial.println(F("Pulse1 clearing"));
       ow2408out(term[si],regs[si] | SW_MASK | SW_OUT1);
       
       if (wstat[si] & SW_CHANGED_P1) {
@@ -421,7 +421,7 @@ if (wstat[si] & SW_PULSE_P1) {
         if (!(wstat[si] & SW_DOUBLECHECK))
           {
           wstat[si]|=SW_DOUBLECHECK; //suspected
-          Serial.println("DOUBLECHECK");
+          Serial.println(F("DOUBLECHECK"));
           return recheck_interval;
           }
         
@@ -441,7 +441,7 @@ if (wstat[si] & SW_PULSE_P1) {
   case 0x81:
   t=wstat[si];
   if (t!=regs[si]) 
-    { Serial.println("Changed"); 
+    { Serial.println(F("Changed")); 
      if (owChanged) owChanged(si,term[si],t);    
      regs[si]=t;
     }

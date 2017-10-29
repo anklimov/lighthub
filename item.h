@@ -88,7 +88,7 @@ class Item
   int SendCmd(short cmd,short n=0, int * Par=NULL);
   
   protected:  
-  int VacomSetFan (int addr, int8_t  val);
+  int VacomSetFan (int8_t  val, int8_t  cmd=0);
   int VacomSetHeat(int addr, int8_t  val, int8_t  cmd=0);
   int isActive();
   void Parse();

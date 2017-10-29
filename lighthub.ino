@@ -70,7 +70,8 @@ dmx relay out
 #include <avr/wdt.h>
 
 // Hardcoded definitions
-#define GIST 2
+//Thermostate histeresys
+#define GIST 2  
 #define serverip "192.168.88.2"
 IPAddress server(192, 168, 88, 2); //TODO - configure it
 //char* inprefix=("/myhome/in/");
@@ -205,19 +206,34 @@ void callback(char* topic, byte* payload, unsigned int length) {
    Item item (subtopic); 
    if (item.isValid())  
    {
-     if (!cmd)
+     switch (cmd)
      {
+      case 0:
+      {
       short i=0;
-      int Par[3];
-      
+      int Par[3];  
       
       while (payload && i<3)
           Par[i++]=getInt((char**)&payload); 
    
       item.Ctrl(0,i,Par);
+      }
+      break;
+
+      case -1: //Not known command
+      case -2: //JSON input (not implemented yet
+      break;
+
+      case CMD_ON:
+       
+       if (item.getEnableCMD(500)) item.Ctrl(cmd); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
+           else Serial.println("on Skipped");
+       
+      break;     
+      default: //some known command
+      item.Ctrl(cmd); 
+            
      } //ctrl
-     else if ((cmd!=CMD_ON) || (item.getEnableCMD(500))) item.Ctrl(cmd); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
-            else Serial.println("on Skipped");
    } //valid json
   } //no1wire
 }
@@ -720,7 +736,7 @@ void setup() {
   //Serial.begin(115200);
    cmdInit(115200);
 
-  Serial.println(F("\nLazyhome.ru LightHub controller v0.9"));
+  Serial.println(F("\nLazyhome.ru LightHub controller v0.91"));
   
   
   for (short i=0;i<6;i++) mac[i]=EEPROM.read(i);
@@ -755,30 +771,6 @@ void setup() {
  
 }
 
-
-
-//unsigned long modbus_check=0; 
-
-
-
-/*
-void modbusloop()
-{
-  
-  if (millis()>modbus_check)
-  { 
-  checkDev(0x60);
-  delay(10);
-  checkDev(0x61);
-    delay(10);
-  checkFMDev(10);  
-
-  
-  modbus_check=millis()+5000;
-  Serial.println(freeRam());
-  }
-}
-*/
 
 void loop(){
   wdt_reset();
