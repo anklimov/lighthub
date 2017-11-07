@@ -447,7 +447,11 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
         case CH_THERMO:
         ///thermoSet(name,cmd,Par1); all cativities done - update temp & cmd
         break;
+        }
         case CH_PWM:
+        {int k;
+        short inverse=0;
+        if (iaddr<0) {iaddr=-iaddr;inverse=1;}
         pinMode(iaddr,OUTPUT);
         //timer 0 for pin 13 and 4
         //timer 1 for pin 12 and 11
@@ -466,8 +470,10 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
         tval=2;
         TCCR4B|=tval;
         TCCR3B|=tval;
-         
-        analogWrite(iaddr,k=map(Par[0],0,100,0,255));
+
+        if (inverse)  k=map(Par[0],100,0,0,255);
+                      else k=map(Par[0],0,100,0,255);
+        analogWrite(iaddr,k);              
         Serial.print(F("Pin:"));Serial.print(iaddr);Serial.print(F("="));Serial.println(k);
         break;
         }
@@ -602,6 +608,11 @@ POOL  2101x10
 
 */
 
+void mb_fail(short addr, short op, int val, int cmd)
+{
+  Serial.println(F("Modbus op failed"));
+  
+}
 
 extern ModbusMaster node;
 
@@ -611,7 +622,7 @@ int Item::VacomSetFan (int8_t  val, int8_t cmd)
   Serial.print(F("VC#"));Serial.print(addr);Serial.print(F("="));Serial.println(val);
 
 
-  if (modbusBusy) return -1;
+  if (modbusBusy) {mb_fail(1,addr,val,cmd);return -1;}
     modbusBusy=1;
     
   uint8_t j, result;
@@ -635,14 +646,14 @@ int Item::VacomSetFan (int8_t  val, int8_t cmd)
   
 }
 
-#define a 0.1846 
-#define b -36.8
+#define a 0.1842 
+#define b -36.68
 
 int Item::VacomSetHeat(int addr,int8_t val, int8_t  cmd)
   {
     
     Serial.print(F("VC_heat#"));Serial.print(addr);Serial.print(F("="));Serial.print(val);Serial.print(F(" cmd="));Serial.println(cmd);
-   if (modbusBusy) return -1;
+   if (modbusBusy) {mb_fail(2,addr,val,cmd);return -1;}
    modbusBusy=1;
     
    node.begin(9600,SERIAL_8N1,13);
@@ -720,7 +731,7 @@ int Item::SendCmd(short cmd,short n, int * Par)
   int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value)
   {
    
-   if (modbusBusy) return -1;
+   if (modbusBusy) {mb_fail(3,addr,value,0);return -1;};
    modbusBusy=1;
    node.begin(9600,SERIAL_8E1,13);
    node.setSlave(addr);  
@@ -776,10 +787,10 @@ int Item::checkFM()
     
  //     aJson.addNumberToObject(out,"gsw",    (int) node.getResponseBuffer(1));
       aJson.addNumberToObject(out,"V",      (int) node.getResponseBuffer(2)/100.);
-      aJson.addNumberToObject(out,"f",      (int) node.getResponseBuffer(3)/100.);
+ //     aJson.addNumberToObject(out,"f",      (int) node.getResponseBuffer(3)/100.);
       aJson.addNumberToObject(out,"RPM",    (int) node.getResponseBuffer(4));
       aJson.addNumberToObject(out,"I",      (int) node.getResponseBuffer(5)/100.);
- //     aJson.addNumberToObject(out,"M",      (int) node.getResponseBuffer(6)/10.);
+      aJson.addNumberToObject(out,"M",      (int) node.getResponseBuffer(6)/10.);
  //     aJson.addNumberToObject(out,"P",      (int) node.getResponseBuffer(7)/10.);
  //     aJson.addNumberToObject(out,"U",      (int) node.getResponseBuffer(8)/10.);
  //     aJson.addNumberToObject(out,"Ui",     (int) node.getResponseBuffer(9));
@@ -788,7 +799,7 @@ int Item::checkFM()
     Serial.println();
   } else  {Serial.print(F("Modbus pooling error=")); Serial.println(result,HEX); }
 
-if (node.getResponseBuffer(0) & 8) //Active failt
+if (node.getResponseBuffer(0) & 8) //Active fault
   {
     result = node.readHoldingRegisters(2111-1, 1);
        if (result == node.ku8MBSuccess) aJson.addNumberToObject(out,"flt",  (int) node.getResponseBuffer(0));
