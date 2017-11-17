@@ -21,22 +21,23 @@ use
 avrdude  -v -V -patmega2560 -cwiring -b115200 -D -Uflash:w:lighthub.ino.hex:i
 to flash your Mega 2560
 
-#Dependences (quite big number of libs required. Use git clone to have your local copy in your Arduino libs folder)
+# Dependences 
+(quite big number of libs required. Use git clone to have your local copy in your Arduino libs folder)
 
 For patched libraries, appropriate GitHub repo URL provided:
 
-Arduino-Temperature-Control-Library   https://github.com/anklimov/Arduino-Temperature-Control-Library
-DS2482_OneWire                        https://github.com/anklimov/DS2482_OneWire
-FastLED
-Wire (standard)
-Artnet
-DmxSimple                             https://github.com/anklimov/DmxSimple (for AVR) or https://github.com/anklimov/ESP-Dmx (for ESP) or https://github.com/anklimov/DmxDue (for DUE)
-HTTPClient                            https://github.com/anklimov/HTTPClient
-aJson                                 https://github.com/anklimov/aJson
-CmdArduino                            https://github.com/anklimov/CmdArduino
-EEPROM (standard for AVR) or DueFlashStorage for DUE
-ModbusMaster                          https://github.com/anklimov/ModbusMaster
-pubsubclient-2.6
-DMXSerial-master (for AVR)            https://github.com/anklimov/DMXSerial
-Ethernet                              https://github.com/anklimov/Ethernet
-SPI (standard)
+* Arduino-Temperature-Control-Library   https://github.com/anklimov/Arduino-Temperature-Control-Library
+* DS2482_OneWire                        https://github.com/anklimov/DS2482_OneWire
+* FastLED
+* Wire (standard)
+* Artnet
+* DmxSimple                             https://github.com/anklimov/DmxSimple (for AVR) or https://github.com/anklimov/ESP-Dmx (for ESP) or https://github.com/anklimov/DmxDue (for DUE)
+* HTTPClient                            https://github.com/anklimov/HTTPClient
+* aJson                                 https://github.com/anklimov/aJson
+* CmdArduino                            https://github.com/anklimov/CmdArduino
+* EEPROM (standard for AVR) or DueFlashStorage for DUE
+* ModbusMaster                          https://github.com/anklimov/ModbusMaster
+* pubsubclient-2.6
+* DMXSerial-master (for AVR)            https://github.com/anklimov/DMXSerial
+* Ethernet                              https://github.com/anklimov/Ethernet
+* SPI (standard)
