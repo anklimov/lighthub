@@ -19,7 +19,7 @@ e-mail    anklimov@gmail.com
 */
 
 //define APU_OFF
-#include <OneWire.h>
+#include <DS2482_OneWire.h>
 #include <DallasTemperature.h>
 
 

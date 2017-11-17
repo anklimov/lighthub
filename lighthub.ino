@@ -62,12 +62,24 @@ dmx relay out
 #include "HTTPClient.h"
 #include <Cmd.h>
 #include "stdarg.h"
+
+#if defined(__AVR__)
 #include <avr/pgmspace.h>
-#include <EEPROM.h>
+#include <avr/wdt.h>
 #include "dmx.h"
+#endif
+
+#if defined(__SAM3X8E__)
+#include <DueFlashStorage.h>
+DueFlashStorage EEPROM;
+#else
+#include <EEPROM.h>
+#endif
+
+
 #include "item.h"
 #include "inputs.h"
-#include <avr/wdt.h>
+#include "dmx.h"
 
 // Hardcoded definitions
 //Thermostate histeresys
@@ -302,7 +314,9 @@ break;
    break; 
  case 2: // IP Ready, Connecting & subscribe
 //Arming Watchdog
+#if defined(__AVR_ATmega2560__)
   wdt_enable(WDTO_8S);
+#endif
   
 if (!client.connected() && mqttArr && (aJson.getArraySize(mqttArr)>1)) {
      char *c=aJson.getArrayItem(mqttArr,1)->valuestring;
@@ -354,7 +368,10 @@ break;
 //if (millis()>mtnCnt)
 {
 //mtnCnt=millis()+2;
+#if defined(__AVR_ATmega2560__)
 wdt_disable();
+#endif
+
 switch (Ethernet.maintain())
   {
     case 1:
@@ -390,7 +407,9 @@ switch (Ethernet.maintain())
       break;
 
   }
+#if defined(__AVR_ATmega2560__)
   wdt_enable(WDTO_8S);
+#endif
   }
 
 return lanStatus;
@@ -655,7 +674,7 @@ void _setConfig(int arg_cnt, char **args)
     return;
 }
   printMACAddress();
-  for (short i=0;i<6;i++) { EEPROM.update(i, mac[i]);}
+  for (short i=0;i<6;i++) { EEPROM.write(i, mac[i]);}
   Serial.println(F("Updated"));
   
 }
@@ -773,14 +792,18 @@ void setup() {
 
 
 void loop(){
+#if defined(__AVR_ATmega2560__)
   wdt_reset();
+#endif
 
  //commandLine.update();
   cmdPoll();
 if (lanLoop() >1) {client.loop();  if (artnet) artnet->read();}
 if (owReady && owArr)      owLoop();
 
+#if defined(__AVR_ATmega2560__)
     unsigned long lastpacket = DMXSerial.noDataSince();
+#endif    
    // if (lastpacket && (lastpacket%10==0)) Serial.println(lastpacket);
 
  DMXCheck();
@@ -793,8 +816,9 @@ if (owReady && owArr)      owLoop();
 // Idle handlers
 void owIdle(void) 
 { if (artnet) artnet->read();
+#if defined(__AVR_ATmega2560__)
   wdt_reset();
-
+#endif
   return;///
   Serial.print("o");
 
@@ -808,8 +832,9 @@ if (lanLoop() == 1) client.loop();
 void modbusIdle(void) 
 {
   //Serial.print("m");
+#if defined(__AVR_ATmega2560__)
     wdt_reset();
-
+#endif
 if (lanLoop() > 1) {client.loop();if (artnet) artnet->read();}
 //if (owReady) owLoop();
  DMXCheck();

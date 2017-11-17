@@ -52,7 +52,7 @@ e-mail    anklimov@gmail.com
 #define t_max 20 //Maximum number of 1w devices
 #define TEMPERATURE_PRECISION 9
 
-#include <OneWire.h>
+#include <DS2482_OneWire.h>
 #include <DallasTemperature.h>
 #include "aJSON.h"
 

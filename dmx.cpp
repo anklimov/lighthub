@@ -57,6 +57,7 @@ for (short tch=0; tch<=3 ; tch++)
 
 void DMXUpdate(void)
 {
+#if defined(__AVR_ATmega2560__)
 int t;
 for (short tch=0; tch<=3 ; tch++) 
     {
@@ -81,6 +82,7 @@ for (short tch=0; tch<=3 ; tch++)
         }
     }
     //Serial.print(D_State,BIN);Serial.println();
+#endif
 }
 
 
@@ -88,6 +90,7 @@ for (short tch=0; tch<=3 ; tch++)
 {
 //  CHSV hsv;
 //  CRGB rgb;
+#if defined(__AVR_ATmega2560__)
    
 short t,tch;
 //Here code for semi-immediate update
@@ -109,6 +112,7 @@ D_checkT=0;
 DMXput();
 for (int i=1; i<17; i++) {Serial.print(DMXSerial.read(i));Serial.print(";");}
        Serial.println();
+#endif
 }
 
 
@@ -125,14 +129,15 @@ void DMXinSetup(int channels)
  // //Use digital pin 3 for DMX output. Must be a PWM channel.
  // DmxSimple.usePin(pin);
   //DmxSimple.maxChannel(channels);
-
+ #if defined(__AVR_ATmega2560__)
+ 
    DMXin = new uint8_t [channels];
   
    DMXSerial.init(DMXReceiver,0,channels);
     if (DMXSerial.getBuffer()) {Serial.print(F("Init in ch:"));Serial.println(channels);} else Serial.println(F("DMXin Buffer alloc err"));
    //DMXSerial.maxChannel(channels);
    DMXSerial.attachOnUpdate(&DMXUpdate);
-
+ #endif
     // this will be called for each packet received
   if (artnet) artnet->setArtDmxCallback(onDmxFrame);
 }

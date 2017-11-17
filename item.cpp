@@ -20,7 +20,18 @@ e-mail    anklimov@gmail.com
 
 #include "item.h"
 #include "aJSON.h"
+#if defined(__AVR__)
 #include <DmxSimple.h>
+#endif
+
+#if defined(__ESP__)
+#include <ESP-Dmx.h>
+#endif 
+
+#if defined(__SAM3X8E__)
+#include <DmxSimple.h>
+#endif
+
 #include "FastLED.h"
 #include <ModbusMaster.h>
 #include <PubSubClient2.h>
@@ -465,12 +476,13 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
         //prescaler = 5 ---> PWM frequency is 30 Hz
         //prescaler = 6 ---> PWM frequency is <20 Hz
         int tval = 7;             // this is 111 in binary and is used as an eraser
+#if defined(__AVR_ATmega2560__)
         TCCR4B &= ~tval;   // this operation (AND plus NOT),  set the three bits in TCCR2B to 0
         TCCR3B &= ~tval; 
         tval=2;
         TCCR4B|=tval;
         TCCR3B|=tval;
-
+#endif
         if (inverse)  k=map(Par[0],100,0,0,255);
                       else k=map(Par[0],0,100,0,255);
         analogWrite(iaddr,k);              
@@ -805,7 +817,7 @@ if (node.getResponseBuffer(0) & 8) //Active fault
        if (result == node.ku8MBSuccess) aJson.addNumberToObject(out,"flt",  (int) node.getResponseBuffer(0));
   }
 
-
+delay(50);
 result = node.readHoldingRegisters(20-1, 4);
   
   // do something with data if read is successful
@@ -844,7 +856,8 @@ result = node.readHoldingRegisters(20-1, 4);
   if (modbusBusy) return -1;
   modbusBusy=1;
   
-  node.begin(9600,SERIAL_8E1,13);
+   node.begin(9600,SERIAL_8E1,13);
+   //node.begin(9600,UARTClass::Mode_8E1,13);
    
   uint8_t   result;
   

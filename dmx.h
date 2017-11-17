@@ -29,9 +29,24 @@ e-mail    anklimov@gmail.com
 
 //#define DMX_OUT_PIN  3
 
+#if defined(__AVR__)
 #include <DmxSimple.h>
+#endif
+
+#if defined(__ESP__)
+#include <ESP-Dmx.h>
+#endif 
+
+#if defined(__SAM3X8E__)
+#include <DmxSimple.h>
+#endif
+
 #include <Artnet.h>
+
+#if defined(__AVR_ATmega2560__)
 #include <DMXSerial.h>
+#endif
+
 #include "aJSON.h"
 
 extern aJsonObject *dmxArr;
