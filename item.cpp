@@ -815,7 +815,7 @@ if (node.getResponseBuffer(0) & 8) //Active fault
   {
     result = node.readHoldingRegisters(2111-1, 1);
        if (result == node.ku8MBSuccess) aJson.addNumberToObject(out,"flt",  (int) node.getResponseBuffer(0));
-  }
+  } else aJson.addNumberToObject(out,"flt", 0);
 
 delay(50);
 result = node.readHoldingRegisters(20-1, 4);

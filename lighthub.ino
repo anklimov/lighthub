@@ -516,7 +516,7 @@ void modbusIdle(void) ;
 void _handleHelp(int arg_cnt, char **args)
 //(char* tokens)
 {
-  Serial.println(F("Use the commands 'help', 'save', 'get' or 'item'."));
+  Serial.println(F("Use the commands: 'help' - this text\n'save' - save config in NVRAM\n'get' - get config from pre-configured URL\n'load' - load config from NVRAM\n'kill' - test watchdog"));
 }
 
 void _kill(int arg_cnt, char **args)
@@ -755,7 +755,7 @@ void setup() {
   //Serial.begin(115200);
    cmdInit(115200);
 
-  Serial.println(F("\nLazyhome.ru LightHub controller v0.91"));
+  Serial.println(F("\nLazyhome.ru LightHub controller v0.92"));
   
   
   for (short i=0;i<6;i++) mac[i]=EEPROM.read(i);
@@ -777,7 +777,10 @@ void setup() {
 
   
  ArtnetSetup();
-
+ 
+#if defined(__SAM3X8E__)
+  checkForRemoteSketchUpdate();
+#endif
 
  cmdAdd("help", _handleHelp);
  cmdAdd("save", _saveConfig);
@@ -909,7 +912,7 @@ void modbusLoop(void)
 
 void thermoLoop(void)
 { 
-#define T_ATTEMPTS 20
+#define T_ATTEMPTS 200
 #define IET_TEMP     0 
 #define IET_ATTEMPTS 1
 
@@ -932,12 +935,20 @@ void thermoLoop(void)
             if (extArr && (aJson.getArraySize(extArr)>1) )
             {
             int curtemp =   aJson.getArrayItem(extArr, IET_TEMP)->valueint;
-            if   (!aJson.getArrayItem(extArr, IET_ATTEMPTS)->valueint) {Serial.print(item->name);Serial.println(F(" Expired"));} else aJson.getArrayItem(extArr, IET_ATTEMPTS)->valueint--;
-             
+            if   (!aJson.getArrayItem(extArr, IET_ATTEMPTS)->valueint) 
+                      {
+                        Serial.print(item->name);Serial.println(F(" Expired"));
+                   
+                        } 
+             else 
+                    {
+                    if (! (--aJson.getArrayItem(extArr, IET_ATTEMPTS)->valueint)) client.publish("/alarm",item->name);
+                    
+                    }
             Serial.print(item->name);Serial.print(F(" Set:"));Serial.print(temp); Serial.print(F(" Curtemp:"));Serial.print(curtemp); Serial.print(F( " cmd:")); Serial.print(cmd),   
 
             pinMode(pin,OUTPUT);
-            if (cmd==CMD_OFF || cmd==CMD_HALT) {digitalWrite(pin,LOW);Serial.println(F(" OFF"));}
+            if (cmd==CMD_OFF || cmd==CMD_HALT || aJson.getArrayItem(extArr, IET_ATTEMPTS)->valueint==0) {digitalWrite(pin,LOW);Serial.println(F(" OFF"));}
                 else
                 {
                   if (curtemp+GIST<temp) {digitalWrite(pin,HIGH);Serial.println(F(" ON"));} //too cold
@@ -980,8 +991,10 @@ if (items)
             } //if
             else if (extArray=aJson.getArrayItem(item,I_EXT)) 
             {
+             aJsonObject * att = aJson.getArrayItem(extArray, IET_ATTEMPTS); 
              aJson.getArrayItem(extArray, IET_TEMP)->valueint=t;
-             aJson.getArrayItem(extArray, IET_ATTEMPTS)->valueint=(int) T_ATTEMPTS;
+              if (att->valueint == 0)  client.publish("/alarmoff",item->name);
+             att->valueint =(int) T_ATTEMPTS;
             } //if
             
         
