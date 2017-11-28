@@ -16,6 +16,8 @@ Scalability is virtually unlimited: Setup so many controllers you needed in most
 
 Prease refer our Wiki for insructions.
 
+Just started preparation to porting firmware to AVR based Arduino DUE and ESP8266/ESP32
+
 Compiled image has been added to compiled/ folder
 use 
 avrdude  -v -V -patmega2560 -cwiring -b115200 -D -Uflash:w:lighthub.ino.hex:i
