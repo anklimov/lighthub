@@ -42,44 +42,75 @@ analog in local ctrl
 Smooth regulation/fading
 PID Termostat out
 dmx relay out
+Relay array channel
+Relay DMX array channel
+
+Portation issues DUE:
+DMX in (new lib) - to do
+load and get fails (and then hungs)
+EEPROM
+HTTP
+
+Portation ESP:
+Ethernet
+
+
 
 */
 
 //define NOETHER
+// Configuration of drivers enabled
+#include "options.h"
+
+
 
 #include <Ethernet.h>
 #include <PubSubClient2.h>
 #include <SPI.h>
 #include "utils.h"
-#include "owTerm.h"
 
-//#include "led_sysdefs.h"
-//#include "pixeltypes.h"
-//#include  "hsv2rgb.h"
 #include <string.h>
 #include <ModbusMaster.h>
 #include "aJSON.h"
-#include "HTTPClient.h"
 #include <Cmd.h>
 #include "stdarg.h"
 
 #if defined(__AVR__)
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
-#include "dmx.h"
+#include "HTTPClient.h"
 #endif
 
 #if defined(__SAM3X8E__)
 #include <DueFlashStorage.h>
-DueFlashStorage EEPROM;
+          DueFlashStorage EEPROM;
+#include <malloc.h>
+
 #else
 #include <EEPROM.h>
 #endif
 
+#if defined(ESP_PLATFORM)
+//extern "C" {
+//#include "user_interface.h"
+//}
+#endif
+
+#ifdef _owire
+#include "owTerm.h"
+#endif
+
+#if defined(_dmxin) || defined(_dmxout) || defined (_artnet)
+#include "dmx.h"
+#endif
 
 #include "item.h"
 #include "inputs.h"
-#include "dmx.h"
+
+#ifdef _artnet
+#include <Artnet.h>
+extern Artnet *artnet;
+#endif
 
 // Hardcoded definitions
 //Thermostate histeresys
@@ -93,7 +124,6 @@ IPAddress server(192, 168, 88, 2); //TODO - configure it
 #define inprefix "/myhome/in/"
 const char outprefix[] PROGMEM  = "/myhome/s_out/";
 #define subprefix "/myhome/in/#"
-//
 
 aJsonObject *root  =  NULL;
 aJsonObject *items =  NULL;
@@ -110,16 +140,12 @@ unsigned long thermocheck=0;
 
 aJsonObject * modbusitem= NULL; 
 
-
-// CommandLine instance.
-//CommandLine commandLine(Serial, "> ");
-
-
 bool owReady = false; 
 int  lanStatus = 0;
 
-ModbusMaster node(2,0x60); //TODO dynamic alloc
-
+#ifdef _modbus
+ModbusMaster node;
+#endif
 
 byte mac[6];
 
@@ -128,6 +154,7 @@ PubSubClient client(ethClient);
 
 
 int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value);
+short thermoSetCurTemp(char * name, short t);
 int freeRam (void) ;
 
 
@@ -142,21 +169,23 @@ int itemCtrl2(char* name,int r,int g, int b, int w)
         short itemaddr = aJson.getArrayItem(itemArr,1)->valueint;  
        switch (itemtype){
        case 0: //Dimmed light       
-////         if (is_on)  DmxSimple.write(5, 255); //ArduinoDmx2.TxBuffer[itemaddr[ch]]=255;//
-////         else DmxSimple.write(itemaddr, map(Par1,0,100,0,255)); //ArduinoDmx2.TxBuffer[itemaddr[ch]]=map(Par1,0,100,0,255);//
+////         if (is_on)  DmxWrite(5, 255); //ArduinoDmx2.TxBuffer[itemaddr[ch]]=255;//
+////         else DmxWrite(itemaddr, map(Par1,0,100,0,255)); //ArduinoDmx2.TxBuffer[itemaddr[ch]]=map(Par1,0,100,0,255);//
        break;
- 
+
+#ifdef _dmxout 
        case 1: //Colour RGBW
-        DmxSimple.write(itemaddr+3, w);
+        DmxWrite(itemaddr+3, w);
+
        case 2: // RGB
       {
    
-        DmxSimple.write(itemaddr,   r);
-        DmxSimple.write(itemaddr+1, g);
-        DmxSimple.write(itemaddr+2, b);
+        DmxWrite(itemaddr,   r);
+        DmxWrite(itemaddr+1, g);
+        DmxWrite(itemaddr+2, b);
           
          break; }    
-                  
+#endif                  
         case 7: //Group
         aJsonObject *groupArr= aJson.getArrayItem(itemArr, 1);      
         if (groupArr && (groupArr->type==aJson_Array))
@@ -180,8 +209,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   int fr = freeRam();
   if (fr<250) {Serial.println(F("OOM!"));return;}
- 
- char subtopic[20]="";
+
+ #define sublen 20
+ char subtopic[sublen]="";
  int cmd = 0;
   
   for (int i=0;i<length;i++) {
@@ -194,7 +224,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
  cmd= txt2cmd((char*) payload);
  char * t;
- if (t=strrchr (topic,'/')) strncpy(subtopic,t+1 , 20);
+ if (t=strrchr (topic,'/')) strncpy(subtopic,t+1 , sublen-1);
    
    
  
@@ -309,19 +339,42 @@ break;
  case 1:
  
    lanStatus=getConfig(0,NULL); //from server
+   #ifdef _artnet
    if (artnet) artnet->begin();
-  
+   #endif
+     
    break; 
  case 2: // IP Ready, Connecting & subscribe
 //Arming Watchdog
 #if defined(__AVR_ATmega2560__)
   wdt_enable(WDTO_8S);
 #endif
+{
+short n=0;
+int port=1883;
+char empty=0;
+char * user = &empty;
+char * pass = &empty;
   
-if (!client.connected() && mqttArr && (aJson.getArraySize(mqttArr)>1)) {
-     char *c=aJson.getArrayItem(mqttArr,1)->valuestring;
-     Serial.print(F("Attempting MQTT connection..."));
-      if (client.connect(c)) {
+if (!client.connected() && mqttArr && ((n=aJson.getArraySize(mqttArr))>1)) {
+     char *c=aJson.getArrayItem(mqttArr,0)->valuestring;
+     char *servername=aJson.getArrayItem(mqttArr,1)->valuestring;
+     if (n>=3) port=aJson.getArrayItem(mqttArr,2)->valueint;
+       
+     if (n>=4) user=aJson.getArrayItem(mqttArr,3)->valuestring;
+     if (n>=5) pass=aJson.getArrayItem(mqttArr,4)->valuestring;
+     
+     client.setServer(servername,port);
+     
+     Serial.print(F("Attempting MQTT connection to ")); 
+     Serial.print(servername); 
+     Serial.print(F(":"));
+     Serial.print(port);
+     Serial.print(F(" user:"));
+     Serial.print(user);
+     Serial.print(F(" ..."));
+     
+      if (client.connect(c,user,pass)) {
           Serial.print(F("connected as "));Serial.println(c);
          
           
@@ -341,6 +394,7 @@ if (!client.connected() && mqttArr && (aJson.getArraySize(mqttArr)>1)) {
       }
 }
 break;
+}
  case 3: //operation
  if (!client.connected()) lanStatus=2;
  break;
@@ -416,7 +470,7 @@ return lanStatus;
 
 }
 
-
+#ifdef _owire
 void Changed (int i, DeviceAddress addr, int val)
 {
   char addrstr[32]="NIL";
@@ -509,7 +563,7 @@ void Changed (int i, DeviceAddress addr, int val)
   //Serial.println(valstr);
 
 }
-
+#endif
 
 void modbusIdle(void) ;
 
@@ -530,15 +584,16 @@ void parseConfig()
 {    int mc,incnt;
             //DMX out is configured
             aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
+            #ifdef _dmxout
             if (dmxoutArr && aJson.getArraySize(dmxoutArr)==2)
                 {   
-                    DmxSimple.usePin(aJson.getArrayItem(dmxoutArr,0)->valueint);
-                    DmxSimple.maxChannel(mc=aJson.getArrayItem(dmxoutArr,1)->valueint);
+                   DMXoutSetup(mc=aJson.getArrayItem(dmxoutArr,1)->valueint,aJson.getArrayItem(dmxoutArr,0)->valueint);                   
                     Serial.print(F("DMX out started. Channels: "));
                     Serial.println(mc);
                 }
-            
+            #endif
             //DMX in is configured
+            #ifdef _dmxin
             dmxArr=    aJson.getObjectItem(root, "dmxin"); 
             if (dmxArr && (incnt=aJson.getArraySize(dmxArr)))
                 {
@@ -546,15 +601,21 @@ void parseConfig()
                  Serial.print(F("DMX in started. Channels:"));
                  Serial.println(incnt*4);
                 }
+            #endif
                 
             items =    aJson.getObjectItem(root,"items"); 
             modbusitem = items->child;
             inputs =    aJson.getObjectItem(root,"in"); 
-            
+
+            #ifdef _modbus
             modbusArr= aJson.getObjectItem(root, "modbus");
+            #endif
+            
             mqttArr=   aJson.getObjectItem(root, "mqtt"); 
+            
+            #ifdef _owire
             owArr=     aJson.getObjectItem(root, "ow"); 
-          
+            #endif
           
          Serial.println(F("Configured:"));
         
@@ -563,7 +624,8 @@ void parseConfig()
          Serial.print(F("modbus ")); printBool(modbusArr);
          Serial.print(F("mqtt ")); printBool(mqttArr);
          Serial.print(F("1-wire ")); printBool(owArr);
-
+         
+          #ifdef _owire
           if (owArr && !owReady)
                 { 
                 aJsonObject * item= owArr->child;
@@ -582,7 +644,7 @@ void parseConfig()
                   }
                   
                   }
-
+          #endif
 }
 
 void _loadConfig (int arg_cnt, char **args) {loadConfig(arg_cnt,args);restoreState();}
@@ -691,13 +753,16 @@ int getConfig (int arg_cnt, char **args)
     int returnCode ;
     char ch;
     char URI[32];
-    byte hserver[] = { 192,168,88,2 };  
-
+     
+    char server[] = "lazyhome.ru"; 
 
     snprintf(URI, sizeof(URI), "/%02x-%02x-%02x-%02x-%02x-%02x.config.json",mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     Serial.println(F("Config URI: "));Serial.println(URI);
-    
+
+    #if defined(__AVR__)
+    byte hserver[] = { 192,168,88,2 }; 
     HTTPClient hclient(serverip,hserver,80);
+  
    
    // FILE is the return STREAM type of the HTTPClient
     result = hclient.getURI( URI);
@@ -744,42 +809,141 @@ int getConfig (int arg_cnt, char **args)
       lanCheck=millis()+5000;
       return -11;
           }
-  
+   #else
+// Dummy http client
+   // if you get a connection, report back via serial:
+  if (ethClient.connect(server, 80)) {
+    Serial.println(F("connected"));
+    // Make a HTTP request:
+    ethClient.print(F("GET "));
+    ethClient.print(URI);
+    ethClient.println(F(" HTTP/1.1"));
+    ethClient.print(F("Host: "));
+    ethClient.println(server);
+    ethClient.println("Connection: close");
+    ethClient.println();
+  } else {
+    // if you didn't get a connection to the server:
+    Serial.println("connection failed");
+  }
+    #define buflen 16000
+    unsigned long t=millis()+10000;
+    char buf [buflen];
+    int i=0;
+    while (millis()<t)
+    {
+      if (ethClient.available()) {
+              buf[i] = ethClient.read();
+              Serial.print(buf[i]);
+              if (buf[i]=='{' || i>0) i++;
+              if (i>=buflen-1) break;
+             }
+    }
+    ethClient.stop();
+    
+    buf[i]=0;
+    Serial.println(buf);
 
-  
-  return 2;
+    aJson.deleteItem(root); 
+    root = aJson.parse(buf);         
+                
+        if (!root)
+          {
+            Serial.println(F("Config parsing failed"));
+            lanCheck=millis()+15000;
+           return -11;
+            } 
+            else   
+          {
+            char * outstr=aJson.print(root);
+            Serial.println(outstr);
+            free (outstr);
+   
+            parseConfig();
+
+             
+          }
+    
+   #endif
+    return 2;
 }
  
+#define TXEnablePin 13
+void preTransmission()
+{
+  digitalWrite(TXEnablePin, 1);
+}
+
+void postTransmission()
+{
+  modbusSerial.flush(); 
+  digitalWrite(TXEnablePin, 0);
+}
 
 void setup() {
-  //Serial.begin(115200);
+  
+  
    cmdInit(115200);
 
-  Serial.println(F("\nLazyhome.ru LightHub controller v0.92"));
+  Serial.println(F("\nLazyhome.ru LightHub controller v0.94"));
   
+  short macvalid=0;
+  byte defmac[6]={0xDE,0xAD,0xBE,0xEF,0xFE,0};
   
-  for (short i=0;i<6;i++) mac[i]=EEPROM.read(i);
+  for (short i=0;i<6;i++) 
+                            {
+                            mac[i]=EEPROM.read(i);
+                            if (mac[i]!=0 && mac[i]!=0xff) macvalid=1;
+                            }
+  if (!macvalid) 
+              {
+                Serial.println(F("Invalid MAC: set default"));
+                memcpy(mac,defmac,6);
+              }
   printMACAddress();
   
-    // initialize Modbus communication baud rate
-  node.begin(9600,SERIAL_8N1,13);
+
+   
+  #ifdef _modbus
+  pinMode(TXEnablePin,OUTPUT);
+  modbusSerial.begin(9600);
+
+  /* 
+  // initialize Modbus communication baud rate
+  #ifdef __SAM3X8E__  
+     node.begin(9600,UARTClass::Mode_8E1,13);
+  #else
+     node.begin(9600,SERIAL_8E1,13);
+  #endif
+  */
+  node.idle(&modbusIdle);
+  
+    // Callbacks allow us to configure the RS485 transceiver correctly
+  node.preTransmission(preTransmission);
+  node.postTransmission(postTransmission);
+  #endif  
  
+  delay(20);
+  
   owReady=0;
     //=owSetup(&Changed);
   
+  #ifdef _owire
   if (net) net->idle(&owIdle);
-  node.idle(&modbusIdle);
+  #endif
+  
 
   
   client.setServer(server, 1883);
   client.setCallback(callback);
   
 
-  
+ #ifdef _artnet
  ArtnetSetup();
+ #endif
  
 #if defined(__SAM3X8E__)
-  checkForRemoteSketchUpdate();
+//  checkForRemoteSketchUpdate();
 #endif
 
  cmdAdd("help", _handleHelp);
@@ -801,24 +965,45 @@ void loop(){
 
  //commandLine.update();
   cmdPoll();
-if (lanLoop() >1) {client.loop();  if (artnet) artnet->read();}
-if (owReady && owArr)      owLoop();
+if (lanLoop() >1) 
+  {
+  client.loop();  
+  #ifdef _artnet
+  if (artnet) artnet->read();
+  #endif
+  }
 
-#if defined(__AVR_ATmega2560__)
+#ifdef _owire
+if (owReady && owArr)      owLoop();
+#endif
+
+#ifdef _dmxin
     unsigned long lastpacket = DMXSerial.noDataSince();
+     DMXCheck();
 #endif    
    // if (lastpacket && (lastpacket%10==0)) Serial.println(lastpacket);
 
- DMXCheck();
+
+
+ #ifdef _modbus
  if (modbusArr && items) modbusLoop();
+ #endif
+
+ #ifdef _owire
  if (items)   thermoLoop();
+ #endif
+ 
  if (inputs)  inputLoop();
 
 }
 
 // Idle handlers
 void owIdle(void) 
-{ if (artnet) artnet->read();
+{
+#ifdef _artnet  
+  if (artnet) artnet->read();
+#endif
+
 #if defined(__AVR_ATmega2560__)
   wdt_reset();
 #endif
@@ -827,7 +1012,11 @@ void owIdle(void)
 
 if (lanLoop() == 1) client.loop();
 //if (owReady) owLoop();
+
+#ifdef _dmxin 
  DMXCheck();
+#endif
+ 
  //modbusLoop();
  }
 
@@ -838,9 +1027,18 @@ void modbusIdle(void)
 #if defined(__AVR_ATmega2560__)
     wdt_reset();
 #endif
-if (lanLoop() > 1) {client.loop();if (artnet) artnet->read();}
+if (lanLoop() > 1) 
+            {
+              client.loop();
+              #ifdef _artnet
+              if (artnet) artnet->read();
+              #endif
+             }
+            
 //if (owReady) owLoop();
+#ifdef _dmxin
  DMXCheck();
+#endif
  //modbusloop();
  }
 
@@ -1004,10 +1202,41 @@ if (items)
 } //proc
 
 
+
+#if defined(ESP_PLATFORM) 
+int freeRam () 
+{return system_get_free_heap_size();}
+#endif
+
+#if defined(__AVR__) 
 int freeRam () 
 {
   extern int __heap_start, *__brkval; 
   int v; 
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
 }
+#endif
 
+#if defined(__SAM3X8E__)
+extern char _end;
+extern "C" char *sbrk(int i);
+
+int freeRam()
+{
+  char *ramstart = (char *) 0x20070000;
+  char *ramend = (char *) 0x20088000;
+  char *heapend = sbrk(0);
+  register char * stack_ptr asm( "sp" );
+  struct mallinfo mi = mallinfo();
+/*
+  Serial << "Ram used (bytes): " << endl
+    << "  dynamic: " << mi.uordblks << endl
+    << "  static:  " << &_end - ramstart << endl
+    << "  stack:   " << ramend - stack_ptr << endl; 
+  Serial << "Estimation free Ram: " << stack_ptr - heapend + mi.fordblks << endl;
+*/
+
+  
+  return stack_ptr - heapend + mi.fordblks; 
+}
+ #endif 

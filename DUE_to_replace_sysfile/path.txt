@@ -1,0 +1,4 @@
+To avoid interrupt corflicts between DmxDue an  USART1 need to copy patched file over DUE sys lib 
+
+Patch example for OSX:
+/Users/andrey/Library/Arduino15/packages/arduino/hardware/sam/1.6.11/variants/arduino_due_x/variant.cpp

@@ -20,6 +20,10 @@ e-mail    anklimov@gmail.com
 
 #include "item.h"
 #include "aJSON.h"
+
+#ifdef _dmxout
+
+/*
 #if defined(__AVR__)
 #include <DmxSimple.h>
 #endif
@@ -29,14 +33,18 @@ e-mail    anklimov@gmail.com
 #endif 
 
 #if defined(__SAM3X8E__)
-#include <DmxSimple.h>
+#include <DmxDue.h>
 #endif
-
+*/
+#include "dmx.h"
 #include "FastLED.h"
+#endif 
+
 #include <ModbusMaster.h>
 #include <PubSubClient2.h>
 
-
+#define dimPar SERIAL_8E1
+#define fmPar  SERIAL_8N1
 
 short modbusBusy=0;
 extern aJsonObject * modbusitem; 
@@ -182,6 +190,14 @@ void Item::copyPar (aJsonObject *itemV)
    for (int i=0;i<n;i++) setPar(i,aJson.getArrayItem(itemV,i)->valueint); 
 }
 */
+
+#ifdef ESP32
+void analogWrite(int pin, int val)
+{
+  //TBD
+}
+#endif
+
 
 boolean Item::getEnableCMD(int delta)
 {
@@ -387,18 +403,23 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
   
        switch (itemType)
        {
+        
+       #ifdef _dmxout
        case CH_DIMMER: //Dimmed light       
 
-       DmxSimple.write(iaddr, map(Par[0],0,100,0,255)); 
+       DmxWrite(iaddr, map(Par[0],0,100,0,255)); 
        
        break;
+      
        
        case CH_RGBW: //Colour RGBW
        {
        int k;
-       DmxSimple.write(iaddr+3, k=map((100-Par[1])*Par[2],0,10000,0,255));
+       DmxWrite(iaddr+3, k=map((100-Par[1])*Par[2],0,10000,0,255));
        Serial.print(F("W:"));Serial.println(k); 
        }
+       
+   
        case CH_RGB: // RGB
        
        {
@@ -406,20 +427,23 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
       
        CRGB rgb= CHSV(map(Par[0],0,365,0,255),map(Par[1],0,100,0,255),map(Par[2],0,100,0,255));
    
-       DmxSimple.write(iaddr,   rgb.r);
-       DmxSimple.write(iaddr+1, rgb.g);
-       DmxSimple.write(iaddr+2, rgb.b);
+       DmxWrite(iaddr,   rgb.r);
+       DmxWrite(iaddr+1, rgb.g);
+       DmxWrite(iaddr+2, rgb.b);
           
         
         break; }  
-        
-        case CH_WHITE:
-        DmxSimple.write(iaddr,   0);
-        DmxSimple.write(iaddr+1, 0);
-        DmxSimple.write(iaddr+2, 0);
-        DmxSimple.write(iaddr+3, map(Par[2],0,100,0,255)); 
-        break;
 
+       
+        case CH_WHITE:
+        DmxWrite(iaddr,   0);
+        DmxWrite(iaddr+1, 0);
+        DmxWrite(iaddr+2, 0);
+        DmxWrite(iaddr+3, map(Par[2],0,100,0,255)); 
+        break;
+        #endif
+
+        #ifdef _modbus
         case CH_MODBUS:
         {
           
@@ -432,6 +456,7 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
           modbusSet(_addr,_reg,_mask,map(Par[0],0,100,0,0x3f));   
            }
         break;}
+        #endif
           
         case CH_GROUP://Group
         {
@@ -489,7 +514,7 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
         Serial.print(F("Pin:"));Serial.print(iaddr);Serial.print(F("="));Serial.println(k);
         break;
         }
-
+#ifdef _modbus
         case CH_VC:
       
         VacomSetFan(Par[0],cmd);
@@ -503,7 +528,7 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
                         VacomSetHeat(it.getArg(),Par[0],cmd);            
           break;  
           }
-        
+#endif        
         
        } // switch itemtype
      //  break;
@@ -639,9 +664,20 @@ int Item::VacomSetFan (int8_t  val, int8_t cmd)
     
   uint8_t j, result;
   uint16_t data[1];
-   node.begin(9600,SERIAL_8N1,13);
+
+  /*
+ #ifdef __SAM3X8E__  
+  node.begin(9600,UARTClass::Mode_8E1,13);
+  #else
+  node.begin(9600,SERIAL_8E1,13);
+  #endif
+
+
 
   node.setSlave(addr);
+*/
+modbusSerial.begin(9600,fmPar);
+node.begin(addr,modbusSerial);
 
   if (val) {
     node.writeSingleRegister(2001-1,4+1);//delay(500);
@@ -667,9 +703,19 @@ int Item::VacomSetHeat(int addr,int8_t val, int8_t  cmd)
     Serial.print(F("VC_heat#"));Serial.print(addr);Serial.print(F("="));Serial.print(val);Serial.print(F(" cmd="));Serial.println(cmd);
    if (modbusBusy) {mb_fail(2,addr,val,cmd);return -1;}
    modbusBusy=1;
-    
-   node.begin(9600,SERIAL_8N1,13);
+ /*   
+ #ifdef __SAM3X8E__ 
+  node.begin(9600,UARTClass::Mode_8E1,13);
+  #else
+  node.begin(9600,SERIAL_8E1,13);
+  #endif
+
    node.setSlave(addr);
+*/
+
+modbusSerial.begin(9600,fmPar);
+node.begin(addr,modbusSerial);
+
    uint16_t regval;  
    
    switch (cmd)
@@ -745,8 +791,18 @@ int Item::SendCmd(short cmd,short n, int * Par)
    
    if (modbusBusy) {mb_fail(3,addr,value,0);return -1;};
    modbusBusy=1;
-   node.begin(9600,SERIAL_8E1,13);
+  /*
+  #ifdef __SAM3X8E__ 
+  node.begin(9600,UARTClass::Mode_8E1,13);
+  #else
+  node.begin(9600,SERIAL_8E1,13);
+  #endif
+
    node.setSlave(addr);  
+  */
+modbusSerial.begin(9600,dimPar);
+node.begin(addr,modbusSerial);
+
   
 if (_mask) 
       {value <<= 8; value |= (0xff);}
@@ -778,12 +834,20 @@ int Item::checkFM()
   strncat(addrstr,"_stat",sizeof(addrstr)-1);
   
  // aJson.addStringToObject(out,"type",   "rect");
+/*
+#ifdef __SAM3X8E__
+  node.begin(9600,UARTClass::Mode_8E1,13);
+  #else
+  node.begin(9600,SERIAL_8E1,13);
+  #endif
 
-
-  
-   node.begin(9600,SERIAL_8N1,13);
 
   node.setSlave(getArg());
+  */
+
+modbusSerial.begin(9600,fmPar);
+node.begin(getArg(),modbusSerial);
+
   
   result = node.readHoldingRegisters(2101-1, 10);
   
@@ -855,9 +919,14 @@ result = node.readHoldingRegisters(20-1, 4);
   {
   if (modbusBusy) return -1;
   modbusBusy=1;
-  
-   node.begin(9600,SERIAL_8E1,13);
-   //node.begin(9600,UARTClass::Mode_8E1,13);
+
+  /*
+  #ifdef __SAM3X8E__  
+  node.begin(9600,UARTClass::Mode_8E1,13);
+  #else
+  node.begin(9600,SERIAL_8E1,13);
+  #endif
+   */
    
   uint8_t   result;
   
@@ -867,7 +936,12 @@ result = node.readHoldingRegisters(20-1, 4);
  
   int       data;
   
-  node.setSlave(addr);
+  //node.setSlave(addr);
+  
+  modbusSerial.begin(9600,dimPar);
+  node.begin(addr,modbusSerial);
+
+  
   result = node.readHoldingRegisters(reg, 1);
 
   if (result == node.ku8MBSuccess)

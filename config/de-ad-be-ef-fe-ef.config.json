@@ -1,5 +1,5 @@
 {
-  "mqtt":["192.168.88.2","teplo"],
+  "mqtt":["public_test1","m21.cloudmqtt.com",12299,"bkyyvlha","RpHF-x6v4YWb"],
   "ow":{
 		 "2807FFD503000036":{"emit":"t_balk1","item":"h_balk1"},
        		 "284811170400005B":{"emit":"t_entr"},

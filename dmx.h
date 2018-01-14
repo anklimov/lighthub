@@ -29,8 +29,13 @@ e-mail    anklimov@gmail.com
 
 //#define DMX_OUT_PIN  3
 
+#include "options.h"
+
+#if defined(_dmxout)
+
 #if defined(__AVR__)
 #include <DmxSimple.h>
+#define DmxWrite DmxSimple.write
 #endif
 
 #if defined(__ESP__)
@@ -38,23 +43,29 @@ e-mail    anklimov@gmail.com
 #endif 
 
 #if defined(__SAM3X8E__)
-#include <DmxSimple.h>
+#include <DmxDue.h>
+#define DmxWrite dmxout.write
+#endif
 #endif
 
+#ifdef _artnet
 #include <Artnet.h>
+extern Artnet *artnet;
+#endif
 
-#if defined(__AVR_ATmega2560__)
+#ifdef _dmxin
 #include <DMXSerial.h>
 #endif
 
 #include "aJSON.h"
 
 extern aJsonObject *dmxArr;
-extern Artnet *artnet;
 
 
 void DMXput(void);
 void DMXinSetup(int channels);
+void DMXoutSetup(int channels,int pin);
 void ArtnetSetup();
 void DMXCheck(void);
 int itemCtrl2(char* name,int r,int g, int b, int w);
+void ArtnetSetup();

@@ -23,6 +23,12 @@ use
 avrdude  -v -V -patmega2560 -cwiring -b115200 -D -Uflash:w:lighthub.ino.hex:i
 to flash your Mega 2560
 
+or 
+
+/Users/<user>/Library/Arduino15/packages/arduino/tools/bossac/1.6.1-arduino/bossac -i -d --port=cu.usbmodem1451 -U false -e -w -v -b lighthub.ino.bin -R 
+to flash your DUE
+
+(need to correct path and port, of course)
 # Dependences 
 (quite big number of libs required. Use git clone to have your local copy in your Arduino libs folder)
 
@@ -43,3 +49,18 @@ For patched libraries, appropriate GitHub repo URL provided:
 * DMXSerial-master (for AVR)            https://github.com/anklimov/DMXSerial
 * Ethernet                              https://github.com/anklimov/Ethernet
 * SPI (standard)
+
+Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) and ESP not completed yet and on early stage now.
+Core is mostly migrated (except EEPROM in DUE)
+
+AVR version is basic and have all functions
+
+Another platforms limitations (todo):
+SAM3X8E:
+-EEPROM issues to be fixed
+-DMX-in - not deployed yet
+-Improve http client
+
+ESP:
+-Wifi instead Ether not implemented yet
+-DMX-IN 

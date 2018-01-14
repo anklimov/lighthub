@@ -17,6 +17,7 @@ GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
 
 */
+#include "options.h"
 
 #define CH_DIMMER 0   //DMX 1 ch  
 #define CH_RGBW   1   //DMX 4 ch

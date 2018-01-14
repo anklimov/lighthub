@@ -40,6 +40,7 @@
     "fm_h":[8,"fm"]
    
     },
-  "mqtt":["192.168.88.2","light"]
+  "mqtt":["public_test2","m21.cloudmqtt.com",12299,"bkyyvlha","RpHF-x6v4YWb"]    
   }
 
+	
