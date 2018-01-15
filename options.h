@@ -14,9 +14,7 @@
 #if defined(__SAM3X8E__)
 /// DMX not deployed yet           
 #undef _dmxin
-//#undef _dmxout
 #define modbusSerial Serial2
-//#include <DmxDue.h>
 #define dmxout DmxDue4 
 #define dmxin  DmxDue1
 #endif
@@ -24,7 +22,6 @@
 #if defined(ESP_PLATFORM)
 #undef _dmxin
 #undef _dmxout
-//#undef _modbus
 #define modbusSerial Serial
 #endif
 

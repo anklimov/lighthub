@@ -1,4 +1,4 @@
-/* Copyright © 2017 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ e-mail    anklimov@gmail.com
 */
 
 #include "utils.h"
+#if defined(__SAM3X8E__)
+#include <malloc.h>
+#endif
 
 void PrintBytes(uint8_t* addr, uint8_t count, bool newline) {
   for (uint8_t i = 0; i < count; i++) {
@@ -70,3 +73,33 @@ int getInt(char ** chan)
   
 }
 
+
+#if defined(ESP_PLATFORM) 
+int freeRam () 
+{return system_get_free_heap_size();}
+#endif
+
+#if defined(__AVR__) 
+int freeRam () 
+{
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+}
+#endif
+
+#if defined(__SAM3X8E__)
+extern char _end;
+extern "C" char *sbrk(int i);
+
+int freeRam()
+{
+  char *ramstart = (char *) 0x20070000;
+  char *ramend = (char *) 0x20088000;
+  char *heapend = sbrk(0);
+  register char * stack_ptr asm( "sp" );
+  struct mallinfo mi = mallinfo();
+  
+  return stack_ptr - heapend + mi.fordblks; 
+}
+ #endif 

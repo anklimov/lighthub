@@ -1,4 +1,4 @@
-/* Copyright © 2017 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ e-mail    anklimov@gmail.com
  * 1-wire
  * DMX - out
  * DMX IN
- * 1809 strip out
+ * 1809 strip out (discarded)
  * Modbus master Out
  * DHCP
  * JSON config
@@ -44,25 +44,23 @@ PID Termostat out
 dmx relay out
 Relay array channel
 Relay DMX array channel
+Config URL configuration
 
-Portation issues DUE:
+todo DUE related:
 DMX in (new lib) - to do
-load and get fails (and then hungs)
-EEPROM
 HTTP
+PWM freq fix
+Config webserver
 
-Portation ESP:
-Ethernet
-
-
+todo ESP:
+Ethernet - to wifi portation
+DMX-OUT deploy on USART1
+Config webserver
 
 */
 
-//define NOETHER
 // Configuration of drivers enabled
 #include "options.h"
-
-
 
 #include <Ethernet.h>
 #include <PubSubClient2.h>
@@ -76,24 +74,29 @@ Ethernet
 #include "stdarg.h"
 
 #if defined(__AVR__)
+#include "HTTPClient.h"
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
-#include "HTTPClient.h"
+#define wdt_en()   wdt_enable(WDTO_8S)
+#define wdt_dis()  wdt_disable()
+#define wdt_res()  wdt_reset()
+#else
+#include <ArduinoHttpClient.h>
 #endif
 
 #if defined(__SAM3X8E__)
 #include <DueFlashStorage.h>
           DueFlashStorage EEPROM;
-#include <malloc.h>
-
+#include <watchdog.h>
+#define wdt_res() watchdogReset()
+#define wdt_en()  
+#define wdt_dis() 
+          
 #else
 #include <EEPROM.h>
 #endif
 
 #if defined(ESP_PLATFORM)
-//extern "C" {
-//#include "user_interface.h"
-//}
 #endif
 
 #ifdef _owire
@@ -115,8 +118,8 @@ extern Artnet *artnet;
 // Hardcoded definitions
 //Thermostate histeresys
 #define GIST 2  
-#define serverip "192.168.88.2"
-IPAddress server(192, 168, 88, 2); //TODO - configure it
+//#define serverip "192.168.88.2"
+//IPAddress server(192, 168, 88, 2); //TODO - configure it
 //char* inprefix=("/myhome/in/");
 //char* outprefix=("/myhome/s_out/");
 //char* subprefix=("/myhome/in/#");
@@ -132,6 +135,7 @@ aJsonObject *inputs =  NULL;
 aJsonObject *mqttArr =  NULL;
 aJsonObject *modbusArr = NULL;
 aJsonObject *owArr =  NULL;
+aJsonObject *dmxArr = NULL;
 
 unsigned long modbuscheck=0;
 unsigned long incheck    =0;
@@ -153,54 +157,9 @@ EthernetClient ethClient;
 PubSubClient client(ethClient);
 
 
-int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value);
-short thermoSetCurTemp(char * name, short t);
-int freeRam (void) ;
+void watchdogSetup(void){}    //Do not remove - strong re-definition WDT Init for DUE
 
-
-int itemCtrl2(char* name,int r,int g, int b, int w)
-{
-  aJsonObject *itemArr= aJson.getObjectItem(items, name);    
-
-       if (itemArr && (itemArr->type==aJson_Array))
-       { 
-         
-        short itemtype = aJson.getArrayItem(itemArr,0)->valueint;
-        short itemaddr = aJson.getArrayItem(itemArr,1)->valueint;  
-       switch (itemtype){
-       case 0: //Dimmed light       
-////         if (is_on)  DmxWrite(5, 255); //ArduinoDmx2.TxBuffer[itemaddr[ch]]=255;//
-////         else DmxWrite(itemaddr, map(Par1,0,100,0,255)); //ArduinoDmx2.TxBuffer[itemaddr[ch]]=map(Par1,0,100,0,255);//
-       break;
-
-#ifdef _dmxout 
-       case 1: //Colour RGBW
-        DmxWrite(itemaddr+3, w);
-
-       case 2: // RGB
-      {
-   
-        DmxWrite(itemaddr,   r);
-        DmxWrite(itemaddr+1, g);
-        DmxWrite(itemaddr+2, b);
-          
-         break; }    
-#endif                  
-        case 7: //Group
-        aJsonObject *groupArr= aJson.getArrayItem(itemArr, 1);      
-        if (groupArr && (groupArr->type==aJson_Array))
-        { aJsonObject *i =groupArr->child;
-          while (i)
-            { //Serial.println(i->valuestring);
-            itemCtrl2(i->valuestring,r,g,b,w);
-              i=i->next;}
-        }
-       } //itemtype
-     //  break;
-          } //if have correct array 
-  }
-
- 
+// MQTT Callback routine 
 void callback(char* topic, byte* payload, unsigned int length) {
   payload[length]=0;
   Serial.print(F("["));
@@ -314,41 +273,43 @@ void restoreState()
 
 int getConfig (int arg_cnt, char **args);
 int  lanLoop() {
-  static short _once=1;
 
 #ifdef NOETHER
-lanStatus=-11;
+lanStatus=-14;
 #endif
 
 //Serial.println(lanStatus);
 switch (lanStatus) 
 
 {
+//Initial state  
 case 0: //Ethernet.begin(mac,ip);
 Serial.println(F("Starting lan"));
-if (Ethernet.begin(mac) == 0) {
+wdt_dis();
+if (Ethernet.begin(mac,12000) == 0) {
     Serial.println(F("Failed to configure Ethernet using DHCP"));
     lanStatus = -10;
-    lanCheck=millis()+5000;
+    lanCheck=millis()+60000;
   } else
   {
   printIPAddress();
   lanStatus = 1;
   }
+ wdt_en();
+ wdt_res();
 break;  
+//Have IP address
  case 1:
  
-   lanStatus=getConfig(0,NULL); //from server
+   lanStatus=getConfig(0,NULL); //got config from server or load from NVRAM
    #ifdef _artnet
    if (artnet) artnet->begin();
    #endif
      
    break; 
- case 2: // IP Ready, Connecting & subscribe
+ case 2: // IP Ready, config loaded, Connecting broker  & subscribe
 //Arming Watchdog
-#if defined(__AVR_ATmega2560__)
-  wdt_enable(WDTO_8S);
-#endif
+ wdt_res(); 
 {
 short n=0;
 int port=1883;
@@ -412,21 +373,16 @@ break;
  case -11:  
             if (loadConfig(0,NULL)) lanStatus=2;
               else  {lanCheck=millis()+5000;lanStatus=-10;}
-                
-               
 break;
-                         
-}                  
-//static long mtnCnt=0;  
-// Maintain dynamic IP
-//if (millis()>mtnCnt)
-{
-//mtnCnt=millis()+2;
-#if defined(__AVR_ATmega2560__)
-wdt_disable();
-#endif
 
-switch (Ethernet.maintain())
+ case -14: ;
+ // do notghing with net                         
+}                  
+
+{
+wdt_dis();
+if (lanStatus>0)
+ switch (Ethernet.maintain())
   {
     case 1:
       //renewed fail
@@ -461,9 +417,9 @@ switch (Ethernet.maintain())
       break;
 
   }
-#if defined(__AVR_ATmega2560__)
-  wdt_enable(WDTO_8S);
-#endif
+
+  wdt_en();
+
   }
 
 return lanStatus;
@@ -553,15 +509,6 @@ void Changed (int i, DeviceAddress addr, int val)
       {
       thermoSetCurTemp(owItem,val);  ///TODO: Refactore using Items interface
       }
-
-  
-  
- //client.publish(addrstr, valstr); 
-  
-  //Serial.print(addrstr);
-  //Serial.print(" = ");
-  //Serial.println(valstr);
-
 }
 #endif
 
@@ -575,10 +522,10 @@ void _handleHelp(int arg_cnt, char **args)
 
 void _kill(int arg_cnt, char **args)
 {
-  for (short i=9;i>0;i--) {delay(1000);Serial.println(i);};
+  for (short i=17;i>0;i--) {delay(1000);Serial.println(i);};
 }
 
-#define EEPROM_offset 40
+#define EEPROM_offset 32+6
 
 void parseConfig()
 {    int mc,incnt;
@@ -650,8 +597,12 @@ void parseConfig()
 void _loadConfig (int arg_cnt, char **args) {loadConfig(arg_cnt,args);restoreState();}
 int loadConfig (int arg_cnt, char **args)
 //(char* tokens)
-{
+{         char ch; 
           Serial.println(F("loading Config")); 
+          
+          ch=EEPROM.read(EEPROM_offset);
+          if (ch=='{')
+          {
           aJsonEEPROMStream as=aJsonEEPROMStream(EEPROM_offset);  
           aJson.deleteItem(root);
           root = aJson.parse(&as);
@@ -663,7 +614,14 @@ int loadConfig (int arg_cnt, char **args)
             } 
             Serial.println(F("Loaded"));
             parseConfig();
-            return 1;   
+            return 1; 
+          }
+          else  
+          {
+            Serial.println(F("No stored config"));
+            return 0;
+             
+          }
 }
 
 void _mqttConfigReq (int arg_cnt, char **args) {mqttConfigReq(arg_cnt,args);restoreState();}
@@ -746,28 +704,42 @@ void _getConfig(int arg_cnt, char **args) {getConfig(arg_cnt,args);restoreState(
 void printBool (bool arg)
 {if (arg) Serial.println(F("on")); else Serial.println(F("off"));}
 
+
+void saveFlash(short n, char* str)
+{}
+
+void loadFlash(short n, char* str)
+{}
+
 int getConfig (int arg_cnt, char **args)
 //(char *tokens)
 {
-    FILE* result;
-    int returnCode ;
+    
+    
+    int returnCode =0;
     char ch;
-    char URI[32];
-     
-    char server[] = "lazyhome.ru"; 
+    char URI   [32];
+    char server[32] = "lazyhome.ru"; 
+    if (arg_cnt>0) {
+                    strncpy(server,args[1],sizeof(server)-1);
+                    saveFlash(0,server);
+                    }
+    else loadFlash(0,server);                 
 
     snprintf(URI, sizeof(URI), "/%02x-%02x-%02x-%02x-%02x-%02x.config.json",mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    Serial.println(F("Config URI: "));Serial.println(URI);
+    Serial.println(F("Config URI: "));Serial.print(F("http://"));Serial.print(server);Serial.println(URI);
 
     #if defined(__AVR__)
-    byte hserver[] = { 192,168,88,2 }; 
-    HTTPClient hclient(serverip,hserver,80);
+    FILE* result;
+    //byte hserver[] = { 192,168,88,2 }; 
+    wdt_dis();
+    HTTPClient hclient(server,80);
   
    
    // FILE is the return STREAM type of the HTTPClient
     result = hclient.getURI( URI);
     returnCode = hclient.getLastReturnCode();
- 
+    wdt_en();  
     if (result!=NULL) {
       if (returnCode==200) {
          
@@ -809,60 +781,60 @@ int getConfig (int arg_cnt, char **args)
       lanCheck=millis()+5000;
       return -11;
           }
+   
    #else
-// Dummy http client
-   // if you get a connection, report back via serial:
-  if (ethClient.connect(server, 80)) {
-    Serial.println(F("connected"));
-    // Make a HTTP request:
-    ethClient.print(F("GET "));
-    ethClient.print(URI);
-    ethClient.println(F(" HTTP/1.1"));
-    ethClient.print(F("Host: "));
-    ethClient.println(server);
-    ethClient.println("Connection: close");
-    ethClient.println();
-  } else {
-    // if you didn't get a connection to the server:
-    Serial.println("connection failed");
-  }
-    #define buflen 16000
-    unsigned long t=millis()+10000;
-    char buf [buflen];
-    int i=0;
-    while (millis()<t)
-    {
-      if (ethClient.available()) {
-              buf[i] = ethClient.read();
-              Serial.print(buf[i]);
-              if (buf[i]=='{' || i>0) i++;
-              if (i>=buflen-1) break;
-             }
-    }
-    ethClient.stop();
+  //Non AVR code 
+  String response;
+  
+  HttpClient htclient = HttpClient(ethClient, server, 80);
+  htclient.setHttpResponseTimeout(4000);
+  wdt_res();
+  //Serial.println("making GET request");
+  htclient.beginRequest();
+  htclient.get(URI);
+  htclient.endRequest();
+  
+  
+  // read the status code and body of the response
+  returnCode = htclient.responseStatusCode();
+  response = htclient.responseBody();
+  htclient.stop();
+  wdt_res();
+  Serial.print("HTTP Status code: ");
+  Serial.println(returnCode);
+  //Serial.print("GET Response: ");
     
-    buf[i]=0;
-    Serial.println(buf);
-
+    if (returnCode==200)
+    {
     aJson.deleteItem(root); 
-    root = aJson.parse(buf);         
+    root = aJson.parse((char*) response.c_str());         
                 
         if (!root)
           {
             Serial.println(F("Config parsing failed"));
-            lanCheck=millis()+15000;
-           return -11;
+           // lanCheck=millis()+15000;
+           return -11; //Load from NVRAM
             } 
             else   
           {
+            /*
             char * outstr=aJson.print(root);
             Serial.println(outstr);
             free (outstr);
-   
+             */
+            Serial.println(response); 
             parseConfig();
 
              
           }
+    }
+    else 
+       {
+            Serial.println(F("Config retrieving failed"));
+            //lanCheck=millis()+15000;
+            return -11; //Load from NVRAM
+            } 
+
     
    #endif
     return 2;
@@ -876,7 +848,7 @@ void preTransmission()
 
 void postTransmission()
 {
-  modbusSerial.flush(); 
+  //modbusSerial.flush(); 
   digitalWrite(TXEnablePin, 0);
 }
 
@@ -885,7 +857,7 @@ void setup() {
   
    cmdInit(115200);
 
-  Serial.println(F("\nLazyhome.ru LightHub controller v0.94"));
+  Serial.println(F("\nLazyhome.ru LightHub controller v0.95"));
   
   short macvalid=0;
   byte defmac[6]={0xDE,0xAD,0xBE,0xEF,0xFE,0};
@@ -902,22 +874,13 @@ void setup() {
               }
   printMACAddress();
   
-
+  loadConfig(0,NULL); 
    
   #ifdef _modbus
   pinMode(TXEnablePin,OUTPUT);
   modbusSerial.begin(9600);
 
-  /* 
-  // initialize Modbus communication baud rate
-  #ifdef __SAM3X8E__  
-     node.begin(9600,UARTClass::Mode_8E1,13);
-  #else
-     node.begin(9600,SERIAL_8E1,13);
-  #endif
-  */
-  node.idle(&modbusIdle);
-  
+  node.idle(&modbusIdle);  
     // Callbacks allow us to configure the RS485 transceiver correctly
   node.preTransmission(preTransmission);
   node.postTransmission(postTransmission);
@@ -926,15 +889,12 @@ void setup() {
   delay(20);
   
   owReady=0;
-    //=owSetup(&Changed);
   
   #ifdef _owire
   if (net) net->idle(&owIdle);
   #endif
   
-
-  
-  client.setServer(server, 1883);
+  //client.setServer(server, 1883);
   client.setCallback(callback);
   
 
@@ -959,9 +919,7 @@ void setup() {
 
 
 void loop(){
-#if defined(__AVR_ATmega2560__)
-  wdt_reset();
-#endif
+  wdt_res();
 
  //commandLine.update();
   cmdPoll();
@@ -1004,9 +962,7 @@ void owIdle(void)
   if (artnet) artnet->read();
 #endif
 
-#if defined(__AVR_ATmega2560__)
-  wdt_reset();
-#endif
+  wdt_res();
   return;///
   Serial.print("o");
 
@@ -1024,9 +980,8 @@ if (lanLoop() == 1) client.loop();
 void modbusIdle(void) 
 {
   //Serial.print("m");
-#if defined(__AVR_ATmega2560__)
-    wdt_reset();
-#endif
+
+    wdt_res();
 if (lanLoop() > 1) 
             {
               client.loop();
@@ -1072,8 +1027,6 @@ void inputLoop(void)
   }
 
 }
-
-
 
 void modbusLoop(void)
 { 
@@ -1203,40 +1156,3 @@ if (items)
 
 
 
-#if defined(ESP_PLATFORM) 
-int freeRam () 
-{return system_get_free_heap_size();}
-#endif
-
-#if defined(__AVR__) 
-int freeRam () 
-{
-  extern int __heap_start, *__brkval; 
-  int v; 
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
-}
-#endif
-
-#if defined(__SAM3X8E__)
-extern char _end;
-extern "C" char *sbrk(int i);
-
-int freeRam()
-{
-  char *ramstart = (char *) 0x20070000;
-  char *ramend = (char *) 0x20088000;
-  char *heapend = sbrk(0);
-  register char * stack_ptr asm( "sp" );
-  struct mallinfo mi = mallinfo();
-/*
-  Serial << "Ram used (bytes): " << endl
-    << "  dynamic: " << mi.uordblks << endl
-    << "  static:  " << &_end - ramstart << endl
-    << "  stack:   " << ramend - stack_ptr << endl; 
-  Serial << "Estimation free Ram: " << stack_ptr - heapend + mi.fordblks << endl;
-*/
-
-  
-  return stack_ptr - heapend + mi.fordblks; 
-}
- #endif 

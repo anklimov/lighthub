@@ -31,6 +31,7 @@ to flash your DUE
 (need to correct path and port, of course)
 # Dependences 
 (quite big number of libs required. Use git clone to have your local copy in your Arduino libs folder)
+Please check updates for all dependences.
 
 For patched libraries, appropriate GitHub repo URL provided:
 
@@ -40,7 +41,7 @@ For patched libraries, appropriate GitHub repo URL provided:
 * Wire (standard)
 * Artnet
 * DmxSimple                             https://github.com/anklimov/DmxSimple (for AVR) or https://github.com/anklimov/ESP-Dmx (for ESP) or https://github.com/anklimov/DmxDue (for DUE)
-* HTTPClient                            https://github.com/anklimov/HTTPClient
+* HTTPClient (for AVR)                  https://github.com/anklimov/HTTPClient or https://github.com/arduino-libraries/ArduinoHttpClient for other platforms
 * aJson                                 https://github.com/anklimov/aJson
 * CmdArduino                            https://github.com/anklimov/CmdArduino
 * EEPROM (standard for AVR) or DueFlashStorage for DUE
@@ -50,17 +51,15 @@ For patched libraries, appropriate GitHub repo URL provided:
 * Ethernet                              https://github.com/anklimov/Ethernet
 * SPI (standard)
 
-Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) and ESP not completed yet and on early stage now.
-Core is mostly migrated (except EEPROM in DUE)
+Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) and ESP is not completed yet.
+Core is mostly migrated 
 
 AVR version is basic and have all functions
 
 Another platforms limitations (todo):
 SAM3X8E:
--EEPROM issues to be fixed
--DMX-in - not deployed yet
--Improve http client
+*DMX-in - not deployed yet
 
 ESP:
--Wifi instead Ether not implemented yet
--DMX-IN 
+*Wifi instead Ether not implemented yet
+*DMX-IN not possible to deploy

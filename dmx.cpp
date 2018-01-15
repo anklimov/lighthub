@@ -1,4 +1,4 @@
-/* Copyright © 2017 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,7 +35,54 @@ unsigned long D_checkT=0;
 Artnet *artnet = NULL;
 #endif
 
-aJsonObject *dmxArr = NULL;
+
+extern aJsonObject *items;
+extern aJsonObject *dmxArr;
+
+
+int itemCtrl2(char* name,int r,int g, int b, int w)
+{
+  aJsonObject *itemArr= aJson.getObjectItem(items, name);    
+
+       if (itemArr && (itemArr->type==aJson_Array))
+       { 
+         
+        short itemtype = aJson.getArrayItem(itemArr,0)->valueint;
+        short itemaddr = aJson.getArrayItem(itemArr,1)->valueint;  
+       switch (itemtype){
+#ifdef _dmxout 
+       case 0: //Dimmed light       
+
+       DmxWrite(itemaddr, w); 
+       break;
+
+
+       case 1: //Colour RGBW
+        DmxWrite(itemaddr+3, w);
+
+       case 2: // RGB
+      {
+   
+        DmxWrite(itemaddr,   r);
+        DmxWrite(itemaddr+1, g);
+        DmxWrite(itemaddr+2, b);
+          
+         break; }    
+#endif                  
+        case 7: //Group
+        aJsonObject *groupArr= aJson.getArrayItem(itemArr, 1);      
+        if (groupArr && (groupArr->type==aJson_Array))
+        { aJsonObject *i =groupArr->child;
+          while (i)
+            { //Serial.println(i->valuestring);
+            itemCtrl2(i->valuestring,r,g,b,w);
+              i=i->next;}
+        }
+       } //itemtype
+     //  break;
+          } //if have correct array 
+  }
+
 
 void DMXImmediateUpdate(short tch,short r, short g, short b, short w) {
 //Here only safe re-interable code for quick passthrow between DMX IN and DMX OUT

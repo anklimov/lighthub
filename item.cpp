@@ -1,4 +1,4 @@
-/* Copyright © 2017 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -665,17 +665,6 @@ int Item::VacomSetFan (int8_t  val, int8_t cmd)
   uint8_t j, result;
   uint16_t data[1];
 
-  /*
- #ifdef __SAM3X8E__  
-  node.begin(9600,UARTClass::Mode_8E1,13);
-  #else
-  node.begin(9600,SERIAL_8E1,13);
-  #endif
-
-
-
-  node.setSlave(addr);
-*/
 modbusSerial.begin(9600,fmPar);
 node.begin(addr,modbusSerial);
 
@@ -688,10 +677,7 @@ node.begin(addr,modbusSerial);
   node.writeSingleRegister(2003-1,val*100);
 
    modbusBusy=0;
-
-
-  
-  
+   
 }
 
 #define a 0.1842 
@@ -703,15 +689,6 @@ int Item::VacomSetHeat(int addr,int8_t val, int8_t  cmd)
     Serial.print(F("VC_heat#"));Serial.print(addr);Serial.print(F("="));Serial.print(val);Serial.print(F(" cmd="));Serial.println(cmd);
    if (modbusBusy) {mb_fail(2,addr,val,cmd);return -1;}
    modbusBusy=1;
- /*   
- #ifdef __SAM3X8E__ 
-  node.begin(9600,UARTClass::Mode_8E1,13);
-  #else
-  node.begin(9600,SERIAL_8E1,13);
-  #endif
-
-   node.setSlave(addr);
-*/
 
 modbusSerial.begin(9600,fmPar);
 node.begin(addr,modbusSerial);
@@ -791,15 +768,7 @@ int Item::SendCmd(short cmd,short n, int * Par)
    
    if (modbusBusy) {mb_fail(3,addr,value,0);return -1;};
    modbusBusy=1;
-  /*
-  #ifdef __SAM3X8E__ 
-  node.begin(9600,UARTClass::Mode_8E1,13);
-  #else
-  node.begin(9600,SERIAL_8E1,13);
-  #endif
-
-   node.setSlave(addr);  
-  */
+ 
 modbusSerial.begin(9600,dimPar);
 node.begin(addr,modbusSerial);
 
@@ -834,16 +803,7 @@ int Item::checkFM()
   strncat(addrstr,"_stat",sizeof(addrstr)-1);
   
  // aJson.addStringToObject(out,"type",   "rect");
-/*
-#ifdef __SAM3X8E__
-  node.begin(9600,UARTClass::Mode_8E1,13);
-  #else
-  node.begin(9600,SERIAL_8E1,13);
-  #endif
 
-
-  node.setSlave(getArg());
-  */
 
 modbusSerial.begin(9600,fmPar);
 node.begin(getArg(),modbusSerial);
@@ -919,14 +879,6 @@ result = node.readHoldingRegisters(20-1, 4);
   {
   if (modbusBusy) return -1;
   modbusBusy=1;
-
-  /*
-  #ifdef __SAM3X8E__  
-  node.begin(9600,UARTClass::Mode_8E1,13);
-  #else
-  node.begin(9600,SERIAL_8E1,13);
-  #endif
-   */
    
   uint8_t   result;
   

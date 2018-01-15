@@ -1,4 +1,4 @@
-/* Copyright © 2017 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,3 +24,4 @@ void SetBytes(uint8_t* addr, uint8_t count, char * out);
 void SetAddr(char * out,  uint8_t* addr);
 uint8_t HEX2DEC(char i);
 int getInt(char ** chan);
+int freeRam ();
