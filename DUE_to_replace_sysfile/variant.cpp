@@ -325,7 +325,7 @@ RingBuffer tx_buffer2;
 RingBuffer tx_buffer3;
 RingBuffer tx_buffer4;
 
-USARTClass Serial1(USART0, USART0_IRQn, ID_USART0, &rx_buffer2, &tx_buffer2);
+///USARTClass Serial1(USART0, USART0_IRQn, ID_USART0, &rx_buffer2, &tx_buffer2);
 void serialEvent1() __attribute__((weak));
 void serialEvent1() { }
 USARTClass Serial2(USART1, USART1_IRQn, ID_USART1, &rx_buffer3, &tx_buffer3);
@@ -336,28 +336,30 @@ void serialEvent3() __attribute__((weak));
 void serialEvent3() { }
 
 // IT handlers
-void USART0_Handler(void)
-{
-  Serial1.IrqHandler();
-}
 
-///void USART1_Handler(void)
+///void USART0_Handler(void)
 ///{
-///  Serial2.IrqHandler();
+///  Serial1.IrqHandler();
 ///}
+
+void USART1_Handler(void)
+{
+  Serial2.IrqHandler();
+}
 
 void USART3_Handler(void)
 {
   Serial3.IrqHandler();
 }
 
+
 // ----------------------------------------------------------------------------
 
 void serialEventRun(void)
 {
   if (Serial.available()) serialEvent();
-  if (Serial1.available()) serialEvent1();
-///  if (Serial2.available()) serialEvent2();
+///  if (Serial1.available()) serialEvent1();
+  if (Serial2.available()) serialEvent2();
   if (Serial3.available()) serialEvent3();
 }
 

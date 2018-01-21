@@ -51,14 +51,17 @@ For patched libraries, appropriate GitHub repo URL provided:
 * Ethernet                              https://github.com/anklimov/Ethernet
 * SPI (standard)
 
-Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) and ESP is not completed yet.
-Core is mostly migrated 
+Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) is done since v 0.96
+Next step ESP portation
+
+#Platforms specific details:
 
 AVR version is basic and have all functions
+*DMX-out is software (DMXSimple) on pin3
 
-Another platforms limitations (todo):
 SAM3X8E:
-*DMX-in - not deployed yet
+*default PWM frequency 
+*both, DMX-in and DMX-out are hardware USART based. Use USART1 (pins 18 and 19) for DMX-out and DMX-in
 
 ESP:
 *Wifi instead Ether not implemented yet
