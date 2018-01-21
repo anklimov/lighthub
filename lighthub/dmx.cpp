@@ -21,8 +21,11 @@ e-mail    anklimov@gmail.com
 //#include <DmxSimple.h>
 //#include <DMXSerial.h>
 #include "options.h"
+
 #ifdef _dmxin
+#if defined(__AVR__)
 #include <DMXSerial.h>
+#endif
 #endif
 
 uint8_t * DMXin = NULL;
@@ -120,7 +123,7 @@ for (short tch=0; tch<=3 ; tch++)
     bool updated = 0;
     
     for (short trh=0; trh<4 ; trh++) 
-    if ((t=DMXSerial.read(base+trh+1)) != DMXin[base+trh])
+    if ((t=dmxin.read(base+trh+1)) != DMXin[base+trh])
       {
         D_State |= (1<<tch);
         updated=1;
@@ -166,7 +169,7 @@ D_checkT=0;
 //int ch = 0;
 DMXput();
 #ifdef _dmxout
-for (int i=1; i<17; i++) {Serial.print(DMXSerial.read(i));Serial.print(";");}
+for (int i=1; i<17; i++) {Serial.print(dmxin.read(i));Serial.print(";");}
 #endif
        Serial.println();
 #endif
@@ -189,14 +192,22 @@ void DMXinSetup(int channels)
  // DmxSimple.usePin(pin);
   //DmxSimple.maxChannel(channels);
   
- #if defined(_dmxin)
+#if defined(_dmxin)
    DMXin = new uint8_t [channels];
-  
+#if defined(__AVR__)  
    DMXSerial.init(DMXReceiver,0,channels);
     if (DMXSerial.getBuffer()) {Serial.print(F("Init in ch:"));Serial.println(channels);} else Serial.println(F("DMXin Buffer alloc err"));
    //DMXSerial.maxChannel(channels);
    DMXSerial.attachOnUpdate(&DMXUpdate);
- #endif
+#endif
+
+#if defined(__SAM3X8E__)
+dmxin.begin();
+dmxin.setRxEvent(DMXUpdate);  
+
+#endif
+   
+#endif
 
  #ifdef _artnet
     // this will be called for each packet received
@@ -217,8 +228,8 @@ void DMXoutSetup(int channels,int pin)
 #endif 
 
 #if defined(__SAM3X8E__)
+dmxout.begin();
 dmxout.setTxMaxChannels(channels);
-dmxout.beginWrite();
 #endif
 #endif
 }

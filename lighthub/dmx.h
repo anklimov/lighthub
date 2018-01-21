@@ -54,7 +54,9 @@ extern Artnet *artnet;
 #endif
 
 #ifdef _dmxin
+#if defined(__AVR__)
 #include <DMXSerial.h>
+#endif
 #endif
 
 #include "aJSON.h"

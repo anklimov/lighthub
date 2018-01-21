@@ -47,7 +47,6 @@ Relay DMX array channel
 Config URL configuration
 
 todo DUE related:
-DMX in (new lib) - to do
 HTTP
 PWM freq fix
 Config webserver
@@ -857,7 +856,7 @@ void setup() {
   
    cmdInit(115200);
 
-  Serial.println(F("\nLazyhome.ru LightHub controller v0.95"));
+  Serial.println(F("\nLazyhome.ru LightHub controller v0.96"));
   
   short macvalid=0;
   byte defmac[6]={0xDE,0xAD,0xBE,0xEF,0xFE,0};
@@ -936,7 +935,7 @@ if (owReady && owArr)      owLoop();
 #endif
 
 #ifdef _dmxin
-    unsigned long lastpacket = DMXSerial.noDataSince();
+//    unsigned long lastpacket = DMXSerial.noDataSince();
      DMXCheck();
 #endif    
    // if (lastpacket && (lastpacket%10==0)) Serial.println(lastpacket);

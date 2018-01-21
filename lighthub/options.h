@@ -8,14 +8,14 @@
 
 #if defined(__AVR__)
 //All options available
-#define modbusSerial Serial2 
+#define modbusSerial Serial2
+#define dmxin DMXSerial
+#define dmxout DmxSimple 
 #endif
 
 #if defined(__SAM3X8E__)
-/// DMX not deployed yet           
-#undef _dmxin
 #define modbusSerial Serial2
-#define dmxout DmxDue4 
+#define dmxout DmxDue1 
 #define dmxin  DmxDue1
 #endif
 
