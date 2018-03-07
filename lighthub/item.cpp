@@ -41,7 +41,7 @@ e-mail    anklimov@gmail.com
 #endif 
 
 #include <ModbusMaster.h>
-#include <PubSubClient2.h>
+#include <PubSubClient.h>
 
 #define dimPar SERIAL_8E1
 #define fmPar  SERIAL_8N1

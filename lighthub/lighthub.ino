@@ -62,7 +62,7 @@ Config webserver
 #include "options.h"
 
 #include <Ethernet.h>
-#include <PubSubClient2.h>
+#include <PubSubClient.h>
 #include <SPI.h>
 #include "utils.h"
 
