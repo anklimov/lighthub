@@ -21,7 +21,7 @@ e-mail    anklimov@gmail.com
 #include "inputs.h"
 #include "aJSON.h"
 #include "item.h"
-#include <PubSubClient2.h>
+#include <PubSubClient.h>
 
 extern PubSubClient client;
 
