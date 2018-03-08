@@ -5,6 +5,9 @@
 #define _modbus  
 #define _artnet
 
+#if defined(ESP8266)
+#define __ESP__
+#endif
 
 #if defined(__AVR__)
 //All options available
@@ -19,10 +22,11 @@
 #define dmxin  DmxDue1
 #endif
 
-#if defined(ESP_PLATFORM)
+#if defined(__ESP__)
 #undef _dmxin
-#undef _dmxout
-#define modbusSerial Serial
+#undef _modbus
+#define _espdmx
+#define modbusSerial Serial1
 #endif
 
 #ifndef _dmxout

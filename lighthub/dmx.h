@@ -39,7 +39,9 @@ e-mail    anklimov@gmail.com
 #endif
 
 #if defined(__ESP__)
-#include <ESP-Dmx.h>
+#include <ESPDMX.h>
+extern DMXESPSerial dmxout;
+#define DmxWrite dmxout.write
 #endif 
 
 #if defined(__SAM3X8E__)

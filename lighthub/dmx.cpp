@@ -28,6 +28,10 @@ e-mail    anklimov@gmail.com
 #endif
 #endif
 
+#if defined(__ESP__)
+DMXESPSerial dmxout;
+#endif
+
 uint8_t * DMXin = NULL;
 int D_State=0;
 
@@ -225,6 +229,7 @@ void DMXoutSetup(int channels,int pin)
 
 
 #if defined(__ESP__)
+dmxout.init(channels);
 #endif 
 
 #if defined(__SAM3X8E__)

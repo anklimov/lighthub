@@ -57,11 +57,14 @@ DMX-OUT deploy on USART1
 Config webserver
 
 */
+#if defined(__ESP__)
+#include <FS.h>                   //this needs to be first, or it all crashes and burns...
+#endif
 
 // Configuration of drivers enabled
 #include "options.h"
 
-#include <Ethernet.h>
+
 #include <PubSubClient.h>
 #include <SPI.h>
 #include "utils.h"
@@ -95,7 +98,16 @@ Config webserver
 #include <EEPROM.h>
 #endif
 
-#if defined(ESP_PLATFORM)
+#if defined(__ESP__)
+#include "esp.h"
+#define wdt_res()
+#define wdt_en()  
+#define wdt_dis()
+
+ 
+#else
+#include <Ethernet2.h>
+EthernetClient ethClient;
 #endif
 
 #ifdef _owire
@@ -152,7 +164,7 @@ ModbusMaster node;
 
 byte mac[6];
 
-EthernetClient ethClient;
+
 PubSubClient client(ethClient);
 
 
@@ -283,9 +295,15 @@ switch (lanStatus)
 {
 //Initial state  
 case 0: //Ethernet.begin(mac,ip);
+
+#ifdef __ESP__
+//WiFi.mode(WIFI_STA);
+//wifiMulti.addAP("Smartbox", "");
+if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
+#else
 Serial.println(F("Starting lan"));
 wdt_dis();
-if (Ethernet.begin(mac,12000) == 0) {
+if (Ethernet.begin(mac,12000) == 0) {    
     Serial.println(F("Failed to configure Ethernet using DHCP"));
     lanStatus = -10;
     lanCheck=millis()+60000;
@@ -296,6 +314,7 @@ if (Ethernet.begin(mac,12000) == 0) {
   }
  wdt_en();
  wdt_res();
+#endif 
 break;  
 //Have IP address
  case 1:
@@ -851,13 +870,24 @@ void postTransmission()
   digitalWrite(TXEnablePin, 0);
 }
 
-void setup() {
-  
-  
-   cmdInit(115200);
+void setup() { 
+ cmdInit(115200);
 
-  Serial.println(F("\nLazyhome.ru LightHub controller v0.96"));
-  
+ Serial.println(F("\nLazyhome.ru LightHub controller v0.96"));
+
+ cmdAdd("help", _handleHelp);
+ cmdAdd("save", _saveConfig);
+ cmdAdd("load", _loadConfig);
+ cmdAdd("get",  _getConfig);
+ cmdAdd("set",  _setConfig);
+ cmdAdd("kill", _kill);
+ cmdAdd("req", _mqttConfigReq);
+
+
+  #ifdef __ESP__
+  espSetup();
+  #endif
+
   short macvalid=0;
   byte defmac[6]={0xDE,0xAD,0xBE,0xEF,0xFE,0};
   
@@ -905,14 +935,6 @@ void setup() {
 //  checkForRemoteSketchUpdate();
 #endif
 
- cmdAdd("help", _handleHelp);
- cmdAdd("save", _saveConfig);
- cmdAdd("load", _loadConfig);
- cmdAdd("get",  _getConfig);
- cmdAdd("set",  _setConfig);
- cmdAdd("kill", _kill);
- cmdAdd("req", _mqttConfigReq);
- 
  
 }
 
@@ -952,6 +974,10 @@ if (owReady && owArr)      owLoop();
  
  if (inputs)  inputLoop();
 
+#if defined (_espdmx) 
+ dmxout.update();
+#endif
+
 }
 
 // Idle handlers
@@ -971,7 +997,11 @@ if (lanLoop() == 1) client.loop();
 #ifdef _dmxin 
  DMXCheck();
 #endif
- 
+
+#if defined (_espdmx) 
+ dmxout.update();
+#endif
+
  //modbusLoop();
  }
 
@@ -993,6 +1023,11 @@ if (lanLoop() > 1)
 #ifdef _dmxin
  DMXCheck();
 #endif
+
+#if defined (_espdmx) 
+ dmxout.update();
+#endif
+
  //modbusloop();
  }
 

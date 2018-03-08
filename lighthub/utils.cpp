@@ -23,6 +23,12 @@ e-mail    anklimov@gmail.com
 #include <malloc.h>
 #endif
 
+#if defined(ESP8266)
+extern "C" {
+#include "user_interface.h"
+}
+#endif
+
 void PrintBytes(uint8_t* addr, uint8_t count, bool newline) {
   for (uint8_t i = 0; i < count; i++) {
     Serial.print(addr[i]>>4, HEX);
@@ -74,13 +80,13 @@ int getInt(char ** chan)
 }
 
 
-#if defined(ESP_PLATFORM) 
-int freeRam () 
+#if defined(ESP8266)
+unsigned long freeRam () 
 {return system_get_free_heap_size();}
 #endif
 
 #if defined(__AVR__) 
-int freeRam () 
+unsigned long freeRam () 
 {
   extern int __heap_start, *__brkval; 
   int v; 
@@ -92,7 +98,7 @@ int freeRam ()
 extern char _end;
 extern "C" char *sbrk(int i);
 
-int freeRam()
+unsigned long freeRam()
 {
   char *ramstart = (char *) 0x20070000;
   char *ramend = (char *) 0x20088000;

@@ -22,20 +22,6 @@ e-mail    anklimov@gmail.com
 #include "aJSON.h"
 
 #ifdef _dmxout
-
-/*
-#if defined(__AVR__)
-#include <DmxSimple.h>
-#endif
-
-#if defined(__ESP__)
-#include <ESP-Dmx.h>
-#endif 
-
-#if defined(__SAM3X8E__)
-#include <DmxDue.h>
-#endif
-*/
 #include "dmx.h"
 #include "FastLED.h"
 #endif 
@@ -223,20 +209,7 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
   {
   int t;
    case CMD_TOGGLE: 
-    switch (t=getCmd())
-    {
-    case CMD_ON:
-    case CMD_SET:
-      cmd=CMD_OFF;
-      break;
-    case CMD_OFF:
-    case CMD_HALT:
-    case  0:
-    case -1:       //No stored command yet
-      cmd=CMD_ON;
-      break;       
-    }//switch old cmd
-   //Serial.print("Tog/oldcmd:");Serial.print(t);Serial.print(F(" new "));Serial.println(cmd);
+   if (isActive()) cmd=CMD_OFF; else cmd=CMD_ON;  
    break;
  
    case CMD_RESTORE:
@@ -253,7 +226,7 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
   } //switch cmd
       
   switch (cmd) 
-  {
+  {   
      case 0: //no command
      
      setCmd(CMD_SET);
@@ -268,15 +241,18 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
           st.h=Par[0];
           st.s=Par[1];
           st.v=Par[2];
-          setVal(st.aslong);         
+          setVal(st.aslong);   
+             //SendCmd(0,3,Par); // Send back triplet ?     
           break;
           
-      case CH_DIMMER:  //Everywhere, in flat VAL
+      case CH_PWM: 
+      case CH_VC:            
+      case CH_DIMMER:  
       case CH_MODBUS:
-      case CH_THERMO:
-      case CH_VC:
+           SendCmd(0,1,Par);  // Send back parameter for channel above this line
+      case CH_THERMO:      
       case CH_VCTEMP:
-          setVal(Par[0]);
+          setVal(Par[0]);          // Store value
           
      }//itemtype
      
@@ -305,11 +281,14 @@ int Item::Ctrl(short cmd, short n, int * Par, boolean send)
                   params=3;
                   SendCmd(0,params,Par); // Send restored triplet
                   break;
-          
+                  
+                   
                   case CH_DIMMER:         //Everywhere, in flat VAL
-                  case CH_MODBUS:           
-                  case CH_VC:
-                  case CH_VCTEMP:
+                  case CH_MODBUS: 
+                  case CH_VC:          
+                  case CH_VCTEMP:  
+                  case CH_PWM:
+                  
                   Par[0]=st.aslong;
                   params=1;
                   SendCmd(0,params,Par);  // Send restored parameter
@@ -544,7 +523,12 @@ int Item::isActive()
 
 if (!isValid()) return -1;
 //Serial.print(itemArr->name);
+
 int cmd=getCmd();
+
+
+if (itemType!=CH_GROUP)  
+// Simple check last command first
 switch (cmd)
 {
   case CMD_ON:
@@ -552,19 +536,38 @@ switch (cmd)
   return 1;
   case CMD_OFF:
   case CMD_HALT:
+  case -1: ///// No last command
   //Serial.println(" inactive");
   return 0;
 }
 
+// Last time was not a command but parameters set. Looking inside
  st.aslong=getVal(); 
  
 switch (itemType)
 {
-  //case CH_GROUP: 
+  case CH_GROUP: //make recursive calculation - is it some active in group
+  if (itemArg->type==aJson_Array)
+        { 
+          Serial.println(F("Grp check: "));
+          aJsonObject *i =itemArg->child;
+          while (i)
+            {
+            Item it (i->valuestring);
+            
+            if (it.isValid() && it.isActive()) {Serial.println(F("Active")); return 1;} 
+            i=i->next;
+            } //while
+            return 0;
+        } //if
+  break;
+  
+        
    case CH_RGBW: 
    case CH_RGB:
-                 
-   val=st.v;
+
+                    
+   val=st.v;  //Light volume
    break;
    
    case CH_DIMMER:         //Everywhere, in flat VAL
@@ -572,7 +575,7 @@ switch (itemType)
    case CH_THERMO:
    case CH_VC:
    case CH_VCTEMP:
-   val=st.aslong;
+   val=st.aslong; 
 } //switch 
 Serial.print(F(":="));Serial.println(val);
  if (val) return 1; else return 0;

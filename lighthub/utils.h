@@ -24,4 +24,4 @@ void SetBytes(uint8_t* addr, uint8_t count, char * out);
 void SetAddr(char * out,  uint8_t* addr);
 uint8_t HEX2DEC(char i);
 int getInt(char ** chan);
-int freeRam ();
+unsigned long freeRam ();
