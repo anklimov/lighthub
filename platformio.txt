@@ -1,0 +1,100 @@
+; PlatformIO Project Configuration File (for copy and paste)
+;
+;   Build options: build flags, source filter
+;   Upload options: custom upload port, speed and extra flags
+;   Library options: dependencies, extra library storages
+;   Advanced options: extra scripting
+;
+; Please visit documentation for the other options and examples
+; http://docs.platformio.org/page/projectconf.html
+[platformio]
+src_dir = lighthub
+[env:due]
+  platform = atmelsam
+  framework = arduino
+  board = due
+  build_flags =
+      -D Wiz5500
+  ib_deps =
+    https://github.com/sebnil/DueFlashStorage
+    https://github.com/anklimov/Arduino-Temperature-Control-Library.git
+    https://github.com/anklimov/DS2482_OneWire
+    https://github.com/anklimov/DmxDue
+    https://github.com/arduino-libraries/ArduinoHttpClient
+    https://github.com/anklimov/aJson
+    https://github.com/anklimov/CmdArduino
+    https://github.com/anklimov/ModbusMaster
+    https://github.com/anklimov/Ethernet2
+    https://github.com/PaulStoffregen/SPI.git
+    https://github.com/knolleary/pubsubclient.git
+    https://github.com/anklimov/Artnet.git
+    [env:megaatmega2560-5500]
+        platform = atmelavr
+        board = megaatmega2560
+        framework = arduino
+        build_flags = -D Wiz5500
+        lib_deps =
+          https://github.com/anklimov/Arduino-Temperature-Control-Library.git
+          https://github.com/anklimov/DS2482_OneWire
+          https://github.com/anklimov/DmxSimple
+          https://github.com/anklimov/HTTPClient
+          https://github.com/anklimov/aJson
+          https://github.com/anklimov/CmdArduino
+          https://github.com/anklimov/ModbusMaster
+          https://github.com/anklimov/DMXSerial
+          https://github.com/anklimov/Ethernet2
+          https://github.com/PaulStoffregen/SPI.git
+          https://github.com/knolleary/pubsubclient.git
+          https://github.com/anklimov/Artnet.git
+    [env:megaatmega2560]
+        platform = atmelavr
+        board = megaatmega2560
+        framework = arduino
+        lib_deps =
+          https://github.com/anklimov/Arduino-Temperature-Control-Library.git
+          https://github.com/anklimov/DS2482_OneWire
+          https://github.com/anklimov/DmxSimple
+          https://github.com/anklimov/HTTPClient
+          https://github.com/anklimov/aJson
+          https://github.com/anklimov/CmdArduino
+          https://github.com/anklimov/ModbusMaster
+          https://github.com/anklimov/DMXSerial
+          https://github.com/anklimov/Ethernet
+          https://github.com/PaulStoffregen/SPI.git
+          https://github.com/knolleary/pubsubclient.git
+          https://github.com/anklimov/Artnet.git
+
+
+    [env:due]
+          platform = atmelsam
+          framework = arduino
+          board = due
+          ib_deps =
+            https://github.com/sebnil/DueFlashStorage
+            https://github.com/anklimov/Arduino-Temperature-Control-Library.git
+            https://github.com/anklimov/DS2482_OneWire
+            https://github.com/anklimov/DmxDue
+            https://github.com/arduino-libraries/ArduinoHttpClient
+            https://github.com/anklimov/aJson
+            https://github.com/anklimov/CmdArduino
+            https://github.com/anklimov/ModbusMaster
+            https://github.com/anklimov/Ethernet
+            https://github.com/PaulStoffregen/SPI.git
+            https://github.com/knolleary/pubsubclient.git
+            https://github.com/anklimov/Artnet.git
+
+    [env:espressif8266]
+        platform= espressif8266
+        framework = arduino
+        board = nodemcuv2
+        ib_deps =
+          https://github.com/anklimov/Arduino-Temperature-Control-Library.git
+          https://github.com/anklimov/DS2482_OneWire
+          https://github.com/anklimov/ESP-Dmx
+          https://github.com/arduino-libraries/ArduinoHttpClient
+          https://github.com/anklimov/aJson
+          https://github.com/anklimov/CmdArduino
+          https://github.com/anklimov/ModbusMaster
+          https://github.com/anklimov/DMXSerial
+          https://github.com/knolleary/pubsubclient.git
+          https://github.com/anklimov/Artnet.git

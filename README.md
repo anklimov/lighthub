@@ -1,5 +1,5 @@
 # LightHub 
-is Flexible, Arduino-Mega based SmartHome controller
+is Flexible, Arduino-Mega/Arduino DUE/ESP8266  based SmartHome controller
 
 It allow to connect together:
 
@@ -16,7 +16,7 @@ Scalability is virtually unlimited: Setup so many controllers you needed in most
 
 Prease refer our Wiki for insructions.
 
-Just started preparation to porting firmware to AVR based Arduino DUE and ESP8266/ESP32
+Finished portation of proejct to  Arduino DUE and ESP8266 (ESP32 not tested)
 
 Compiled image has been added to compiled/ folder
 use 
@@ -39,7 +39,7 @@ For patched libraries, appropriate GitHub repo URL provided:
 * DS2482_OneWire                        https://github.com/anklimov/DS2482_OneWire
 * FastLED
 * Wire (standard)
-* Artnet
+* Artnet				https://github.com/anklimov/Artnet.git
 * DmxSimple                             https://github.com/anklimov/DmxSimple (for AVR) or https://github.com/anklimov/ESP-Dmx (for ESP) or https://github.com/anklimov/DmxDue (for DUE)
 * HTTPClient (for AVR)                  https://github.com/anklimov/HTTPClient or https://github.com/arduino-libraries/ArduinoHttpClient for other platforms
 * aJson                                 https://github.com/anklimov/aJson
@@ -51,8 +51,7 @@ For patched libraries, appropriate GitHub repo URL provided:
 * Ethernet                              https://github.com/anklimov/Ethernet
 * SPI (standard)
 
-Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) is done since v 0.96
-Next step ESP portation
+Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) done since v 0.96
 
 #Platforms specific details:
 
@@ -64,5 +63,14 @@ SAM3X8E:
 *both, DMX-in and DMX-out are hardware USART based. Use USART1 (pins 18 and 19) for DMX-out and DMX-in
 
 ESP:
-*Wifi instead Ether not implemented yet
-*DMX-IN not possible to deploy
+*DMX-OUT on USART1 TX
+*DMX-IN - not possible to deploy in ESP8266
+*Modbus - disabled. Might be configured in future on USART0 instead CLI/DEBUG
+
+since v. 0.97:
+
+There is first attempt to use Wiznet 5500  (still not stable enough)
+Need to use compiler directive -D Wiz5500 and https://github.com/anklimov/Ethernet2 library
+
+First attempt to use platformio toolchain for compiling (work not completed yet)
+
