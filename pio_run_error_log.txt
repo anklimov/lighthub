@@ -1,0 +1,1848 @@
+livello@lserver ~/PROG/lighthub $ rm .piolibdeps/ -R -f && pio run -e megaatmega2560
+
+[Wed Mar 14 02:13:43 2018] Processing megaatmega2560 (platform: atmelavr; board: megaatmega2560; framework: arduino)
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+LibraryManager: Installing Arduino-Temperature-Control-Library
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-d4rqwB-package»…
+remote: Counting objects: 337, done.
+remote: Compressing objects: 100% (6/6), done.
+remote: Total 337 (delta 1), reused 0 (delta 0), pack-reused 331
+Получение объектов: 100% (337/337), 151.23 KiB | 0 bytes/s, готово.
+Определение изменений: 100% (174/174), готово.
+Проверка соединения… готово.
+HEAD сейчас на 1306c49 Update OneWire.cpp
+LibraryManager: Installing DS2482_OneWire
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-_j6w1l-package»…
+remote: Counting objects: 14, done.
+remote: Compressing objects: 100% (10/10), done.
+remote: Total 14 (delta 1), reused 7 (delta 0), pack-reused 0
+Распаковка объектов: 100% (14/14), готово.
+Проверка соединения… готово.
+LibraryManager: Installing DmxSimple
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-9UrkaE-package»…
+remote: Counting objects: 15, done.
+remote: Compressing objects: 100% (12/12), done.
+remote: Total 15 (delta 0), reused 13 (delta 0), pack-reused 0
+Распаковка объектов: 100% (15/15), готово.
+Проверка соединения… готово.
+LibraryManager: Installing httpClient
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-fzHDYg-package»…
+remote: Counting objects: 13, done.
+remote: Compressing objects: 100% (11/11), done.
+remote: Total 13 (delta 0), reused 9 (delta 0), pack-reused 0
+Распаковка объектов: 100% (13/13), готово.
+Проверка соединения… готово.
+LibraryManager: Installing aJson
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-t91cPW-package»…
+remote: Counting objects: 20, done.
+remote: Compressing objects: 100% (16/16), done.
+remote: Total 20 (delta 0), reused 13 (delta 0), pack-reused 0
+Распаковка объектов: 100% (20/20), готово.
+Проверка соединения… готово.
+LibraryManager: Installing CmdArduino
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-K87pw4-package»…
+remote: Counting objects: 17, done.
+remote: Compressing objects: 100% (14/14), done.
+remote: Total 17 (delta 2), reused 15 (delta 1), pack-reused 0
+Распаковка объектов: 100% (17/17), готово.
+Проверка соединения… готово.
+LibraryManager: Installing ModbusMaster
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-MpOaw_-package»…
+remote: Counting objects: 41, done.
+remote: Compressing objects: 100% (35/35), done.
+remote: Total 41 (delta 0), reused 18 (delta 0), pack-reused 0
+Распаковка объектов: 100% (41/41), готово.
+Проверка соединения… готово.
+LibraryManager: Installing DMXSerial
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-8uNNCf-package»…
+remote: Counting objects: 17, done.
+remote: Compressing objects: 100% (14/14), done.
+remote: Total 17 (delta 0), reused 9 (delta 0), pack-reused 0
+Распаковка объектов: 100% (17/17), готово.
+Проверка соединения… готово.
+LibraryManager: Installing Ethernet
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-kgiEoN-package»…
+remote: Counting objects: 48, done.
+remote: Compressing objects: 100% (41/41), done.
+remote: Total 48 (delta 4), reused 20 (delta 1), pack-reused 0
+Распаковка объектов: 100% (48/48), готово.
+Проверка соединения… готово.
+LibraryManager: Installing SPI
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-HL64L4-package»…
+remote: Counting objects: 12, done.
+remote: Compressing objects: 100% (11/11), done.
+remote: Total 12 (delta 0), reused 6 (delta 0), pack-reused 0
+Распаковка объектов: 100% (12/12), готово.
+Проверка соединения… готово.
+LibraryManager: Installing pubsubclient
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-Sn_BZN-package»…
+remote: Counting objects: 56, done.
+remote: Compressing objects: 100% (48/48), done.
+remote: Total 56 (delta 5), reused 26 (delta 1), pack-reused 0
+Распаковка объектов: 100% (56/56), готово.
+Проверка соединения… готово.
+LibraryManager: Installing Artnet
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-7FI8Ud-package»…
+remote: Counting objects: 37, done.
+remote: Compressing objects: 100% (32/32), done.
+remote: Total 37 (delta 8), reused 17 (delta 0), pack-reused 0
+Распаковка объектов: 100% (37/37), готово.
+Проверка соединения… готово.
+LibraryManager: Installing id=126
+Downloading  [####################################]  100%
+Unpacking  [####################################]  100%
+Verbose mode can be enabled via `-v, --verbose` option
+PLATFORM: Atmel AVR > Arduino Mega or Mega 2560 ATmega2560 (Mega 2560)
+SYSTEM: ATMEGA2560 16MHz 8KB RAM (248KB Flash)
+Converting lighthub.ino
+Library Dependency Finder -> http://bit.ly/configure-pio-ldf
+LDF MODES: FINDER(chain) COMPATIBILITY(light)
+Collected 37 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- <DallasTemperature> #1306c49
+|   |-- <DS2482_OneWire> #3ef01fc
+|   |   |-- <Wire> v1.0
+|   |-- <ModbusMaster> v2.0.1 #4a429bf
+|-- <DS2482_OneWire> #3ef01fc
+|   |-- <Wire> v1.0
+|-- <DmxSimple> v3.1 #62f0959
+|-- <httpClient> #007e22e
+|   |-- <Ethernet> v1.1.2 #238e8fc
+|   |   |-- <SPI> v1.0 #8d59205
+|-- <aJson> #60e5d57
+|   |-- <EEPROM> v2.0
+|-- <CmdArduino> #c94cd3f
+|-- <ModbusMaster> v2.0.1 #4a429bf
+|-- <DMXSerial> v1.3.0 #4db73b3
+|-- <Ethernet> v1.1.2 #238e8fc
+|   |-- <SPI> v1.0 #8d59205
+|-- <SPI> v1.0 #8d59205
+|-- <PubSubClient> v2.6 #f029640
+|-- <Artnet> #3d39995
+|   |-- <WiFi> v1.2.7
+|   |   |-- <SPI> v1.0 #8d59205
+|   |-- <Ethernet> v1.1.2 #238e8fc
+|   |   |-- <SPI> v1.0 #8d59205
+|-- <FastLED> v3.1.8
+|   |-- <SoftwareSerial> v1.0
+|   |-- <DmxSimple> v3.1 #62f0959
+|   |-- <DMXSerial> v1.3.0 #4db73b3
+|-- <Wire> v1.0
+|-- <EEPROM> v2.0
+Compiling .pioenvs/megaatmega2560/libc0c/FastLED_ID126/FastLED.cpp.o
+Compiling .pioenvs/megaatmega2560/libc0c/FastLED_ID126/bitswap.cpp.o
+Compiling .pioenvs/megaatmega2560/libc0c/FastLED_ID126/colorpalettes.cpp.o
+Compiling .pioenvs/megaatmega2560/libc0c/FastLED_ID126/colorutils.cpp.o
+Compiling .pioenvs/megaatmega2560/libc0c/FastLED_ID126/hsv2rgb.cpp.o
+Compiling .pioenvs/megaatmega2560/libc0c/FastLED_ID126/lib8tion.cpp.o
+Compiling .pioenvs/megaatmega2560/libc0c/FastLED_ID126/noise.cpp.o
+Compiling .pioenvs/megaatmega2560/libc0c/FastLED_ID126/power_mgt.cpp.o
+Compiling .pioenvs/megaatmega2560/libc0c/FastLED_ID126/wiring.cpp.o
+Compiling .pioenvs/megaatmega2560/src/dmx.cpp.o
+Compiling .pioenvs/megaatmega2560/src/esp.cpp.o
+Compiling .pioenvs/megaatmega2560/src/inputs.cpp.o
+lighthub/dmx.cpp: In function 'int itemCtrl2(char*, int, int, int, int)':
+lighthub/dmx.cpp:91:3: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/dmx.cpp: In function 'void DMXput()':
+lighthub/dmx.cpp:111:5: warning: unused variable 't' [-Wunused-variable]
+int t;
+^
+lighthub/dmx.cpp: In function 'void onDmxFrame(uint16_t, uint16_t, uint8_t, uint8_t*, IPAddress)':
+lighthub/dmx.cpp:186:22: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+for (int i = 0 ; i < length && i<MAX_CHANNELS ; i++)
+^
+Compiling .pioenvs/megaatmega2560/src/item.cpp.o
+Compiling .pioenvs/megaatmega2560/src/lighthub.ino.cpp.o
+In file included from lighthub/inputs.cpp:23:0:
+lighthub/item.h: In member function 'int Item::On()':
+lighthub/item.h:85:33: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int On (){Ctrl(CMD_ON);};
+^
+lighthub/item.h: In member function 'int Item::Off()':
+lighthub/item.h:86:34: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Off(){Ctrl(CMD_OFF);};
+^
+lighthub/item.h: In member function 'int Item::Toggle()':
+lighthub/item.h:87:40: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Toggle(){Ctrl(CMD_TOGGLE);};
+^
+Compiling .pioenvs/megaatmega2560/src/main.cpp.o
+Compiling .pioenvs/megaatmega2560/src/owSwitch.cpp.o
+Compiling .pioenvs/megaatmega2560/src/owTerm.cpp.o
+In file included from lighthub/item.cpp:21:0:
+lighthub/item.h: In member function 'int Item::On()':
+lighthub/item.h:85:33: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int On (){Ctrl(CMD_ON);};
+^
+lighthub/item.h: In member function 'int Item::Off()':
+lighthub/item.h:86:34: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Off(){Ctrl(CMD_OFF);};
+^
+lighthub/item.h: In member function 'int Item::Toggle()':
+lighthub/item.h:87:40: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Toggle(){Ctrl(CMD_TOGGLE);};
+^
+Compiling .pioenvs/megaatmega2560/src/utils.cpp.o
+In file included from lighthub/item.cpp:26:0:
+.piolibdeps/FastLED_ID126/FastLED.h: At global scope:
+.piolibdeps/FastLED_ID126/FastLED.h:17:21: note: #pragma message: FastLED version 3.001.008
+#    pragma message "FastLED version 3.001.008"
+^
+Compiling .pioenvs/megaatmega2560/lib090/Wire/Wire.cpp.o
+lighthub/owSwitch.cpp: In function 'int cntrl2408(uint8_t*, int, int)':
+lighthub/owSwitch.cpp:96:6: warning: variable 'mask' set but not used [-Wunused-but-set-variable]
+int mask,devnum;
+^
+lighthub/owSwitch.cpp:102:7: warning: unused variable 'r' [-Wunused-variable]
+int r,f;
+^
+lighthub/owSwitch.cpp:102:9: warning: unused variable 'f' [-Wunused-variable]
+int r,f;
+^
+In file included from lighthub/main.cpp:132:0:
+lighthub/item.h: In member function 'int Item::On()':
+lighthub/item.h:85:33: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int On (){Ctrl(CMD_ON);};
+^
+lighthub/item.h: In member function 'int Item::Off()':
+lighthub/item.h:86:34: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Off(){Ctrl(CMD_OFF);};
+^
+lighthub/item.h: In member function 'int Item::Toggle()':
+lighthub/item.h:87:40: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Toggle(){Ctrl(CMD_TOGGLE);};
+^
+lighthub/main.cpp: In function 'void callback(char*, byte*, unsigned int)':
+lighthub/main.cpp:198:19: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+for (int i=0;i<length;i++) {
+^
+lighthub/main.cpp:208:30: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+if (t=strrchr (topic,'/')) strncpy(subtopic,t+1 , sublen-1);
+^
+Compiling .pioenvs/megaatmega2560/lib090/Wire/utility/twi.c.o
+lighthub/main.cpp: In function 'int mqttConfigReq(int, char**)':
+lighthub/main.cpp:676:1: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/main.cpp: In function 'void _setConfig(int, char**)':
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 3 has type 'byte* {aka unsigned char*}' [-Wformat=]
+&mac[5]) < 6)
+^
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 4 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 5 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 6 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 7 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 8 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: unknown conversion type character 0xffffffd1 in format [-Wformat=]
+lighthub/main.cpp: In function 'int getConfig(int, char**)':
+lighthub/main.cpp:751:10: warning: unused variable 'ch' [-Wunused-variable]
+char ch;
+^
+lighthub/main.cpp: In function 'void setup_main()':
+lighthub/main.cpp:891:31: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("help", _handleHelp);
+^
+lighthub/main.cpp:892:31: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("save", _saveConfig);
+^
+lighthub/main.cpp:893:31: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("load", _loadConfig);
+^
+lighthub/main.cpp:894:30: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("get",  _getConfig);
+^
+lighthub/main.cpp:895:30: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("set",  _setConfig);
+^
+lighthub/main.cpp:896:25: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("kill", _kill);
+^
+lighthub/main.cpp:897:33: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("req", _mqttConfigReq);
+^
+lighthub/owTerm.cpp: In function 'int owUpdate()':
+lighthub/owTerm.cpp:45:9: warning: unused variable 'sr' [-Wunused-variable]
+short sr;
+^
+lighthub/owTerm.cpp:77:1: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/main.cpp: In function 'short int thermoSetCurTemp(char*, short int)':
+lighthub/main.cpp:1190:61: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+else if (extArray=aJson.getArrayItem(item,I_EXT))
+^
+lighthub/main.cpp:1202:1: warning: no return statement in function returning non-void [-Wreturn-type]
+} //proc
+^
+Compiling .pioenvs/megaatmega2560/lib5a0/DS2482_OneWire/DS2482_OneWire.cpp.o
+Compiling .pioenvs/megaatmega2560/libecc/ModbusMaster/ModbusMaster.cpp.o
+Compiling .pioenvs/megaatmega2560/lib704/DallasTemperature/DallasTemperature.cpp.o
+Compiling .pioenvs/megaatmega2560/lib704/DallasTemperature/OneWire.cpp.o
+In file included from .piolibdeps/ModbusMaster/src/ModbusMaster.h:58:0,
+from lighthub/main.cpp:75:
+lighthub/main.cpp: At top level:
+.piolibdeps/ModbusMaster/src/util/crc16.h:71:17: warning: 'crc16_update' defined but not used [-Wunused-function]
+static uint16_t crc16_update(uint16_t crc, uint8_t a)
+^
+Archiving .pioenvs/megaatmega2560/lib090/libWire.a
+Indexing .pioenvs/megaatmega2560/lib090/libWire.a
+.piolibdeps/ModbusMaster/src/ModbusMaster.cpp: In member function 'ModbusMaster::requestFrom(unsigned int, unsigned int)':
+.piolibdeps/ModbusMaster/src/ModbusMaster.cpp:94:33: warning: 'read' is used uninitialized in this function [-Wuninitialized]
+_u8ResponseBufferLength = read;
+^
+Compiling .pioenvs/megaatmega2560/lib60c/DmxSimple/DmxSimple.cpp.o
+lighthub/item.cpp: In member function 'int Item::VacomSetFan(int8_t, int8_t)':
+lighthub/item.cpp:668:11: warning: unused variable 'j' [-Wunused-variable]
+uint8_t j, result;
+^
+lighthub/item.cpp:668:14: warning: unused variable 'result' [-Wunused-variable]
+uint8_t j, result;
+^
+lighthub/item.cpp:669:12: warning: unused variable 'data' [-Wunused-variable]
+uint16_t data[1];
+^
+Archiving .pioenvs/megaatmega2560/lib5a0/libDS2482_OneWire.a
+lighthub/item.cpp: In member function 'int Item::checkModbus()':
+lighthub/item.cpp:914:93: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (modbusitem &&  nextItem.isValid() && nextItem.itemType==CH_MODBUS && nextItem.getArg(0)==addr && nextItem.getArg(1)==reg)
+^
+lighthub/item.cpp:914:121: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (modbusitem &&  nextItem.isValid() && nextItem.itemType==CH_MODBUS && nextItem.getArg(0)==addr && nextItem.getArg(1)==reg)
+^
+lighthub/item.cpp:890:13: warning: unused variable 'mask' [-Wunused-variable]
+short     mask  = getArg(2);
+^
+lighthub/item.cpp: In member function 'int Item::checkModbus(int)':
+lighthub/item.cpp:932:29: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+if (getVal()!=d || d && cmd==CMD_OFF || d && cmd==CMD_HALT) //volume changed or turned on manualy
+^
+lighthub/item.cpp:932:50: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+if (getVal()!=d || d && cmd==CMD_OFF || d && cmd==CMD_HALT) //volume changed or turned on manualy
+^
+lighthub/item.cpp:950:3: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::Pool()':
+lighthub/item.cpp:962:3: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'virtual int Item::Ctrl(short int, short int, int*, boolean)':
+lighthub/item.cpp:517:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::VacomSetFan(int8_t, int8_t)':
+lighthub/item.cpp:684:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::VacomSetHeat(int, int8_t, int8_t)':
+lighthub/item.cpp:715:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In function 'int modbusSet(int, uint16_t, int, uint16_t)':
+lighthub/item.cpp:787:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::checkFM()':
+lighthub/item.cpp:878:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::checkModbus()':
+lighthub/item.cpp:921:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+Indexing .pioenvs/megaatmega2560/lib5a0/libDS2482_OneWire.a
+In file included from .piolibdeps/DallasTemperature/OneWire.h:7:0,
+from .piolibdeps/DallasTemperature/OneWire.cpp:142:
+.piolibdeps/ModbusMaster/src/util/crc16.h:71:17: warning: 'crc16_update' defined but not used [-Wunused-function]
+static uint16_t crc16_update(uint16_t crc, uint8_t a)
+^
+Compiling .pioenvs/megaatmega2560/lib465/SPI/SPI.cpp.o
+.piolibdeps/DmxSimple/DmxSimple.cpp: In function 'void dmxWrite(int, uint8_t)':
+.piolibdeps/DmxSimple/DmxSimple.cpp:257:16: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (channel>dmxMax) dmxMaxChannel(channel);
+^
+Compiling .pioenvs/megaatmega2560/libab3/Ethernet/Dhcp.cpp.o
+Archiving .pioenvs/megaatmega2560/lib60c/libDmxSimple.a
+In file included from .piolibdeps/ModbusMaster/src/ModbusMaster.h:58:0,
+from lighthub/item.cpp:29:
+lighthub/item.cpp: At top level:
+.piolibdeps/ModbusMaster/src/util/crc16.h:71:17: warning: 'crc16_update' defined but not used [-Wunused-function]
+static uint16_t crc16_update(uint16_t crc, uint8_t a)
+^
+Archiving .pioenvs/megaatmega2560/lib704/libDallasTemperature.a
+Indexing .pioenvs/megaatmega2560/lib60c/libDmxSimple.a
+Indexing .pioenvs/megaatmega2560/lib704/libDallasTemperature.a
+Archiving .pioenvs/megaatmega2560/libecc/libModbusMaster.a
+Indexing .pioenvs/megaatmega2560/libecc/libModbusMaster.a
+Compiling .pioenvs/megaatmega2560/libab3/Ethernet/Dns.cpp.o
+Compiling .pioenvs/megaatmega2560/libab3/Ethernet/Ethernet.cpp.o
+Archiving .pioenvs/megaatmega2560/lib465/libSPI.a
+Compiling .pioenvs/megaatmega2560/libab3/Ethernet/EthernetClient.cpp.o
+Indexing .pioenvs/megaatmega2560/lib465/libSPI.a
+Compiling .pioenvs/megaatmega2560/libab3/Ethernet/EthernetServer.cpp.o
+Compiling .pioenvs/megaatmega2560/libab3/Ethernet/EthernetUdp.cpp.o
+Compiling .pioenvs/megaatmega2560/libab3/Ethernet/utility/socket.cpp.o
+Compiling .pioenvs/megaatmega2560/libab3/Ethernet/utility/w5100.cpp.o
+Compiling .pioenvs/megaatmega2560/liba60/httpClient/HTTPClient.cpp.o
+Archiving .pioenvs/megaatmega2560/libf1a/libEEPROM.a
+Compiling .pioenvs/megaatmega2560/lib9dd/aJson/aJSON.cpp.o
+Indexing .pioenvs/megaatmega2560/libf1a/libEEPROM.a
+In file included from .piolibdeps/httpClient/HTTPClient.cpp:41:0:
+.piolibdeps/httpClient/HTTPClient.h: In constructor 'HTTPClient::HTTPClient(char*, uint8_t*)':
+.piolibdeps/httpClient/HTTPClient.h:186:8: warning: 'HTTPClient::debugCommunication' will be initialized after [-Wreorder]
+char debugCommunication;
+^
+.piolibdeps/httpClient/HTTPClient.h:180:12: warning:   'uint8_t* HTTPClient::ip' [-Wreorder]
+uint8_t* ip;
+^
+.piolibdeps/httpClient/HTTPClient.cpp:56:1: warning:   when initialized here [-Wreorder]
+HTTPClient::HTTPClient(char* host, uint8_t* ip) :
+^
+In file included from .piolibdeps/httpClient/HTTPClient.cpp:41:0:
+.piolibdeps/httpClient/HTTPClient.h: In constructor 'HTTPClient::HTTPClient(char*, uint8_t*, uint16_t)':
+.piolibdeps/httpClient/HTTPClient.h:186:8: warning: 'HTTPClient::debugCommunication' will be initialized after [-Wreorder]
+char debugCommunication;
+^
+.piolibdeps/httpClient/HTTPClient.h:180:12: warning:   'uint8_t* HTTPClient::ip' [-Wreorder]
+uint8_t* ip;
+^
+.piolibdeps/httpClient/HTTPClient.cpp:62:1: warning:   when initialized here [-Wreorder]
+HTTPClient::HTTPClient(char* host, uint8_t* ip, uint16_t port) :
+^
+In file included from .piolibdeps/httpClient/HTTPClient.cpp:41:0:
+.piolibdeps/httpClient/HTTPClient.h: In constructor 'HTTPClient::HTTPClient(char*, uint16_t)':
+.piolibdeps/httpClient/HTTPClient.h:186:8: warning: 'HTTPClient::debugCommunication' will be initialized after [-Wreorder]
+char debugCommunication;
+^
+.piolibdeps/httpClient/HTTPClient.h:180:12: warning:   'uint8_t* HTTPClient::ip' [-Wreorder]
+uint8_t* ip;
+^
+.piolibdeps/httpClient/HTTPClient.cpp:68:1: warning:   when initialized here [-Wreorder]
+HTTPClient::HTTPClient(char* host, uint16_t port) :
+^
+.piolibdeps/httpClient/HTTPClient.cpp: In member function 'char HTTPClient::sendUriAndHeaders(FILE*, char*, const char*, char*, http_client_parameter*, http_client_parameter*)':
+.piolibdeps/httpClient/HTTPClient.cpp:260:51: warning: array subscript has type 'char' [-Wchar-subscripts]
+parameter = &parameters[parameter_number];
+^
+.piolibdeps/httpClient/HTTPClient.cpp:270:34: warning: array subscript has type 'char' [-Wchar-subscripts]
+while (headers[headerNumber].name != NULL)
+^
+.piolibdeps/httpClient/HTTPClient.cpp:272:35: warning: array subscript has type 'char' [-Wchar-subscripts]
+if (headers[headerNumber].value != NULL)
+^
+.piolibdeps/httpClient/HTTPClient.cpp:274:73: warning: array subscript has type 'char' [-Wchar-subscripts]
+fprintf_P(stream, PSTR("%s: %s\r\n"), headers[headerNumber].name,
+^
+.piolibdeps/httpClient/HTTPClient.cpp:275:39: warning: array subscript has type 'char' [-Wchar-subscripts]
+headers[headerNumber].value);
+^
+.piolibdeps/httpClient/HTTPClient.cpp: In static member function 'static int HTTPClient::clientWrite(char, FILE*)':
+.piolibdeps/httpClient/HTTPClient.cpp:349:38: warning: array subscript has type 'char' [-Wchar-subscripts]
+client->write(encoded[i]);
+^
+.piolibdeps/httpClient/HTTPClient.cpp:352:41: warning: array subscript has type 'char' [-Wchar-subscripts]
+Serial.print(encoded[i]);
+^
+.piolibdeps/httpClient/HTTPClient.cpp: In member function 'int HTTPClient::skipHeader(FILE*)':
+.piolibdeps/httpClient/HTTPClient.cpp:435:18: warning: converting to non-pointer type 'int' from NULL [-Wconversion-null]
+lastReturnCode = NULL;
+^
+.piolibdeps/httpClient/HTTPClient.cpp:437:30: warning: converting to non-pointer type 'int' from NULL [-Wconversion-null]
+if (stream == NULL) return NULL;
+^
+.piolibdeps/httpClient/HTTPClient.cpp:447:22: warning: converting to non-pointer type 'int' from NULL [-Wconversion-null]
+if (res!=1) return NULL;
+^
+.piolibdeps/httpClient/HTTPClient.cpp:464:18: warning: converting to non-pointer type 'int' from NULL [-Wconversion-null]
+Compiling .pioenvs/megaatmega2560/lib9dd/aJson/utility/stringbuffer.c.o
+return NULL;
+^
+Compiling .pioenvs/megaatmega2560/libf1a/CmdArduino/Cmd.cpp.o
+.piolibdeps/aJson/aJSON.cpp: In member function 'virtual bool aJsonEEPROMStream::available()':
+.piolibdeps/aJson/aJSON.cpp:145:21: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+while (addr+offset<EEPROM.length())
+^
+.piolibdeps/aJson/aJSON.cpp: In member function 'int aJsonStream::printArray(aJsonObject*)':
+.piolibdeps/aJson/aJSON.cpp:849:24: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print('[') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp:862:32: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print(',') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp:868:24: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print(']') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp: In member function 'int aJsonStream::printObject(aJsonObject*)':
+.piolibdeps/aJson/aJSON.cpp:960:24: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print('{') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp:970:28: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print(':') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp:981:32: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print(',') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp:987:24: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print('}') == EOF)
+^
+Archiving .pioenvs/megaatmega2560/libab3/libEthernet.a
+Indexing .pioenvs/megaatmega2560/libab3/libEthernet.a
+Compiling .pioenvs/megaatmega2560/lib231/DMXSerial/DMXSerial.cpp.o
+.piolibdeps/CmdArduino/Cmd.cpp: In function 'void cmd_parse(char*)':
+.piolibdeps/CmdArduino/Cmd.cpp:78:10: warning: unused variable 'buf' [-Wunused-variable]
+char buf[50];
+^
+Compiling .pioenvs/megaatmega2560/lib9a2/PubSubClient/PubSubClient.cpp.o
+.piolibdeps/DMXSerial/src/DMXSerial.cpp:157:0: warning: "SERIAL_8N1" redefined
+#define SERIAL_8N1  ((0<<USBSn) | (0<<UPMn0) | (3<<UCSZn0))
+^
+In file included from /home/livello/.platformio/packages/framework-arduinoavr/cores/arduino/Arduino.h:232:0,
+from .piolibdeps/DMXSerial/src/DMXSerial.cpp:25:
+/home/livello/.platformio/packages/framework-arduinoavr/cores/arduino/HardwareSerial.h:71:0: note: this is the location of the previous definition
+#define SERIAL_8N1 0x06
+^
+.piolibdeps/DMXSerial/src/DMXSerial.cpp:158:0: warning: "SERIAL_8N2" redefined
+#define SERIAL_8N2  ((1<<USBSn) | (0<<UPMn0) | (3<<UCSZn0))
+^
+In file included from /home/livello/.platformio/packages/framework-arduinoavr/cores/arduino/Arduino.h:232:0,
+from .piolibdeps/DMXSerial/src/DMXSerial.cpp:25:
+/home/livello/.platformio/packages/framework-arduinoavr/cores/arduino/HardwareSerial.h:75:0: note: this is the location of the previous definition
+#define SERIAL_8N2 0x0E
+^
+.piolibdeps/DMXSerial/src/DMXSerial.cpp:159:0: warning: "SERIAL_8E1" redefined
+#define SERIAL_8E1  ((0<<USBSn) | (2<<UPMn0) | (3<<UCSZn0))
+^
+In file included from /home/livello/.platformio/packages/framework-arduinoavr/cores/arduino/Arduino.h:232:0,
+from .piolibdeps/DMXSerial/src/DMXSerial.cpp:25:
+/home/livello/.platformio/packages/framework-arduinoavr/cores/arduino/HardwareSerial.h:79:0: note: this is the location of the previous definition
+#define SERIAL_8E1 0x26
+^
+.piolibdeps/DMXSerial/src/DMXSerial.cpp:160:0: warning: "SERIAL_8E2" redefined
+#define SERIAL_8E2  ((1<<USBSn) | (2<<UPMn0) | (3<<UCSZn0))
+^
+In file included from /home/livello/.platformio/packages/framework-arduinoavr/cores/arduino/Arduino.h:232:0,
+from .piolibdeps/DMXSerial/src/DMXSerial.cpp:25:
+/home/livello/.platformio/packages/framework-arduinoavr/cores/arduino/HardwareSerial.h:83:0: note: this is the location of the previous definition
+#define SERIAL_8E2 0x2E
+^
+Compiling .pioenvs/megaatmega2560/lib255/WiFi/WiFi.cpp.o
+.piolibdeps/DMXSerial/src/DMXSerial.cpp: In member function 'uint8_t DMXSerialClass::read(int)':
+.piolibdeps/DMXSerial/src/DMXSerial.cpp:322:16: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (channel > _dmxMaxChannel) channel = _dmxMaxChannel;
+^
+.piolibdeps/DMXSerial/src/DMXSerial.cpp: In member function 'void DMXSerialClass::write(int, uint8_t)':
+.piolibdeps/DMXSerial/src/DMXSerial.cpp:336:17: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (channel > _dmxMaxChannel) channel = _dmxMaxChannel;
+^
+.piolibdeps/DMXSerial/src/DMXSerial.cpp: In function 'void __vector_37()':
+.piolibdeps/DMXSerial/src/DMXSerial.cpp:543:19: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (_dmxChannel > _dmxMaxChannel) {
+^
+Compiling .pioenvs/megaatmega2560/lib255/WiFi/WiFiClient.cpp.o
+Archiving .pioenvs/megaatmega2560/lib231/libDMXSerial.a
+Archiving .pioenvs/megaatmega2560/libf1a/libCmdArduino.a
+Archiving .pioenvs/megaatmega2560/liba60/libhttpClient.a
+Indexing .pioenvs/megaatmega2560/lib231/libDMXSerial.a
+Indexing .pioenvs/megaatmega2560/libf1a/libCmdArduino.a
+Indexing .pioenvs/megaatmega2560/liba60/libhttpClient.a
+Compiling .pioenvs/megaatmega2560/lib255/WiFi/WiFiServer.cpp.o
+Archiving .pioenvs/megaatmega2560/lib9a2/libPubSubClient.a
+Archiving .pioenvs/megaatmega2560/lib9dd/libaJson.a
+Indexing .pioenvs/megaatmega2560/lib9a2/libPubSubClient.a
+Compiling .pioenvs/megaatmega2560/lib255/WiFi/WiFiUdp.cpp.o
+Indexing .pioenvs/megaatmega2560/lib9dd/libaJson.a
+Compiling .pioenvs/megaatmega2560/lib255/WiFi/utility/server_drv.cpp.o
+Compiling .pioenvs/megaatmega2560/lib255/WiFi/utility/spi_drv.cpp.o
+Compiling .pioenvs/megaatmega2560/lib255/WiFi/utility/wifi_drv.cpp.o
+Compiling .pioenvs/megaatmega2560/libc78/Artnet/Artnet.cpp.o
+Compiling .pioenvs/megaatmega2560/lib988/SoftwareSerial/SoftwareSerial.cpp.o
+Archiving .pioenvs/megaatmega2560/libFrameworkArduinoVariant.a
+/home/livello/.platformio/packages/framework-arduinoavr/libraries/WiFi/src/utility/wifi_drv.cpp: In static member function 'static uint8_t WiFiDrv::getEncTypeNetowrks(uint8_t)':
+/home/livello/.platformio/packages/framework-arduinoavr/libraries/WiFi/src/utility/wifi_drv.cpp:451:10: warning: converting to non-pointer type 'uint8_t {aka unsigned char}' from NULL [-Wconversion-null]
+return NULL;
+^
+/home/livello/.platformio/packages/framework-arduinoavr/libraries/WiFi/src/utility/wifi_drv.cpp: In static member function 'static int32_t WiFiDrv::getRSSINetoworks(uint8_t)':
+/home/livello/.platformio/packages/framework-arduinoavr/libraries/WiFi/src/utility/wifi_drv.cpp:476:10: warning: converting to non-pointer type 'int32_t {aka long int}' from NULL [-Wconversion-null]
+return NULL;
+^
+In file included from /home/livello/.platformio/packages/framework-arduinoavr/libraries/WiFi/src/utility/spi_drv.cpp:22:0:
+/home/livello/.platformio/packages/framework-arduinoavr/libraries/WiFi/src/utility/spi_drv.h:41:13: warning: 'initialized' defined but not used [-Wunused-variable]
+static bool initialized = false;
+^
+.piolibdeps/Artnet/Artnet.cpp: In member function 'uint16_t Artnet::read()':
+.piolibdeps/Artnet/Artnet.cpp:94:40: warning: embedded '\0' in format [-Wformat-contains-nul]
+sprintf((char *)id, "Art-Net\0");
+^
+.piolibdeps/Artnet/Artnet.cpp:107:54: warning: embedded '\0' in format [-Wformat-contains-nul]
+sprintf((char *)shortname, "artnet arduino\0");
+^
+.piolibdeps/Artnet/Artnet.cpp:108:64: warning: embedded '\0' in format [-Wformat-contains-nul]
+sprintf((char *)longname, "Art-Net -> Arduino Bridge\0");
+^
+.piolibdeps/Artnet/Artnet.cpp:143:109: warning: embedded '\0' in format [-Wformat-contains-nul]
+sprintf((char *)ArtPollReply.nodereport, "%i DMX output universes active.\0", ArtPollReply.numbports);
+^
+.piolibdeps/Artnet/Artnet.cpp:160:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+Indexing .pioenvs/megaatmega2560/libFrameworkArduinoVariant.a
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/CDC.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/HardwareSerial.cpp.o
+Archiving .pioenvs/megaatmega2560/libc78/libArtnet.a
+Archiving .pioenvs/megaatmega2560/lib255/libWiFi.a
+Indexing .pioenvs/megaatmega2560/libc78/libArtnet.a
+Indexing .pioenvs/megaatmega2560/lib255/libWiFi.a
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/HardwareSerial0.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/HardwareSerial1.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/HardwareSerial2.cpp.o
+Archiving .pioenvs/megaatmega2560/lib988/libSoftwareSerial.a
+Indexing .pioenvs/megaatmega2560/lib988/libSoftwareSerial.a
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/HardwareSerial3.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/IPAddress.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/PluggableUSB.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/Print.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/Stream.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/Tone.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/USBCore.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/WInterrupts.c.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/WMath.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/WString.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/_wiring_pulse.S.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/abi.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/hooks.c.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/main.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/new.cpp.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/wiring.c.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/wiring_analog.c.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/wiring_digital.c.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/wiring_pulse.c.o
+Compiling .pioenvs/megaatmega2560/FrameworkArduino/wiring_shift.c.o
+Archiving .pioenvs/megaatmega2560/libFrameworkArduino.a
+Indexing .pioenvs/megaatmega2560/libFrameworkArduino.a
+Linking .pioenvs/megaatmega2560/firmware.elf
+Calculating size .pioenvs/megaatmega2560/firmware.elf
+Building .pioenvs/megaatmega2560/firmware.hex
+AVR Memory Usage
+----------------
+Device: atmega2560
+
+Program:   56650 bytes (21.6% Full)
+(.text + .data + .bootloader)
+
+Data:       2559 bytes (31.2% Full)
+(.data + .bss + .noinit)
+
+
+======================================================================================= [SUCCESS] Took 25.45 seconds =======================================================================================
+
+================================================================================================= [SUMMARY] =================================================================================================
+Environment due                	[SKIP]
+Environment due-5500           	[SKIP]
+Environment megaatmega2560     	[SUCCESS]
+Environment megaatmega2560-5500	[SKIP]
+Environment espressif8266      	[SKIP]
+======================================================================================= [SUCCESS] Took 25.45 seconds =======================================================================================
+livello@lserver ~/PROG/lighthub $ pio run -e due
+[Wed Mar 14 02:14:22 2018] Processing due (platform: atmelsam; board: due; framework: arduino)
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+LibraryManager: Installing DueFlashStorage
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-IcfSg7-package»…
+remote: Counting objects: 19, done.
+remote: Compressing objects: 100% (16/16), done.
+remote: Total 19 (delta 3), reused 15 (delta 3), pack-reused 0
+Распаковка объектов: 100% (19/19), готово.
+Проверка соединения… готово.
+LibraryManager: Installing DmxDue
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-6V6WxO-package»…
+remote: Counting objects: 7, done.
+remote: Compressing objects: 100% (5/5), done.
+remote: Total 7 (delta 0), reused 5 (delta 0), pack-reused 0
+Распаковка объектов: 100% (7/7), готово.
+Проверка соединения… готово.
+LibraryManager: Installing ArduinoHttpClient
+git version 2.7.4
+Клонирование в «/home/livello/PROG/lighthub/.piolibdeps/_tmp_installing-SAsCAo-package»…
+remote: Counting objects: 45, done.
+remote: Compressing objects: 100% (41/41), done.
+remote: Total 45 (delta 9), reused 22 (delta 3), pack-reused 0
+Распаковка объектов: 100% (45/45), готово.
+Проверка соединения… готово.
+Verbose mode can be enabled via `-v, --verbose` option
+PLATFORM: Atmel SAM > Arduino Due (Programming Port)
+SYSTEM: AT91SAM3X8E 84MHz 32KB RAM (512KB Flash)
+DEBUG: CURRENT(blackmagic) EXTERNAL(blackmagic, jlink)
+Converting lighthub.ino
+Library Dependency Finder -> http://bit.ly/configure-pio-ldf
+LDF MODES: FINDER(chain) COMPATIBILITY(light)
+Collected 19 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- <DueFlashStorage> v1.0.0 #a41b206
+|-- <DallasTemperature> #1306c49
+|   |-- <DS2482_OneWire> #3ef01fc
+|   |   |-- <Wire> v1.0
+|   |-- <ModbusMaster> v2.0.1 #4a429bf
+|-- <DS2482_OneWire> #3ef01fc
+|   |-- <Wire> v1.0
+|-- <DmxDue> #bf7ffb2
+|-- <ArduinoHttpClient> #acde3dc
+|-- <aJson> #60e5d57
+|   |-- <DueFlashStorage> v1.0.0 #a41b206
+|-- <CmdArduino> #c94cd3f
+|-- <ModbusMaster> v2.0.1 #4a429bf
+|-- <Ethernet> v1.1.2 #238e8fc
+|   |-- <SPI> v1.0 #8d59205
+|-- <SPI> v1.0 #8d59205
+|-- <PubSubClient> v2.6 #f029640
+|-- <Artnet> #3d39995
+|   |-- <Ethernet> v1.1.2 #238e8fc
+|   |   |-- <SPI> v1.0 #8d59205
+|-- <FastLED> v3.1.8
+|   |-- <DmxSimple> v3.1 #62f0959
+|   |-- <DMXSerial> v1.3.0 #4db73b3
+|-- <Wire> v1.0
+|-- <DmxSimple> v3.1 #62f0959
+|-- <httpClient> #007e22e
+|   |-- <Ethernet> v1.1.2 #238e8fc
+|   |   |-- <SPI> v1.0 #8d59205
+|-- <DMXSerial> v1.3.0 #4db73b3
+Compiling .pioenvs/due/libc0c/FastLED_ID126/FastLED.cpp.o
+Compiling .pioenvs/due/libc0c/FastLED_ID126/bitswap.cpp.o
+Compiling .pioenvs/due/libc0c/FastLED_ID126/colorpalettes.cpp.o
+Compiling .pioenvs/due/libc0c/FastLED_ID126/colorutils.cpp.o
+Compiling .pioenvs/due/libc0c/FastLED_ID126/hsv2rgb.cpp.o
+Compiling .pioenvs/due/libc0c/FastLED_ID126/lib8tion.cpp.o
+Compiling .pioenvs/due/libc0c/FastLED_ID126/noise.cpp.o
+Compiling .pioenvs/due/libc0c/FastLED_ID126/power_mgt.cpp.o
+Compiling .pioenvs/due/libc0c/FastLED_ID126/wiring.cpp.o
+Compiling .pioenvs/due/src/dmx.cpp.o
+Compiling .pioenvs/due/src/esp.cpp.o
+Compiling .pioenvs/due/src/inputs.cpp.o
+Compiling .pioenvs/due/src/item.cpp.o
+lighthub/dmx.cpp: In function 'int itemCtrl2(char*, int, int, int, int)':
+lighthub/dmx.cpp:91:3: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/dmx.cpp: In function 'void DMXput()':
+lighthub/dmx.cpp:111:5: warning: unused variable 't' [-Wunused-variable]
+int t;
+^
+Compiling .pioenvs/due/src/lighthub.ino.cpp.o
+Compiling .pioenvs/due/src/main.cpp.o
+In file included from lighthub/inputs.cpp:23:0:
+lighthub/item.h: In member function 'int Item::On()':
+lighthub/item.h:85:33: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int On (){Ctrl(CMD_ON);};
+^
+lighthub/item.h: In member function 'int Item::Off()':
+lighthub/item.h:86:34: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Off(){Ctrl(CMD_OFF);};
+^
+lighthub/item.h: In member function 'int Item::Toggle()':
+lighthub/item.h:87:40: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Toggle(){Ctrl(CMD_TOGGLE);};
+^
+Compiling .pioenvs/due/src/owSwitch.cpp.o
+In file included from lighthub/item.cpp:21:0:
+lighthub/item.h: In member function 'int Item::On()':
+lighthub/item.h:85:33: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int On (){Ctrl(CMD_ON);};
+^
+lighthub/item.h: In member function 'int Item::Off()':
+lighthub/item.h:86:34: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Off(){Ctrl(CMD_OFF);};
+^
+lighthub/item.h: In member function 'int Item::Toggle()':
+lighthub/item.h:87:40: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Toggle(){Ctrl(CMD_TOGGLE);};
+^
+In file included from lighthub/item.cpp:26:0:
+.piolibdeps/FastLED_ID126/FastLED.h: At global scope:
+.piolibdeps/FastLED_ID126/FastLED.h:17:21: note: #pragma message: FastLED version 3.001.008
+#    pragma message "FastLED version 3.001.008"
+^
+Compiling .pioenvs/due/src/owTerm.cpp.o
+Compiling .pioenvs/due/src/utils.cpp.o
+In file included from lighthub/main.cpp:71:0:
+.piolibdeps/SPI/SPI.h:1028:8: error: 'SPIClass' does not name a type
+extern SPIClass SPI;
+^
+In file included from lighthub/main.cpp:132:0:
+lighthub/item.h: In member function 'int Item::On()':
+lighthub/item.h:85:33: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int On (){Ctrl(CMD_ON);};
+^
+lighthub/item.h: In member function 'int Item::Off()':
+lighthub/item.h:86:34: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Off(){Ctrl(CMD_OFF);};
+^
+lighthub/item.h: In member function 'int Item::Toggle()':
+lighthub/item.h:87:40: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Toggle(){Ctrl(CMD_TOGGLE);};
+^
+lighthub/main.cpp: In function 'void callback(char*, byte*, unsigned int)':
+lighthub/main.cpp:198:20: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+for (int i=0;i<length;i++) {
+^
+lighthub/main.cpp:208:30: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+if (t=strrchr (topic,'/')) strncpy(subtopic,t+1 , sublen-1);
+^
+lighthub/main.cpp: In function 'int mqttConfigReq(int, char**)':
+lighthub/main.cpp:676:1: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/main.cpp: In function 'void _setConfig(int, char**)':
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 3 has type 'byte* {aka unsigned char*}' [-Wformat=]
+&mac[5]) < 6)
+^
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 4 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 5 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 6 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 7 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 8 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: unknown conversion type character 0xffffffd1 in format [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 3 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 4 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 5 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 6 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 7 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 8 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: unknown conversion type character 0xffffffd1 in format [-Wformat=]
+lighthub/main.cpp: In function 'int getConfig(int, char**)':
+lighthub/main.cpp:751:10: warning: unused variable 'ch' [-Wunused-variable]
+char ch;
+^
+lighthub/main.cpp: In function 'void setup_main()':
+lighthub/main.cpp:891:31: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("help", _handleHelp);
+^
+lighthub/main.cpp:892:31: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("save", _saveConfig);
+^
+lighthub/main.cpp:893:31: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("load", _loadConfig);
+^
+lighthub/main.cpp:894:30: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("get",  _getConfig);
+^
+lighthub/main.cpp:895:30: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("set",  _setConfig);
+^
+lighthub/main.cpp:896:25: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("kill", _kill);
+^
+lighthub/main.cpp:897:33: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("req", _mqttConfigReq);
+^
+lighthub/main.cpp: In function 'short int thermoSetCurTemp(char*, short int)':
+lighthub/main.cpp:1190:61: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+else if (extArray=aJson.getArrayItem(item,I_EXT))
+^
+lighthub/main.cpp:1202:1: warning: no return statement in function returning non-void [-Wreturn-type]
+} //proc
+^
+lighthub/owSwitch.cpp: In function 'int cntrl2408(uint8_t*, int, int)':
+lighthub/owSwitch.cpp:96:6: warning: variable 'mask' set but not used [-Wunused-but-set-variable]
+int mask,devnum;
+^
+lighthub/owSwitch.cpp:102:7: warning: unused variable 'r' [-Wunused-variable]
+int r,f;
+^
+lighthub/owSwitch.cpp:102:9: warning: unused variable 'f' [-Wunused-variable]
+int r,f;
+^
+In file included from .piolibdeps/ModbusMaster/src/ModbusMaster.h:58:0,
+from lighthub/main.cpp:75:
+.piolibdeps/ModbusMaster/src/util/crc16.h: At global scope:
+.piolibdeps/ModbusMaster/src/util/crc16.h:71:17: warning: 'uint16_t crc16_update(uint16_t, uint8_t)' defined but not used [-Wunused-function]
+static uint16_t crc16_update(uint16_t crc, uint8_t a)
+^
+lighthub/owTerm.cpp: In function 'int owUpdate()':
+lighthub/owTerm.cpp:45:9: warning: unused variable 'sr' [-Wunused-variable]
+short sr;
+^
+lighthub/owTerm.cpp:77:1: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+Compiling .pioenvs/due/libe82/DueFlashStorage/DueFlashStorage.cpp.o
+lighthub/item.cpp: In member function 'virtual int Item::Ctrl(short int, short int, int*, boolean)':
+lighthub/item.cpp:482:13: warning: unused variable 'tval' [-Wunused-variable]
+int tval = 7;             // this is 111 in binary and is used as an eraser
+^
+lighthub/item.cpp: In member function 'int Item::VacomSetFan(int8_t, int8_t)':
+lighthub/item.cpp:668:11: warning: unused variable 'j' [-Wunused-variable]
+uint8_t j, result;
+^
+lighthub/item.cpp:668:14: warning: unused variable 'result' [-Wunused-variable]
+uint8_t j, result;
+^
+lighthub/item.cpp:669:12: warning: unused variable 'data' [-Wunused-variable]
+uint16_t data[1];
+^
+*** [.pioenvs/due/src/main.cpp.o] Error 1
+lighthub/item.cpp: In member function 'int Item::checkModbus()':
+lighthub/item.cpp:890:13: warning: unused variable 'mask' [-Wunused-variable]
+short     mask  = getArg(2);
+^
+lighthub/item.cpp: In member function 'int Item::checkModbus(int)':
+lighthub/item.cpp:932:29: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+if (getVal()!=d || d && cmd==CMD_OFF || d && cmd==CMD_HALT) //volume changed or turned on manualy
+^
+lighthub/item.cpp:932:50: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+if (getVal()!=d || d && cmd==CMD_OFF || d && cmd==CMD_HALT) //volume changed or turned on manualy
+^
+lighthub/item.cpp:950:3: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::Pool()':
+lighthub/item.cpp:962:3: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'virtual int Item::Ctrl(short int, short int, int*, boolean)':
+lighthub/item.cpp:517:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::VacomSetFan(int8_t, int8_t)':
+lighthub/item.cpp:684:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/utils.cpp: In function 'long unsigned int freeRam()':
+lighthub/utils.cpp:103:9: warning: unused variable 'ramstart' [-Wunused-variable]
+char *ramstart = (char *) 0x20070000;
+^
+lighthub/utils.cpp:104:9: warning: unused variable 'ramend' [-Wunused-variable]
+char *ramend = (char *) 0x20088000;
+^
+lighthub/item.cpp: In member function 'int Item::VacomSetHeat(int, int8_t, int8_t)':
+lighthub/item.cpp:715:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In function 'int modbusSet(int, uint16_t, int, uint16_t)':
+lighthub/item.cpp:787:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::checkFM()':
+lighthub/item.cpp:878:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::checkModbus()':
+lighthub/item.cpp:921:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/utils.cpp: In function 'byte HEX2DEC(char)':
+lighthub/utils.cpp:59:10: warning: 'v' may be used uninitialized in this function [-Wmaybe-uninitialized]
+return v;
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'boolean DueFlashStorage::write(uint32_t, byte)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:23:9: warning: unused variable 'data' [-Wunused-variable]
+byte *data;
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'boolean DueFlashStorage::write(uint32_t, byte*, uint32_t)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:62:29: warning: suggest parentheses around '+' in operand of '&' [-Wparentheses]
+if (((uint32_t)FLASH_START+address & 3) != 0) {
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'boolean DueFlashStorage::write_unlocked(uint32_t, byte)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:94:9: warning: unused variable 'data' [-Wunused-variable]
+byte *data;
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'boolean DueFlashStorage::write_unlocked(uint32_t, byte*, uint32_t)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:121:29: warning: suggest parentheses around '+' in operand of '&' [-Wparentheses]
+if (((uint32_t)FLASH_START+address & 3) != 0) {
+^
+lighthub/item.cpp:916:29: warning: 'data' may be used uninitialized in this function [-Wmaybe-uninitialized]
+nextItem.checkModbus(data);
+^
+In file included from .piolibdeps/ModbusMaster/src/ModbusMaster.h:58:0,
+from lighthub/item.cpp:29:
+.piolibdeps/ModbusMaster/src/util/crc16.h: At global scope:
+.piolibdeps/ModbusMaster/src/util/crc16.h:71:17: warning: 'uint16_t crc16_update(uint16_t, uint8_t)' defined but not used [-Wunused-function]
+static uint16_t crc16_update(uint16_t crc, uint8_t a)
+^
+========================================================================================= [ERROR] Took 6.61 seconds =========================================================================================
+
+================================================================================================= [SUMMARY] =================================================================================================
+Environment due                	[ERROR]
+Environment due-5500           	[SKIP]
+Environment megaatmega2560     	[SKIP]
+Environment megaatmega2560-5500	[SKIP]
+Environment espressif8266      	[SKIP]
+========================================================================================= [ERROR] Took 6.61 seconds =========================================================================================
+livello@lserver ~/PROG/lighthub $ pio run -e megaatmega2560
+
+[Wed Mar 14 02:14:38 2018] Processing megaatmega2560 (platform: atmelavr; board: megaatmega2560; framework: arduino)
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+PLATFORM: Atmel AVR > Arduino Mega or Mega 2560 ATmega2560 (Mega 2560)
+SYSTEM: ATMEGA2560 16MHz 8KB RAM (248KB Flash)
+Converting lighthub.ino
+Library Dependency Finder -> http://bit.ly/configure-pio-ldf
+LDF MODES: FINDER(chain) COMPATIBILITY(light)
+Collected 40 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- <DallasTemperature> #1306c49
+|   |-- <DS2482_OneWire> #3ef01fc
+|   |   |-- <Wire> v1.0
+|   |-- <ModbusMaster> v2.0.1 #4a429bf
+|-- <DS2482_OneWire> #3ef01fc
+|   |-- <Wire> v1.0
+|-- <DmxSimple> v3.1 #62f0959
+|-- <httpClient> #007e22e
+|   |-- <Ethernet> v1.1.2 #238e8fc
+|   |   |-- <SPI> v1.0 #8d59205
+|-- <aJson> #60e5d57
+|   |-- <EEPROM> v2.0
+|   |-- <DueFlashStorage> v1.0.0 #a41b206
+|-- <CmdArduino> #c94cd3f
+|-- <ModbusMaster> v2.0.1 #4a429bf
+|-- <DMXSerial> v1.3.0 #4db73b3
+|-- <Ethernet> v1.1.2 #238e8fc
+|   |-- <SPI> v1.0 #8d59205
+|-- <SPI> v1.0 #8d59205
+|-- <PubSubClient> v2.6 #f029640
+|-- <Artnet> #3d39995
+|   |-- <Ethernet> v1.1.2 #238e8fc
+|   |   |-- <SPI> v1.0 #8d59205
+|   |-- <WiFi> v1.2.7
+|   |   |-- <SPI> v1.0 #8d59205
+|-- <FastLED> v3.1.8
+|   |-- <DmxSimple> v3.1 #62f0959
+|   |-- <SoftwareSerial> v1.0
+|   |-- <DMXSerial> v1.3.0 #4db73b3
+|-- <DueFlashStorage> v1.0.0 #a41b206
+|-- <EEPROM> v2.0
+|-- <ArduinoHttpClient> #acde3dc
+|-- <Wire> v1.0
+|-- <DmxDue> #bf7ffb2
+Compiling .pioenvs/megaatmega2560/src/dmx.cpp.o
+Compiling .pioenvs/megaatmega2560/src/item.cpp.o
+Compiling .pioenvs/megaatmega2560/src/lighthub.ino.cpp.o
+lighthub/dmx.cpp: In function 'int itemCtrl2(char*, int, int, int, int)':
+lighthub/dmx.cpp:91:3: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/dmx.cpp: In function 'void DMXput()':
+lighthub/dmx.cpp:111:5: warning: unused variable 't' [-Wunused-variable]
+int t;
+^
+lighthub/dmx.cpp: In function 'void onDmxFrame(uint16_t, uint16_t, uint8_t, uint8_t*, IPAddress)':
+lighthub/dmx.cpp:186:22: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+for (int i = 0 ; i < length && i<MAX_CHANNELS ; i++)
+^
+Compiling .pioenvs/megaatmega2560/src/main.cpp.o
+In file included from lighthub/item.cpp:21:0:
+lighthub/item.h: In member function 'int Item::On()':
+lighthub/item.h:85:33: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int On (){Ctrl(CMD_ON);};
+^
+lighthub/item.h: In member function 'int Item::Off()':
+lighthub/item.h:86:34: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Off(){Ctrl(CMD_OFF);};
+^
+lighthub/item.h: In member function 'int Item::Toggle()':
+lighthub/item.h:87:40: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Toggle(){Ctrl(CMD_TOGGLE);};
+^
+In file included from lighthub/item.cpp:26:0:
+.piolibdeps/FastLED_ID126/FastLED.h: At global scope:
+.piolibdeps/FastLED_ID126/FastLED.h:17:21: note: #pragma message: FastLED version 3.001.008
+#    pragma message "FastLED version 3.001.008"
+^
+In file included from lighthub/main.cpp:132:0:
+lighthub/item.h: In member function 'int Item::On()':
+lighthub/item.h:85:33: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int On (){Ctrl(CMD_ON);};
+^
+lighthub/item.h: In member function 'int Item::Off()':
+lighthub/item.h:86:34: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Off(){Ctrl(CMD_OFF);};
+^
+lighthub/item.h: In member function 'int Item::Toggle()':
+lighthub/item.h:87:40: warning: no return statement in function returning non-void [-Wreturn-type]
+inline int Toggle(){Ctrl(CMD_TOGGLE);};
+^
+lighthub/main.cpp: In function 'void callback(char*, byte*, unsigned int)':
+lighthub/main.cpp:198:19: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+for (int i=0;i<length;i++) {
+^
+lighthub/main.cpp:208:30: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+if (t=strrchr (topic,'/')) strncpy(subtopic,t+1 , sublen-1);
+^
+lighthub/main.cpp: In function 'int mqttConfigReq(int, char**)':
+lighthub/main.cpp:676:1: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/main.cpp: In function 'void _setConfig(int, char**)':
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 3 has type 'byte* {aka unsigned char*}' [-Wformat=]
+&mac[5]) < 6)
+^
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 4 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 5 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 6 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 7 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: format '%x' expects argument of type 'unsigned int*', but argument 8 has type 'byte* {aka unsigned char*}' [-Wformat=]
+lighthub/main.cpp:721:23: warning: unknown conversion type character 0xffffffd1 in format [-Wformat=]
+lighthub/main.cpp: In function 'int getConfig(int, char**)':
+lighthub/main.cpp:751:10: warning: unused variable 'ch' [-Wunused-variable]
+char ch;
+^
+lighthub/main.cpp: In function 'void setup_main()':
+lighthub/main.cpp:891:31: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("help", _handleHelp);
+^
+lighthub/main.cpp:892:31: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("save", _saveConfig);
+^
+lighthub/main.cpp:893:31: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("load", _loadConfig);
+^
+lighthub/main.cpp:894:30: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("get",  _getConfig);
+^
+lighthub/main.cpp:895:30: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("set",  _setConfig);
+^
+lighthub/main.cpp:896:25: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("kill", _kill);
+^
+lighthub/main.cpp:897:33: warning: deprecated conversion from string constant to 'char*' [-Wwrite-strings]
+cmdAdd("req", _mqttConfigReq);
+^
+lighthub/main.cpp: In function 'short int thermoSetCurTemp(char*, short int)':
+lighthub/main.cpp:1190:61: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+else if (extArray=aJson.getArrayItem(item,I_EXT))
+^
+lighthub/main.cpp:1202:1: warning: no return statement in function returning non-void [-Wreturn-type]
+} //proc
+^
+Compiling .pioenvs/megaatmega2560/libe82/DueFlashStorage/DueFlashStorage.cpp.o
+Compiling .pioenvs/megaatmega2560/libe82/DueFlashStorage/efc.cpp.o
+In file included from .piolibdeps/ModbusMaster/src/ModbusMaster.h:58:0,
+from lighthub/main.cpp:75:
+lighthub/main.cpp: At top level:
+.piolibdeps/ModbusMaster/src/util/crc16.h:71:17: warning: 'crc16_update' defined but not used [-Wunused-function]
+static uint16_t crc16_update(uint16_t crc, uint8_t a)
+^
+Compiling .pioenvs/megaatmega2560/libe82/DueFlashStorage/flash_efc.cpp.o
+Compiling .pioenvs/megaatmega2560/lib9dd/aJson/aJSON.cpp.o
+In file included from .piolibdeps/DueFlashStorage/src/flash_efc.h:48:0,
+from .piolibdeps/DueFlashStorage/src/DueFlashStorage.h:18,
+from .piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:1:
+.piolibdeps/DueFlashStorage/src/efc.h:116:19: error: 'Efc' was not declared in this scope
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:24: error: 'p_efc' was not declared in this scope
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:40: error: expected primary-expression before 'ul_access_mode'
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:65: error: expected primary-expression before 'ul_fws'
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:71: warning: expression list treated as compound expression in initializer [-fpermissive]
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:117:32: error: variable or field 'efc_enable_frdy_interrupt' declared void
+void efc_enable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:117:32: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:117:37: error: 'p_efc' was not declared in this scope
+void efc_enable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:118:33: error: variable or field 'efc_disable_frdy_interrupt' declared void
+void efc_disable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:118:33: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:118:38: error: 'p_efc' was not declared in this scope
+void efc_disable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:119:32: error: variable or field 'efc_set_flash_access_mode' declared void
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:119:32: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:119:37: error: 'p_efc' was not declared in this scope
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:119:53: error: expected primary-expression before 'ul_mode'
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:120:36: error: 'Efc' was not declared in this scope
+uint32_t efc_get_flash_access_mode(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:120:41: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_flash_access_mode(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:121:25: error: variable or field 'efc_set_wait_state' declared void
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:121:25: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:121:30: error: 'p_efc' was not declared in this scope
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:121:46: error: expected primary-expression before 'ul_fws'
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:122:29: error: 'Efc' was not declared in this scope
+uint32_t efc_get_wait_state(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:122:34: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_wait_state(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:123:30: error: 'Efc' was not declared in this scope
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:123:35: error: 'p_efc' was not declared in this scope
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:123:51: error: expected primary-expression before 'ul_command'
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:124:12: error: expected primary-expression before 'ul_argument'
+uint32_t ul_argument);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:124:23: warning: expression list treated as compound expression in initializer [-fpermissive]
+uint32_t ul_argument);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:125:25: error: 'Efc' was not declared in this scope
+uint32_t efc_get_status(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:125:30: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_status(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:126:25: error: 'Efc' was not declared in this scope
+uint32_t efc_get_result(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:126:30: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_result(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:127:36: error: 'Efc' was not declared in this scope
+uint32_t efc_perform_read_sequence(Efc *p_efc,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:127:41: error: 'p_efc' was not declared in this scope
+uint32_t efc_perform_read_sequence(Efc *p_efc,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:128:12: error: expected primary-expression before 'ul_cmd_st'
+uint32_t ul_cmd_st, uint32_t ul_cmd_sp,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:128:32: error: expected primary-expression before 'ul_cmd_sp'
+uint32_t ul_cmd_st, uint32_t ul_cmd_sp,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:12: error: expected primary-expression before '*' token
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:13: error: 'p_ul_buf' was not declared in this scope
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:32: error: expected primary-expression before 'ul_size'
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:39: warning: expression list treated as compound expression in initializer [-fpermissive]
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+In file included from .piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:1:0:
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'byte DueFlashStorage::read(uint32_t)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:14:10: note: in expansion of macro 'FLASH_START'
+return FLASH_START[address];
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'byte* DueFlashStorage::readAddress(uint32_t)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:17:10: note: in expansion of macro 'FLASH_START'
+return FLASH_START+address;
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'boolean DueFlashStorage::write(uint32_t, byte)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:25:36: note: in expansion of macro 'FLASH_START'
+retCode = flash_unlock((uint32_t)FLASH_START+address, (uint32_t)FLASH_START+address + byteLength - 1, 0, 0);
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:23:9: warning: unused variable 'data' [-Wunused-variable]
+byte *data;
+^
+In file included from .piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:1:0:
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'boolean DueFlashStorage::write(uint32_t, byte*, uint32_t)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:52:17: note: in expansion of macro 'FLASH_START'
+if ((uint32_t)FLASH_START+address < IFLASH1_ADDR) {
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:57:17: note: in expansion of macro 'FLASH_START'
+if ((uint32_t)FLASH_START+address >= (IFLASH1_ADDR + IFLASH1_SIZE)) {
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:57:56: error: 'IFLASH1_SIZE' was not declared in this scope
+if ((uint32_t)FLASH_START+address >= (IFLASH1_ADDR + IFLASH1_SIZE)) {
+^
+In file included from .piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:1:0:
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:62:18: note: in expansion of macro 'FLASH_START'
+if (((uint32_t)FLASH_START+address & 3) != 0) {
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:68:36: note: in expansion of macro 'FLASH_START'
+retCode = flash_unlock((uint32_t)FLASH_START+address, (uint32_t)FLASH_START+address + dataLength - 1, 0, 0);
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'boolean DueFlashStorage::write_unlocked(uint32_t, byte)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:97:35: note: in expansion of macro 'FLASH_START'
+retCode = flash_write((uint32_t)FLASH_START+address, &value, byteLength, 1);
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:94:9: warning: unused variable 'data' [-Wunused-variable]
+byte *data;
+^
+In file included from .piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:1:0:
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'boolean DueFlashStorage::write_unlocked(uint32_t, byte*, uint32_t)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:111:17: note: in expansion of macro 'FLASH_START'
+if ((uint32_t)FLASH_START+address < IFLASH1_ADDR) {
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:116:17: note: in expansion of macro 'FLASH_START'
+if ((uint32_t)FLASH_START+address >= (IFLASH1_ADDR + IFLASH1_SIZE)) {
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:116:56: error: 'IFLASH1_SIZE' was not declared in this scope
+if ((uint32_t)FLASH_START+address >= (IFLASH1_ADDR + IFLASH1_SIZE)) {
+^
+In file included from .piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:1:0:
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:121:18: note: in expansion of macro 'FLASH_START'
+if (((uint32_t)FLASH_START+address & 3) != 0) {
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.h:25:32: error: 'IFLASH1_ADDR' was not declared in this scope
+#define  FLASH_START  ((byte *)IFLASH1_ADDR)
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:127:35: note: in expansion of macro 'FLASH_START'
+retCode = flash_write((uint32_t)FLASH_START+address, data, dataLength, 1);
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'byte DueFlashStorage::read(uint32_t)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:15:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp: In member function 'byte* DueFlashStorage::readAddress(uint32_t)':
+.piolibdeps/DueFlashStorage/src/DueFlashStorage.cpp:18:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::VacomSetFan(int8_t, int8_t)':
+lighthub/item.cpp:668:11: warning: unused variable 'j' [-Wunused-variable]
+uint8_t j, result;
+^
+lighthub/item.cpp:668:14: warning: unused variable 'result' [-Wunused-variable]
+uint8_t j, result;
+^
+lighthub/item.cpp:669:12: warning: unused variable 'data' [-Wunused-variable]
+uint16_t data[1];
+^
+*** [.pioenvs/megaatmega2560/libe82/DueFlashStorage/DueFlashStorage.cpp.o] Error 1
+lighthub/item.cpp: In member function 'int Item::checkModbus()':
+lighthub/item.cpp:914:93: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (modbusitem &&  nextItem.isValid() && nextItem.itemType==CH_MODBUS && nextItem.getArg(0)==addr && nextItem.getArg(1)==reg)
+^
+lighthub/item.cpp:914:121: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (modbusitem &&  nextItem.isValid() && nextItem.itemType==CH_MODBUS && nextItem.getArg(0)==addr && nextItem.getArg(1)==reg)
+^
+lighthub/item.cpp:890:13: warning: unused variable 'mask' [-Wunused-variable]
+short     mask  = getArg(2);
+^
+lighthub/item.cpp: In member function 'int Item::checkModbus(int)':
+lighthub/item.cpp:932:29: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+if (getVal()!=d || d && cmd==CMD_OFF || d && cmd==CMD_HALT) //volume changed or turned on manualy
+^
+lighthub/item.cpp:932:50: warning: suggest parentheses around '&&' within '||' [-Wparentheses]
+if (getVal()!=d || d && cmd==CMD_OFF || d && cmd==CMD_HALT) //volume changed or turned on manualy
+^
+lighthub/item.cpp:950:3: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::Pool()':
+lighthub/item.cpp:962:3: warning: no return statement in function returning non-void [-Wreturn-type]
+}
+^
+In file included from .piolibdeps/DueFlashStorage/src/efc.cpp:44:0:
+.piolibdeps/DueFlashStorage/src/efc.h:116:19: error: 'Efc' was not declared in this scope
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:24: error: 'p_efc' was not declared in this scope
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:40: error: expected primary-expression before 'ul_access_mode'
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:65: error: expected primary-expression before 'ul_fws'
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:71: warning: expression list treated as compound expression in initializer [-fpermissive]
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:117:32: error: variable or field 'efc_enable_frdy_interrupt' declared void
+void efc_enable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:117:32: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:117:37: error: 'p_efc' was not declared in this scope
+void efc_enable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:118:33: error: variable or field 'efc_disable_frdy_interrupt' declared void
+void efc_disable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:118:33: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:118:38: error: 'p_efc' was not declared in this scope
+void efc_disable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:119:32: error: variable or field 'efc_set_flash_access_mode' declared void
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:119:32: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:119:37: error: 'p_efc' was not declared in this scope
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:119:53: error: expected primary-expression before 'ul_mode'
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:120:36: error: 'Efc' was not declared in this scope
+uint32_t efc_get_flash_access_mode(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:120:41: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_flash_access_mode(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:121:25: error: variable or field 'efc_set_wait_state' declared void
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:121:25: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:121:30: error: 'p_efc' was not declared in this scope
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:121:46: error: expected primary-expression before 'ul_fws'
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:122:29: error: 'Efc' was not declared in this scope
+uint32_t efc_get_wait_state(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:122:34: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_wait_state(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:123:30: error: 'Efc' was not declared in this scope
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:123:35: error: 'p_efc' was not declared in this scope
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:123:51: error: expected primary-expression before 'ul_command'
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:124:12: error: expected primary-expression before 'ul_argument'
+uint32_t ul_argument);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:124:23: warning: expression list treated as compound expression in initializer [-fpermissive]
+uint32_t ul_argument);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:125:25: error: 'Efc' was not declared in this scope
+uint32_t efc_get_status(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:125:30: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_status(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:126:25: error: 'Efc' was not declared in this scope
+uint32_t efc_get_result(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:126:30: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_result(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:127:36: error: 'Efc' was not declared in this scope
+uint32_t efc_perform_read_sequence(Efc *p_efc,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:127:41: error: 'p_efc' was not declared in this scope
+uint32_t efc_perform_read_sequence(Efc *p_efc,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:128:12: error: expected primary-expression before 'ul_cmd_st'
+uint32_t ul_cmd_st, uint32_t ul_cmd_sp,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:128:32: error: expected primary-expression before 'ul_cmd_sp'
+uint32_t ul_cmd_st, uint32_t ul_cmd_sp,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:12: error: expected primary-expression before '*' token
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:13: error: 'p_ul_buf' was not declared in this scope
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:32: error: expected primary-expression before 'ul_size'
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:39: warning: expression list treated as compound expression in initializer [-fpermissive]
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:84:27: error: variable or field 'efc_write_fmr' declared void
+extern void efc_write_fmr(Efc *p_efc, uint32_t ul_fmr);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:84:27: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.cpp:84:32: error: 'p_efc' was not declared in this scope
+extern void efc_write_fmr(Efc *p_efc, uint32_t ul_fmr);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:84:48: error: expected primary-expression before 'ul_fmr'
+extern void efc_write_fmr(Efc *p_efc, uint32_t ul_fmr);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:85:33: warning: 'efc_perform_fcr' initialized and declared 'extern'
+extern uint32_t efc_perform_fcr(Efc *p_efc, uint32_t ul_fcr);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:85:33: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.cpp:85:38: error: 'p_efc' was not declared in this scope
+extern uint32_t efc_perform_fcr(Efc *p_efc, uint32_t ul_fcr);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:85:54: error: expected primary-expression before 'ul_fcr'
+extern uint32_t efc_perform_fcr(Efc *p_efc, uint32_t ul_fcr);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:85:60: warning: expression list treated as compound expression in initializer [-fpermissive]
+extern uint32_t efc_perform_fcr(Efc *p_efc, uint32_t ul_fcr);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:95:19: error: redefinition of 'uint32_t efc_init'
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws)
+^
+In file included from .piolibdeps/DueFlashStorage/src/efc.cpp:44:0:
+.piolibdeps/DueFlashStorage/src/efc.h:116:10: note: 'uint32_t efc_init' previously defined here
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:95:19: error: 'Efc' was not declared in this scope
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:95:24: error: 'p_efc' was not declared in this scope
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:95:40: error: expected primary-expression before 'ul_access_mode'
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:95:65: error: expected primary-expression before 'ul_fws'
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:106:32: error: variable or field 'efc_enable_frdy_interrupt' declared void
+void efc_enable_frdy_interrupt(Efc *p_efc)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:106:32: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.cpp:106:37: error: 'p_efc' was not declared in this scope
+void efc_enable_frdy_interrupt(Efc *p_efc)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:118:33: error: variable or field 'efc_disable_frdy_interrupt' declared void
+void efc_disable_frdy_interrupt(Efc *p_efc)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:118:33: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.cpp:118:38: error: 'p_efc' was not declared in this scope
+void efc_disable_frdy_interrupt(Efc *p_efc)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:131:32: error: variable or field 'efc_set_flash_access_mode' declared void
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:131:32: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.cpp:131:37: error: 'p_efc' was not declared in this scope
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:131:53: error: expected primary-expression before 'ul_mode'
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:145:36: error: redefinition of 'uint32_t efc_get_flash_access_mode'
+uint32_t efc_get_flash_access_mode(Efc *p_efc)
+^
+In file included from .piolibdeps/DueFlashStorage/src/efc.cpp:44:0:
+.piolibdeps/DueFlashStorage/src/efc.h:120:10: note: 'uint32_t efc_get_flash_access_mode' previously defined here
+uint32_t efc_get_flash_access_mode(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:145:36: error: 'Efc' was not declared in this scope
+uint32_t efc_get_flash_access_mode(Efc *p_efc)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:145:41: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_flash_access_mode(Efc *p_efc)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:156:25: error: variable or field 'efc_set_wait_state' declared void
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:156:25: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.cpp:156:30: error: 'p_efc' was not declared in this scope
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:156:46: error: expected primary-expression before 'ul_fws'
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:170:29: error: redefinition of 'uint32_t efc_get_wait_state'
+uint32_t efc_get_wait_state(Efc *p_efc)
+^
+In file included from .piolibdeps/DueFlashStorage/src/efc.cpp:44:0:
+.piolibdeps/DueFlashStorage/src/efc.h:122:10: note: 'uint32_t efc_get_wait_state' previously defined here
+uint32_t efc_get_wait_state(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:170:29: error: 'Efc' was not declared in this scope
+uint32_t efc_get_wait_state(Efc *p_efc)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:170:34: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_wait_state(Efc *p_efc)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:188:30: error: redefinition of 'uint32_t efc_perform_command'
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+In file included from .piolibdeps/DueFlashStorage/src/efc.cpp:44:0:
+.piolibdeps/DueFlashStorage/src/efc.h:123:10: note: 'uint32_t efc_perform_command' previously defined here
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:188:30: error: 'Efc' was not declared in this scope
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:188:35: error: 'p_efc' was not declared in this scope
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:188:51: error: expected primary-expression before 'ul_command'
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:189:12: error: expected primary-expression before 'ul_argument'
+uint32_t ul_argument)
+^
+.piolibdeps/DueFlashStorage/src/efc.cpp:337:1: error: expected '}' at end of input
+}
+^
+*** [.pioenvs/megaatmega2560/libe82/DueFlashStorage/efc.cpp.o] Error 1
+lighthub/item.cpp: In member function 'virtual int Item::Ctrl(short int, short int, int*, boolean)':
+lighthub/item.cpp:517:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::VacomSetFan(int8_t, int8_t)':
+lighthub/item.cpp:684:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::VacomSetHeat(int, int8_t, int8_t)':
+lighthub/item.cpp:715:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In function 'int modbusSet(int, uint16_t, int, uint16_t)':
+lighthub/item.cpp:787:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::checkFM()':
+lighthub/item.cpp:878:3: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+lighthub/item.cpp: In member function 'int Item::checkModbus()':
+lighthub/item.cpp:921:1: warning: control reaches end of non-void function [-Wreturn-type]
+}
+^
+In file included from .piolibdeps/DueFlashStorage/src/flash_efc.h:48:0,
+from .piolibdeps/DueFlashStorage/src/flash_efc.cpp:46:
+.piolibdeps/DueFlashStorage/src/efc.h:116:19: error: 'Efc' was not declared in this scope
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:24: error: 'p_efc' was not declared in this scope
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:40: error: expected primary-expression before 'ul_access_mode'
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:65: error: expected primary-expression before 'ul_fws'
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:116:71: warning: expression list treated as compound expression in initializer [-fpermissive]
+uint32_t efc_init(Efc *p_efc, uint32_t ul_access_mode, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:117:32: error: variable or field 'efc_enable_frdy_interrupt' declared void
+void efc_enable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:117:32: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:117:37: error: 'p_efc' was not declared in this scope
+void efc_enable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:118:33: error: variable or field 'efc_disable_frdy_interrupt' declared void
+void efc_disable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:118:33: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:118:38: error: 'p_efc' was not declared in this scope
+void efc_disable_frdy_interrupt(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:119:32: error: variable or field 'efc_set_flash_access_mode' declared void
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:119:32: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:119:37: error: 'p_efc' was not declared in this scope
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:119:53: error: expected primary-expression before 'ul_mode'
+void efc_set_flash_access_mode(Efc *p_efc, uint32_t ul_mode);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:120:36: error: 'Efc' was not declared in this scope
+uint32_t efc_get_flash_access_mode(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:120:41: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_flash_access_mode(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:121:25: error: variable or field 'efc_set_wait_state' declared void
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:121:25: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/efc.h:121:30: error: 'p_efc' was not declared in this scope
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:121:46: error: expected primary-expression before 'ul_fws'
+void efc_set_wait_state(Efc *p_efc, uint32_t ul_fws);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:122:29: error: 'Efc' was not declared in this scope
+uint32_t efc_get_wait_state(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:122:34: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_wait_state(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:123:30: error: 'Efc' was not declared in this scope
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:123:35: error: 'p_efc' was not declared in this scope
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:123:51: error: expected primary-expression before 'ul_command'
+uint32_t efc_perform_command(Efc *p_efc, uint32_t ul_command,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:124:12: error: expected primary-expression before 'ul_argument'
+uint32_t ul_argument);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:124:23: warning: expression list treated as compound expression in initializer [-fpermissive]
+uint32_t ul_argument);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:125:25: error: 'Efc' was not declared in this scope
+uint32_t efc_get_status(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:125:30: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_status(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:126:25: error: 'Efc' was not declared in this scope
+uint32_t efc_get_result(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:126:30: error: 'p_efc' was not declared in this scope
+uint32_t efc_get_result(Efc *p_efc);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:127:36: error: 'Efc' was not declared in this scope
+uint32_t efc_perform_read_sequence(Efc *p_efc,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:127:41: error: 'p_efc' was not declared in this scope
+uint32_t efc_perform_read_sequence(Efc *p_efc,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:128:12: error: expected primary-expression before 'ul_cmd_st'
+uint32_t ul_cmd_st, uint32_t ul_cmd_sp,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:128:32: error: expected primary-expression before 'ul_cmd_sp'
+uint32_t ul_cmd_st, uint32_t ul_cmd_sp,
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:12: error: expected primary-expression before '*' token
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:13: error: 'p_ul_buf' was not declared in this scope
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:32: error: expected primary-expression before 'ul_size'
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/efc.h:129:39: warning: expression list treated as compound expression in initializer [-fpermissive]
+uint32_t *p_ul_buf, uint32_t ul_size);
+^
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:89:31: error: 'IFLASH0_PAGE_SIZE' was not declared in this scope
+# define IFLASH_PAGE_SIZE     IFLASH0_PAGE_SIZE
+^
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:94:35: note: in expansion of macro 'IFLASH_PAGE_SIZE'
+static uint32_t gs_ul_page_buffer[IFLASH_PAGE_SIZE / sizeof(uint32_t)];
+^
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:106:31: error: variable or field 'translate_address' declared void
+static void translate_address(Efc **pp_efc, uint32_t ul_addr,
+^
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:106:31: error: 'Efc' was not declared in this scope
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:106:37: error: 'pp_efc' was not declared in this scope
+static void translate_address(Efc **pp_efc, uint32_t ul_addr,
+^
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:106:54: error: expected primary-expression before 'ul_addr'
+static void translate_address(Efc **pp_efc, uint32_t ul_addr,
+^
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:107:12: error: expected primary-expression before '*' token
+uint16_t *pus_page, uint16_t *pus_offset)
+^
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:107:13: error: 'pus_page' was not declared in this scope
+uint16_t *pus_page, uint16_t *pus_offset)
+^
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:107:32: error: expected primary-expression before '*' token
+uint16_t *pus_page, uint16_t *pus_offset)
+^
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:107:33: error: 'pus_offset' was not declared in this scope
+uint16_t *pus_page, uint16_t *pus_offset)
+^
+.piolibdeps/DueFlashStorage/src/flash_efc.cpp:913:1: error: expected '}' at end of input
+}
+^
+*** [.pioenvs/megaatmega2560/libe82/DueFlashStorage/flash_efc.cpp.o] Error 1
+.piolibdeps/aJson/aJSON.cpp: In member function 'virtual bool aJsonEEPROMStream::available()':
+.piolibdeps/aJson/aJSON.cpp:145:21: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+while (addr+offset<EEPROM.length())
+^
+.piolibdeps/aJson/aJSON.cpp: In member function 'int aJsonStream::printArray(aJsonObject*)':
+.piolibdeps/aJson/aJSON.cpp:849:24: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print('[') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp:862:32: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print(',') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp:868:24: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print(']') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp: In member function 'int aJsonStream::printObject(aJsonObject*)':
+.piolibdeps/aJson/aJSON.cpp:960:24: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print('{') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp:970:28: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print(':') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp:981:32: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print(',') == EOF)
+^
+.piolibdeps/aJson/aJSON.cpp:987:24: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+if (this->print('}') == EOF)
+^
+In file included from .piolibdeps/ModbusMaster/src/ModbusMaster.h:58:0,
+from lighthub/item.cpp:29:
+lighthub/item.cpp: At top level:
+.piolibdeps/ModbusMaster/src/util/crc16.h:71:17: warning: 'crc16_update' defined but not used [-Wunused-function]
+static uint16_t crc16_update(uint16_t crc, uint8_t a)
+^
+========================================================================================= [ERROR] Took 1.46 seconds =========================================================================================
+
+================================================================================================= [SUMMARY] =================================================================================================
+Environment due                	[SKIP]
+Environment due-5500           	[SKIP]
+Environment megaatmega2560     	[ERROR]
+Environment megaatmega2560-5500	[SKIP]
+Environment espressif8266      	[SKIP]
+========================================================================================= [ERROR] Took 1.46 seconds =========================================================================================
+livello@lserver ~/PROG/lighthub $
