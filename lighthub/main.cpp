@@ -334,8 +334,7 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
 #endif
 
             break;
-        case 2: // IP Ready, config loaded, Connecting broker  & subscribe
-//Arming Watchdog
+        case 2: // IP Ready, config loaded, Connecting broker  & subscribeArming Watchdog
             wdt_res();
             {
                 short n=0;
