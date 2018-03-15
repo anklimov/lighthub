@@ -133,7 +133,7 @@ EthernetClient ethClient;
 #define QUOTE(x) Q(x)
 
 #ifndef PIO_SRC_REV
-#define PIO_SRC_REV_BRANCH v0.97
+#define PIO_SRC_REV v0.97
 #endif
 
 
