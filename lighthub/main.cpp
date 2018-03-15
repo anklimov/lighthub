@@ -81,14 +81,17 @@ Config webserver
 #include "HTTPClient.h"
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
-//#define wdt_en()   wdt_enable(WDTO_8S)
-//#define wdt_dis()  wdt_disable()
-//#define wdt_res()  wdt_reset()
+#define wdt_en()   wdt_enable(WDTO_8S)
+#define wdt_dis()  wdt_disable()
+#define wdt_res()  wdt_reset()
+#else
+#include <ArduinoHttpClient.h>
+#endif
+
+#ifdef WATCH_DOG_TICKER_DISABLE
 #define wdt_en()   wdt_disable()
 #define wdt_dis()  wdt_disable()
 #define wdt_res()  wdt_disable()
-#else
-#include <ArduinoHttpClient.h>
 #endif
 
 #if defined(__SAM3X8E__)
