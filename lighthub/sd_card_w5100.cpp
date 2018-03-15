@@ -148,8 +148,7 @@ void sd_card_w5100_setup() {
     // Note that even if it's not used as the CS pin, the hardware SS pin
     // (10 on most Arduino boards, 53 on the Mega) must be left as an output
     // or the SD library functions will not work.
-    pinMode(chipSelect, OUTPUT);     // change this to 53 on a mega
-    SPI.begin(chipSelect); //but it didn'temp_DHT22 workt wiht it and whitout it   [/b]  // change this to 53 on a mega
+    pinMode(chipSelect, OUTPUT);
 
     if (!card.init(SPI_FULL_SPEED, chipSelect)) {
         Serial.println("initialization failed. Things to check:");
