@@ -129,6 +129,14 @@ EthernetClient ethClient;
 #include "dmx.h"
 #endif
 
+#define Q(x) #x
+#define QUOTE(x) Q(x)
+
+#ifndef PIO_SRC_REV
+#define PIO_SRC_REV_BRANCH v0.97
+#endif
+
+
 #include "item.h"
 #include "inputs.h"
 
@@ -886,7 +894,9 @@ void postTransmission()
 void setup_main() {
     cmdInit(115200);
 
-    Serial.println(F("\nLazyhome.ru LightHub controller v0.97"));
+    Serial.print(F("\nLazyhome.ru LightHub controller "));
+    Serial.println(F(QUOTE(PIO_SRC_REV)));
+
 
     cmdAdd("help", _handleHelp);
     cmdAdd("save", _saveConfig);
