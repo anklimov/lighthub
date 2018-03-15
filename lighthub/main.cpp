@@ -145,6 +145,8 @@ EthernetClient ethClient;
 extern Artnet *artnet;
 #endif
 
+#include "sd_card_w5100.h"
+
 // Hardcoded definitions
 //Thermostate histeresys
 #define GIST 2
@@ -896,7 +898,7 @@ void setup_main() {
 
     Serial.print(F("\nLazyhome.ru LightHub controller "));
     Serial.println(F(QUOTE(PIO_SRC_REV)));
-
+    sd_card_w5100_setup();
 
     cmdAdd("help", _handleHelp);
     cmdAdd("save", _saveConfig);
