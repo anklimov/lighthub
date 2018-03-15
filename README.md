@@ -76,4 +76,5 @@ First attempt to use platformio toolchain for compiling (work not completed yet)
 
 # Due compilation issue "USART0_Handler redefinition"
 Please, open  /variants/arduino_due_x/variant.cpp file, then edit USART0_Handler method definition like this
+
 void USART0_Handler(void)  __attribute__((weak));
