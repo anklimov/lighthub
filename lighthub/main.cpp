@@ -161,7 +161,7 @@ extern Artnet *artnet;
 
 #define inprefix "/myhome/in/"
 const char outprefix[] PROGMEM  = "/myhome/s_out/";
-#define subprefix "/myhome/in/#"
+const char subprefix[] PROGMEM =  "/myhome/in/#";
 
 aJsonObject *root  =  NULL;
 aJsonObject *items =  NULL;
