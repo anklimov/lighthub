@@ -79,15 +79,27 @@ Please, open  /variants/arduino_due_x/variant.cpp file, then edit USART0_Handler
 
 void USART0_Handler(void)  __attribute__((weak));
 
-# Platformio
+# Platformio command line build instructions
 First of all install platformio framework. http://docs.platformio.org/en/latest/installation.html
-git clone https://github.com/anklimov/lighthub.git
-pio init --ide clion // prepare CMake build files for Intellij CLion IDE, look list if suppoerted ide here: http://docs.platformio.org/en/latest/ide.html
-pio run -e due // this will build firmware for arduino due board
-rm -Rf .piolibdeps // this will clean libraries folder. Try it if you have compilation problem
-pio run -e megaatmega2560 //build for arduino mega
-pio run -e due -t upload //build and upload firmware to arduino due
 
+https://geektimes.ru/post/273852/ // Good tutorial for fast start in RUSSIAN
 
-export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1"
-set ip address for your configuration server and completely disable wdt feature for AVR.
+In linux you can open terminal, navigate to your programming directory, then
+
+* git clone https://github.com/anklimov/lighthub.git
+
+* cd lighthub
+
+* pio init --ide clion // use your IDE, others here: http://docs.platformio.org/en/latest/ide.html
+
+* export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1"
+
+set ip address of your configuration server and disable wdt feature in case bootloader of your mega2560 is stock
+
+* pio run -e due // this will build firmware for arduino due board
+
+* rm -Rf .piolibdeps // this will clean libraries folder. Try it if you have compilation problem
+
+* pio run -e megaatmega2560 //build for arduino mega
+
+* pio run -e due -t upload //build and upload firmware to arduino due
