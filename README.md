@@ -90,7 +90,7 @@ In linux you can open terminal, navigate to your programming directory, then
 
 * cd lighthub
 
-* pio init --ide clion // prepare CMake build files for Intellij CLion IDE or look if your ide here: http://docs.platformio.org/en/latest/ide.html
+* pio init --ide clion // use your IDE, others here: http://docs.platformio.org/en/latest/ide.html
 
 * pio run -e due // this will build firmware for arduino due board
 
