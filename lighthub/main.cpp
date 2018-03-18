@@ -88,7 +88,7 @@ Config webserver
 #include <ArduinoHttpClient.h>
 #endif
 
-#ifdef WATCH_DOG_TICKER_DISABLE
+#if defined(WATCH_DOG_TICKER_DISABLE)
 #define wdt_en()   wdt_disable()
 #define wdt_dis()  wdt_disable()
 #define wdt_res()  wdt_disable()
@@ -161,7 +161,7 @@ extern Artnet *artnet;
 
 #define inprefix "/myhome/in/"
 const char outprefix[] PROGMEM  = "/myhome/s_out/";
-#define subprefix "/myhome/in/#"
+const char subprefix[] PROGMEM =  "/myhome/in/#";
 
 aJsonObject *root  =  NULL;
 aJsonObject *items =  NULL;
@@ -755,6 +755,11 @@ void saveFlash(short n, char* str)
 void loadFlash(short n, char* str)
 {}
 
+#ifndef MY_CONFIG_SERVER
+#define CONFIG_SERVER "lazyhome.ru"
+#else
+#define CONFIG_SERVER QUOTE(MY_CONFIG_SERVER)
+#endif
 int getConfig (int arg_cnt, char **args)
 //(char *tokens)
 {
@@ -763,7 +768,7 @@ int getConfig (int arg_cnt, char **args)
     int returnCode =0;
     char ch;
     char URI   [32];
-    char server[32] = "lazyhome.ru";
+    char server[sizeof(CONFIG_SERVER)+21] = CONFIG_SERVER;
     if (arg_cnt>0) {
         strncpy(server,args[1],sizeof(server)-1);
         saveFlash(0,server);
