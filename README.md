@@ -94,7 +94,7 @@ In linux you can open terminal, navigate to your programming directory, then
 
 * export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1"
 
-set ip address for your configuration server and completely disable wdt feature for AVR in case bootloader of your mega2560 is stock
+set ip address of your configuration server and disable wdt feature in case bootloader of your mega2560 is stock
 
 * pio run -e due // this will build firmware for arduino due board
 
