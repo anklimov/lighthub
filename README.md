@@ -86,21 +86,20 @@ https://geektimes.ru/post/273852/ // Good tutorial for fast start in RUSSIAN
 
 In linux you can open terminal, navigate to your programming directory, then
 
-*git clone https://github.com/anklimov/lighthub.git
+* git clone https://github.com/anklimov/lighthub.git
 
-*cd lighthub
+* cd lighthub
 
-*pio init --ide clion // prepare CMake build files for Intellij CLion IDE or look if your ide here: http://docs.platformio.org/en/latest/ide.html
+* pio init --ide clion // prepare CMake build files for Intellij CLion IDE or look if your ide here: http://docs.platformio.org/en/latest/ide.html
 
-*pio run -e due // this will build firmware for arduino due board
+* pio run -e due // this will build firmware for arduino due board
 
-*rm -Rf .piolibdeps // this will clean libraries folder. Try it if you have compilation problem
+* rm -Rf .piolibdeps // this will clean libraries folder. Try it if you have compilation problem
 
-*pio run -e megaatmega2560 //build for arduino mega
+* pio run -e megaatmega2560 //build for arduino mega
 
-*pio run -e due -t upload //build and upload firmware to arduino due
+* pio run -e due -t upload //build and upload firmware to arduino due
 
-
-*export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1"
+* export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1"
 
 set ip address for your configuration server and completely disable wdt feature for AVR in case bootloader of your mega2560 is stock
