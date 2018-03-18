@@ -92,6 +92,10 @@ In linux you can open terminal, navigate to your programming directory, then
 
 * pio init --ide clion // use your IDE, others here: http://docs.platformio.org/en/latest/ide.html
 
+* export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1"
+
+set ip address for your configuration server and completely disable wdt feature for AVR in case bootloader of your mega2560 is stock
+
 * pio run -e due // this will build firmware for arduino due board
 
 * rm -Rf .piolibdeps // this will clean libraries folder. Try it if you have compilation problem
@@ -99,7 +103,3 @@ In linux you can open terminal, navigate to your programming directory, then
 * pio run -e megaatmega2560 //build for arduino mega
 
 * pio run -e due -t upload //build and upload firmware to arduino due
-
-* export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1"
-
-set ip address for your configuration server and completely disable wdt feature for AVR in case bootloader of your mega2560 is stock
