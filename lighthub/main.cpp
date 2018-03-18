@@ -763,7 +763,7 @@ int getConfig (int arg_cnt, char **args)
     int returnCode =0;
     char ch;
     char URI   [32];
-    char server[32] = "lazyhome.ru";
+    char server[32] = "ri48.ru/tid";
     if (arg_cnt>0) {
         strncpy(server,args[1],sizeof(server)-1);
         saveFlash(0,server);
