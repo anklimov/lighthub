@@ -88,7 +88,7 @@ Config webserver
 #include <ArduinoHttpClient.h>
 #endif
 
-#ifdef WATCH_DOG_TICKER_DISABLE
+#if defined(WATCH_DOG_TICKER_DISABLE)
 #define wdt_en()   wdt_disable()
 #define wdt_dis()  wdt_disable()
 #define wdt_res()  wdt_disable()
