@@ -755,6 +755,11 @@ void saveFlash(short n, char* str)
 void loadFlash(short n, char* str)
 {}
 
+#ifndef MY_CONFIG_SERVER
+#define CONFIG_SERVER "lazyhome.ru"
+#else
+#define CONFIG_SERVER QUOTE(MY_CONFIG_SERVER)
+#endif
 int getConfig (int arg_cnt, char **args)
 //(char *tokens)
 {
@@ -763,7 +768,7 @@ int getConfig (int arg_cnt, char **args)
     int returnCode =0;
     char ch;
     char URI   [32];
-    char server[32] = "ri48.ru/tid";
+    char server[sizeof(CONFIG_SERVER)+21] = CONFIG_SERVER;
     if (arg_cnt>0) {
         strncpy(server,args[1],sizeof(server)-1);
         saveFlash(0,server);
