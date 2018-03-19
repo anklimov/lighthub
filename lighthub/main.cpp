@@ -136,7 +136,7 @@ EthernetClient ethClient;
 #define QUOTE(x) Q(x)
 
 #ifndef PIO_SRC_REV
-#define PIO_SRC_REV v0.97
+#define PIO_SRC_REV v0.98
 #endif
 
 
@@ -148,7 +148,9 @@ EthernetClient ethClient;
 extern Artnet *artnet;
 #endif
 
+#ifdef _sd
 #include "sd_card_w5100.h"
+#endif
 
 // Hardcoded definitions
 //Thermostate histeresys
@@ -161,7 +163,7 @@ extern Artnet *artnet;
 
 #define inprefix "/myhome/in/"
 const char outprefix[] PROGMEM  = "/myhome/s_out/";
-const char subprefix[] PROGMEM =  "/myhome/in/#";
+#define subprefix "/myhome/in/#"
 
 aJsonObject *root  =  NULL;
 aJsonObject *items =  NULL;
@@ -767,8 +769,8 @@ int getConfig (int arg_cnt, char **args)
 
     int returnCode =0;
     char ch;
-    char URI   [32];
-    char server[sizeof(CONFIG_SERVER)+21] = CONFIG_SERVER;
+    char URI   [40];
+    char server[32] = CONFIG_SERVER;
     if (arg_cnt>0) {
         strncpy(server,args[1],sizeof(server)-1);
         saveFlash(0,server);
@@ -906,7 +908,10 @@ void setup_main() {
 
     Serial.print(F("\nLazyhome.ru LightHub controller "));
     Serial.println(F(QUOTE(PIO_SRC_REV)));
+
+#ifdef _sd
     sd_card_w5100_setup();
+#endif
 
     cmdAdd("help", _handleHelp);
     cmdAdd("save", _saveConfig);
