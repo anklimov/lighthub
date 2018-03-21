@@ -47,8 +47,6 @@ e-mail    anklimov@gmail.com
 #define recheck_interval 5
 #define check_circle 2000/t_count
 
-
-
 #define t_max 20 //Maximum number of 1w devices
 #define TEMPERATURE_PRECISION 9
 
@@ -59,13 +57,12 @@ e-mail    anklimov@gmail.com
 extern aJsonObject *owArr;
 
 typedef   void (*owChangedType) (int , DeviceAddress, int) ;
+#ifndef USE_1W_PIN
+#define DS2482_100_I2C_TO_1W_BRIDGE // HW driver
+#endif
 
-#define _2482 // HW driver
-
-#ifdef _2482
-#include <Wire.h>   
-#else
-#define ONE_WIRE_BUS A0
+#ifdef DS2482_100_I2C_TO_1W_BRIDGE
+#include <Wire.h>
 #endif
 
 extern OneWire *net;
