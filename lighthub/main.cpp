@@ -132,9 +132,6 @@ EthernetClient ethClient;
 #include "dmx.h"
 #endif
 
-#define Q(x) #x
-#define QUOTE(x) Q(x)
-
 #ifndef PIO_SRC_REV
 #define PIO_SRC_REV v0.98
 #endif
@@ -148,7 +145,7 @@ EthernetClient ethClient;
 extern Artnet *artnet;
 #endif
 
-#ifdef _sd
+#ifdef SD_CARD_INSERTED
 #include "sd_card_w5100.h"
 #endif
 
@@ -904,12 +901,15 @@ void postTransmission()
 }
 
 void setup_main() {
-    cmdInit(115200);
+    cmdInit(uint32_t(SERIAL_BAUD));
 
     Serial.print(F("\nLazyhome.ru LightHub controller "));
     Serial.println(F(QUOTE(PIO_SRC_REV)));
+#ifdef WATCH_DOG_TICKER_DISABLE
+    Serial.println(F("WATCHDOG TICKER DISABLED"));
+#endif
 
-#ifdef _sd
+#ifdef SD_CARD_INSERTED
     sd_card_w5100_setup();
 #endif
 

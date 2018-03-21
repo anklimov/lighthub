@@ -87,19 +87,20 @@ https://geektimes.ru/post/273852/ // Good tutorial for fast start in RUSSIAN
 In linux you can open terminal, navigate to your programming directory, then
 
 * git clone https://github.com/anklimov/lighthub.git
-
 * cd lighthub
-
 * pio init --ide clion // use your IDE, others here: http://docs.platformio.org/en/latest/ide.html
-
-* export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1"
-
-set ip address of your configuration server and disable wdt feature in case bootloader of your mega2560 is stock
-
 * pio run -e due // this will build firmware for arduino due board
-
 * rm -Rf .piolibdeps // this will clean libraries folder. Try it if you have compilation problem
-
 * pio run -e megaatmega2560 //build for arduino mega
-
 * pio run -e due -t upload //build and upload firmware to arduino due
+
+# Custom build flags
+
+* MY_CONFIG_SERVER=192.168.1.1 // address of external JSON-config http://192.168.1.1/de-ad-be-ef-fe-00.config.json
+* WATCH_DOG_TICKER_DISABLE=1 //disable wdt feature
+* USE_1W_PIN=49 // use direct connection to 1W devices, no I2C bridge DS2482-100
+* SD_CARD_INSERTED=1 // enable sd-card support and fix lan starting
+* SERIAL_BAUD=115200 // set baud rate for console on Serial0
+
+export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1 -DUSE_1W_PIN=49 -DSERIAL_BAUD=115200 -DSD_CARD_INSERTED=1"
+

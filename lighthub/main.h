@@ -5,7 +5,10 @@
 #ifndef LIGHTHUB_MAIN_H
 #define LIGHTHUB_MAIN_H
 
-#endif //LIGHTHUB_MAIN_H
+
+#ifndef  SERIAL_BAUD
+#define SERIAL_BAUD 115200
+#endif
 
 #include "Arduino.h"
 #include "DallasTemperature.h"
@@ -45,3 +48,4 @@ void inputLoop(void);
 void modbusLoop(void);
 void thermoLoop(void);
 short thermoSetCurTemp(char * name, short t);
+#endif //LIGHTHUB_MAIN_H

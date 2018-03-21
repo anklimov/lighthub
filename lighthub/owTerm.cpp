@@ -80,10 +80,13 @@ while (net && net->wireSearch(term[t_count])>0 && (t_count<t_max) && finish > mi
 int owSetup(owChangedType owCh) {
   //// todo - move memory allocation to here
 
-#ifdef _2482   
+#ifdef DS2482_100_I2C_TO_1W_BRIDGE
+    Serial.println(F("DS2482_100_I2C_TO_1W_BRIDGE init"));
 net = new OneWire;
 #else
-net = new OneWire (ONE_WIRE_BUS);
+    Serial.print(F("One wire setup on PIN:"));
+    Serial.println(QUOTE(USE_1W_PIN));
+net = new OneWire (USE_1W_PIN);
 #endif
 
 
@@ -97,7 +100,7 @@ wstat = new   uint16_t  [t_max];
 
 
   
-  #ifdef _2482
+  #ifdef DS2482_100_I2C_TO_1W_BRIDGE
   Wire.begin(); 
   if (net->checkPresence())
   {
