@@ -647,7 +647,7 @@ OFF
 [22:25:34] => Poll: 0A 06 07 D0 00 00 88 3C 
 
 
-POOL  2101x10
+POLL  2101x10
 [22:27:29] <= Response: 0A 03 14 00 23 00 00 27 10 13 88 0B 9C 00 32 00 F8 00 F2 06 FA 01 3F AD D0 
 [22:27:29] => Poll: 0A 03 08 34 00 0A 87 18 
 
@@ -854,7 +854,7 @@ int Item::checkFM() {
 
         Serial.println();
     } else {
-        Serial.print(F("Modbus pooling error="));
+        Serial.print(F("Modbus polling error="));
         Serial.println(result, HEX);
     }
 
@@ -887,7 +887,7 @@ int Item::checkFM() {
 
         Serial.println();
     } else {
-        Serial.print(F("Modbus pooling error="));
+        Serial.print(F("Modbus polling error="));
         Serial.println(result, HEX);
     }
 
@@ -927,7 +927,7 @@ int Item::checkModbus() {
         Serial.println(data, HEX);
         checkModbus(data);
     } else {
-        Serial.print(F("Modbus pooling error="));
+        Serial.print(F("Modbus polling error="));
         Serial.println(result, HEX);
     }
 
@@ -969,7 +969,7 @@ int Item::checkModbus(int data) {
     } //if data changed
 }
 
-int Item::Pool() {
+int Item::Poll() {
     switch (itemType) {
         case CH_MODBUS:
             checkModbus();

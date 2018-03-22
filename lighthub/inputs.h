@@ -87,7 +87,7 @@ class Input
   boolean isValid ();
   void Changed (int val);
 
-  int Pool ();
+  int Poll();
   protected:  
   void Parse();
 };

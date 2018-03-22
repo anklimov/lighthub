@@ -80,7 +80,7 @@ void Input::Parse()
   }
 }
 
-int Input::Pool ()
+int Input::Poll()
 { 
   boolean v;
   if (!isValid()) return -1;

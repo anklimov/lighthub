@@ -25,7 +25,7 @@ void Changed (int i, DeviceAddress addr, int val);
 void modbusIdle(void);
 void _handleHelp(int arg_cnt, char **args);
 void _kill(int arg_cnt, char **args);
-void parseConfigFromParsedJSON();
+void applyConfig();
 void _loadConfig (int arg_cnt, char **args);
 int loadConfigFromEEPROM(int arg_cnt, char **args);
 void _mqttConfigRequest(int arg_cnt, char **args);

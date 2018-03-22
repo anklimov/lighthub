@@ -180,7 +180,7 @@ extern Artnet *artnet;
 const char outprefix[] PROGMEM = "/myhome/s_out/";
 #define subprefix "/myhome/in/#"
 
-aJsonObject *aJsonObjectRoot = NULL;
+aJsonObject *root = NULL;
 aJsonObject *items = NULL;
 aJsonObject *inputs = NULL;
 
@@ -597,10 +597,10 @@ void _kill(int arg_cnt, char **args) {
 
 #define EEPROM_offset 32+6
 
-void parseConfigFromParsedJSON() {
+void applyConfig() {
     int arrayItemValue, itemsCount;
     //DMX out is configured
-    aJsonObject *dmxoutArr = aJson.getObjectItem(aJsonObjectRoot, "dmx");
+    aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
 #ifdef _dmxout
     if (dmxoutArr && aJson.getArraySize(dmxoutArr) == 2) {
         DMXoutSetup(arrayItemValue = aJson.getArrayItem(dmxoutArr, 1)->valueint,
@@ -611,7 +611,7 @@ void parseConfigFromParsedJSON() {
 #endif
     //DMX in is configured
 #ifdef _dmxin
-    dmxArr = aJson.getObjectItem(aJsonObjectRoot, "dmxin");
+    dmxArr = aJson.getObjectItem(root, "dmxin");
     if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
         DMXinSetup(itemsCount * 4);
         Serial.print(F("DMX in started. Channels:"));
@@ -619,18 +619,18 @@ void parseConfigFromParsedJSON() {
     }
 #endif
 
-    items = aJson.getObjectItem(aJsonObjectRoot, "items");
+    items = aJson.getObjectItem(root, "items");
     modbusitem = items->child;
-    inputs = aJson.getObjectItem(aJsonObjectRoot, "in");
+    inputs = aJson.getObjectItem(root, "in");
 
 #ifdef _modbus
-    modbusArr = aJson.getObjectItem(aJsonObjectRoot, "modbus");
+    modbusArr = aJson.getObjectItem(root, "modbus");
 #endif
 
-    mqttArr = aJson.getObjectItem(aJsonObjectRoot, "mqtt");
+    mqttArr = aJson.getObjectItem(root, "mqtt");
 
 #ifdef _owire
-    owArr = aJson.getObjectItem(aJsonObjectRoot, "ow");
+    owArr = aJson.getObjectItem(root, "ow");
 #endif
 
     Serial.println(F("Configured:"));
@@ -679,15 +679,15 @@ int loadConfigFromEEPROM(int arg_cnt, char **args)
     ch = EEPROM.read(EEPROM_offset);
     if (ch == '{') {
         aJsonEEPROMStream as = aJsonEEPROMStream(EEPROM_offset);
-        aJson.deleteItem(aJsonObjectRoot);
-        aJsonObjectRoot = aJson.parse(&as);
+        aJson.deleteItem(root);
+        root = aJson.parse(&as);
         Serial.println();
-        if (!aJsonObjectRoot) {
+        if (!root) {
             Serial.println(F("load failed"));
             return 0;
         }
         Serial.println(F("Loaded"));
-        parseConfigFromParsedJSON();
+        applyConfig();
         return 1;
     } else {
         Serial.println(F("No stored config"));
@@ -726,14 +726,14 @@ int mqttConfigResp(char *as) {
     //aJsonEEPROMStream as=aJsonEEPROMStream(EEPROM_offset);
 
     //aJson.deleteItem(root);
-    aJsonObjectRoot = aJson.parse(as);
+    root = aJson.parse(as);
     Serial.println();
-    if (!aJsonObjectRoot) {
+    if (!root) {
         Serial.println(F("load failed"));
         return 0;
     }
     Serial.println(F("Loaded"));
-    parseConfigFromParsedJSON();
+    applyConfig();
     return 1;
 }
 
@@ -742,7 +742,7 @@ void _saveConfigToEEPROM(int arg_cnt, char **args)
 {
     aJsonEEPROMStream jsonEEPROMStream = aJsonEEPROMStream(EEPROM_offset);
     Serial.println(F("Saving config to EEPROM.."));
-    aJson.print(aJsonObjectRoot, &jsonEEPROMStream);
+    aJson.print(root, &jsonEEPROMStream);
     jsonEEPROMStream.putEOF();
     Serial.println(F("Saved to EEPROM"));
 }
@@ -822,20 +822,20 @@ int getConfig(int arg_cnt, char **args)
 
             Serial.println(F("got Config"));
             aJsonFileStream as = aJsonFileStream(result);
-            aJson.deleteItem(aJsonObjectRoot);
-            aJsonObjectRoot = aJson.parse(&as);
+            aJson.deleteItem(root);
+            root = aJson.parse(&as);
             hclient.closeStream(result);  // this is very important -- be sure to close the STREAM
 
-            if (!aJsonObjectRoot) {
+            if (!root) {
                 Serial.println(F("Config parsing failed"));
                 lanCheck = millis() + 15000;
                 return -11;
             } else {
-                char *outstr = aJson.print(aJsonObjectRoot);
+                char *outstr = aJson.print(root);
                 Serial.println(outstr);
                 free(outstr);
 
-                parseConfigFromParsedJSON();
+                applyConfig();
 
 
             }
@@ -877,10 +877,10 @@ int getConfig(int arg_cnt, char **args)
     //Serial.print("GET Response: ");
 
     if (responseStatusCode == 200) {
-        aJson.deleteItem(aJsonObjectRoot);
-        aJsonObjectRoot = aJson.parse((char *) response.c_str());
+        aJson.deleteItem(root);
+        root = aJson.parse((char *) response.c_str());
 
-        if (!aJsonObjectRoot) {
+        if (!root) {
             Serial.println(F("Config parsing failed"));
             // lanCheck=millis()+15000;
             return -11; //Load from NVRAM
@@ -891,7 +891,7 @@ int getConfig(int arg_cnt, char **args)
             free (outstr);
              */
             Serial.println(response);
-            parseConfigFromParsedJSON();
+            applyConfig();
 
 
         }
@@ -1095,7 +1095,7 @@ void inputLoop(void) {
         while (input) {
             if ((input->type == aJson_Object)) {
                 Input in(input);
-                in.Pool();
+                in.Poll();
             }
             input = input->next;
         }
@@ -1117,7 +1117,7 @@ void modbusLoop(void) {
                         //case CH_VCTEMP:
                     case CH_VC: {
                         Item it(modbusitem);
-                        it.Pool();
+                        it.Poll();
                         modbuscheck = millis() + 2000;
                         done = true;
                         break; //case;
