@@ -1,7 +1,7 @@
 # LightHub 
 is Flexible, Arduino-Mega/Arduino DUE/ESP8266  based SmartHome controller
 
-It allow to connect together:
+It allows connecting together:
 
 * Contact sensors (switches, buttons etc)
 * 1-Wire temperature sensors (up to 20 on single bus)
@@ -29,7 +29,7 @@ or
 to flash your DUE
 
 (need to correct path and port, of course)
-# Dependences 
+# Dependencies
 (quite big number of libs required. Use git clone to have your local copy in your Arduino libs folder)
 Please check updates for all dependences.
 
@@ -93,14 +93,27 @@ In linux you can open terminal, navigate to your programming directory, then
 * rm -Rf .piolibdeps // this will clean libraries folder. Try it if you have compilation problem
 * pio run -e megaatmega2560 //build for arduino mega
 * pio run -e due -t upload //build and upload firmware to arduino due
+* platformio device monitor -b 115200 // open com port monitor with specified baud rate
 
 # Custom build flags
 
 * MY_CONFIG_SERVER=192.168.1.1 // address of external JSON-config http://192.168.1.1/de-ad-be-ef-fe-00.config.json
 * WATCH_DOG_TICKER_DISABLE=1 //disable wdt feature
-* USE_1W_PIN=49 // use direct connection to 1W devices, no I2C bridge DS2482-100
+* USE_1W_PIN=49 // use direct connection to 1W devices on 49 pin, no I2C bridge DS2482-100
 * SD_CARD_INSERTED=1 // enable sd-card support and fix lan starting
 * SERIAL_BAUD=115200 // set baud rate for console on Serial0
+* Wiz5500 //Use Wiznet 5500 library instead Wiznet 5100
+* DISABLE_FREERAM_PRINT // disable printing free Ram in bytes
+* CUSTOM_FIRMWARE_MAC=de:ad:be:ef:fe:00 //set firmware macaddress
 
-export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1 -DUSE_1W_PIN=49 -DSERIAL_BAUD=115200 -DSD_CARD_INSERTED=1"
+Look at build_flags_template.sh for customizing.
 
+# Default compilation behavior:
+* Config server: lazyhome.ru
+* Watchdog enabled
+* 1-Wire communication with DS2482-100 I2C driver
+* No SD
+* Serial speed 115200
+* Wiznet 5100 (for MEGA & DUE)
+* Free Ram printing enabled
+* de:ad:be:ef:fe:00

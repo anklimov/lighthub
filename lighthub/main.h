@@ -5,9 +5,15 @@
 #ifndef LIGHTHUB_MAIN_H
 #define LIGHTHUB_MAIN_H
 
+#define TXEnablePin 13
 
 #ifndef  SERIAL_BAUD
 #define SERIAL_BAUD 115200
+#endif
+
+#define CUSTOM_FIRMWARE_MAC C4:3E:1f:03:1B:1E
+#ifndef CUSTOM_FIRMWARE_MAC
+#define FIRMWARE_MAC {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0}
 #endif
 
 #include "Arduino.h"

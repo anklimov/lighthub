@@ -906,8 +906,6 @@ int getConfig(int arg_cnt, char **args)
     return 2;
 }
 
-#define TXEnablePin 13
-
 void preTransmission() {
     digitalWrite(TXEnablePin, 1);
 }
@@ -924,6 +922,10 @@ void setup_main() {
     Serial.println(F(QUOTE(PIO_SRC_REV)));
 #ifdef WATCH_DOG_TICKER_DISABLE
     Serial.println(F("WATCHDOG TICKER DISABLED"));
+#endif
+
+#ifdef DISABLE_FREERAM_PRINT
+    Serial.println(F("FreeRam printing DISABLED"));
 #endif
 
 #ifdef SD_CARD_INSERTED
@@ -944,15 +946,22 @@ void setup_main() {
 #endif
 
     short macvalid = 0;
-    byte defmac[6] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0};
+
+#ifdef FIRMWARE_MAC
+    byte firmwareMacAddress[6] = FIRMWARE_MAC;
+#else
+    byte firmwareMacAddress[6];
+    const char* macStr = QUOTE(CUSTOM_FIRMWARE_MAC);
+    parseBytes(macStr, ':', firmwareMacAddress, 6, 16);
+#endif
 
     for (short i = 0; i < 6; i++) {
         mac[i] = EEPROM.read(i);
         if (mac[i] != 0 && mac[i] != 0xff) macvalid = 1;
     }
     if (!macvalid) {
-        Serial.println(F("Invalid MAC: set default"));
-        memcpy(mac, defmac, 6);
+        Serial.println(F("Invalid MAC: set firmware's MAC"));
+        memcpy(mac, firmwareMacAddress, 6);
     }
     printMACAddress();
 
@@ -1143,7 +1152,7 @@ void thermoLoop(void) {
 #define IET_ATTEMPTS 1
 
     if (millis() > thermocheck) {
-
+        bool thermostatCheckPrinted = false;
         aJsonObject *item = items->child;
 
         while (item) {
@@ -1167,6 +1176,7 @@ void thermoLoop(void) {
                             mqttClient.publish("/alarm", item->name);
 
                     }
+                    thermostatCheckPrinted = true;
                     Serial.print(item->name);
                     Serial.print(F(" Set:"));
                     Serial.print(temp);
@@ -1190,18 +1200,19 @@ void thermoLoop(void) {
                         } //Reached settings
                         else Serial.println(F(" --")); // Nothing to do
                     }
-
                 }
             }
             item = item->next;
         }
 
-
         thermocheck = millis() + 5000;
+
+#ifndef DISABLE_FREERAM_PRINT
+        (thermostatCheckPrinted) ? Serial.print(F("\nfree:")) : Serial.print(F(" "));
         Serial.print(freeRam());
         Serial.print(" ");
+#endif
     }
-
 }
 
 
