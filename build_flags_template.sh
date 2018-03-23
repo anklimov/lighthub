@@ -2,7 +2,9 @@
 # usage:
 # first make your own copy of template
 # cp build_flags_template.sh my_build_flags.sh
-# then source it
+# then edit, change or comment something
+# nano  my_build_flags.sh
+# and source it
 # source my_build_flags.sh
  export FLAGS="-DMY_CONFIG_SERVER=lazyhome.ru"
  export FLAGS="$FLAGS -DWATCH_DOG_TICKER_DISABLE"
