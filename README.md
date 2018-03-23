@@ -1,5 +1,5 @@
 # LightHub 
-is Flexible, Arduino-Mega/Arduino DUE/ESP8266  based SmartHome controller
+is Flexible, Arduino-Mega/Arduino DUE/ESP8266  based SmartHome controller. [RU](https://geektimes.ru/post/295109/)
 
 It allows connecting together:
 
@@ -12,23 +12,24 @@ It allows connecting together:
 
 Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from Openhab or Openhab2 Smarthome software
 
-Scalability is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab and propagate commands across network
+Scalability is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab and propagate commands across network.
 
 [Prease refer to our Wiki for insructions.](https://github.com/anklimov/lighthub/wiki/Configuring)
 
-Finished portation of project to  Arduino DUE and ESP8266 (ESP32 not tested)
+Finished portation of project to  Arduino DUE and ESP8266 (ESP32 not tested).
 
-Compiled image has been added to compiled/ folder
-use 
+Compiled image has been added to [compiled/](https://github.com/anklimov/lighthub/tree/master/compiled) folder. Flash your Mega 2560
+
+```bash
 avrdude  -v -V -patmega2560 -cwiring -b115200 -D -Uflash:w:lighthub.ino.hex:i
-to flash your Mega 2560
+```
 
-or 
+or flash your DUE (need to correct path and port, of course)
+```bash
+/Users/<user>/Library/Arduino15/packages/arduino/tools/bossac/1.6.1-arduino/bossac -i -d --port=cu.usbmodem1451 -U false -e -w -v -b lighthub.ino.bin -R
+```
 
-/Users/<user>/Library/Arduino15/packages/arduino/tools/bossac/1.6.1-arduino/bossac -i -d --port=cu.usbmodem1451 -U false -e -w -v -b lighthub.ino.bin -R 
-to flash your DUE
 
-(need to correct path and port, of course)
 # Dependencies
 (quite big number of libs required. Use git clone to have your local copy in your Arduino libs folder)
 Please check updates for all dependences.
@@ -58,21 +59,21 @@ Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) done since v 0.96
 AVR version is basic and has all functions
 *DMX-out is software (DMXSimple) on pin3
 
-SAM3X8E:
-*default PWM frequency 
-*both, DMX-in and DMX-out are hardware USART based. Use USART1 (pins 18 and 19) for DMX-out and DMX-in
+**SAM3X8E**:
+* default PWM frequency
+* both, DMX-in and DMX-out are hardware USART based. Use USART1 (pins 18 and 19) for DMX-out and DMX-in
 
-ESP:
-*DMX-OUT on USART1 TX
-*DMX-IN - not possible to deploy in ESP8266
-*Modbus - disabled. Might be configured in future on USART0 instead CLI/DEBUG
+**ESP8266**:
+* DMX-OUT on USART1 TX
+* DMX-IN - not possible to deploy in ESP8266
+* Modbus - disabled. Might be configured in future on USART0 instead CLI/DEBUG
 
 since v. 0.97:
 
 There is first attempt to use Wiznet 5500  (still not stable enough)
 Need to use compiler directive -D Wiz5500 and https://github.com/anklimov/Ethernet2 library
 
-First attempt to use platformio toolchain for compiling (work not completed yet)
+Prefered way to compile project is using platformio toolchain, suitable for Arduino Due, and Arduino Mega2560, but work is still in progress.
 
 # Due compilation issue "USART0_Handler redefinition"
 Please, open  /variants/arduino_due_x/variant.cpp file, then edit USART0_Handler method definition like this
