@@ -1,8 +1,17 @@
 // Configuration of drivers enabled
+#ifndef DMX_DISABLE
 #define _dmxin
 #define _dmxout
+#endif
+
+#ifndef OWIRE_DISABLE
 #define _owire
-#define _modbus  
+#endif
+
+#ifndef MODBUS_DISABLE
+#define _modbus
+#endif
+
 #define _artnet
 
 #if defined(ESP8266)

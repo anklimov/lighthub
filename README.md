@@ -125,6 +125,9 @@ platformio device monitor -b 115200
 * Wiz5500 //Use Wiznet 5500 library instead Wiznet 5100
 * DISABLE_FREERAM_PRINT // disable printing free Ram in bytes
 * CUSTOM_FIRMWARE_MAC=de:ad:be:ef:fe:00 //set firmware macaddress
+* DMX_DISABLE //disable DMX support
+* MODBUS_DISABLE // disable Modbus support
+* OWIRE_DISABLE // disable OneWire support
 
 Look at build_flags_template.sh for customizing.
 
@@ -137,3 +140,6 @@ Look at build_flags_template.sh for customizing.
 * Wiznet 5100 (for MEGA & DUE)
 * Free Ram printing enabled
 * de:ad:be:ef:fe:00
+* DMX support enabled
+* Modbus support enabled
+* OneWire support enabled

@@ -19,6 +19,7 @@ e-mail    anklimov@gmail.com
 */
 
 #include "utils.h"
+
 #if defined(__SAM3X8E__)
 #include <malloc.h>
 #endif
@@ -29,63 +30,62 @@ extern "C" {
 }
 #endif
 
-void PrintBytes(uint8_t* addr, uint8_t count, bool newline) {
-  for (uint8_t i = 0; i < count; i++) {
-    Serial.print(addr[i]>>4, HEX);
-    Serial.print(addr[i]&0x0f, HEX);
-  }
-  if (newline)
-    Serial.println();
+void PrintBytes(uint8_t *addr, uint8_t count, bool newline) {
+    for (uint8_t i = 0; i < count; i++) {
+        Serial.print(addr[i] >> 4, HEX);
+        Serial.print(addr[i] & 0x0f, HEX);
+    }
+    if (newline)
+        Serial.println();
 }
 
-const char HEXSTR[]="0123456789ABCDEF";
+const char HEXSTR[] = "0123456789ABCDEF";
 
-void SetBytes(uint8_t* addr, uint8_t count, char * out) {
- // Serial.println("SB:");
-  for (uint8_t i = 0; i < count; i++) {
-    *(out++)=HEXSTR[(addr[i]>>4)];
-    *(out++)=HEXSTR[(addr[i]&0x0f)];
-  }
-  *out=0;
-   
-}
+void SetBytes(uint8_t *addr, uint8_t count, char *out) {
+    // Serial.println("SB:");
+    for (uint8_t i = 0; i < count; i++) {
+        *(out++) = HEXSTR[(addr[i] >> 4)];
+        *(out++) = HEXSTR[(addr[i] & 0x0f)];
+    }
+    *out = 0;
 
-
-byte HEX2DEC(char i)
-{ byte v;  
-if      ('a' <= i && i <='f') { v=i-97+10; }
-        else if ('A' <= i && i <='F') { v=i-65+10; }
-        else if ('0' <= i && i <='9') { v=i-48;    }
-  return v;
-  }
-
-void SetAddr(char * out,  uint8_t* addr) {
- 
-  for (uint8_t i = 0; i < 8; i++) {
-    *addr=HEX2DEC(*out++)<<4;
-    *addr++|=HEX2DEC(*out++);
-     }
 }
 
 
-int getInt(char ** chan)
-{
-  int ch = atoi(*chan);
-  *chan=strchr(*chan,',');
-  
-  if (*chan) *chan+=1;
-  //Serial.print(F("Par:")); Serial.println(ch);
-  return ch;
-  
+byte HEX2DEC(char i) {
+    byte v;
+    if ('a' <= i && i <= 'f') { v = i - 97 + 10; }
+    else if ('A' <= i && i <= 'F') { v = i - 65 + 10; }
+    else if ('0' <= i && i <= '9') { v = i - 48; }
+    return v;
+}
+
+void SetAddr(char *out, uint8_t *addr) {
+
+    for (uint8_t i = 0; i < 8; i++) {
+        *addr = HEX2DEC(*out++) << 4;
+        *addr++ |= HEX2DEC(*out++);
+    }
+}
+
+
+int getInt(char **chan) {
+    int ch = atoi(*chan);
+    *chan = strchr(*chan, ',');
+
+    if (*chan) *chan += 1;
+    //Serial.print(F("Par:")); Serial.println(ch);
+    return ch;
+
 }
 
 
 #if defined(ESP8266)
-unsigned long freeRam () 
+unsigned long freeRam ()
 {return system_get_free_heap_size();}
 #endif
 
-#if defined(__AVR__) 
+#if defined(__AVR__)
 unsigned long freeRam () 
 {
   extern int __heap_start, *__brkval; 
@@ -98,25 +98,25 @@ unsigned long freeRam ()
 extern char _end;
 extern "C" char *sbrk(int i);
 
-unsigned long freeRam()
-{
-  char *ramstart = (char *) 0x20070000;
-  char *ramend = (char *) 0x20088000;
-  char *heapend = sbrk(0);
-  register char * stack_ptr asm( "sp" );
-  struct mallinfo mi = mallinfo();
-  
-  return stack_ptr - heapend + mi.fordblks; 
-}
- #endif
+unsigned long freeRam() {
+    char *ramstart = (char *) 0x20070000;
+    char *ramend = (char *) 0x20088000;
+    char *heapend = sbrk(0);
+    register char *stack_ptr asm( "sp" );
+    struct mallinfo mi = mallinfo();
 
-void parseBytes(const char* str, char separator, byte* bytes, int maxBytes, int base) {
-  for (int i = 0; i < maxBytes; i++) {
-    bytes[i] = strtoul(str, NULL, base);  // Convert byte
-    str = strchr(str, separator);               // Find next separator
-    if (str == NULL || *str == '\0') {
-      break;                            // No more separators, exit
+    return stack_ptr - heapend + mi.fordblks;
+}
+
+#endif
+
+void parseBytes(const char *str, char separator, byte *bytes, int maxBytes, int base) {
+    for (int i = 0; i < maxBytes; i++) {
+        bytes[i] = strtoul(str, NULL, base);  // Convert byte
+        str = strchr(str, separator);               // Find next separator
+        if (str == NULL || *str == '\0') {
+            break;                            // No more separators, exit
+        }
+        str++;                                // Point to next character after separator
     }
-    str++;                                // Point to next character after separator
-  }
 }

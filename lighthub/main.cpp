@@ -122,8 +122,9 @@ DueFlashStorage EEPROM;
 #define wdt_en()
 #define wdt_dis()
 
-
 #else
+
+#include "Dhcp.h"
 
 #ifdef Wiz5500
 #include <Ethernet2.h>
@@ -447,31 +448,24 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
         wdt_dis();
         if (lanStatus > 0)
             switch (Ethernet.maintain()) {
-                case 1:
+                case DHCP_CHECK_RENEW_FAIL:
                     //renewed fail
                     Serial.println(F("Error: renewed fail"));
                     lanStatus = -10;
                     break;
 
-                case 2:
-                    //renewed success
+                case DHCP_CHECK_RENEW_OK:
                     Serial.println(F("Renewed success"));
-
-                    //print your local IP address:
                     printIPAddress();
                     break;
 
-                case 3:
-                    //rebind fail
+                case DHCP_CHECK_REBIND_FAIL:
                     Serial.println(F("Error: rebind fail"));
                     lanStatus = -10;
                     break;
 
-                case 4:
-                    //rebind success
+                case DHCP_CHECK_REBIND_OK:
                     Serial.println(F("Rebind success"));
-
-                    //print your local IP address:
                     printIPAddress();
                     break;
 
