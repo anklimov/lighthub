@@ -130,6 +130,10 @@ platformio device monitor -b 115200
 * OWIRE_DISABLE // disable OneWire support
 
 Look at build_flags_template.sh for customizing.
+=======
+
+export PLATFORMIO_BUILD_FLAGS="-DMY_CONFIG_SERVER=192.168.1.1 -DWATCH_DOG_TICKER_DISABLE=1 -DUSE_1W_PIN=49 -DSERIAL_BAUD=115200 -DSD_CARD_INSERTED=1"
+
 
 # Default compilation behavior:
 * Config server: lazyhome.ru
@@ -143,3 +147,5 @@ Look at build_flags_template.sh for customizing.
 * DMX support enabled
 * Modbus support enabled
 * OneWire support enabled
+=======
+
