@@ -23,7 +23,7 @@ e-mail    anklimov@gmail.com
 #include "item.h"
 #include <PubSubClient.h>
 
-extern PubSubClient client;
+extern PubSubClient mqttClient;
 
 Input::Input(char * name) //Constructor
 {
@@ -80,7 +80,7 @@ void Input::Parse()
   }
 }
 
-int Input::Pool ()
+int Input::Poll()
 { 
   boolean v;
   if (!isValid()) return -1;
@@ -121,11 +121,11 @@ void Input::Changed (int val)
 
   if (val)
             {  //send set command
-               if (!scmd) client.publish(emit->valuestring,"ON"); else  if (strlen(scmd->valuestring)) client.publish(emit->valuestring,scmd->valuestring); 
+               if (!scmd) mqttClient.publish(emit->valuestring,"ON"); else  if (strlen(scmd->valuestring)) mqttClient.publish(emit->valuestring,scmd->valuestring);
             }
        else
             {  //send reset command
-              if (!rcmd) client.publish(emit->valuestring,"OFF");  else  if (strlen(rcmd->valuestring)) client.publish(emit->valuestring,rcmd->valuestring);
+              if (!rcmd) mqttClient.publish(emit->valuestring,"OFF");  else  if (strlen(rcmd->valuestring)) mqttClient.publish(emit->valuestring,rcmd->valuestring);
             } 
   }
 

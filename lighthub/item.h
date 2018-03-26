@@ -47,7 +47,7 @@ e-mail    anklimov@gmail.com
 
 #include "aJSON.h"
 
-extern aJsonObject *items; 
+extern aJsonObject *items;
  
 int txt2cmd (char * payload);
 
@@ -85,7 +85,7 @@ class Item
   inline int On (){Ctrl(CMD_ON);};
   inline int Off(){Ctrl(CMD_OFF);};
   inline int Toggle(){Ctrl(CMD_TOGGLE);};
-  int Pool ();
+  int Poll();
   int SendCmd(short cmd,short n=0, int * Par=NULL);
   
   protected:  

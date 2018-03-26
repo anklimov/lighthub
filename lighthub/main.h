@@ -5,9 +5,14 @@
 #ifndef LIGHTHUB_MAIN_H
 #define LIGHTHUB_MAIN_H
 
+#define TXEnablePin 13
 
 #ifndef  SERIAL_BAUD
 #define SERIAL_BAUD 115200
+#endif
+
+#ifndef CUSTOM_FIRMWARE_MAC
+#define FIRMWARE_MAC {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0}
 #endif
 
 #include "Arduino.h"
@@ -25,14 +30,14 @@ void Changed (int i, DeviceAddress addr, int val);
 void modbusIdle(void);
 void _handleHelp(int arg_cnt, char **args);
 void _kill(int arg_cnt, char **args);
-void parseConfig();
+void applyConfig();
 void _loadConfig (int arg_cnt, char **args);
-int loadConfig (int arg_cnt, char **args);
-void _mqttConfigReq (int arg_cnt, char **args);
-int mqttConfigReq (int arg_cnt, char **args);
+int loadConfigFromEEPROM(int arg_cnt, char **args);
+void _mqttConfigRequest(int arg_cnt, char **args);
+int mqttConfigRequest(int arg_cnt, char **args);
 int mqttConfigResp (char * as);
-void _saveConfig(int arg_cnt, char **args);
-void _setConfig(int arg_cnt, char **args);
+void _saveConfigToEEPROM(int arg_cnt, char **args);
+void _setMacAddress(int arg_cnt, char **args);
 void _getConfig(int arg_cnt, char **args);
 void printBool (bool arg);
 void saveFlash(short n, char* str);
