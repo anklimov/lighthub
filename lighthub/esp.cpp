@@ -17,13 +17,13 @@ bool shouldSaveConfig = false;
 
 //callback notifying us of the need to save config
 void saveConfigCallback () {
-  Serial.println("Should save config");
+  Serial.println(F("Should save config"));
   shouldSaveConfig = true;
 }
 
 
 void espSetup () {
-  Serial.println("Setting up Wifi");
+  Serial.println(F("Setting up Wifi"));
   shouldSaveConfig = true;
  //WiFiManager
 
@@ -37,7 +37,7 @@ void espSetup () {
   wifiManager.setMinimumSignalQuality();
      
 if (!wifiManager.autoConnect()) {
-    Serial.println("failed to connect and hit timeout");
+    Serial.println(F("failed to connect and hit timeout"));
     delay(3000);
     //reset and try again, or maybe put it to deep sleep
     ESP.reset();
@@ -45,7 +45,7 @@ if (!wifiManager.autoConnect()) {
   }
 
   //if you get here you have connected to the WiFi
-  Serial.println("connected...yeey :)");
+  Serial.println(F("connected...yeey :)"));
 
   //read updated parameters
   strcpy(mqtt_password, custom_mqtt_password.getValue());

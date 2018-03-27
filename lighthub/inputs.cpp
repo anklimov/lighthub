@@ -71,7 +71,7 @@ void Input::Parse()
 
   
   s             = aJson.getObjectItem(inputObj,"S");
-  if (!s)     { Serial.print("In: ");Serial.print(pin);Serial.print("/");Serial.println(inType);
+  if (!s)     { Serial.print(F("In: "));Serial.print(pin);Serial.print(F("/"));Serial.println(inType);
                 aJson.addNumberToObject(inputObj,"S", 0);
                 s = aJson.getObjectItem(inputObj,"S");
                 }
@@ -110,7 +110,7 @@ int Input::Poll()
 
 void Input::Changed (int val)
 {
-  Serial.print(pin);Serial.print("=");Serial.println(val); 
+  Serial.print(pin);Serial.print(F("="));Serial.println(val); 
   aJsonObject * item = aJson.getObjectItem(inputObj,"item");  
   aJsonObject * scmd = aJson.getObjectItem(inputObj,"scmd");
   aJsonObject * rcmd = aJson.getObjectItem(inputObj,"rcmd");   
@@ -121,11 +121,11 @@ void Input::Changed (int val)
 
   if (val)
             {  //send set command
-               if (!scmd) mqttClient.publish(emit->valuestring,"ON"); else  if (strlen(scmd->valuestring)) mqttClient.publish(emit->valuestring,scmd->valuestring);
+               if (!scmd) mqttClient.publish(emit->valuestring,"ON",true); else  if (strlen(scmd->valuestring)) mqttClient.publish(emit->valuestring,scmd->valuestring,true);
             }
        else
             {  //send reset command
-              if (!rcmd) mqttClient.publish(emit->valuestring,"OFF");  else  if (strlen(rcmd->valuestring)) mqttClient.publish(emit->valuestring,rcmd->valuestring);
+              if (!rcmd) mqttClient.publish(emit->valuestring,"OFF",true);  else  if (strlen(rcmd->valuestring)) mqttClient.publish(emit->valuestring,rcmd->valuestring,true);
             } 
   }
 

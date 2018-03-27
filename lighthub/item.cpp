@@ -17,7 +17,7 @@ GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
 
 */
-
+#include "options.h"
 #include "item.h"
 #include "aJSON.h"
 
@@ -41,8 +41,8 @@ extern aJsonObject *modbusitem;
 int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value);
 
 extern PubSubClient mqttClient;
-//extern const char* outprefix;
-const char outprefix[] PROGMEM = "/myhome/s_out/";
+//extern char  outprefix[];
+const char outprefix[] PROGMEM = OUTTOPIC;
 
 static unsigned long lastctrl = 0;
 static aJsonObject *lastobj = NULL;
@@ -252,7 +252,7 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
                 case CH_VC:
                 case CH_DIMMER:
                 case CH_MODBUS:
-                    SendCmd(0, 1, Par);  // Send back parameter for channel above this line
+                    if (send) SendCmd(0, 1, Par);  // Send back parameter for channel above this line
                 case CH_THERMO:
                 case CH_VCTEMP:
                     setVal(Par[0]);          // Store value
@@ -279,7 +279,7 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
                             Par[1] = st.s;
                             Par[2] = st.v;
                             params = 3;
-                            SendCmd(0, params, Par); // Send restored triplet
+                            SendCmd(0, params, Par); // Send restored triplet. In any cases
                             break;
 
 
@@ -291,15 +291,15 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
 
                             Par[0] = st.aslong;
                             params = 1;
-                            SendCmd(0, params, Par);  // Send restored parameter
+                            SendCmd(0, params, Par);  // Send restored parameter, even if send=false - no problem, loop will be supressed at next hop
                             break;
                         case CH_THERMO:
                             Par[0] = st.aslong;
                             params = 0;
-                            SendCmd(CMD_ON);  // Just ON (switch)
+                            if (send) SendCmd(CMD_ON);  // Just ON (switch)
                             break;
                         default:
-                            SendCmd(cmd);          // Just send ON
+                            if (send) SendCmd(cmd);          // Just send ON
                     }//itemtype
                 else {// Default settings
                     Serial.print(st.aslong);
@@ -325,7 +325,7 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
                 }
 
 
-                setCmd(cmd);
+                if (send) setCmd(cmd);
             } else {  //Double ON - apply special preset - clean white full power
                 switch (itemType) {
                     case CH_RGBW:
@@ -341,7 +341,7 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
                         setVal(st.aslong);
 
                         //Send to OH
-                        SendCmd(0, 3, Par);
+                        if (send) SendCmd(0, 3, Par);
                         break;
                 } //itemtype
             } //else
@@ -359,7 +359,7 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
                 Par[1] = 0;
                 Par[2] = 0;
                 setCmd(cmd);
-                SendCmd(cmd);
+                if (send) SendCmd(cmd); ///?
             }
             break;
 
@@ -370,7 +370,7 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
                 Par[1] = 0;
                 Par[2] = 0;
                 setCmd(cmd);
-                SendCmd(CMD_OFF);
+                SendCmd(CMD_OFF); //HALT to OFF mapping - send in any cases
                 Serial.println(F(" Halted"));
             }
 
@@ -770,7 +770,7 @@ int Item::SendCmd(short cmd, short n, int *Par) {
     Serial.print(addrstr);
     Serial.print(F("->"));
     Serial.println(valstr);
-    mqttClient.publish(addrstr, valstr);
+    mqttClient.publish(addrstr, valstr,true);
     return 0;
 }
 

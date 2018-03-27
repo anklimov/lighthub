@@ -1,4 +1,16 @@
 // Configuration of drivers enabled
+#ifndef PIO_SRC_REV
+#define PIO_SRC_REV v0.99
+#endif
+
+#ifndef OUTTOPIC
+#define OUTTOPIC "/myhome/s_out/"
+#endif
+
+#ifndef INTOPIC
+#define INTOPIC  "/myhome/in/"
+#endif
+
 #ifndef DMX_DISABLE
 #define _dmxin
 #define _dmxout
@@ -12,7 +24,9 @@
 #define _modbus
 #endif
 
+#ifdef ARTNET_ENABLE
 #define _artnet
+#endif
 
 #if defined(ESP8266)
 #define __ESP__

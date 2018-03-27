@@ -149,11 +149,6 @@ EthernetClient ethClient;
 
 #endif
 
-#ifndef PIO_SRC_REV
-#define PIO_SRC_REV v0.98
-#endif
-
-
 #include "item.h"
 #include "inputs.h"
 
@@ -173,13 +168,10 @@ extern Artnet *artnet;
 #define GIST 2
 //#define serverip "192.168.88.2"
 //IPAddress server(192, 168, 88, 2); //TODO - configure it
-//char* inprefix=("/myhome/in/");
-//char* outprefix=("/myhome/s_out/");
-//char* subprefix=("/myhome/in/#");
 
-#define inprefix "/myhome/in/"
-const char outprefix[] PROGMEM = "/myhome/s_out/";
-#define subprefix "/myhome/in/#"
+//const char  inprefix[] PROGMEM = "/myhome/in/"
+const char outprefix[] PROGMEM = OUTTOPIC;
+const char inprefix[] PROGMEM = INTOPIC;
 
 aJsonObject *root = NULL;
 aJsonObject *items = NULL;
@@ -213,30 +205,43 @@ PubSubClient mqttClient(ethClient);
 void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
 
 // MQTT Callback routine
+#define sublen 20
+#define topiclen 20
 void callback(char *topic, byte *payload, unsigned int length) {
     payload[length] = 0;
     Serial.print(F("\n["));
     Serial.print(topic);
-    Serial.print("] ");
+    Serial.print(F("] "));
 
     int fr = freeRam();
     if (fr < 250) {
         Serial.println(F("OOM!"));
         return;
     }
-
-#define sublen 20
-    char subtopic[sublen] = "";
-    int cmd = 0;
-
+    
     for (int i = 0; i < length; i++) {
         Serial.print((char) payload[i]);
     }
     Serial.println();
 
-    // short intopic  = strncmp(topic,F(inprefix),strlen(inprefix));
-    // short outtopic = strncmp(topic,F(outprefix),strlen(outprefix));
+    boolean retaining = (lanStatus == 4);  //Todo - named constant 
+    //Check if topic = Command topic
+    short intopic=0;
+    {
+    char buf[topiclen+1];
+    strncpy_P(buf,inprefix,sizeof(buf));
+    intopic  = strncmp(topic,buf,strlen(inprefix));
+    }
 
+    // in Retaining status - trying to restore previous state from retained output topic. Retained input topics are not relevant.
+    if (retaining && !intopic) {
+      Serial.println(F("Skipping.."));
+      return;
+    }
+    
+    char subtopic[sublen] = "";
+    int cmd = 0;
+   
     cmd = txt2cmd((char *) payload);
     char *t;
     if (t = strrchr(topic, '/')) strncpy(subtopic, t + 1, sublen - 1);
@@ -270,7 +275,7 @@ void callback(char *topic, byte *payload, unsigned int length) {
                     while (payload && i < 3)
                         Par[i++] = getInt((char **) &payload);
 
-                    item.Ctrl(0, i, Par);
+                    item.Ctrl(0, i, Par, !retaining);
                 }
                     break;
 
@@ -280,13 +285,13 @@ void callback(char *topic, byte *payload, unsigned int length) {
 
                 case CMD_ON:
 
-                    if (item.getEnableCMD(500))
-                        item.Ctrl(cmd); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
+                    if (item.getEnableCMD(500) || lanStatus == 4)
+                        item.Ctrl(cmd, 0, NULL, !retaining); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
                     else Serial.println("on Skipped");
 
                     break;
                 default: //some known command
-                    item.Ctrl(cmd);
+                    item.Ctrl(cmd, 0, NULL, !retaining);
 
             } //ctrl
         } //valid json
@@ -320,7 +325,7 @@ void printMACAddress() {
 
 void restoreState() {
     // Once connected, publish an announcement... // Once connected, publish an announcement...
-    mqttClient.publish("/myhome/out/RestoreState", "ON");
+    //mqttClient.publish("/myhome/out/RestoreState", "ON");
 };
 
 
@@ -397,13 +402,23 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                         Serial.println(client_id);
 
 
-                        // ... and resubscribe
-                        mqttClient.subscribe(subprefix);
-
-
-                        restoreState();
+                        // ... Temporary subscribe to status topic
+                        char buf[topiclen];
+                        
+                        strncpy_P(buf,outprefix,sizeof(buf));
+                        strncat(buf,"#",sizeof(buf));
+                        mqttClient.subscribe(buf);
+                        
+                        //Subscribing for command topics
+                        strncpy_P(buf,inprefix,sizeof(buf));
+                        strncat(buf,"#",sizeof(buf));
+                        mqttClient.subscribe(buf);                                  
+                        
+                        //restoreState();
                         // if (_once) {DMXput(); _once=0;}
-                        lanStatus = 3;
+                        lanStatus = 4;
+                        lanCheck = millis() + 5000;
+                        Serial.println(F("Awaiting for retained topics"));
                     } else {
                         Serial.print(F("failed, rc="));
                         Serial.print(mqttClient.state());
@@ -414,6 +429,21 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                 }
                 break;
             }
+
+        case 4: //retaining ... Collecting 
+             if (millis() > lanCheck) {
+             char buf[topiclen];
+             
+             //Unsubscribe from status topics..
+             strncpy_P(buf,outprefix,sizeof(buf));
+             strncat(buf,"#",sizeof(buf));
+             mqttClient.unsubscribe(buf);
+             
+             lanStatus = 3;
+             Serial.println(F("Accepting commands..."));
+             break;
+             }
+             
         case 3: //operation
             if (!mqttClient.connected()) lanStatus = 2;
             break;
@@ -505,7 +535,7 @@ void Changed(int i, DeviceAddress addr, int val) {
         if (owEmit) {
             strncpy(addrbuf, owEmit, sizeof(addrbuf));
             Serial.print(owEmit);
-            Serial.print("=");
+            Serial.print(F("="));
             Serial.println(val);
         }
         owItem = aJson.getObjectItem(owObj, "item")->valuestring;
@@ -866,7 +896,7 @@ int getConfig(int arg_cnt, char **args)
     response = htclient.responseBody();
     htclient.stop();
     wdt_res();
-    Serial.print("HTTP Status code: ");
+    Serial.print(F("HTTP Status code: "));
     Serial.println(responseStatusCode);
     //Serial.print("GET Response: ");
 
@@ -1043,7 +1073,7 @@ void owIdle(void) {
 
     wdt_res();
     return;///
-    Serial.print("o");
+    Serial.print(F("o"));
 
     if (lanLoop() == 1) mqttClient.loop();
 //if (owReady) owLoop();
