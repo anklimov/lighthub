@@ -17,8 +17,11 @@ GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
 
 */
+#define Q(x) #x
+#define QUOTE(x) Q(x)
 
 #include <Arduino.h>
+
 void PrintBytes(uint8_t* addr, uint8_t count, bool newline=0); 
 void SetBytes(uint8_t* addr, uint8_t count, char * out);
 void SetAddr(char * out,  uint8_t* addr);

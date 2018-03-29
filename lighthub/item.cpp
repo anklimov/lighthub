@@ -35,7 +35,7 @@ e-mail    anklimov@gmail.com
 #define fmPar  SERIAL_8N1
 
 short modbusBusy = 0;
-extern aJsonObject *modbusitem;
+extern aJsonObject *modbusItem;
 
 
 int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value);
@@ -934,12 +934,12 @@ int Item::checkModbus() {
     modbusBusy = 0;
 
 // Looking 1 step ahead for modbus item, which uses same register
-    Item nextItem(modbusitem->next);
-    if (modbusitem && nextItem.isValid() && nextItem.itemType == CH_MODBUS && nextItem.getArg(0) == addr &&
+    Item nextItem(modbusItem->next);
+    if (modbusItem && nextItem.isValid() && nextItem.itemType == CH_MODBUS && nextItem.getArg(0) == addr &&
         nextItem.getArg(1) == reg) {
         nextItem.checkModbus(data);
-        modbusitem = modbusitem->next;
-        if (!modbusitem) modbusitem = items->child;
+        modbusItem = modbusItem->next;
+        if (!modbusItem) modbusItem = items->child;
     }
 
 }
