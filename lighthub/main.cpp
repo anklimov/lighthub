@@ -170,6 +170,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
 
         Item item(subtopic);
         if (item.isValid()) {
+           if (item.itemType==CH_GROUP && retaining) return; //Do not restore group channels - they consist not relevant data
             switch (cmd) {
                 case 0: {
                     short i = 0;
@@ -885,14 +886,7 @@ void printFirmwareVersionAndBuildOptions() {
     Serial.print(F("Config server:"));
     Serial.println(F(CONFIG_SERVER));
     Serial.print(F("Firmware MAC Address "));
-#ifdef DEFAULT_FIRMWARE_MAC
-    Serial.println(F(Q(DEFAULT_FIRMWARE_MAC)));
-#endif
-#ifdef CUSTOM_FIRMWARE_MAC
-    Serial.println(F(QUOTE(CUSTOM_FIRMWARE_MAC)));
-#endif
-    printMACAddress();
-
+    Serial.println(F(QUOTE(CUSTOM_FIRMWARE_MAC)));   
 #ifdef DISABLE_FREERAM_PRINT
     Serial.println(F("(-)FreeRam printing"));
 #else
@@ -903,13 +897,9 @@ void printFirmwareVersionAndBuildOptions() {
 }
 
 void setupMacAddress() {
-#ifdef DEFAULT_FIRMWARE_MAC
-    byte firmwareMacAddress[6] = DEFAULT_FIRMWARE_MAC;
-#else
     byte firmwareMacAddress[6];
     const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);
     parseBytes(macStr, ':', firmwareMacAddress, 6, 16);
-#endif
 
     bool isMacValid = false;
     for (short i = 0; i < 6; i++) {
