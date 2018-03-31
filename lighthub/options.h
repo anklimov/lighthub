@@ -3,6 +3,33 @@
 #define PIO_SRC_REV v0.99
 #endif
 
+#define TXEnablePin 13
+
+#define T_ATTEMPTS 200
+#define IET_TEMP     0
+#define IET_ATTEMPTS 1
+
+#define THERMO_GIST_CELSIUS 2
+
+#define EEPROM_offset 32+6
+
+#define INTERVAL_CHECK_INPUT 50
+#define INTERVAL_CHECK_MODBUS 2000
+#define THERMOSTAT_CHECK_PERIOD 5000
+
+#ifndef MODBUS_SERIAL_BAUD
+#define MODBUS_SERIAL_BAUD 9600
+#endif
+
+#ifndef  SERIAL_BAUD
+#define SERIAL_BAUD 115200
+#endif
+
+#ifndef CUSTOM_FIRMWARE_MAC
+#define DEFAULT_FIRMWARE_MAC {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0}
+#endif
+
+
 #ifndef OUTTOPIC
 #define OUTTOPIC "/myhome/s_out/"
 #endif
@@ -55,6 +82,3 @@
 #ifndef _dmxout
 #undef _artnet
 #endif
-
-#define Q(x) #x
-#define QUOTE(x) Q(x)
