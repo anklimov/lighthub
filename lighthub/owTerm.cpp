@@ -86,7 +86,7 @@ int owUpdate() {
 
 int owSetup(owChangedType owCh) {
     //// todo - move memory allocation to here
-
+    if (net) return true;    // Already initialized
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     Serial.println(F("DS2482_100_I2C_TO_1W_BRIDGE init"));
     net = new OneWire;
@@ -182,6 +182,7 @@ int owFind(DeviceAddress addr) {
 }
 
 void owAdd(DeviceAddress addr) {
+  if (t_count>=t_max) return;
     wstat[t_count] = SW_FIND; //Newly detected
     memcpy(term[t_count], addr, 8);
     //term[t_count]=addr;

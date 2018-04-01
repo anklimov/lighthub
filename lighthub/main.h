@@ -162,7 +162,7 @@ void modbusIdle(void);
 
 void inputLoop(void);
 
-void modbusLoop(void);
+void pollingLoop(void);
 
 void thermoLoop(void);
 

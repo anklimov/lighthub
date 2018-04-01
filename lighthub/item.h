@@ -38,6 +38,8 @@ e-mail    anklimov@gmail.com
 #define CMD_TOGGLE 4
 #define CMD_CURTEMP 127
 #define CMD_SET 9
+#define CMD_RETRY 64
+#define CMD_REPORT 32
 
 #define I_TYPE 0 //Type of item
 #define I_ARG  1 //Chanel-type depended argument or array of arguments (pin, address etc) 
@@ -99,15 +101,19 @@ class Item
   inline int Off(){Ctrl(CMD_OFF);};
   inline int Toggle(){Ctrl(CMD_TOGGLE);};
   int Poll();
-  int SendCmd(short cmd,short n=0, int * Par=NULL);
+  int SendStatus(short cmd, short n=0, int * Par=NULL, boolean deferred = false);
   
   protected:  
   int VacomSetFan (int8_t  val, int8_t  cmd=0);
   int VacomSetHeat(int addr, int8_t  val, int8_t  cmd=0);
+  int modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value);
+  void mb_fail(short addr, short op, int val, int cmd);
   int isActive();
   void Parse();
-  int checkModbus();
-  int checkModbus(int data);
+  int checkModbusDimmer();
+  int checkModbusDimmer(int data);
+  boolean checkModbusRetry();
+  void sendDelayedStatus();
 
   int checkFM();
 

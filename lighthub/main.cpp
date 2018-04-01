@@ -1,5 +1,4 @@
-/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
-
+/*
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -83,12 +82,12 @@ aJsonObject *modbusArr = NULL;
 aJsonObject *owArr = NULL;
 aJsonObject *dmxArr = NULL;
 
-unsigned long nextModbusCheck = 0;
+unsigned long nextPollingCheck = 0;
 unsigned long nextInputCheck = 0;
 unsigned long lanCheck = 0;
 unsigned long nextThermostatCheck = 0;
 
-aJsonObject *modbusItem = NULL;
+aJsonObject *pollingItem = NULL;
 
 bool owReady = false;
 int lanStatus = 0;
@@ -201,10 +200,10 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
                 }    
                 case CMD_ON:
 
-                    if (item.getEnableCMD(500) || lanStatus == 4)
+             //       if (item.getEnableCMD(500) || lanStatus == 4)
                         item.Ctrl(cmd, 0, NULL,
                                   !retaining); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
-                    else Serial.println(F("on Skipped"));
+             //       else Serial.println(F("on Skipped"));
 
                     break;
                 default: //some known command
@@ -563,6 +562,7 @@ void applyConfig() {
     if (owArr && !owReady) {
         aJsonObject *item = owArr->child;
         owReady = owSetup(&Changed);
+        t_count=0;
         while (item) {
             if ((item->type == aJson_Object)) {
                 DeviceAddress addr;
@@ -575,7 +575,7 @@ void applyConfig() {
     }
 #endif
     items = aJson.getObjectItem(root, "items");
-    modbusItem = items->child;
+    pollingItem = items->child;
     inputs = aJson.getObjectItem(root, "in");
     mqttArr = aJson.getObjectItem(root, "mqtt");
     printConfigSummary();
@@ -761,9 +761,9 @@ int getConfig(int arg_cnt, char **args)
                 lanCheck = millis() + 15000;
                 return -11;
             } else {
-                char *outstr = aJson.print(root);
-                Serial.println(outstr);
-                free(outstr);
+            //    char *outstr = aJson.print(root);
+            //    Serial.println(outstr);
+            //    free(outstr);
 
                 applyConfig();
 
@@ -956,13 +956,13 @@ void loop_main() {
 #endif
     // if (lastpacket && (lastpacket%10==0)) Serial.println(lastpacket);
 
-#ifdef _modbus
-    if (modbusArr && items) modbusLoop();
-#endif
-
+if (items) {
+if (lanStatus!=4) pollingLoop();
 #ifdef _owire
-    if (items) thermoLoop();
+thermoLoop();
 #endif
+}
+
 
     if (inputs) inputLoop();
 
@@ -1023,27 +1023,18 @@ void inputLoop(void) {
     }
 }
 
-void modbusLoop(void) {
+void pollingLoop(void) {
     boolean done = false;
-    if (millis() > nextModbusCheck) {
-        while (modbusItem && !done) {
-            if (modbusItem->type == aJson_Array) {
-                switch (aJson.getArrayItem(modbusItem, 0)->valueint) {
-                    case CH_MODBUS:
-                        //case CH_VCTEMP:
-                    case CH_VC: {
-                        Item it(modbusItem);
-                        it.Poll();
-                        nextModbusCheck = millis() + INTERVAL_CHECK_MODBUS;
-                        done = true;
-                        break; //case;
-                    }
-                } //switch
-
+    if (millis() > nextPollingCheck) {
+        while (pollingItem && !done) {
+            if (pollingItem->type == aJson_Array) {
+                        Item it(pollingItem);
+                        nextPollingCheck = millis() + it.Poll();    //INTERVAL_CHECK_MODBUS;
+                        done= true;
             }//if
-            modbusItem = modbusItem->next;
-            if (!modbusItem) {
-                modbusItem = items->child;
+            pollingItem = pollingItem->next;
+            if (!pollingItem) {
+                pollingItem = items->child;
                 return;
             } //start from 1-st element
         } //while
@@ -1076,9 +1067,11 @@ void thermoLoop(void) {
 
                 } else {
                     if (!(--aJson.getArrayItem(itemExtensionArray, IET_ATTEMPTS)->valueint))
-                        mqttClient.publish("/alarm", item->name);
+                        mqttClient.publish("/alarm/snsr", item->name);
 
                 }
+                if (curtemp>itemTempSetting+THERMO_OVERHEAT_CELSIUS)  mqttClient.publish("/alarm/ovrht", item->name); 
+                
                 thermostatCheckPrinted = true;
                 Serial.print(item->name);
                 Serial.print(F(" Set:"));
@@ -1139,7 +1132,7 @@ short thermoSetCurTemp(char *name, short t) {
             else if (extArray = aJson.getArrayItem(item, I_EXT)) {
                 aJsonObject *att = aJson.getArrayItem(extArray, IET_ATTEMPTS);
                 aJson.getArrayItem(extArray, IET_TEMP)->valueint = t;
-                if (att->valueint == 0) mqttClient.publish("/alarmoff", item->name);
+                if (att->valueint == 0) mqttClient.publish("/alarmoff/snsr", item->name);
                 att->valueint = (int) T_ATTEMPTS;
             } //if
 

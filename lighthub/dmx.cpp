@@ -192,6 +192,7 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* d
 
 void DMXinSetup(int channels)
 {
+   if (DMXin) return;/// ToDo: re-init
  // //Use digital pin 3 for DMX output. Must be a PWM channel.
  // DmxSimple.usePin(pin);
   //DmxSimple.maxChannel(channels);
