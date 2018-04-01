@@ -186,7 +186,19 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
                 case -1: //Not known command
                 case -2: //JSON input (not implemented yet
                     break;
-
+                case  -3: //RGB color in #RRGGBB notation
+                {
+                 CRGB rgb;
+                if (sscanf(payload,"#%2X%2X%2X",&rgb.r,&rgb.g,&rgb.b)==3)
+                    { int Par[3];
+                      CHSV hsv=rgb2hsv_approximate(rgb);
+                      Par[0]=map(hsv.h,0,255,0,365);
+                      Par[1]=map(hsv.s,0,255,0,100);
+                      Par[2]=map(hsv.v,0,255,0,100);
+                      item.Ctrl(0, 3, Par, !retaining);
+                    }
+                    break;  
+                }    
                 case CMD_ON:
 
                     if (item.getEnableCMD(500) || lanStatus == 4)
@@ -885,8 +897,8 @@ void printFirmwareVersionAndBuildOptions() {
 #endif
     Serial.print(F("Config server:"));
     Serial.println(F(CONFIG_SERVER));
-    Serial.print(F("Firmware MAC Address "));
-    Serial.println(F(QUOTE(CUSTOM_FIRMWARE_MAC)));   
+//    Serial.print(F("Firmware MAC Address "));
+//    Serial.println(F(QUOTE(CUSTOM_FIRMWARE_MAC))); //Q Macros didn't working with 6 args   
 #ifdef DISABLE_FREERAM_PRINT
     Serial.println(F("(-)FreeRam printing"));
 #else
@@ -897,9 +909,9 @@ void printFirmwareVersionAndBuildOptions() {
 }
 
 void setupMacAddress() {
-    byte firmwareMacAddress[6];
-    const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);
-    parseBytes(macStr, ':', firmwareMacAddress, 6, 16);
+    byte firmwareMacAddress[6]=CUSTOM_FIRMWARE_MAC;
+//    const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);
+//    parseBytes(macStr, ':', firmwareMacAddress, 6, 16);
 
     bool isMacValid = false;
     for (short i = 0; i < 6; i++) {

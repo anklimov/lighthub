@@ -1,6 +1,6 @@
 // Configuration of drivers enabled
 #ifndef PIO_SRC_REV
-#define PIO_SRC_REV v0.99.1
+#define PIO_SRC_REV v0.992
 #endif
 
 #define TXEnablePin 13
@@ -26,7 +26,7 @@
 #endif
 
 #ifndef CUSTOM_FIRMWARE_MAC
-#define CUDTOM_FIRMWARE_MAC {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0}
+#define CUSTOM_FIRMWARE_MAC {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0}
 #endif
 
 

@@ -41,6 +41,8 @@
 #include "item.h"
 #include "inputs.h"
 #include "Dhcp.h"
+#include "FastLED.h"
+//#include "hsv2rgb.h"
 
 #if defined(__SAM3X8E__)
 

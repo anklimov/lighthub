@@ -62,6 +62,19 @@ typedef union
       };
 } HSVstore;
 
+
+typedef union 
+{
+  long int aslong;
+  struct
+      {
+        int8_t  r;
+        int8_t  g;
+        int8_t  b;
+        int8_t  v;         
+      };
+} RGBVstore;
+
 class Item 
 {
   public:

@@ -58,6 +58,7 @@ int txt2cmd(char *payload) {
     else if (strcmp(payload, "HALT") == 0) cmd = CMD_HALT;
     else if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = 0;
     else if (*payload == '{') cmd = -2;
+    else if (*payload == '#') cmd = -3;
 
     return cmd;
 }
@@ -245,7 +246,7 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
                     st.s = Par[1];
                     st.v = Par[2];
                     setVal(st.aslong);
-                    //SendCmd(0,3,Par); // Send back triplet ?
+                      if (send) SendCmd(0,3,Par); // Send back triplet ?
                     break;
 
                 case CH_PWM:
@@ -265,7 +266,7 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
             break;
 
         case CMD_ON:
-            if (getCmd() != CMD_ON) {
+            if (itemType!=CH_RGBW || getCmd() != CMD_ON) {
                 short params = 0;
                 //retrive stored values
                 st.aslong = getVal();
@@ -278,16 +279,17 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
                             Par[0] = st.h;
                             Par[1] = st.s;
                             Par[2] = st.v;
+                            if (!Par[2]) Par[2]=80;   //If RGB value==0 set to 80%
                             params = 3;
                             SendCmd(0, params, Par); // Send restored triplet. In any cases
                             break;
 
-
+                        case CH_VCTEMP:
+                        case CH_PWM:
                         case CH_DIMMER:         //Everywhere, in flat VAL
                         case CH_MODBUS:
                         case CH_VC:
-                        case CH_VCTEMP:
-                        case CH_PWM:
+                        
 
                             Par[0] = st.aslong;
                             params = 1;
@@ -840,18 +842,26 @@ int Item::checkFM() {
             Serial.print(F("-"));
 
         }
-
+        int RPM;
         //     aJson.addNumberToObject(out,"gsw",    (int) node.getResponseBuffer(1));
         aJson.addNumberToObject(out, "V", (int) node.getResponseBuffer(2) / 100.);
         //     aJson.addNumberToObject(out,"f",      (int) node.getResponseBuffer(3)/100.);
-        aJson.addNumberToObject(out, "RPM", (int) node.getResponseBuffer(4));
+        aJson.addNumberToObject(out, "RPM", RPM=(int) node.getResponseBuffer(4));
         aJson.addNumberToObject(out, "I", (int) node.getResponseBuffer(5) / 100.);
         aJson.addNumberToObject(out, "M", (int) node.getResponseBuffer(6) / 10.);
         //     aJson.addNumberToObject(out,"P",      (int) node.getResponseBuffer(7)/10.);
         //     aJson.addNumberToObject(out,"U",      (int) node.getResponseBuffer(8)/10.);
         //     aJson.addNumberToObject(out,"Ui",     (int) node.getResponseBuffer(9));
         aJson.addNumberToObject(out, "sw", (int) node.getResponseBuffer(0));
-
+        
+        if (RPM && itemArg->type == aJson_Array)
+              { aJsonObject *airGateObj = aJson.getArrayItem(itemArg, 1);
+                if (airGateObj) {
+                      int val = 100;
+                      Item item(airGateObj->valuestring);
+                         if (item.isValid()) item.Ctrl(0,1,&val);        
+                }
+              }
         Serial.println();
     } else {
         Serial.print(F("Modbus polling error="));
