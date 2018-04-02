@@ -20,6 +20,7 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 #include "item.h"
 #include "aJSON.h"
+#include "utils.h"
 
 #ifdef _dmxout
 
@@ -197,21 +198,18 @@ boolean Item::getEnableCMD(int delta) {
     return ((millis() - lastctrl > (unsigned long) delta));// || ((void *)itemArr != (void *) lastobj));
 }
 
-int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
+#define MAXCTRLPAR 3
+int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
 
-    Serial.print(F("Cmd="));
-    Serial.println(cmd);
-    //va_list vl;
+    
+    Serial.print(F("Cmd="));Serial.print(cmd);Serial.print(F(" MEM="));Serial.println(freeRam());
 
-    int _Par[3] = {0, 0, 0};
-    if (Par == NULL) Par = _Par;
+    int Par[MAXCTRLPAR] = {0, 0, 0};
+    if (Parameters) 
+            for (short i=0;i<n && i<MAXCTRLPAR;i++) Par[i] = Parameters[i];
 
     int iaddr = getArg();
     HSVstore st;
-    //Store Parameter(s) into json VAL
-
-
-
     switch (cmd) {
         int t;
         case CMD_TOGGLE:
@@ -254,9 +252,9 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
                 case CH_VC:
                 case CH_DIMMER:
                 case CH_MODBUS:
-                    if (send) SendStatus(0, 1, Par,true);  // Send back parameter for channel above this line
-                case CH_THERMO:
                 case CH_VCTEMP:
+                    if (send) SendStatus(0, 1, Par,true);  // Send back parameter for channel above this line
+                case CH_THERMO:            
                     setVal(Par[0]);          // Store value
 
             }//itemtype
@@ -269,6 +267,7 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
         case CMD_ON:
             if (itemType!=CH_RGBW || getCmd() != CMD_ON) {
                 short params = 0;
+                setCmd(cmd);
                 //retrive stored values
                 st.aslong = getVal();
                 if (st.aslong > 0)  //Stored smthng
@@ -311,25 +310,31 @@ int Item::Ctrl(short cmd, short n, int *Par, boolean send) {
 
                     switch (itemType) {
                         case CH_VCTEMP:
-                            Par[0] = 20;
-                            break;
-                        default:
+                        case CH_THERMO:
+                            Par[0] = 20;   //20 degrees celsium - safe temperature
+                            params = 1;
+                            SendStatus(0, params, Par);
+                            break;           
+                        case CH_RGBW:
+                        case CH_RGB:
                             Par[0] = 100;
                             Par[1] = 0;
                             Par[2] = 100;
+                            params = 3;
+                            SendStatus(0, params, Par,true);
+                            break;
+                      default:      
+                            Par[0] = 100;
+                            params = 1;
+                            SendStatus(0, params, Par);
                     }
                 }
-
-
                 for (short i = 0; i < params; i++) {
                     Serial.print(F("Restored: "));
                     Serial.print(i);
                     Serial.print(F("="));
                     Serial.println(Par[i]);
                 }
-
-
-                if (send) setCmd(cmd);
             } else {  //Double ON - apply special preset - clean white full power
                 if (getEnableCMD(500)) switch (itemType) {
                     case CH_RGBW:
@@ -730,7 +735,7 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
             regval = round(((float) val - b) * 10 / a);
     }
 
-    Serial.println(regval);
+    //Serial.println(regval);
     node.writeSingleRegister(2004 - 1, regval);
     modbusBusy = 0;
 }
@@ -913,7 +918,7 @@ int Item::checkFM() {
         int pwr = node.getResponseBuffer(3);
         if (pwr > 0) aJson.addNumberToObject(out, "pwr", pwr / 10.); else aJson.addNumberToObject(out, "pwr", 0);
         
-         if (ftemp>fset+FM_OVERHEAT_CELSIUS)  
+         if (ftemp>fset+FM_OVERHEAT_CELSIUS && set)  
             {
             mqttClient.publish("/alarm/ovrht", itemArr->name); 
             Ctrl(CMD_OFF); //Shut down 
@@ -1025,12 +1030,15 @@ int Item::Poll() {
             break;
         case CH_VC:
             checkFM();
+            sendDelayedStatus(); 
             return INTERVAL_CHECK_MODBUS;
             break;
         case CH_RGB:    //All channels with slider generate too many updates
         case CH_RGBW:
         case CH_DIMMER:
-        case CH_PWM:    
+        case CH_PWM:  
+        case CH_VCTEMP:
+        case CH_THERMO:  
             sendDelayedStatus(); 
     }
     return INTERVAL_POLLING;

@@ -87,7 +87,7 @@ class Item
   Item(char * name);
   Item(aJsonObject * obj);
   boolean isValid ();
-  virtual int Ctrl(short cmd, short n=0, int * Par=NULL, boolean send=true);
+  virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true);
   int getArg(short n=0);
   boolean getEnableCMD(int delta);
   //int getVal(short n); //From VAL array. Negative if no array

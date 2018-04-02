@@ -1,4 +1,5 @@
-/*
+/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
+ *  
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -33,27 +34,35 @@ e-mail    anklimov@gmail.com
  * 1-w relay out
  * Termostat out
 
-Todo
+Todo (backlog)
 ===
-A/C control/Dimmer ?
-rotary encoder local ctrl
+rotary encoder local ctrl ?
 analog in local ctrl
 Smooth regulation/fading
-PID Termostat out
+PID Termostat out ?
 dmx relay out
 Relay array channel
 Relay DMX array channel
-Config URL configuration
+Config URL & MQTT password commandline configuration
+1-wire Update refactoring (save memory)
+Static IP
+Topic configuration
+Timer 
+Modbus response check
+control/debug (Commandline) over MQTT
+more Modbus dimmers
 
 todo DUE related:
-HTTP
 PWM freq fix
 Config webserver
+SSL
 
 todo ESP:
-Ethernet - to wifi portation
-DMX-OUT deploy on USART1
 Config webserver
+SSL
+
+ESP32
+PWM Out
 
 */
 
