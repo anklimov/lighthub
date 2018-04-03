@@ -178,7 +178,8 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
 
         Item item(subtopic);
         if (item.isValid()) {
-           if (item.itemType==CH_GROUP && retaining) return; //Do not restore group channels - they consist not relevant data
+            if (item.itemType == CH_GROUP && retaining)
+                return; //Do not restore group channels - they consist not relevant data
             switch (cmd) {
                 case 0: {
                     short i = 0;
@@ -194,25 +195,25 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
                 case -1: //Not known command
                 case -2: //JSON input (not implemented yet
                     break;
-                case  -3: //RGB color in #RRGGBB notation
+                case -3: //RGB color in #RRGGBB notation
                 {
-                 CRGB rgb;
-                if (sscanf(payload,"#%2X%2X%2X",&rgb.r,&rgb.g,&rgb.b)==3)
-                    { int Par[3];
-                      CHSV hsv=rgb2hsv_approximate(rgb);
-                      Par[0]=map(hsv.h,0,255,0,365);
-                      Par[1]=map(hsv.s,0,255,0,100);
-                      Par[2]=map(hsv.v,0,255,0,100);
-                      item.Ctrl(0, 3, Par, !retaining);
+                    CRGB rgb;
+                    if (sscanf((const char*)payload, "#%2X%2X%2X", &rgb.r, &rgb.g, &rgb.b) == 3) {
+                        int Par[3];
+                        CHSV hsv = rgb2hsv_approximate(rgb);
+                        Par[0] = map(hsv.h, 0, 255, 0, 365);
+                        Par[1] = map(hsv.s, 0, 255, 0, 100);
+                        Par[2] = map(hsv.v, 0, 255, 0, 100);
+                        item.Ctrl(0, 3, Par, !retaining);
                     }
-                    break;  
-                }    
+                    break;
+                }
                 case CMD_ON:
 
-             //       if (item.getEnableCMD(500) || lanStatus == 4)
-                        item.Ctrl(cmd, 0, NULL,
-                                  !retaining); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
-             //       else Serial.println(F("on Skipped"));
+                    //       if (item.getEnableCMD(500) || lanStatus == 4)
+                    item.Ctrl(cmd, 0, NULL,
+                              !retaining); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
+                    //       else Serial.println(F("on Skipped"));
 
                     break;
                 default: //some known command
@@ -571,7 +572,7 @@ void applyConfig() {
     if (owArr && !owReady) {
         aJsonObject *item = owArr->child;
         owReady = owSetup(&Changed);
-        t_count=0;
+        t_count = 0;
         while (item) {
             if ((item->type == aJson_Object)) {
                 DeviceAddress addr;
@@ -918,7 +919,7 @@ void printFirmwareVersionAndBuildOptions() {
 }
 
 void setupMacAddress() {
-    byte firmwareMacAddress[6]=CUSTOM_FIRMWARE_MAC;
+    byte firmwareMacAddress[6] = CUSTOM_FIRMWARE_MAC;
 //    const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);
 //    parseBytes(macStr, ':', firmwareMacAddress, 6, 16);
 
@@ -965,12 +966,12 @@ void loop_main() {
 #endif
     // if (lastpacket && (lastpacket%10==0)) Serial.println(lastpacket);
 
-if (items) {
-if (lanStatus!=4) pollingLoop();
+    if (items) {
+        if (lanStatus != 4) pollingLoop();
 #ifdef _owire
-thermoLoop();
+        thermoLoop();
 #endif
-}
+    }
 
 
     if (inputs) inputLoop();
@@ -1037,9 +1038,9 @@ void pollingLoop(void) {
     if (millis() > nextPollingCheck) {
         while (pollingItem && !done) {
             if (pollingItem->type == aJson_Array) {
-                        Item it(pollingItem);
-                        nextPollingCheck = millis() + it.Poll();    //INTERVAL_CHECK_MODBUS;
-                        done= true;
+                Item it(pollingItem);
+                nextPollingCheck = millis() + it.Poll();    //INTERVAL_CHECK_MODBUS;
+                done = true;
             }//if
             pollingItem = pollingItem->next;
             if (!pollingItem) {
@@ -1079,8 +1080,8 @@ void thermoLoop(void) {
                         mqttClient.publish("/alarm/snsr", item->name);
 
                 }
-                if (curtemp>itemTempSetting+THERMO_OVERHEAT_CELSIUS)  mqttClient.publish("/alarm/ovrht", item->name); 
-                
+                if (curtemp > itemTempSetting + THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", item->name);
+
                 thermostatCheckPrinted = true;
                 Serial.print(item->name);
                 Serial.print(F(" Set:"));
@@ -1088,9 +1089,7 @@ void thermoLoop(void) {
                 Serial.print(F(" Curtemp:"));
                 Serial.print(curtemp);
                 Serial.print(F(" cmd:"));
-                Serial.print(itemCommand),
-
-                        pinMode(itemPin, OUTPUT);
+                Serial.print(itemCommand), pinMode(itemPin, OUTPUT);
                 if (itemCommand == CMD_OFF || itemCommand == CMD_HALT ||
                     aJson.getArrayItem(itemExtensionArray, IET_ATTEMPTS)->valueint == 0) {
                     digitalWrite(itemPin, LOW);
