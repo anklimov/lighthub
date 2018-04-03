@@ -523,6 +523,7 @@ void Changed(int i, DeviceAddress addr, int val) {
 void cmdFunctionHelp(int arg_cnt, char **args)
 //(char* tokens)
 {
+    printFirmwareVersionAndBuildOptions();
     Serial.println(F("Use the commands: 'help' - this text\n"
                              "'set de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
                              "'save' - save config in NVRAM\n"
@@ -907,21 +908,61 @@ void printFirmwareVersionAndBuildOptions() {
 #endif
     Serial.print(F("Config server:"));
     Serial.println(F(CONFIG_SERVER));
-//    Serial.print(F("Firmware MAC Address "));
-//    Serial.println(F(QUOTE(CUSTOM_FIRMWARE_MAC))); //Q Macros didn't working with 6 args   
+    Serial.print(F("Firmware MAC Address "));
+    Serial.println(F(QUOTE(CUSTOM_FIRMWARE_MAC))); //Q Macros didn't working with 6 args
 #ifdef DISABLE_FREERAM_PRINT
     Serial.println(F("(-)FreeRam printing"));
 #else
     Serial.println(F("(+)FreeRam printing"));
 #endif
 
+#ifdef USE_1W_PIN
+    Serial.print(F("(-)DS2482-100 USE_1W_PIN="));
+    Serial.println(QUOTE(USE_1W_PIN));
+#else
+    Serial.println(F("(+)DS2482-100"));
+#endif
+
+#ifdef Wiz5500
+    Serial.println(F("(+)WizNet5500"));
+#endif
+
+#ifdef DMX_DISABLE
+    Serial.println(F("(-)DMX"));
+#else
+    Serial.println(F("(+)DMX"));
+#endif
+
+#ifdef MODBUS_DISABLE
+    Serial.println(F("(-)MODBUS"));
+#else
+    Serial.println(F("(+)MODBUS"));
+#endif
+
+#ifdef OWIRE_DISABLE
+    Serial.println(F("(-)OWIRE"));
+#else
+    Serial.println(F("(+)OWIRE"));
+#endif
+
+#ifdef SD_CARD_INSERTED
+    Serial.println(F("(+)SDCARD"));
+#endif
+
 
 }
 
 void setupMacAddress() {
-    byte firmwareMacAddress[6] = CUSTOM_FIRMWARE_MAC;
-//    const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);
-//    parseBytes(macStr, ':', firmwareMacAddress, 6, 16);
+
+#ifdef DEFAULT_FIRMWARE_MAC
+    byte firmwareMacAddress[6] = DEFAULT_FIRMWARE_MAC;//comma(,) separated hex-array, hard-coded
+#endif
+
+#ifdef CUSTOM_FIRMWARE_MAC
+    byte firmwareMacAddress[6];
+    const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);//colon(:) separated from build options
+    parseBytes(macStr, ':', firmwareMacAddress, 6, 16);
+#endif
 
     bool isMacValid = false;
     for (short i = 0; i < 6; i++) {
