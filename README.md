@@ -21,7 +21,11 @@ Home Remote mobile applicatios for IoS and Android requires only MQTT broker to 
 
 Scalability is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab/NodeRed/HomeRemote and propagate commands across network.
 
-[Prease refer to our Wiki for insructions.](https://github.com/anklimov/lighthub/wiki/Configuring)
+# [Please refer to our Wiki for insructions.](https://github.com/anklimov/lighthub/wiki/Configuring)
+* [Compiling and flashing](https://github.com/anklimov/lighthub/wiki/Compiling-and-flashing) 
+* [Configuring](https://github.com/anklimov/lighthub/wiki/Configuring)
+* [Channel commands](https://github.com/anklimov/lighthub/wiki/Channel-commands)
+* [OpenHab integration](https://github.com/anklimov/lighthub/wiki/OpenHab--integration)
 
 Finished portation of project to  Arduino DUE and ESP8266 (ESP32 not tested).
 
