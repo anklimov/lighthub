@@ -1,5 +1,5 @@
 # LightHub 
-is Flexible, Arduino-Mega/Arduino DUE/ESP8266  based SmartHome controller. [RU](https://geektimes.ru/post/295109/)
+is Flexible, Arduino-Mega/Arduino DUE/ESP8266  based SmartHome controller. [RU](https://geektimes.ru/post/295109/) [HOME-site RU](http://lazyhome.ru)
 
 It allows connecting together:
 
