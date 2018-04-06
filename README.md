@@ -9,18 +9,24 @@ It allows connecting together:
 * Standard LED and AC DMX-512 dimmer boards
 * Modbus RTU devices (Currently, are deployed two types of Modbus devices: AC Dimmer and Ventilation set (Based on Vacon 10 controller)
 * Simple DMX wall sensor panel
-![alt text](LightHub.png "LightHub application diagram")
-https://github.com/anklimov/lighthub/blob/master/LightHub.png
 
-Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from Openhab or Openhab2 Smarthome software
+![alt text](LightHub.png "LightHub application diagram")
+
+Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from MQTT enabled software. At the moment, tested:
+* [Openhab or Openhab2 Smarthome software](http://www.openhab.org/)
+Openhab provides own native mobile app both, for IoS and Android, requires some server to be installed (Raspberry PI good enough)
+* [HomeRemote mobile client](http://thehomeremote.com/)
+Home Remote mobile applicatios for IoS and Android requires only MQTT broker to be working. Any Cloud-based MQTT broker, like [CloudMQTT](https://www.cloudmqtt.com/) is good enough to serve average household, even with free account. 
 
 Scalability is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab and propagate commands across network.
+
+To deploy event-based authomation and scripting on top of LightHub, possibly, the best solution is [Node-Red](https://nodered.org/)
 
 [Prease refer to our Wiki for insructions.](https://github.com/anklimov/lighthub/wiki/Configuring)
 
 Finished portation of project to  Arduino DUE and ESP8266 (ESP32 not tested).
 
-Compiled image has been added to [compiled/](https://github.com/anklimov/lighthub/tree/master/compiled) folder. Flash your Mega 2560
+Compiled image  has been added to [compiled/](https://github.com/anklimov/lighthub/tree/master/compiled) folder. Flash your Mega 2560
 
 ```bash
 avrdude  -v -V -patmega2560 -cwiring -b115200 -D -Uflash:w:lighthub.ino.hex:i
@@ -30,7 +36,7 @@ or flash your DUE (need to correct path and port, of course)
 ```bash
 /Users/<user>/Library/Arduino15/packages/arduino/tools/bossac/1.6.1-arduino/bossac -i -d --port=cu.usbmodem1451 -U false -e -w -v -b lighthub.ino.bin -R
 ```
-
+Note: binary images usually not up-to-date with recent code. The preferred way, to compile and upload firmware to your controller.
 
 # Dependencies
 (quite big number of libs required. Use git clone to have your local copy in your Arduino libs folder)
@@ -130,6 +136,7 @@ platformio device monitor -b 115200
 * DMX_DISABLE //disable DMX support
 * MODBUS_DISABLE // disable Modbus support
 * OWIRE_DISABLE // disable OneWire support
+* ARTNET_ENABLE //Enable Artnet protocol support
 
 
 # Default compilation behavior:
@@ -144,4 +151,10 @@ platformio device monitor -b 115200
 * DMX support enabled
 * Modbus support enabled
 * OneWire support enabled
+* Artnet disabled
+* Defailt MQTT input topic: /myhome/in
+* Default MQTT topic to publish device status: /myhome/s_out
+* Default Alarm output topic /alarm
+
+If you've using Arduino IDE to compile & flash firmware, you will not able to configure compilers options except edit "options.h" file
 
