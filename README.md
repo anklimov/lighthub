@@ -5,10 +5,10 @@ It allows connecting together:
 
 * Contact sensors (switches, buttons etc)
 * 1-Wire temperature sensors (up to 20 on single bus)
-* Standard nonexpensive Relay board with TTL inputs, (like this) to control AC powered lamps, floor heaters, boilers etc
-* Standard LED and AC DMX-512 dimmer boards
-* Modbus RTU devices (Currently, are deployed two types of Modbus devices: AC Dimmer and Ventilation set (Based on Vacon 10 controller)
-* Simple DMX wall sensor panel
+* Standard nonexpensive Relay board with TTL inputs, [like this](https://aliexpress.com/item/16-Channel-20A-Relay-Control-Module-for-Arduino-UNO-MEGA2560-R3-Raspberry-Pi/32747887693.html) to control AC powered lamps, floor heaters, boilers etc
+* [Standard nonexpensive LED dimmers](https://aliexpress.com/item/30-channel-27channel-Easy-DMX-LED-controller-dmx-decoder-driver-rgb-led-controller/2015743918.html) and [AC DMX-512 dimmers](https://aliexpress.com/item/DMX302-led-DMX-triac-dimmer-brightness-controller-AC90V-240V-Output-3channels-1A-CH-High-voltage-led/32822841266.html)
+* Modbus RTU devices (Currently, are deployed two types of Modbus devices: AC Dimmer and Ventilation set (Based on [Vacon 10 controller](http://files.danfoss.com/download/Drives/Vacon-10-Quick-Guide-DPD00714F1-UK.pdf))
+* Simple DMX wall sensor panel [like this](https://aliexpress.com/item/New-Ltech-D8-LED-rgb-RGBW-touch-panel-controller-DMX512-controller-DC12-24V-4-zones-4/32800199589.html)
 
 ![alt text](LightHub.png "LightHub application diagram")
 
@@ -17,10 +17,9 @@ Where is possible both, to configure local control/mapping between inputs and ou
 Openhab provides own native mobile app both, for IoS and Android, requires some server to be installed (Raspberry PI good enough)
 * [HomeRemote mobile client](http://thehomeremote.com/)
 Home Remote mobile applicatios for IoS and Android requires only MQTT broker to be working. Any Cloud-based MQTT broker, like [CloudMQTT](https://www.cloudmqtt.com/) is good enough to serve average household, even with free account. 
+* [Node-Red](https://nodered.org/)  Possibly, the best solution to deploy event-based authomation and scripting on top of MQTT/LightHub. The easy to use universal and visual tool to wire many different devices in single system.
 
-Scalability is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab and propagate commands across network.
-
-To deploy event-based authomation and scripting on top of LightHub, possibly, the best solution is [Node-Red](https://nodered.org/)
+Scalability is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab/NodeRed/HomeRemote and propagate commands across network.
 
 [Prease refer to our Wiki for insructions.](https://github.com/anklimov/lighthub/wiki/Configuring)
 
