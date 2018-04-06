@@ -9,6 +9,8 @@ It allows connecting together:
 * Standard LED and AC DMX-512 dimmer boards
 * Modbus RTU devices (Currently, are deployed two types of Modbus devices: AC Dimmer and Ventilation set (Based on Vacon 10 controller)
 * Simple DMX wall sensor panel
+![alt text](LightHub.png "LightHub application diagram")
+https://github.com/anklimov/lighthub/blob/master/LightHub.png
 
 Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from Openhab or Openhab2 Smarthome software
 
