@@ -1,6 +1,6 @@
 // Configuration of drivers enabled
 #ifndef PIO_SRC_REV
-#define PIO_SRC_REV v0.994
+#define PIO_SRC_REV v0.995
 #endif
 
 #define TXEnablePin 13
@@ -10,8 +10,8 @@
 #define IET_ATTEMPTS 1
 
 #define THERMO_GIST_CELSIUS 2
-#define THERMO_OVERHEAT_CELSIUS 5
-#define FM_OVERHEAT_CELSIUS 5.
+#define THERMO_OVERHEAT_CELSIUS 38
+#define FM_OVERHEAT_CELSIUS 40.
 
 #define EEPROM_offset 32+6
 

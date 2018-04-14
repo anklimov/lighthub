@@ -918,7 +918,7 @@ int Item::checkFM() {
         int pwr = node.getResponseBuffer(3);
         if (pwr > 0) aJson.addNumberToObject(out, "pwr", pwr / 10.); else aJson.addNumberToObject(out, "pwr", 0);
         
-         if (ftemp>fset+FM_OVERHEAT_CELSIUS && set)  
+         if (ftemp>FM_OVERHEAT_CELSIUS && set)  
             {
             mqttClient.publish("/alarm/ovrht", itemArr->name); 
             Ctrl(CMD_OFF); //Shut down 

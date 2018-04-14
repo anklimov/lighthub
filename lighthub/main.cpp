@@ -1121,7 +1121,7 @@ void thermoLoop(void) {
                         mqttClient.publish("/alarm/snsr", item->name);
 
                 }
-                if (curtemp > itemTempSetting + THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", item->name);
+                if (curtemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", item->name);
 
                 thermostatCheckPrinted = true;
                 Serial.print(item->name);
