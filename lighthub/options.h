@@ -1,6 +1,6 @@
 // Configuration of drivers enabled
 #ifndef PIO_SRC_REV
-#define PIO_SRC_REV v0.995
+#define PIO_SRC_REV v0.996
 #endif
 
 #define TXEnablePin 13

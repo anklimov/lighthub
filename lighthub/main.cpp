@@ -586,6 +586,34 @@ void applyConfig() {
     }
 #endif
     items = aJson.getObjectItem(root, "items");
+
+// Digital output related Items initialization
+{
+aJsonObject * item = items->child;
+while (items && item)
+  if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
+    int cmd = CMD_OFF;
+    int pin = aJson.getArrayItem(item, I_ARG)->valueint;
+    if (aJson.getArraySize(item) > I_CMD) cmd = aJson.getArrayItem(item, I_CMD)->valueint;
+    
+      switch (aJson.getArrayItem(item, I_TYPE)->valueint) {         
+          case CH_RELAY: 
+          case CH_THERMO:
+            {
+            int k;
+            pinMode(pin, OUTPUT);
+            digitalWrite(pin, k = ((cmd == CMD_ON) ? HIGH : LOW));
+            Serial.print(F("Pin:"));
+            Serial.print(pin);
+            Serial.print(F("="));
+            Serial.println(k);
+            }
+            break;
+          } //switch
+          item = item->next;
+     }  //if
+
+}           
     pollingItem = items->child;
     inputs = aJson.getObjectItem(root, "in");
     mqttArr = aJson.getObjectItem(root, "mqtt");
@@ -751,13 +779,13 @@ int getConfig(int arg_cnt, char **args)
     FILE *result;
     //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
+   
     HTTPClient hclient(configServer, 80);
-
-
     // FILE is the return STREAM type of the HTTPClient
     result = hclient.getURI(URI);
     responseStatusCode = hclient.getLastReturnCode();
     wdt_en();
+   
     if (result != NULL) {
         if (responseStatusCode == 200) {
 
