@@ -26,7 +26,7 @@ e-mail    anklimov@gmail.com
 
 
 OneWire *net = NULL;
-// Pass our oneWire reference to Dallas Temperature. 
+// Pass our oneWire reference to Dallas Temperature.
 //DallasTemperature sensors(&net);
 
 DeviceAddress *term = NULL;
@@ -98,7 +98,7 @@ net = new OneWire (USE_1W_PIN);
 
 
 
-// Pass our oneWire reference to Dallas Temperature. 
+// Pass our oneWire reference to Dallas Temperature.
     sensors = new DallasTemperature(net);
 
     term = new DeviceAddress[t_max];
@@ -131,7 +131,7 @@ net = new OneWire (USE_1W_PIN);
         return true;
     }
 #endif
-
+    Serial.println(F("\tDS2482 error"));
     return false;
     // IC Default 9 bit. If you have troubles consider upping it 12. Ups the delay giving the IC more time to process the temperature measurement
 
@@ -199,5 +199,3 @@ void owAdd(DeviceAddress addr) {
     }
     t_count++;
 }
-
-

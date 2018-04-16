@@ -588,6 +588,7 @@ int Item::isActive() {
         case CH_THERMO:
         case CH_VC:
         case CH_VCTEMP:
+        case CH_PWM:
             val = st.aslong;
     } //switch
     Serial.print(F(":="));
