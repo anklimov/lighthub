@@ -40,7 +40,6 @@
 #include "stdarg.h"
 #include "item.h"
 #include "inputs.h"
-#include "Dhcp.h"
 #include "FastLED.h"
 //#include "hsv2rgb.h"
 
@@ -81,9 +80,7 @@
 #ifdef Wiz5500
 #include <Ethernet2.h>
 #else
-
 #include <Ethernet.h>
-
 #endif
 
 #ifdef _artnet

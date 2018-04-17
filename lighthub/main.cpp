@@ -1,5 +1,5 @@
 /* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
- *  
+ *
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -47,7 +47,7 @@ Config URL & MQTT password commandline configuration
 1-wire Update refactoring (save memory)
 Static IP
 Topic configuration
-Timer 
+Timer
 Modbus response check
 control/debug (Commandline) over MQTT
 more Modbus dimmers
@@ -134,7 +134,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     }
     Serial.println();
 
-    boolean retaining = (lanStatus == 4);  //Todo - named constant 
+    boolean retaining = (lanStatus == 4);  //Todo - named constant
     //Check if topic = Command topic
     short intopic = 0;
     {
@@ -350,7 +350,7 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                 break;
             }
 
-        case 4: //retaining ... Collecting 
+        case 4: //retaining ... Collecting
             if (millis() > lanCheck) {
                 char buf[MQTT_TOPIC_LENGTH];
 
@@ -501,7 +501,7 @@ void Changed(int i, DeviceAddress addr, int val) {
    }
     */
 
-    if ((val == -127) || (val == 85)) {
+    if ((val == -127) || (val == 85) || (val == 0)) { //ToDo: 1-w short circuit mapped to "0" celsium
 //        Serial.print("Temp err ");Serial.println(t);
         return;
     }
@@ -574,7 +574,7 @@ void applyConfig() {
         aJsonObject *item = owArr->child;
         owReady = owSetup(&Changed);
         t_count = 0;
-        while (item) {
+        while (item && owReady) {
             if ((item->type == aJson_Object)) {
                 DeviceAddress addr;
                 //Serial.print(F("Add:")),Serial.println(item->name);
@@ -595,9 +595,9 @@ while (items && item)
     int cmd = CMD_OFF;
     int pin = aJson.getArrayItem(item, I_ARG)->valueint;
     if (aJson.getArraySize(item) > I_CMD) cmd = aJson.getArrayItem(item, I_CMD)->valueint;
-    
-      switch (aJson.getArrayItem(item, I_TYPE)->valueint) {         
-          case CH_RELAY: 
+
+      switch (aJson.getArrayItem(item, I_TYPE)->valueint) {
+          case CH_RELAY:
           case CH_THERMO:
             {
             int k;
@@ -613,7 +613,7 @@ while (items && item)
           item = item->next;
      }  //if
 
-}           
+}
     pollingItem = items->child;
     inputs = aJson.getObjectItem(root, "in");
     mqttArr = aJson.getObjectItem(root, "mqtt");
@@ -779,13 +779,13 @@ int getConfig(int arg_cnt, char **args)
     FILE *result;
     //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
-   
+
     HTTPClient hclient(configServer, 80);
     // FILE is the return STREAM type of the HTTPClient
     result = hclient.getURI(URI);
     responseStatusCode = hclient.getLastReturnCode();
     wdt_en();
-   
+
     if (result != NULL) {
         if (responseStatusCode == 200) {
 

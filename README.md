@@ -1,4 +1,4 @@
-# LightHub 
+# LightHub
 is Flexible, Arduino-Mega/Arduino DUE/ESP8266  based SmartHome controller. [RU](https://geektimes.ru/post/295109/) [HOME-site RU](http://lazyhome.ru)
 
 It allows connecting together:
@@ -16,13 +16,13 @@ Where is possible both, to configure local control/mapping between inputs and ou
 * [Openhab or Openhab2 Smarthome software](http://www.openhab.org/)
 Openhab provides own native mobile app both, for IoS and Android, requires some server to be installed (Raspberry PI good enough)
 * [HomeRemote mobile client](http://thehomeremote.com/)
-Home Remote mobile applicatios for IoS and Android requires only MQTT broker to be working. Any Cloud-based MQTT broker, like [CloudMQTT](https://www.cloudmqtt.com/) is good enough to serve average household, even with free account. 
+Home Remote mobile applicatios for IoS and Android requires only MQTT broker to be working. Any Cloud-based MQTT broker, like [CloudMQTT](https://www.cloudmqtt.com/) is good enough to serve average household, even with free account.
 * [Node-Red](https://nodered.org/)  Possibly, the best solution to deploy event-based authomation and scripting on top of MQTT/LightHub. The easy to use universal and visual tool to wire many different devices in single system.
 
 Scalability is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab/NodeRed/HomeRemote and propagate commands across network.
 
 # [Please refer to our Wiki for insructions.](https://github.com/anklimov/lighthub/wiki/Configuring)
-* [Compiling and flashing](https://github.com/anklimov/lighthub/wiki/Compiling-and-flashing) 
+* [Compiling and flashing](https://github.com/anklimov/lighthub/wiki/Compiling-and-flashing)
 * [Configuring](https://github.com/anklimov/lighthub/wiki/Configuring)
 * [Channel commands](https://github.com/anklimov/lighthub/wiki/Channel-commands)
 * [OpenHab integration](https://github.com/anklimov/lighthub/wiki/OpenHab--integration)
@@ -87,9 +87,11 @@ Need to use compiler directive -D Wiz5500 and https://github.com/anklimov/Ethern
 Prefered way to compile project is using platformio toolchain, suitable for Arduino Due, and Arduino Mega2560, but work is still in progress.
 
 # Due compilation issue "USART0_Handler redefinition"
-Please, open  /variants/arduino_due_x/variant.cpp file, then edit USART0_Handler method definition like this
+Please, open  /variants/arduino_due_x/variant.cpp file, then add USART0_Handler method definition like this
+void USART0_Handler(void) __attribute__((weak));
 
-void USART0_Handler(void)  __attribute__((weak));
+The normal path to find this file in platformio is:
+.platformio/packages/framework-arduinosam/variants/arduino_due_x
 
 # Platformio command line build instructions
 [First of all install platformio framework.]( http://docs.platformio.org/en/latest/installation.html)  [Good tutorial for fast start in RUSSIAN.](https://geektimes.ru/post/273852/)
@@ -160,4 +162,3 @@ platformio device monitor -b 115200
 * Default Alarm output topic /alarm
 
 If you've using Arduino IDE to compile & flash firmware, you will not able to configure compilers options except edit "options.h" file
-
