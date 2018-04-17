@@ -1,3 +1,8 @@
+
+
+
+
+
 /* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
  *
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -550,7 +555,6 @@ void applyConfig() {
         Serial.println(maxChannels);
     }
 #endif
-
 #ifdef _dmxin
     int itemsCount;
     dmxArr = aJson.getObjectItem(root, "dmxin");
@@ -560,7 +564,6 @@ void applyConfig() {
         Serial.println(itemsCount * 4);
     }
 #endif
-
 #ifdef _modbus
     modbusArr = aJson.getObjectItem(root, "modbus");
 #endif
