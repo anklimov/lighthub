@@ -32,12 +32,12 @@ Finished portation of project to  Arduino DUE and ESP8266 (ESP32 not tested).
 Compiled image  has been added to [compiled/](https://github.com/anklimov/lighthub/tree/master/compiled) folder. Flash your Mega 2560
 
 ```bash
-avrdude  -v -V -patmega2560 -cwiring -b115200 -D -Uflash:w:lighthub.ino.hex:i
+avrdude  -v -V -patmega2560 -cwiring -b115200 -D -Uflash:w:firmware.hex:i
 ```
 
 or flash your DUE (need to correct path and port, of course)
 ```bash
-/Users/<user>/Library/Arduino15/packages/arduino/tools/bossac/1.6.1-arduino/bossac -i -d --port=cu.usbmodem1451 -U false -e -w -v -b lighthub.ino.bin -R
+/Users/<user>/Library/Arduino15/packages/arduino/tools/bossac/1.6.1-arduino/bossac -i -d --port=cu.usbmodem1451 -U false -e -w -v -b firmware.bin -R
 ```
 Note: binary images usually not up-to-date with recent code. The preferred way, to compile and upload firmware to your controller.
 
@@ -56,35 +56,34 @@ For patched libraries, appropriate GitHub repo URL provided:
 * HTTPClient (for AVR)                  https://github.com/anklimov/HTTPClient or https://github.com/arduino-libraries/ArduinoHttpClient for other platforms
 * aJson                                 https://github.com/anklimov/aJson
 * CmdArduino                            https://github.com/anklimov/CmdArduino
-* EEPROM (standard for AVR) or DueFlashStorage for DUE
+* EEPROM (standard for AVR) or DueFlashStorage for DUE: https://github.com/sebnil/DueFlashStorage
 * ModbusMaster                          https://github.com/anklimov/ModbusMaster
 * pubsubclient-2.6
 * DMXSerial-master (for AVR)            https://github.com/anklimov/DMXSerial
 * Ethernet                              https://github.com/anklimov/Ethernet
 * SPI (standard)
 
-Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) done since v 0.96
+Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) done since v 0.96 and tested against Wiznet 5100 Ethernet shield and Wiznet 5500 Ethernet module 
 
 # Platforms specific details:
 
-AVR version is basic and has all functions
+AVR version is basic, long tome in production and have all functions
 *DMX-out is software (DMXSimple) on pin3
 
-**SAM3X8E**:
+**SAM3X8E**: (Tested. Recomended hardware at current moment)
 * default PWM frequency
 * both, DMX-in and DMX-out are hardware USART based. Use USART1 (pins 18 and 19) for DMX-out and DMX-in
 
-**ESP8266**:
+**ESP8266**: (Developed but not tested in production)
 * DMX-OUT on USART1 TX
 * DMX-IN - not possible to deploy in ESP8266
 * Modbus - disabled. Might be configured in future on USART0 instead CLI/DEBUG
 
 since v. 0.97:
+Mega and DUE:
+Need to use compiler directive -D Wiz5500 and https://github.com/anklimov/Ethernet2 library to compile with Wiznet 5500 instead 5100
 
-There is first attempt to use Wiznet 5500  (still not stable enough)
-Need to use compiler directive -D Wiz5500 and https://github.com/anklimov/Ethernet2 library
-
-Prefered way to compile project is using platformio toolchain, suitable for Arduino Due, and Arduino Mega2560, but work is still in progress.
+Prefered way to compile project is using platformio toolchain, suitable for Arduino Due, and Arduino Mega2560
 
 # Due compilation issue "USART0_Handler redefinition"
 Please, open  /variants/arduino_due_x/variant.cpp file, then add USART0_Handler method definition like this
@@ -161,4 +160,4 @@ platformio device monitor -b 115200
 * Default MQTT topic to publish device status: /myhome/s_out
 * Default Alarm output topic /alarm
 
-If you've using Arduino IDE to compile & flash firmware, you will not able to configure compilers options except edit "options.h" file
+If you've using Arduino IDE to compile & flash firmware, it will use Default options above and you will not able to configure additional compilers options except edit "options.h" file
