@@ -129,12 +129,12 @@ int Item::getArg(short n) //Return arg int or first array element if Arg is arra
 /*
 int Item::getVal(short n) //Return Val from Value array
 { if (!itemVal) return -1;
-      else if  (itemVal->type==aJson_Array) 
+      else if  (itemVal->type==aJson_Array)
             {
-            aJsonObject *t = aJson.getArrayItem(itemVal,n);  
+            aJsonObject *t = aJson.getArrayItem(itemVal,n);
             if (t)    return t->valueint;
                else   return -3;
-            }           
+            }
            else return -2;
 }
 */
@@ -156,9 +156,9 @@ void Item::setVal(short n, int par)  // Only store  if VAL is array defined in c
   if (!itemVal || itemVal->type!=aJson_Array) return;
   Serial.print(F(" Store p="));Serial.print(n);Serial.print(F(" Val="));Serial.println(par);
   for (int i=aJson.getArraySize(itemVal);i<=n;i++) aJson.addItemToArray(itemVal,aJson.createItem(int(0))); //Enlarge array of Values
-  
+
   aJsonObject *t = aJson.getArrayItem(itemVal,n);
-  if (t) t->valueint=par;  
+  if (t) t->valueint=par;
 }
 */
 
@@ -182,7 +182,7 @@ boolean Item::isValid() {
 void Item::copyPar (aJsonObject *itemV)
 { int n=aJson.getArraySize(itemV);
   //for (int i=aJson.getArraySize(itemVal);i<n;i++) aJson.addItemToArray(itemVal,aJson.createItem(int(0))); //Enlarge array of Values
-   for (int i=0;i<n;i++) setPar(i,aJson.getArrayItem(itemV,i)->valueint); 
+   for (int i=0;i<n;i++) setPar(i,aJson.getArrayItem(itemV,i)->valueint);
 }
 */
 
@@ -201,11 +201,11 @@ boolean Item::getEnableCMD(int delta) {
 #define MAXCTRLPAR 3
 int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
 
-    
+
     Serial.print(F("Cmd="));Serial.print(cmd);Serial.print(F(" MEM="));Serial.println(freeRam());
 
     int Par[MAXCTRLPAR] = {0, 0, 0};
-    if (Parameters) 
+    if (Parameters)
             for (short i=0;i<n && i<MAXCTRLPAR;i++) Par[i] = Parameters[i];
 
     int iaddr = getArg();
@@ -254,7 +254,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                 case CH_MODBUS:
                 case CH_VCTEMP:
                     if (send) SendStatus(0, 1, Par,true);  // Send back parameter for channel above this line
-                case CH_THERMO:            
+                case CH_THERMO:
                     setVal(Par[0]);          // Store value
 
             }//itemtype
@@ -265,7 +265,23 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
             break;
 
         case CMD_ON:
-            if (itemType!=CH_RGBW || getCmd() != CMD_ON) {
+        if (itemType==CH_RGBW && getCmd() == CMD_ON && getEnableCMD(500)) {
+                  Serial.println(F("Force White"));
+                  itemType = CH_WHITE;
+                  Par[1] = 0;   //Zero saturation
+                  Par[2] = 100; //Full power
+                  // Store
+                  st.h = Par[0];
+                  st.s = Par[1];
+                  st.v = Par[2];
+                  setVal(st.aslong);
+                  //Send to OH
+                  if (send) SendStatus(0, 3, Par);
+          break;
+        } // if forcewhite
+
+      //  if (itemType!=CH_RGBW || getCmd() != CMD_ON) {
+        {
                 short params = 0;
                 setCmd(cmd);
                 //retrive stored values
@@ -290,7 +306,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                         case CH_DIMMER:         //Everywhere, in flat VAL
                         case CH_MODBUS:
                         case CH_VC:
-                        
+
 
                             Par[0] = st.aslong;
                             params = 1;
@@ -303,8 +319,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                             break;
                         default:
                             if (send) SendStatus(cmd);          // Just send ON
-                    }//itemtype
-                else {// Default settings
+                    }//itemtype switch
+                else {// Default settings, values not stored yet
                     Serial.print(st.aslong);
                     Serial.println(F(": No stored values - default"));
 
@@ -314,7 +330,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                             Par[0] = 20;   //20 degrees celsium - safe temperature
                             params = 1;
                             SendStatus(0, params, Par);
-                            break;           
+                            break;
                         case CH_RGBW:
                         case CH_RGB:
                             Par[0] = 100;
@@ -323,18 +339,24 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                             params = 3;
                             SendStatus(0, params, Par,true);
                             break;
-                      default:      
+                        case CH_RELAY:
+                            Par[0] = 100;
+                            params = 1;
+                            if (send) SendStatus(CMD_ON);
+                            break;
+                      default:
                             Par[0] = 100;
                             params = 1;
                             SendStatus(0, params, Par);
                     }
-                }
+                } // default handler
                 for (short i = 0; i < params; i++) {
                     Serial.print(F("Restored: "));
                     Serial.print(i);
                     Serial.print(F("="));
                     Serial.println(Par[i]);
                 }
+/*
             } else {  //Double ON - apply special preset - clean white full power
                 if (getEnableCMD(500)) switch (itemType) {
                     case CH_RGBW:
@@ -354,10 +376,10 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                         break;
                 } //itemtype
             } //else
-
+*/
             //Serial.print("Sa:");Serial.println(Par[1]);
             if ((itemType == CH_RGBW) && (Par[1] == 0)) itemType = CH_WHITE;
-
+          }
 
             break; //CMD_ON
 
@@ -368,7 +390,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                 Par[1] = 0;
                 Par[2] = 0;
                 setCmd(cmd);
-                if (send) SendStatus(cmd); 
+                if (send) SendStatus(cmd);
             }
             break;
 
@@ -453,7 +475,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                 aJsonObject *i = itemArg->child;
                 while (i) {
                     Item it(i->valuestring);
-//            it.copyPar(itemVal);   
+//            it.copyPar(itemVal);
                     it.Ctrl(cmd, n, Par, send); //// was true
                     i = i->next;
                 } //while
@@ -600,20 +622,20 @@ int Item::isActive() {
 
 short thermoSet(char * name, short cmd, short t)
 {
-  
+
 if (items)
   {
   aJsonObject *item= aJson.getObjectItem(items, name);
   if (item && (item->type==aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint==CH_THERMO))
-      { 
+      {
 
         for (int i=aJson.getArraySize(item);i<4;i++) aJson.addItemToArray(item,aJson.createItem(int(0))); //Enlarge item to 4 elements
              if (!cmd) aJson.getArrayItem(item, I_VAL)->valueint=t;
              aJson.getArrayItem(item, I_CMD)->valueint=cmd;
-            
-      }     
-     
-  } 
+
+      }
+
+  }
 }
 
 
@@ -623,8 +645,8 @@ if (PoolingInterval)
   {
     Pool();
     next=millis()+PoolingInterval;
-  }        
-   
+  }
+
 };
 
 
@@ -635,31 +657,31 @@ addr 10d
 Снять аварию 42001 (2001=7d1) =>4
 
 [22:20:33] Write task has completed successfully
-[22:20:33] <= Response: 0A 06 07 D0 00 04 89 FF 
-[22:20:32] => Poll: 0A 06 07 D0 00 04 89 FF 
+[22:20:33] <= Response: 0A 06 07 D0 00 04 89 FF
+[22:20:32] => Poll: 0A 06 07 D0 00 04 89 FF
 
 100%
 2003-> 10000
 [22:24:05] Write task has completed successfully
-[22:24:05] <= Response: 0A 06 07 D2 27 10 33 C0 
-[22:24:05] => Poll: 0A 06 07 D2 27 10 33 C0 
+[22:24:05] <= Response: 0A 06 07 D2 27 10 33 C0
+[22:24:05] => Poll: 0A 06 07 D2 27 10 33 C0
 
 ON
 2001->1
 [22:24:50] Write task has completed successfully
-[22:24:50] <= Response: 0A 06 07 D0 00 01 49 FC 
-[22:24:50] => Poll: 0A 06 07 D0 00 01 49 FC 
+[22:24:50] <= Response: 0A 06 07 D0 00 01 49 FC
+[22:24:50] => Poll: 0A 06 07 D0 00 01 49 FC
 
-OFF 
+OFF
 2001->0
 [22:25:35] Write task has completed successfully
-[22:25:35] <= Response: 0A 06 07 D0 00 00 88 3C 
-[22:25:34] => Poll: 0A 06 07 D0 00 00 88 3C 
+[22:25:35] <= Response: 0A 06 07 D0 00 00 88 3C
+[22:25:34] => Poll: 0A 06 07 D0 00 00 88 3C
 
 
 POLL  2101x10
-[22:27:29] <= Response: 0A 03 14 00 23 00 00 27 10 13 88 0B 9C 00 32 00 F8 00 F2 06 FA 01 3F AD D0 
-[22:27:29] => Poll: 0A 03 08 34 00 0A 87 18 
+[22:27:29] <= Response: 0A 03 14 00 23 00 00 27 10 13 88 0B 9C 00 32 00 F8 00 F2 06 FA 01 3F AD D0
+[22:27:29] => Poll: 0A 03 08 34 00 0A 87 18
 
 */
 
@@ -749,7 +771,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
     if (deffered) {
         setCmd(cmd | CMD_REPORT);
          Serial.println(F("Status deffered"));
-      //     mqttClient.publish("/push", "1");  
+      //     mqttClient.publish("/push", "1");
          return 0;
      // Todo: Parameters?  Now expected that parameters already stored by setVal()
     }
@@ -759,7 +781,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
     char valstr[16] = "";
 
     strcpy_P(addrstr, outprefix);
-    strncat(addrstr, itemArr->name, sizeof(addrstr)); 
+    strncat(addrstr, itemArr->name, sizeof(addrstr));
 
 
     switch (cmd) {
@@ -802,7 +824,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
 
     if (modbusBusy) {
         mb_fail(3, addr, value, 0);
-        
+
         return -1;
     };
     modbusBusy = 1;
@@ -876,13 +898,13 @@ int Item::checkFM() {
         //     aJson.addNumberToObject(out,"U",      (int) node.getResponseBuffer(8)/10.);
         //     aJson.addNumberToObject(out,"Ui",     (int) node.getResponseBuffer(9));
         aJson.addNumberToObject(out, "sw", (int) node.getResponseBuffer(0));
-        
+
         if (RPM && itemArg->type == aJson_Array)
               { aJsonObject *airGateObj = aJson.getArrayItem(itemArg, 1);
                 if (airGateObj) {
                       int val = 100;
                       Item item(airGateObj->valuestring);
-                         if (item.isValid()) item.Ctrl(0,1,&val);        
+                         if (item.isValid()) item.Ctrl(0,1,&val);
                 }
               }
         Serial.println();
@@ -918,11 +940,11 @@ int Item::checkFM() {
         //   aJson.addNumberToObject(out,"d",    (int) node.getResponseBuffer(2)*a+b);
         int pwr = node.getResponseBuffer(3);
         if (pwr > 0) aJson.addNumberToObject(out, "pwr", pwr / 10.); else aJson.addNumberToObject(out, "pwr", 0);
-        
-         if (ftemp>FM_OVERHEAT_CELSIUS && set)  
+
+         if (ftemp>FM_OVERHEAT_CELSIUS && set)
             {
-            mqttClient.publish("/alarm/ovrht", itemArr->name); 
-            Ctrl(CMD_OFF); //Shut down 
+            mqttClient.publish("/alarm/ovrht", itemArr->name);
+            Ctrl(CMD_OFF); //Shut down
             }
         Serial.println();
     } else {
@@ -942,12 +964,12 @@ int Item::checkFM() {
 boolean Item::checkModbusRetry() {
     int cmd = getCmd();
     if (cmd & CMD_RETRY) {   // if last sending attempt of command was failed
-      int val = getVal();    
+      int val = getVal();
       Serial.println(F("Retrying CMD"));
       cmd &= ~CMD_RETRY;     // Clean retry flag
-      Ctrl(cmd,1,&val);      // Execute command again 
+      Ctrl(cmd,1,&val);      // Execute command again
       return true;
-    }  
+    }
 return false;
 }
 
@@ -1026,28 +1048,28 @@ int Item::Poll() {
     switch (itemType) {
         case CH_MODBUS:
             checkModbusDimmer();
-            sendDelayedStatus(); 
+            sendDelayedStatus();
             return INTERVAL_CHECK_MODBUS;
             break;
         case CH_VC:
             checkFM();
-            sendDelayedStatus(); 
+            sendDelayedStatus();
             return INTERVAL_CHECK_MODBUS;
             break;
         case CH_RGB:    //All channels with slider generate too many updates
         case CH_RGBW:
         case CH_DIMMER:
-        case CH_PWM:  
+        case CH_PWM:
         case CH_VCTEMP:
-        case CH_THERMO:  
-            sendDelayedStatus(); 
+        case CH_THERMO:
+            sendDelayedStatus();
     }
     return INTERVAL_POLLING;
 }
 
 void Item::sendDelayedStatus(){
       HSVstore st;
-      int cmd=getCmd();  
+      int cmd=getCmd();
       short params = 0;
       int Par[3];
       if (cmd & CMD_REPORT)
@@ -1062,7 +1084,7 @@ void Item::sendDelayedStatus(){
                             Par[1] = st.s;
                             Par[2] = st.v;
                             params = 3;
-                            SendStatus(0, params, Par); // Send restored triplet. 
+                            SendStatus(0, params, Par); // Send restored triplet.
                             break;
 
                         case CH_VCTEMP:
@@ -1071,17 +1093,16 @@ void Item::sendDelayedStatus(){
                         case CH_MODBUS:
                         case CH_VC:
                         case CH_THERMO:
-                        
+
 
                             Par[0] = st.aslong;
                             params = 1;
                             SendStatus(0, params, Par);  // Send restored parameter
-                            break;                           
+                            break;
                         default:
                             SendStatus(cmd);          // Just send CMD
                     }//itemtype
       cmd &= ~CMD_REPORT;     // Clean report flag
       setCmd(cmd);
-      }   
+      }
 }
-

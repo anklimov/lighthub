@@ -41,6 +41,7 @@
 #include "item.h"
 #include "inputs.h"
 #include "FastLED.h"
+#include "Dns.h"
 //#include "hsv2rgb.h"
 
 #if defined(__SAM3X8E__)
@@ -95,7 +96,7 @@
 extern Artnet *artnet;
 #endif
 
-void watchdogSetup(void);
+//void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);
 
@@ -141,9 +142,13 @@ void printBool(bool arg);
 
 void saveFlash(short n, char *str);
 
-void loadFlash(short n, char *str);
+int loadFlash(short n, char *str, short l=32);
 
-int getConfig(int arg_cnt, char **args);
+void saveFlash(short n, IPAddress& ip);
+
+int loadFlash(short n, IPAddress& ip);
+
+int getConfig(int arg_cnt=0, char **args=NULL);
 
 void preTransmission();
 
