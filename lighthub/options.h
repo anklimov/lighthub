@@ -1,6 +1,6 @@
 // Configuration of drivers enabled
 #ifndef PIO_SRC_REV
-#define PIO_SRC_REV v0.997
+#define PIO_SRC_REV v0.998
 #endif
 
 #define TXEnablePin 13
@@ -20,7 +20,8 @@
 #define OFFSET_GW OFFSET_DNS+4
 #define OFFSET_MASK OFFSET_GW+4
 #define OFFSET_CONFIGSERVER OFFSET_MASK+4
-#define EEPROM_offset OFFSET_CONFIGSERVER+32
+#define OFFSET_MQTT_PWD OFFSET_CONFIGSERVER+32
+#define EEPROM_offset OFFSET_MQTT_PWD+16
 
 #define INTERVAL_CHECK_INPUT  50
 #define INTERVAL_CHECK_MODBUS 2000
@@ -46,11 +47,11 @@
 #endif
 
 #ifndef OUTTOPIC
-#define OUTTOPIC "/myhome/s_out1/"
+#define OUTTOPIC "/myhome/s_out/"
 #endif
 
 #ifndef INTOPIC
-#define INTOPIC  "/myhome/in1/"
+#define INTOPIC  "/myhome/in/"
 #endif
 
 #define MQTT_SUBJECT_LENGTH 20
