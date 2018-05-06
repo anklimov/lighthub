@@ -32,8 +32,6 @@ e-mail    anklimov@gmail.com
 #include <ModbusMaster.h>
 #include <PubSubClient.h>
 
-#define dimPar SERIAL_8E1
-#define fmPar  SERIAL_8N1
 
 short modbusBusy = 0;
 extern aJsonObject *pollingItem;
@@ -121,9 +119,9 @@ void Item::setCmd(uint8_t cmd) {
 int Item::getArg(short n) //Return arg int or first array element if Arg is array
 {
     if (!itemArg) return -1;
-    if (itemArg->type == aJson_Int){ 
+    if (itemArg->type == aJson_Int){
         if (!n) return itemArg->valueint; else return -1;
-    }    
+    }
     if ((itemArg->type == aJson_Array) && ( n < aJson.getArraySize(itemArg))) return aJson.getArrayItem(itemArg, n)->valueint;
     else return -2;
 }
@@ -839,13 +837,13 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
 
 
     switch (_mask) {
-       case 1:  
+       case 1:
         value <<= 8;
         value |= (0xff);
-        break;    
+        break;
        case 0:
         value &= 0xff;
-        value |= (0xff00);            
+        value |= (0xff00);
     }
 
     Serial.print(addr);
@@ -1030,16 +1028,16 @@ int Item::checkModbusDimmer() {
 int Item::checkModbusDimmer(int data) {
     short mask = getArg(2);
     if (mask < 0) return 0;
-    
+
     short maxVal = getArg(3);
     if (maxVal<=0) maxVal = 0x3f;
-    
+
     int d = data;
     if (mask == 1) d >>= 8;
     if (mask == 0 || mask == 1) d &= 0xff;
-    
+
     if (maxVal) d = map(d, 0, maxVal, 0, 100);
-    
+
     int cmd = getCmd();
     //Serial.println(d);
     if (getVal() != d || d && cmd == CMD_OFF || d && cmd == CMD_HALT) //volume changed or turned on manualy
