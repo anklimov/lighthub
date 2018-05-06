@@ -285,10 +285,15 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                                                 else Ethernet.begin(mac,ip,dns,gw);
                                                     else  Ethernet.begin(mac,ip,dns);
                                                           else  Ethernet.begin(mac,ip);
-                                                                else res = Ethernet.begin(mac, 12000);
+                                                                else
+                                                                  {
+                                                                  wdt_dis();
+                                                                  res = Ethernet.begin(mac, 12000);
+                                                                  wdt_en();
+                                                                  wdt_res();
+                                                                   }
 
 
-            wdt_dis();
             if (res == 0) {
                 Serial.println(F("Failed to configure Ethernet using DHCP"));
                 lanStatus = -10;
@@ -297,8 +302,7 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                 printIPAddress();
                 lanStatus = 1;
             }
-            wdt_en();
-            wdt_res();
+
 
 #endif
             break;
@@ -997,7 +1001,11 @@ void setup_main() {
 #ifdef _artnet
     ArtnetSetup();
 #endif
-
+/*
+SPI.begin();
+while (Ethernet.maintain() == NO_LINK && millis()<3000UL) {delay(500);Serial.print(F("."));}
+*/
+delay(1000); //Wiz5500
     //TODO: checkForRemoteSketchUpdate();
 }
 
