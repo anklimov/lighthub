@@ -121,8 +121,10 @@ void Item::setCmd(uint8_t cmd) {
 int Item::getArg(short n) //Return arg int or first array element if Arg is array
 {
     if (!itemArg) return -1;
-    if (itemArg->type == aJson_Int) return itemArg->valueint;
-    else if (itemArg->type == aJson_Array) return aJson.getArrayItem(itemArg, n)->valueint;
+    if (itemArg->type == aJson_Int){ 
+        if (!n) return itemArg->valueint; else return -1;
+    }    
+    if ((itemArg->type == aJson_Array) && ( n < aJson.getArraySize(itemArg))) return aJson.getArrayItem(itemArg, n)->valueint;
     else return -2;
 }
 
@@ -456,13 +458,16 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
 
 #ifdef _modbus
         case CH_MODBUS: {
-
-            if ((itemArg->type == aJson_Array) && (aJson.getArraySize(itemArg) == 3)) {
+               short numpar=0;
+            if ((itemArg->type == aJson_Array) && ((numpar = aJson.getArraySize(itemArg)) >= 2)) {
                 int _addr = aJson.getArrayItem(itemArg, 0)->valueint;
                 int _reg = aJson.getArrayItem(itemArg, 1)->valueint;
-                int _mask = aJson.getArrayItem(itemArg, 2)->valueint;
-
-                modbusDimmerSet(_addr, _reg, _mask, map(Par[0], 0, 100, 0, 0x3f));
+                int _mask = -1;
+                if (numpar >= 3)  _mask = aJson.getArrayItem(itemArg, 2)->valueint;
+                int _maxval = 0x3f;
+                if (numpar >=4) _maxval = aJson.getArrayItem(itemArg, 3)->valueint;
+                if (_maxval) modbusDimmerSet(_addr, _reg, _mask, map(Par[0], 0, 100, 0, _maxval));
+                             else modbusDimmerSet(_addr, _reg, _mask, Par[0]);
             }
             break;
         }
@@ -833,12 +838,14 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
     node.begin(addr, modbusSerial);
 
 
-    if (_mask) {
+    switch (_mask) {
+       case 1:  
         value <<= 8;
         value |= (0xff);
-    } else {
+        break;    
+       case 0:
         value &= 0xff;
-        value |= (0xff00);
+        value |= (0xff00);            
     }
 
     Serial.print(addr);
@@ -1022,10 +1029,17 @@ int Item::checkModbusDimmer() {
 
 int Item::checkModbusDimmer(int data) {
     short mask = getArg(2);
+    if (mask < 0) return 0;
+    
+    short maxVal = getArg(3);
+    if (maxVal<=0) maxVal = 0x3f;
+    
     int d = data;
-    if (mask) d >>= 8;
-    d &= 0xff;
-    d = map(d, 0, 0x3f, 0, 100);
+    if (mask == 1) d >>= 8;
+    if (mask == 0 || mask == 1) d &= 0xff;
+    
+    if (maxVal) d = map(d, 0, maxVal, 0, 100);
+    
     int cmd = getCmd();
     //Serial.println(d);
     if (getVal() != d || d && cmd == CMD_OFF || d && cmd == CMD_HALT) //volume changed or turned on manualy
