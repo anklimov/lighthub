@@ -1,6 +1,6 @@
 // Configuration of drivers enabled
 #ifndef PIO_SRC_REV
-#define PIO_SRC_REV v0.998
+#define PIO_SRC_REV v0.999
 #endif
 
 #define TXEnablePin 13
@@ -83,7 +83,11 @@
 
 #if defined(__AVR__)
 //All options available
+#ifdef CONTROLLINO
+#define modbusSerial Serial3
+#else
 #define modbusSerial Serial2
+#endif
 #define dmxin DMXSerial
 #define dmxout DmxSimple
 #endif

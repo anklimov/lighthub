@@ -324,15 +324,17 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                 int port = 1883;
                 char empty = 0;
                 char *user = &empty;
-                char *password = &empty;
+                char passwordBuf[16]="";
+                char *password = passwordBuf;
+
 
                 if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
                     char *client_id = aJson.getArrayItem(mqttArr, 0)->valuestring;
                     char *servername = aJson.getArrayItem(mqttArr, 1)->valuestring;
                     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
-
                     if (n >= 4) user = aJson.getArrayItem(mqttArr, 3)->valuestring;
-                    if (n >= 5) password = aJson.getArrayItem(mqttArr, 4)->valuestring;
+                    if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf,sizeof(passwordBuf)) && (n >= 5))
+                          password = aJson.getArrayItem(mqttArr, 4)->valuestring;
 
                     mqttClient.setServer(servername, port);
                     mqttClient.setCallback(mqttCallback);
@@ -772,6 +774,13 @@ void cmdFunctionIp(int arg_cnt, char **args)
 Serial.println(F("Saved"));
 }
 
+void cmdFunctionPwd(int arg_cnt, char **args)
+//(char* tokens)
+{ char empty[]="";
+  if (arg_cnt)
+      saveFlash(OFFSET_MQTT_PWD,args[1]);
+  else saveFlash(OFFSET_MQTT_PWD,empty);
+    }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
 
@@ -955,12 +964,21 @@ int getConfig(int arg_cnt, char **args)
 }
 
 void preTransmission() {
+#ifdef CONTROLLINO
+// set DE and RE on HIGH
+    PORTJ |= B01100000;
+#else
     digitalWrite(TXEnablePin, 1);
+#endif
 }
 
 void postTransmission() {
-    //modbusSerial.flush();
+    #ifdef CONTROLLINO
+    // set DE and RE on LOW
+		PORTJ &= B10011111;
+    #else
     digitalWrite(TXEnablePin, 0);
+    #endif
 }
 //#define PIO_SRC_REV commit 8034a6b765229d94a94d90fd08dd9588acf5f3da Author: livello <livello@bk.ru> Date:   Wed Mar 28 02:35:50 2018 +0300 refactoring
 
@@ -981,7 +999,14 @@ void setup_main() {
     loadConfigFromEEPROM(0, NULL);
 
 #ifdef _modbus
-    pinMode(TXEnablePin, OUTPUT);
+#ifdef CONTROLLINO
+//set PORTJ pin 5,6 direction (RE,DE)
+DDRJ |= B01100000;
+//set RE,DE on LOW
+PORTJ &= B10011111;
+#else
+pinMode(TXEnablePin, OUTPUT);
+#endif
     modbusSerial.begin(MODBUS_SERIAL_BAUD);
     node.idle(&modbusIdle);
     // Callbacks allow us to configure the RS485 transceiver correctly
@@ -1097,6 +1122,7 @@ void setupCmdArduino() {
     cmdAdd("kill", cmdFunctionKill);
     cmdAdd("req", cmdFunctionReq);
     cmdAdd("ip", cmdFunctionIp);
+    cmdAdd("pwd", cmdFunctionPwd);
 }
 
 void loop_main() {
