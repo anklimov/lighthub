@@ -1,8 +1,11 @@
 # LightHub
-is Flexible, Arduino-Mega/Arduino DUE/ESP8266  based SmartHome controller. [RU](https://geektimes.ru/post/295109/) [HOME-site RU](http://lazyhome.ru)
+is Flexible, Arduino-Mega/Arduino DUE/ESP8266 open-software and open-hardware SmartHome controller. [RU](https://geektimes.ru/post/295109/) [HOME-site RU](http://lazyhome.ru)
+It may operate both: 
+* On [especially designed hardware board](http://www.lazyhome.ru/index.php/featurerequest) with 16 optocoupled digital inputs, 16 ESD protected digital/analog Inputs/outputs, 8 open-collector outputs (up to 0.5A/50V), DMX IN/OUT, MODBUS RTU and hardware 1-wire support circuit.
+* On plain Arduino MEGA 2560, Arduino DUE, ESP8266 and even on [Controllino](http://controllino.biz/)
+(Controllino and ESP8266 is not tested enough and in experimental stage yet)
 
-It allows connecting together:
-
+Lighthub allows connecting together:
 * Contact sensors (switches, buttons etc)
 * 1-Wire temperature sensors (up to 20 on single bus)
 * Standard nonexpensive Relay board with TTL inputs, [like this](https://aliexpress.com/item/16-Channel-20A-Relay-Control-Module-for-Arduino-UNO-MEGA2560-R3-Raspberry-Pi/32747887693.html) to control AC powered lamps, floor heaters, boilers etc
