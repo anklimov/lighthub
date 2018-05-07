@@ -45,7 +45,6 @@ Relay array channel
 Relay DMX array channel
 Config URL & MQTT password commandline configuration
 1-wire Update refactoring (save memory)
-Static IP
 Topic configuration
 Timer
 Modbus response check
@@ -334,7 +333,10 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
                     if (n >= 4) user = aJson.getArrayItem(mqttArr, 3)->valuestring;
                     if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf,sizeof(passwordBuf)) && (n >= 5))
+                        {
                           password = aJson.getArrayItem(mqttArr, 4)->valuestring;
+                          Serial.println(F("Using MQTT password from config"));
+                        }
 
                     mqttClient.setServer(servername, port);
                     mqttClient.setCallback(mqttCallback);
@@ -564,10 +566,11 @@ void cmdFunctionHelp(int arg_cnt, char **args)
     printFirmwareVersionAndBuildOptions();
     Serial.println(F("Use the commands: 'help' - this text\n"
                              "'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
-                             "'ip [ip[,dns[,gw[,subnet]]]]'\n"
+                             "'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"
                              "'save' - save config in NVRAM\n"
-                             "'get' [config addr]' - get config from pre-configured URL\n"
+                             "'get' [config addr]' - get config from pre-configured URL and store addr\n"
                              "'load' - load config from NVRAM\n"
+                             "'pwd' - define MQTT password\n"
                              "'kill' - test watchdog"));
 }
 
@@ -780,6 +783,7 @@ void cmdFunctionPwd(int arg_cnt, char **args)
   if (arg_cnt)
       saveFlash(OFFSET_MQTT_PWD,args[1]);
   else saveFlash(OFFSET_MQTT_PWD,empty);
+  Serial.println(F("Password updated"));
     }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
@@ -1030,7 +1034,7 @@ pinMode(TXEnablePin, OUTPUT);
 SPI.begin();
 while (Ethernet.maintain() == NO_LINK && millis()<3000UL) {delay(500);Serial.print(F("."));}
 */
-delay(1000); //Wiz5500
+//delay(1000); //Wiz5500
     //TODO: checkForRemoteSketchUpdate();
 }
 
