@@ -141,6 +141,7 @@ platformio device monitor -b 115200
 * MODBUS_DISABLE // disable Modbus support
 * OWIRE_DISABLE // disable OneWire support
 * ARTNET_ENABLE //Enable Artnet protocol support
+* CONTROLLINO //Change Modbus port, direction pins and Wiznet SS pins to be working on [Controllino](http://controllino.biz/)
 
 
 # Default compilation behavior:
