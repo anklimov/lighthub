@@ -15,14 +15,14 @@ Lighthub allows connecting together:
 
 ![alt text](LightHub.png "LightHub application diagram")
 
-Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from MQTT enabled software. At the moment, tested:
+Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from MQTT enabled software. At the moment, LightHub tested with following set of complementary free software:
 * [Openhab or Openhab2 Smarthome software](http://www.openhab.org/)
-Openhab provides own native mobile app both, for IoS and Android, requires some server to be installed (Raspberry PI good enough)
+Openhab provides own native mobile app both, for IoS and Android, and even allow you to use Apple's HomeKit to say "Siri, turn on light in bedroom" but requires some server to be installed (Raspberry PI with [Openhabian](https://docs.openhab.org/installation/openhabian) will good enough)
 * [HomeRemote mobile client](http://thehomeremote.com/)
-Home Remote mobile applicatios for IoS and Android requires only MQTT broker to be working. Any Cloud-based MQTT broker, like [CloudMQTT](https://www.cloudmqtt.com/) is good enough to serve average household, even with free account.
-* [Node-Red](https://nodered.org/)  Possibly, the best solution to deploy event-based authomation and scripting on top of MQTT/LightHub. The easy to use universal and visual tool to wire many different devices in single system.
+Home Remote mobile applicatios for IoS and Android requires just MQTT broker to be working. Any Cloud-based MQTT broker, like [CloudMQTT](https://www.cloudmqtt.com/) will enough to serve average household, even with free account.
+* [Node-Red](https://nodered.org/)  Possibly, the best solution to deploy event-based authomation and scripting on top of MQTT/LightHub. The easy to use universal and visual tool to wire many different devices in single system. Having own Dashbord which allow control from web/mobile web, even without mobile apps (but excelent co-working with OpenHab and HomeRemote)
 
-Scalability is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab/NodeRed/HomeRemote and propagate commands across network.
+Scalability of Lighthub is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab/NodeRed/HomeRemote and propagate commands across network.
 
 # [Please refer to our Wiki for insructions.](https://github.com/anklimov/lighthub/wiki/Configuring)
 * [Compiling and flashing](https://github.com/anklimov/lighthub/wiki/Compiling-and-flashing)
