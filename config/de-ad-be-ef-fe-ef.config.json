@@ -1,5 +1,5 @@
 {
-  "mqtt":["public_test1","m21.cloudmqtt.com",12299,"bkyyvlha","RpHF-x6v4YWb"],
+  "mqtt":["public_test1","m2m.eclipse.org"],
   "ow":{
 		 "2807FFD503000036":{"emit":"t_balk1","item":"h_balk1"},
        		 "284811170400005B":{"emit":"t_entr"},

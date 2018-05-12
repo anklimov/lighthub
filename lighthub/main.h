@@ -40,8 +40,8 @@
 #include "stdarg.h"
 #include "item.h"
 #include "inputs.h"
-#include "Dhcp.h"
 #include "FastLED.h"
+#include "Dns.h"
 //#include "hsv2rgb.h"
 
 #if defined(__SAM3X8E__)
@@ -81,9 +81,7 @@
 #ifdef Wiz5500
 #include <Ethernet2.h>
 #else
-
 #include <Ethernet.h>
-
 #endif
 
 #ifdef _artnet
@@ -92,13 +90,17 @@
 
 #ifdef SD_CARD_INSERTED
 #include "sd_card_w5100.h"
-#endif
+#endif //SD_CARD_INSERTED
+
+#ifdef DHT_ENABLE
+#include <DHT.h>
+#endif //DHT_ENABLE/**/
 
 #ifdef _artnet
 extern Artnet *artnet;
 #endif
 
-void watchdogSetup(void);
+//void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);
 
@@ -142,11 +144,15 @@ void cmdFunctionGet(int arg_cnt, char **args);
 
 void printBool(bool arg);
 
-void saveFlash(short n, char *str);
+void saveStringToFlash(short n, char *str);
 
-void loadFlash(short n, char *str);
+int loadStringFromFlash(short offset, char *str, short numBytes = 32);
 
-int getConfig(int arg_cnt, char **args);
+void saveIPAddressToFlash(short n, IPAddress &ip);
+
+int loadIPAddressFromFlash(short n, IPAddress &ip);
+
+int getConfig(int arg_cnt=0, char **args=NULL);
 
 void preTransmission();
 

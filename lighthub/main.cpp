@@ -1,5 +1,5 @@
 /* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
- *  
+ *
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -45,9 +45,8 @@ Relay array channel
 Relay DMX array channel
 Config URL & MQTT password commandline configuration
 1-wire Update refactoring (save memory)
-Static IP
 Topic configuration
-Timer 
+Timer
 Modbus response check
 control/debug (Commandline) over MQTT
 more Modbus dimmers
@@ -66,7 +65,7 @@ PWM Out
 
 */
 
-
+#include "Arduino.h"
 #include "main.h"
 #include "options.h"
 
@@ -81,6 +80,8 @@ EthernetClient ethClient;
 
 const char outprefix[] PROGMEM = OUTTOPIC;
 const char inprefix[] PROGMEM = INTOPIC;
+const char configServerPrecompiled[] PROGMEM = CONFIG_SERVER;
+
 
 aJsonObject *root = NULL;
 aJsonObject *items = NULL;
@@ -99,6 +100,7 @@ unsigned long nextThermostatCheck = 0;
 aJsonObject *pollingItem = NULL;
 
 bool owReady = false;
+bool configOk = false;
 int lanStatus = 0;
 
 #ifdef _modbus
@@ -113,15 +115,17 @@ PubSubClient mqttClient(ethClient);
 
 void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
 
+
 // MQTT Callback routine
-#define MQTT_SUBJECT_LENGTH 20
-#define MQTT_TOPIC_LENGTH 20
+
 
 void mqttCallback(char *topic, byte *payload, unsigned int length) {
-    payload[length] = 0;
+
     Serial.print(F("\n["));
     Serial.print(topic);
     Serial.print(F("] "));
+    if (!payload) return;
+      payload[length] = 0;
 
     int fr = freeRam();
     if (fr < 250) {
@@ -134,7 +138,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     }
     Serial.println();
 
-    boolean retaining = (lanStatus == 4);  //Todo - named constant 
+    boolean retaining = (lanStatus == 4);  //Todo - named constant
     //Check if topic = Command topic
     short intopic = 0;
     {
@@ -261,15 +265,35 @@ int lanLoop() {
     switch (lanStatus) {
 //Initial state
         case 0: //Ethernet.begin(mac,ip);
-
+        {
 #ifdef __ESP__
             //WiFi.mode(WIFI_STA);
 //wifiMulti.addAP("Smartbox", "");
 if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
 #else
+            IPAddress ip;
+            IPAddress dns;
+            IPAddress gw;
+            IPAddress mask;
+            int res = 1;
             Serial.println(F("Starting lan"));
-            wdt_dis();
-            if (Ethernet.begin(mac, 12000) == 0) {
+            if (loadIPAddressFromFlash(OFFSET_IP, ip))
+               if (loadIPAddressFromFlash(OFFSET_DNS, dns))
+                  if (loadIPAddressFromFlash(OFFSET_GW, gw))
+                     if (loadIPAddressFromFlash(OFFSET_MASK, mask)) Ethernet.begin(mac,ip,dns,gw,mask);
+                                                else Ethernet.begin(mac,ip,dns,gw);
+                                                    else  Ethernet.begin(mac,ip,dns);
+                                                          else  Ethernet.begin(mac,ip);
+                                                                else
+                                                                  {
+                                                                  wdt_dis();
+                                                                  res = Ethernet.begin(mac, 12000);
+                                                                  wdt_en();
+                                                                  wdt_res();
+                                                                   }
+
+
+            if (res == 0) {
                 Serial.println(F("Failed to configure Ethernet using DHCP"));
                 lanStatus = -10;
                 lanCheck = millis() + 60000;
@@ -277,14 +301,16 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                 printIPAddress();
                 lanStatus = 1;
             }
-            wdt_en();
-            wdt_res();
+
+
 #endif
             break;
+          }
 //Have IP address
         case 1:
-
-            lanStatus = getConfig(0, NULL); //got config from server or load from NVRAM
+            if (!configOk)
+                lanStatus = getConfig(0, NULL); //got config from server or load from NVRAM
+                else lanStatus = 2;
 #ifdef _artnet
             if (artnet) artnet->begin();
 #endif
@@ -297,17 +323,23 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                 int port = 1883;
                 char empty = 0;
                 char *user = &empty;
-                char *password = &empty;
+                char passwordBuf[16]="";
+                char *password = passwordBuf;
+
 
                 if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
                     char *client_id = aJson.getArrayItem(mqttArr, 0)->valuestring;
                     char *servername = aJson.getArrayItem(mqttArr, 1)->valuestring;
                     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
-
                     if (n >= 4) user = aJson.getArrayItem(mqttArr, 3)->valuestring;
-                    if (n >= 5) password = aJson.getArrayItem(mqttArr, 4)->valuestring;
+                    if (!loadStringFromFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5))
+                        {
+                          password = aJson.getArrayItem(mqttArr, 4)->valuestring;
+                          Serial.println(F("Using MQTT password from config"));
+                        }
 
                     mqttClient.setServer(servername, port);
+                    mqttClient.setCallback(mqttCallback);
 
                     Serial.print(F("Attempting MQTT connection to "));
                     Serial.print(servername);
@@ -317,11 +349,12 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                     Serial.print(user);
                     Serial.print(F(" ..."));
 
+                    wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
                     if (mqttClient.connect(client_id, user, password)) {
                         Serial.print(F("connected as "));
                         Serial.println(client_id);
-
-
+                    wdt_en();
+                        configOk=true;
                         // ... Temporary subscribe to status topic
                         char buf[MQTT_TOPIC_LENGTH];
 
@@ -344,13 +377,13 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                         Serial.print(mqttClient.state());
                         Serial.println(F(" try again in 5 seconds"));
                         lanCheck = millis() + 5000;
-                        lanStatus = -12;
+                        lanStatus = 12;
                     }
                 }
                 break;
             }
 
-        case 4: //retaining ... Collecting 
+        case 4: //retaining ... Collecting
             if (millis() > lanCheck) {
                 char buf[MQTT_TOPIC_LENGTH];
 
@@ -374,7 +407,7 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                 lanStatus = 0;
             break;
 //Reconnect
-        case -12:
+        case 12:
             if (millis() > lanCheck)
 
                 lanStatus = 2;
@@ -398,9 +431,15 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
         wdt_dis();
         if (lanStatus > 0)
             switch (Ethernet.maintain()) {
+                case NO_LINK:
+                    Serial.println(F("No link"));
+                    if (mqttClient.connected()) mqttClient.disconnect();
+                    lanStatus = -10;
+                    break;
                 case DHCP_CHECK_RENEW_FAIL:
                     //renewed fail
                     Serial.println(F("Error: renewed fail"));
+                    if (mqttClient.connected()) mqttClient.disconnect();
                     lanStatus = -10;
                     break;
 
@@ -411,6 +450,7 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
 
                 case DHCP_CHECK_REBIND_FAIL:
                     Serial.println(F("Error: rebind fail"));
+                    if (mqttClient.connected()) mqttClient.disconnect();
                     lanStatus = -10;
                     break;
 
@@ -501,7 +541,7 @@ void Changed(int i, DeviceAddress addr, int val) {
    }
     */
 
-    if ((val == -127) || (val == 85)) {
+    if ((val == -127) || (val == 85) || (val == 0)) { //ToDo: 1-w short circuit mapped to "0" celsium
 //        Serial.print("Temp err ");Serial.println(t);
         return;
     }
@@ -525,21 +565,24 @@ void cmdFunctionHelp(int arg_cnt, char **args)
 {
     printFirmwareVersionAndBuildOptions();
     Serial.println(F("Use the commands: 'help' - this text\n"
-                             "'set de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
+                             "'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
+                             "'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"
                              "'save' - save config in NVRAM\n"
-                             "'get' - get config from pre-configured URL\n"
+                             "'get' [config addr]' - get config from pre-configured URL and store addr\n"
                              "'load' - load config from NVRAM\n"
+                             "'pwd' - define MQTT password\n"
                              "'kill' - test watchdog"));
 }
 
 void cmdFunctionKill(int arg_cnt, char **args) {
-    for (short i = 17; i > 0; i--) {
+    for (short i = 1; i < 20; i++) {
         delay(1000);
         Serial.println(i);
     };
 }
 
 void applyConfig() {
+  if (!root) return;
 #ifdef _dmxout
     int maxChannels;
     aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
@@ -550,7 +593,6 @@ void applyConfig() {
         Serial.println(maxChannels);
     }
 #endif
-
 #ifdef _dmxin
     int itemsCount;
     dmxArr = aJson.getObjectItem(root, "dmxin");
@@ -560,7 +602,6 @@ void applyConfig() {
         Serial.println(itemsCount * 4);
     }
 #endif
-
 #ifdef _modbus
     modbusArr = aJson.getObjectItem(root, "modbus");
 #endif
@@ -574,7 +615,7 @@ void applyConfig() {
         aJsonObject *item = owArr->child;
         owReady = owSetup(&Changed);
         t_count = 0;
-        while (item) {
+        while (item && owReady) {
             if ((item->type == aJson_Object)) {
                 DeviceAddress addr;
                 //Serial.print(F("Add:")),Serial.println(item->name);
@@ -586,7 +627,37 @@ void applyConfig() {
     }
 #endif
     items = aJson.getObjectItem(root, "items");
+
+// Digital output related Items initialization
+pollingItem=NULL;
+if (items) {
+aJsonObject * item = items->child;
+while (items && item)
+  if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
+    Item it(item);
+    if (it.isValid()) {
+    int pin=it.getArg();
+    int cmd = it.getCmd();
+    switch (it.itemType) {
+          case CH_THERMO:
+          if (cmd<1) it.setCmd(CMD_OFF);
+          case CH_RELAY:
+            {
+            int k;
+            pinMode(pin, OUTPUT);
+            digitalWrite(pin, k = ((cmd == CMD_ON) ? HIGH : LOW));
+            Serial.print(F("Pin:"));
+            Serial.print(pin);
+            Serial.print(F("="));
+            Serial.println(k);
+            }
+            break;
+          } //switch
+       } //isValid
+          item = item->next;
+     }  //if
     pollingItem = items->child;
+}
     inputs = aJson.getObjectItem(root, "in");
     mqttArr = aJson.getObjectItem(root, "mqtt");
     printConfigSummary();
@@ -629,6 +700,7 @@ int loadConfigFromEEPROM(int arg_cnt, char **args)
         }
         Serial.println(F("Loaded"));
         applyConfig();
+        ethClient.stop(); //Refresh MQTT connect to get retained info
         return 1;
     } else {
         Serial.println(F("No stored config"));
@@ -688,6 +760,35 @@ void cmdFunctionSave(int arg_cnt, char **args)
     Serial.println(F("Saved to EEPROM"));
 }
 
+void cmdFunctionIp(int arg_cnt, char **args)
+//(char* tokens)
+{ IPAddress ip0 (0,0,0,0);
+  IPAddress ip;
+  DNSClient dns;
+    switch (arg_cnt) {
+      case 5: if (dns.inet_aton(args[4],ip)) saveIPAddressToFlash(OFFSET_MASK, ip); else
+              saveIPAddressToFlash(OFFSET_MASK, ip0);
+      case 4: if (dns.inet_aton(args[3],ip)) saveIPAddressToFlash(OFFSET_GW, ip); else
+              saveIPAddressToFlash(OFFSET_GW, ip0);
+      case 3: if (dns.inet_aton(args[2],ip)) saveIPAddressToFlash(OFFSET_DNS, ip); else
+              saveIPAddressToFlash(OFFSET_DNS, ip0);
+      case 2: if (dns.inet_aton(args[1],ip)) saveIPAddressToFlash(OFFSET_IP, ip); else
+              saveIPAddressToFlash(OFFSET_IP, ip0);
+      break;
+      case 1: //dynamic IP
+          saveIPAddressToFlash(OFFSET_IP, ip0);
+    }
+Serial.println(F("Saved"));
+}
+
+void cmdFunctionPwd(int arg_cnt, char **args)
+//(char* tokens)
+{ char empty[]="";
+  if (arg_cnt)
+      saveStringToFlash(OFFSET_MQTT_PWD, args[1]);
+  else saveStringToFlash(OFFSET_MQTT_PWD, empty);
+  Serial.println(F("Password updated"));
+    }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
 
@@ -710,22 +811,40 @@ void cmdFunctionSetMac(int arg_cnt, char **args) {
 }
 
 void cmdFunctionGet(int arg_cnt, char **args) {
-    getConfig(arg_cnt, args);
-    restoreState();
+    lanStatus=getConfig(arg_cnt, args);
+    ethClient.stop(); //Refresh MQTT connect to get retained info
+    //restoreState();
 }
 
 void printBool(bool arg) { (arg) ? Serial.println(F("on")) : Serial.println(F("off")); }
 
 
-void saveFlash(short n, char *str) {}
+void saveStringToFlash(short n, char *str) {
+  short i;
+  short len=strlen(str);
+  if (len>31) len=31;
+  for(int i=0;i<len;i++) EEPROM.write(n+i,str[i]);
+  EEPROM.write(n+len,0);
+}
 
-void loadFlash(short n, char *str) {}
+int loadStringFromFlash(short offset, char *str, short numBytes) {
+short i;
+uint8_t ch = EEPROM.read(offset);
+if (!ch || (ch == 0xff)) return 0;
+  for (i=0;i<numBytes-1 && (str[i] = EEPROM.read(offset++));i++);
+  str[i]=0;
+return 1;
+}
 
-#ifndef MY_CONFIG_SERVER
-#define CONFIG_SERVER "lazyhome.ru"
-#else
-#define CONFIG_SERVER QUOTE(MY_CONFIG_SERVER)
-#endif
+void saveIPAddressToFlash(short n, IPAddress &ip) {
+  for(int i=0;i<4;i++) EEPROM.write(n++,ip[i]);
+}
+
+int loadIPAddressFromFlash(short n, IPAddress &ip) {
+  for(int i=0;i<4;i++) ip[i]=EEPROM.read(n++);
+  if (ip[0] && (ip[0] != 0xff)) return 1;
+return 0;
+}
 
 int getConfig(int arg_cnt, char **args)
 //(char *tokens)
@@ -734,12 +853,13 @@ int getConfig(int arg_cnt, char **args)
 
     int responseStatusCode = 0;
     char ch;
-    char URI[40];
-    char configServer[32] = CONFIG_SERVER;
-    if (arg_cnt > 0) {
+    char URI[CONFIG_URI_LENGTH];
+    char configServer[CONFIG_SERVER_ADDRESS_LENGTH]="";
+    if (arg_cnt > 1) {
         strncpy(configServer, args[1], sizeof(configServer) - 1);
-        saveFlash(0, configServer);
-    } else loadFlash(0, configServer);
+        saveStringToFlash(OFFSET_CONFIGSERVER, configServer);
+    } else if (!loadStringFromFlash(OFFSET_CONFIGSERVER, configServer))
+              strncpy_P(configServer,configServerPrecompiled,sizeof(configServer));
 
     snprintf(URI, sizeof(URI), "/%02x-%02x-%02x-%02x-%02x-%02x.config.json", mac[0], mac[1], mac[2], mac[3], mac[4],
              mac[5]);
@@ -749,22 +869,24 @@ int getConfig(int arg_cnt, char **args)
 
 #if defined(__AVR__)
     FILE *result;
-    //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
-    HTTPClient hclient(configServer, 80);
 
-
+    HTTPClient hclient(configServer, CONFIG_SERVER_PORT);
     // FILE is the return STREAM type of the HTTPClient
     result = hclient.getURI(URI);
     responseStatusCode = hclient.getLastReturnCode();
     wdt_en();
+
     if (result != NULL) {
         if (responseStatusCode == 200) {
 
             Serial.println(F("got Config"));
             aJsonFileStream as = aJsonFileStream(result);
+            noInterrupts();
             aJson.deleteItem(root);
             root = aJson.parse(&as);
+            interrupts();
+        //    Serial.println(F("Parsed."));
             hclient.closeStream(result);  // this is very important -- be sure to close the STREAM
 
             if (!root) {
@@ -775,7 +897,7 @@ int getConfig(int arg_cnt, char **args)
             //    char *outstr = aJson.print(root);
             //    Serial.println(outstr);
             //    free(outstr);
-
+            Serial.println(F("Applying."));
                 applyConfig();
 
 
@@ -798,11 +920,12 @@ int getConfig(int arg_cnt, char **args)
 #else
     //Non AVR code
     String response;
-
-    HttpClient htclient = HttpClient(ethClient, configServer, 80);
-    htclient.setHttpResponseTimeout(4000);
+    EthernetClient configEthClient;
+    HttpClient htclient = HttpClient(configEthClient, configServer, CONFIG_SERVER_PORT);
+    //htclient.stop(); //_socket =MAX
+    htclient.setHttpResponseTimeout(CONFIG_SERVER_RESPONSE_TIMEOUT);
     wdt_res();
-    //Serial.println("making GET request");
+    //Serial.println("making GET request");get
     htclient.beginRequest();
     htclient.get(URI);
     htclient.endRequest();
@@ -848,14 +971,22 @@ int getConfig(int arg_cnt, char **args)
 }
 
 void preTransmission() {
+#ifdef CONTROLLINO
+// set DE and RE on HIGH
+    PORTJ |= B01100000;
+#else
     digitalWrite(TXEnablePin, 1);
+#endif
 }
 
 void postTransmission() {
-    //modbusSerial.flush();
+    #ifdef CONTROLLINO
+    // set DE and RE on LOW
+		PORTJ &= B10011111;
+    #else
     digitalWrite(TXEnablePin, 0);
+    #endif
 }
-//#define PIO_SRC_REV commit 8034a6b765229d94a94d90fd08dd9588acf5f3da Author: livello <livello@bk.ru> Date:   Wed Mar 28 02:35:50 2018 +0300 refactoring
 
 void setup_main() {
     setupCmdArduino();
@@ -874,7 +1005,14 @@ void setup_main() {
     loadConfigFromEEPROM(0, NULL);
 
 #ifdef _modbus
-    pinMode(TXEnablePin, OUTPUT);
+#ifdef CONTROLLINO
+//set PORTJ pin 5,6 direction (RE,DE)
+DDRJ |= B01100000;
+//set RE,DE on LOW
+PORTJ &= B10011111;
+#else
+pinMode(TXEnablePin, OUTPUT);
+#endif
     modbusSerial.begin(MODBUS_SERIAL_BAUD);
     node.idle(&modbusIdle);
     // Callbacks allow us to configure the RS485 transceiver correctly
@@ -894,7 +1032,11 @@ void setup_main() {
 #ifdef _artnet
     ArtnetSetup();
 #endif
-
+/*
+SPI.begin();
+while (Ethernet.maintain() == NO_LINK && millis()<3000UL) {delay(500);Serial.print(F("."));}
+*/
+//delay(1000); //Wiz5500
     //TODO: checkForRemoteSketchUpdate();
 }
 
@@ -982,9 +1124,11 @@ void setupCmdArduino() {
     cmdAdd("save", cmdFunctionSave);
     cmdAdd("load", cmdFunctionLoad);
     cmdAdd("get", cmdFunctionGet);
-    cmdAdd("set", cmdFunctionSetMac);
+    cmdAdd("mac", cmdFunctionSetMac);
     cmdAdd("kill", cmdFunctionKill);
     cmdAdd("req", cmdFunctionReq);
+    cmdAdd("ip", cmdFunctionIp);
+    cmdAdd("pwd", cmdFunctionPwd);
 }
 
 void loop_main() {
@@ -1015,7 +1159,7 @@ void loop_main() {
     }
 
 
-    if (inputs) inputLoop();
+    inputLoop();
 
 #if defined (_espdmx)
     dmxout.update();
@@ -1041,6 +1185,11 @@ void owIdle(void) {
     dmxout.update();
 #endif
 }
+void ethernetIdle(void){
+  wdt_res();
+  inputLoop();
+//  Serial.print(".");
+  };
 
 void modbusIdle(void) {
     wdt_res();
@@ -1049,7 +1198,9 @@ void modbusIdle(void) {
 #ifdef _artnet
         if (artnet) artnet->read();
 #endif
+     inputLoop();
     }
+
 
 #ifdef _dmxin
     DMXCheck();
@@ -1061,6 +1212,7 @@ void modbusIdle(void) {
 }
 
 void inputLoop(void) {
+    if (!inputs) return;
     if (millis() > nextInputCheck) {
         aJsonObject *input = inputs->child;
         while (input) {
@@ -1121,7 +1273,7 @@ void thermoLoop(void) {
                         mqttClient.publish("/alarm/snsr", item->name);
 
                 }
-                if (curtemp > itemTempSetting + THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", item->name);
+                if (curtemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", item->name);
 
                 thermostatCheckPrinted = true;
                 Serial.print(item->name);
