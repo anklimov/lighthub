@@ -5,6 +5,10 @@
 
 #define TXEnablePin 13
 
+#ifndef AVR_DMXOUT_PIN
+#define AVR_DMXOUT_PIN 3
+#endif
+
 #define T_ATTEMPTS 200
 #define IET_TEMP     0
 #define IET_ATTEMPTS 1

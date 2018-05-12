@@ -42,7 +42,7 @@ e-mail    anklimov@gmail.com
 #include <ESPDMX.h>
 extern DMXESPSerial dmxout;
 #define DmxWrite dmxout.write
-#endif 
+#endif
 
 #if defined(__SAM3X8E__)
 #include <DmxDue.h>
@@ -68,7 +68,7 @@ extern aJsonObject *dmxArr;
 
 void DMXput(void);
 void DMXinSetup(int channels);
-void DMXoutSetup(int channels,int pin);
+void DMXoutSetup(int channels);
 void ArtnetSetup();
 void DMXCheck(void);
 int itemCtrl2(char* name,int r,int g, int b, int w);

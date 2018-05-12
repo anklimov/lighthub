@@ -113,7 +113,10 @@ byte mac[6];
 PubSubClient mqttClient(ethClient);
 
 
-void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
+void watchdogSetup(void) {
+//Serial.begin(115200);
+//Serial.println("Watchdog armed.");
+}    //Do not remove - strong re-definition WDT Init for DUE
 
 
 // MQTT Callback routine
@@ -434,12 +437,14 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                    case NO_LINK:
                     Serial.println(F("No link"));
                     if (mqttClient.connected()) mqttClient.disconnect();
+                    lanCheck = millis() + 30000;
                     lanStatus = -10;
                     break;
                 case DHCP_CHECK_RENEW_FAIL:
                     //renewed fail
                     Serial.println(F("Error: renewed fail"));
                     if (mqttClient.connected()) mqttClient.disconnect();
+                    lanCheck = millis() + 1000;
                     lanStatus = -10;
                     break;
 
@@ -451,6 +456,7 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                 case DHCP_CHECK_REBIND_FAIL:
                     Serial.println(F("Error: rebind fail"));
                     if (mqttClient.connected()) mqttClient.disconnect();
+                    lanCheck = millis() + 1000;
                     lanStatus = -10;
                     break;
 
@@ -583,23 +589,23 @@ void cmdFunctionKill(int arg_cnt, char **args) {
 
 void applyConfig() {
   if (!root) return;
+  #ifdef _dmxin
+      int itemsCount;
+      dmxArr = aJson.getObjectItem(root, "dmxin");
+      if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
+          DMXinSetup(itemsCount * 4);
+          Serial.print(F("DMX in started. Channels:"));
+          Serial.println(itemsCount * 4);
+      }
+  #endif
 #ifdef _dmxout
     int maxChannels;
     aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
-    if (dmxoutArr && aJson.getArraySize(dmxoutArr) == 2) {
-        DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, 1)->valueint,
-                    aJson.getArrayItem(dmxoutArr, 0)->valueint);
+    if (dmxoutArr && aJson.getArraySize(dmxoutArr) >=1 ) {
+        DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, 1)->valueint);
+        //,aJson.getArrayItem(dmxoutArr, 0)->valueint);
         Serial.print(F("DMX out started. Channels: "));
         Serial.println(maxChannels);
-    }
-#endif
-#ifdef _dmxin
-    int itemsCount;
-    dmxArr = aJson.getObjectItem(root, "dmxin");
-    if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
-        DMXinSetup(itemsCount * 4);
-        Serial.print(F("DMX in started. Channels:"));
-        Serial.println(itemsCount * 4);
     }
 #endif
 #ifdef _modbus
@@ -987,7 +993,7 @@ void postTransmission() {
 //#define PIO_SRC_REV commit 8034a6b765229d94a94d90fd08dd9588acf5f3da Author: livello <livello@bk.ru> Date:   Wed Mar 28 02:35:50 2018 +0300 refactoring
 
 void setup_main() {
-    setupCmdArduino();
+      setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 
 #ifdef SD_CARD_INSERTED
@@ -1034,7 +1040,7 @@ pinMode(TXEnablePin, OUTPUT);
 SPI.begin();
 while (Ethernet.maintain() == NO_LINK && millis()<3000UL) {delay(500);Serial.print(F("."));}
 */
-//delay(1000); //Wiz5500
+delay(500); //Wiz5500
     //TODO: checkForRemoteSketchUpdate();
 }
 
@@ -1118,6 +1124,7 @@ void setupMacAddress() {
 
 void setupCmdArduino() {
     cmdInit(uint32_t(SERIAL_BAUD));
+    Serial.println(F(">>>"));
     cmdAdd("help", cmdFunctionHelp);
     cmdAdd("save", cmdFunctionSave);
     cmdAdd("load", cmdFunctionLoad);
