@@ -225,11 +225,11 @@ dmxin.begin();
  #endif
 }
 
-void DMXoutSetup(int channels,int pin)
+void DMXoutSetup(int channels)
 {
 #ifdef _dmxout
 #if defined(__AVR__)
- DmxSimple.usePin(pin);
+ DmxSimple.usePin(AVR_DMXOUT_PIN);
  DmxSimple.maxChannel(channels);
 #endif
 

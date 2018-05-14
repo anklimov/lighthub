@@ -90,11 +90,7 @@
 
 #ifdef SD_CARD_INSERTED
 #include "sd_card_w5100.h"
-#endif //SD_CARD_INSERTED
-
-#ifdef DHT_ENABLE
-#include <DHT.h>
-#endif //DHT_ENABLE/**/
+#endif
 
 #ifdef _artnet
 extern Artnet *artnet;
@@ -144,13 +140,13 @@ void cmdFunctionGet(int arg_cnt, char **args);
 
 void printBool(bool arg);
 
-void saveStringToFlash(short n, char *str);
+void saveFlash(short n, char *str);
 
-int loadStringFromFlash(short offset, char *str, short numBytes = 32);
+int loadFlash(short n, char *str, short l=32);
 
-void saveIPAddressToFlash(short n, IPAddress &ip);
+void saveFlash(short n, IPAddress& ip);
 
-int loadIPAddressFromFlash(short n, IPAddress &ip);
+int loadFlash(short n, IPAddress& ip);
 
 int getConfig(int arg_cnt=0, char **args=NULL);
 

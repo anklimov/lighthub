@@ -110,13 +110,9 @@ pio init --ide [atom|clion|codeblocks|eclipse|emacs|netbeans|qtcreator|sublimete
 ```
 Set custom build flags. first make your own copy of template
 ```bash
-cp build_flags_template.sh my_build_flags.sh
+cp custom_build_flags_template.py my_custom_build_flags.py
 ```
 then edit, change or comment unnecessary sections and source it
-```bash
-nano my_build_flags.sh
-source my_build_flags.sh
-```
 build and upload firmware for due|megaatmega2560|esp8266 board
 ```bash
 pio run -e due|megaatmega2560|esp8266 -t upload
@@ -144,7 +140,9 @@ platformio device monitor -b 115200
 * MODBUS_DISABLE // disable Modbus support
 * OWIRE_DISABLE // disable OneWire support
 * ARTNET_ENABLE //Enable Artnet protocol support
+* DAVR_DMXOUT_PIN=18 // Set Pin for DMXOUT on megaatmega2560
 * CONTROLLINO //Change Modbus port, direction pins and Wiznet SS pins to be working on [Controllino](http://controllino.biz/)
+
 
 
 # Default compilation behavior:

@@ -80,7 +80,7 @@ EthernetClient ethClient;
 
 const char outprefix[] PROGMEM = OUTTOPIC;
 const char inprefix[] PROGMEM = INTOPIC;
-const char configServerPrecompiled[] PROGMEM = CONFIG_SERVER;
+const char configserver[] PROGMEM = CONFIG_SERVER;
 
 
 aJsonObject *root = NULL;
@@ -113,7 +113,10 @@ byte mac[6];
 PubSubClient mqttClient(ethClient);
 
 
-void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
+void watchdogSetup(void) {
+//Serial.begin(115200);
+//Serial.println("Watchdog armed.");
+}    //Do not remove - strong re-definition WDT Init for DUE
 
 
 // MQTT Callback routine
@@ -277,10 +280,10 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
             IPAddress mask;
             int res = 1;
             Serial.println(F("Starting lan"));
-            if (loadIPAddressFromFlash(OFFSET_IP, ip))
-               if (loadIPAddressFromFlash(OFFSET_DNS, dns))
-                  if (loadIPAddressFromFlash(OFFSET_GW, gw))
-                     if (loadIPAddressFromFlash(OFFSET_MASK, mask)) Ethernet.begin(mac,ip,dns,gw,mask);
+            if (loadFlash(OFFSET_IP,ip))
+               if (loadFlash(OFFSET_DNS,dns))
+                  if (loadFlash(OFFSET_GW,gw))
+                     if (loadFlash(OFFSET_MASK,mask)) Ethernet.begin(mac,ip,dns,gw,mask);
                                                 else Ethernet.begin(mac,ip,dns,gw);
                                                     else  Ethernet.begin(mac,ip,dns);
                                                           else  Ethernet.begin(mac,ip);
@@ -332,7 +335,7 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                     char *servername = aJson.getArrayItem(mqttArr, 1)->valuestring;
                     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
                     if (n >= 4) user = aJson.getArrayItem(mqttArr, 3)->valuestring;
-                    if (!loadStringFromFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5))
+                    if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf,sizeof(passwordBuf)) && (n >= 5))
                         {
                           password = aJson.getArrayItem(mqttArr, 4)->valuestring;
                           Serial.println(F("Using MQTT password from config"));
@@ -431,15 +434,17 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
         wdt_dis();
         if (lanStatus > 0)
             switch (Ethernet.maintain()) {
-                case NO_LINK:
+                   case NO_LINK:
                     Serial.println(F("No link"));
                     if (mqttClient.connected()) mqttClient.disconnect();
+                    lanCheck = millis() + 30000;
                     lanStatus = -10;
                     break;
                 case DHCP_CHECK_RENEW_FAIL:
                     //renewed fail
                     Serial.println(F("Error: renewed fail"));
                     if (mqttClient.connected()) mqttClient.disconnect();
+                    lanCheck = millis() + 1000;
                     lanStatus = -10;
                     break;
 
@@ -451,6 +456,7 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
                 case DHCP_CHECK_REBIND_FAIL:
                     Serial.println(F("Error: rebind fail"));
                     if (mqttClient.connected()) mqttClient.disconnect();
+                    lanCheck = millis() + 1000;
                     lanStatus = -10;
                     break;
 
@@ -583,23 +589,23 @@ void cmdFunctionKill(int arg_cnt, char **args) {
 
 void applyConfig() {
   if (!root) return;
+  #ifdef _dmxin
+      int itemsCount;
+      dmxArr = aJson.getObjectItem(root, "dmxin");
+      if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
+          DMXinSetup(itemsCount * 4);
+          Serial.print(F("DMX in started. Channels:"));
+          Serial.println(itemsCount * 4);
+      }
+  #endif
 #ifdef _dmxout
     int maxChannels;
     aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
-    if (dmxoutArr && aJson.getArraySize(dmxoutArr) == 2) {
-        DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, 1)->valueint,
-                    aJson.getArrayItem(dmxoutArr, 0)->valueint);
+    if (dmxoutArr && aJson.getArraySize(dmxoutArr) >=1 ) {
+        DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, 1)->valueint);
+        //,aJson.getArrayItem(dmxoutArr, 0)->valueint);
         Serial.print(F("DMX out started. Channels: "));
         Serial.println(maxChannels);
-    }
-#endif
-#ifdef _dmxin
-    int itemsCount;
-    dmxArr = aJson.getObjectItem(root, "dmxin");
-    if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
-        DMXinSetup(itemsCount * 4);
-        Serial.print(F("DMX in started. Channels:"));
-        Serial.println(itemsCount * 4);
     }
 #endif
 #ifdef _modbus
@@ -766,17 +772,13 @@ void cmdFunctionIp(int arg_cnt, char **args)
   IPAddress ip;
   DNSClient dns;
     switch (arg_cnt) {
-      case 5: if (dns.inet_aton(args[4],ip)) saveIPAddressToFlash(OFFSET_MASK, ip); else
-              saveIPAddressToFlash(OFFSET_MASK, ip0);
-      case 4: if (dns.inet_aton(args[3],ip)) saveIPAddressToFlash(OFFSET_GW, ip); else
-              saveIPAddressToFlash(OFFSET_GW, ip0);
-      case 3: if (dns.inet_aton(args[2],ip)) saveIPAddressToFlash(OFFSET_DNS, ip); else
-              saveIPAddressToFlash(OFFSET_DNS, ip0);
-      case 2: if (dns.inet_aton(args[1],ip)) saveIPAddressToFlash(OFFSET_IP, ip); else
-              saveIPAddressToFlash(OFFSET_IP, ip0);
+      case 5: if (dns.inet_aton(args[4],ip)) saveFlash(OFFSET_MASK,ip); else saveFlash(OFFSET_MASK,ip0);
+      case 4: if (dns.inet_aton(args[3],ip)) saveFlash(OFFSET_GW,ip); else saveFlash(OFFSET_GW,ip0);
+      case 3: if (dns.inet_aton(args[2],ip)) saveFlash(OFFSET_DNS,ip); else saveFlash(OFFSET_DNS,ip0);
+      case 2: if (dns.inet_aton(args[1],ip)) saveFlash(OFFSET_IP,ip); else saveFlash(OFFSET_IP,ip0);
       break;
       case 1: //dynamic IP
-          saveIPAddressToFlash(OFFSET_IP, ip0);
+      saveFlash(OFFSET_IP,ip0);
     }
 Serial.println(F("Saved"));
 }
@@ -785,8 +787,8 @@ void cmdFunctionPwd(int arg_cnt, char **args)
 //(char* tokens)
 { char empty[]="";
   if (arg_cnt)
-      saveStringToFlash(OFFSET_MQTT_PWD, args[1]);
-  else saveStringToFlash(OFFSET_MQTT_PWD, empty);
+      saveFlash(OFFSET_MQTT_PWD,args[1]);
+  else saveFlash(OFFSET_MQTT_PWD,empty);
   Serial.println(F("Password updated"));
     }
 
@@ -819,7 +821,7 @@ void cmdFunctionGet(int arg_cnt, char **args) {
 void printBool(bool arg) { (arg) ? Serial.println(F("on")) : Serial.println(F("off")); }
 
 
-void saveStringToFlash(short n, char *str) {
+void saveFlash(short n, char *str) {
   short i;
   short len=strlen(str);
   if (len>31) len=31;
@@ -827,20 +829,20 @@ void saveStringToFlash(short n, char *str) {
   EEPROM.write(n+len,0);
 }
 
-int loadStringFromFlash(short offset, char *str, short numBytes) {
+int loadFlash(short n, char *str, short l) {
 short i;
-uint8_t ch = EEPROM.read(offset);
+uint8_t ch = EEPROM.read(n);
 if (!ch || (ch == 0xff)) return 0;
-  for (i=0;i<numBytes-1 && (str[i] = EEPROM.read(offset++));i++);
+  for (i=0;i<l-1 && (str[i] = EEPROM.read(n++));i++);
   str[i]=0;
 return 1;
 }
 
-void saveIPAddressToFlash(short n, IPAddress &ip) {
+void saveFlash(short n, IPAddress& ip) {
   for(int i=0;i<4;i++) EEPROM.write(n++,ip[i]);
 }
 
-int loadIPAddressFromFlash(short n, IPAddress &ip) {
+int loadFlash(short n, IPAddress& ip) {
   for(int i=0;i<4;i++) ip[i]=EEPROM.read(n++);
   if (ip[0] && (ip[0] != 0xff)) return 1;
 return 0;
@@ -853,13 +855,13 @@ int getConfig(int arg_cnt, char **args)
 
     int responseStatusCode = 0;
     char ch;
-    char URI[CONFIG_URI_LENGTH];
-    char configServer[CONFIG_SERVER_ADDRESS_LENGTH]="";
+    char URI[40];
+    char configServer[32]="";
     if (arg_cnt > 1) {
         strncpy(configServer, args[1], sizeof(configServer) - 1);
-        saveStringToFlash(OFFSET_CONFIGSERVER, configServer);
-    } else if (!loadStringFromFlash(OFFSET_CONFIGSERVER, configServer))
-              strncpy_P(configServer,configServerPrecompiled,sizeof(configServer));
+        saveFlash(OFFSET_CONFIGSERVER, configServer);
+    } else if (!loadFlash(OFFSET_CONFIGSERVER, configServer))
+              strncpy_P(configServer,configserver,sizeof(configServer));
 
     snprintf(URI, sizeof(URI), "/%02x-%02x-%02x-%02x-%02x-%02x.config.json", mac[0], mac[1], mac[2], mac[3], mac[4],
              mac[5]);
@@ -869,9 +871,10 @@ int getConfig(int arg_cnt, char **args)
 
 #if defined(__AVR__)
     FILE *result;
+    //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
 
-    HTTPClient hclient(configServer, CONFIG_SERVER_PORT);
+    HTTPClient hclient(configServer, 80);
     // FILE is the return STREAM type of the HTTPClient
     result = hclient.getURI(URI);
     responseStatusCode = hclient.getLastReturnCode();
@@ -921,9 +924,9 @@ int getConfig(int arg_cnt, char **args)
     //Non AVR code
     String response;
     EthernetClient configEthClient;
-    HttpClient htclient = HttpClient(configEthClient, configServer, CONFIG_SERVER_PORT);
+    HttpClient htclient = HttpClient(configEthClient, configServer, 80);
     //htclient.stop(); //_socket =MAX
-    htclient.setHttpResponseTimeout(CONFIG_SERVER_RESPONSE_TIMEOUT);
+    htclient.setHttpResponseTimeout(4000);
     wdt_res();
     //Serial.println("making GET request");get
     htclient.beginRequest();
@@ -987,9 +990,10 @@ void postTransmission() {
     digitalWrite(TXEnablePin, 0);
     #endif
 }
+//#define PIO_SRC_REV commit 8034a6b765229d94a94d90fd08dd9588acf5f3da Author: livello <livello@bk.ru> Date:   Wed Mar 28 02:35:50 2018 +0300 refactoring
 
 void setup_main() {
-    setupCmdArduino();
+      setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 
 #ifdef SD_CARD_INSERTED
@@ -1036,7 +1040,7 @@ pinMode(TXEnablePin, OUTPUT);
 SPI.begin();
 while (Ethernet.maintain() == NO_LINK && millis()<3000UL) {delay(500);Serial.print(F("."));}
 */
-//delay(1000); //Wiz5500
+delay(500); //Wiz5500
     //TODO: checkForRemoteSketchUpdate();
 }
 
@@ -1120,6 +1124,7 @@ void setupMacAddress() {
 
 void setupCmdArduino() {
     cmdInit(uint32_t(SERIAL_BAUD));
+    Serial.println(F(">>>"));
     cmdAdd("help", cmdFunctionHelp);
     cmdAdd("save", cmdFunctionSave);
     cmdAdd("load", cmdFunctionLoad);
