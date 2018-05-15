@@ -279,6 +279,7 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
             IPAddress gw;
             IPAddress mask;
             int res = 1;
+            delay(LAN_INIT_DELAY);//for LAN-shield initializing
             Serial.println(F("Starting lan"));
             if (loadFlash(OFFSET_IP,ip))
                if (loadFlash(OFFSET_DNS,dns))
@@ -297,7 +298,8 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
 
 
             if (res == 0) {
-                Serial.println(F("Failed to configure Ethernet using DHCP"));
+                Serial.println(F("Failed to configure Ethernet using DHCP. You can set ip manually!"));
+                Serial.print(F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"));
                 lanStatus = -10;
                 lanCheck = millis() + 60000;
             } else {

@@ -143,8 +143,9 @@ platformio device monitor -b 115200
 * MODBUS_DISABLE // disable Modbus support
 * OWIRE_DISABLE // disable OneWire support
 * ARTNET_ENABLE //Enable Artnet protocol support
-* DAVR_DMXOUT_PIN=18 // Set Pin for DMXOUT on megaatmega2560
+* AVR_DMXOUT_PIN=18 // Set Pin for DMXOUT on megaatmega2560
 * CONTROLLINO //Change Modbus port, direction pins and Wiznet SS pins to be working on [Controllino](http://controllino.biz/)
+* LAN_INIT_DELAY=2000 // set lan init delay for Wiznet ethernet shield
 
 
 
@@ -161,6 +162,7 @@ platformio device monitor -b 115200
 * Modbus support enabled
 * OneWire support enabled
 * Artnet disabled
+* LAN_INIT_DELAY=0
 * Defailt MQTT input topic: /myhome/in
 * Default MQTT topic to publish device status: /myhome/s_out
 * Default Alarm output topic /alarm
