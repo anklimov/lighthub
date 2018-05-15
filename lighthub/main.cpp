@@ -279,7 +279,6 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
             IPAddress gw;
             IPAddress mask;
             int res = 1;
-            delay(LAN_INIT_DELAY);//for LAN-shield initializing
             Serial.println(F("Starting lan"));
             if (loadFlash(OFFSET_IP,ip))
                if (loadFlash(OFFSET_DNS,dns))
@@ -992,7 +991,6 @@ void postTransmission() {
     digitalWrite(TXEnablePin, 0);
     #endif
 }
-//#define PIO_SRC_REV commit 8034a6b765229d94a94d90fd08dd9588acf5f3da Author: livello <livello@bk.ru> Date:   Wed Mar 28 02:35:50 2018 +0300 refactoring
 
 void setup_main() {
       setupCmdArduino();
@@ -1007,7 +1005,6 @@ void setup_main() {
 #endif
 
     setupMacAddress();
-
     loadConfigFromEEPROM(0, NULL);
 
 #ifdef _modbus
@@ -1021,7 +1018,6 @@ pinMode(TXEnablePin, OUTPUT);
 #endif
     modbusSerial.begin(MODBUS_SERIAL_BAUD);
     node.idle(&modbusIdle);
-    // Callbacks allow us to configure the RS485 transceiver correctly
     node.preTransmission(preTransmission);
     node.postTransmission(postTransmission);
 #endif
@@ -1042,13 +1038,16 @@ pinMode(TXEnablePin, OUTPUT);
 SPI.begin();
 while (Ethernet.maintain() == NO_LINK && millis()<3000UL) {delay(500);Serial.print(F("."));}
 */
-delay(500); //Wiz5500
+    delay(LAN_INIT_DELAY);//for LAN-shield initializing
     //TODO: checkForRemoteSketchUpdate();
 }
 
 void printFirmwareVersionAndBuildOptions() {
     Serial.print(F("\nLazyhome.ru LightHub controller "));
     Serial.println(F(QUOTE(PIO_SRC_REV)));
+#ifdef CONTROLLINO
+    Serial.println(F("(+)CONTROLLINO"));
+#endif
 #ifdef WATCH_DOG_TICKER_DISABLE
     Serial.println(F("(-)WATCHDOG"));
 #else

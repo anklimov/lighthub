@@ -162,7 +162,7 @@ platformio device monitor -b 115200
 * Modbus support enabled
 * OneWire support enabled
 * Artnet disabled
-* LAN_INIT_DELAY=0
+* LAN_INIT_DELAY=500 //ms
 * Defailt MQTT input topic: /myhome/in
 * Default MQTT topic to publish device status: /myhome/s_out
 * Default Alarm output topic /alarm

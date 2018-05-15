@@ -82,7 +82,7 @@
 #endif
 
 #ifndef LAN_INIT_DELAY
-#define LAN_INIT_DELAY 0
+#define LAN_INIT_DELAY 500
 #endif
 
 #if defined(ESP8266)
