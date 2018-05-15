@@ -110,9 +110,12 @@ pio init --ide [atom|clion|codeblocks|eclipse|emacs|netbeans|qtcreator|sublimete
 ```
 Set custom build flags. first make your own copy of template
 ```bash
-cp custom_build_flags_template.py my_custom_build_flags.py
+cp build_flags_template.sh my_build_flags.sh
 ```
 then edit, change or comment unnecessary sections and source it
+```bash
+source my_build_flags.sh
+```
 build and upload firmware for due|megaatmega2560|esp8266 board
 ```bash
 pio run -e due|megaatmega2560|esp8266 -t upload
