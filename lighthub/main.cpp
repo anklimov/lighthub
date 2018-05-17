@@ -578,7 +578,8 @@ void cmdFunctionHelp(int arg_cnt, char **args)
                              "'get' [config addr]' - get config from pre-configured URL and store addr\n"
                              "'load' - load config from NVRAM\n"
                              "'pwd' - define MQTT password\n"
-                             "'kill' - test watchdog"));
+                             "'kill' - test watchdog\n"
+                             "'clear' - clear EEPROM"));
 }
 
 void cmdFunctionKill(int arg_cnt, char **args) {
@@ -782,6 +783,13 @@ void cmdFunctionIp(int arg_cnt, char **args)
       saveFlash(OFFSET_IP,ip0);
     }
 Serial.println(F("Saved"));
+}
+
+void cmdFunctionClearEEPROM(int arg_cnt, char **args){
+    for (int i = 0; i < 512; i++)
+        EEPROM.write(i, 0);
+    Serial.println(F("EEPROM cleared"));
+
 }
 
 void cmdFunctionPwd(int arg_cnt, char **args)
@@ -1135,6 +1143,7 @@ void setupCmdArduino() {
     cmdAdd("req", cmdFunctionReq);
     cmdAdd("ip", cmdFunctionIp);
     cmdAdd("pwd", cmdFunctionPwd);
+    cmdAdd("clear",cmdFunctionClearEEPROM);
 }
 
 void loop_main() {
