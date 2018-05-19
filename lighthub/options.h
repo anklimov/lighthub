@@ -81,6 +81,10 @@
 #define _artnet
 #endif
 
+#ifndef LAN_INIT_DELAY
+#define LAN_INIT_DELAY 500
+#endif
+
 #if defined(ESP8266)
 #define __ESP__
 #endif

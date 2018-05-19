@@ -297,7 +297,8 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
 
 
             if (res == 0) {
-                Serial.println(F("Failed to configure Ethernet using DHCP"));
+                Serial.println(F("Failed to configure Ethernet using DHCP. You can set ip manually!"));
+                Serial.print(F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"));
                 lanStatus = -10;
                 lanCheck = millis() + 60000;
             } else {
@@ -577,7 +578,8 @@ void cmdFunctionHelp(int arg_cnt, char **args)
                              "'get' [config addr]' - get config from pre-configured URL and store addr\n"
                              "'load' - load config from NVRAM\n"
                              "'pwd' - define MQTT password\n"
-                             "'kill' - test watchdog"));
+                             "'kill' - test watchdog\n"
+                             "'clear' - clear EEPROM"));
 }
 
 void cmdFunctionKill(int arg_cnt, char **args) {
@@ -781,6 +783,13 @@ void cmdFunctionIp(int arg_cnt, char **args)
       saveFlash(OFFSET_IP,ip0);
     }
 Serial.println(F("Saved"));
+}
+
+void cmdFunctionClearEEPROM(int arg_cnt, char **args){
+    for (int i = 0; i < 512; i++)
+        EEPROM.write(i, 0);
+    Serial.println(F("EEPROM cleared"));
+
 }
 
 void cmdFunctionPwd(int arg_cnt, char **args)
@@ -990,7 +999,6 @@ void postTransmission() {
     digitalWrite(TXEnablePin, 0);
     #endif
 }
-//#define PIO_SRC_REV commit 8034a6b765229d94a94d90fd08dd9588acf5f3da Author: livello <livello@bk.ru> Date:   Wed Mar 28 02:35:50 2018 +0300 refactoring
 
 void setup_main() {
       setupCmdArduino();
@@ -1005,7 +1013,6 @@ void setup_main() {
 #endif
 
     setupMacAddress();
-
     loadConfigFromEEPROM(0, NULL);
 
 #ifdef _modbus
@@ -1019,7 +1026,6 @@ pinMode(TXEnablePin, OUTPUT);
 #endif
     modbusSerial.begin(MODBUS_SERIAL_BAUD);
     node.idle(&modbusIdle);
-    // Callbacks allow us to configure the RS485 transceiver correctly
     node.preTransmission(preTransmission);
     node.postTransmission(postTransmission);
 #endif
@@ -1040,13 +1046,16 @@ pinMode(TXEnablePin, OUTPUT);
 SPI.begin();
 while (Ethernet.maintain() == NO_LINK && millis()<3000UL) {delay(500);Serial.print(F("."));}
 */
-delay(500); //Wiz5500
+    delay(LAN_INIT_DELAY);//for LAN-shield initializing
     //TODO: checkForRemoteSketchUpdate();
 }
 
 void printFirmwareVersionAndBuildOptions() {
     Serial.print(F("\nLazyhome.ru LightHub controller "));
     Serial.println(F(QUOTE(PIO_SRC_REV)));
+#ifdef CONTROLLINO
+    Serial.println(F("(+)CONTROLLINO"));
+#endif
 #ifdef WATCH_DOG_TICKER_DISABLE
     Serial.println(F("(-)WATCHDOG"));
 #else
@@ -1134,6 +1143,7 @@ void setupCmdArduino() {
     cmdAdd("req", cmdFunctionReq);
     cmdAdd("ip", cmdFunctionIp);
     cmdAdd("pwd", cmdFunctionPwd);
+    cmdAdd("clear",cmdFunctionClearEEPROM);
 }
 
 void loop_main() {

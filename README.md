@@ -13,7 +13,7 @@ Lighthub allows connecting together:
 * Modbus RTU devices (Currently, are deployed two types of Modbus devices: AC Dimmer and Ventilation set (Based on [Vacon 10 controller](http://files.danfoss.com/download/Drives/Vacon-10-Quick-Guide-DPD00714F1-UK.pdf))
 * Simple DMX wall sensor panel [like this](https://aliexpress.com/item/New-Ltech-D8-LED-rgb-RGBW-touch-panel-controller-DMX512-controller-DC12-24V-4-zones-4/32800199589.html)
 
-![alt text](LightHub.png "LightHub application diagram")
+![alt text](docs/LightHubAppDiagram.png "LightHub application diagram")
 
 Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from MQTT enabled software. At the moment, LightHub tested with following set of complementary free software:
 * [Openhab or Openhab2 Smarthome software](http://www.openhab.org/)
@@ -90,7 +90,9 @@ Prefered way to compile project is using platformio toolchain, suitable for Ardu
 
 # Due compilation issue "USART0_Handler redefinition"
 Please, open  /variants/arduino_due_x/variant.cpp file, then add USART0_Handler method definition like this
+```
 void USART0_Handler(void) __attribute__((weak));
+```
 
 The normal path to find this file in platformio is:
 .platformio/packages/framework-arduinosam/variants/arduino_due_x
@@ -114,7 +116,6 @@ cp build_flags_template.sh my_build_flags.sh
 ```
 then edit, change or comment unnecessary sections and source it
 ```bash
-nano my_build_flags.sh
 source my_build_flags.sh
 ```
 build and upload firmware for due|megaatmega2560|esp8266 board
@@ -144,7 +145,10 @@ platformio device monitor -b 115200
 * MODBUS_DISABLE // disable Modbus support
 * OWIRE_DISABLE // disable OneWire support
 * ARTNET_ENABLE //Enable Artnet protocol support
+* AVR_DMXOUT_PIN=18 // Set Pin for DMXOUT on megaatmega2560
 * CONTROLLINO //Change Modbus port, direction pins and Wiznet SS pins to be working on [Controllino](http://controllino.biz/)
+* LAN_INIT_DELAY=2000 // set lan init delay for Wiznet ethernet shield
+
 
 
 # Default compilation behavior:
@@ -160,6 +164,7 @@ platformio device monitor -b 115200
 * Modbus support enabled
 * OneWire support enabled
 * Artnet disabled
+* LAN_INIT_DELAY=500 //ms
 * Defailt MQTT input topic: /myhome/in
 * Default MQTT topic to publish device status: /myhome/s_out
 * Default Alarm output topic /alarm
