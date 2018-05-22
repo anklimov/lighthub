@@ -146,6 +146,8 @@ platformio device monitor -b 115200
 * AVR_DMXOUT_PIN=18 // Set Pin for DMXOUT on megaatmega2560
 * CONTROLLINO //Change Modbus port, direction pins and Wiznet SS pins to be working on [Controllino](http://controllino.biz/)
 * LAN_INIT_DELAY=2000 // set lan init delay for Wiznet ethernet shield
+* ESP_WIFI_AP=MYAP // esp wifi access point name
+* ESP_WIFI_PWD=MYPWD // esp wifi access point password
 
 
 

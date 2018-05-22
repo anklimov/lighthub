@@ -29,7 +29,9 @@ e-mail    anklimov@gmail.com
 #endif
 
 #if defined(__ESP__)
+#ifndef DMX_DISABLE
 DMXESPSerial dmxout;
+#endif
 #endif
 
 uint8_t * DMXin = NULL;
