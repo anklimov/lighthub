@@ -91,6 +91,7 @@ aJsonObject *mqttArr = NULL;
 aJsonObject *modbusArr = NULL;
 aJsonObject *owArr = NULL;
 aJsonObject *dmxArr = NULL;
+aJsonObject *dhtArr = NULL;
 
 unsigned long nextPollingCheck = 0;
 unsigned long nextInputCheck = 0;
@@ -595,15 +596,18 @@ void cmdFunctionKill(int arg_cnt, char **args) {
 
 void applyConfig() {
   if (!root) return;
-  #ifdef _dmxin
-      int itemsCount;
-      dmxArr = aJson.getObjectItem(root, "dmxin");
-      if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
-          DMXinSetup(itemsCount * 4);
-          Serial.print(F("DMX in started. Channels:"));
-          Serial.println(itemsCount * 4);
-      }
-  #endif
+#ifdef DHT_ENABLE
+    dhtArr = aJson.getObjectItem(root, "dht");
+#endif
+#ifdef _dmxin
+    int itemsCount;
+    dmxArr = aJson.getObjectItem(root, "dmxin");
+    if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
+        DMXinSetup(itemsCount * 4);
+        Serial.print(F("DMX in started. Channels:"));
+        Serial.println(itemsCount * 4);
+    }
+#endif
 #ifdef _dmxout
     int maxChannels;
     aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
@@ -620,9 +624,6 @@ void applyConfig() {
 
 #ifdef _owire
     owArr = aJson.getObjectItem(root, "ow");
-#endif
-
-#ifdef _owire
     if (owArr && !owReady) {
         aJsonObject *item = owArr->child;
         owReady = owSetup(&Changed);
@@ -687,6 +688,8 @@ void printConfigSummary() {
     printBool(mqttArr);
     Serial.print(F("1-wire "));
     printBool(owArr);
+    Serial.print(F("dht "));
+    printBool(dhtArr);
 }
 
 void cmdFunctionLoad(int arg_cnt, char **args) {
