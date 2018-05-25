@@ -141,6 +141,11 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     }
     Serial.println();
 
+    if(!strcmp(topic,CMDTOPIC)) {
+      cmd_parse((char *)payload);
+      return;
+    }
+
     boolean retaining = (lanStatus == 4);  //Todo - named constant
     //Check if topic = Command topic
     short intopic = 0;
@@ -149,86 +154,23 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         strncpy_P(buf, inprefix, sizeof(buf));
         intopic = strncmp(topic, buf, strlen(inprefix));
     }
-
     // in Retaining status - trying to restore previous state from retained output topic. Retained input topics are not relevant.
     if (retaining && !intopic) {
         Serial.println(F("Skipping.."));
         return;
     }
-
     char subtopic[MQTT_SUBJECT_LENGTH] = "";
-    int cmd = 0;
-
-    cmd = txt2cmd((char *) payload);
+  //  int cmd = 0;
+    //cmd = txt2cmd((char *) payload);
     char *t;
     if (t = strrchr(topic, '/'))
         strncpy(subtopic, t + 1, MQTT_SUBJECT_LENGTH - 1);
-
-
-
-    /* No 1-w direct support anymore
-    int subchan;
-    char buf[17];
-    //Check for  one-wire address
-    if (sscanf(subtopic,"S%1d%16s",&subchan,&buf)==2)   // SnXXXXXXXX
-    {    DeviceAddress addr;
-         SetAddr(buf,addr);;
-         PrintBytes(addr,8);
-         Serial.print(F(":"));
-         Serial.println(subchan);
-         cntrl2413(addr,subchan,(cmd==CMD_ON)?1:0);
-    }// End OneWire
-
-     else
-     */
-    {
-
         Item item(subtopic);
         if (item.isValid()) {
             if (item.itemType == CH_GROUP && retaining)
                 return; //Do not restore group channels - they consist not relevant data
-            switch (cmd) {
-                case 0: {
-                    short i = 0;
-                    int Par[3];
-
-                    while (payload && i < 3)
-                        Par[i++] = getInt((char **) &payload);
-
-                    item.Ctrl(0, i, Par, !retaining);
-                }
-                    break;
-
-                case -1: //Not known command
-                case -2: //JSON input (not implemented yet
-                    break;
-                case -3: //RGB color in #RRGGBB notation
-                {
-                    CRGB rgb;
-                    if (sscanf((const char*)payload, "#%2X%2X%2X", &rgb.r, &rgb.g, &rgb.b) == 3) {
-                        int Par[3];
-                        CHSV hsv = rgb2hsv_approximate(rgb);
-                        Par[0] = map(hsv.h, 0, 255, 0, 365);
-                        Par[1] = map(hsv.s, 0, 255, 0, 100);
-                        Par[2] = map(hsv.v, 0, 255, 0, 100);
-                        item.Ctrl(0, 3, Par, !retaining);
-                    }
-                    break;
-                }
-                case CMD_ON:
-
-                    //       if (item.getEnableCMD(500) || lanStatus == 4)
-                    item.Ctrl(cmd, 0, NULL,
-                              !retaining); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
-                    //       else Serial.println(F("on Skipped"));
-
-                    break;
-                default: //some known command
-                    item.Ctrl(cmd, 0, NULL, !retaining);
-
-            } //ctrl
-        } //valid json
-    } //no1wire
+        item.Ctrl((char *)payload, !retaining);
+        } //valid item
 }
 
 #ifndef __ESP__
