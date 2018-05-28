@@ -199,6 +199,53 @@ boolean Item::getEnableCMD(int delta) {
 }
 
 #define MAXCTRLPAR 3
+
+
+int Item::Ctrl(char * payload, boolean send){
+  int cmd = txt2cmd(payload);
+  switch (cmd) {
+      case 0: {
+          short i = 0;
+          int Par[3];
+
+          while (payload && i < 3)
+              Par[i++] = getInt((char **) &payload);
+
+          Ctrl(0, i, Par, send);
+      }
+          break;
+
+      case -1: //Not known command
+      case -2: //JSON input (not implemented yet
+          break;
+      case -3: //RGB color in #RRGGBB notation
+      {
+          CRGB rgb;
+          if (sscanf((const char*)payload, "#%2X%2X%2X", &rgb.r, &rgb.g, &rgb.b) == 3) {
+              int Par[3];
+              CHSV hsv = rgb2hsv_approximate(rgb);
+              Par[0] = map(hsv.h, 0, 255, 0, 365);
+              Par[1] = map(hsv.s, 0, 255, 0, 100);
+              Par[2] = map(hsv.v, 0, 255, 0, 100);
+              Ctrl(0, 3, Par, send);
+          }
+          break;
+      }
+      case CMD_ON:
+
+          //       if (item.getEnableCMD(500) || lanStatus == 4)
+         Ctrl(cmd, 0, NULL,
+                    send); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
+          //       else Serial.println(F("on Skipped"));
+
+          break;
+      default: //some known command
+          Ctrl(cmd, 0, NULL, send);
+
+  } //ctrl
+}
+
+
 int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
 
 
@@ -286,6 +333,20 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                 setCmd(cmd);
                 //retrive stored values
                 st.aslong = getVal();
+
+                // If command is ON but saved volume to low - setup mimimum volume
+                switch (itemType) {
+                  case CH_DIMMER:
+                  case CH_MODBUS:
+                  if (st.aslong<MIN_VOLUME) st.aslong=INIT_VOLUME;
+                  setVal(st.aslong);
+                  break;
+                  case CH_RGB:
+                  case CH_RGBW:
+                  if (st.aslong && (st.v<MIN_VOLUME)) st.v=INIT_VOLUME;
+                  setVal(st.aslong);
+                }
+
                 if (st.aslong > 0)  //Stored smthng
 
                     switch (itemType) {
@@ -295,8 +356,6 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                             Par[0] = st.h;
                             Par[1] = st.s;
                             Par[2] = st.v;
-                            if (!Par[2]) Par[2]=80;   //If RGB value==0 set to 80%
-                            setVal(st.aslong);
                             params = 3;
                             SendStatus(0, params, Par,true); // Send restored triplet. In any cases
                             break;
@@ -306,8 +365,6 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                         case CH_DIMMER:         //Everywhere, in flat VAL
                         case CH_MODBUS:
                         case CH_VC:
-
-
                             Par[0] = st.aslong;
                             params = 1;
                             SendStatus(0, params, Par, true);  // Send restored parameter, even if send=false - no problem, loop will be supressed at next hop
@@ -616,8 +673,8 @@ int Item::isActive() {
         case CH_PWM:
             val = st.aslong;
     } //switch
-    Serial.print(F(":="));
-    Serial.println(val);
+    //Serial.print(F(":="));
+    //Serial.println(val);
     if (val) return 1; else return 0;
 }
 
@@ -715,8 +772,8 @@ int Item::VacomSetFan(int8_t val, int8_t cmd) {
     }
     modbusBusy = 1;
 
-    uint8_t j, result;
-    uint16_t data[1];
+    uint8_t j;//, result;
+    //uint16_t data[1];
 
     modbusSerial.begin(9600, fmPar);
     node.begin(addr, modbusSerial);
@@ -932,7 +989,7 @@ int Item::checkModbusDimmer() {
 
     uint16_t addr = getArg(0);
     uint16_t reg = getArg(1);
-    short mask = getArg(2);
+  //  short mask = getArg(2);
 
     int data;
 

@@ -17,6 +17,8 @@
 #define THERMO_OVERHEAT_CELSIUS 38
 #define FM_OVERHEAT_CELSIUS 40.
 
+#define MIN_VOLUME 10
+#define INIT_VOLUME 30
 
 #define OFFSET_MAC 0
 #define OFFSET_IP OFFSET_MAC+6
@@ -55,6 +57,10 @@
 
 #ifndef OUTTOPIC
 #define OUTTOPIC "/myhome/s_out/"
+#endif
+
+#ifndef CMDTOPIC
+#define CMDTOPIC "/myhome/in/command/"
 #endif
 
 #ifndef INTOPIC
