@@ -21,6 +21,8 @@
  export FLAGS="$FLAGS -DAVR_DMXOUT_PIN=18"
  export FLAGS="$FLAGS -DLAN_INIT_DELAY=2000"
  export FLAGS="$FLAGS -DCONTROLLINO"
+ export FLAGS="$FLAGS -DESP_WIFI_AP=MYAP"
+ export FLAGS="$FLAGS -DESP_WIFI_PWD=MYPWD"
  export PLATFORMIO_BUILD_FLAGS="$FLAGS"
  echo PLATFORMIO_BUILD_FLAGS=$PLATFORMIO_BUILD_FLAGS
  echo "==============================================Custom build flags END====================================================="

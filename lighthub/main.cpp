@@ -91,6 +91,7 @@ aJsonObject *mqttArr = NULL;
 aJsonObject *modbusArr = NULL;
 aJsonObject *owArr = NULL;
 aJsonObject *dmxArr = NULL;
+aJsonObject *dhtArr = NULL;
 
 unsigned long nextPollingCheck = 0;
 unsigned long nextInputCheck = 0;
@@ -212,9 +213,13 @@ int lanLoop() {
         case 0: //Ethernet.begin(mac,ip);
         {
 #ifdef __ESP__
-            //WiFi.mode(WIFI_STA);
-//wifiMulti.addAP("Smartbox", "");
-if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
+            WiFi.mode(WIFI_STA);
+            Serial.print(F("WIFI AP/Password:"));
+            Serial.print(QUOTE(ESP_WIFI_AP));
+            Serial.print(F("/"));
+            Serial.println(QUOTE(ESP_WIFI_PWD));
+            wifiMulti.addAP(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
+            if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
 #else
             IPAddress ip;
             IPAddress dns;
@@ -533,15 +538,18 @@ void cmdFunctionKill(int arg_cnt, char **args) {
 
 void applyConfig() {
   if (!root) return;
-  #ifdef _dmxin
-      int itemsCount;
-      dmxArr = aJson.getObjectItem(root, "dmxin");
-      if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
-          DMXinSetup(itemsCount * 4);
-          Serial.print(F("DMX in started. Channels:"));
-          Serial.println(itemsCount * 4);
-      }
-  #endif
+#ifdef DHT_ENABLE
+    dhtArr = aJson.getObjectItem(root, "dht");
+#endif
+#ifdef _dmxin
+    int itemsCount;
+    dmxArr = aJson.getObjectItem(root, "dmxin");
+    if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
+        DMXinSetup(itemsCount * 4);
+        Serial.print(F("DMX in started. Channels:"));
+        Serial.println(itemsCount * 4);
+    }
+#endif
 #ifdef _dmxout
     int maxChannels;
     aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
@@ -558,9 +566,6 @@ void applyConfig() {
 
 #ifdef _owire
     owArr = aJson.getObjectItem(root, "ow");
-#endif
-
-#ifdef _owire
     if (owArr && !owReady) {
         aJsonObject *item = owArr->child;
         owReady = owSetup(&Changed);
@@ -625,6 +630,8 @@ void printConfigSummary() {
     printBool(mqttArr);
     Serial.print(F("1-wire "));
     printBool(owArr);
+    Serial.print(F("dht "));
+    printBool(dhtArr);
 }
 
 void cmdFunctionLoad(int arg_cnt, char **args) {
@@ -800,10 +807,7 @@ return 0;
 }
 
 int getConfig(int arg_cnt, char **args)
-//(char *tokens)
 {
-
-
     int responseStatusCode = 0;
     char ch;
     char URI[40];
@@ -870,9 +874,8 @@ int getConfig(int arg_cnt, char **args)
         lanCheck = millis() + 5000;
         return -11;
     }
-
-#else
-    //Non AVR code
+#endif
+#if defined(__SAM3X8E__)
     String response;
     EthernetClient configEthClient;
     HttpClient htclient = HttpClient(configEthClient, configServer, 80);
@@ -918,9 +921,39 @@ int getConfig(int arg_cnt, char **args)
         //lanCheck=millis()+15000;
         return -11; //Load from NVRAM
     }
-
-
 #endif
+#if defined(__ESP__)
+    HTTPClient httpClient;
+    String fullURI = "http://";
+    fullURI+=configServer;
+    fullURI+=URI;
+    httpClient.begin(fullURI);
+    int httpResponseCode = httpClient.GET();
+    if (httpResponseCode > 0) {
+        // HTTP header has been send and Server response header has been handled
+        Serial.printf("[HTTP] GET... code: %d\n", httpResponseCode);
+        // file found at server
+        if (httpResponseCode == HTTP_CODE_OK) {
+            String response = httpClient.getString();
+            Serial.println(response);
+            aJson.deleteItem(root);
+            root = aJson.parse((char *) response.c_str());
+            if (!root) {
+                Serial.println(F("Config parsing failed"));
+                return -11; //Load from NVRAM
+            } else {
+                Serial.println(F("Config OK, Applying"));
+                applyConfig();
+            }
+        }
+    } else {
+        Serial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(httpResponseCode).c_str());
+        httpClient.end();
+        return -11; //Load from NVRAM
+    }
+    httpClient.end();
+#endif
+
     return 2;
 }
 
@@ -1109,7 +1142,9 @@ void loop_main() {
     // if (lastpacket && (lastpacket%10==0)) Serial.println(lastpacket);
 
     if (items) {
+        #ifndef MODBUS_DISABLE
         if (lanStatus != 4) pollingLoop();
+        #endif
 #ifdef _owire
         thermoLoop();
 #endif
@@ -1183,6 +1218,7 @@ void inputLoop(void) {
     }
 }
 
+#ifndef MODBUS_DISABLE
 void pollingLoop(void) {
     boolean done = false;
     if (millis() > nextPollingCheck) {
@@ -1200,6 +1236,7 @@ void pollingLoop(void) {
         } //while
     }//if
 }
+#endif
 
 
 //TODO: refactoring

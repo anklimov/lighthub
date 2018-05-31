@@ -753,7 +753,10 @@ void Item::mb_fail(short addr, short op, int val, int cmd) {
     setVal(val);
 }
 
+#ifndef MODBUS_DISABLE
 extern ModbusMaster node;
+
+
 
 int Item::VacomSetFan(int8_t val, int8_t cmd) {
     int addr = getArg();
@@ -823,63 +826,6 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
     modbusBusy = 0;
 }
 
-
-int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
-
-/// ToDo: relative patches, configuration
-
-    if (deffered) {
-        setCmd(cmd | CMD_REPORT);
-         Serial.println(F("Status deffered"));
-      //     mqttClient.publish("/push", "1");
-         return 0;
-     // Todo: Parameters?  Now expected that parameters already stored by setVal()
-    }
-    else {  //publush to MQTT
-    char addrstr[32];
-    //char addrbuf[17];
-    char valstr[16] = "";
-
-    strcpy_P(addrstr, outprefix);
-    strncat(addrstr, itemArr->name, sizeof(addrstr));
-
-
-    switch (cmd) {
-        case CMD_ON:
-            strcpy(valstr, "ON");
-            break;
-        case CMD_OFF:
-        case CMD_HALT:
-            strcpy(valstr, "OFF");
-            break;
-            // TODO send Par
-        case 0:
-        case CMD_SET:
-            if (Par)
-                for (short i = 0; i < n; i++) {
-                    char num[4];
-                    snprintf(num, sizeof(num), "%d", Par[i]);
-                    strncat(valstr, num, sizeof(valstr));
-                    if (i != n - 1) {
-                        strcpy(num, ",");
-                        strncat(valstr, num, sizeof(valstr));
-                    }
-                }
-            break;
-        default:
-           Serial.println(F("Unknown cmd "));
-            return -1;
-    }
-    Serial.print(F("Pub: "));
-    Serial.print(addrstr);
-    Serial.print(F("->"));
-    Serial.println(valstr);
-    mqttClient.publish(addrstr, valstr,true);
-    return 0;
-    }
-}
-
-
 int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
 
     if (modbusBusy) {
@@ -912,7 +858,6 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
     node.writeSingleRegister(_reg, value);
     modbusBusy = 0;
 }
-
 
 int Item::checkFM() {
     if (modbusBusy) return -1;
@@ -1174,4 +1119,60 @@ void Item::sendDelayedStatus(){
       cmd &= ~CMD_REPORT;     // Clean report flag
       setCmd(cmd);
       }
+}
+
+#endif
+int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
+
+/// ToDo: relative patches, configuration
+
+    if (deffered) {
+        setCmd(cmd | CMD_REPORT);
+        Serial.println(F("Status deffered"));
+        //     mqttClient.publish("/push", "1");
+        return 0;
+        // Todo: Parameters?  Now expected that parameters already stored by setVal()
+    }
+    else {  //publush to MQTT
+        char addrstr[32];
+        //char addrbuf[17];
+        char valstr[16] = "";
+
+        strcpy_P(addrstr, outprefix);
+        strncat(addrstr, itemArr->name, sizeof(addrstr));
+
+
+        switch (cmd) {
+            case CMD_ON:
+                strcpy(valstr, "ON");
+                break;
+            case CMD_OFF:
+            case CMD_HALT:
+                strcpy(valstr, "OFF");
+                break;
+                // TODO send Par
+            case 0:
+            case CMD_SET:
+                if (Par)
+                    for (short i = 0; i < n; i++) {
+                        char num[4];
+                        snprintf(num, sizeof(num), "%d", Par[i]);
+                        strncat(valstr, num, sizeof(valstr));
+                        if (i != n - 1) {
+                            strcpy(num, ",");
+                            strncat(valstr, num, sizeof(valstr));
+                        }
+                    }
+                break;
+            default:
+                Serial.println(F("Unknown cmd "));
+                return -1;
+        }
+        Serial.print(F("Pub: "));
+        Serial.print(addrstr);
+        Serial.print(F("->"));
+        Serial.println(valstr);
+        mqttClient.publish(addrstr, valstr,true);
+        return 0;
+    }
 }

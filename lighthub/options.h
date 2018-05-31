@@ -115,10 +115,20 @@
 #if defined(__ESP__)
 #undef _dmxin
 #undef _modbus
+#ifndef DMX_DISABLE
 #define _espdmx
+#endif
 #define modbusSerial Serial1
 #endif
 
 #ifndef _dmxout
 #undef _artnet
+#endif
+
+#ifndef ESP_WIFI_AP
+#define ESP_WIFI_AP mywifiap
+#endif
+
+#ifndef ESP_WIFI_PWD
+#define ESP_WIFI_PWD mywifipass
 #endif

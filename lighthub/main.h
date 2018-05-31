@@ -63,7 +63,7 @@
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 #include "esp.h"
 #include <EEPROM.h>
-#include <ArduinoHttpClient.h>
+#include <ESP8266HTTPClient.h>
 #endif
 
 #ifdef _owire
