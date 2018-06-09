@@ -118,6 +118,8 @@ void Input::dht22Poll() {
         store->nextPollMillis = millis() + DHT_POLL_DELAY_DEFAULT;
         Serial.print(" NextPollMillis=");Serial.println(store->nextPollMillis);
     }
+    else
+        store->nextPollMillis = millis() + DHT_POLL_DELAY_DEFAULT/3;
 #endif
 }
 
