@@ -801,9 +801,10 @@ int getConfig(int arg_cnt, char **args)
     //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
     HTTPClient hclient(configServer, 80);
+    HTTPClient hclientPrint(configServer, 80);
     // FILE is the return STREAM type of the HTTPClient
     configStream = hclient.getURI(URI);
-    configStreamPrint = hclient.getURI(URI);
+    configStreamPrint = hclientPrint.getURI(URI);
     responseStatusCode = hclient.getLastReturnCode();
     wdt_en();
 
@@ -814,7 +815,7 @@ int getConfig(int arg_cnt, char **args)
             char c;
             for(int i = 0; (c = getc(configStreamPrint)) != EOF; i++)
                 Serial.print(c);
-            hclient.closeStream(configStreamPrint);
+            hclientPrint.closeStream(configStreamPrint);
             aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
             aJson.deleteItem(root);
