@@ -41,7 +41,7 @@ unsigned long owTimer = 0;
 owChangedType owChanged;
 
 int owUpdate() {
-    unsigned long finish = millis() + 5000;
+    unsigned long finish = millis() + OW_UPDATE_INTERVAL;
     short sr;
 
     //net.setStrongPullup();

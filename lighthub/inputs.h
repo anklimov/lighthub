@@ -26,7 +26,9 @@ e-mail    anklimov@gmail.com
 
 #define IN_PUSH_ON       0      // PUSH - ON, Release - OFF (ovverrided by pcmd/rcmd) - DEFAULT
 #define IN_PUSH_TOGGLE   1      // Every physicall push toggle logical switch  on/off
+#define IN_DHT22         4
 
+#define SAME_STATE_ATTEMPTS 3
 
 // in syntaxis
 // "pin": { "T":"N", "emit":"out_emit", item:"out_item", "scmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd":"repeat_command" }
@@ -57,19 +59,20 @@ e-mail    anklimov@gmail.com
 //"pin1": { "T":"0", "emit":"/light1", item:"light1", "scmd": "ON", repcmd:"INCREASE"}
 //"pin2": { "T":"0", "emit":"/light1", item:"light1", "scmd": "OFF", repcmd:"INCREASE"}
 
+
 extern aJsonObject *inputs;
 
 
 typedef union
 {
-  long int aslong;
-  struct
-      {
-        int8_t  reserve;
-        int8_t  logicState;
-        int8_t  bounce;
-        int8_t  cur;
-      };
+    long int aslong;
+    struct {
+        int8_t reserve;
+        int8_t logicState;
+        int8_t bounce;
+        int8_t currentValue;
+    };
+    unsigned long nextPollMillis;
 } inStore;
 
 class Input
@@ -85,9 +88,14 @@ class Input
   Input(char * name);
 
   boolean isValid ();
-  void Changed (int val);
+  void onContactChanged(int val);
 
-  int Poll();
+  int poll();
   protected:
   void Parse();
+
+    void contactPoll();
+
+    void dht22Poll();
+
 };

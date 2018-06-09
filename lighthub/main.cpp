@@ -64,7 +64,6 @@ ESP32
 PWM Out
 
 */
-
 #include "Arduino.h"
 #include "main.h"
 #include "options.h"
@@ -76,6 +75,12 @@ EthernetClient ethClient;
 
 #if defined(__AVR__)
 EthernetClient ethClient;
+#endif
+
+#ifdef __ESP__
+#include <ESP8266WiFi.h>
+#include <user_interface.h>
+WiFiClient ethClient;
 #endif
 
 const char outprefix[] PROGMEM = OUTTOPIC;
@@ -91,7 +96,6 @@ aJsonObject *mqttArr = NULL;
 aJsonObject *modbusArr = NULL;
 aJsonObject *owArr = NULL;
 aJsonObject *dmxArr = NULL;
-aJsonObject *dhtArr = NULL;
 
 unsigned long nextPollingCheck = 0;
 unsigned long nextInputCheck = 0;
@@ -113,6 +117,12 @@ byte mac[6];
 
 PubSubClient mqttClient(ethClient);
 
+
+bool wifiInitialized;
+
+bool IsThermostat(const aJsonObject *item);
+
+bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLatestCommand);
 
 void watchdogSetup(void) {
 //Serial.begin(115200);
@@ -213,13 +223,25 @@ int lanLoop() {
         case 0: //Ethernet.begin(mac,ip);
         {
 #ifdef __ESP__
-            WiFi.mode(WIFI_STA);
-            Serial.print(F("WIFI AP/Password:"));
-            Serial.print(QUOTE(ESP_WIFI_AP));
-            Serial.print(F("/"));
-            Serial.println(QUOTE(ESP_WIFI_PWD));
-            wifiMulti.addAP(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
-            if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
+            if(!wifiInitialized) {
+                WiFi.mode(WIFI_STA);
+                Serial.print(F("WIFI AP/Password:"));
+                Serial.print(QUOTE(ESP_WIFI_AP));
+                Serial.print(F("/"));
+                Serial.println(QUOTE(ESP_WIFI_PWD));
+                wifi_set_macaddr(STATION_IF,mac);
+                WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
+                wifiInitialized = true;
+            }
+
+            if (WiFi.status() == WL_CONNECTED) {
+                Serial.println("WiFi connected");
+                Serial.println("IP address: ");
+                Serial.println(WiFi.localIP());
+                lanStatus=1;
+            }
+
+
 #else
             IPAddress ip;
             IPAddress dns;
@@ -426,7 +448,6 @@ int lanLoop() {
     return lanStatus;
 
 }
-
 #ifdef _owire
 
 void Changed(int i, DeviceAddress addr, int val) {
@@ -436,12 +457,8 @@ void Changed(int i, DeviceAddress addr, int val) {
     char *owEmit = NULL;
     char *owItem = NULL;
 
-    //PrintBytes(addr,8);
-    // Serial.print("Emit: ");
     SetBytes(addr, 8, addrbuf);
     addrbuf[17] = 0;
-
-    //Serial.println(addrbuf);
 
     aJsonObject *owObj = aJson.getObjectItem(owArr, addrbuf);
     if (owObj) {
@@ -453,56 +470,14 @@ void Changed(int i, DeviceAddress addr, int val) {
             Serial.println(val);
         }
         owItem = aJson.getObjectItem(owObj, "item")->valuestring;
-    } else Serial.println(F("Not find"));
-
-
-    /* No sw support anymore
-   switch (addr[0]){
-    case 0x29: // DS2408
-      snprintf(addrstr,sizeof(addrstr),"%sS0%s",outprefix,addrbuf);
-     // Serial.println(addrstr);
-      client.publish(addrstr, (val & SW_STAT0)?"ON":"OFF");
-      snprintf(addrstr,sizeof(addrstr),"%sS1%s",outprefix,addrbuf);
-    //  Serial.println(addrstr);
-      client.publish(addrstr, (val & SW_STAT1)?"ON":"OFF");
-      snprintf(addrstr,sizeof(addrstr),"%sS2%s",outprefix,addrbuf);
-     // Serial.println(addrstr);
-      client.publish(addrstr, (val & SW_AUX0)?"OFF":"ON");
-      snprintf(addrstr,sizeof(addrstr),"%sS3%s",outprefix,addrbuf);
-     // Serial.println(addrstr);
-      client.publish(addrstr, (val & SW_AUX1)?"OFF":"ON");
-      break;
-
-    case 0x28: // Thermomerer
-
-     snprintf(addrstr,sizeof(addrstr),"%s%s",outprefix,addrbuf);
-     sprintf(valstr,"%d",val);
-     //Serial.println(val);
-     //Serial.println(valstr);
-     client.publish(addrstr, valstr);
-
-     if (owItem)
-        {
-        thermoSetCurTemp(owItem,val);
-        }
-     break;
-
-    case 0x01:
-    case 0x81:
-     snprintf(addrstr,sizeof(addrstr),"%sDS%s",outprefix,addrbuf);
-     if (val) sprintf(valstr,"%s","ON"); else sprintf(valstr,"%s","OFF");
-     client.publish(addrstr, valstr);
-   }
-    */
+    } else Serial.println(F("1w-item not found in config"));
 
     if ((val == -127) || (val == 85) || (val == 0)) { //ToDo: 1-w short circuit mapped to "0" celsium
-//        Serial.print("Temp err ");Serial.println(t);
         return;
     }
 
     strcpy_P(addrstr, outprefix);
     strncat(addrstr, addrbuf, sizeof(addrstr));
-    //snprintf(addrstr,sizeof(addrstr),"%s%s",F(outprefix),addrbuf);
     sprintf(valstr, "%d", val);
     mqttClient.publish(addrstr, valstr);
 
@@ -538,9 +513,7 @@ void cmdFunctionKill(int arg_cnt, char **args) {
 
 void applyConfig() {
   if (!root) return;
-#ifdef DHT_ENABLE
-    dhtArr = aJson.getObjectItem(root, "dht");
-#endif
+
 #ifdef _dmxin
     int itemsCount;
     dmxArr = aJson.getObjectItem(root, "dmxin");
@@ -630,8 +603,6 @@ void printConfigSummary() {
     printBool(mqttArr);
     Serial.print(F("1-wire "));
     printBool(owArr);
-    Serial.print(F("dht "));
-    printBool(dhtArr);
 }
 
 void cmdFunctionLoad(int arg_cnt, char **args) {
@@ -982,11 +953,6 @@ void setup_main() {
 #ifdef SD_CARD_INSERTED
     sd_card_w5100_setup();
 #endif
-
-#ifdef __ESP__
-    espSetup();
-#endif
-
     setupMacAddress();
     loadConfigFromEEPROM(0, NULL);
 
@@ -1073,6 +1039,10 @@ void printFirmwareVersionAndBuildOptions() {
     Serial.println(F("(-)OWIRE"));
 #else
     Serial.println(F("(+)OWIRE"));
+#endif
+
+#ifdef Wiz5500
+    Serial.println(F("(+)Wiz5500"));
 #endif
 
 #ifdef SD_CARD_INSERTED
@@ -1210,7 +1180,7 @@ void inputLoop(void) {
         while (input) {
             if ((input->type == aJson_Object)) {
                 Input in(input);
-                in.Poll();
+                in.poll();
             }
             input = input->next;
         }
@@ -1238,63 +1208,69 @@ void pollingLoop(void) {
 }
 #endif
 
+bool isThermostatWithMinArraySize(aJsonObject *item, int minimalArraySize) {
+    return (item->type == aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint == CH_THERMO) &&
+           (aJson.getArraySize(item) >= minimalArraySize);
+}
+
+bool thermoDisabledOrDisconnected(aJsonObject *thermoExtensionArray, int thermoStateCommand) {
+    return thermoStateCommand == CMD_OFF || thermoStateCommand == CMD_HALT ||
+           aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint == 0;
+}
+
 
 //TODO: refactoring
-
 void thermoLoop(void) {
     if (millis() < nextThermostatCheck)
         return;
-
     bool thermostatCheckPrinted = false;
-    aJsonObject *item = items->child;
 
-    while (item) {
-        if ((item->type == aJson_Array) && (aJson.getArrayItem(item, 0)->valueint == CH_THERMO) &&
-            (aJson.getArraySize(item) > 4)) {
-            int itemPin = aJson.getArrayItem(item, I_ARG)->valueint;
-            int itemTempSetting = aJson.getArrayItem(item, I_VAL)->valueint;
-            int itemCommand = aJson.getArrayItem(item, I_CMD)->valueint;
-            aJsonObject *itemExtensionArray = aJson.getArrayItem(item, I_EXT);
+    for (aJsonObject *thermoItem = items->child; thermoItem; thermoItem = thermoItem->next) {
+        if (isThermostatWithMinArraySize(thermoItem, 5)) {
+            aJsonObject *thermoExtensionArray = aJson.getArrayItem(thermoItem, I_EXT);
+            if (thermoExtensionArray && (aJson.getArraySize(thermoExtensionArray) > 1)) {
+                int thermoPin = aJson.getArrayItem(thermoItem, I_ARG)->valueint;
+                int thermoSetting = aJson.getArrayItem(thermoItem, I_VAL)->valueint;
+                int thermoStateCommand = aJson.getArrayItem(thermoItem, I_CMD)->valueint;
+                int curTemp = aJson.getArrayItem(thermoExtensionArray, IET_TEMP)->valueint;
 
-            if (itemExtensionArray && (aJson.getArraySize(itemExtensionArray) > 1)) {
-                int curtemp = aJson.getArrayItem(itemExtensionArray, IET_TEMP)->valueint;
-                if (!aJson.getArrayItem(itemExtensionArray, IET_ATTEMPTS)->valueint) {
-                    Serial.print(item->name);
+                if (!aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint) {
+                    Serial.print(thermoItem->name);
                     Serial.println(F(" Expired"));
 
                 } else {
-                    if (!(--aJson.getArrayItem(itemExtensionArray, IET_ATTEMPTS)->valueint))
-                        mqttClient.publish("/alarm/snsr", item->name);
+                    if (!(--aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint))
+                        mqttClient.publish("/alarm/snsr", thermoItem->name);
 
                 }
-                if (curtemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", item->name);
+                if (curTemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", thermoItem->name);
 
-                thermostatCheckPrinted = true;
-                Serial.print(item->name);
+
+                Serial.print(thermoItem->name);
                 Serial.print(F(" Set:"));
-                Serial.print(itemTempSetting);
-                Serial.print(F(" Curtemp:"));
-                Serial.print(curtemp);
+                Serial.print(thermoSetting);
+                Serial.print(F(" Cur:"));
+                Serial.print(curTemp);
                 Serial.print(F(" cmd:"));
-                Serial.print(itemCommand), pinMode(itemPin, OUTPUT);
-                if (itemCommand == CMD_OFF || itemCommand == CMD_HALT ||
-                    aJson.getArrayItem(itemExtensionArray, IET_ATTEMPTS)->valueint == 0) {
-                    digitalWrite(itemPin, LOW);
+                Serial.print(thermoStateCommand);
+                pinMode(thermoPin, OUTPUT);
+                if (thermoDisabledOrDisconnected(thermoExtensionArray, thermoStateCommand)) {
+                    digitalWrite(thermoPin, LOW);
                     Serial.println(F(" OFF"));
                 } else {
-                    if (curtemp + THERMO_GIST_CELSIUS < itemTempSetting) {
-                        digitalWrite(itemPin, HIGH);
+                    if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) {
+                        digitalWrite(thermoPin, HIGH);
                         Serial.println(F(" ON"));
                     } //too cold
-                    else if (itemTempSetting <= curtemp) {
-                        digitalWrite(itemPin, LOW);
+                    else if (curTemp >= thermoSetting) {
+                        digitalWrite(thermoPin, LOW);
                         Serial.println(F(" OFF"));
                     } //Reached settings
-                    else Serial.println(F(" --")); // Nothing to do
+                    else Serial.println(F(" -target zone-")); // Nothing to do
                 }
+                thermostatCheckPrinted = true;
             }
         }
-        item = item->next;
     }
 
     nextThermostatCheck = millis() + THERMOSTAT_CHECK_PERIOD;
@@ -1306,15 +1282,13 @@ void thermoLoop(void) {
 #endif
 }
 
-
 short thermoSetCurTemp(char *name, short t) {
     if (items) {
-        aJsonObject *item = aJson.getObjectItem(items, name);
-        if (item && (item->type == aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint == CH_THERMO) &&
-            (aJson.getArraySize(item) >= 4)) {
+        aJsonObject *thermoItem = aJson.getObjectItem(items, name);
+        if (isThermostatWithMinArraySize(thermoItem, 4)) {
             aJsonObject *extArray = NULL;
 
-            if (aJson.getArraySize(item) == 4) //No thermo extension yet
+            if (aJson.getArraySize(thermoItem) == 4) //No thermo extension yet
             {
                 extArray = aJson.createArray(); //Create Ext Array
 
@@ -1322,17 +1296,17 @@ short thermoSetCurTemp(char *name, short t) {
                 aJsonObject *oattempts = aJson.createItem(T_ATTEMPTS); //Create int
                 aJson.addItemToArray(extArray, ocurt);
                 aJson.addItemToArray(extArray, oattempts);
-                aJson.addItemToArray(item, extArray); //Adding to item
-            } //if
-            else if (extArray = aJson.getArrayItem(item, I_EXT)) {
+                aJson.addItemToArray(thermoItem, extArray); //Adding to thermoItem
+            }
+            else if (extArray = aJson.getArrayItem(thermoItem, I_EXT)) {
                 aJsonObject *att = aJson.getArrayItem(extArray, IET_ATTEMPTS);
                 aJson.getArrayItem(extArray, IET_TEMP)->valueint = t;
-                if (att->valueint == 0) mqttClient.publish("/alarmoff/snsr", item->name);
+                if (att->valueint == 0) mqttClient.publish("/alarmoff/snsr", thermoItem->name);
                 att->valueint = (int) T_ATTEMPTS;
-            } //if
+            }
 
+        }
+    }
 
-        } //if
-    } // if items
+}
 
-} //proc

@@ -22,8 +22,10 @@ e-mail    anklimov@gmail.com
 #include "aJSON.h"
 #include "item.h"
 #include <PubSubClient.h>
+#include <DHT.h>
 
 extern PubSubClient mqttClient;
+//DHT dht();
 
 Input::Input(char * name) //Constructor
 {
@@ -56,59 +58,90 @@ boolean Input::isValid ()
 
 void Input::Parse()
 {
-   store         = NULL;
-   inType        = 0;
-   pin           = 0;
+    store = NULL;
+    inType = 0;
+    pin = 0;
 
-  if (inputObj && (inputObj->type==aJson_Object))
-  {
-  aJsonObject * s;
+    if (inputObj && (inputObj->type == aJson_Object)) {
+        aJsonObject *s;
 
-  s             = aJson.getObjectItem(inputObj,"T");
-  if (s) inType = s->valueint;
+        s = aJson.getObjectItem(inputObj, "T");
+        if (s) inType = s->valueint;
 
-  pin           = atoi(inputObj->name);
+        pin = atoi(inputObj->name);
 
+        s = aJson.getObjectItem(inputObj, "S");
+        if (!s) {
+            Serial.print(F("In: "));
+            Serial.print(pin);
+            Serial.print(F("/"));
+            Serial.println(inType);
+            aJson.addNumberToObject(inputObj, "S", 0);
+            s = aJson.getObjectItem(inputObj, "S");
+        }
 
-  s             = aJson.getObjectItem(inputObj,"S");
-  if (!s)     { Serial.print(F("In: "));Serial.print(pin);Serial.print(F("/"));Serial.println(inType);
-                aJson.addNumberToObject(inputObj,"S", 0);
-                s = aJson.getObjectItem(inputObj,"S");
-                }
-
-  if (s)        store= (inStore *) &s->valueint;
-  }
+        if (s) store = (inStore *) &s->valueint;
+    }
 }
 
-int Input::Poll()
-{
-  boolean v;
-  if (!isValid()) return -1;
-
-
-  if (inType & IN_ACTIVE_HIGH)
-      {   pinMode(pin, INPUT);
-        v = (digitalRead(pin)==HIGH);
-      }
-        else
-      {   pinMode(pin, INPUT_PULLUP);
-        v = (digitalRead(pin)==LOW);
-      }
-  if (v!=store->cur) // value changed
-      {
-            if (store->bounce) store->bounce--;
-               else //confirmed change
-               {
-                Changed(v);
-                store->cur=v;
-               }
-      }
-  else // no change
-      store->bounce=3;
- return  0;
+int Input::poll() {
+    if (!isValid()) return -1;
+    if (inType & IN_PUSH_ON)
+        contactPoll();
+    else if (inType & IN_DHT22)
+        dht22Poll();
+    return 0;
 }
 
-void Input::Changed (int val)
+void Input::dht22Poll() {
+    if (store->nextPollMillis > millis())
+        return;
+    DHT dht(pin, DHT22);
+    float temp = dht.readTemperature();
+    float humidity = dht.readHumidity();
+    aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
+    if (emit && temp && humidity && temp == temp && humidity == humidity) {
+        Serial.print(F("IN:"));Serial.print(pin);Serial.print(F(" DHT22 type. T="));Serial.print(temp);
+        Serial.print(F("°C H="));Serial.print(humidity);Serial.print(F("%"));
+        char valstr[10];
+        char addrstr[100] = "";
+        strcat(addrstr, emit->valuestring);
+        strcat(addrstr, "T");
+        sprintf(valstr, "%2.1f", temp);
+        mqttClient.publish(addrstr, valstr);
+        addrstr[strlen(addrstr) - 1] = 'H';
+        sprintf(valstr, "%2.1f", humidity);
+        mqttClient.publish(addrstr, valstr);
+        store->nextPollMillis = millis() + DHT_POLL_DELAY_DEFAULT;
+        Serial.print(" NextPollMillis=");Serial.println(store->nextPollMillis);
+    }
+}
+
+void Input::contactPoll() {
+    boolean currentInputState;
+    uint8_t inputPinMode, inputOnLevel;
+    if (inType & IN_ACTIVE_HIGH) {
+        inputOnLevel = HIGH;
+        inputPinMode = INPUT;
+    } else {
+        inputOnLevel = LOW;
+        inputPinMode = INPUT_PULLUP;
+    }
+    pinMode(pin, inputPinMode);
+    currentInputState = (digitalRead(pin) == inputOnLevel);
+    if (currentInputState != store->currentValue) // value changed
+    {
+        if (store->bounce) store->bounce = store->bounce - 1;
+        else //confirmed change
+        {
+            onContactChanged(currentInputState);
+            store->currentValue = currentInputState;
+        }
+    } else // no change
+        store->bounce = SAME_STATE_ATTEMPTS;
+}
+
+void Input::onContactChanged(int val)
 {
   Serial.print(F("IN:"));  Serial.print(pin);Serial.print(F("="));Serial.println(val);
   aJsonObject * item = aJson.getObjectItem(inputObj,"item");

@@ -61,7 +61,6 @@
 
 #if defined(__ESP__)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
-#include "esp.h"
 #include <EEPROM.h>
 #include <ESP8266HTTPClient.h>
 #endif
@@ -96,6 +95,9 @@
 extern Artnet *artnet;
 #endif
 
+#ifndef WITHOUT_DHT
+#include "DHT.h"
+#endif
 //void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);
