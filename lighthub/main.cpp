@@ -799,7 +799,6 @@ int getConfig(int arg_cnt, char **args)
     FILE *result;
     //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
-
     HTTPClient hclient(configServer, 80);
     // FILE is the return STREAM type of the HTTPClient
     result = hclient.getURI(URI);
@@ -810,6 +809,9 @@ int getConfig(int arg_cnt, char **args)
         if (responseStatusCode == 200) {
 
             Serial.println(F("got Config"));
+            char c;
+            for(int i = 0; (c = getc(result)) != EOF; i++)
+                Serial.print(c);
             aJsonFileStream as = aJsonFileStream(result);
             noInterrupts();
             aJson.deleteItem(root);
@@ -1039,6 +1041,11 @@ void printFirmwareVersionAndBuildOptions() {
     Serial.println(F("(-)OWIRE"));
 #else
     Serial.println(F("(+)OWIRE"));
+#endif
+#ifndef WITHOUT_DHT
+    Serial.println(F("(+)DHT"));
+#else
+    Serial.println(F("(-)DHT"));
 #endif
 
 #ifdef Wiz5500

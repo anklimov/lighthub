@@ -19,10 +19,12 @@ e-mail    anklimov@gmail.com
 */
 
 #include "inputs.h"
-#include "aJSON.h"
 #include "item.h"
 #include <PubSubClient.h>
-#include <DHT.h>
+
+#ifndef WITHOUT_DHT
+#include "DHT.h"
+#endif
 
 extern PubSubClient mqttClient;
 //DHT dht();
@@ -94,6 +96,7 @@ int Input::poll() {
 }
 
 void Input::dht22Poll() {
+#ifndef WITHOUT_DHT
     if (store->nextPollMillis > millis())
         return;
     DHT dht(pin, DHT22);
@@ -115,6 +118,7 @@ void Input::dht22Poll() {
         store->nextPollMillis = millis() + DHT_POLL_DELAY_DEFAULT;
         Serial.print(" NextPollMillis=");Serial.println(store->nextPollMillis);
     }
+#endif
 }
 
 void Input::contactPoll() {

@@ -95,9 +95,6 @@
 extern Artnet *artnet;
 #endif
 
-#ifndef WITHOUT_DHT
-#include "DHT.h"
-#endif
 //void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);

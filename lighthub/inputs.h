@@ -18,7 +18,7 @@ e-mail    anklimov@gmail.com
 
 */
 
-#include "aJSON.h"
+#include <aJSON.h>
 
 #define IN_ACTIVE_HIGH   2      // High level = PUSHED/ CLOSED/ ON othervise :Low Level
 #define IN_ANALOG        64     // Analog input
