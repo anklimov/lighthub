@@ -61,7 +61,6 @@
 
 #if defined(__ESP__)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
-#include "esp.h"
 #include <EEPROM.h>
 #include <ESP8266HTTPClient.h>
 #endif

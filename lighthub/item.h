@@ -127,7 +127,7 @@ class Item
 class PooledItem : public Item
 {
   public:
-  virtual int Changed() = 0;
+  virtual int onContactChanged() = 0;
   virtual void Idle ();
   protected:
   int PoolingInterval;

@@ -139,7 +139,7 @@ for (short tch=0; tch<=3 ; tch++)
       {
         D_State |= (1<<tch);
         updated=1;
-        //Serial.print("Changed :"); Serial.print(DMXin[tch*4+trh]); Serial.print(" => "); Serial.print(t);Serial.println();
+        //Serial.print("onContactChanged :"); Serial.print(DMXin[tch*4+trh]); Serial.print(" => "); Serial.print(t);Serial.println();
         DMXin[base+trh]=t;
         //DMXImmediateUpdate(tch,trh,t);
         //break;
