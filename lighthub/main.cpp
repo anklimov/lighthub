@@ -796,30 +796,32 @@ int getConfig(int arg_cnt, char **args)
     Serial.println(URI);
 
 #if defined(__AVR__)
-    FILE *result;
+    FILE *configStream;
+    FILE *configStreamPrint;
     //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
     HTTPClient hclient(configServer, 80);
     // FILE is the return STREAM type of the HTTPClient
-    result = hclient.getURI(URI);
+    configStream = hclient.getURI(URI);
+    configStreamPrint = hclient.getURI(URI);
     responseStatusCode = hclient.getLastReturnCode();
     wdt_en();
 
-    if (result != NULL) {
+    if (configStream != NULL && configStreamPrint) {
         if (responseStatusCode == 200) {
 
             Serial.println(F("got Config"));
             char c;
-            for(int i = 0; (c = getc(result)) != EOF; i++)
+            for(int i = 0; (c = getc(configStreamPrint)) != EOF; i++)
                 Serial.print(c);
-            rewind(result);
-            aJsonFileStream as = aJsonFileStream(result);
+            hclient.closeStream(configStreamPrint);
+            aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
             aJson.deleteItem(root);
             root = aJson.parse(&as);
             interrupts();
         //    Serial.println(F("Parsed."));
-            hclient.closeStream(result);  // this is very important -- be sure to close the STREAM
+            hclient.closeStream(configStream);  // this is very important -- be sure to close the STREAM
 
             if (!root) {
                 Serial.println(F("Config parsing failed"));
