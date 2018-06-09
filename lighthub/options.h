@@ -34,6 +34,10 @@
 #define INTERVAL_POLLING      100
 #define THERMOSTAT_CHECK_PERIOD 5000
 
+#ifndef OW_UPDATE_INTERVAL
+#define OW_UPDATE_INTERVAL 5000
+#endif
+
 #ifndef MODBUS_SERIAL_BAUD
 #define MODBUS_SERIAL_BAUD 9600
 #endif
@@ -132,3 +136,5 @@
 #ifndef ESP_WIFI_PWD
 #define ESP_WIFI_PWD mywifipass
 #endif
+
+#define DHT_POLL_DELAY_DEFAULT 15000
