@@ -103,9 +103,9 @@ void Input::dht22Poll() {
     float temp = dht.readTemperature();
     float humidity = dht.readHumidity();
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
+    Serial.print(F("IN:"));Serial.print(pin);Serial.print(F(" DHT22 type. T="));Serial.print(temp);
+    Serial.print(F("°C H="));Serial.print(humidity);Serial.print(F("%"));
     if (emit && temp && humidity && temp == temp && humidity == humidity) {
-        Serial.print(F("IN:"));Serial.print(pin);Serial.print(F(" DHT22 type. T="));Serial.print(temp);
-        Serial.print(F("°C H="));Serial.print(humidity);Serial.print(F("%"));
         char valstr[10];
         char addrstr[100] = "";
         strcat(addrstr, emit->valuestring);
