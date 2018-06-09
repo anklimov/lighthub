@@ -812,6 +812,7 @@ int getConfig(int arg_cnt, char **args)
             char c;
             for(int i = 0; (c = getc(result)) != EOF; i++)
                 Serial.print(c);
+            rewind(result);
             aJsonFileStream as = aJsonFileStream(result);
             noInterrupts();
             aJson.deleteItem(root);
