@@ -797,25 +797,20 @@ int getConfig(int arg_cnt, char **args)
 
 #if defined(__AVR__)
     FILE *configStream;
-    FILE *configStreamPrint;
     //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
     HTTPClient hclient(configServer, 80);
     HTTPClient hclientPrint(configServer, 80);
     // FILE is the return STREAM type of the HTTPClient
     configStream = hclient.getURI(URI);
-    configStreamPrint = hclientPrint.getURI(URI);
     responseStatusCode = hclient.getLastReturnCode();
     wdt_en();
 
-    if (configStream != NULL && configStreamPrint) {
+    if (configStream != NULL) {
         if (responseStatusCode == 200) {
 
             Serial.println(F("got Config"));
             char c;
-            for(int i = 0; (c = getc(configStreamPrint)) != EOF; i++)
-                Serial.print(c);
-            hclientPrint.closeStream(configStreamPrint);
             aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
             aJson.deleteItem(root);
