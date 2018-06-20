@@ -150,7 +150,7 @@ platformio device monitor -b 115200
 * LAN_INIT_DELAY=2000 // set lan init delay for Wiznet ethernet shield
 * ESP_WIFI_AP=MYAP // esp wifi access point name
 * ESP_WIFI_PWD=MYPWD // esp wifi access point password
-* WITHOUT_DHT //disable DHT Input support
+* DHT_DISABLE //disable DHT Input support
 
 
 

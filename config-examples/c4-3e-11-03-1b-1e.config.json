@@ -1,5 +1,5 @@
 {
-  "mqtt":["garden","192.168.10.115",1883,"test","test"],
+  "mqtt":["garden","192.168.10.114",1883,"test","test"],
   "ow":{
     "28FFADCE601705A3":{"emit":"t_soil1","item":"h_relay6"},
     "286164123FF96F55":{"emit":"t_soil2"},
@@ -17,6 +17,7 @@
     "h_auto":[6,29,1,1]
   },
   "in":{
+    "5": {"T":4,"emit": "/myhome/s_out/t_dht1"},
     "40":{"emit":"/myhome/s_out/g_in1","scmd":"CLOSED","rcmd":"OPEN"},
     "41":{"emit":"/myhome/s_out/g_in2","scmd":"CLOSED","rcmd":"OPEN"},
     "42":{"emit":"/myhome/s_out/g_in3","scmd":"CLOSED","rcmd":"OPEN"},

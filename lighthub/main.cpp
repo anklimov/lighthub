@@ -120,9 +120,13 @@ PubSubClient mqttClient(ethClient);
 
 bool wifiInitialized;
 
+int mqtt_error_rate;
+
 bool IsThermostat(const aJsonObject *item);
 
 bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLatestCommand);
+
+void resetFunc();
 
 void watchdogSetup(void) {
 //Serial.begin(115200);
@@ -183,6 +187,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         item.Ctrl((char *)payload, !retaining);
         } //valid item
 }
+
 
 #ifndef __ESP__
 
@@ -270,6 +275,9 @@ int lanLoop() {
                 Serial.print(F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"));
                 lanStatus = -10;
                 lanCheck = millis() + 60000;
+#ifdef RESET_PIN
+                resetFunc();
+#endif
             } else {
                 printIPAddress();
                 lanStatus = 1;
@@ -324,6 +332,7 @@ int lanLoop() {
 
                     wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
                     if (mqttClient.connect(client_id, user, password)) {
+                        mqtt_error_rate=0;
                         Serial.print(F("connected as "));
                         Serial.println(client_id);
                     wdt_en();
@@ -350,6 +359,13 @@ int lanLoop() {
                         Serial.print(mqttClient.state());
                         Serial.println(F(" try again in 5 seconds"));
                         lanCheck = millis() + 5000;
+#ifdef RESET_PIN
+                        mqtt_error_rate++;
+                        if(mqtt_error_rate>50){
+                            Serial.print(F("Too many MQTT connection errors. Resetting."));
+                            resetFunc();
+                        }
+#endif
                         lanStatus = 12;
                     }
                 }
@@ -448,6 +464,24 @@ int lanLoop() {
     return lanStatus;
 
 }
+
+void (*softResetFunc)(void) = 0;
+
+void resetFunc() {
+#ifdef RESET_PIN
+    Serial.println(F("Reset arduino with digital pin "));
+    Serial.print(QUOTE(RESET_PIN));
+    delay(1000);
+    pinMode(RESET_PIN, OUTPUT);
+    digitalWrite(RESET_PIN,LOW);
+    delay(1000);
+    digitalWrite(RESET_PIN,HIGH);
+#endif
+    Serial.println(F("Hardware reset not working! Use soft reset... "));
+    delay(1000);
+    softResetFunc();
+}
+
 #ifdef _owire
 
 void Changed(int i, DeviceAddress addr, int val) {
@@ -488,7 +522,6 @@ void Changed(int i, DeviceAddress addr, int val) {
 
 #endif //_owire
 
-
 void cmdFunctionHelp(int arg_cnt, char **args)
 //(char* tokens)
 {
@@ -501,7 +534,8 @@ void cmdFunctionHelp(int arg_cnt, char **args)
                              "'load' - load config from NVRAM\n"
                              "'pwd' - define MQTT password\n"
                              "'kill' - test watchdog\n"
-                             "'clear' - clear EEPROM"));
+                             "'clear' - clear EEPROM\n"
+                             "'reboot' - reboot controller"));
 }
 
 void cmdFunctionKill(int arg_cnt, char **args) {
@@ -509,6 +543,11 @@ void cmdFunctionKill(int arg_cnt, char **args) {
         delay(1000);
         Serial.println(i);
     };
+}
+
+void cmdFunctionReboot(int arg_cnt, char **args) {
+    Serial.println(F("Rebooting..."));
+    resetFunc();
 }
 
 void applyConfig() {
@@ -1041,7 +1080,7 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     Serial.println(F("(+)OWIRE"));
 #endif
-#ifndef WITHOUT_DHT
+#ifndef DHT_DISABLE
     Serial.println(F("(+)DHT"));
 #else
     Serial.println(F("(-)DHT"));
@@ -1053,6 +1092,13 @@ void printFirmwareVersionAndBuildOptions() {
 
 #ifdef SD_CARD_INSERTED
     Serial.println(F("(+)SDCARD"));
+#endif
+
+#ifdef RESET_PIN
+    Serial.println(F("(+)HARDRESET on pin="));
+    Serial.print(F(QUOTE(RESET_PIN)));
+#else
+    Serial.println("(-)HARDRESET, using soft");
 #endif
 
 
@@ -1095,6 +1141,7 @@ void setupCmdArduino() {
     cmdAdd("ip", cmdFunctionIp);
     cmdAdd("pwd", cmdFunctionPwd);
     cmdAdd("clear",cmdFunctionClearEEPROM);
+    cmdAdd("reboot",cmdFunctionReboot);
 }
 
 void loop_main() {

@@ -98,4 +98,6 @@ class Input
 
     void dht22Poll();
 
+
+    void printFloatValueToStr(float temp, char *valstr);
 };
