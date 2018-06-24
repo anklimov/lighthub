@@ -620,6 +620,7 @@ void applyConfig() {
     if (owArr && !owReady) {
         aJsonObject *item = owArr->child;
         owReady = owSetup(&Changed);
+        if (owReady) Serial.println(F("One wire Ready"));
         t_count = 0;
         while (item && owReady) {
             if ((item->type == aJson_Object)) {
@@ -1025,7 +1026,7 @@ pinMode(TXEnablePin, OUTPUT);
 #endif
 
     delay(20);
-    owReady = 0;
+    //owReady = 0;
 
 #ifdef _owire
     if (net) net->idle(&owIdle);
