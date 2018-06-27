@@ -95,6 +95,18 @@
 extern Artnet *artnet;
 #endif
 
+enum lan_status {
+    INITIAL_STATE = 0,
+    HAVE_IP_ADDRESS = 1,
+    IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER = 2,
+    OPERATION = 3,
+    RETAINING_COLLECTING = 4,
+    AWAITING_ADDRESS = -10,
+    RECONNECT = 12,
+    READ_RE_CONFIG = -11,
+    DO_NOTHING = -14
+};
+
 //void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);
@@ -109,7 +121,7 @@ void printMACAddress();
 
 void restoreState();
 
-int lanLoop();
+lan_status lanLoop();
 
 void Changed(int i, DeviceAddress addr, int val);
 
@@ -147,7 +159,7 @@ void saveFlash(short n, IPAddress& ip);
 
 int loadFlash(short n, IPAddress& ip);
 
-int getConfig(int arg_cnt=0, char **args=NULL);
+lan_status getConfig(int arg_cnt=0, char **args=NULL);
 
 void preTransmission();
 
@@ -177,8 +189,12 @@ void setupCmdArduino();
 
 void setupMacAddress();
 
-int getConfig(int arg_cnt, char **args);
-
 void printFirmwareVersionAndBuildOptions();
+
+bool IsThermostat(const aJsonObject *item);
+
+bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLatestCommand);
+
+void resetFunc();
 
 #endif //LIGHTHUB_MAIN_H

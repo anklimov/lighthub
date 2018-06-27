@@ -83,6 +83,8 @@ EthernetClient ethClient;
 WiFiClient ethClient;
 #endif
 
+lan_status lanStatus = INITIAL_STATE;
+
 const char outprefix[] PROGMEM = OUTTOPIC;
 const char inprefix[] PROGMEM = INTOPIC;
 const char configserver[] PROGMEM = CONFIG_SERVER;
@@ -106,7 +108,6 @@ aJsonObject *pollingItem = NULL;
 
 bool owReady = false;
 bool configOk = false;
-int lanStatus = 0;
 
 #ifdef _modbus
 ModbusMaster node;
@@ -114,19 +115,11 @@ ModbusMaster node;
 
 byte mac[6];
 
-
 PubSubClient mqttClient(ethClient);
-
 
 bool wifiInitialized;
 
 int mqtt_error_rate;
-
-bool IsThermostat(const aJsonObject *item);
-
-bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLatestCommand);
-
-void resetFunc();
 
 void watchdogSetup(void) {
 //Serial.begin(115200);
@@ -216,16 +209,16 @@ void restoreState() {
     //mqttClient.publish("/myhome/out/RestoreState", "ON");
 };
 
-int lanLoop() {
+
+
+lan_status lanLoop() {
 
 #ifdef NOETHER
     lanStatus=-14;
 #endif
 
-//Serial.println(lanStatus);
     switch (lanStatus) {
-//Initial state
-        case 0: //Ethernet.begin(mac,ip);
+        case INITIAL_STATE:
         {
 #ifdef __ESP__
             if(!wifiInitialized) {
@@ -254,57 +247,55 @@ int lanLoop() {
             IPAddress mask;
             int res = 1;
             Serial.println(F("Starting lan"));
-            if (loadFlash(OFFSET_IP,ip))
-               if (loadFlash(OFFSET_DNS,dns))
-                  if (loadFlash(OFFSET_GW,gw))
-                     if (loadFlash(OFFSET_MASK,mask)) Ethernet.begin(mac,ip,dns,gw,mask);
-                                                else Ethernet.begin(mac,ip,dns,gw);
-                                                    else  Ethernet.begin(mac,ip,dns);
-                                                          else  Ethernet.begin(mac,ip);
-                                                                else
-                                                                  {
-                                                                  wdt_dis();
-                                                                  res = Ethernet.begin(mac, 12000);
-                                                                  wdt_en();
-                                                                  wdt_res();
-                                                                   }
+            if (loadFlash(OFFSET_IP, ip))
+                if (loadFlash(OFFSET_DNS, dns))
+                    if (loadFlash(OFFSET_GW, gw))
+                        if (loadFlash(OFFSET_MASK, mask)) Ethernet.begin(mac, ip, dns, gw, mask);
+                        else Ethernet.begin(mac, ip, dns, gw);
+                    else Ethernet.begin(mac, ip, dns);
+                else Ethernet.begin(mac, ip);
+            else {
+                wdt_dis();
+                res = Ethernet.begin(mac, 12000);
+                wdt_en();
+                wdt_res();
+            }
 
 
             if (res == 0) {
                 Serial.println(F("Failed to configure Ethernet using DHCP. You can set ip manually!"));
                 Serial.print(F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"));
-                lanStatus = -10;
+                lanStatus = AWAITING_ADDRESS;//-10;
                 lanCheck = millis() + 60000;
 #ifdef RESET_PIN
                 resetFunc();
 #endif
             } else {
                 printIPAddress();
-                lanStatus = 1;
+                lanStatus = HAVE_IP_ADDRESS;//1;
             }
 
 
 #endif
             break;
-          }
-//Have IP address
-        case 1:
+        }
+        case HAVE_IP_ADDRESS:
             if (!configOk)
                 lanStatus = getConfig(0, NULL); //got config from server or load from NVRAM
-                else lanStatus = 2;
+            else lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
 #ifdef _artnet
             if (artnet) artnet->begin();
 #endif
 
             break;
-        case 2: // IP Ready, config loaded, Connecting broker  & subscribeArming Watchdog
+        case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
             wdt_res();
             {
                 short n = 0;
                 int port = 1883;
                 char empty = 0;
                 char *user = &empty;
-                char passwordBuf[16]="";
+                char passwordBuf[16] = "";
                 char *password = passwordBuf;
 
 
@@ -313,11 +304,10 @@ int lanLoop() {
                     char *servername = aJson.getArrayItem(mqttArr, 1)->valuestring;
                     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
                     if (n >= 4) user = aJson.getArrayItem(mqttArr, 3)->valuestring;
-                    if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf,sizeof(passwordBuf)) && (n >= 5))
-                        {
-                          password = aJson.getArrayItem(mqttArr, 4)->valuestring;
-                          Serial.println(F("Using MQTT password from config"));
-                        }
+                    if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5)) {
+                        password = aJson.getArrayItem(mqttArr, 4)->valuestring;
+                        Serial.println(F("Using MQTT password from config"));
+                    }
 
                     mqttClient.setServer(servername, port);
                     mqttClient.setCallback(mqttCallback);
@@ -332,11 +322,11 @@ int lanLoop() {
 
                     wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
                     if (mqttClient.connect(client_id, user, password)) {
-                        mqtt_error_rate=0;
+                        mqtt_error_rate = 0;
                         Serial.print(F("connected as "));
                         Serial.println(client_id);
-                    wdt_en();
-                        configOk=true;
+                        wdt_en();
+                        configOk = true;
                         // ... Temporary subscribe to status topic
                         char buf[MQTT_TOPIC_LENGTH];
 
@@ -351,7 +341,7 @@ int lanLoop() {
 
                         //restoreState();
                         // if (_once) {DMXput(); _once=0;}
-                        lanStatus = 4;
+                        lanStatus = RETAINING_COLLECTING;//4;
                         lanCheck = millis() + 5000;
                         Serial.println(F("Awaiting for retained topics"));
                     } else {
@@ -366,13 +356,13 @@ int lanLoop() {
                             resetFunc();
                         }
 #endif
-                        lanStatus = 12;
+                        lanStatus = RECONNECT;//12;
                     }
                 }
                 break;
             }
 
-        case 4: //retaining ... Collecting
+        case RETAINING_COLLECTING:
             if (millis() > lanCheck) {
                 char buf[MQTT_TOPIC_LENGTH];
 
@@ -381,37 +371,34 @@ int lanLoop() {
                 strncat(buf, "#", sizeof(buf));
                 mqttClient.unsubscribe(buf);
 
-                lanStatus = 3;
+                lanStatus = OPERATION;//3;
                 Serial.println(F("Accepting commands..."));
                 break;
             }
 
-        case 3: //operation
-            if (!mqttClient.connected()) lanStatus = 2;
+        case OPERATION:
+            if (!mqttClient.connected()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             break;
 
-//Awaiting address
-        case -10:
+        case AWAITING_ADDRESS:
             if (millis() > lanCheck)
-                lanStatus = 0;
+                lanStatus = INITIAL_STATE;//0;
             break;
-//Reconnect
-        case 12:
+
+        case RECONNECT:
             if (millis() > lanCheck)
 
-                lanStatus = 2;
+                lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             break;
-            // read or Re-read config
-        case -11:
-            if (loadConfigFromEEPROM(0, NULL)) lanStatus = 2;
+        case READ_RE_CONFIG:
+            if (loadConfigFromEEPROM(0, NULL)) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             else {
                 lanCheck = millis() + 5000;
-                lanStatus = -10;
+                lanStatus = AWAITING_ADDRESS;//-10;
             }
             break;
 
-        case -14:;
-            // do notghing with net
+        case DO_NOTHING:;
     }
 
 
@@ -424,14 +411,14 @@ int lanLoop() {
                     Serial.println(F("No link"));
                     if (mqttClient.connected()) mqttClient.disconnect();
                     lanCheck = millis() + 30000;
-                    lanStatus = -10;
+                    lanStatus = AWAITING_ADDRESS;//-10;
                     break;
                 case DHCP_CHECK_RENEW_FAIL:
                     //renewed fail
                     Serial.println(F("Error: renewed fail"));
                     if (mqttClient.connected()) mqttClient.disconnect();
                     lanCheck = millis() + 1000;
-                    lanStatus = -10;
+                    lanStatus = AWAITING_ADDRESS;//-10;
                     break;
 
                 case DHCP_CHECK_RENEW_OK:
@@ -443,7 +430,7 @@ int lanLoop() {
                     Serial.println(F("Error: rebind fail"));
                     if (mqttClient.connected()) mqttClient.disconnect();
                     lanCheck = millis() + 1000;
-                    lanStatus = -10;
+                    lanStatus = AWAITING_ADDRESS;//-10;
                     break;
 
                 case DHCP_CHECK_REBIND_OK:
@@ -469,8 +456,8 @@ void (*softResetFunc)(void) = 0;
 
 void resetFunc() {
 #ifdef RESET_PIN
-    Serial.println(F("Reset arduino with digital pin "));
-    Serial.print(QUOTE(RESET_PIN));
+    Serial.print(F("Reset arduino with digital pin "));
+    Serial.println(QUOTE(RESET_PIN));
     delay(1000);
     pinMode(RESET_PIN, OUTPUT);
     digitalWrite(RESET_PIN,LOW);
@@ -816,7 +803,7 @@ int loadFlash(short n, IPAddress& ip) {
 return 0;
 }
 
-int getConfig(int arg_cnt, char **args)
+lan_status getConfig(int arg_cnt, char **args)
 {
     int responseStatusCode = 0;
     char ch;
@@ -876,14 +863,14 @@ int getConfig(int arg_cnt, char **args)
             Serial.print(F("ERROR: Server returned "));
             Serial.println(responseStatusCode);
             lanCheck = millis() + 5000;
-            return -11;
+            return READ_RE_CONFIG;//-11;
         }
 
     } else {
         Serial.println(F("failed to connect"));
         Serial.println(F(" try again in 5 seconds"));
         lanCheck = millis() + 5000;
-        return -11;
+        return READ_RE_CONFIG;//-11;
     }
 #endif
 #if defined(__SAM3X8E__)
@@ -915,7 +902,7 @@ int getConfig(int arg_cnt, char **args)
         if (!root) {
             Serial.println(F("Config parsing failed"));
             // lanCheck=millis()+15000;
-            return -11; //Load from NVRAM
+            return READ_RE_CONFIG;//-11; //Load from NVRAM
         } else {
             /*
             char * outstr=aJson.print(root);
@@ -930,7 +917,7 @@ int getConfig(int arg_cnt, char **args)
     } else {
         Serial.println(F("Config retrieving failed"));
         //lanCheck=millis()+15000;
-        return -11; //Load from NVRAM
+        return READ_RE_CONFIG;//-11; //Load from NVRAM
     }
 #endif
 #if defined(__ESP__)
@@ -965,7 +952,7 @@ int getConfig(int arg_cnt, char **args)
     httpClient.end();
 #endif
 
-    return 2;
+    return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
 }
 
 void preTransmission() {
@@ -1095,8 +1082,8 @@ void printFirmwareVersionAndBuildOptions() {
 #endif
 
 #ifdef RESET_PIN
-    Serial.println(F("(+)HARDRESET on pin="));
-    Serial.print(F(QUOTE(RESET_PIN)));
+    Serial.print(F("(+)HARDRESET on pin="));
+    Serial.println(F(QUOTE(RESET_PIN)));
 #else
     Serial.println("(-)HARDRESET, using soft");
 #endif
