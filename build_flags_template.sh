@@ -24,7 +24,8 @@
  export FLAGS="$FLAGS -DESP_WIFI_AP=MYAP"
  export FLAGS="$FLAGS -DESP_WIFI_PWD=MYPWD"
  export FLAGS="$FLAGS -DDHT_DISABLE"
- export FLAGS="$FLAGS -DRESET_PIN=5"
+ export FLAGS="$FLAGS -DW5100_RESET_PIN=5"
+ export FLAGS="$FLAGS -DDHCP_RETRY_INTERVAL=60000"
  export PLATFORMIO_BUILD_FLAGS="$FLAGS"
  echo PLATFORMIO_BUILD_FLAGS=$PLATFORMIO_BUILD_FLAGS
  echo "==============================================Custom build flags END====================================================="

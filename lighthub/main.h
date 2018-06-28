@@ -10,6 +10,10 @@
 #define wdt_dis()
 #endif
 
+#ifndef DHCP_RETRY_INTERVAL
+#define DHCP_RETRY_INTERVAL 60000
+#endif
+
 #if defined(__AVR__)
 #define wdt_en()   wdt_enable(WDTO_8S)
 #define wdt_dis()  wdt_disable()
@@ -195,6 +199,10 @@ bool IsThermostat(const aJsonObject *item);
 
 bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLatestCommand);
 
-void resetFunc();
+void resetW5100();
+
+void onInitialStateInitLAN();
+
+void ip_ready_config_loaded_connecting_to_broker();
 
 #endif //LIGHTHUB_MAIN_H
