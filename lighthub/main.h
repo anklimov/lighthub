@@ -117,7 +117,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length);
 
 #ifndef __ESP__
 
-void printIPAddress();
+void printIPAddress(IPAddress ipAddress);
 
 #endif
 

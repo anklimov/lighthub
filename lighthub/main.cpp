@@ -184,10 +184,9 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
 
 #ifndef __ESP__
 
-void printIPAddress() {
-    Serial.print(F("My IP address: "));
+void printIPAddress(IPAddress ipAddress) {
     for (byte thisByte = 0; thisByte < 4; thisByte++) {
-        Serial.print(Ethernet.localIP()[thisByte], DEC);
+        Serial.print(ipAddress[thisByte], DEC);
         Serial.print(F("."));
     }
     Serial.println();
@@ -295,8 +294,8 @@ lan_status lanLoop() {
                     break;
 
                 case DHCP_CHECK_RENEW_OK:
-                    Serial.println(F("Renewed success"));
-                    printIPAddress();
+                    Serial.println(F("Renewed success. IP address:"));
+                    printIPAddress(Ethernet.localIP());
                     break;
 
                 case DHCP_CHECK_REBIND_FAIL:
@@ -307,8 +306,8 @@ lan_status lanLoop() {
                     break;
 
                 case DHCP_CHECK_REBIND_OK:
-                    Serial.println(F("Rebind success"));
-                    printIPAddress();
+                    Serial.println(F("Rebind success. IP address:"));
+                    printIPAddress(Ethernet.localIP());
                     break;
 
                 default:
@@ -420,17 +419,28 @@ void onInitialStateInitLAN() {
 
 
 #else
-    IPAddress ip,dns,gw,mask;
+    IPAddress ip, dns, gw, mask;
     int res = 1;
     Serial.println(F("Starting lan"));
-    if (loadFlash(OFFSET_IP, ip))
-        if (loadFlash(OFFSET_DNS, dns))
-            if (loadFlash(OFFSET_GW, gw))
-                if (loadFlash(OFFSET_MASK, mask)) Ethernet.begin(mac, ip, dns, gw, mask);
-                else Ethernet.begin(mac, ip, dns, gw);
-            else Ethernet.begin(mac, ip, dns);
-        else Ethernet.begin(mac, ip);
-    else {
+    if (loadFlash(OFFSET_IP, ip)) {
+        Serial.print("Loaded from flash IP:");
+        printIPAddress(ip);
+        if (loadFlash(OFFSET_DNS, dns)) {
+            Serial.print(" DNS:");
+            printIPAddress(dns);
+            if (loadFlash(OFFSET_GW, gw)) {
+                Serial.print(" GW:");
+                printIPAddress(gw);
+                if (loadFlash(OFFSET_MASK, mask)) {
+                    Serial.print(" MASK:");
+                    printIPAddress(mask);
+                    Ethernet.begin(mac, ip, dns, gw, mask);
+                } else Ethernet.begin(mac, ip, dns, gw);
+            } else Ethernet.begin(mac, ip, dns);
+        } else Ethernet.begin(mac, ip);
+    }
+        else {
+        Serial.print("No IP data found in flash");
         wdt_dis();
         res = Ethernet.begin(mac, 12000);
         wdt_en();
@@ -438,17 +448,18 @@ void onInitialStateInitLAN() {
     }
 
     if (res == 0) {
-                Serial.println(F("Failed to configure Ethernet using DHCP. You can set ip manually!"));
-                Serial.print(F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"));
-                lanStatus = AWAITING_ADDRESS;//-10;
-                nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
+        Serial.println(F("Failed to configure Ethernet using DHCP. You can set ip manually!"));
+        Serial.print(F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"));
+        lanStatus = AWAITING_ADDRESS;//-10;
+        nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
 #ifdef W5100_RESET_PIN
-                resetW5100();
+        resetW5100();
 #endif
-            } else {
-                printIPAddress();
-                lanStatus = HAVE_IP_ADDRESS;//1;
-            }
+    } else {
+        Serial.print(F("Got IP address:"));
+        printIPAddress(Ethernet.localIP());
+        lanStatus = HAVE_IP_ADDRESS;//1;
+    }
 
 
 #endif
