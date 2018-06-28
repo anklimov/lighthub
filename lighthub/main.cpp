@@ -182,17 +182,13 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
 }
 
 
-#ifndef __ESP__
-
 void printIPAddress(IPAddress ipAddress) {
     for (byte thisByte = 0; thisByte < 4; thisByte++) {
         Serial.print(ipAddress[thisByte], DEC);
-        Serial.print(F("."));
+        if (thisByte < 3)
+            Serial.print(F("."));
     }
-    Serial.println();
 }
-
-#endif
 
 void printMACAddress() {
     Serial.print(F("Configured MAC:"));
@@ -413,7 +409,7 @@ void onInitialStateInitLAN() {
                 Serial.println("WiFi connected");
                 Serial.println("IP address: ");
                 Serial.println(WiFi.localIP());
-                lanStatus=1;
+                lanStatus=HAVE_IP_ADDRESS;//1;
             }
 
 
@@ -974,7 +970,7 @@ lan_status getConfig(int arg_cnt, char **args)
             root = aJson.parse((char *) response.c_str());
             if (!root) {
                 Serial.println(F("Config parsing failed"));
-                return -11; //Load from NVRAM
+                return READ_RE_CONFIG;//-11; //Load from NVRAM
             } else {
                 Serial.println(F("Config OK, Applying"));
                 applyConfig();
@@ -983,7 +979,7 @@ lan_status getConfig(int arg_cnt, char **args)
     } else {
         Serial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(httpResponseCode).c_str());
         httpClient.end();
-        return -11; //Load from NVRAM
+        return READ_RE_CONFIG;//-11; //Load from NVRAM
     }
     httpClient.end();
 #endif

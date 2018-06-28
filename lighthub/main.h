@@ -115,11 +115,11 @@ enum lan_status {
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);
 
-#ifndef __ESP__
+//#ifndef __ESP__
 
 void printIPAddress(IPAddress ipAddress);
 
-#endif
+//#endif
 
 void printMACAddress();
 
