@@ -215,10 +215,9 @@ lan_status lanLoop() {
 #endif
 
     switch (lanStatus) {
-        case INITIAL_STATE: {
+        case INITIAL_STATE:
             onInitialStateInitLAN();
             break;
-        }
 
         case HAVE_IP_ADDRESS:
             if (!configOk)
@@ -382,12 +381,12 @@ void ip_ready_config_loaded_connecting_to_broker() {
                         Serial.print(mqttClient.state());
                         Serial.println(F(" try again in 5 seconds"));
                         nextLanCheckTime = millis() + 5000;
-#ifdef W5100_RESET_PIN
+#ifdef RESET_PIN
                         mqttErrorRate++;
                         if(mqttErrorRate>50){
                             Serial.print(F("Too many MQTT connection errors. Restart LAN"));
                             mqttErrorRate=0;
-                            resetW5100();
+                            resetHard();
                             lanStatus=INITIAL_STATE;
                             return;
                         }
@@ -422,16 +421,16 @@ void onInitialStateInitLAN() {
     IPAddress ip, dns, gw, mask;
     int res = 1;
     Serial.println(F("Starting lan"));
-    if (loadFlash(OFFSET_IP, ip)) {
+    if (ipLoadFromFlash(OFFSET_IP, ip)) {
         Serial.print("Loaded from flash IP:");
         printIPAddress(ip);
-        if (loadFlash(OFFSET_DNS, dns)) {
+        if (ipLoadFromFlash(OFFSET_DNS, dns)) {
             Serial.print(" DNS:");
             printIPAddress(dns);
-            if (loadFlash(OFFSET_GW, gw)) {
+            if (ipLoadFromFlash(OFFSET_GW, gw)) {
                 Serial.print(" GW:");
                 printIPAddress(gw);
-                if (loadFlash(OFFSET_MASK, mask)) {
+                if (ipLoadFromFlash(OFFSET_MASK, mask)) {
                     Serial.print(" MASK:");
                     printIPAddress(mask);
                     Ethernet.begin(mac, ip, dns, gw, mask);
@@ -440,7 +439,7 @@ void onInitialStateInitLAN() {
         } else Ethernet.begin(mac, ip);
     }
         else {
-        Serial.print("No IP data found in flash");
+        Serial.println("No IP data found in flash");
         wdt_dis();
         res = Ethernet.begin(mac, 12000);
         wdt_en();
@@ -452,8 +451,8 @@ void onInitialStateInitLAN() {
         Serial.print(F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"));
         lanStatus = AWAITING_ADDRESS;//-10;
         nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
-#ifdef W5100_RESET_PIN
-        resetW5100();
+#ifdef RESET_PIN
+        resetHard();
 #endif
     } else {
         Serial.print(F("Got IP address:"));
@@ -467,10 +466,10 @@ void onInitialStateInitLAN() {
 
 void (*softRebootFunc)(void) = 0;
 
-void resetW5100() {
-#ifdef W5100_RESET_PIN
+void resetHard() {
+#ifdef RESET_PIN
     Serial.print(F("Reset Wiznet5100 shield with digital pin "));
-    Serial.println(QUOTE(W5100_RESET_PIN));
+    Serial.println(QUOTE(RESET_PIN));
     delay(50);
     pinMode(W5100_RESET_PIN, OUTPUT);
     digitalWrite(W5100_RESET_PIN,LOW);
@@ -727,19 +726,45 @@ void cmdFunctionSave(int arg_cnt, char **args)
 
 void cmdFunctionIp(int arg_cnt, char **args)
 //(char* tokens)
-{ IPAddress ip0 (0,0,0,0);
-  IPAddress ip;
-  DNSClient dns;
+{
+    IPAddress ip0(0, 0, 0, 0);
+    IPAddress ip;
+    DNSClient dns;
     switch (arg_cnt) {
-      case 5: if (dns.inet_aton(args[4],ip)) saveFlash(OFFSET_MASK,ip); else saveFlash(OFFSET_MASK,ip0);
-      case 4: if (dns.inet_aton(args[3],ip)) saveFlash(OFFSET_GW,ip); else saveFlash(OFFSET_GW,ip0);
-      case 3: if (dns.inet_aton(args[2],ip)) saveFlash(OFFSET_DNS,ip); else saveFlash(OFFSET_DNS,ip0);
-      case 2: if (dns.inet_aton(args[1],ip)) saveFlash(OFFSET_IP,ip); else saveFlash(OFFSET_IP,ip0);
-      break;
-      case 1: //dynamic IP
-      saveFlash(OFFSET_IP,ip0);
+        case 5:
+            if (dns.inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
+            else saveFlash(OFFSET_MASK, ip0);
+        case 4:
+            if (dns.inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
+            else saveFlash(OFFSET_GW, ip0);
+        case 3:
+            if (dns.inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
+            else saveFlash(OFFSET_DNS, ip0);
+        case 2:
+            if (dns.inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
+            else saveFlash(OFFSET_IP, ip0);
+            break;
+        case 1:
+            IPAddress current_ip = Ethernet.localIP();
+            IPAddress current_mask = Ethernet.subnetMask();
+            IPAddress current_gw = Ethernet.gatewayIP();
+            IPAddress current_dns = Ethernet.dnsServerIP();
+            saveFlash(OFFSET_IP, current_ip);
+            saveFlash(OFFSET_MASK, current_mask);
+            saveFlash(OFFSET_GW, current_gw);
+            saveFlash(OFFSET_DNS, current_dns);
+            Serial.print(F("Saved current config(ip,dns,gw,subnet):"));
+            printIPAddress(current_ip);
+            Serial.print(F(" ,"));
+            printIPAddress(current_dns);
+            Serial.print(F(" ,"));
+            printIPAddress(current_gw);
+            Serial.print(F(" ,"));
+            printIPAddress(current_mask);
+            Serial.println(F(";"));
+
     }
-Serial.println(F("Saved"));
+    Serial.println(F("Saved"));
 }
 
 void cmdFunctionClearEEPROM(int arg_cnt, char **args){
@@ -808,7 +833,7 @@ void saveFlash(short n, IPAddress& ip) {
   for(int i=0;i<4;i++) EEPROM.write(n++,ip[i]);
 }
 
-int loadFlash(short n, IPAddress& ip) {
+int ipLoadFromFlash(short n, IPAddress &ip) {
   for(int i=0;i<4;i++) ip[i]=EEPROM.read(n++);
   if (ip[0] && (ip[0] != 0xff)) return 1;
 return 0;
@@ -859,7 +884,7 @@ lan_status getConfig(int arg_cnt, char **args)
             if (!root) {
                 Serial.println(F("Config parsing failed"));
                 nextLanCheckTime = millis() + 15000;
-                return -11;
+                return READ_RE_CONFIG;//-11;
             } else {
             //    char *outstr = aJson.print(root);
             //    Serial.println(outstr);
@@ -1092,9 +1117,9 @@ void printFirmwareVersionAndBuildOptions() {
     Serial.println(F("(+)SDCARD"));
 #endif
 
-#ifdef W5100_RESET_PIN
+#ifdef RESET_PIN
     Serial.print(F("(+)HARDRESET on pin="));
-    Serial.println(F(QUOTE(W5100_RESET_PIN)));
+    Serial.println(F(QUOTE(RESET_PIN)));
 #else
     Serial.println("(-)HARDRESET, using soft");
 #endif

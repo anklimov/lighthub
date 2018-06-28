@@ -161,7 +161,7 @@ int loadFlash(short n, char *str, short l=32);
 
 void saveFlash(short n, IPAddress& ip);
 
-int loadFlash(short n, IPAddress& ip);
+int ipLoadFromFlash(short n, IPAddress &ip);
 
 lan_status getConfig(int arg_cnt=0, char **args=NULL);
 
@@ -199,7 +199,7 @@ bool IsThermostat(const aJsonObject *item);
 
 bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLatestCommand);
 
-void resetW5100();
+void resetHard();
 
 void onInitialStateInitLAN();
 
