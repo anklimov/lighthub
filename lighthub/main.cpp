@@ -471,10 +471,10 @@ void resetHard() {
     Serial.print(F("Reset Wiznet5100 shield with digital pin "));
     Serial.println(QUOTE(RESET_PIN));
     delay(50);
-    pinMode(W5100_RESET_PIN, OUTPUT);
-    digitalWrite(W5100_RESET_PIN,LOW);
+    pinMode(RESET_PIN, OUTPUT);
+    digitalWrite(RESET_PIN,LOW);
     delay(25);
-    digitalWrite(W5100_RESET_PIN,HIGH);
+    digitalWrite(RESET_PIN,HIGH);
     delay(500);
 #endif    
 }
