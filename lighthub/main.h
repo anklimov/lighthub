@@ -67,6 +67,13 @@
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 #include <EEPROM.h>
 #include <ESP8266HTTPClient.h>
+
+#ifndef WIFI_MANAGER_DISABLE
+#include <WiFiManager.h>
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#endif
+
 #endif
 
 #ifdef _owire

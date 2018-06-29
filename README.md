@@ -150,7 +150,9 @@ platformio device monitor -b 115200
 * LAN_INIT_DELAY=2000 // set lan init delay for Wiznet ethernet shield
 * ESP_WIFI_AP=MYAP // esp wifi access point name
 * ESP_WIFI_PWD=MYPWD // esp wifi access point password
+* WIFI_MANAGER_DISABLE //Disable wifi manager for esp8266
 * DHT_DISABLE //disable DHT Input support
+* RESTART_LAN_ON_MQTT_ERRORS //reinit LAN if many mqtt errors occured
 
 
 
@@ -172,5 +174,7 @@ platformio device monitor -b 115200
 * Default MQTT topic to publish device status: /myhome/s_out
 * Default Alarm output topic /alarm
 * DHT support enabled
+* Wifi manager for esp8266 enabled
+* RESTART_LAN_ON_MQTT_ERRORS disabled
 
 If you've using Arduino IDE to compile & flash firmware, it will use Default options above and you will not able to configure additional compilers options except edit "options.h" file

@@ -129,12 +129,14 @@
 #undef _artnet
 #endif
 
+#ifdef WIFI_MANAGER_DISABLE
 #ifndef ESP_WIFI_AP
 #define ESP_WIFI_AP mywifiap
 #endif
 
 #ifndef ESP_WIFI_PWD
 #define ESP_WIFI_PWD mywifipass
+#endif
 #endif
 
 #define DHT_POLL_DELAY_DEFAULT 15000

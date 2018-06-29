@@ -181,7 +181,6 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         } //valid item
 }
 
-
 void printIPAddress(IPAddress ipAddress) {
     for (byte thisByte = 0; thisByte < 4; thisByte++) {
         Serial.print(ipAddress[thisByte], DEC);
@@ -377,16 +376,19 @@ void ip_ready_config_loaded_connecting_to_broker() {
                         Serial.print(mqttClient.state());
                         Serial.println(F(" try again in 5 seconds"));
                         nextLanCheckTime = millis() + 5000;
-#ifdef RESET_PIN
+#ifdef RESTART_LAN_ON_MQTT_ERRORS
                         mqttErrorRate++;
                         if(mqttErrorRate>50){
                             Serial.print(F("Too many MQTT connection errors. Restart LAN"));
                             mqttErrorRate=0;
+#ifdef RESET_PIN
                             resetHard();
+#endif
                             lanStatus=INITIAL_STATE;
                             return;
                         }
 #endif
+
                         lanStatus = RECONNECT;//12;
                     }
                 }
@@ -394,6 +396,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
 void onInitialStateInitLAN() {
 #ifdef __ESP__
+#ifdef WIFI_MANAGER_DISABLE
     if(!wifiInitialized) {
                 WiFi.mode(WIFI_STA);
                 Serial.print(F("WIFI AP/Password:"));
@@ -404,16 +407,16 @@ void onInitialStateInitLAN() {
                 WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
                 wifiInitialized = true;
             }
-
+#endif
             if (WiFi.status() == WL_CONNECTED) {
                 Serial.println("WiFi connected");
                 Serial.println("IP address: ");
                 Serial.println(WiFi.localIP());
                 lanStatus=HAVE_IP_ADDRESS;//1;
             }
+#endif
 
-
-#else
+#if not defined(__ESP__)
     IPAddress ip, dns, gw, mask;
     int res = 1;
     Serial.println(F("Starting lan"));
@@ -464,12 +467,12 @@ void (*softRebootFunc)(void) = 0;
 
 void resetHard() {
 #ifdef RESET_PIN
-    Serial.print(F("Reset Wiznet5100 shield with digital pin "));
+    Serial.print(F("Reset Arduino with digital pin "));
     Serial.println(QUOTE(RESET_PIN));
-    delay(50);
+    delay(500);
     pinMode(RESET_PIN, OUTPUT);
     digitalWrite(RESET_PIN,LOW);
-    delay(25);
+    delay(500);
     digitalWrite(RESET_PIN,HIGH);
     delay(500);
 #endif    
@@ -1006,7 +1009,7 @@ void postTransmission() {
 }
 
 void setup_main() {
-      setupCmdArduino();
+    setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 
 #ifdef SD_CARD_INSERTED
@@ -1017,17 +1020,17 @@ void setup_main() {
 
 #ifdef _modbus
 #ifdef CONTROLLINO
-//set PORTJ pin 5,6 direction (RE,DE)
-DDRJ |= B01100000;
-//set RE,DE on LOW
-PORTJ &= B10011111;
+    //set PORTJ pin 5,6 direction (RE,DE)
+    DDRJ |= B01100000;
+    //set RE,DE on LOW
+    PORTJ &= B10011111;
 #else
-pinMode(TXEnablePin, OUTPUT);
+    pinMode(TXEnablePin, OUTPUT);
 #endif
-    modbusSerial.begin(MODBUS_SERIAL_BAUD);
-    node.idle(&modbusIdle);
-    node.preTransmission(preTransmission);
-    node.postTransmission(postTransmission);
+        modbusSerial.begin(MODBUS_SERIAL_BAUD);
+        node.idle(&modbusIdle);
+        node.preTransmission(preTransmission);
+        node.postTransmission(postTransmission);
 #endif
 
     delay(20);
@@ -1042,10 +1045,16 @@ pinMode(TXEnablePin, OUTPUT);
 #ifdef _artnet
     ArtnetSetup();
 #endif
-/*
-SPI.begin();
-while (Ethernet.maintain() == NO_LINK && millis()<3000UL) {delay(500);Serial.print(F("."));}
-*/
+
+#ifndef WIFI_MANAGER_DISABLE
+    WiFiManager wifiManager;
+#if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
+    wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
+#else
+    wifiManager.autoConnect();
+#endif
+#endif
+
     delay(LAN_INIT_DELAY);//for LAN-shield initializing
     //TODO: checkForRemoteSketchUpdate();
 }
@@ -1120,7 +1129,11 @@ void printFirmwareVersionAndBuildOptions() {
     Serial.println("(-)HARDRESET, using soft");
 #endif
 
-
+#ifdef RESTART_LAN_ON_MQTT_ERRORS
+    Serial.println(F("(+)RESTART_LAN_ON_MQTT_ERRORS"));
+#else
+    Serial.println("(-)RESTART_LAN_ON_MQTT_ERRORS");
+#endif
 }
 
 void setupMacAddress() {
