@@ -64,7 +64,6 @@ ESP32
 PWM Out
 
 */
-
 #include "Arduino.h"
 #include "main.h"
 #include "options.h"
@@ -77,6 +76,14 @@ EthernetClient ethClient;
 #if defined(__AVR__)
 EthernetClient ethClient;
 #endif
+
+#ifdef __ESP__
+#include <ESP8266WiFi.h>
+#include <user_interface.h>
+WiFiClient ethClient;
+#endif
+
+lan_status lanStatus = INITIAL_STATE;
 
 const char outprefix[] PROGMEM = OUTTOPIC;
 const char inprefix[] PROGMEM = INTOPIC;
@@ -94,14 +101,13 @@ aJsonObject *dmxArr = NULL;
 
 unsigned long nextPollingCheck = 0;
 unsigned long nextInputCheck = 0;
-unsigned long lanCheck = 0;
+unsigned long nextLanCheckTime = 0;
 unsigned long nextThermostatCheck = 0;
 
 aJsonObject *pollingItem = NULL;
 
 bool owReady = false;
 bool configOk = false;
-int lanStatus = 0;
 
 #ifdef _modbus
 ModbusMaster node;
@@ -109,9 +115,11 @@ ModbusMaster node;
 
 byte mac[6];
 
-
 PubSubClient mqttClient(ethClient);
 
+bool wifiInitialized;
+
+int mqttErrorRate;
 
 void watchdogSetup(void) {
 //Serial.begin(115200);
@@ -141,7 +149,12 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     }
     Serial.println();
 
-    boolean retaining = (lanStatus == 4);  //Todo - named constant
+    if(!strcmp(topic,CMDTOPIC)) {
+      cmd_parse((char *)payload);
+      return;
+    }
+
+    boolean retaining = (lanStatus == RETAINING_COLLECTING);
     //Check if topic = Command topic
     short intopic = 0;
     {
@@ -149,100 +162,32 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         strncpy_P(buf, inprefix, sizeof(buf));
         intopic = strncmp(topic, buf, strlen(inprefix));
     }
-
     // in Retaining status - trying to restore previous state from retained output topic. Retained input topics are not relevant.
     if (retaining && !intopic) {
         Serial.println(F("Skipping.."));
         return;
     }
-
     char subtopic[MQTT_SUBJECT_LENGTH] = "";
-    int cmd = 0;
-
-    cmd = txt2cmd((char *) payload);
+  //  int cmd = 0;
+    //cmd = txt2cmd((char *) payload);
     char *t;
     if (t = strrchr(topic, '/'))
         strncpy(subtopic, t + 1, MQTT_SUBJECT_LENGTH - 1);
-
-
-
-    /* No 1-w direct support anymore
-    int subchan;
-    char buf[17];
-    //Check for  one-wire address
-    if (sscanf(subtopic,"S%1d%16s",&subchan,&buf)==2)   // SnXXXXXXXX
-    {    DeviceAddress addr;
-         SetAddr(buf,addr);;
-         PrintBytes(addr,8);
-         Serial.print(F(":"));
-         Serial.println(subchan);
-         cntrl2413(addr,subchan,(cmd==CMD_ON)?1:0);
-    }// End OneWire
-
-     else
-     */
-    {
-
         Item item(subtopic);
         if (item.isValid()) {
             if (item.itemType == CH_GROUP && retaining)
                 return; //Do not restore group channels - they consist not relevant data
-            switch (cmd) {
-                case 0: {
-                    short i = 0;
-                    int Par[3];
-
-                    while (payload && i < 3)
-                        Par[i++] = getInt((char **) &payload);
-
-                    item.Ctrl(0, i, Par, !retaining);
-                }
-                    break;
-
-                case -1: //Not known command
-                case -2: //JSON input (not implemented yet
-                    break;
-                case -3: //RGB color in #RRGGBB notation
-                {
-                    CRGB rgb;
-                    if (sscanf((const char*)payload, "#%2X%2X%2X", &rgb.r, &rgb.g, &rgb.b) == 3) {
-                        int Par[3];
-                        CHSV hsv = rgb2hsv_approximate(rgb);
-                        Par[0] = map(hsv.h, 0, 255, 0, 365);
-                        Par[1] = map(hsv.s, 0, 255, 0, 100);
-                        Par[2] = map(hsv.v, 0, 255, 0, 100);
-                        item.Ctrl(0, 3, Par, !retaining);
-                    }
-                    break;
-                }
-                case CMD_ON:
-
-                    //       if (item.getEnableCMD(500) || lanStatus == 4)
-                    item.Ctrl(cmd, 0, NULL,
-                              !retaining); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
-                    //       else Serial.println(F("on Skipped"));
-
-                    break;
-                default: //some known command
-                    item.Ctrl(cmd, 0, NULL, !retaining);
-
-            } //ctrl
-        } //valid json
-    } //no1wire
+        item.Ctrl((char *)payload, !retaining);
+        } //valid item
 }
 
-#ifndef __ESP__
-
-void printIPAddress() {
-    Serial.print(F("My IP address: "));
+void printIPAddress(IPAddress ipAddress) {
     for (byte thisByte = 0; thisByte < 4; thisByte++) {
-        Serial.print(Ethernet.localIP()[thisByte], DEC);
-        Serial.print(F("."));
+        Serial.print(ipAddress[thisByte], DEC);
+        if (thisByte < 3)
+            Serial.print(F("."));
     }
-    Serial.println();
 }
-
-#endif
 
 void printMACAddress() {
     Serial.print(F("Configured MAC:"));
@@ -258,88 +203,138 @@ void restoreState() {
     //mqttClient.publish("/myhome/out/RestoreState", "ON");
 };
 
-int lanLoop() {
+lan_status lanLoop() {
 
-#ifdef NOETHER
-    lanStatus=-14;
+    #ifdef NOETHER
+    lanStatus=DO_NOTHING;//-14;
 #endif
 
-//Serial.println(lanStatus);
     switch (lanStatus) {
-//Initial state
-        case 0: //Ethernet.begin(mac,ip);
-        {
-#ifdef __ESP__
-            //WiFi.mode(WIFI_STA);
-//wifiMulti.addAP("Smartbox", "");
-if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
-#else
-            IPAddress ip;
-            IPAddress dns;
-            IPAddress gw;
-            IPAddress mask;
-            int res = 1;
-            Serial.println(F("Starting lan"));
-            if (loadFlash(OFFSET_IP,ip))
-               if (loadFlash(OFFSET_DNS,dns))
-                  if (loadFlash(OFFSET_GW,gw))
-                     if (loadFlash(OFFSET_MASK,mask)) Ethernet.begin(mac,ip,dns,gw,mask);
-                                                else Ethernet.begin(mac,ip,dns,gw);
-                                                    else  Ethernet.begin(mac,ip,dns);
-                                                          else  Ethernet.begin(mac,ip);
-                                                                else
-                                                                  {
-                                                                  wdt_dis();
-                                                                  res = Ethernet.begin(mac, 12000);
-                                                                  wdt_en();
-                                                                  wdt_res();
-                                                                   }
-
-
-            if (res == 0) {
-                Serial.println(F("Failed to configure Ethernet using DHCP"));
-                lanStatus = -10;
-                lanCheck = millis() + 60000;
-            } else {
-                printIPAddress();
-                lanStatus = 1;
-            }
-
-
-#endif
+        case INITIAL_STATE:
+            onInitialStateInitLAN();
             break;
-          }
-//Have IP address
-        case 1:
+
+        case HAVE_IP_ADDRESS:
             if (!configOk)
                 lanStatus = getConfig(0, NULL); //got config from server or load from NVRAM
-                else lanStatus = 2;
+            else lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
 #ifdef _artnet
             if (artnet) artnet->begin();
 #endif
-
             break;
-        case 2: // IP Ready, config loaded, Connecting broker  & subscribeArming Watchdog
+
+        case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
             wdt_res();
-            {
-                short n = 0;
-                int port = 1883;
-                char empty = 0;
-                char *user = &empty;
-                char passwordBuf[16]="";
-                char *password = passwordBuf;
+            ip_ready_config_loaded_connecting_to_broker();
+            break;
+
+        case RETAINING_COLLECTING:
+            if (millis() > nextLanCheckTime) {
+                char buf[MQTT_TOPIC_LENGTH];
+
+                //Unsubscribe from status topics..
+                strncpy_P(buf, outprefix, sizeof(buf));
+                strncat(buf, "#", sizeof(buf));
+                mqttClient.unsubscribe(buf);
+
+                lanStatus = OPERATION;//3;
+                Serial.println(F("Accepting commands..."));
+                break;
+            }
+
+        case OPERATION:
+            if (!mqttClient.connected()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
+            break;
+
+        case AWAITING_ADDRESS:
+            if (millis() > nextLanCheckTime)
+                lanStatus = INITIAL_STATE;//0;
+            break;
+
+        case RECONNECT:
+            if (millis() > nextLanCheckTime)
+
+                lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
+            break;
+
+        case READ_RE_CONFIG:
+            if (loadConfigFromEEPROM(0, NULL)) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
+            else {
+                nextLanCheckTime = millis() + 5000;
+                lanStatus = AWAITING_ADDRESS;//-10;
+            }
+            break;
+
+        case DO_NOTHING:;
+    }
 
 
-                if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
+    {
+#ifndef __ESP__
+        wdt_dis();
+        if (lanStatus > 0)
+            switch (Ethernet.maintain()) {
+                   case NO_LINK:
+                    Serial.println(F("No link"));
+                    if (mqttClient.connected()) mqttClient.disconnect();
+                    nextLanCheckTime = millis() + 30000;
+                    lanStatus = AWAITING_ADDRESS;//-10;
+                    break;
+                case DHCP_CHECK_RENEW_FAIL:
+                    Serial.println(F("Error: renewed fail"));
+                    if (mqttClient.connected()) mqttClient.disconnect();
+                    nextLanCheckTime = millis() + 1000;
+                    lanStatus = AWAITING_ADDRESS;//-10;
+                    break;
+
+                case DHCP_CHECK_RENEW_OK:
+                    Serial.println(F("Renewed success. IP address:"));
+                    printIPAddress(Ethernet.localIP());
+                    break;
+
+                case DHCP_CHECK_REBIND_FAIL:
+                    Serial.println(F("Error: rebind fail"));
+                    if (mqttClient.connected()) mqttClient.disconnect();
+                    nextLanCheckTime = millis() + 1000;
+                    lanStatus = AWAITING_ADDRESS;//-10;
+                    break;
+
+                case DHCP_CHECK_REBIND_OK:
+                    Serial.println(F("Rebind success. IP address:"));
+                    printIPAddress(Ethernet.localIP());
+                    break;
+
+                default:
+                    break;
+
+            }
+
+        wdt_en();
+#endif
+    }
+
+    return lanStatus;
+
+}
+
+void ip_ready_config_loaded_connecting_to_broker() {
+    short n = 0;
+    int port = 1883;
+    char empty = 0;
+    char *user = &empty;
+    char passwordBuf[16] = "";
+    char *password = passwordBuf;
+
+
+    if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
                     char *client_id = aJson.getArrayItem(mqttArr, 0)->valuestring;
                     char *servername = aJson.getArrayItem(mqttArr, 1)->valuestring;
                     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
                     if (n >= 4) user = aJson.getArrayItem(mqttArr, 3)->valuestring;
-                    if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf,sizeof(passwordBuf)) && (n >= 5))
-                        {
-                          password = aJson.getArrayItem(mqttArr, 4)->valuestring;
-                          Serial.println(F("Using MQTT password from config"));
-                        }
+                    if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5)) {
+                        password = aJson.getArrayItem(mqttArr, 4)->valuestring;
+                        Serial.println(F("Using MQTT password from config"));
+                    }
 
                     mqttClient.setServer(servername, port);
                     mqttClient.setCallback(mqttCallback);
@@ -354,10 +349,11 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
 
                     wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
                     if (mqttClient.connect(client_id, user, password)) {
+                        mqttErrorRate = 0;
                         Serial.print(F("connected as "));
                         Serial.println(client_id);
-                    wdt_en();
-                        configOk=true;
+                        wdt_en();
+                        configOk = true;
                         // ... Temporary subscribe to status topic
                         char buf[MQTT_TOPIC_LENGTH];
 
@@ -372,111 +368,114 @@ if((wifiMulti.run() == WL_CONNECTED)) lanStatus=1;
 
                         //restoreState();
                         // if (_once) {DMXput(); _once=0;}
-                        lanStatus = 4;
-                        lanCheck = millis() + 5000;
+                        lanStatus = RETAINING_COLLECTING;//4;
+                        nextLanCheckTime = millis() + 5000;
                         Serial.println(F("Awaiting for retained topics"));
                     } else {
                         Serial.print(F("failed, rc="));
                         Serial.print(mqttClient.state());
                         Serial.println(F(" try again in 5 seconds"));
-                        lanCheck = millis() + 5000;
-                        lanStatus = 12;
+                        nextLanCheckTime = millis() + 5000;
+#ifdef RESTART_LAN_ON_MQTT_ERRORS
+                        mqttErrorRate++;
+                        if(mqttErrorRate>50){
+                            Serial.print(F("Too many MQTT connection errors. Restart LAN"));
+                            mqttErrorRate=0;
+#ifdef RESET_PIN
+                            resetHard();
+#endif
+                            lanStatus=INITIAL_STATE;
+                            return;
+                        }
+#endif
+
+                        lanStatus = RECONNECT;//12;
                     }
                 }
-                break;
+}
+
+void onInitialStateInitLAN() {
+#ifdef __ESP__
+#ifdef WIFI_MANAGER_DISABLE
+    if(!wifiInitialized) {
+                WiFi.mode(WIFI_STA);
+                Serial.print(F("WIFI AP/Password:"));
+                Serial.print(QUOTE(ESP_WIFI_AP));
+                Serial.print(F("/"));
+                Serial.println(QUOTE(ESP_WIFI_PWD));
+                wifi_set_macaddr(STATION_IF,mac);
+                WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
+                wifiInitialized = true;
             }
-
-        case 4: //retaining ... Collecting
-            if (millis() > lanCheck) {
-                char buf[MQTT_TOPIC_LENGTH];
-
-                //Unsubscribe from status topics..
-                strncpy_P(buf, outprefix, sizeof(buf));
-                strncat(buf, "#", sizeof(buf));
-                mqttClient.unsubscribe(buf);
-
-                lanStatus = 3;
-                Serial.println(F("Accepting commands..."));
-                break;
-            }
-
-        case 3: //operation
-            if (!mqttClient.connected()) lanStatus = 2;
-            break;
-
-//Awaiting address
-        case -10:
-            if (millis() > lanCheck)
-                lanStatus = 0;
-            break;
-//Reconnect
-        case 12:
-            if (millis() > lanCheck)
-
-                lanStatus = 2;
-            break;
-            // read or Re-read config
-        case -11:
-            if (loadConfigFromEEPROM(0, NULL)) lanStatus = 2;
-            else {
-                lanCheck = millis() + 5000;
-                lanStatus = -10;
-            }
-            break;
-
-        case -14:;
-            // do notghing with net
-    }
-
-
-    {
-#ifndef __ESP__
-        wdt_dis();
-        if (lanStatus > 0)
-            switch (Ethernet.maintain()) {
-                   case NO_LINK:
-                    Serial.println(F("No link"));
-                    if (mqttClient.connected()) mqttClient.disconnect();
-                    lanCheck = millis() + 30000;
-                    lanStatus = -10;
-                    break;
-                case DHCP_CHECK_RENEW_FAIL:
-                    //renewed fail
-                    Serial.println(F("Error: renewed fail"));
-                    if (mqttClient.connected()) mqttClient.disconnect();
-                    lanCheck = millis() + 1000;
-                    lanStatus = -10;
-                    break;
-
-                case DHCP_CHECK_RENEW_OK:
-                    Serial.println(F("Renewed success"));
-                    printIPAddress();
-                    break;
-
-                case DHCP_CHECK_REBIND_FAIL:
-                    Serial.println(F("Error: rebind fail"));
-                    if (mqttClient.connected()) mqttClient.disconnect();
-                    lanCheck = millis() + 1000;
-                    lanStatus = -10;
-                    break;
-
-                case DHCP_CHECK_REBIND_OK:
-                    Serial.println(F("Rebind success"));
-                    printIPAddress();
-                    break;
-
-                default:
-                    //nothing happened
-                    break;
-
-            }
-
-        wdt_en();
 #endif
+            if (WiFi.status() == WL_CONNECTED) {
+                Serial.println("WiFi connected");
+                Serial.println("IP address: ");
+                Serial.println(WiFi.localIP());
+                lanStatus=HAVE_IP_ADDRESS;//1;
+            }
+#endif
+
+#if not defined(__ESP__)
+    IPAddress ip, dns, gw, mask;
+    int res = 1;
+    Serial.println(F("Starting lan"));
+    if (ipLoadFromFlash(OFFSET_IP, ip)) {
+        Serial.print("Loaded from flash IP:");
+        printIPAddress(ip);
+        if (ipLoadFromFlash(OFFSET_DNS, dns)) {
+            Serial.print(" DNS:");
+            printIPAddress(dns);
+            if (ipLoadFromFlash(OFFSET_GW, gw)) {
+                Serial.print(" GW:");
+                printIPAddress(gw);
+                if (ipLoadFromFlash(OFFSET_MASK, mask)) {
+                    Serial.print(" MASK:");
+                    printIPAddress(mask);
+                    Ethernet.begin(mac, ip, dns, gw, mask);
+                } else Ethernet.begin(mac, ip, dns, gw);
+            } else Ethernet.begin(mac, ip, dns);
+        } else Ethernet.begin(mac, ip);
+    }
+        else {
+        Serial.println("No IP data found in flash");
+        wdt_dis();
+        res = Ethernet.begin(mac, 12000);
+        wdt_en();
+        wdt_res();
     }
 
-    return lanStatus;
+    if (res == 0) {
+        Serial.println(F("Failed to configure Ethernet using DHCP. You can set ip manually!"));
+        Serial.print(F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"));
+        lanStatus = AWAITING_ADDRESS;//-10;
+        nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
+#ifdef RESET_PIN
+        resetHard();
+#endif
+    } else {
+        Serial.print(F("Got IP address:"));
+        printIPAddress(Ethernet.localIP());
+        lanStatus = HAVE_IP_ADDRESS;//1;
+    }
 
+
+#endif
+}
+
+void (*softRebootFunc)(void) = 0;
+
+void resetHard() {
+#ifdef RESET_PIN
+    Serial.print(F("Reset Arduino with digital pin "));
+    Serial.println(QUOTE(RESET_PIN));
+    delay(500);
+    pinMode(RESET_PIN, OUTPUT);
+    digitalWrite(RESET_PIN,LOW);
+    delay(500);
+    digitalWrite(RESET_PIN,HIGH);
+    delay(500);
+#endif    
 }
 
 #ifdef _owire
@@ -488,12 +487,8 @@ void Changed(int i, DeviceAddress addr, int val) {
     char *owEmit = NULL;
     char *owItem = NULL;
 
-    //PrintBytes(addr,8);
-    // Serial.print("Emit: ");
     SetBytes(addr, 8, addrbuf);
     addrbuf[17] = 0;
-
-    //Serial.println(addrbuf);
 
     aJsonObject *owObj = aJson.getObjectItem(owArr, addrbuf);
     if (owObj) {
@@ -505,56 +500,14 @@ void Changed(int i, DeviceAddress addr, int val) {
             Serial.println(val);
         }
         owItem = aJson.getObjectItem(owObj, "item")->valuestring;
-    } else Serial.println(F("Not find"));
-
-
-    /* No sw support anymore
-   switch (addr[0]){
-    case 0x29: // DS2408
-      snprintf(addrstr,sizeof(addrstr),"%sS0%s",outprefix,addrbuf);
-     // Serial.println(addrstr);
-      client.publish(addrstr, (val & SW_STAT0)?"ON":"OFF");
-      snprintf(addrstr,sizeof(addrstr),"%sS1%s",outprefix,addrbuf);
-    //  Serial.println(addrstr);
-      client.publish(addrstr, (val & SW_STAT1)?"ON":"OFF");
-      snprintf(addrstr,sizeof(addrstr),"%sS2%s",outprefix,addrbuf);
-     // Serial.println(addrstr);
-      client.publish(addrstr, (val & SW_AUX0)?"OFF":"ON");
-      snprintf(addrstr,sizeof(addrstr),"%sS3%s",outprefix,addrbuf);
-     // Serial.println(addrstr);
-      client.publish(addrstr, (val & SW_AUX1)?"OFF":"ON");
-      break;
-
-    case 0x28: // Thermomerer
-
-     snprintf(addrstr,sizeof(addrstr),"%s%s",outprefix,addrbuf);
-     sprintf(valstr,"%d",val);
-     //Serial.println(val);
-     //Serial.println(valstr);
-     client.publish(addrstr, valstr);
-
-     if (owItem)
-        {
-        thermoSetCurTemp(owItem,val);
-        }
-     break;
-
-    case 0x01:
-    case 0x81:
-     snprintf(addrstr,sizeof(addrstr),"%sDS%s",outprefix,addrbuf);
-     if (val) sprintf(valstr,"%s","ON"); else sprintf(valstr,"%s","OFF");
-     client.publish(addrstr, valstr);
-   }
-    */
+    } else Serial.println(F("1w-item not found in config"));
 
     if ((val == -127) || (val == 85) || (val == 0)) { //ToDo: 1-w short circuit mapped to "0" celsium
-//        Serial.print("Temp err ");Serial.println(t);
         return;
     }
 
     strcpy_P(addrstr, outprefix);
     strncat(addrstr, addrbuf, sizeof(addrstr));
-    //snprintf(addrstr,sizeof(addrstr),"%s%s",F(outprefix),addrbuf);
     sprintf(valstr, "%d", val);
     mqttClient.publish(addrstr, valstr);
 
@@ -564,7 +517,6 @@ void Changed(int i, DeviceAddress addr, int val) {
 }
 
 #endif //_owire
-
 
 void cmdFunctionHelp(int arg_cnt, char **args)
 //(char* tokens)
@@ -577,7 +529,9 @@ void cmdFunctionHelp(int arg_cnt, char **args)
                              "'get' [config addr]' - get config from pre-configured URL and store addr\n"
                              "'load' - load config from NVRAM\n"
                              "'pwd' - define MQTT password\n"
-                             "'kill' - test watchdog"));
+                             "'kill' - test watchdog\n"
+                             "'clear' - clear EEPROM\n"
+                             "'reboot' - reboot controller"));
 }
 
 void cmdFunctionKill(int arg_cnt, char **args) {
@@ -587,17 +541,23 @@ void cmdFunctionKill(int arg_cnt, char **args) {
     };
 }
 
+void cmdFunctionReboot(int arg_cnt, char **args) {
+    Serial.println(F("Soft rebooting..."));
+    softRebootFunc();
+}
+
 void applyConfig() {
   if (!root) return;
-  #ifdef _dmxin
-      int itemsCount;
-      dmxArr = aJson.getObjectItem(root, "dmxin");
-      if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
-          DMXinSetup(itemsCount * 4);
-          Serial.print(F("DMX in started. Channels:"));
-          Serial.println(itemsCount * 4);
-      }
-  #endif
+
+#ifdef _dmxin
+    int itemsCount;
+    dmxArr = aJson.getObjectItem(root, "dmxin");
+    if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
+        DMXinSetup(itemsCount * 4);
+        Serial.print(F("DMX in started. Channels:"));
+        Serial.println(itemsCount * 4);
+    }
+#endif
 #ifdef _dmxout
     int maxChannels;
     aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
@@ -614,9 +574,6 @@ void applyConfig() {
 
 #ifdef _owire
     owArr = aJson.getObjectItem(root, "ow");
-#endif
-
-#ifdef _owire
     if (owArr && !owReady) {
         aJsonObject *item = owArr->child;
         owReady = owSetup(&Changed);
@@ -769,19 +726,52 @@ void cmdFunctionSave(int arg_cnt, char **args)
 
 void cmdFunctionIp(int arg_cnt, char **args)
 //(char* tokens)
-{ IPAddress ip0 (0,0,0,0);
-  IPAddress ip;
-  DNSClient dns;
+{
+    IPAddress ip0(0, 0, 0, 0);
+    IPAddress ip;
+    DNSClient dns;
     switch (arg_cnt) {
-      case 5: if (dns.inet_aton(args[4],ip)) saveFlash(OFFSET_MASK,ip); else saveFlash(OFFSET_MASK,ip0);
-      case 4: if (dns.inet_aton(args[3],ip)) saveFlash(OFFSET_GW,ip); else saveFlash(OFFSET_GW,ip0);
-      case 3: if (dns.inet_aton(args[2],ip)) saveFlash(OFFSET_DNS,ip); else saveFlash(OFFSET_DNS,ip0);
-      case 2: if (dns.inet_aton(args[1],ip)) saveFlash(OFFSET_IP,ip); else saveFlash(OFFSET_IP,ip0);
-      break;
-      case 1: //dynamic IP
-      saveFlash(OFFSET_IP,ip0);
+        case 5:
+            if (dns.inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
+            else saveFlash(OFFSET_MASK, ip0);
+        case 4:
+            if (dns.inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
+            else saveFlash(OFFSET_GW, ip0);
+        case 3:
+            if (dns.inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
+            else saveFlash(OFFSET_DNS, ip0);
+        case 2:
+            if (dns.inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
+            else saveFlash(OFFSET_IP, ip0);
+            break;
+        case 1:
+            IPAddress current_ip = Ethernet.localIP();
+            IPAddress current_mask = Ethernet.subnetMask();
+            IPAddress current_gw = Ethernet.gatewayIP();
+            IPAddress current_dns = Ethernet.dnsServerIP();
+            saveFlash(OFFSET_IP, current_ip);
+            saveFlash(OFFSET_MASK, current_mask);
+            saveFlash(OFFSET_GW, current_gw);
+            saveFlash(OFFSET_DNS, current_dns);
+            Serial.print(F("Saved current config(ip,dns,gw,subnet):"));
+            printIPAddress(current_ip);
+            Serial.print(F(" ,"));
+            printIPAddress(current_dns);
+            Serial.print(F(" ,"));
+            printIPAddress(current_gw);
+            Serial.print(F(" ,"));
+            printIPAddress(current_mask);
+            Serial.println(F(";"));
+
     }
-Serial.println(F("Saved"));
+    Serial.println(F("Saved"));
+}
+
+void cmdFunctionClearEEPROM(int arg_cnt, char **args){
+    for (int i = 0; i < 512; i++)
+        EEPROM.write(i, 0);
+    Serial.println(F("EEPROM cleared"));
+
 }
 
 void cmdFunctionPwd(int arg_cnt, char **args)
@@ -843,17 +833,14 @@ void saveFlash(short n, IPAddress& ip) {
   for(int i=0;i<4;i++) EEPROM.write(n++,ip[i]);
 }
 
-int loadFlash(short n, IPAddress& ip) {
+int ipLoadFromFlash(short n, IPAddress &ip) {
   for(int i=0;i<4;i++) ip[i]=EEPROM.read(n++);
   if (ip[0] && (ip[0] != 0xff)) return 1;
 return 0;
 }
 
-int getConfig(int arg_cnt, char **args)
-//(char *tokens)
+lan_status getConfig(int arg_cnt, char **args)
 {
-
-
     int responseStatusCode = 0;
     char ch;
     char URI[40];
@@ -871,32 +858,33 @@ int getConfig(int arg_cnt, char **args)
     Serial.println(URI);
 
 #if defined(__AVR__)
-    FILE *result;
+    FILE *configStream;
     //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
-
     HTTPClient hclient(configServer, 80);
+    HTTPClient hclientPrint(configServer, 80);
     // FILE is the return STREAM type of the HTTPClient
-    result = hclient.getURI(URI);
+    configStream = hclient.getURI(URI);
     responseStatusCode = hclient.getLastReturnCode();
     wdt_en();
 
-    if (result != NULL) {
+    if (configStream != NULL) {
         if (responseStatusCode == 200) {
 
             Serial.println(F("got Config"));
-            aJsonFileStream as = aJsonFileStream(result);
+            char c;
+            aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
             aJson.deleteItem(root);
             root = aJson.parse(&as);
             interrupts();
         //    Serial.println(F("Parsed."));
-            hclient.closeStream(result);  // this is very important -- be sure to close the STREAM
+            hclient.closeStream(configStream);  // this is very important -- be sure to close the STREAM
 
             if (!root) {
                 Serial.println(F("Config parsing failed"));
-                lanCheck = millis() + 15000;
-                return -11;
+                nextLanCheckTime = millis() + 15000;
+                return READ_RE_CONFIG;//-11;
             } else {
             //    char *outstr = aJson.print(root);
             //    Serial.println(outstr);
@@ -910,19 +898,18 @@ int getConfig(int arg_cnt, char **args)
         } else {
             Serial.print(F("ERROR: Server returned "));
             Serial.println(responseStatusCode);
-            lanCheck = millis() + 5000;
-            return -11;
+            nextLanCheckTime = millis() + 5000;
+            return READ_RE_CONFIG;//-11;
         }
 
     } else {
         Serial.println(F("failed to connect"));
         Serial.println(F(" try again in 5 seconds"));
-        lanCheck = millis() + 5000;
-        return -11;
+        nextLanCheckTime = millis() + 5000;
+        return READ_RE_CONFIG;//-11;
     }
-
-#else
-    //Non AVR code
+#endif
+#if defined(__SAM3X8E__)
     String response;
     EthernetClient configEthClient;
     HttpClient htclient = HttpClient(configEthClient, configServer, 80);
@@ -950,8 +937,8 @@ int getConfig(int arg_cnt, char **args)
 
         if (!root) {
             Serial.println(F("Config parsing failed"));
-            // lanCheck=millis()+15000;
-            return -11; //Load from NVRAM
+            // nextLanCheckTime=millis()+15000;
+            return READ_RE_CONFIG;//-11; //Load from NVRAM
         } else {
             /*
             char * outstr=aJson.print(root);
@@ -965,13 +952,43 @@ int getConfig(int arg_cnt, char **args)
         }
     } else {
         Serial.println(F("Config retrieving failed"));
-        //lanCheck=millis()+15000;
-        return -11; //Load from NVRAM
+        //nextLanCheckTime=millis()+15000;
+        return READ_RE_CONFIG;//-11; //Load from NVRAM
     }
-
-
 #endif
-    return 2;
+#if defined(__ESP__)
+    HTTPClient httpClient;
+    String fullURI = "http://";
+    fullURI+=configServer;
+    fullURI+=URI;
+    httpClient.begin(fullURI);
+    int httpResponseCode = httpClient.GET();
+    if (httpResponseCode > 0) {
+        // HTTP header has been send and Server response header has been handled
+        Serial.printf("[HTTP] GET... code: %d\n", httpResponseCode);
+        // file found at server
+        if (httpResponseCode == HTTP_CODE_OK) {
+            String response = httpClient.getString();
+            Serial.println(response);
+            aJson.deleteItem(root);
+            root = aJson.parse((char *) response.c_str());
+            if (!root) {
+                Serial.println(F("Config parsing failed"));
+                return READ_RE_CONFIG;//-11; //Load from NVRAM
+            } else {
+                Serial.println(F("Config OK, Applying"));
+                applyConfig();
+            }
+        }
+    } else {
+        Serial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(httpResponseCode).c_str());
+        httpClient.end();
+        return READ_RE_CONFIG;//-11; //Load from NVRAM
+    }
+    httpClient.end();
+#endif
+
+    return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
 }
 
 void preTransmission() {
@@ -991,38 +1008,30 @@ void postTransmission() {
     digitalWrite(TXEnablePin, 0);
     #endif
 }
-//#define PIO_SRC_REV commit 8034a6b765229d94a94d90fd08dd9588acf5f3da Author: livello <livello@bk.ru> Date:   Wed Mar 28 02:35:50 2018 +0300 refactoring
 
 void setup_main() {
-      setupCmdArduino();
+    setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 
 #ifdef SD_CARD_INSERTED
     sd_card_w5100_setup();
 #endif
-
-#ifdef __ESP__
-    espSetup();
-#endif
-
     setupMacAddress();
-
     loadConfigFromEEPROM(0, NULL);
 
 #ifdef _modbus
 #ifdef CONTROLLINO
-//set PORTJ pin 5,6 direction (RE,DE)
-DDRJ |= B01100000;
-//set RE,DE on LOW
-PORTJ &= B10011111;
+    //set PORTJ pin 5,6 direction (RE,DE)
+    DDRJ |= B01100000;
+    //set RE,DE on LOW
+    PORTJ &= B10011111;
 #else
-pinMode(TXEnablePin, OUTPUT);
+    pinMode(TXEnablePin, OUTPUT);
 #endif
-    modbusSerial.begin(MODBUS_SERIAL_BAUD);
-    node.idle(&modbusIdle);
-    // Callbacks allow us to configure the RS485 transceiver correctly
-    node.preTransmission(preTransmission);
-    node.postTransmission(postTransmission);
+        modbusSerial.begin(MODBUS_SERIAL_BAUD);
+        node.idle(&modbusIdle);
+        node.preTransmission(preTransmission);
+        node.postTransmission(postTransmission);
 #endif
 
     delay(20);
@@ -1037,17 +1046,26 @@ pinMode(TXEnablePin, OUTPUT);
 #ifdef _artnet
     ArtnetSetup();
 #endif
-/*
-SPI.begin();
-while (Ethernet.maintain() == NO_LINK && millis()<3000UL) {delay(500);Serial.print(F("."));}
-*/
-delay(500); //Wiz5500
+
+#if defined(__ESP__) and not defined(WIFI_MANAGER_DISABLE)
+    WiFiManager wifiManager;
+#if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
+    wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
+#else
+    wifiManager.autoConnect();
+#endif
+#endif
+
+    delay(LAN_INIT_DELAY);//for LAN-shield initializing
     //TODO: checkForRemoteSketchUpdate();
 }
 
 void printFirmwareVersionAndBuildOptions() {
     Serial.print(F("\nLazyhome.ru LightHub controller "));
     Serial.println(F(QUOTE(PIO_SRC_REV)));
+#ifdef CONTROLLINO
+    Serial.println(F("(+)CONTROLLINO"));
+#endif
 #ifdef WATCH_DOG_TICKER_DISABLE
     Serial.println(F("(-)WATCHDOG"));
 #else
@@ -1091,12 +1109,32 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     Serial.println(F("(+)OWIRE"));
 #endif
+#ifndef DHT_DISABLE
+    Serial.println(F("(+)DHT"));
+#else
+    Serial.println(F("(-)DHT"));
+#endif
+
+#ifdef Wiz5500
+    Serial.println(F("(+)Wiz5500"));
+#endif
 
 #ifdef SD_CARD_INSERTED
     Serial.println(F("(+)SDCARD"));
 #endif
 
+#ifdef RESET_PIN
+    Serial.print(F("(+)HARDRESET on pin="));
+    Serial.println(F(QUOTE(RESET_PIN)));
+#else
+    Serial.println("(-)HARDRESET, using soft");
+#endif
 
+#ifdef RESTART_LAN_ON_MQTT_ERRORS
+    Serial.println(F("(+)RESTART_LAN_ON_MQTT_ERRORS"));
+#else
+    Serial.println("(-)RESTART_LAN_ON_MQTT_ERRORS");
+#endif
 }
 
 void setupMacAddress() {
@@ -1135,6 +1173,8 @@ void setupCmdArduino() {
     cmdAdd("req", cmdFunctionReq);
     cmdAdd("ip", cmdFunctionIp);
     cmdAdd("pwd", cmdFunctionPwd);
+    cmdAdd("clear",cmdFunctionClearEEPROM);
+    cmdAdd("reboot",cmdFunctionReboot);
 }
 
 void loop_main() {
@@ -1158,7 +1198,9 @@ void loop_main() {
     // if (lastpacket && (lastpacket%10==0)) Serial.println(lastpacket);
 
     if (items) {
-        if (lanStatus != 4) pollingLoop();
+        #ifndef MODBUS_DISABLE
+        if (lanStatus != RETAINING_COLLECTING) pollingLoop();
+        #endif
 #ifdef _owire
         thermoLoop();
 #endif
@@ -1224,7 +1266,7 @@ void inputLoop(void) {
         while (input) {
             if ((input->type == aJson_Object)) {
                 Input in(input);
-                in.Poll();
+                in.poll();
             }
             input = input->next;
         }
@@ -1232,6 +1274,7 @@ void inputLoop(void) {
     }
 }
 
+#ifndef MODBUS_DISABLE
 void pollingLoop(void) {
     boolean done = false;
     if (millis() > nextPollingCheck) {
@@ -1249,64 +1292,71 @@ void pollingLoop(void) {
         } //while
     }//if
 }
+#endif
+
+bool isThermostatWithMinArraySize(aJsonObject *item, int minimalArraySize) {
+    return (item->type == aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint == CH_THERMO) &&
+           (aJson.getArraySize(item) >= minimalArraySize);
+}
+
+bool thermoDisabledOrDisconnected(aJsonObject *thermoExtensionArray, int thermoStateCommand) {
+    return thermoStateCommand == CMD_OFF || thermoStateCommand == CMD_HALT ||
+           aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint == 0;
+}
 
 
 //TODO: refactoring
-
 void thermoLoop(void) {
     if (millis() < nextThermostatCheck)
         return;
-
     bool thermostatCheckPrinted = false;
-    aJsonObject *item = items->child;
 
-    while (item) {
-        if ((item->type == aJson_Array) && (aJson.getArrayItem(item, 0)->valueint == CH_THERMO) &&
-            (aJson.getArraySize(item) > 4)) {
-            int itemPin = aJson.getArrayItem(item, I_ARG)->valueint;
-            int itemTempSetting = aJson.getArrayItem(item, I_VAL)->valueint;
-            int itemCommand = aJson.getArrayItem(item, I_CMD)->valueint;
-            aJsonObject *itemExtensionArray = aJson.getArrayItem(item, I_EXT);
+    for (aJsonObject *thermoItem = items->child; thermoItem; thermoItem = thermoItem->next) {
+        if (isThermostatWithMinArraySize(thermoItem, 5)) {
+            aJsonObject *thermoExtensionArray = aJson.getArrayItem(thermoItem, I_EXT);
+            if (thermoExtensionArray && (aJson.getArraySize(thermoExtensionArray) > 1)) {
+                int thermoPin = aJson.getArrayItem(thermoItem, I_ARG)->valueint;
+                int thermoSetting = aJson.getArrayItem(thermoItem, I_VAL)->valueint;
+                int thermoStateCommand = aJson.getArrayItem(thermoItem, I_CMD)->valueint;
+                int curTemp = aJson.getArrayItem(thermoExtensionArray, IET_TEMP)->valueint;
 
-            if (itemExtensionArray && (aJson.getArraySize(itemExtensionArray) > 1)) {
-                int curtemp = aJson.getArrayItem(itemExtensionArray, IET_TEMP)->valueint;
-                if (!aJson.getArrayItem(itemExtensionArray, IET_ATTEMPTS)->valueint) {
-                    Serial.print(item->name);
+                if (!aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint) {
+                    Serial.print(thermoItem->name);
                     Serial.println(F(" Expired"));
 
                 } else {
-                    if (!(--aJson.getArrayItem(itemExtensionArray, IET_ATTEMPTS)->valueint))
-                        mqttClient.publish("/alarm/snsr", item->name);
+                    if (!(--aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint))
+                        mqttClient.publish("/alarm/snsr", thermoItem->name);
 
                 }
-                if (curtemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", item->name);
+                if (curTemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", thermoItem->name);
 
-                thermostatCheckPrinted = true;
-                Serial.print(item->name);
+
+                Serial.print(thermoItem->name);
                 Serial.print(F(" Set:"));
-                Serial.print(itemTempSetting);
-                Serial.print(F(" Curtemp:"));
-                Serial.print(curtemp);
+                Serial.print(thermoSetting);
+                Serial.print(F(" Cur:"));
+                Serial.print(curTemp);
                 Serial.print(F(" cmd:"));
-                Serial.print(itemCommand), pinMode(itemPin, OUTPUT);
-                if (itemCommand == CMD_OFF || itemCommand == CMD_HALT ||
-                    aJson.getArrayItem(itemExtensionArray, IET_ATTEMPTS)->valueint == 0) {
-                    digitalWrite(itemPin, LOW);
+                Serial.print(thermoStateCommand);
+                pinMode(thermoPin, OUTPUT);
+                if (thermoDisabledOrDisconnected(thermoExtensionArray, thermoStateCommand)) {
+                    digitalWrite(thermoPin, LOW);
                     Serial.println(F(" OFF"));
                 } else {
-                    if (curtemp + THERMO_GIST_CELSIUS < itemTempSetting) {
-                        digitalWrite(itemPin, HIGH);
+                    if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) {
+                        digitalWrite(thermoPin, HIGH);
                         Serial.println(F(" ON"));
                     } //too cold
-                    else if (itemTempSetting <= curtemp) {
-                        digitalWrite(itemPin, LOW);
+                    else if (curTemp >= thermoSetting) {
+                        digitalWrite(thermoPin, LOW);
                         Serial.println(F(" OFF"));
                     } //Reached settings
-                    else Serial.println(F(" --")); // Nothing to do
+                    else Serial.println(F(" -target zone-")); // Nothing to do
                 }
+                thermostatCheckPrinted = true;
             }
         }
-        item = item->next;
     }
 
     nextThermostatCheck = millis() + THERMOSTAT_CHECK_PERIOD;
@@ -1318,15 +1368,13 @@ void thermoLoop(void) {
 #endif
 }
 
-
 short thermoSetCurTemp(char *name, short t) {
     if (items) {
-        aJsonObject *item = aJson.getObjectItem(items, name);
-        if (item && (item->type == aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint == CH_THERMO) &&
-            (aJson.getArraySize(item) >= 4)) {
+        aJsonObject *thermoItem = aJson.getObjectItem(items, name);
+        if (isThermostatWithMinArraySize(thermoItem, 4)) {
             aJsonObject *extArray = NULL;
 
-            if (aJson.getArraySize(item) == 4) //No thermo extension yet
+            if (aJson.getArraySize(thermoItem) == 4) //No thermo extension yet
             {
                 extArray = aJson.createArray(); //Create Ext Array
 
@@ -1334,17 +1382,17 @@ short thermoSetCurTemp(char *name, short t) {
                 aJsonObject *oattempts = aJson.createItem(T_ATTEMPTS); //Create int
                 aJson.addItemToArray(extArray, ocurt);
                 aJson.addItemToArray(extArray, oattempts);
-                aJson.addItemToArray(item, extArray); //Adding to item
-            } //if
-            else if (extArray = aJson.getArrayItem(item, I_EXT)) {
+                aJson.addItemToArray(thermoItem, extArray); //Adding to thermoItem
+            }
+            else if (extArray = aJson.getArrayItem(thermoItem, I_EXT)) {
                 aJsonObject *att = aJson.getArrayItem(extArray, IET_ATTEMPTS);
                 aJson.getArrayItem(extArray, IET_TEMP)->valueint = t;
-                if (att->valueint == 0) mqttClient.publish("/alarmoff/snsr", item->name);
+                if (att->valueint == 0) mqttClient.publish("/alarmoff/snsr", thermoItem->name);
                 att->valueint = (int) T_ATTEMPTS;
-            } //if
+            }
 
+        }
+    }
 
-        } //if
-    } // if items
+}
 
-} //proc

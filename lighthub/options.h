@@ -17,6 +17,8 @@
 #define THERMO_OVERHEAT_CELSIUS 38
 #define FM_OVERHEAT_CELSIUS 40.
 
+#define MIN_VOLUME 10
+#define INIT_VOLUME 30
 
 #define OFFSET_MAC 0
 #define OFFSET_IP OFFSET_MAC+6
@@ -31,6 +33,10 @@
 #define INTERVAL_CHECK_MODBUS 2000
 #define INTERVAL_POLLING      100
 #define THERMOSTAT_CHECK_PERIOD 5000
+
+#ifndef OW_UPDATE_INTERVAL
+#define OW_UPDATE_INTERVAL 5000
+#endif
 
 #ifndef MODBUS_SERIAL_BAUD
 #define MODBUS_SERIAL_BAUD 9600
@@ -57,6 +63,10 @@
 #define OUTTOPIC "/myhome/s_out/"
 #endif
 
+#ifndef CMDTOPIC
+#define CMDTOPIC "/myhome/in/command/"
+#endif
+
 #ifndef INTOPIC
 #define INTOPIC  "/myhome/in/"
 #endif
@@ -79,6 +89,10 @@
 
 #ifdef ARTNET_ENABLE
 #define _artnet
+#endif
+
+#ifndef LAN_INIT_DELAY
+#define LAN_INIT_DELAY 500
 #endif
 
 #if defined(ESP8266)
@@ -105,10 +119,24 @@
 #if defined(__ESP__)
 #undef _dmxin
 #undef _modbus
+#ifndef DMX_DISABLE
 #define _espdmx
+#endif
 #define modbusSerial Serial1
 #endif
 
 #ifndef _dmxout
 #undef _artnet
 #endif
+
+#ifdef WIFI_MANAGER_DISABLE
+#ifndef ESP_WIFI_AP
+#define ESP_WIFI_AP mywifiap
+#endif
+
+#ifndef ESP_WIFI_PWD
+#define ESP_WIFI_PWD mywifipass
+#endif
+#endif
+
+#define DHT_POLL_DELAY_DEFAULT 15000

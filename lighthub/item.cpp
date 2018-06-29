@@ -199,6 +199,53 @@ boolean Item::getEnableCMD(int delta) {
 }
 
 #define MAXCTRLPAR 3
+
+
+int Item::Ctrl(char * payload, boolean send){
+  int cmd = txt2cmd(payload);
+  switch (cmd) {
+      case 0: {
+          short i = 0;
+          int Par[3];
+
+          while (payload && i < 3)
+              Par[i++] = getInt((char **) &payload);
+
+          Ctrl(0, i, Par, send);
+      }
+          break;
+
+      case -1: //Not known command
+      case -2: //JSON input (not implemented yet
+          break;
+      case -3: //RGB color in #RRGGBB notation
+      {
+          CRGB rgb;
+          if (sscanf((const char*)payload, "#%2X%2X%2X", &rgb.r, &rgb.g, &rgb.b) == 3) {
+              int Par[3];
+              CHSV hsv = rgb2hsv_approximate(rgb);
+              Par[0] = map(hsv.h, 0, 255, 0, 365);
+              Par[1] = map(hsv.s, 0, 255, 0, 100);
+              Par[2] = map(hsv.v, 0, 255, 0, 100);
+              Ctrl(0, 3, Par, send);
+          }
+          break;
+      }
+      case CMD_ON:
+
+          //       if (item.getEnableCMD(500) || lanStatus == 4)
+         Ctrl(cmd, 0, NULL,
+                    send); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
+          //       else Serial.println(F("on Skipped"));
+
+          break;
+      default: //some known command
+          Ctrl(cmd, 0, NULL, send);
+
+  } //ctrl
+}
+
+
 int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
 
 
@@ -286,6 +333,20 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                 setCmd(cmd);
                 //retrive stored values
                 st.aslong = getVal();
+
+                // If command is ON but saved volume to low - setup mimimum volume
+                switch (itemType) {
+                  case CH_DIMMER:
+                  case CH_MODBUS:
+                  if (st.aslong<MIN_VOLUME) st.aslong=INIT_VOLUME;
+                  setVal(st.aslong);
+                  break;
+                  case CH_RGB:
+                  case CH_RGBW:
+                  if (st.aslong && (st.v<MIN_VOLUME)) st.v=INIT_VOLUME;
+                  setVal(st.aslong);
+                }
+
                 if (st.aslong > 0)  //Stored smthng
 
                     switch (itemType) {
@@ -295,8 +356,6 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                             Par[0] = st.h;
                             Par[1] = st.s;
                             Par[2] = st.v;
-                            if (!Par[2]) Par[2]=80;   //If RGB value==0 set to 80%
-                            setVal(st.aslong);
                             params = 3;
                             SendStatus(0, params, Par,true); // Send restored triplet. In any cases
                             break;
@@ -306,8 +365,6 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                         case CH_DIMMER:         //Everywhere, in flat VAL
                         case CH_MODBUS:
                         case CH_VC:
-
-
                             Par[0] = st.aslong;
                             params = 1;
                             SendStatus(0, params, Par, true);  // Send restored parameter, even if send=false - no problem, loop will be supressed at next hop
@@ -616,8 +673,8 @@ int Item::isActive() {
         case CH_PWM:
             val = st.aslong;
     } //switch
-    Serial.print(F(":="));
-    Serial.println(val);
+    //Serial.print(F(":="));
+    //Serial.println(val);
     if (val) return 1; else return 0;
 }
 
@@ -684,7 +741,7 @@ OFF
 
 POLL  2101x10
 [22:27:29] <= Response: 0A 03 14 00 23 00 00 27 10 13 88 0B 9C 00 32 00 F8 00 F2 06 FA 01 3F AD D0
-[22:27:29] => Poll: 0A 03 08 34 00 0A 87 18
+[22:27:29] => poll: 0A 03 08 34 00 0A 87 18
 
 */
 
@@ -696,7 +753,10 @@ void Item::mb_fail(short addr, short op, int val, int cmd) {
     setVal(val);
 }
 
+#ifndef MODBUS_DISABLE
 extern ModbusMaster node;
+
+
 
 int Item::VacomSetFan(int8_t val, int8_t cmd) {
     int addr = getArg();
@@ -712,8 +772,8 @@ int Item::VacomSetFan(int8_t val, int8_t cmd) {
     }
     modbusBusy = 1;
 
-    uint8_t j, result;
-    uint16_t data[1];
+    uint8_t j;//, result;
+    //uint16_t data[1];
 
     modbusSerial.begin(9600, fmPar);
     node.begin(addr, modbusSerial);
@@ -766,63 +826,6 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
     modbusBusy = 0;
 }
 
-
-int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
-
-/// ToDo: relative patches, configuration
-
-    if (deffered) {
-        setCmd(cmd | CMD_REPORT);
-         Serial.println(F("Status deffered"));
-      //     mqttClient.publish("/push", "1");
-         return 0;
-     // Todo: Parameters?  Now expected that parameters already stored by setVal()
-    }
-    else {  //publush to MQTT
-    char addrstr[32];
-    //char addrbuf[17];
-    char valstr[16] = "";
-
-    strcpy_P(addrstr, outprefix);
-    strncat(addrstr, itemArr->name, sizeof(addrstr));
-
-
-    switch (cmd) {
-        case CMD_ON:
-            strcpy(valstr, "ON");
-            break;
-        case CMD_OFF:
-        case CMD_HALT:
-            strcpy(valstr, "OFF");
-            break;
-            // TODO send Par
-        case 0:
-        case CMD_SET:
-            if (Par)
-                for (short i = 0; i < n; i++) {
-                    char num[4];
-                    snprintf(num, sizeof(num), "%d", Par[i]);
-                    strncat(valstr, num, sizeof(valstr));
-                    if (i != n - 1) {
-                        strcpy(num, ",");
-                        strncat(valstr, num, sizeof(valstr));
-                    }
-                }
-            break;
-        default:
-           Serial.println(F("Unknown cmd "));
-            return -1;
-    }
-    Serial.print(F("Pub: "));
-    Serial.print(addrstr);
-    Serial.print(F("->"));
-    Serial.println(valstr);
-    mqttClient.publish(addrstr, valstr,true);
-    return 0;
-    }
-}
-
-
 int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
 
     if (modbusBusy) {
@@ -855,7 +858,6 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
     node.writeSingleRegister(_reg, value);
     modbusBusy = 0;
 }
-
 
 int Item::checkFM() {
     if (modbusBusy) return -1;
@@ -987,7 +989,7 @@ int Item::checkModbusDimmer() {
 
     uint16_t addr = getArg(0);
     uint16_t reg = getArg(1);
-    short mask = getArg(2);
+  //  short mask = getArg(2);
 
     int data;
 
@@ -1117,4 +1119,60 @@ void Item::sendDelayedStatus(){
       cmd &= ~CMD_REPORT;     // Clean report flag
       setCmd(cmd);
       }
+}
+
+#endif
+int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
+
+/// ToDo: relative patches, configuration
+
+    if (deffered) {
+        setCmd(cmd | CMD_REPORT);
+        Serial.println(F("Status deffered"));
+        //     mqttClient.publish("/push", "1");
+        return 0;
+        // Todo: Parameters?  Now expected that parameters already stored by setVal()
+    }
+    else {  //publush to MQTT
+        char addrstr[32];
+        //char addrbuf[17];
+        char valstr[16] = "";
+
+        strcpy_P(addrstr, outprefix);
+        strncat(addrstr, itemArr->name, sizeof(addrstr));
+
+
+        switch (cmd) {
+            case CMD_ON:
+                strcpy(valstr, "ON");
+                break;
+            case CMD_OFF:
+            case CMD_HALT:
+                strcpy(valstr, "OFF");
+                break;
+                // TODO send Par
+            case 0:
+            case CMD_SET:
+                if (Par)
+                    for (short i = 0; i < n; i++) {
+                        char num[4];
+                        snprintf(num, sizeof(num), "%d", Par[i]);
+                        strncat(valstr, num, sizeof(valstr));
+                        if (i != n - 1) {
+                            strcpy(num, ",");
+                            strncat(valstr, num, sizeof(valstr));
+                        }
+                    }
+                break;
+            default:
+                Serial.println(F("Unknown cmd "));
+                return -1;
+        }
+        Serial.print(F("Pub: "));
+        Serial.print(addrstr);
+        Serial.print(F("->"));
+        Serial.println(valstr);
+        mqttClient.publish(addrstr, valstr,true);
+        return 0;
+    }
 }

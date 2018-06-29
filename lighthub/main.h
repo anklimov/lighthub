@@ -10,6 +10,10 @@
 #define wdt_dis()
 #endif
 
+#ifndef DHCP_RETRY_INTERVAL
+#define DHCP_RETRY_INTERVAL 60000
+#endif
+
 #if defined(__AVR__)
 #define wdt_en()   wdt_enable(WDTO_8S)
 #define wdt_dis()  wdt_disable()
@@ -61,9 +65,15 @@
 
 #if defined(__ESP__)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
-#include "esp.h"
 #include <EEPROM.h>
-#include <ArduinoHttpClient.h>
+#include <ESP8266HTTPClient.h>
+
+#ifndef WIFI_MANAGER_DISABLE
+#include <WiFiManager.h>
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#endif
+
 #endif
 
 #ifdef _owire
@@ -96,21 +106,33 @@
 extern Artnet *artnet;
 #endif
 
+enum lan_status {
+    INITIAL_STATE = 0,
+    HAVE_IP_ADDRESS = 1,
+    IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER = 2,
+    OPERATION = 3,
+    RETAINING_COLLECTING = 4,
+    AWAITING_ADDRESS = -10,
+    RECONNECT = 12,
+    READ_RE_CONFIG = -11,
+    DO_NOTHING = -14
+};
+
 //void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);
 
-#ifndef __ESP__
+//#ifndef __ESP__
 
-void printIPAddress();
+void printIPAddress(IPAddress ipAddress);
 
-#endif
+//#endif
 
 void printMACAddress();
 
 void restoreState();
 
-int lanLoop();
+lan_status lanLoop();
 
 void Changed(int i, DeviceAddress addr, int val);
 
@@ -146,9 +168,9 @@ int loadFlash(short n, char *str, short l=32);
 
 void saveFlash(short n, IPAddress& ip);
 
-int loadFlash(short n, IPAddress& ip);
+int ipLoadFromFlash(short n, IPAddress &ip);
 
-int getConfig(int arg_cnt=0, char **args=NULL);
+lan_status getConfig(int arg_cnt=0, char **args=NULL);
 
 void preTransmission();
 
@@ -178,8 +200,16 @@ void setupCmdArduino();
 
 void setupMacAddress();
 
-int getConfig(int arg_cnt, char **args);
-
 void printFirmwareVersionAndBuildOptions();
+
+bool IsThermostat(const aJsonObject *item);
+
+bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLatestCommand);
+
+void resetHard();
+
+void onInitialStateInitLAN();
+
+void ip_ready_config_loaded_connecting_to_broker();
 
 #endif //LIGHTHUB_MAIN_H

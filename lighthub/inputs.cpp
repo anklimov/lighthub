@@ -19,19 +19,23 @@ e-mail    anklimov@gmail.com
 */
 
 #include "inputs.h"
-#include "aJSON.h"
 #include "item.h"
 #include <PubSubClient.h>
 
+#ifndef DHT_DISABLE
+#include "DHT.h"
+#endif
+
 extern PubSubClient mqttClient;
+//DHT dht();
 
 Input::Input(char * name) //Constructor
 {
-  if (name) 
+  if (name)
        inputObj= aJson.getObjectItem(inputs, name);
   else inputObj=NULL;
-    
-     Parse();  
+
+     Parse();
 }
 
 
@@ -42,79 +46,131 @@ Input::Input(int pin) //Constructor
 
 
  Input::Input(aJsonObject * obj) //Constructor
-{ 
-  inputObj= obj;  
+{
+  inputObj= obj;
   Parse();
-    
+
 }
 
 
 boolean Input::isValid ()
 {
- return  (pin && store); 
+ return  (pin && store);
 }
 
 void Input::Parse()
-{ 
-   store         = NULL;
-   inType        = 0;
-   pin           = 0; 
-  
-  if (inputObj && (inputObj->type==aJson_Object))
-  {
-  aJsonObject * s;
-  
-  s             = aJson.getObjectItem(inputObj,"T");  
-  if (s) inType = s->valueint;
-  
-  pin           = atoi(inputObj->name);
-
-  
-  s             = aJson.getObjectItem(inputObj,"S");
-  if (!s)     { Serial.print(F("In: "));Serial.print(pin);Serial.print(F("/"));Serial.println(inType);
-                aJson.addNumberToObject(inputObj,"S", 0);
-                s = aJson.getObjectItem(inputObj,"S");
-                }
-
-  if (s)        store= (inStore *) &s->valueint;
-  }
-}
-
-int Input::Poll()
-{ 
-  boolean v;
-  if (!isValid()) return -1;
-
-  
-  if (inType & IN_ACTIVE_HIGH) 
-      {   pinMode(pin, INPUT);    
-        v = (digitalRead(pin)==HIGH); 
-      } 
-        else 
-      {   pinMode(pin, INPUT_PULLUP);    
-        v = (digitalRead(pin)==LOW);
-      }  
-  if (v!=store->cur) // value changed 
-      {
-            if (store->bounce) store->bounce--;  
-               else //confirmed change
-               {
-                Changed(v);
-                store->cur=v;
-               }
-      }
-  else // no change 
-      store->bounce=3;         
- return  0; 
-}
-
-void Input::Changed (int val)
 {
-  Serial.print(pin);Serial.print(F("="));Serial.println(val); 
-  aJsonObject * item = aJson.getObjectItem(inputObj,"item");  
+    store = NULL;
+    inType = 0;
+    pin = 0;
+
+    if (inputObj && (inputObj->type == aJson_Object)) {
+        aJsonObject *s;
+
+        s = aJson.getObjectItem(inputObj, "T");
+        if (s) inType = s->valueint;
+
+        pin = atoi(inputObj->name);
+
+        s = aJson.getObjectItem(inputObj, "S");
+        if (!s) {
+            Serial.print(F("In: "));
+            Serial.print(pin);
+            Serial.print(F("/"));
+            Serial.println(inType);
+            aJson.addNumberToObject(inputObj, "S", 0);
+            s = aJson.getObjectItem(inputObj, "S");
+        }
+
+        if (s) store = (inStore *) &s->valueint;
+    }
+}
+
+int Input::poll() {
+    if (!isValid()) return -1;
+    if (inType & IN_PUSH_ON)
+        contactPoll();
+    else if (inType & IN_DHT22)
+        dht22Poll();
+    return 0;
+}
+
+void Input::dht22Poll() {
+#ifndef DHT_DISABLE
+    if (store->nextPollMillis > millis())
+        return;
+    DHT dht(pin, DHT22);
+    float temp = dht.readTemperature();
+    float humidity = dht.readHumidity();
+    aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
+    Serial.print(F("IN:"));Serial.print(pin);Serial.print(F(" DHT22 type. T="));Serial.print(temp);
+    Serial.print(F("°C H="));Serial.print(humidity);Serial.print(F("%"));
+    if (emit && temp && humidity && temp == temp && humidity == humidity) {
+        char valstr[10];
+        char addrstr[100] = "";
+        strcat(addrstr, emit->valuestring);
+        strcat(addrstr, "T");
+        printFloatValueToStr(temp, valstr);
+        mqttClient.publish(addrstr, valstr);
+        addrstr[strlen(addrstr) - 1] = 'H';
+        printFloatValueToStr(humidity, valstr);
+        mqttClient.publish(addrstr, valstr);
+        store->nextPollMillis = millis() + DHT_POLL_DELAY_DEFAULT;
+        Serial.print(" NextPollMillis=");Serial.println(store->nextPollMillis);
+    }
+    else
+        store->nextPollMillis = millis() + DHT_POLL_DELAY_DEFAULT/3;
+#endif
+}
+
+void Input::printFloatValueToStr(float temp, char *valstr) {
+    #if defined(__ESP__)
+    sprintf(valstr, "%2.1f", temp);
+    #endif
+    #if defined(__AVR__)
+    sprintf(valstr, "%d", (int)temp);
+    int fractional = 10.0*((float)abs(temp)-(float)abs((int)temp));
+    int val_len =strlen(valstr);
+    valstr[val_len]='.';
+    valstr[val_len+1]='0'+fractional;
+    valstr[val_len+2]='\0';
+    #endif
+    #if defined(__SAM3X8E__)
+    sprintf(valstr, "%2.1f", temp);
+    #endif
+}
+
+void Input::contactPoll() {
+    boolean currentInputState;
+    uint8_t inputPinMode, inputOnLevel;
+    if (inType & IN_ACTIVE_HIGH) {
+        inputOnLevel = HIGH;
+        inputPinMode = INPUT;
+    } else {
+        inputOnLevel = LOW;
+        inputPinMode = INPUT_PULLUP;
+    }
+    pinMode(pin, inputPinMode);
+    currentInputState = (digitalRead(pin) == inputOnLevel);
+    if (currentInputState != store->currentValue) // value changed
+    {
+        if (store->bounce) store->bounce = store->bounce - 1;
+        else //confirmed change
+        {
+            onContactChanged(currentInputState);
+            store->currentValue = currentInputState;
+        }
+    } else // no change
+        store->bounce = SAME_STATE_ATTEMPTS;
+}
+
+void Input::onContactChanged(int val)
+{
+  Serial.print(F("IN:"));  Serial.print(pin);Serial.print(F("="));Serial.println(val);
+  aJsonObject * item = aJson.getObjectItem(inputObj,"item");
   aJsonObject * scmd = aJson.getObjectItem(inputObj,"scmd");
-  aJsonObject * rcmd = aJson.getObjectItem(inputObj,"rcmd");   
-  aJsonObject * emit = aJson.getObjectItem(inputObj,"emit");    
+  aJsonObject * rcmd = aJson.getObjectItem(inputObj,"rcmd");
+  aJsonObject * emit = aJson.getObjectItem(inputObj,"emit");
 
   if (emit)
   {
@@ -126,7 +182,7 @@ void Input::Changed (int val)
        else
             {  //send reset command
               if (!rcmd) mqttClient.publish(emit->valuestring,"OFF",true);  else  if (strlen(rcmd->valuestring)) mqttClient.publish(emit->valuestring,rcmd->valuestring,true);
-            } 
+            }
   }
 
   if (item)
@@ -136,11 +192,11 @@ void Input::Changed (int val)
       {
        if (val)
             {  //send set command
-               if (!scmd) it.Ctrl(CMD_ON,0,NULL,true); else if   (strlen(scmd->valuestring)) it.Ctrl(txt2cmd(scmd->valuestring),0,NULL,true); 
+               if (!scmd) it.Ctrl(CMD_ON,0,NULL,true); else if   (strlen(scmd->valuestring))  it.Ctrl(scmd->valuestring,true);
             }
        else
             {  //send reset command
-               if (!rcmd) it.Ctrl(CMD_OFF,0,NULL,true); else if  (strlen(rcmd->valuestring)) it.Ctrl(txt2cmd(rcmd->valuestring),0,NULL,true);      
+               if (!rcmd) it.Ctrl(CMD_OFF,0,NULL,true); else if  (strlen(rcmd->valuestring))  it.Ctrl(rcmd->valuestring,true);
             }
       }
   }
