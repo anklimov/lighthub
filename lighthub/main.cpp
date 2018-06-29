@@ -1046,7 +1046,7 @@ void setup_main() {
     ArtnetSetup();
 #endif
 
-#ifndef WIFI_MANAGER_DISABLE
+#if defined(__ESP__) and not defined(WIFI_MANAGER_DISABLE)
     WiFiManager wifiManager;
 #if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
     wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
