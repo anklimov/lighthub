@@ -90,12 +90,56 @@ int Input::poll() {
     if (!isValid()) return -1;
     if (inType & IN_DHT22)
         dht22Poll();
-/* example
+else if(inType & IN_ENCODER)
+    encoderPoll();
+    /* example
     else if (inType & IN_ANALOG)
         analogPoll(); */
     else
         contactPoll();
     return 0;
+}
+
+void Input::encoderPoll() {
+    if (store->nextPollMillis > millis())
+        return;
+    if (store->logicState == 0) {
+        short real_pin;
+#if defined(__AVR__)
+#define interrupt_number pin
+        if (interrupt_number >= 0 && interrupt_number < 6) {
+            short mega_interrupt_array[6] = {2, 3, 21, 20, 19, 18};
+            real_pin = mega_interrupt_array[interrupt_number];
+            pinMode(real_pin, INPUT);
+            attachInterrupt(interrupt_number, onEncoderChanged, RISING);
+        } else {
+            Serial.print(F("IRQ:"));
+            Serial.print(pin);
+            Serial.print(F(" Encoder type. INCORRECT Interrupt number!!!"));
+            return;
+        }
+#endif
+
+#if defined(__SAM3X8E__)
+        pinMode(pin, INPUT);
+        attachInterrupt(pin, onEncoderChanged, RISING);
+#endif
+        store->logicState = 1;
+        return;
+    }
+    aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
+    Serial.print(F("IN:"));Serial.print(pin);Serial.print(F(" Encoder type. val="));Serial.print(store->aslong);
+    if (emit) {
+        char valstr[10];
+        char addrstr[100] = "";
+        strcat(addrstr, emit->valuestring);
+        sprintf(valstr, "%d", store->aslong);
+        mqttClient.publish(addrstr, valstr);
+        store->nextPollMillis = millis() + DHT_POLL_DELAY_DEFAULT;
+        Serial.print(F(" NextPollMillis="));Serial.println(store->nextPollMillis);
+    }
+    else
+        Serial.print(F(" No emit data!"));
 }
 
 void Input::dht22Poll() {
@@ -203,4 +247,8 @@ void Input::onContactChanged(int val)
             }
       }
   }
+}
+
+static void Input::onEncoderChanged() {
+    store->aslong++;
 }

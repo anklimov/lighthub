@@ -27,6 +27,7 @@ e-mail    anklimov@gmail.com
 #define IN_PUSH_ON       0      // PUSH - ON, Release - OFF (ovverrided by pcmd/rcmd) - DEFAULT
 #define IN_PUSH_TOGGLE   1      // Every physicall push toggle logical switch  on/off
 #define IN_DHT22         4
+#define IN_ENCODER       8
 
 #define SAME_STATE_ATTEMPTS 3
 
@@ -100,4 +101,8 @@ class Input
 
 
     void printFloatValueToStr(float temp, char *valstr);
+
+    void encoderPoll();
+
+    void onEncoderChanged();
 };
