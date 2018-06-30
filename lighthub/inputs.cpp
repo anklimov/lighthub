@@ -88,10 +88,13 @@ void Input::Parse()
 
 int Input::poll() {
     if (!isValid()) return -1;
-    if (inType & IN_PUSH_ON)
-        contactPoll();
-    else if (inType & IN_DHT22)
+    if (inType & IN_DHT22)
         dht22Poll();
+/* example
+    else if (inType & IN_ANALOG)
+        analogPoll(); */
+    else
+        contactPoll();
     return 0;
 }
 
