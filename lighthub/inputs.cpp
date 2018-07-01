@@ -155,24 +155,31 @@ void Input::encoderPoll() {
 
 void Input::attachInterruptPinIrq(int realPin, int irq) {
     pinMode(realPin, INPUT);
+    int real_irq;
+#if defined(__AVR__)
+    real_irq = irq;
+#endif
+#if defined(__SAM3X8E__)
+    real_irq = realPin;
+#endif
     switch(irq){
             case 0:
-                attachInterrupt(realPin, onEncoderChanged0, RISING);
+                attachInterrupt(real_irq, onEncoderChanged0, RISING);
                 break;
             case 1:
-                attachInterrupt(realPin, onEncoderChanged1, RISING);
+                attachInterrupt(real_irq, onEncoderChanged1, RISING);
                 break;
             case 2:
-                attachInterrupt(realPin, onEncoderChanged2, RISING);
+                attachInterrupt(real_irq, onEncoderChanged2, RISING);
                 break;
             case 3:
-                attachInterrupt(realPin, onEncoderChanged3, RISING);
+                attachInterrupt(real_irq, onEncoderChanged3, RISING);
                 break;
             case 4:
-                attachInterrupt(realPin, onEncoderChanged4, RISING);
+                attachInterrupt(real_irq, onEncoderChanged4, RISING);
                 break;
             case 5:
-                attachInterrupt(realPin, onEncoderChanged5, RISING);
+                attachInterrupt(real_irq, onEncoderChanged5, RISING);
                 break;
         default:
             Serial.print(F("Incorrect irq:"));Serial.println(irq);
