@@ -64,8 +64,7 @@ e-mail    anklimov@gmail.com
 extern aJsonObject *inputs;
 
 
-typedef union
-{
+typedef union {
     long int aslong;
     struct {
         int8_t reserve;
@@ -76,33 +75,44 @@ typedef union
     unsigned long nextPollMillis;
 } inStore;
 
-class Input
-{
-  public:
-  aJsonObject *inputObj;
-  uint8_t inType;
-  uint8_t pin;
-  inStore * store;
+class Input {
+public:
+    aJsonObject *inputObj;
+    uint8_t inType;
+    uint8_t pin;
+    inStore *store;
 
-  Input(int pin);
-  Input(aJsonObject * obj);
-  Input(char * name);
+    Input(int pin);
 
-  boolean isValid ();
-  void onContactChanged(int val);
+    Input(aJsonObject *obj);
 
-  int poll();
-  protected:
-  void Parse();
+    Input(char *name);
+
+    boolean isValid();
+
+    void onContactChanged(int val);
+
+    int poll();
+
+    static void onEncoderChanged0();
+    static void onEncoderChanged1();
+    static void onEncoderChanged2();
+    static void onEncoderChanged3();
+    static void onEncoderChanged4();
+    static void onEncoderChanged5();
+
+
+
+protected:
+    void Parse();
 
     void contactPoll();
 
     void dht22Poll();
 
-
     void printFloatValueToStr(float temp, char *valstr);
 
     void encoderPoll();
 
-    void onEncoderChanged();
+    void attachInterruptPinIrq(int realPin, int irq);
 };
