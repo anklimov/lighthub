@@ -38,7 +38,7 @@ e-mail    anklimov@gmail.com
 #define DmxWrite DmxSimple.write
 #endif
 
-#if defined(__ESP__)
+#if defined(ESP8266)
 #include <ESPDMX.h>
 extern DMXESPSerial dmxout;
 #define DmxWrite dmxout.write

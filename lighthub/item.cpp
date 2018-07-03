@@ -186,7 +186,7 @@ void Item::copyPar (aJsonObject *itemV)
 }
 */
 
-#ifdef ESP32
+#if defined(ARDUINO_ARCH_ESP32)
 void analogWrite(int pin, int val)
 {
   //TBD
@@ -218,6 +218,7 @@ int Item::Ctrl(char * payload, boolean send){
       case -1: //Not known command
       case -2: //JSON input (not implemented yet
           break;
+#if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266)
       case -3: //RGB color in #RRGGBB notation
       {
           CRGB rgb;
@@ -231,6 +232,7 @@ int Item::Ctrl(char * payload, boolean send){
           }
           break;
       }
+#endif
       case CMD_ON:
 
           //       if (item.getEnableCMD(500) || lanStatus == 4)

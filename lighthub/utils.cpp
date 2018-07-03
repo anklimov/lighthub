@@ -80,7 +80,7 @@ int getInt(char **chan) {
 }
 
 
-#if defined(ESP8266)
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
 unsigned long freeRam ()
 {return system_get_free_heap_size();}
 #endif

@@ -77,9 +77,17 @@ EthernetClient ethClient;
 EthernetClient ethClient;
 #endif
 
-#ifdef __ESP__
+#ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <user_interface.h>
+WiFiClient ethClient;
+#endif
+
+#ifdef ARDUINO_ARCH_ESP32
+#include <WiFiClient.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <EEPROM.h>
 WiFiClient ethClient;
 #endif
 
@@ -270,7 +278,7 @@ lan_status lanLoop() {
 
 
     {
-#ifndef __ESP__
+#if defined(__AVR__) || defined(__SAM3X8E__)
         wdt_dis();
         if (lanStatus > 0)
             switch (Ethernet.maintain()) {
@@ -395,8 +403,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 }
 
 void onInitialStateInitLAN() {
-#ifdef __ESP__
-#ifdef WIFI_MANAGER_DISABLE
+#if defined(ESP8266) and defined(WIFI_MANAGER_DISABLE)
     if(!wifiInitialized) {
                 WiFi.mode(WIFI_STA);
                 Serial.print(F("WIFI AP/Password:"));
@@ -408,15 +415,40 @@ void onInitialStateInitLAN() {
                 wifiInitialized = true;
             }
 #endif
-            if (WiFi.status() == WL_CONNECTED) {
-                Serial.println("WiFi connected");
-                Serial.println("IP address: ");
-                Serial.println(WiFi.localIP());
-                lanStatus=HAVE_IP_ADDRESS;//1;
-            }
+
+#ifdef ARDUINO_ARCH_ESP32
+    if(!wifiInitialized) {
+        WiFi.mode(WIFI_STA);
+        WiFi.disconnect();
+        Serial.print(F("WIFI AP/Password:"));
+        Serial.print(QUOTE(ESP_WIFI_AP));
+        Serial.print(F("/"));
+        Serial.println(QUOTE(ESP_WIFI_PWD));
+        WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
+
+        int wifi_connection_wait = 10000;
+        while (WiFi.status() != WL_CONNECTED && wifi_connection_wait > 0) {
+            delay(500);
+            wifi_connection_wait -= 500;
+            Serial.print(".");
+        }
+        wifiInitialized = true;
+    }
 #endif
 
-#if not defined(__ESP__)
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.print(F("WiFi connected. IP address: "));
+        Serial.println(WiFi.localIP());
+        lanStatus = HAVE_IP_ADDRESS;//1;
+    } else
+    {
+        Serial.println(F("Problem with WiFi connected"));
+        nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL/5;
+    }
+#endif
+
+    #if defined(__AVR__) || defined(__SAM3X8E__)
     IPAddress ip, dns, gw, mask;
     int res = 1;
     Serial.println(F("Starting lan"));
@@ -956,7 +988,7 @@ lan_status getConfig(int arg_cnt, char **args)
         return READ_RE_CONFIG;//-11; //Load from NVRAM
     }
 #endif
-#if defined(__ESP__)
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
     HTTPClient httpClient;
     String fullURI = "http://";
     fullURI+=configServer;
@@ -1047,7 +1079,7 @@ void setup_main() {
     ArtnetSetup();
 #endif
 
-#if defined(__ESP__) and not defined(WIFI_MANAGER_DISABLE)
+#if defined(ESP8266) and not defined(WIFI_MANAGER_DISABLE)
     WiFiManager wifiManager;
 #if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
     wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
@@ -1059,6 +1091,10 @@ void setup_main() {
     delay(LAN_INIT_DELAY);//for LAN-shield initializing
     //TODO: checkForRemoteSketchUpdate();
 }
+
+#ifdef MMMMMM
+errro!!!
+#endif
 
 void printFirmwareVersionAndBuildOptions() {
     Serial.print(F("\nLazyhome.ru LightHub controller "));

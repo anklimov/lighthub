@@ -95,10 +95,6 @@
 #define LAN_INIT_DELAY 500
 #endif
 
-#if defined(ESP8266)
-#define __ESP__
-#endif
-
 #if defined(__AVR__)
 //All options available
 #ifdef CONTROLLINO
@@ -116,7 +112,7 @@
 #define dmxin  DmxDue1
 #endif
 
-#if defined(__ESP__)
+#if defined(ESP8266)
 #undef _dmxin
 #undef _modbus
 #ifndef DMX_DISABLE

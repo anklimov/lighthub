@@ -14,17 +14,23 @@
 #define DHCP_RETRY_INTERVAL 60000
 #endif
 
-#if defined(__AVR__)
+#if defined(ESP8266)
 #define wdt_en()   wdt_enable(WDTO_8S)
 #define wdt_dis()  wdt_disable()
 #define wdt_res()  wdt_reset()
 #endif
 
-#if defined(__ESP__)
+#ifdef ARDUINO_ARCH_ESP32
 #define wdt_res()
 #define wdt_en()
 #define wdt_dis()
 #endif
+
+//#if defined(ESP8266)
+//#define wdt_res()
+//#define wdt_en()
+//#define wdt_dis()
+//#endif
 
 #if defined(WATCH_DOG_TICKER_DISABLE) && defined(__AVR__)
 #define wdt_en() wdt_disable()
@@ -63,16 +69,13 @@
 #include <EEPROM.h>
 #endif
 
-#if defined(__ESP__)
+#if defined(ESP8266)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 #include <EEPROM.h>
 #include <ESP8266HTTPClient.h>
-
-#ifndef WIFI_MANAGER_DISABLE
 #include <WiFiManager.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
-#endif
 
 #endif
 
@@ -88,11 +91,19 @@
 
 #endif
 
+#if defined(__AVR__) || defined(__SAM3X8E__) || defined(ESP8266)
 #ifdef Wiz5500
 #include <Ethernet2.h>
 #else
 #include <Ethernet.h>
 #endif
+#endif
+
+#ifdef ARDUINO_ARCH_ESP32
+#include <SPI.h>
+#include <Ethernet3.h>
+#endif
+
 
 #ifdef _artnet
 #include <Artnet.h>
@@ -122,11 +133,8 @@ enum lan_status {
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);
 
-//#ifndef __ESP__
 
 void printIPAddress(IPAddress ipAddress);
-
-//#endif
 
 void printMACAddress();
 
