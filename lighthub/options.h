@@ -136,3 +136,15 @@
 #endif
 
 #define DHT_POLL_DELAY_DEFAULT 15000
+
+#ifdef ARDUINO_ARCH_STM32F1
+#define strncpy_P strncpy
+#endif
+
+#ifndef debugSerial
+#define debugSerial Serial1
+#endif
+
+#ifndef Wiz5500
+#define W5100_ETHERNET_SHIELD
+#endif

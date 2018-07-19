@@ -10,6 +10,12 @@
 #define wdt_dis()
 #endif
 
+#if defined(ARDUINO_ARCH_STM32F1)
+#define wdt_res()
+#define wdt_en()
+#define wdt_dis()
+#endif
+
 #ifndef DHCP_RETRY_INTERVAL
 #define DHCP_RETRY_INTERVAL 60000
 #endif
@@ -50,7 +56,9 @@
 #include "stdarg.h"
 #include "item.h"
 #include "inputs.h"
+#ifndef ARDUINO_ARCH_STM32F1
 #include "FastLED.h"
+#endif
 #include "Dns.h"
 //#include "hsv2rgb.h"
 

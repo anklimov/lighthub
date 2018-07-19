@@ -1,7 +1,7 @@
 #! /bin/bash
 # usage:
 # first make your own copy of template
-# cp build_flags_template.sh build_flags_{ENVNAME}.sh
+# cp build_flags_template.sh build_flags_ENVNAME.sh
 # then edit, change or comment something
  export FLAGS="-DMY_CONFIG_SERVER=lazyhome.ru"
  #export FLAGS="$FLAGS -DWATCH_DOG_TICKER_DISABLE"

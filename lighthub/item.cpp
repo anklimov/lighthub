@@ -218,7 +218,7 @@ int Item::Ctrl(char * payload, boolean send){
       case -1: //Not known command
       case -2: //JSON input (not implemented yet
           break;
-#if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266)
+#if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266) and not defined(ARDUINO_ARCH_STM32F1)
       case -3: //RGB color in #RRGGBB notation
       {
           CRGB rgb;

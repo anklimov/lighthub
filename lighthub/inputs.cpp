@@ -41,7 +41,7 @@ static volatile long encoder_value[6];
 static volatile long encoder_value[6];
 #endif
 
-#if defined(__SAM3X8E__)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1)
 static short encoder_irq_map[54];
     static long encoder_value[54];
     static int encoders_count;
@@ -242,7 +242,14 @@ void Input::printFloatValueToStr(float temp, char *valstr) {
 
 void Input::contactPoll() {
     boolean currentInputState;
-    uint8_t inputPinMode, inputOnLevel;
+#if defined(ARDUINO_ARCH_STM32F1)
+     WiringPinMode inputPinMode;
+#endif
+#if defined(__SAM3X8E__)||defined(__AVR__)||defined(ESP8266)
+     uint32_t inputPinMode;
+#endif
+
+     uint8_t inputOnLevel;
     if (inType & IN_ACTIVE_HIGH) {
         inputOnLevel = HIGH;
         inputPinMode = INPUT;
@@ -302,62 +309,32 @@ void Input::onContactChanged(int val)
   }
 }
 
+void Input::onEncoderChanged(int i) {
+#if defined(__SAM3X8E__)
+    encoder_value[encoder_irq_map[i]]++;
+#endif
+
+#if defined(__AVR__)
+    encoder_value[i]++;
+#endif
+}
+
 void Input::onEncoderChanged0() {
-#if defined(__SAM3X8E__)
-    encoder_value[encoder_irq_map[0]]++;
-#endif
-
-#if defined(__AVR__)
-    encoder_value[0]++;
-#endif
+    onEncoderChanged(0);
 }
-
 void Input::onEncoderChanged1() {
-#if defined(__SAM3X8E__)
-    encoder_value[encoder_irq_map[1]]++;
-#endif
-
-#if defined(__AVR__)
-    encoder_value[1]++;
-#endif
+    onEncoderChanged(1);
 }
-
 void Input::onEncoderChanged2() {
-#if defined(__SAM3X8E__)
-    encoder_value[encoder_irq_map[2]]++;
-#endif
-
-#if defined(__AVR__)
-    encoder_value[2]++;
-#endif
+    onEncoderChanged(2);
 }
-
 void Input::onEncoderChanged3() {
-#if defined(__SAM3X8E__)
-    encoder_value[encoder_irq_map[3]]++;
-#endif
-
-#if defined(__AVR__)
-    encoder_value[3]++;
-#endif
+    onEncoderChanged(3);
 }
-
 void Input::onEncoderChanged4() {
-#if defined(__SAM3X8E__)
-    encoder_value[encoder_irq_map[4]]++;
-#endif
-
-#if defined(__AVR__)
-    encoder_value[4]++;
-#endif
+    onEncoderChanged(4);
 }
-
 void Input::onEncoderChanged5() {
-#if defined(__SAM3X8E__)
-    encoder_value[encoder_irq_map[5]]++;
-#endif
-
-#if defined(__AVR__)
-    encoder_value[5]++;
-#endif
+    onEncoderChanged(5);
 }
+

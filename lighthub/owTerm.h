@@ -50,7 +50,10 @@ e-mail    anklimov@gmail.com
 #define t_max 20 //Maximum number of 1w devices
 #define TEMPERATURE_PRECISION 9
 
+#ifndef ARDUINO_ARCH_STM32F1
 #include <DS2482_OneWire.h>
+#endif
+
 #include <DallasTemperature.h>
 #include "aJSON.h"
 

@@ -94,6 +94,7 @@ public:
 
     int poll();
 
+    static void inline onEncoderChanged(int i);
     static void onEncoderChanged0();
     static void onEncoderChanged1();
     static void onEncoderChanged2();
@@ -115,4 +116,5 @@ protected:
     void encoderPoll();
 
     void attachInterruptPinIrq(int realPin, int irq);
+
 };
