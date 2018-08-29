@@ -57,6 +57,10 @@ e-mail    anklimov@gmail.com
 //"pin1": { "T":"0", "emit":"/light1", item:"light1", "scmd": "ON", repcmd:"INCREASE"}
 //"pin2": { "T":"0", "emit":"/light1", item:"light1", "scmd": "OFF", repcmd:"INCREASE"}
 
+//Button Switch
+//"38":{"T":2, "item":"lamp1", "emit":"/myhome/in/lamp1"},
+//"40":{"T":2, "item":"led1", "emit":"/myhome/in/led1","scmd": "OFF", "rcmd": "ON"}
+
 extern aJsonObject *inputs; 
  
 
