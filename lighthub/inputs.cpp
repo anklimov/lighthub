@@ -23,30 +23,35 @@ e-mail    anklimov@gmail.com
 #include <PubSubClient.h>
 
 #ifndef DHT_DISABLE
+#if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
+#include <DHTesp.h>
+#else
 #include "DHT.h"
+#endif
 #endif
 
 extern PubSubClient mqttClient;
-//DHT dht();
+
+static volatile unsigned long nextPollMillisValue[5];
+static volatile int nextPollMillisPin[5] = {0,0,0,0,0};
 
 #if defined(__AVR__)
-static volatile long encoder_value[6];
+static volatile long counter_value[6];
 #endif
 
 #if defined(ESP8266)
-static volatile long encoder_value[6];
+static volatile long counter_value[6];
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32)
-static volatile long encoder_value[6];
+static volatile long counter_value[6];
 #endif
 
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1)
-static short encoder_irq_map[54];
-    static long encoder_value[54];
-    static int encoders_count;
+static short counter_irq_map[54];
+    static long counter_value[54];
+    static int counters_count;
 #endif
-
 Input::Input(char * name) //Constructor
 {
   if (name)
@@ -57,13 +62,13 @@ Input::Input(char * name) //Constructor
 }
 
 
-Input::Input(int pin) //Constructor
+Input::Input(int pin)
 {
  // TODO
 }
 
 
- Input::Input(aJsonObject * obj) //Constructor
+ Input::Input(aJsonObject * obj)
 {
   inputObj= obj;
   Parse();
@@ -86,9 +91,9 @@ void Input::Parse()
         aJsonObject *s;
 
         s = aJson.getObjectItem(inputObj, "T");
-        if (s) inType = s->valueint;
+        if (s) inType = static_cast<uint8_t>(s->valueint);
 
-        pin = atoi(inputObj->name);
+        pin = static_cast<uint8_t>(atoi(inputObj->name));
 
         s = aJson.getObjectItem(inputObj, "S");
         if (!s) {
@@ -108,18 +113,17 @@ int Input::poll() {
     if (!isValid()) return -1;
     if (inType & IN_DHT22)
         dht22Poll();
-else if(inType & IN_ENCODER)
-    encoderPoll();
-    /* example
-    else if (inType & IN_ANALOG)
-        analogPoll(); */
+    else if (inType & IN_COUNTER)
+        counterPoll();
+    else if (inType & IN_UPTIME)
+        uptimePoll();
     else
         contactPoll();
     return 0;
 }
 
-void Input::encoderPoll() {
-    if (store->nextPollMillis > millis())
+void Input::counterPoll() {
+    if(nextPollTime()>millis())
         return;
     if (store->logicState == 0) {
 #if defined(__AVR__)
@@ -131,31 +135,31 @@ void Input::encoderPoll() {
         } else {
             Serial.print(F("IRQ:"));
             Serial.print(pin);
-            Serial.print(F(" Encoder type. INCORRECT Interrupt number!!!"));
+            Serial.print(F(" Counter type. INCORRECT Interrupt number!!!"));
             return;
         }
 #endif
 
 #if defined(__SAM3X8E__)
-        attachInterruptPinIrq(pin,encoders_count);
-        encoder_irq_map[encoders_count]=pin;
-        encoders_count++;
+        attachInterruptPinIrq(pin,counters_count);
+        counter_irq_map[counters_count]=pin;
+        counters_count++;
 #endif
         store->logicState = 1;
         return;
     }
-    long encoderValue = encoder_value[pin];
-    Serial.print(F("IN:"));Serial.print(pin);Serial.print(F(" Encoder type. val="));Serial.print(encoderValue);
+    long counterValue = counter_value[pin];
+    Serial.print(F("IN:"));Serial.print(pin);Serial.print(F(" Counter type. val="));Serial.print(counterValue);
 
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     if (emit) {
         char valstr[10];
         char addrstr[100] = "";
         strcat(addrstr, emit->valuestring);
-        sprintf(valstr, "%d", encoderValue);
+        sprintf(valstr, "%d", counterValue);
         mqttClient.publish(addrstr, valstr);
-        store->nextPollMillis = millis() + DHT_POLL_DELAY_DEFAULT;
-        Serial.print(F(" NextPollMillis="));Serial.println(store->nextPollMillis);
+        setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
+        Serial.print(F(" NextPollMillis="));Serial.println(nextPollTime());
     }
     else
         Serial.print(F(" No emit data!"));
@@ -172,22 +176,22 @@ void Input::attachInterruptPinIrq(int realPin, int irq) {
 #endif
     switch(irq){
             case 0:
-                attachInterrupt(real_irq, onEncoderChanged0, RISING);
+                attachInterrupt(real_irq, onCounterChanged0, RISING);
                 break;
             case 1:
-                attachInterrupt(real_irq, onEncoderChanged1, RISING);
+                attachInterrupt(real_irq, onCounterChanged1, RISING);
                 break;
             case 2:
-                attachInterrupt(real_irq, onEncoderChanged2, RISING);
+                attachInterrupt(real_irq, onCounterChanged2, RISING);
                 break;
             case 3:
-                attachInterrupt(real_irq, onEncoderChanged3, RISING);
+                attachInterrupt(real_irq, onCounterChanged3, RISING);
                 break;
             case 4:
-                attachInterrupt(real_irq, onEncoderChanged4, RISING);
+                attachInterrupt(real_irq, onCounterChanged4, RISING);
                 break;
             case 5:
-                attachInterrupt(real_irq, onEncoderChanged5, RISING);
+                attachInterrupt(real_irq, onCounterChanged5, RISING);
                 break;
         default:
             Serial.print(F("Incorrect irq:"));Serial.println(irq);
@@ -197,14 +201,27 @@ void Input::attachInterruptPinIrq(int realPin, int irq) {
 
 void Input::dht22Poll() {
 #ifndef DHT_DISABLE
-    if (store->nextPollMillis > millis())
+    if(nextPollTime()>millis())
         return;
+#if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
+    DHTesp dhtSensor;
+    dhtSensor.setup(pin, DHTesp::DHT22);
+    TempAndHumidity dhtSensorData = dhtSensor.getTempAndHumidity();
+    float temp = dhtSensorData.temperature;
+    float humidity = dhtSensorData.humidity;
+#else
     DHT dht(pin, DHT22);
     float temp = dht.readTemperature();
     float humidity = dht.readHumidity();
+#endif
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
-    Serial.print(F("IN:"));Serial.print(pin);Serial.print(F(" DHT22 type. T="));Serial.print(temp);
-    Serial.print(F("°C H="));Serial.print(humidity);Serial.print(F("%"));
+    Serial.print(F("IN:"));
+    Serial.print(pin);
+    Serial.print(F(" DHT22 type. T="));
+    Serial.print(temp);
+    Serial.print(F("°C H="));
+    Serial.print(humidity);
+    Serial.print(F("%"));
     if (emit && temp && humidity && temp == temp && humidity == humidity) {
         char valstr[10];
         char addrstr[100] = "";
@@ -215,28 +232,53 @@ void Input::dht22Poll() {
         addrstr[strlen(addrstr) - 1] = 'H';
         printFloatValueToStr(humidity, valstr);
         mqttClient.publish(addrstr, valstr);
-        store->nextPollMillis = millis() + DHT_POLL_DELAY_DEFAULT;
-        Serial.print(" NextPollMillis=");Serial.println(store->nextPollMillis);
-    }
-    else
-        store->nextPollMillis = millis() + DHT_POLL_DELAY_DEFAULT/3;
+        setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
+        Serial.print(" NextPollMillis=");
+        Serial.println(nextPollTime());
+    } else
+        setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT / 3);
 #endif
 }
 
-void Input::printFloatValueToStr(float temp, char *valstr) {
-    #if defined(ESP8266)
-    sprintf(valstr, "%2.1f", temp);
+unsigned long Input::nextPollTime() const {
+    for(int i=0;i<5;i++){
+        if(nextPollMillisPin[i]==pin)
+            return nextPollMillisValue[i];
+        else if(nextPollMillisPin[i]==0) {
+            nextPollMillisPin[i]=pin;
+            return nextPollMillisValue[i] = 0;
+        }
+    }
+    return 0;
+}
+
+void Input::setNextPollTime(unsigned long pollTime) {
+    for (int i = 0; i < 5; i++) {
+        if (nextPollMillisPin[i] == pin) {
+            nextPollMillisValue[i] = pollTime;
+            return;
+        } else if (nextPollMillisPin[i] == 0) {
+            nextPollMillisPin[i] == pin;
+            nextPollMillisValue[i] = pollTime;
+            return;
+        }
+    }
+}
+
+void Input::printFloatValueToStr(float value, char *valstr) {
+    #if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
+    sprintf(valstr, "%2.1f", value);
     #endif
     #if defined(__AVR__)
-    sprintf(valstr, "%d", (int)temp);
-    int fractional = 10.0*((float)abs(temp)-(float)abs((int)temp));
+    sprintf(valstr, "%d", (int)value);
+    int fractional = 10.0*((float)abs(value)-(float)abs((int)value));
     int val_len =strlen(valstr);
     valstr[val_len]='.';
     valstr[val_len+1]='0'+fractional;
     valstr[val_len+2]='\0';
     #endif
     #if defined(__SAM3X8E__)
-    sprintf(valstr, "%2.1f", temp);
+    sprintf(valstr, "%2.1f",value);
     #endif
 }
 
@@ -245,7 +287,7 @@ void Input::contactPoll() {
 #if defined(ARDUINO_ARCH_STM32F1)
      WiringPinMode inputPinMode;
 #endif
-#if defined(__SAM3X8E__)||defined(__AVR__)||defined(ESP8266)
+#if defined(__SAM3X8E__)||defined(__AVR__)||defined(ESP8266)||defined(ARDUINO_ARCH_ESP32)
      uint32_t inputPinMode;
 #endif
 
@@ -269,6 +311,19 @@ void Input::contactPoll() {
         }
     } else // no change
         store->bounce = SAME_STATE_ATTEMPTS;
+}
+
+void Input::uptimePoll() {
+    if(nextPollTime()>millis())
+        return;
+    aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
+    if (emit) {
+        char valstr[11];
+//        printUlongValueToStr(valstr,millis());
+        printUlongValueToStr(valstr,millis());
+        mqttClient.publish(emit->valuestring, valstr);
+    }
+    setNextPollTime(millis() +UPTIME_POLL_DELAY_DEFAULT);
 }
 
 void Input::onContactChanged(int val)
@@ -309,32 +364,47 @@ void Input::onContactChanged(int val)
   }
 }
 
-void Input::onEncoderChanged(int i) {
+void Input::onCounterChanged(int i) {
 #if defined(__SAM3X8E__)
-    encoder_value[encoder_irq_map[i]]++;
+    counter_value[counter_irq_map[i]]++;
 #endif
 
 #if defined(__AVR__)
-    encoder_value[i]++;
+    counter_value[i]++;
 #endif
 }
 
-void Input::onEncoderChanged0() {
-    onEncoderChanged(0);
+void Input::onCounterChanged0() {
+    onCounterChanged(0);
 }
-void Input::onEncoderChanged1() {
-    onEncoderChanged(1);
+void Input::onCounterChanged1() {
+    onCounterChanged(1);
 }
-void Input::onEncoderChanged2() {
-    onEncoderChanged(2);
+void Input::onCounterChanged2() {
+    onCounterChanged(2);
 }
-void Input::onEncoderChanged3() {
-    onEncoderChanged(3);
+void Input::onCounterChanged3() {
+    onCounterChanged(3);
 }
-void Input::onEncoderChanged4() {
-    onEncoderChanged(4);
+void Input::onCounterChanged4() {
+    onCounterChanged(4);
 }
-void Input::onEncoderChanged5() {
-    onEncoderChanged(5);
+void Input::onCounterChanged5() {
+    onCounterChanged(5);
+}
+
+void Input::printUlongValueToStr(char *valstr, unsigned long value) {
+    char buf[11];
+    int i=0;
+    for(;value>0;i++){
+        unsigned long mod = value - ((unsigned long)(value/10))*10;
+        buf[i]=mod+48;
+        value = (unsigned long)(value/10);
+    }
+
+    for(int n=0;n<=i;n++){
+        valstr[n]=buf[i-n-1];
+    }
+    valstr[i]='\0';
 }
 

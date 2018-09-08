@@ -109,7 +109,7 @@
 
 #ifdef ARDUINO_ARCH_ESP32
 #include <SPI.h>
-#include <Ethernet3.h>
+//#include <Ethernet3.h>
 #endif
 
 

@@ -88,6 +88,7 @@ WiFiClient ethClient;
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <EEPROM.h>
+#include "Ethernet3.h"
 WiFiClient ethClient;
 #endif
 
@@ -105,6 +106,14 @@ WiFiClient ethClient;
 EthernetClient ethClient;
 #endif
 
+#ifndef SYSLOG_DISABLE
+#include <EthernetUdp.h>
+#include <Syslog.h>
+EthernetUDP udpSyslogClient;
+Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_IETF);
+unsigned long nextSyslogPingTime;
+#endif
+
 lan_status lanStatus = INITIAL_STATE;
 
 const char outprefix[] PROGMEM = OUTTOPIC;
@@ -120,6 +129,7 @@ aJsonObject *mqttArr = NULL;
 aJsonObject *modbusArr = NULL;
 aJsonObject *owArr = NULL;
 aJsonObject *dmxArr = NULL;
+aJsonObject *udpSyslogArr = NULL;
 
 unsigned long nextPollingCheck = 0;
 unsigned long nextInputCheck = 0;
@@ -158,7 +168,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     debugSerial.print(topic);
     debugSerial.print(F("] "));
     if (!payload) return;
-      payload[length] = 0;
+    payload[length] = 0;
 
     int fr = freeRam();
     if (fr < 250) {
@@ -172,8 +182,8 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     debugSerial.println();
 
     if(!strcmp(topic,CMDTOPIC)) {
-      cmd_parse((char *)payload);
-      return;
+        cmd_parse((char *)payload);
+        return;
     }
 
     boolean retaining = (lanStatus == RETAINING_COLLECTING);
@@ -191,17 +201,17 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         return;
     }
     char subtopic[MQTT_SUBJECT_LENGTH] = "";
-  //  int cmd = 0;
+    //  int cmd = 0;
     //cmd = txt2cmd((char *) payload);
     char *t;
     if (t = strrchr(topic, '/'))
         strncpy(subtopic, t + 1, MQTT_SUBJECT_LENGTH - 1);
-        Item item(subtopic);
-        if (item.isValid()) {
-            if (item.itemType == CH_GROUP && retaining)
-                return; //Do not restore group channels - they consist not relevant data
+    Item item(subtopic);
+    if (item.isValid()) {
+        if (item.itemType == CH_GROUP && retaining)
+            return; //Do not restore group channels - they consist not relevant data
         item.Ctrl((char *)payload, !retaining);
-        } //valid item
+    } //valid item
 }
 
 void printIPAddress(IPAddress ipAddress) {
@@ -230,7 +240,7 @@ lan_status lanLoop() {
 
     #ifdef NOETHER
     lanStatus=DO_NOTHING;//-14;
-#endif
+    #endif
 
     switch (lanStatus) {
         case INITIAL_STATE:
@@ -347,60 +357,77 @@ void ip_ready_config_loaded_connecting_to_broker() {
     char *user = &empty;
     char passwordBuf[16] = "";
     char *password = passwordBuf;
-
+#ifndef SYSLOG_DISABLE
+    debugSerial.println("debugSerial:");
+    delay(100);
+    char *syslogServer = aJson.getArrayItem(udpSyslogArr, 0)->valuestring;
+    int syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
+    char *syslogDeviceHostname = aJson.getArrayItem(udpSyslogArr, 2)->valuestring;
+    char *syslogAppname = aJson.getArrayItem(udpSyslogArr, 3)->valuestring;
+    debugSerial.println("debugSerial:");
+    debugSerial.println(syslogServer);
+    debugSerial.println(syslogPort);
+    debugSerial.println(syslogDeviceHostname);
+    debugSerial.println(syslogAppname);
+    udpSyslog.server(syslogServer, syslogPort);
+    udpSyslog.deviceHostname(syslogDeviceHostname);
+    udpSyslog.appName(syslogAppname);
+    udpSyslog.defaultPriority(LOG_KERN);
+    udpSyslog.log(LOG_INFO, "UDP Syslog initialized!");
+#endif
 
     if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
-                    char *client_id = aJson.getArrayItem(mqttArr, 0)->valuestring;
-                    char *servername = aJson.getArrayItem(mqttArr, 1)->valuestring;
-                    if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
-                    if (n >= 4) user = aJson.getArrayItem(mqttArr, 3)->valuestring;
-                    if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5)) {
-                        password = aJson.getArrayItem(mqttArr, 4)->valuestring;
-                        debugSerial.println(F("Using MQTT password from config"));
-                    }
+        char *client_id = aJson.getArrayItem(mqttArr, 0)->valuestring;
+        char *servername = aJson.getArrayItem(mqttArr, 1)->valuestring;
+        if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
+        if (n >= 4) user = aJson.getArrayItem(mqttArr, 3)->valuestring;
+        if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5)) {
+            password = aJson.getArrayItem(mqttArr, 4)->valuestring;
+            debugSerial.println(F("Using MQTT password from config"));
+        }
 
-                    mqttClient.setServer(servername, port);
-                    mqttClient.setCallback(mqttCallback);
+        mqttClient.setServer(servername, port);
+        mqttClient.setCallback(mqttCallback);
 
-                    debugSerial.print(F("Attempting MQTT connection to "));
-                    debugSerial.print(servername);
-                    debugSerial.print(F(":"));
-                    debugSerial.print(port);
-                    debugSerial.print(F(" user:"));
-                    debugSerial.print(user);
-                    debugSerial.print(F(" ..."));
+        debugSerial.print(F("Attempting MQTT connection to "));
+        debugSerial.print(servername);
+        debugSerial.print(F(":"));
+        debugSerial.print(port);
+        debugSerial.print(F(" user:"));
+        debugSerial.print(user);
+        debugSerial.print(F(" ..."));
 
-                    wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
-                    if (mqttClient.connect(client_id, user, password)) {
-                        mqttErrorRate = 0;
-                        debugSerial.print(F("connected as "));
-                        debugSerial.println(client_id);
-                        wdt_en();
-                        configOk = true;
-                        // ... Temporary subscribe to status topic
-                        char buf[MQTT_TOPIC_LENGTH];
+        wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
+        if (mqttClient.connect(client_id, user, password)) {
+            mqttErrorRate = 0;
+            debugSerial.print(F("connected as "));
+            debugSerial.println(client_id);
+            wdt_en();
+            configOk = true;
+            // ... Temporary subscribe to status topic
+            char buf[MQTT_TOPIC_LENGTH];
 
-                        strncpy_P(buf, outprefix, sizeof(buf));
-                        strncat(buf, "#", sizeof(buf));
-                        mqttClient.subscribe(buf);
+            strncpy_P(buf, outprefix, sizeof(buf));
+            strncat(buf, "#", sizeof(buf));
+            mqttClient.subscribe(buf);
 
-                        //Subscribing for command topics
-                        strncpy_P(buf, inprefix, sizeof(buf));
-                        strncat(buf, "#", sizeof(buf));
-                        mqttClient.subscribe(buf);
+            //Subscribing for command topics
+            strncpy_P(buf, inprefix, sizeof(buf));
+            strncat(buf, "#", sizeof(buf));
+            mqttClient.subscribe(buf);
 
-                        //restoreState();
-                        // if (_once) {DMXput(); _once=0;}
-                        lanStatus = RETAINING_COLLECTING;//4;
-                        nextLanCheckTime = millis() + 5000;
-                        debugSerial.println(F("Awaiting for retained topics"));
-                    } else {
-                        debugSerial.print(F("failed, rc="));
-                        debugSerial.print(mqttClient.state());
-                        debugSerial.println(F(" try again in 5 seconds"));
-                        nextLanCheckTime = millis() + 5000;
+            //restoreState();
+            // if (_once) {DMXput(); _once=0;}
+            lanStatus = RETAINING_COLLECTING;//4;
+            nextLanCheckTime = millis() + 5000;
+            debugSerial.println(F("Awaiting for retained topics"));
+        } else {
+            debugSerial.print(F("failed, rc="));
+            debugSerial.print(mqttClient.state());
+            debugSerial.println(F(" try again in 5 seconds"));
+            nextLanCheckTime = millis() + 5000;
 #ifdef RESTART_LAN_ON_MQTT_ERRORS
-                        mqttErrorRate++;
+            mqttErrorRate++;
                         if(mqttErrorRate>50){
                             debugSerial.print(F("Too many MQTT connection errors. Restart LAN"));
                             mqttErrorRate=0;
@@ -412,9 +439,9 @@ void ip_ready_config_loaded_connecting_to_broker() {
                         }
 #endif
 
-                        lanStatus = RECONNECT;//12;
-                    }
-                }
+            lanStatus = RECONNECT;//12;
+        }
+    }
 }
 
 void onInitialStateInitLAN() {
@@ -484,7 +511,7 @@ void onInitialStateInitLAN() {
             } else Ethernet.begin(mac, ip, dns);
         } else Ethernet.begin(mac, ip);
     }
-        else {
+    else {
         debugSerial.println("No IP data found in flash");
         wdt_dis();
 #if defined(__AVR__) || defined(__SAM3X8E__)
@@ -510,7 +537,7 @@ void onInitialStateInitLAN() {
         printIPAddress(Ethernet.localIP());
         lanStatus = HAVE_IP_ADDRESS;//1;
     }
-#endif
+    #endif
 }
 
 #ifdef ARDUINO_ARCH_STM32F1
@@ -587,17 +614,20 @@ void cmdFunctionHelp(int arg_cnt, char **args)
 //(char* tokens)
 {
     printFirmwareVersionAndBuildOptions();
+    #ifndef SYSLOG_DISABLE
+//    udpSyslog.logf(LOG_INFO, "free RAM: %d",freeRam());
+    #endif
     debugSerial.print(F(" free RAM: "));debugSerial.print(freeRam());
     debugSerial.println(F(" Use the commands: 'help' - this text\n"
-                             "'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
-                             "'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"
-                             "'save' - save config in NVRAM\n"
-                             "'get' [config addr]' - get config from pre-configured URL and store addr\n"
-                             "'load' - load config from NVRAM\n"
-                             "'pwd' - define MQTT password\n"
-                             "'kill' - test watchdog\n"
-                             "'clear' - clear EEPROM\n"
-                             "'reboot' - reboot controller"));
+                          "'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
+                          "'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"
+                          "'save' - save config in NVRAM\n"
+                          "'get' [config addr]' - get config from pre-configured URL and store addr\n"
+                          "'load' - load config from NVRAM\n"
+                          "'pwd' - define MQTT password\n"
+                          "'kill' - test watchdog\n"
+                          "'clear' - clear EEPROM\n"
+                          "'reboot' - reboot controller"));
 }
 
 void cmdFunctionKill(int arg_cnt, char **args) {
@@ -613,7 +643,7 @@ void cmdFunctionReboot(int arg_cnt, char **args) {
 }
 
 void applyConfig() {
-  if (!root) return;
+    if (!root) return;
 
 #ifdef _dmxin
     int itemsCount;
@@ -659,37 +689,38 @@ void applyConfig() {
     items = aJson.getObjectItem(root, "items");
 
 // Digital output related Items initialization
-pollingItem=NULL;
-if (items) {
-aJsonObject * item = items->child;
-while (items && item)
-  if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
-    Item it(item);
-    if (it.isValid()) {
-    int pin=it.getArg();
-    int cmd = it.getCmd();
-    switch (it.itemType) {
-          case CH_THERMO:
-          if (cmd<1) it.setCmd(CMD_OFF);
-          case CH_RELAY:
-            {
-            int k;
-            pinMode(pin, OUTPUT);
-            digitalWrite(pin, k = ((cmd == CMD_ON) ? HIGH : LOW));
-            debugSerial.print(F("Pin:"));
-            debugSerial.print(pin);
-            debugSerial.print(F("="));
-            debugSerial.println(k);
-            }
-            break;
-          } //switch
-       } //isValid
-          item = item->next;
-     }  //if
-    pollingItem = items->child;
-}
+    pollingItem=NULL;
+    if (items) {
+        aJsonObject * item = items->child;
+        while (items && item)
+            if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
+                Item it(item);
+                if (it.isValid()) {
+                    int pin=it.getArg();
+                    int cmd = it.getCmd();
+                    switch (it.itemType) {
+                        case CH_THERMO:
+                            if (cmd<1) it.setCmd(CMD_OFF);
+                        case CH_RELAY:
+                        {
+                            int k;
+                            pinMode(pin, OUTPUT);
+                            digitalWrite(pin, k = ((cmd == CMD_ON) ? HIGH : LOW));
+                            debugSerial.print(F("Pin:"));
+                            debugSerial.print(pin);
+                            debugSerial.print(F("="));
+                            debugSerial.println(k);
+                        }
+                            break;
+                    } //switch
+                } //isValid
+                item = item->next;
+            }  //if
+        pollingItem = items->child;
+    }
     inputs = aJson.getObjectItem(root, "in");
     mqttArr = aJson.getObjectItem(root, "mqtt");
+    udpSyslogArr = aJson.getObjectItem(root, "syslog");
     printConfigSummary();
 }
 
@@ -705,6 +736,8 @@ void printConfigSummary() {
     printBool(mqttArr);
     debugSerial.print(F("1-wire "));
     printBool(owArr);
+    debugSerial.print(F("udp syslog "));
+    printBool(udpSyslogArr);
 }
 
 void cmdFunctionLoad(int arg_cnt, char **args) {
@@ -843,11 +876,11 @@ void cmdFunctionClearEEPROM(int arg_cnt, char **args){
 void cmdFunctionPwd(int arg_cnt, char **args)
 //(char* tokens)
 { char empty[]="";
-  if (arg_cnt)
-      saveFlash(OFFSET_MQTT_PWD,args[1]);
-  else saveFlash(OFFSET_MQTT_PWD,empty);
-  debugSerial.println(F("Password updated"));
-    }
+    if (arg_cnt)
+        saveFlash(OFFSET_MQTT_PWD,args[1]);
+    else saveFlash(OFFSET_MQTT_PWD,empty);
+    debugSerial.println(F("Password updated"));
+}
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
 
@@ -879,30 +912,30 @@ void printBool(bool arg) { (arg) ? debugSerial.println(F("on")) : debugSerial.pr
 
 
 void saveFlash(short n, char *str) {
-  short i;
-  short len=strlen(str);
-  if (len>31) len=31;
-  for(int i=0;i<len;i++) EEPROM.write(n+i,str[i]);
-  EEPROM.write(n+len,0);
+    short i;
+    short len=strlen(str);
+    if (len>31) len=31;
+    for(int i=0;i<len;i++) EEPROM.write(n+i,str[i]);
+    EEPROM.write(n+len,0);
 }
 
 int loadFlash(short n, char *str, short l) {
-short i;
-uint8_t ch = EEPROM.read(n);
-if (!ch || (ch == 0xff)) return 0;
-  for (i=0;i<l-1 && (str[i] = EEPROM.read(n++));i++);
-  str[i]=0;
-return 1;
+    short i;
+    uint8_t ch = EEPROM.read(n);
+    if (!ch || (ch == 0xff)) return 0;
+    for (i=0;i<l-1 && (str[i] = EEPROM.read(n++));i++);
+    str[i]=0;
+    return 1;
 }
 
 void saveFlash(short n, IPAddress& ip) {
-  for(int i=0;i<4;i++) EEPROM.write(n++,ip[i]);
+    for(int i=0;i<4;i++) EEPROM.write(n++,ip[i]);
 }
 
 int ipLoadFromFlash(short n, IPAddress &ip) {
-  for(int i=0;i<4;i++) ip[i]=EEPROM.read(n++);
-  if (ip[0] && (ip[0] != 0xff)) return 1;
-return 0;
+    for(int i=0;i<4;i++) ip[i]=EEPROM.read(n++);
+    if (ip[0] && (ip[0] != 0xff)) return 1;
+    return 0;
 }
 
 lan_status getConfig(int arg_cnt, char **args)
@@ -915,7 +948,7 @@ lan_status getConfig(int arg_cnt, char **args)
         strncpy(configServer, args[1], sizeof(configServer) - 1);
         saveFlash(OFFSET_CONFIGSERVER, configServer);
     } else if (!loadFlash(OFFSET_CONFIGSERVER, configServer))
-              strncpy_P(configServer,configserver,sizeof(configServer));
+        strncpy_P(configServer,configserver,sizeof(configServer));
 
     snprintf(URI, sizeof(URI), "/%02x-%02x-%02x-%02x-%02x-%02x.config.json", mac[0], mac[1], mac[2], mac[3], mac[4],
              mac[5]);
@@ -1059,7 +1092,7 @@ lan_status getConfig(int arg_cnt, char **args)
 
 void preTransmission() {
 #ifdef CONTROLLINO
-// set DE and RE on HIGH
+    // set DE and RE on HIGH
     PORTJ |= B01100000;
 #else
     digitalWrite(TXEnablePin, 1);
@@ -1086,7 +1119,7 @@ void setup_main() {
     loadConfigFromEEPROM(0, NULL);
 
 #ifdef _modbus
-#ifdef CONTROLLINO
+    #ifdef CONTROLLINO
     //set PORTJ pin 5,6 direction (RE,DE)
     DDRJ |= B01100000;
     //set RE,DE on LOW
@@ -1129,6 +1162,8 @@ void setup_main() {
 void printFirmwareVersionAndBuildOptions() {
     debugSerial.print(F("\nLazyhome.ru LightHub controller "));
     debugSerial.println(F(QUOTE(PIO_SRC_REV)));
+    debugSerial.print(F("C++ version:"));
+    debugSerial.println(F(QUOTE(__cplusplus)));
 #ifdef CONTROLLINO
     debugSerial.println(F("(+)CONTROLLINO"));
 #endif
@@ -1254,7 +1289,7 @@ void loop_main() {
 #endif
 
 #ifdef _dmxin
-//    unsigned long lastpacket = DMXSerial.noDataSince();
+    //    unsigned long lastpacket = DMXSerial.noDataSince();
     DMXCheck();
 #endif
     // if (lastpacket && (lastpacket%10==0)) debugSerial.println(lastpacket);
@@ -1274,6 +1309,12 @@ void loop_main() {
 #if defined (_espdmx)
     dmxout.update();
 #endif
+
+#ifndef SYSLOG_DISABLE
+//        debugSerial.print(F("#"));
+//        udpSyslog.log(LOG_INFO, "Ping syslog:");
+#endif
+
 }
 
 void owIdle(void) {
@@ -1296,10 +1337,10 @@ void owIdle(void) {
 #endif
 }
 void ethernetIdle(void){
-  wdt_res();
-  inputLoop();
+    wdt_res();
+    inputLoop();
 //  debugSerial.print(".");
-  };
+};
 
 void modbusIdle(void) {
     wdt_res();
@@ -1308,7 +1349,7 @@ void modbusIdle(void) {
 #ifdef _artnet
         if (artnet) artnet->read();
 #endif
-     inputLoop();
+        inputLoop();
     }
 
 
