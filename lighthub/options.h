@@ -50,7 +50,7 @@
 #endif
 
 #ifndef CUSTOM_FIRMWARE_MAC
-#define DEFAULT_FIRMWARE_MAC {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 01}
+#define DEFAULT_FIRMWARE_MAC {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xFF}
 #endif
 
 #ifndef MY_CONFIG_SERVER
