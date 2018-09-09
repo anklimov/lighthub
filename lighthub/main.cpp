@@ -360,20 +360,22 @@ void ip_ready_config_loaded_connecting_to_broker() {
 #ifndef SYSLOG_DISABLE
     debugSerial.println("debugSerial:");
     delay(100);
-    char *syslogServer = aJson.getArrayItem(udpSyslogArr, 0)->valuestring;
-    int syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
-    char *syslogDeviceHostname = aJson.getArrayItem(udpSyslogArr, 2)->valuestring;
-    char *syslogAppname = aJson.getArrayItem(udpSyslogArr, 3)->valuestring;
-    debugSerial.println("debugSerial:");
-    debugSerial.println(syslogServer);
-    debugSerial.println(syslogPort);
-    debugSerial.println(syslogDeviceHostname);
-    debugSerial.println(syslogAppname);
-    udpSyslog.server(syslogServer, syslogPort);
-    udpSyslog.deviceHostname(syslogDeviceHostname);
-    udpSyslog.appName(syslogAppname);
-    udpSyslog.defaultPriority(LOG_KERN);
-    udpSyslog.log(LOG_INFO, "UDP Syslog initialized!");
+    if (udpSyslogArr && aJson.getArraySize(udpSyslogArr)) {
+      char *syslogServer = aJson.getArrayItem(udpSyslogArr, 0)->valuestring;
+      int syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
+      char *syslogDeviceHostname = aJson.getArrayItem(udpSyslogArr, 2)->valuestring;
+      char *syslogAppname = aJson.getArrayItem(udpSyslogArr, 3)->valuestring;
+      debugSerial.println("debugSerial:");
+      debugSerial.println(syslogServer);
+      debugSerial.println(syslogPort);
+      debugSerial.println(syslogDeviceHostname);
+      debugSerial.println(syslogAppname);
+      udpSyslog.server(syslogServer, syslogPort);
+      udpSyslog.deviceHostname(syslogDeviceHostname);
+      udpSyslog.appName(syslogAppname);
+      udpSyslog.defaultPriority(LOG_KERN);
+      udpSyslog.log(LOG_INFO, "UDP Syslog initialized!");
+    }  
 #endif
 
     if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
