@@ -41,6 +41,7 @@ unsigned long owTimer = 0;
 owChangedType owChanged;
 
 int owUpdate() {
+#ifndef OWIRE_DISABLE
     unsigned long finish = millis() + OW_UPDATE_INTERVAL;
     short sr;
 
@@ -80,11 +81,12 @@ int owUpdate() {
 
     Serial.print(F("1-wire count: "));
     Serial.println(t_count);
-
+#endif
 }
 
 
 int owSetup(owChangedType owCh) {
+#ifndef OWIRE_DISABLE
     //// todo - move memory allocation to here
     if (net) return true;    // Already initialized
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
@@ -138,6 +140,7 @@ net = new OneWire (USE_1W_PIN);
 
     delay(500);
 
+#endif
 }
 
 
@@ -182,6 +185,7 @@ int owFind(DeviceAddress addr) {
 }
 
 void owAdd(DeviceAddress addr) {
+#ifndef OWIRE_DISABLE
   if (t_count>=t_max) return;
     wstat[t_count] = SW_FIND; //Newly detected
     memcpy(term[t_count], addr, 8);
@@ -198,4 +202,5 @@ void owAdd(DeviceAddress addr) {
         //                sensors.requestTemperaturesByAddress(term[t_count]);
     }
     t_count++;
+#endif
 }

@@ -27,6 +27,8 @@ e-mail    anklimov@gmail.com
 #define IN_PUSH_ON       0      // PUSH - ON, Release - OFF (ovverrided by pcmd/rcmd) - DEFAULT
 #define IN_PUSH_TOGGLE   1      // Every physicall push toggle logical switch  on/off
 #define IN_DHT22         4
+#define IN_COUNTER       8
+#define IN_UPTIME       16
 
 #define SAME_STATE_ATTEMPTS 3
 
@@ -63,8 +65,7 @@ e-mail    anklimov@gmail.com
 extern aJsonObject *inputs;
 
 
-typedef union
-{
+typedef union {
     long int aslong;
     struct {
         int8_t reserve;
@@ -72,32 +73,56 @@ typedef union
         int8_t bounce;
         int8_t currentValue;
     };
-    unsigned long nextPollMillis;
+
 } inStore;
 
-class Input
-{
-  public:
-  aJsonObject *inputObj;
-  uint8_t inType;
-  uint8_t pin;
-  inStore * store;
+class Input {
+public:
+    aJsonObject *inputObj;
+    uint8_t inType;
+    uint8_t pin;
+    inStore *store;
 
-  Input(int pin);
-  Input(aJsonObject * obj);
-  Input(char * name);
+    Input(int pin);
 
-  boolean isValid ();
-  void onContactChanged(int val);
+    Input(aJsonObject *obj);
 
-  int poll();
-  protected:
-  void Parse();
+    Input(char *name);
+
+    boolean isValid();
+
+    void onContactChanged(int val);
+
+    int poll();
+
+    static void inline onCounterChanged(int i);
+    static void onCounterChanged0();
+    static void onCounterChanged1();
+    static void onCounterChanged2();
+    static void onCounterChanged3();
+    static void onCounterChanged4();
+    static void onCounterChanged5();
+
+
+
+protected:
+    void Parse();
 
     void contactPoll();
 
     void dht22Poll();
 
+    void printFloatValueToStr(float value, char *valstr);
 
-    void printFloatValueToStr(float temp, char *valstr);
+    void counterPoll();
+
+    void attachInterruptPinIrq(int realPin, int irq);
+
+    unsigned long nextPollTime() const;
+    void setNextPollTime(unsigned long pollTime);
+
+
+    void uptimePoll();
+
+    void printUlongValueToStr(char *valstr, unsigned long value);
 };

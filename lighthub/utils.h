@@ -19,6 +19,9 @@ e-mail    anklimov@gmail.com
 */
 #define Q(x) #x
 #define QUOTE(x) Q(x)
+#define VALUE_TO_STRING(x) #x
+#define VALUE(x) VALUE_TO_STRING(x)
+#define VAR_NAME_VALUE(var) #var "="  VALUE(var)
 
 #include <Arduino.h>
 

@@ -20,7 +20,7 @@ e-mail    anklimov@gmail.com
 
 #include "utils.h"
 
-#if defined(__SAM3X8E__)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1)
 #include <malloc.h>
 #endif
 
@@ -53,7 +53,7 @@ void SetBytes(uint8_t *addr, uint8_t count, char *out) {
 
 
 byte HEX2DEC(char i) {
-    byte v;
+    byte v=0;
     if ('a' <= i && i <= 'f') { v = i - 97 + 10; }
     else if ('A' <= i && i <= 'F') { v = i - 65 + 10; }
     else if ('0' <= i && i <= '9') { v = i - 48; }
@@ -80,7 +80,7 @@ int getInt(char **chan) {
 }
 
 
-#if defined(ESP8266)
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
 unsigned long freeRam ()
 {return system_get_free_heap_size();}
 #endif
@@ -92,6 +92,20 @@ unsigned long freeRam ()
   int v; 
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
 }
+#endif
+
+#if defined(ARDUINO_ARCH_STM32F1)
+extern char _end;
+extern "C" char *sbrk(int i);
+
+unsigned long freeRam() {
+    char *heapend = sbrk(0);
+    register char *stack_ptr asm( "sp" );
+    struct mallinfo mi = mallinfo();
+
+    return stack_ptr - heapend + mi.fordblks;
+}
+
 #endif
 
 #if defined(__SAM3X8E__)
@@ -120,3 +134,5 @@ void parseBytes(const char *str, char separator, byte *bytes, int maxBytes, int 
         str++;                                // Point to next character after separator
     }
 }
+#pragma message(VAR_NAME_VALUE(debugSerial))
+#pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

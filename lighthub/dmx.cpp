@@ -28,7 +28,7 @@ e-mail    anklimov@gmail.com
 #endif
 #endif
 
-#if defined(__ESP__)
+#if defined(ESP8266)
 #ifndef DMX_DISABLE
 DMXESPSerial dmxout;
 #endif
@@ -236,7 +236,7 @@ void DMXoutSetup(int channels)
 #endif
 
 
-#if defined(__ESP__)
+#if defined(ESP8266)
 dmxout.init(channels);
 #endif
 
