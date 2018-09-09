@@ -107,7 +107,7 @@ EthernetClient ethClient;
 #endif
 
 #ifndef SYSLOG_DISABLE
-#include <EthernetUdp.h>
+//#include <EthernetUdp.h>
 #include <Syslog.h>
 EthernetUDP udpSyslogClient;
 Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_IETF);
@@ -490,7 +490,7 @@ void onInitialStateInitLAN() {
     }
 #endif
 
-    #if defined(__AVR__) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32F1)
+#if defined(__AVR__) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32F1)
     IPAddress ip, dns, gw, mask;
     int res = 1;
     debugSerial.println(F("Starting lan"));
@@ -510,6 +510,8 @@ void onInitialStateInitLAN() {
                 } else Ethernet.begin(mac, ip, dns, gw);
             } else Ethernet.begin(mac, ip, dns);
         } else Ethernet.begin(mac, ip);
+    debugSerial.println();
+    lanStatus = HAVE_IP_ADDRESS;
     }
     else {
         debugSerial.println("No IP data found in flash");
@@ -522,7 +524,7 @@ void onInitialStateInitLAN() {
 #endif
         wdt_en();
         wdt_res();
-    }
+
 
     if (res == 0) {
         debugSerial.println(F("Failed to configure Ethernet using DHCP. You can set ip manually!"));
@@ -533,10 +535,11 @@ void onInitialStateInitLAN() {
         resetHard();
 #endif
     } else {
-        debugSerial.print(F("Got IP address:"));
+        debugSerial.println(F("Got IP address:"));
         printIPAddress(Ethernet.localIP());
         lanStatus = HAVE_IP_ADDRESS;//1;
     }
+  }
     #endif
 }
 
