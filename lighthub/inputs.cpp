@@ -81,31 +81,42 @@ void Input::Parse()
 }
 
 int Input::Poll()
-{ 
+{
   boolean v;
   if (!isValid()) return -1;
 
-  
-  if (inType & IN_ACTIVE_HIGH) 
-      {   pinMode(pin, INPUT);    
-        v = (digitalRead(pin)==HIGH); 
-      } 
-        else 
-      {   pinMode(pin, INPUT_PULLUP);    
+
+  if (inType == 1)
+      {   pinMode(pin, INPUT);
+        v = (digitalRead(pin)==HIGH);
+      }
+        else
+      {   pinMode(pin, INPUT_PULLUP);
         v = (digitalRead(pin)==LOW);
-      }  
-  if (v!=store->cur) // value changed 
+      }
+  if (v!=store->cur) // value changed
       {
-            if (store->bounce) store->bounce--;  
+            if (store->bounce) store->bounce--;
                else //confirmed change
                {
-                Changed(v);
-                store->cur=v;
+                 if (inType == 0 || inType == 1) {
+                   Changed(v);
+                   store->cur=v;
+                   store -> logicState = v;
+                 }
+                 if (inType == 2) {
+                   if (!store->cur && v) {//changed from HIGH to LOW
+                     boolean logicState = !(store ->logicState);
+                     store ->logicState = logicState;
+                     Changed(logicState);
+                   }
+                   store->cur=v;
+                 }
                }
       }
-  else // no change 
-      store->bounce=3;         
- return  0; 
+  else // no change
+      store->bounce=3;
+ return  0;
 }
 
 void Input::Changed (int val)
