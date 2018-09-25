@@ -493,6 +493,11 @@ void onInitialStateInitLAN() {
 #endif
 
 #if defined(__AVR__) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32F1)
+#ifdef W5500_CS_PIN
+    Ethernet.w5500_cspin = W5500_CS_PIN;
+    debugSerial.print(F("Use W5500 pin: "));
+    debugSerial.println(Ethernet.w5500_cspin);
+#endif
     IPAddress ip, dns, gw, mask;
     int res = 1;
     debugSerial.println(F("Starting lan"));
