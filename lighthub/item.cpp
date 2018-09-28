@@ -55,6 +55,8 @@ int txt2cmd(char *payload) {
     else if (strcmp(payload, "REST") == 0) cmd = CMD_RESTORE;
     else if (strcmp(payload, "TOGGLE") == 0) cmd = CMD_TOGGLE;
     else if (strcmp(payload, "HALT") == 0) cmd = CMD_HALT;
+    else if (strcmp(payload, "XON") == 0) cmd = CMD_XON;
+    else if (strcmp(payload, "XOFF") == 0) cmd = CMD_XOFF;
     else if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = 0;
     else if (*payload == '{') cmd = -2;
     else if (*payload == '#') cmd = -3;
@@ -277,6 +279,17 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                     default:
                         return -3;
                 }//switch old cmd
+          case CMD_XOFF:
+          if (itemType != CH_GROUP) //individual threating of channels. Ignore restore command for groups
+              switch (t = getCmd()) {
+                  case CMD_XON: //previous command was CMD_XON ?
+                          Serial.print(F("Turned off from:"));
+                          Serial.println(t);
+                          cmd = CMD_OFF;    //turning Off
+                          break;
+                  default:
+                      return -3;
+              }//switch old cmd
     } //switch cmd
 
     switch (cmd) {
@@ -290,10 +303,20 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                     if (!Par[1]) itemType = CH_WHITE;
                 case CH_GROUP: //Save for groups as well
                 case CH_RGB:
+                if (n == 3) { // Full triplet passed
                     st.h = Par[0];
                     st.s = Par[1];
                     st.v = Par[2];
                     setVal(st.aslong);
+                  } else  // Just volume passed
+                  {
+                    st.aslong = getVal(); // restore Colour
+                    st.v = Par[0]; // override volume
+                    setVal(st.aslong); // Save back
+                    Par[0] = st.h;
+                    Par[1] = st.s;
+                    Par[2] = st.v;
+                  }
                       if (send) SendStatus(0,3,Par,true); // Send back triplet ?
                     break;
 
@@ -314,6 +337,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
             break;
 
         case CMD_ON:
+        case CMD_XON:
         if (itemType==CH_RGBW && getCmd() == CMD_ON && getEnableCMD(500)) {
                   Serial.println(F("Force White"));
                   itemType = CH_WHITE;
@@ -547,7 +571,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
         case CH_RELAY: {
             int k;
             pinMode(iaddr, OUTPUT);
-            digitalWrite(iaddr, k = ((cmd == CMD_ON) ? HIGH : LOW));
+            digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? HIGH : LOW));
             Serial.print(F("Pin:"));
             Serial.print(iaddr);
             Serial.print(F("="));
@@ -629,6 +653,7 @@ int Item::isActive() {
 // Simple check last command first
         switch (cmd) {
             case CMD_ON:
+            case CMD_XON:
                 //Serial.println(" active");
                 return 1;
             case CMD_OFF:
@@ -1146,6 +1171,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
 
         switch (cmd) {
             case CMD_ON:
+            case CMD_XON:
                 strcpy(valstr, "ON");
                 break;
             case CMD_OFF:

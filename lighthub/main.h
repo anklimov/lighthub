@@ -37,15 +37,23 @@
 //#define wdt_en()
 //#define wdt_dis()
 //#endif
-
-#if defined(WATCH_DOG_TICKER_DISABLE) && defined(__AVR__)
+#if defined(__AVR__)
+#if defined(WATCH_DOG_TICKER_DISABLE)
 #define wdt_en() wdt_disable()
 #define wdt_dis() wdt_disable()
 #define wdt_res() wdt_disable()
+#else
+#define wdt_en()   wdt_enable(WDTO_8S)
+#define wdt_dis()  wdt_disable()
+#define wdt_res()  wdt_reset()
+#endif
+#endif
+
+#ifndef OWIRE_DISABLE
+#include "DallasTemperature.h"
 #endif
 
 #include "Arduino.h"
-#include "DallasTemperature.h"
 #include <PubSubClient.h>
 #include <SPI.h>
 #include "utils.h"
@@ -56,18 +64,18 @@
 #include "stdarg.h"
 #include "item.h"
 #include "inputs.h"
+
 #ifndef ARDUINO_ARCH_STM32F1
 #include "FastLED.h"
 #endif
+
 #include "Dns.h"
 //#include "hsv2rgb.h"
 
 #if defined(__SAM3X8E__)
-
 #include <DueFlashStorage.h>
 #include <watchdog.h>
 #include <ArduinoHttpClient.h>
-
 #endif
 
 #if defined(__AVR__)
@@ -150,7 +158,9 @@ void restoreState();
 
 lan_status lanLoop();
 
+#ifndef OWIRE_DISABLE
 void Changed(int i, DeviceAddress addr, int val);
+#endif
 
 void modbusIdle(void);
 

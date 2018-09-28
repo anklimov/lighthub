@@ -33,9 +33,11 @@ e-mail    anklimov@gmail.com
 
 #define CMD_ON  1
 #define CMD_OFF 2
-#define CMD_HALT 5
-#define CMD_RESTORE 3
+#define CMD_RESTORE 3 //on only if was turned off by CMD_HALT 
 #define CMD_TOGGLE 4
+#define CMD_HALT 5    //just Off
+#define CMD_XON 6     //just on
+#define CMD_XOFF 7    //off only if was previously turned on by CMD_XON
 #define CMD_CURTEMP 127
 #define CMD_SET 9
 #define CMD_RETRY 64
