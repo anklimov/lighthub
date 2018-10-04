@@ -20,12 +20,12 @@ e-mail    anklimov@gmail.com
 
 #include <aJSON.h>
 
-#define IN_ACTIVE_HIGH   2      // High level = PUSHED/ CLOSED/ ON othervise :Low Level
+#define IN_ACTIVE_HIGH   2      // High level = PUSHED/ CLOSED/ ON othervise :Low Level. Use INPUT mode instead of INPUT_PULLUP for digital pin
 #define IN_ANALOG        64     // Analog input
 #define IN_RE            32     // Rotary Encoder (for further use)
 
 #define IN_PUSH_ON       0      // PUSH - ON, Release - OFF (ovverrided by pcmd/rcmd) - DEFAULT
-#define IN_PUSH_TOGGLE   1      // Every physicall push toggle logical switch  on/off
+#define IN_PUSH_TOGGLE   1      // Used for push buttons. Every physicall push toggle logical switch  on/off. Toggle on leading edge
 #define IN_DHT22         4
 #define IN_COUNTER       8
 #define IN_UPTIME       16
@@ -41,14 +41,14 @@ e-mail    anklimov@gmail.com
 
 //
 //Normal (not button) Switch (toggled mode)
-//"pin": { "T":"1", "emit":"/light1", item:"light1", "scmd": "TOGGLE", "rcmd": "TOGGLE"}
+//"pin": { "T":"0", "emit":"/light1", item:"light1", "scmd": "TOGGLE", "rcmd": "TOGGLE"}
 // or
 // "pin": { "T":"xx", "emit":"/light1", item:"light1"}
 
-//Normal (not button) Switch
-//"pin": { "T":"0", "emit":"/light1", item:"light1", "scmd": "ON", "rcmd": "OFF"}
+//Use Button
+//"pin": { "T":"1", "emit":"/light1", item:"light1", "scmd": "ON", "rcmd": "OFF"}
 // or
-// "pin": { "T":"0", "emit":"/light1", item:"light1"}
+// "pin": { "T":"1", "emit":"/light1", item:"light1"}
 //or
 // "pin": { "emit":"/light1", item:"light1"}
 

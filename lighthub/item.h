@@ -33,11 +33,17 @@ e-mail    anklimov@gmail.com
 
 #define CMD_ON  1
 #define CMD_OFF 2
-#define CMD_HALT 5
-#define CMD_RESTORE 3
+#define CMD_RESTORE 3 //on only if was turned off by CMD_HALT
 #define CMD_TOGGLE 4
+#define CMD_HALT 5    //just Off
+#define CMD_XON 6     //just on
+#define CMD_XOFF 7    //off only if was previously turned on by CMD_XON
+#define CMD_UP 8     //just on
+#define CMD_DN 9    //off only if was previously turned on by CMD_XON
+#define CMD_SET 0xe
+#define CMD_MASK 0xf
+
 #define CMD_CURTEMP 127
-#define CMD_SET 9
 #define CMD_RETRY 64
 #define CMD_REPORT 32
 
@@ -94,7 +100,7 @@ class Item
   boolean getEnableCMD(int delta);
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array
-  uint8_t getCmd();
+  uint8_t getCmd(bool ext = false);
   void setCmd(uint8_t cmd);
   //void setVal(uint8_t n, int par);
   void setVal(long int par);

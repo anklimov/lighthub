@@ -55,6 +55,10 @@ int txt2cmd(char *payload) {
     else if (strcmp(payload, "REST") == 0) cmd = CMD_RESTORE;
     else if (strcmp(payload, "TOGGLE") == 0) cmd = CMD_TOGGLE;
     else if (strcmp(payload, "HALT") == 0) cmd = CMD_HALT;
+    else if (strcmp(payload, "XON") == 0) cmd = CMD_XON;
+    else if (strcmp(payload, "XOFF") == 0) cmd = CMD_XOFF;
+    else if (strcmp(payload, "INCREASE") == 0) cmd = CMD_UP;
+    else if (strcmp(payload, "DECREASE") == 0) cmd = CMD_DN;
     else if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = 0;
     else if (*payload == '{') cmd = -2;
     else if (*payload == '#') cmd = -3;
@@ -102,10 +106,12 @@ Item::Item(char *name) //Constructor
     Parse();
 }
 
-uint8_t Item::getCmd() {
+uint8_t Item::getCmd(bool ext) {
     aJsonObject *t = aJson.getArrayItem(itemArr, I_CMD);
     if (t)
+        if (ext)
         return t->valueint;
+        else  return t->valueint & CMD_MASK;
     else return -1;
 }
 
@@ -113,7 +119,11 @@ uint8_t Item::getCmd() {
 void Item::setCmd(uint8_t cmd) {
     aJsonObject *t = aJson.getArrayItem(itemArr, I_CMD);
     if (t)
+    {
         t->valueint = cmd;
+        Serial.print(F("SetCmd:"));
+        Serial.println(cmd);
+      }
 }
 
 int Item::getArg(short n) //Return arg int or first array element if Arg is array
@@ -277,6 +287,21 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                     default:
                         return -3;
                 }//switch old cmd
+                break;
+          case CMD_XOFF:
+          if (itemType != CH_GROUP) //individual threating of channels. Ignore restore command for groups
+              switch (t = getCmd()) {
+                  case CMD_XON: //previous command was CMD_XON ?
+                          Serial.print(F("Turned off from:"));
+                          Serial.println(t);
+                          cmd = CMD_OFF;    //turning Off
+                          break;
+                  default:
+                      Serial.print(F("XOFF skipped. Prev cmd:"));
+                      Serial.println(t);
+                      return -3;
+              }//switch old cmd
+              break;
     } //switch cmd
 
     switch (cmd) {
@@ -290,10 +315,21 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                     if (!Par[1]) itemType = CH_WHITE;
                 case CH_GROUP: //Save for groups as well
                 case CH_RGB:
+                if (n == 3) { // Full triplet passed
                     st.h = Par[0];
                     st.s = Par[1];
                     st.v = Par[2];
                     setVal(st.aslong);
+                  } else  // Just volume passed
+                  {
+                    st.aslong = getVal(); // restore Colour
+                    st.v = Par[0]; // override volume
+                    setVal(st.aslong); // Save back
+                    Par[0] = st.h;
+                    Par[1] = st.s;
+                    Par[2] = st.v;
+                    n = 3;
+                  }
                       if (send) SendStatus(0,3,Par,true); // Send back triplet ?
                     break;
 
@@ -313,7 +349,19 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
 
             break;
 
+        case CMD_XON:
+        if (!isActive())  //if channel was'nt active before CMD_XON
+              {
+                Serial.println(F("Turning XON"));
+//                setCmd(cmd);
+              }
+          else
+          {  //cmd = CMD_ON;
+            Serial.println(F("Already Active"));
+            if (itemType != CH_GROUP) return -3;
+          }
         case CMD_ON:
+
         if (itemType==CH_RGBW && getCmd() == CMD_ON && getEnableCMD(500)) {
                   Serial.println(F("Force White"));
                   itemType = CH_WHITE;
@@ -388,6 +436,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                         case CH_THERMO:
                             Par[0] = 20;   //20 degrees celsium - safe temperature
                             params = 1;
+                            setVal(20);
                             SendStatus(0, params, Par);
                             break;
                         case CH_RGBW:
@@ -396,16 +445,23 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                             Par[1] = 0;
                             Par[2] = 100;
                             params = 3;
+                            // Store
+                            st.h = Par[0];
+                            st.s = Par[1];
+                            st.v = Par[2];
+                            setVal(st.aslong);
                             SendStatus(0, params, Par,true);
                             break;
                         case CH_RELAY:
                             Par[0] = 100;
                             params = 1;
+                            setVal(100);
                             if (send) SendStatus(CMD_ON);
                             break;
                       default:
                             Par[0] = 100;
                             params = 1;
+                            setVal(100);
                             SendStatus(0, params, Par);
                     }
                 } // default handler
@@ -547,7 +603,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
         case CH_RELAY: {
             int k;
             pinMode(iaddr, OUTPUT);
-            digitalWrite(iaddr, k = ((cmd == CMD_ON) ? HIGH : LOW));
+            digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? HIGH : LOW));
             Serial.print(F("Pin:"));
             Serial.print(iaddr);
             Serial.print(F("="));
@@ -629,6 +685,7 @@ int Item::isActive() {
 // Simple check last command first
         switch (cmd) {
             case CMD_ON:
+            case CMD_XON:
                 //Serial.println(" active");
                 return 1;
             case CMD_OFF:
@@ -971,7 +1028,7 @@ int Item::checkFM() {
 }
 
 boolean Item::checkModbusRetry() {
-    int cmd = getCmd();
+    int cmd = getCmd(true);
     if (cmd & CMD_RETRY) {   // if last sending attempt of command was failed
       int val = getVal();
       Serial.println(F("Retrying CMD"));
@@ -1049,7 +1106,7 @@ int Item::checkModbusDimmer(int data) {
         if (d) { // Actually turned on
             if (cmd == CMD_OFF || cmd == CMD_HALT) SendStatus(CMD_ON); //update OH with ON if it was turned off before
             SendStatus(0, 1, &d); //update OH with value
-            setCmd(CMD_ON);  //store command
+            if (cmd != CMD_XON && cmd != CMD_ON) setCmd(CMD_ON);  //store command
             setVal(d);       //store value
         } else {
             if (cmd != CMD_HALT && cmd != CMD_OFF) {
@@ -1085,7 +1142,7 @@ int Item::Poll() {
 
 void Item::sendDelayedStatus(){
       HSVstore st;
-      int cmd=getCmd();
+      int cmd=getCmd(true);
       short params = 0;
       int Par[3];
       if (cmd & CMD_REPORT)
@@ -1127,9 +1184,9 @@ void Item::sendDelayedStatus(){
 int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
 
 /// ToDo: relative patches, configuration
-
+    int chancmd=getCmd(true);
     if (deffered) {
-        setCmd(cmd | CMD_REPORT);
+        setCmd(chancmd | CMD_REPORT);
         Serial.println(F("Status deffered"));
         //     mqttClient.publish("/push", "1");
         return 0;
@@ -1146,6 +1203,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
 
         switch (cmd) {
             case CMD_ON:
+            case CMD_XON:
                 strcpy(valstr, "ON");
                 break;
             case CMD_OFF:

@@ -18,6 +18,7 @@ e-mail    anklimov@gmail.com
 
 */
 
+#ifndef OWIRE_DISABLE
 
 #include "owTerm.h"
 #include <Arduino.h>
@@ -204,3 +205,4 @@ void owAdd(DeviceAddress addr) {
     t_count++;
 #endif
 }
+#endif
