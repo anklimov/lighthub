@@ -196,7 +196,7 @@ void saveFlash(short n, IPAddress& ip);
 
 int ipLoadFromFlash(short n, IPAddress &ip);
 
-lan_status getConfig(int arg_cnt=0, char **args=NULL);
+lan_status loadConfigFromHttp(int arg_cnt = 0, char **args = NULL);
 
 void preTransmission();
 

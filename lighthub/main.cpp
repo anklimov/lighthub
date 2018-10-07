@@ -153,23 +153,15 @@ bool wifiInitialized;
 
 int mqttErrorRate;
 
-void watchdogSetup(void) {
-//Serial.begin(115200);
-//debugSerial.println("Watchdog armed.");
-}    //Do not remove - strong re-definition WDT Init for DUE
-
-
-// MQTT Callback routine
-
+void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
 
 void mqttCallback(char *topic, byte *payload, unsigned int length) {
-
     debugSerial.print(F("\n["));
     debugSerial.print(topic);
     debugSerial.print(F("] "));
     if (!payload) return;
-    payload[length] = 0;
 
+    payload[length] = 0;
     int fr = freeRam();
     if (fr < 250) {
         debugSerial.println(F("OOM!"));
@@ -186,17 +178,15 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         return;
     }
 
-    boolean retaining = (lanStatus == RETAINING_COLLECTING);
     //Check if topic = Command topic
     short intopic = 0;
     {
         char buf[MQTT_TOPIC_LENGTH + 1];
         strncpy_P(buf, inprefix, sizeof(buf));
-
         intopic = strncmp(topic, buf, strlen(inprefix));
     }
     // in Retaining status - trying to restore previous state from retained output topic. Retained input topics are not relevant.
-    if (retaining && !intopic) {
+    if ((lanStatus == RETAINING_COLLECTING) && !intopic) {
         debugSerial.println(F("Skipping.."));
         return;
     }
@@ -208,9 +198,9 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         strncpy(subtopic, t + 1, MQTT_SUBJECT_LENGTH - 1);
     Item item(subtopic);
     if (item.isValid()) {
-        if (item.itemType == CH_GROUP && retaining)
+        if (item.itemType == CH_GROUP && (lanStatus == RETAINING_COLLECTING))
             return; //Do not restore group channels - they consist not relevant data
-        item.Ctrl((char *)payload, !retaining);
+        item.Ctrl((char *)payload, !(lanStatus == RETAINING_COLLECTING));
     } //valid item
 }
 
@@ -249,7 +239,7 @@ lan_status lanLoop() {
 
         case HAVE_IP_ADDRESS:
             if (!configOk)
-                lanStatus = getConfig(0, NULL); //got config from server or load from NVRAM
+                lanStatus = loadConfigFromHttp(0, NULL);
             else lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
 #ifdef _artnet
             if (artnet) artnet->begin();
@@ -621,12 +611,22 @@ void Changed(int i, DeviceAddress addr, int val) {
 #endif //_owire
 
 void cmdFunctionHelp(int arg_cnt, char **args)
-//(char* tokens)
 {
     printFirmwareVersionAndBuildOptions();
     #ifndef SYSLOG_DISABLE
 //    udpSyslog.logf(LOG_INFO, "free RAM: %d",freeRam());
     #endif
+
+
+    debugSerial.print(F("Current LAN config(ip,dns,gw,subnet):"));
+    printIPAddress(Ethernet.localIP());
+    debugSerial.print(F(" ,"));
+    printIPAddress(Ethernet.dnsServerIP());
+    debugSerial.print(F(" ,"));
+    printIPAddress(Ethernet.gatewayIP());
+    debugSerial.print(F(" ,"));
+    printIPAddress(Ethernet.subnetMask());
+    debugSerial.println(F(";"));
     debugSerial.print(F(" free RAM: "));debugSerial.print(freeRam());
     debugSerial.println(F(" Use the commands: 'help' - this text\n"
                           "'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
@@ -756,7 +756,6 @@ void cmdFunctionLoad(int arg_cnt, char **args) {
 }
 
 int loadConfigFromEEPROM(int arg_cnt, char **args)
-//(char* tokens)
 {
     char ch;
     debugSerial.println(F("loading Config"));
@@ -778,7 +777,6 @@ int loadConfigFromEEPROM(int arg_cnt, char **args)
     } else {
         debugSerial.println(F("No stored config"));
         return 0;
-
     }
 }
 
@@ -789,7 +787,6 @@ void cmdFunctionReq(int arg_cnt, char **args) {
 
 
 int mqttConfigRequest(int arg_cnt, char **args)
-//(char* tokens)
 {
     char buf[25] = "/";
     debugSerial.println(F("request MQTT Config"));
@@ -802,16 +799,11 @@ int mqttConfigRequest(int arg_cnt, char **args)
     strncat(buf, "/req/conf", 25);
     debugSerial.println(buf);
     mqttClient.publish(buf, "1");
-
 }
 
 
 int mqttConfigResp(char *as) {
     debugSerial.println(F("got MQTT Config"));
-
-    //aJsonEEPROMStream as=aJsonEEPROMStream(EEPROM_offset);
-
-    //aJson.deleteItem(root);
     root = aJson.parse(as);
     debugSerial.println();
     if (!root) {
@@ -824,7 +816,6 @@ int mqttConfigResp(char *as) {
 }
 
 void cmdFunctionSave(int arg_cnt, char **args)
-//(char* tokens)
 {
     aJsonEEPROMStream jsonEEPROMStream = aJsonEEPROMStream(EEPROM_offset);
     debugSerial.println(F("Saving config to EEPROM.."));
@@ -834,7 +825,6 @@ void cmdFunctionSave(int arg_cnt, char **args)
 }
 
 void cmdFunctionIp(int arg_cnt, char **args)
-//(char* tokens)
 {
     IPAddress ip0(0, 0, 0, 0);
     IPAddress ip;
@@ -913,7 +903,7 @@ void cmdFunctionSetMac(int arg_cnt, char **args) {
 }
 
 void cmdFunctionGet(int arg_cnt, char **args) {
-    lanStatus=getConfig(arg_cnt, args);
+    lanStatus= loadConfigFromHttp(arg_cnt, args);
     ethClient.stop(); //Refresh MQTT connect to get retained info
     //restoreState();
 }
@@ -948,7 +938,7 @@ int ipLoadFromFlash(short n, IPAddress &ip) {
     return 0;
 }
 
-lan_status getConfig(int arg_cnt, char **args)
+lan_status loadConfigFromHttp(int arg_cnt, char **args)
 {
     int responseStatusCode = 0;
     char ch;
@@ -1287,7 +1277,7 @@ void setupCmdArduino() {
 void loop_main() {
     wdt_res();
     cmdPoll();
-    if (lanLoop() > 1) {
+    if (lanLoop() > HAVE_IP_ADDRESS) {
         mqttClient.loop();
 #ifdef _artnet
         if (artnet) artnet->read();
@@ -1302,7 +1292,6 @@ void loop_main() {
     //    unsigned long lastpacket = DMXSerial.noDataSince();
     DMXCheck();
 #endif
-    // if (lastpacket && (lastpacket%10==0)) debugSerial.println(lastpacket);
 
     if (items) {
         #ifndef MODBUS_DISABLE
@@ -1333,10 +1322,7 @@ void owIdle(void) {
 #endif
 
     wdt_res();
-    return; //TODO: unreached code
-    debugSerial.print(F("o"));
-    if (lanLoop() == 1) mqttClient.loop();
-//if (owReady) owLoop();
+    return;
 
 #ifdef _dmxin
     DMXCheck();
@@ -1349,7 +1335,6 @@ void owIdle(void) {
 void ethernetIdle(void){
     wdt_res();
     inputLoop();
-//  debugSerial.print(".");
 };
 
 void modbusIdle(void) {
