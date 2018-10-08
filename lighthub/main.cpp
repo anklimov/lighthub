@@ -178,7 +178,6 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         return;
     }
 
-    //Check if topic = Command topic
     short intopic = 0;
     {
         char buf[MQTT_TOPIC_LENGTH + 1];
@@ -1063,9 +1062,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     httpClient.begin(fullURI);
     int httpResponseCode = httpClient.GET();
     if (httpResponseCode > 0) {
-        // HTTP header has been send and Server response header has been handled
         debugSerial.printf("[HTTP] GET... code: %d\n", httpResponseCode);
-        // file found at server
         if (httpResponseCode == HTTP_CODE_OK) {
             String response = httpClient.getString();
             debugSerial.println(response);
@@ -1073,7 +1070,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             root = aJson.parse((char *) response.c_str());
             if (!root) {
                 debugSerial.println(F("Config parsing failed"));
-                return READ_RE_CONFIG;//-11; //Load from NVRAM
+                return READ_RE_CONFIG;
             } else {
                 debugSerial.println(F("Config OK, Applying"));
                 applyConfig();
@@ -1082,12 +1079,12 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     } else {
         debugSerial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(httpResponseCode).c_str());
         httpClient.end();
-        return READ_RE_CONFIG;//-11; //Load from NVRAM
+        return READ_RE_CONFIG;
     }
     httpClient.end();
 #endif
 
-    return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
+    return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
 }
 
 void preTransmission() {
