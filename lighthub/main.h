@@ -1,8 +1,5 @@
+#pragma once
 #include "options.h"
-
-#ifndef LIGHTHUB_MAIN_H
-#define LIGHTHUB_MAIN_H
-
 
 #if defined(__SAM3X8E__)
 #define wdt_res() watchdogReset()
@@ -238,4 +235,5 @@ void onInitialStateInitLAN();
 
 void ip_ready_config_loaded_connecting_to_broker();
 
-#endif //LIGHTHUB_MAIN_H
+void printCurentLanConfig();
+
