@@ -1125,12 +1125,12 @@ void setup_main() {
 void printFirmwareVersionAndBuildOptions() {
     debugSerial<<F("\nLazyhome.ru LightHub controller ")<<F(QUOTE(PIO_SRC_REV))<<F("C++ version:")<<F(QUOTE(__cplusplus));
 #ifdef CONTROLLINO
-    debugSerial<<F("\n(+)CONTROLLINO"));
+    debugSerial<<F("\n(+)CONTROLLINO");
 #endif
 #ifdef WATCH_DOG_TICKER_DISABLE
     debugSerial<<F("\n(-)WATCHDOG");
 #else
-    debugSerial<<F("\n(+)WATCHDOG"));
+    debugSerial<<F("\n(+)WATCHDOG");
 #endif
     debugSerial<<F("\nConfig server:")<<F(CONFIG_SERVER)<<F("\nFirmware MAC Address ")<<F(QUOTE(CUSTOM_FIRMWARE_MAC));
 #ifdef DISABLE_FREERAM_PRINT
@@ -1163,7 +1163,7 @@ void printFirmwareVersionAndBuildOptions() {
 #endif
 
 #ifdef OWIRE_DISABLE
-    debugSerial<<F("\n(-)OWIRE"));
+    debugSerial<<F("\n(-)OWIRE");
 #else
     debugSerial<<F("\n(+)OWIRE");
 #endif
@@ -1179,7 +1179,7 @@ void printFirmwareVersionAndBuildOptions() {
 
 #ifdef RESET_PIN
     debugSerial<<F("\n(+)HARDRESET on pin=");
-    debugSerial<<F(QUOTE(RESET_PIN));
+    debugSerial<<F(QUOTE(RESET_PIN);
 #else
     debugSerial<<F("\n(-)HARDRESET, using soft");
 #endif
@@ -1438,8 +1438,6 @@ short thermoSetCurTemp(char *name, short t) {
                 if (att->valueint == 0) mqttClient.publish("/alarmoff/snsr", thermoItem->name);
                 att->valueint = (int) T_ATTEMPTS;
             }
-
         }
     }
-
 }
