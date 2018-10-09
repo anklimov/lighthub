@@ -109,7 +109,6 @@ EthernetClient ethClient;
 #endif
 
 #ifndef SYSLOG_DISABLE
-//#include <EthernetUdp.h>
 #include <Syslog.h>
 EthernetUDP udpSyslogClient;
 Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_IETF);
@@ -493,7 +492,7 @@ void onInitialStateInitLAN() {
     lanStatus = HAVE_IP_ADDRESS;
     }
     else {
-        debugSerial<<"No IP data found in flash";
+        debugSerial<<"\nNo IP data found in flash";
         wdt_dis();
 #if defined(__AVR__) || defined(__SAM3X8E__)
         res = Ethernet.begin(mac, 12000);
@@ -1412,8 +1411,8 @@ void thermoLoop(void) {
     nextThermostatCheck = millis() + THERMOSTAT_CHECK_PERIOD;
 
 #ifndef DISABLE_FREERAM_PRINT
-    (thermostatCheckPrinted) ? debugSerial<<F("\nfree:")) : debugSerial<<F(" "));
-    debugSerial<<freeRam());
+    (thermostatCheckPrinted) ? debugSerial<<F("\nfree:") : debugSerial<<F(" ");
+    debugSerial<<freeRam();
     debugSerial<<" ");
 #endif
 }
