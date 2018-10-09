@@ -1412,8 +1412,7 @@ void thermoLoop(void) {
 
 #ifndef DISABLE_FREERAM_PRINT
     (thermostatCheckPrinted) ? debugSerial<<F("\nfree:") : debugSerial<<F(" ");
-    debugSerial<<freeRam();
-    debugSerial<<" ");
+    debugSerial<<freeRam()<<" ";
 #endif
 }
 
