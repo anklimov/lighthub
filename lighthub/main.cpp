@@ -67,8 +67,13 @@ PWM Out
 #include "Arduino.h"
 #include "main.h"
 #include "options.h"
-//#include "Streaming.h"
+#ifdef WITH_STREAMING_LIB
+#include "Streaming.h"
+#else
 #include "PrintEx.h"
+using namespace ios;
+#endif
+
 
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
@@ -79,7 +84,7 @@ EthernetClient ethClient;
 EthernetClient ethClient;
 #endif
 
-#ifdef ESP8266
+#ifdef ARDUINO_ARCH_ESP8266
 #include <ESP8266WiFi.h>
 #include <user_interface.h>
 WiFiClient ethClient;
@@ -169,7 +174,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
 
     for (int i = 0; i < length; i++) 
         debugSerial<<((char) payload[i]);
-    debugSerial<<ios::endl;
+    debugSerial<<endl;
 
     if(!strcmp(topic,CMDTOPIC)) {
         cmd_parse((char *)payload);
@@ -210,8 +215,11 @@ void printIPAddress(IPAddress ipAddress) {
 void printMACAddress() {
     debugSerial<<F("Configured MAC:");
     for (byte i = 0; i < 6; i++)
-//        (i < 5) ?debugSerial<<_HEX(mac[i])<<F(":"):debugSerial<<_HEX(mac[i])<<endl;
-        (i < 5) ?debugSerial<<ios::hex <<(mac[i])<<F(":"):debugSerial<<ios::hex<<(mac[i])<<ios::endl;
+#ifdef WITH_STREAMING_LIB
+        (i < 5) ?debugSerial<<_HEX(mac[i])<<F(":"):debugSerial<<_HEX(mac[i])<<endl;
+#else
+        (i < 5) ?debugSerial<<hex <<(mac[i])<<F(":"):debugSerial<<hex<<(mac[i])<<endl;
+#endif
 }
 
 void restoreState() {
@@ -418,7 +426,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 }
 
 void onInitialStateInitLAN() {
-#if defined(ESP8266) and defined(WIFI_MANAGER_DISABLE)
+#if defined(ARDUINO_ARCH_ESP8266) and defined(WIFI_MANAGER_DISABLE)
     if(!wifiInitialized) {
                 WiFi.mode(WIFI_STA);
                 debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD);
@@ -448,7 +456,7 @@ void onInitialStateInitLAN() {
     }
 #endif
 
-#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
     if (WiFi.status() == WL_CONNECTED) {
         debugSerial<<F("WiFi connected. IP address: ");
         debugSerial<<WiFi.localIP();
@@ -485,7 +493,7 @@ void onInitialStateInitLAN() {
                 } else Ethernet.begin(mac, ip, dns, gw);
             } else Ethernet.begin(mac, ip, dns);
         } else Ethernet.begin(mac, ip);
-    debugSerial<<ios::endl;
+    debugSerial<<endl;
     lanStatus = HAVE_IP_ADDRESS;
     }
     else {
@@ -530,7 +538,7 @@ void printCurentLanConfig();
 
 #endif
 
-#if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 void softRebootFunc(){
     debugSerial<<F("ESP.restart();");
     ESP.restart();
@@ -1017,7 +1025,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         return READ_RE_CONFIG;//-11; //Load from NVRAM
     }
 #endif
-#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
+#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
     HTTPClient httpClient;
     String fullURI = "http://";
     fullURI+=configServer;
@@ -1106,7 +1114,7 @@ void setup_main() {
     ArtnetSetup();
 #endif
 
-#if defined(ESP8266) and not defined(WIFI_MANAGER_DISABLE)
+#if defined(ARDUINO_ARCH_ESP8266) and not defined(WIFI_MANAGER_DISABLE)
     WiFiManager wifiManager;
 #if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
     wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
@@ -1383,7 +1391,7 @@ void thermoLoop(void) {
                 if (curTemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", thermoItem->name);
 
 
-                debugSerial << ios::endl << thermoItem->name << F("Set:") << thermoSetting << F(" Cur:") << curTemp
+                debugSerial << endl << thermoItem->name << F("Set:") << thermoSetting << F(" Cur:") << curTemp
                             << F(" cmd:") << thermoStateCommand;
                 pinMode(thermoPin, OUTPUT);
                 if (thermoDisabledOrDisconnected(thermoExtensionArray, thermoStateCommand)) {

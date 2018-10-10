@@ -112,9 +112,11 @@
 #define dmxin  DmxDue1
 #endif
 
-#if defined(ESP8266)
+#if defined(ARDUINO_ARCH_ESP8266)
 #undef _dmxin
 #undef _modbus
+#define WITH_STREAMING_LIB
+
 #ifndef DMX_DISABLE
 #define _espdmx
 #endif
