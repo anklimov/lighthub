@@ -453,12 +453,12 @@ void onInitialStateInitLAN() {
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
     if (WiFi.status() == WL_CONNECTED) {
-        debugSerial<<F("WiFi connected. IP address: "));
-        debugSerial<<WiFi.localIP());
+        debugSerial<<F("WiFi connected. IP address: ");
+        debugSerial<<WiFi.localIP();
         lanStatus = HAVE_IP_ADDRESS;//1;
     } else
     {
-        debugSerial<<F("Problem with WiFi connected"));
+        debugSerial<<F("Problem with WiFi connected");
         nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL/5;
     }
 #endif
@@ -535,7 +535,7 @@ void printCurentLanConfig();
 
 #if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
 void softRebootFunc(){
-    debugSerial<<F("ESP.restart();"));
+    debugSerial<<F("ESP.restart();");
     ESP.restart();
 }
 #endif
@@ -1031,14 +1031,14 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         debugSerial.printf("[HTTP] GET... code: %d\n", httpResponseCode);
         if (httpResponseCode == HTTP_CODE_OK) {
             String response = httpClient.getString();
-            debugSerial<<response);
+            debugSerial<<response;
             aJson.deleteItem(root);
             root = aJson.parse((char *) response.c_str());
             if (!root) {
-                debugSerial<<F("Config parsing failed"));
+                debugSerial<<F("Config parsing failed");
                 return READ_RE_CONFIG;
             } else {
-                debugSerial<<F("Config OK, Applying"));
+                debugSerial<<F("Config OK, Applying");
                 applyConfig();
             }
         }
