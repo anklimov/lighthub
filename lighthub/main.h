@@ -169,7 +169,7 @@ void applyConfig();
 
 void cmdFunctionLoad(int arg_cnt, char **args);
 
-int loadConfigFromEEPROM(int arg_cnt, char **args);
+int loadConfigFromEEPROM();
 
 void cmdFunctionReq(int arg_cnt, char **args);
 
@@ -236,4 +236,6 @@ void onInitialStateInitLAN();
 void ip_ready_config_loaded_connecting_to_broker();
 
 void printCurentLanConfig();
+
+void printFreeRam();
 

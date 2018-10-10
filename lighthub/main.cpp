@@ -67,6 +67,7 @@ PWM Out
 #include "Arduino.h"
 #include "main.h"
 #include "options.h"
+#include "utils.h"
 #ifdef WITH_STREAMING_LIB
 #include "Streaming.h"
 #else
@@ -113,7 +114,7 @@ WiFiClient ethClient;
 EthernetClient ethClient;
 #endif
 
-#ifndef SYSLOG_DISABLE
+#ifdef SYSLOG_ENABLE
 #include <Syslog.h>
 EthernetUDP udpSyslogClient;
 Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_IETF);
@@ -208,8 +209,11 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
 
 void printIPAddress(IPAddress ipAddress) {
     for (byte i = 0; i < 4; i++)
-//        (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i])<<F(", ");
-        (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : debugSerial << (ipAddress[i])<<F(", ");
+#ifdef WITH_STREAMING_LIB
+            (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i]) << F(", ");
+#else
+            (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : debugSerial << (ipAddress[i])<<F(", ");
+#endif
 }
 
 void printMACAddress() {
@@ -282,7 +286,7 @@ lan_status lanLoop() {
             break;
 
         case READ_RE_CONFIG:
-            if (loadConfigFromEEPROM(0, NULL)) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
+            if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             else {
                 nextLanCheckTime = millis() + 5000;
                 lanStatus = AWAITING_ADDRESS;//-10;
@@ -348,7 +352,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
     char *user = &empty;
     char passwordBuf[16] = "";
     char *password = passwordBuf;
-#ifndef SYSLOG_DISABLE
+#ifdef SYSLOG_ENABLE
     debugSerial<<"debugSerial:";
     delay(100);
     if (udpSyslogArr && aJson.getArraySize(udpSyslogArr)) {
@@ -575,9 +579,7 @@ void Changed(int i, DeviceAddress addr, int val) {
         owEmit = aJson.getObjectItem(owObj, "emit")->valuestring;
         if (owEmit) {
             strncpy(addrbuf, owEmit, sizeof(addrbuf));
-            debugSerial<<owEmit;
-            debugSerial<<F("=");
-            debugSerial<<val;
+            debugSerial<<owEmit<<F("=")<<val;
         }
         owItem = aJson.getObjectItem(owObj, "item")->valuestring;
     } else debugSerial<<F("1w-item not found in config");
@@ -601,12 +603,12 @@ void Changed(int i, DeviceAddress addr, int val) {
 void cmdFunctionHelp(int arg_cnt, char **args)
 {
     printFirmwareVersionAndBuildOptions();
-    #ifndef SYSLOG_DISABLE
+    #ifdef SYSLOG_ENABLE
 //    udpSyslog.logf(LOG_INFO, "free RAM: %d",freeRam());
     #endif
     printCurentLanConfig();
-
-    debugSerial<<F(" free RAM: ")<<freeRam()<<F(" Use the commands: 'help' - this text\n"
+    printFreeRam();
+    debugSerial<<F("\nUse these commands: 'help' - this text\n"
                           "'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
                           "'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"
                           "'save' - save config in NVRAM\n"
@@ -730,11 +732,11 @@ void printConfigSummary() {
 }
 
 void cmdFunctionLoad(int arg_cnt, char **args) {
-    loadConfigFromEEPROM(arg_cnt, args);
+    loadConfigFromEEPROM();
     restoreState();
 }
 
-int loadConfigFromEEPROM(int arg_cnt, char **args)
+int loadConfigFromEEPROM()
 {
     char ch;
     debugSerial<<F("loading Config");
@@ -847,7 +849,6 @@ void cmdFunctionClearEEPROM(int arg_cnt, char **args){
 }
 
 void cmdFunctionPwd(int arg_cnt, char **args)
-//(char* tokens)
 { char empty[]="";
     if (arg_cnt)
         saveFlash(OFFSET_MQTT_PWD,args[1]);
@@ -856,16 +857,7 @@ void cmdFunctionPwd(int arg_cnt, char **args)
 }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
-
-    //debugSerial<<"Got:");
-    //debugSerial<<args[1]);
-    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%с",
-               &mac[0],
-               &mac[1],
-               &mac[2],
-               &mac[3],
-               &mac[4],
-               &mac[5]) < 6) {
+    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%с", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) < 6) {
         debugSerial<<F("could not parse: ")<<args[1];
         return;
     }
@@ -905,9 +897,9 @@ void saveFlash(short n, IPAddress& ip) {
 }
 
 int ipLoadFromFlash(short n, IPAddress &ip) {
-    for(int i=0;i<4;i++) ip[i]=EEPROM.read(n++);
-    if (ip[0] && (ip[0] != 0xff)) return 1;
-    return 0;
+    for (int i = 0; i < 4; i++)
+        ip[i] = EEPROM.read(n++);
+    return (ip[0] && (ip[0] != 0xff));
 }
 
 lan_status loadConfigFromHttp(int arg_cnt, char **args)
@@ -921,9 +913,12 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         saveFlash(OFFSET_CONFIGSERVER, configServer);
     } else if (!loadFlash(OFFSET_CONFIGSERVER, configServer))
         strncpy_P(configServer,configserver,sizeof(configServer));
-
+#ifndef DEVICE_NAME
     snprintf(URI, sizeof(URI), "/%02x-%02x-%02x-%02x-%02x-%02x.config.json", mac[0], mac[1], mac[2], mac[3], mac[4],
              mac[5]);
+#else
+    snprintf(URI, sizeof(URI), "/%s_config.json",QUOTE(DEVICE_NAME));
+#endif
     debugSerial<<F("Config URI: http://")<<configServer<<URI;
 
 #if defined(__AVR__)
@@ -1084,7 +1079,7 @@ void setup_main() {
     sd_card_w5100_setup();
 #endif
     setupMacAddress();
-    loadConfigFromEEPROM(0, NULL);
+    loadConfigFromEEPROM();
 
 #ifdef _modbus
     #ifdef CONTROLLINO
@@ -1128,7 +1123,7 @@ void setup_main() {
 }
 
 void printFirmwareVersionAndBuildOptions() {
-    debugSerial<<F("\nLazyhome.ru LightHub controller ")<<F(QUOTE(PIO_SRC_REV))<<F("C++ version:")<<F(QUOTE(__cplusplus));
+    debugSerial<<F("\nLazyhome.ru LightHub controller ")<<F(QUOTE(PIO_SRC_REV))<<F(" C++ version:")<<F(QUOTE(__cplusplus));
 #ifdef CONTROLLINO
     debugSerial<<F("\n(+)CONTROLLINO");
 #endif
@@ -1145,8 +1140,7 @@ void printFirmwareVersionAndBuildOptions() {
 #endif
 
 #ifdef USE_1W_PIN
-    debugSerial<<F("(-)DS2482-100 USE_1W_PIN=");
-    debugSerial<<QUOTE(USE_1W_PIN);
+    debugSerial<<F("\n(-)DS2482-100 USE_1W_PIN=")<<QUOTE(USE_1W_PIN);
 #else
     debugSerial<<F("\n(+)DS2482-100");
 #endif
@@ -1156,7 +1150,7 @@ void printFirmwareVersionAndBuildOptions() {
 #endif
 
 #ifdef DMX_DISABLE
-    debugSerial<<F("(-)DMX");
+    debugSerial<<F("\n(-)DMX");
 #else
     debugSerial<<F("\n(+)DMX");
 #endif
@@ -1183,8 +1177,7 @@ void printFirmwareVersionAndBuildOptions() {
 #endif
 
 #ifdef RESET_PIN
-    debugSerial<<F("\n(+)HARDRESET on pin=");
-    debugSerial<<F(QUOTE(RESET_PIN);
+    debugSerial<<F("\n(+)HARDRESET on pin=")<<F(QUOTE(RESET_PIN);
 #else
     debugSerial<<F("\n(-)HARDRESET, using soft");
 #endif
@@ -1194,6 +1187,9 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     debugSerial<<F("\n(-)RESTART_LAN_ON_MQTT_ERRORS");
 #endif
+}
+void printFreeRam(){
+    debugSerial<<F("\nfree RAM: ")<<freeRam();
 }
 
 void setupMacAddress() {
@@ -1271,7 +1267,7 @@ void loop_main() {
     dmxout.update();
 #endif
 
-#ifndef SYSLOG_DISABLE
+#ifdef SYSLOG_ENABLE
 //        debugSerial<<F("#"));
 //        udpSyslog.log(LOG_INFO, "Ping syslog:");
 #endif
@@ -1416,8 +1412,7 @@ void thermoLoop(void) {
     nextThermostatCheck = millis() + THERMOSTAT_CHECK_PERIOD;
 
 #ifndef DISABLE_FREERAM_PRINT
-    (thermostatCheckPrinted) ? debugSerial<<F("\nfree:") : debugSerial<<F(" ");
-    debugSerial<<freeRam()<<" ";
+    (thermostatCheckPrinted) ? debugSerial<<F("\nfree:")<<freeRam()<<" " : debugSerial<<F(" ")<<freeRam()<<F(" ");
 #endif
 }
 

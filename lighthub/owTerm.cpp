@@ -47,7 +47,7 @@ int owUpdate() {
     short sr;
 
     //net.setStrongPullup();
-    Serial.println(F("Searching"));
+    debugSerial.println(F("Searching"));
     if (net) net->reset_search();
     for (short i = 0; i < t_count; i++) wstat[i] &= ~SW_FIND; //absent
 
@@ -58,18 +58,18 @@ int owUpdate() {
                 if (!memcmp(term[i], term[t_count], 8)) {
                     ifind = i;
                     wstat[i] |= SW_FIND;
-                    Serial.print(F(" Node:"));
-                    PrintBytes(term[t_count], 8);
-                    Serial.println(F(" alive"));
+                    debugSerial.print(F(" Node:"));
+                    PrintBytes(term[t_count], 8,0);
+                    debugSerial.println(F(" alive"));
                     break;
                 }; //alive
             if (ifind < 0 && sensors) {
                 wstat[t_count] = SW_FIND; //Newly detected
-                Serial.print(F("dev#"));
-                Serial.print(t_count);
-                Serial.print(F(" Addr:"));
-                PrintBytes(term[t_count], 8);
-                Serial.println();
+                debugSerial.print(F("dev#"));
+                debugSerial.print(t_count);
+                debugSerial.print(F(" Addr:"));
+                PrintBytes(term[t_count], 8,0);
+                debugSerial.println();
                 if (term[t_count][0] == 0x28) {
                     sensors->setResolution(term[t_count], TEMPERATURE_PRECISION);
                     net->setStrongPullup();
@@ -80,8 +80,8 @@ int owUpdate() {
         }//if
     } //while
 
-    Serial.print(F("1-wire count: "));
-    Serial.println(t_count);
+    debugSerial.print(F("1-wire count: "));
+    debugSerial.println(t_count);
 #endif
 }
 
@@ -91,12 +91,12 @@ int owSetup(owChangedType owCh) {
     //// todo - move memory allocation to here
     if (net) return true;    // Already initialized
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
-    Serial.println(F("DS2482_100_I2C_TO_1W_BRIDGE init"));
+    debugSerial.println(F("DS2482_100_I2C_TO_1W_BRIDGE init"));
     net = new OneWire;
 #else
-    Serial.print(F("One wire setup on PIN:"));
-    Serial.println(QUOTE(USE_1W_PIN));
-net = new OneWire (USE_1W_PIN);
+    debugSerial.print(F("One wire setup on PIN:"));
+    debugSerial.println(QUOTE(USE_1W_PIN));
+    net = new OneWire (USE_1W_PIN);
 #endif
 
 
@@ -112,29 +112,29 @@ net = new OneWire (USE_1W_PIN);
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     Wire.begin();
     if (net->checkPresence()) {
-        Serial.println(F("DS2482-100 present"));
+        debugSerial.println(F("DS2482-100 present"));
         net->deviceReset();
 #ifdef APU_OFF
-        Serial.println(F("APU off"));
+        debugSerial.println(F("APU off"));
 #else
         net->setActivePullup();
 #endif
 
-        Serial.println(F("\tChecking for 1-Wire devices..."));
+        debugSerial.println(F("\tChecking for 1-Wire devices..."));
         if (net->wireReset())
-            Serial.println(F("\tReset done"));
+            debugSerial.println(F("\tReset done"));
 
         sensors->begin();
         owChanged = owCh;
         //owUpdate();
-        //Serial.println(F("\t1-w Updated"));
+        //debugSerial.println(F("\t1-w Updated"));
         sensors->setWaitForConversion(false);
 
 
         return true;
     }
 #endif
-    Serial.println(F("\tDS2482 error"));
+    debugSerial.println(F("\tDS2482 error"));
     return false;
     // IC Default 9 bit. If you have troubles consider upping it 12. Ups the delay giving the IC more time to process the temperature measurement
 
@@ -158,7 +158,7 @@ int sensors_loop(void) {
 
         case 0x28: // Thermomerer
             t = sensors->getTempC(term[si]);//*10.0;
-            //Serial.println("o");
+            //debugSerial.println("o");
             if (owChanged) owChanged(si, term[si], t);
             sensors->requestTemperaturesByAddress(term[si]);
             si++;
@@ -192,11 +192,11 @@ void owAdd(DeviceAddress addr) {
     memcpy(term[t_count], addr, 8);
     //term[t_count]=addr;
 
-    Serial.print(F("dev#"));
-    Serial.print(t_count);
-    Serial.print(F(" Addr:"));
-    PrintBytes(term[t_count], 8);
-    Serial.println();
+    debugSerial.print(F("dev#"));
+    debugSerial.print(t_count);
+    debugSerial.print(F(" Addr:"));
+    PrintBytes(term[t_count], 8,0);
+    debugSerial.println();
     if (term[t_count][0] == 0x28) {
         sensors->setResolution(term[t_count], TEMPERATURE_PRECISION);
         net->setStrongPullup();
