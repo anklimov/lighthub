@@ -421,10 +421,7 @@ void onInitialStateInitLAN() {
 #if defined(ESP8266) and defined(WIFI_MANAGER_DISABLE)
     if(!wifiInitialized) {
                 WiFi.mode(WIFI_STA);
-                debugSerial<<F("WIFI AP/Password:"));
-                debugSerial<<QUOTE(ESP_WIFI_AP));
-                debugSerial<<F("/"));
-                debugSerial<<QUOTE(ESP_WIFI_PWD));
+                debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD);
                 wifi_set_macaddr(STATION_IF,mac);
                 WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
                 wifiInitialized = true;
