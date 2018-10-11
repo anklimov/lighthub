@@ -239,7 +239,8 @@ lan_status lanLoop() {
 
     switch (lanStatus) {
         case INITIAL_STATE:
-            onInitialStateInitLAN();
+            if (millis() > nextLanCheckTime)
+                onInitialStateInitLAN();
             break;
 
         case HAVE_IP_ADDRESS:
@@ -467,7 +468,8 @@ void onInitialStateInitLAN() {
         lanStatus = HAVE_IP_ADDRESS;//1;
     } else
     {
-        debugSerial<<F("Problem with WiFi connected");
+
+        debugSerial<<F("Problem with WiFi!");
         nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL/5;
     }
 #endif
