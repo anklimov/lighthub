@@ -173,7 +173,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         return;
     }
 
-    for (int i = 0; i < length; i++) 
+    for (int i = 0; i < length; i++)
         debugSerial<<((char) payload[i]);
     debugSerial<<endl;
 
@@ -368,7 +368,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
       udpSyslog.defaultPriority(LOG_KERN);
       udpSyslog.log(LOG_INFO, F("UDP Syslog initialized!"));
         debugSerial<<F("UDP Syslog initialized!");
-    }  
+    }
 #endif
 
     if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
@@ -937,7 +937,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     if (configStream != NULL) {
         if (responseStatusCode == 200) {
 
-            debugSerial<<F("got Config"));
+            debugSerial<<F("got Config");
             char c;
             aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
@@ -948,29 +948,29 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             hclient.closeStream(configStream);  // this is very important -- be sure to close the STREAM
 
             if (!root) {
-                debugSerial<<F("Config parsing failed"));
+                debugSerial<<F("Config parsing failed");
                 nextLanCheckTime = millis() + 15000;
                 return READ_RE_CONFIG;//-11;
             } else {
             //    char *outstr = aJson.print(root);
             //    debugSerial<<outstr);
             //    free(outstr);
-            debugSerial<<F("Applying."));
+            debugSerial<<F("Applying.");
                 applyConfig();
 
 
             }
 
         } else {
-            debugSerial<<F("ERROR: Server returned "));
-            debugSerial<<responseStatusCode);
+            debugSerial<<F("ERROR: Server returned ");
+            debugSerial<<responseStatusCode;
             nextLanCheckTime = millis() + 5000;
             return READ_RE_CONFIG;//-11;
         }
 
     } else {
-        debugSerial<<F("failed to connect"));
-        debugSerial<<F(" try again in 5 seconds"));
+        debugSerial<<F("failed to connect");
+        debugSerial<<F(" try again in 5 seconds");
         nextLanCheckTime = millis() + 5000;
         return READ_RE_CONFIG;//-11;
     }
