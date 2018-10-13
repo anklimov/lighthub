@@ -25,10 +25,11 @@ e-mail    anklimov@gmail.com
 
 #include <Arduino.h>
 
-void PrintBytes(uint8_t* addr, uint8_t count, bool newline=0); 
+void PrintBytes(uint8_t* addr, uint8_t count, bool newline);
 void SetBytes(uint8_t* addr, uint8_t count, char * out);
 void SetAddr(char * out,  uint8_t* addr);
 uint8_t HEX2DEC(char i);
 int getInt(char ** chan);
 unsigned long freeRam ();
 void parseBytes(const char* str, char separator, byte* bytes, int maxBytes, int base);
+int log(const char *str, ...);

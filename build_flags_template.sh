@@ -25,5 +25,7 @@
 # export FLAGS="$FLAGS -DDHCP_RETRY_INTERVAL=60000"
 # export FLAGS="$FLAGS -DRESTART_LAN_ON_MQTT_ERRORS"
 # export FLAGS="$FLAGS -DW5500_CS_PIN=53"
+#export FLAGS="$FLAGS -DSYSLOG_ENABLE"
+#export FLAGS="$FLAGS -DDEVICE_NAME=MYDEVICE"
  export FLAGS="$FLAGS -DPIO_SRC_REV="$(git log --pretty=format:%h_%ad -1 --date=short)
  echo $FLAGS

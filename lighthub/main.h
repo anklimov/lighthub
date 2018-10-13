@@ -1,8 +1,5 @@
+#pragma once
 #include "options.h"
-
-#ifndef LIGHTHUB_MAIN_H
-#define LIGHTHUB_MAIN_H
-
 
 #if defined(__SAM3X8E__)
 #define wdt_res() watchdogReset()
@@ -172,7 +169,7 @@ void applyConfig();
 
 void cmdFunctionLoad(int arg_cnt, char **args);
 
-int loadConfigFromEEPROM(int arg_cnt, char **args);
+int loadConfigFromEEPROM();
 
 void cmdFunctionReq(int arg_cnt, char **args);
 
@@ -196,7 +193,7 @@ void saveFlash(short n, IPAddress& ip);
 
 int ipLoadFromFlash(short n, IPAddress &ip);
 
-lan_status getConfig(int arg_cnt=0, char **args=NULL);
+lan_status loadConfigFromHttp(int arg_cnt = 0, char **args = NULL);
 
 void preTransmission();
 
@@ -238,4 +235,7 @@ void onInitialStateInitLAN();
 
 void ip_ready_config_loaded_connecting_to_broker();
 
-#endif //LIGHTHUB_MAIN_H
+void printCurentLanConfig();
+
+void printFreeRam();
+

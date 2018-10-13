@@ -153,6 +153,9 @@ platformio device monitor -b 115200
 * WIFI_MANAGER_DISABLE //Disable wifi manager for esp8266
 * DHT_DISABLE //disable DHT Input support
 * RESTART_LAN_ON_MQTT_ERRORS //reinit LAN if many mqtt errors occured
+* WITH_STREAMING_LIB use streaming libriary for serial debug output otherwise use PrintEx library
+* DEVICE_NAME short handy device name which is used instead of mac for download config http://{MY_CONFIG_SERVER}/{DEVICE_NAME}_config.json
+* SYSLOG_ENABLE enable UDP SYSLOG support feature(under DEVELOPMENT) that must be configured through config file
 
 
 
@@ -176,5 +179,8 @@ platformio device monitor -b 115200
 * DHT support enabled
 * Wifi manager for esp8266 enabled
 * RESTART_LAN_ON_MQTT_ERRORS disabled
+* WITH_STREAMING_LIB disabled
+* DEVICE_NAME disabled
+* SYSLOG_ENABLE disabled
 
 If you've using Arduino IDE to compile & flash firmware, it will use Default options above and you will not able to configure additional compilers options except edit "options.h" file
