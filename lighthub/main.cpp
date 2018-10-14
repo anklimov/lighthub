@@ -588,7 +588,7 @@ void Changed(int i, DeviceAddress addr, float val) {
               return;
           }
             strcpy_P(addrstr, outprefix);
-            strncpy(addrstr, owEmit, sizeof(addrstr));
+            strncat(addrstr, owEmit, sizeof(addrstr));
             //strncat(addrstr, addrbuf, sizeof(addrstr));
 
             mqttClient.publish(addrstr, valstr);
