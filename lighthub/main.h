@@ -156,7 +156,7 @@ void restoreState();
 lan_status lanLoop();
 
 #ifndef OWIRE_DISABLE
-void Changed(int i, DeviceAddress addr, int val);
+void Changed(int i, DeviceAddress addr, float val);
 #endif
 
 void modbusIdle(void);
@@ -213,7 +213,7 @@ void pollingLoop(void);
 
 void thermoLoop(void);
 
-short thermoSetCurTemp(char *name, short t);
+short thermoSetCurTemp(char *name, float t);
 
 void modbusIdle(void);
 
@@ -238,4 +238,3 @@ void ip_ready_config_loaded_connecting_to_broker();
 void printCurentLanConfig();
 
 void printFreeRam();
-

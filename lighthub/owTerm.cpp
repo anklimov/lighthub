@@ -27,11 +27,9 @@ e-mail    anklimov@gmail.com
 
 
 OneWire *net = NULL;
-// Pass our oneWire reference to Dallas Temperature.
-//DallasTemperature sensors(&net);
 
 DeviceAddress *term = NULL;
-//int            *regs = NULL;
+
 uint16_t *wstat = NULL;
 DallasTemperature *sensors = NULL;
 
@@ -46,8 +44,8 @@ int owUpdate() {
     unsigned long finish = millis() + OW_UPDATE_INTERVAL;
     short sr;
 
-    //net.setStrongPullup();
-    debugSerial.println(F("Searching"));
+
+    Serial.println(F("Searching"));
     if (net) net->reset_search();
     for (short i = 0; i < t_count; i++) wstat[i] &= ~SW_FIND; //absent
 
@@ -153,12 +151,12 @@ int sensors_loop(void) {
         return 8000;
     }
 
-    int t;
+    float t;
     switch (term[si][0]) {
 
         case 0x28: // Thermomerer
             t = sensors->getTempC(term[si]);//*10.0;
-            //debugSerial.println("o");
+            //Serial.println("o");
             if (owChanged) owChanged(si, term[si], t);
             sensors->requestTemperaturesByAddress(term[si]);
             si++;

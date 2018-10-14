@@ -267,7 +267,7 @@ lan_status lanLoop() {
                 mqttClient.unsubscribe(buf);
 
                 lanStatus = OPERATION;//3;
-                debugSerial<<F("Accepting commands...");
+                debugSerial<<F("Accepting commands...\n");
                 break;
             }
 
@@ -367,7 +367,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
       udpSyslog.appName(syslogAppname);
       udpSyslog.defaultPriority(LOG_KERN);
       udpSyslog.log(LOG_INFO, F("UDP Syslog initialized!"));
-        debugSerial<<F("UDP Syslog initialized!");
+        debugSerial<<F("UDP Syslog initialized!\n");
     }
 #endif
 
@@ -389,7 +389,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
         wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
         if (mqttClient.connect(client_id, user, password)) {
             mqttErrorRate = 0;
-            debugSerial<<F("connected as ")<<client_id;
+            debugSerial<<F("connected as ")<<client_id <<eol;
             wdt_en();
             configOk = true;
             // ... Temporary subscribe to status topic
@@ -503,7 +503,7 @@ void onInitialStateInitLAN() {
     lanStatus = HAVE_IP_ADDRESS;
     }
     else {
-        debugSerial<<"\nNo IP data found in flash";
+        debugSerial<<"\nNo IP data found in flash\n";
         wdt_dis();
 #if defined(__AVR__) || defined(__SAM3X8E__)
         res = Ethernet.begin(mac, 12000);
@@ -566,38 +566,40 @@ void resetHard() {
 
 #ifdef _owire
 
-void Changed(int i, DeviceAddress addr, int val) {
+void Changed(int i, DeviceAddress addr, float val) {
     char addrstr[32] = "NIL";
-    char addrbuf[17];
+    //char addrbuf[17];
     char valstr[16] = "NIL";
     char *owEmit = NULL;
     char *owItem = NULL;
 
-    SetBytes(addr, 8, addrbuf);
-    addrbuf[17] = 0;
+    SetBytes(addr, 8, addrstr);
+    addrstr[17] = 0;
 
-    aJsonObject *owObj = aJson.getObjectItem(owArr, addrbuf);
+    aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);
     if (owObj) {
         owEmit = aJson.getObjectItem(owObj, "emit")->valuestring;
+
         if (owEmit) {
-            strncpy(addrbuf, owEmit, sizeof(addrbuf));
-            debugSerial<<owEmit<<F("=")<<val;
+          printFloatValueToStr(val,valstr);
+          debugSerial<<owEmit<<F("=")<<valstr<<eol;
+
+          if ((val == -127.0) || (val == 85.0) || (val == 0.0)) { //ToDo: 1-w short circuit mapped to "0" celsium
+              return;
+          }
+            strcpy_P(addrstr, outprefix);
+            strncpy(addrstr, owEmit, sizeof(addrstr));
+            //strncat(addrstr, addrbuf, sizeof(addrstr));
+
+            mqttClient.publish(addrstr, valstr);
         }
         owItem = aJson.getObjectItem(owObj, "item")->valuestring;
-    } else debugSerial<<F("1w-item not found in config");
-
-    if ((val == -127) || (val == 85) || (val == 0)) { //ToDo: 1-w short circuit mapped to "0" celsium
-        return;
+        if (owItem) {
+            thermoSetCurTemp(owItem, val);  ///TODO: Refactore using Items interface
     }
 
-    strcpy_P(addrstr, outprefix);
-    strncat(addrstr, addrbuf, sizeof(addrstr));
-    sprintf(valstr, "%d", val);
-    mqttClient.publish(addrstr, valstr);
-
-    if (owItem) {
-        thermoSetCurTemp(owItem, val);  ///TODO: Refactore using Items interface
-    }
+    else debugSerial<<F("1w-item not found in config")<<eol;
+  }
 }
 
 #endif //_owire
@@ -670,7 +672,7 @@ void applyConfig() {
     if (owArr && !owReady) {
         aJsonObject *item = owArr->child;
         owReady = owSetup(&Changed);
-        if (owReady) debugSerial<<F("One wire Ready");
+        if (owReady) debugSerial<<F("One wire Ready\n");
         t_count = 0;
         while (item && owReady) {
             if ((item->type == aJson_Object)) {
@@ -731,6 +733,7 @@ void printConfigSummary() {
     printBool(owArr);
     debugSerial<<F("\nudp syslog ");
     printBool(udpSyslogArr);
+    debugSerial << eol;
 }
 
 void cmdFunctionLoad(int arg_cnt, char **args) {
@@ -752,12 +755,12 @@ int loadConfigFromEEPROM()
             debugSerial<<F("\nload failed");
             return 0;
         }
-        debugSerial<<F("\nLoaded");
+        debugSerial<<F("\nLoaded\n");
         applyConfig();
         ethClient.stop(); //Refresh MQTT connect to get retained info
         return 1;
     } else {
-        debugSerial<<F("\nNo stored config");
+        debugSerial<<F("\nNo stored config\n");
         return 0;
     }
 }
@@ -840,13 +843,13 @@ void cmdFunctionIp(int arg_cnt, char **args)
             printIPAddress(current_gw);
             printIPAddress(current_mask);
     }
-    debugSerial<<F("Saved");
+    debugSerial<<F("Saved\n");
 }
 
 void cmdFunctionClearEEPROM(int arg_cnt, char **args){
     for (int i = 0; i < 512; i++)
         EEPROM.write(i, 0);
-    debugSerial<<F("EEPROM cleared");
+    debugSerial<<F("EEPROM cleared\n");
 
 }
 
@@ -855,7 +858,7 @@ void cmdFunctionPwd(int arg_cnt, char **args)
     if (arg_cnt)
         saveFlash(OFFSET_MQTT_PWD,args[1]);
     else saveFlash(OFFSET_MQTT_PWD,empty);
-    debugSerial<<F("Password updated");
+    debugSerial<<F("Password updated\n");
 }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
@@ -865,7 +868,7 @@ void cmdFunctionSetMac(int arg_cnt, char **args) {
     }
     printMACAddress();
     for (short i = 0; i < 6; i++) { EEPROM.write(i, mac[i]); }
-    debugSerial<<F("Updated");
+    debugSerial<<F("Updated\n");
 }
 
 void cmdFunctionGet(int arg_cnt, char **args) {
@@ -921,7 +924,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 #else
     snprintf(URI, sizeof(URI), "/%s_config.json",QUOTE(DEVICE_NAME));
 #endif
-    debugSerial<<F("Config URI: http://")<<configServer<<URI;
+    debugSerial<<F("Config URI: http://")<<configServer<<URI<<eol;
 
 #if defined(__AVR__)
     FILE *configStream;
@@ -937,7 +940,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     if (configStream != NULL) {
         if (responseStatusCode == 200) {
 
-            debugSerial<<F("got Config");
+            debugSerial<<F("got Config\n");
             char c;
             aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
@@ -948,14 +951,14 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             hclient.closeStream(configStream);  // this is very important -- be sure to close the STREAM
 
             if (!root) {
-                debugSerial<<F("Config parsing failed");
+                debugSerial<<F("Config parsing failed\n");
                 nextLanCheckTime = millis() + 15000;
                 return READ_RE_CONFIG;//-11;
             } else {
             //    char *outstr = aJson.print(root);
             //    debugSerial<<outstr);
             //    free(outstr);
-            debugSerial<<F("Applying.");
+            debugSerial<<F("Applying.\n");
                 applyConfig();
 
 
@@ -970,7 +973,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
     } else {
         debugSerial<<F("failed to connect");
-        debugSerial<<F(" try again in 5 seconds");
+        debugSerial<<F(" try again in 5 seconds\n");
         nextLanCheckTime = millis() + 5000;
         return READ_RE_CONFIG;//-11;
     }
@@ -1002,7 +1005,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         root = aJson.parse((char *) response.c_str());
 
         if (!root) {
-            debugSerial<<F("Config parsing failed");
+            debugSerial<<F("Config parsing failed\n");
             // nextLanCheckTime=millis()+15000;
             return READ_RE_CONFIG;//-11; //Load from NVRAM
         } else {
@@ -1017,7 +1020,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
         }
     } else {
-        debugSerial<<F("Config retrieving failed");
+        debugSerial<<F("Config retrieving failed\n");
         //nextLanCheckTime=millis()+15000;
         return READ_RE_CONFIG;//-11; //Load from NVRAM
     }
@@ -1037,10 +1040,10 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             aJson.deleteItem(root);
             root = aJson.parse((char *) response.c_str());
             if (!root) {
-                debugSerial<<F("Config parsing failed");
+                debugSerial<<F("Config parsing failed\n");
                 return READ_RE_CONFIG;
             } else {
-                debugSerial<<F("Config OK, Applying");
+                debugSerial<<F("Config OK, Applying\n");
                 applyConfig();
             }
         }
@@ -1125,7 +1128,7 @@ void setup_main() {
 }
 
 void printFirmwareVersionAndBuildOptions() {
-    debugSerial<<F("\nLazyhome.ru LightHub controller ")<<F(QUOTE(PIO_SRC_REV))<<F(" C++ version:")<<F(QUOTE(__cplusplus));
+    debugSerial<<F("\nLazyhome.ru LightHub controller ")<<F(QUOTE(PIO_SRC_REV))<<F(" C++ version:")<<F(QUOTE(__cplusplus))<<eol;
 #ifdef CONTROLLINO
     debugSerial<<F("\n(+)CONTROLLINO");
 #endif
@@ -1189,6 +1192,7 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     debugSerial<<F("\n(-)RESTART_LAN_ON_MQTT_ERRORS");
 #endif
+debugSerial<<eol;
 }
 void printFreeRam(){
     debugSerial<<F("\nfree RAM: ")<<freeRam();
@@ -1212,7 +1216,7 @@ void setupMacAddress() {
         if (mac[i] != 0 && mac[i] != 0xff) isMacValid = true;
     }
     if (!isMacValid) {
-        debugSerial<<F("Invalid MAC: set firmware's MAC");
+        debugSerial<<F("Invalid MAC: set firmware's MAC\n");
         memcpy(mac, firmwareMacAddress, 6);
     }
     printMACAddress();
@@ -1374,12 +1378,12 @@ void thermoLoop(void) {
             aJsonObject *thermoExtensionArray = aJson.getArrayItem(thermoItem, I_EXT);
             if (thermoExtensionArray && (aJson.getArraySize(thermoExtensionArray) > 1)) {
                 int thermoPin = aJson.getArrayItem(thermoItem, I_ARG)->valueint;
-                int thermoSetting = aJson.getArrayItem(thermoItem, I_VAL)->valueint;
+                float thermoSetting = aJson.getArrayItem(thermoItem, I_VAL)->valueint; ///
                 int thermoStateCommand = aJson.getArrayItem(thermoItem, I_CMD)->valueint;
-                int curTemp = aJson.getArrayItem(thermoExtensionArray, IET_TEMP)->valueint;
+                float curTemp = aJson.getArrayItem(thermoExtensionArray, IET_TEMP)->valuefloat;
 
                 if (!aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint) {
-                    debugSerial<<thermoItem->name<<F(" Expired");
+                    debugSerial<<thermoItem->name<<F(" Expired\n");
 
                 } else {
                     if (!(--aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint))
@@ -1389,7 +1393,7 @@ void thermoLoop(void) {
                 if (curTemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", thermoItem->name);
 
 
-                debugSerial << endl << thermoItem->name << F("Set:") << thermoSetting << F(" Cur:") << curTemp
+                debugSerial << endl << thermoItem->name << F(" Set:") << thermoSetting << F(" Cur:") << curTemp
                             << F(" cmd:") << thermoStateCommand;
                 pinMode(thermoPin, OUTPUT);
                 if (thermoDisabledOrDisconnected(thermoExtensionArray, thermoStateCommand)) {
@@ -1418,7 +1422,7 @@ void thermoLoop(void) {
 #endif
 }
 
-short thermoSetCurTemp(char *name, short t) {
+short thermoSetCurTemp(char *name, float t) {
     if (items) {
         aJsonObject *thermoItem = aJson.getObjectItem(items, name);
         if (isThermostatWithMinArraySize(thermoItem, 4)) {
@@ -1428,7 +1432,7 @@ short thermoSetCurTemp(char *name, short t) {
             {
                 extArray = aJson.createArray(); //Create Ext Array
 
-                aJsonObject *ocurt = aJson.createItem(t);  //Create int
+                aJsonObject *ocurt = aJson.createItem(t);  //Create float
                 aJsonObject *oattempts = aJson.createItem(T_ATTEMPTS); //Create int
                 aJson.addItemToArray(extArray, ocurt);
                 aJson.addItemToArray(extArray, oattempts);
@@ -1436,7 +1440,7 @@ short thermoSetCurTemp(char *name, short t) {
             }
             else if (extArray = aJson.getArrayItem(thermoItem, I_EXT)) {
                 aJsonObject *att = aJson.getArrayItem(extArray, IET_ATTEMPTS);
-                aJson.getArrayItem(extArray, IET_TEMP)->valueint = t;
+                aJson.getArrayItem(extArray, IET_TEMP)->valuefloat = t;
                 if (att->valueint == 0) mqttClient.publish("/alarmoff/snsr", thermoItem->name);
                 att->valueint = (int) T_ATTEMPTS;
             }

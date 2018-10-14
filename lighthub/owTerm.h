@@ -48,7 +48,7 @@ e-mail    anklimov@gmail.com
 #define check_circle 2000/t_count
 
 #define t_max 20 //Maximum number of 1w devices
-#define TEMPERATURE_PRECISION 9
+#define TEMPERATURE_PRECISION 12 //9
 
 #ifndef OWIRE_DISABLE
 
@@ -61,7 +61,7 @@ e-mail    anklimov@gmail.com
 
 extern aJsonObject *owArr;
 
-typedef   void (*owChangedType) (int , DeviceAddress, int) ;
+typedef   void (*owChangedType) (int , DeviceAddress, float) ;
 #ifndef USE_1W_PIN
 #define DS2482_100_I2C_TO_1W_BRIDGE // HW driver
 #endif

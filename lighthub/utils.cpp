@@ -87,11 +87,11 @@ unsigned long freeRam ()
 #endif
 
 #if defined(__AVR__)
-unsigned long freeRam () 
+unsigned long freeRam ()
 {
-  extern int __heap_start, *__brkval; 
-  int v; 
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 #endif
 
@@ -134,6 +134,24 @@ void parseBytes(const char *str, char separator, byte *bytes, int maxBytes, int 
         }
         str++;                                // Point to next character after separator
     }
+}
+
+
+void printFloatValueToStr(float value, char *valstr) {
+    #if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
+    sprintf(valstr, "%2.1f", value);
+    #endif
+    #if defined(__AVR__)
+    sprintf(valstr, "%d", (int)value);
+    int fractional = 10.0*((float)abs(value)-(float)abs((int)value));
+    int val_len =strlen(valstr);
+    valstr[val_len]='.';
+    valstr[val_len+1]='0'+fractional;
+    valstr[val_len+2]='\0';
+    #endif
+    #if defined(__SAM3X8E__)
+    sprintf(valstr, "%2.1f",value);
+    #endif
 }
 
 #define ARDBUFFER 16 //Buffer for storing intermediate strings. Performance may vary depending on size.

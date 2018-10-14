@@ -265,22 +265,7 @@ void Input::setNextPollTime(unsigned long pollTime) {
     }
 }
 
-void Input::printFloatValueToStr(float value, char *valstr) {
-    #if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
-    sprintf(valstr, "%2.1f", value);
-    #endif
-    #if defined(__AVR__)
-    sprintf(valstr, "%d", (int)value);
-    int fractional = 10.0*((float)abs(value)-(float)abs((int)value));
-    int val_len =strlen(valstr);
-    valstr[val_len]='.';
-    valstr[val_len+1]='0'+fractional;
-    valstr[val_len+2]='\0';
-    #endif
-    #if defined(__SAM3X8E__)
-    sprintf(valstr, "%2.1f",value);
-    #endif
-}
+
 
 void Input::contactPoll() {
     boolean currentInputState;
@@ -415,4 +400,3 @@ void Input::printUlongValueToStr(char *valstr, unsigned long value) {
     }
     valstr[i]='\0';
 }
-

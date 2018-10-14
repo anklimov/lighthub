@@ -112,7 +112,6 @@ protected:
 
     void dht22Poll();
 
-    void printFloatValueToStr(float value, char *valstr);
 
     void counterPoll();
 

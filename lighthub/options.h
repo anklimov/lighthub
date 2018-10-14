@@ -13,8 +13,8 @@
 #define IET_TEMP     0
 #define IET_ATTEMPTS 1
 
-#define THERMO_GIST_CELSIUS 2
-#define THERMO_OVERHEAT_CELSIUS 38
+#define THERMO_GIST_CELSIUS 1.
+#define THERMO_OVERHEAT_CELSIUS 38.
 #define FM_OVERHEAT_CELSIUS 40.
 
 #define MIN_VOLUME 10
@@ -151,3 +151,5 @@
 #ifndef Wiz5500
 #define W5100_ETHERNET_SHIELD
 #endif
+
+#define eol "\n"
