@@ -515,7 +515,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                 Par[0] = 0;
                 Par[1] = 0;
                 Par[2] = 0;
-                setCmd(cmd);
+                if (getCmd() == CMD_XON) setCmd(CMD_OFF); //Prevent restoring temporary turned on channels (by XON) 
+                    else setCmd(cmd);
                 SendStatus(CMD_OFF); //HALT to OFF mapping - send in any cases
                 Serial.println(F(" Halted"));
             }
