@@ -68,12 +68,7 @@ PWM Out
 #include "main.h"
 #include "options.h"
 #include "utils.h"
-#ifdef WITH_STREAMING_LIB
-#include "Streaming.h"
-#else
-#include "PrintEx.h"
-using namespace ios;
-#endif
+
 
 
 #if defined(__SAM3X8E__)
