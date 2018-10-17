@@ -26,6 +26,7 @@ e-mail    anklimov@gmail.com
 #ifndef DHT_DISABLE
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #include <DHTesp.h>
+
 #else
 #include "DHT.h"
 #endif
@@ -40,7 +41,7 @@ static volatile int nextPollMillisPin[5] = {0,0,0,0,0};
 static volatile long counter_value[6];
 #endif
 
-#if defined(ESP8266)
+#if defined(ARDUINO_ARCH_ESP8266)
 static volatile long counter_value[6];
 #endif
 
@@ -204,7 +205,7 @@ void Input::dht22Poll() {
 #ifndef DHT_DISABLE
     if(nextPollTime()>millis())
         return;
-#if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
     DHTesp dhtSensor;
     dhtSensor.setup(pin, DHTesp::DHT22);
     TempAndHumidity dhtSensorData = dhtSensor.getTempAndHumidity();
@@ -223,7 +224,7 @@ void Input::dht22Poll() {
         if(idx&&idx->valuestring){//DOMOTICZ json format support
             debugSerial<<endl<<idx->valuestring<<F(" Domoticz valstr:");
             char valstr[80];
-            sprintf( valstr, "{\"command\":\"udevice\",\"idx\":%s,\"svalue\":\"%.1f;%.0f;0\"}",idx->valuestring,temp,humidity);
+            sprintf( valstr,"{\"command\":\"udevice\",\"idx\":%s,\"svalue\":\"%.1f;%.0f;0\"}",idx->valuestring,temp,humidity);
             debugSerial<<valstr;
             mqttClient.publish(emit->valuestring, valstr);
         }
@@ -277,7 +278,7 @@ void Input::contactPoll() {
 #if defined(ARDUINO_ARCH_STM32F1)
      WiringPinMode inputPinMode;
 #endif
-#if defined(__SAM3X8E__)||defined(__AVR__)||defined(ESP8266)||defined(ARDUINO_ARCH_ESP32)
+#if defined(__SAM3X8E__)||defined(__AVR__)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
      uint32_t inputPinMode;
 #endif
 
