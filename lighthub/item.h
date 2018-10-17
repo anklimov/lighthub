@@ -53,6 +53,17 @@ e-mail    anklimov@gmail.com
 #define I_CMD  3 //Latest CMD received
 #define I_EXT  4 //Chanell-depended extension - array
 
+#define MODBUS_CMD_ARG_ADDR 0
+#define MODBUS_CMD_ARG_REG 1
+#define MODBUS_CMD_ARG_MASK 2
+#define MODBUS_CMD_ARG_MAX_SCALE 3
+#define MODBUS_CMD_ARG_REG_TYPE 4
+
+#define MODBUS_COIL_REG_TYPE 0
+#define MODBUS_DISCRETE_REG_TYPE 1
+#define MODBUS_HOLDING_REG_TYPE 2
+#define MODBUS_INPUT_REG_TYPE 3
+
 #include "aJSON.h"
 
 extern aJsonObject *items;
@@ -114,7 +125,7 @@ class Item
   protected:
   int VacomSetFan (int8_t  val, int8_t  cmd=0);
   int VacomSetHeat(int addr, int8_t  val, int8_t  cmd=0);
-  int modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value);
+  int modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value);
   void mb_fail(short addr, short op, int val, int cmd);
   int isActive();
   void Parse();

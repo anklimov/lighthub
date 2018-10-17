@@ -574,14 +574,16 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
         case CH_MODBUS: {
                short numpar=0;
             if ((itemArg->type == aJson_Array) && ((numpar = aJson.getArraySize(itemArg)) >= 2)) {
-                int _addr = aJson.getArrayItem(itemArg, 0)->valueint;
-                int _reg = aJson.getArrayItem(itemArg, 1)->valueint;
+                int _addr = aJson.getArrayItem(itemArg, MODBUS_CMD_ARG_ADDR)->valueint;
+                int _reg = aJson.getArrayItem(itemArg, MODBUS_CMD_ARG_REG)->valueint;
                 int _mask = -1;
-                if (numpar >= 3)  _mask = aJson.getArrayItem(itemArg, 2)->valueint;
+                if (numpar >= (MODBUS_CMD_ARG_MASK+1))  _mask = aJson.getArrayItem(itemArg, MODBUS_CMD_ARG_MASK)->valueint;
                 int _maxval = 0x3f;
-                if (numpar >=4) _maxval = aJson.getArrayItem(itemArg, 3)->valueint;
-                if (_maxval) modbusDimmerSet(_addr, _reg, _mask, map(Par[0], 0, 100, 0, _maxval));
-                             else modbusDimmerSet(_addr, _reg, _mask, Par[0]);
+                if (numpar >= (MODBUS_CMD_ARG_MAX_SCALE+1)) _maxval = aJson.getArrayItem(itemArg, MODBUS_CMD_ARG_MAX_SCALE)->valueint;
+                int _regType = MODBUS_HOLDING_REG_TYPE;
+                if (numpar >= (MODBUS_CMD_ARG_REG_TYPE+1)) _regType = aJson.getArrayItem(itemArg, MODBUS_CMD_ARG_REG_TYPE)->valueint;
+                if (_maxval) modbusDimmerSet(_addr, _reg, _regType, _mask, map(Par[0], 0, 100, 0, _maxval));
+                             else modbusDimmerSet(_addr, _reg, _regType, _mask, Par[0]);
             }
             break;
         }
@@ -886,7 +888,11 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
     modbusBusy = 0;
 }
 
-int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
+int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value) {
+
+    if (_regType != MODBUS_COIL_REG_TYPE || _regType != MODBUS_HOLDING_REG_TYPE) {
+      
+    }
 
     if (modbusBusy) {
         mb_fail(3, addr, value, 0);
@@ -895,7 +901,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
     };
     modbusBusy = 1;
 
-    modbusSerial.begin(9600, dimPar);
+    modbusSerial.begin(MODBUS_SERIAL_BAUD, dimPar);
     node.begin(addr, modbusSerial);
 
 
@@ -912,10 +918,22 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
     Serial.print(addr);
     Serial.print(F("=>"));
     Serial.print(_reg, HEX);
-    Serial.print(F(":"));
+    Serial.print(F("(T:"));
+    Serial.print(_regType);
+    Serial.print(F("):"));
     Serial.println(value, HEX);
 
-    node.writeSingleRegister(_reg, value);
+    switch (_regType) {
+        case MODBUS_HOLDING_REG_TYPE:
+            node.writeSingleRegister(_reg, value);
+            break;
+        case MODBUS_COIL_REG_TYPE:
+            node.writeSingleCoil(_reg, value);
+            break;
+        default:
+            Serial.println(F("Not supported reg type"));
+    }
+    
     modbusBusy = 0;
 }
 
@@ -1032,7 +1050,7 @@ boolean Item::checkModbusRetry() {
     int cmd = getCmd(true);
     if (cmd & CMD_RETRY) {   // if last sending attempt of command was failed
       int val = getVal();
-      Serial.println(F("Retrying CMD"));
+      
       cmd &= ~CMD_RETRY;     // Clean retry flag
       Ctrl(cmd,1,&val);      // Execute command again
       return true;
@@ -1043,23 +1061,53 @@ return false;
 int Item::checkModbusDimmer() {
     if (modbusBusy) return -1;
     if (checkModbusRetry()) return -2;
+    
+    short numpar = 0;
+    if ((itemArg->type != aJson_Array) || ((numpar = aJson.getArraySize(itemArg)) < 2)) {
+        Serial.println(F("Illegal arguments"));
+        return -3;
+    }
+    
     modbusBusy = 1;
 
     uint8_t result;
 
-    uint16_t addr = getArg(0);
-    uint16_t reg = getArg(1);
+    uint16_t addr = getArg(MODBUS_CMD_ARG_ADDR);
+    uint16_t reg = getArg(MODBUS_CMD_ARG_REG);
+    int _regType = MODBUS_HOLDING_REG_TYPE;
+    if (numpar >= (MODBUS_CMD_ARG_REG_TYPE+1)) _regType = aJson.getArrayItem(itemArg, MODBUS_CMD_ARG_REG_TYPE)->valueint;
   //  short mask = getArg(2);
+    // Serial.print(F("Modbus polling "));
+    // Serial.print(addr);
+    // Serial.print(F("=>"));
+    // Serial.print(reg, HEX);
+    // Serial.print(F("(T:"));
+    // Serial.print(_regType);
+    // Serial.println(F(")"));
 
     int data;
 
     //node.setSlave(addr);
 
-    modbusSerial.begin(9600, dimPar);
+    modbusSerial.begin(MODBUS_SERIAL_BAUD, dimPar);
     node.begin(addr, modbusSerial);
 
-
-    result = node.readHoldingRegisters(reg, 1);
+    switch (_regType) {
+        case MODBUS_HOLDING_REG_TYPE:
+            result = node.readHoldingRegisters(reg, 1);
+            break;
+        case MODBUS_COIL_REG_TYPE:
+            result = node.readCoils(reg, 1);
+            break;
+        case MODBUS_DISCRETE_REG_TYPE:
+            result = node.readDiscreteInputs(reg, 1);
+            break;
+        case MODBUS_INPUT_REG_TYPE:
+            result = node.readInputRegisters(reg, 1);
+            break;
+        default:
+            Serial.println(F("Not supported reg type"));
+    }
 
     if (result == node.ku8MBSuccess) {
         data = node.getResponseBuffer(0);
