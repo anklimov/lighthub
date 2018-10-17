@@ -76,7 +76,7 @@ DueFlashStorage EEPROM;
 EthernetClient ethClient;
 #endif
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 EthernetClient ethClient;
 #endif
 
@@ -286,7 +286,7 @@ lan_status lanLoop() {
 
 
     {
-#if defined(__AVR__) || defined(__SAM3X8E__)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
         wdt_dis();
         if (lanStatus > 0)
             switch (Ethernet.maintain()) {
@@ -456,7 +456,7 @@ void onInitialStateInitLAN() {
     }
 #endif
 
-#if defined(__AVR__) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32F1)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32F1)
 #ifdef W5500_CS_PIN
     Ethernet.w5500_cspin = W5500_CS_PIN;
     debugSerial<<F("Use W5500 pin: "));
@@ -487,7 +487,7 @@ void onInitialStateInitLAN() {
     else {
         debugSerial<<"\nNo IP data found in flash\n";
         wdt_dis();
-#if defined(__AVR__) || defined(__SAM3X8E__)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
         res = Ethernet.begin(mac, 12000);
 #endif
 #if defined(ARDUINO_ARCH_STM32F1)
@@ -519,7 +519,7 @@ void softRebootFunc() {
 }
 #endif
 
-#if defined(__AVR__) || defined(__SAM3X8E__)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
 void (*softRebootFunc)(void) = 0;
 
 void printCurentLanConfig();
@@ -908,7 +908,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 #endif
     debugSerial<<F("Config URI: http://")<<configServer<<URI<<eol;
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
     FILE *configStream;
     //byte hserver[] = { 192,168,88,2 };
     wdt_dis();

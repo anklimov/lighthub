@@ -95,7 +95,7 @@
 #define LAN_INIT_DELAY 500
 #endif
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 //All options available
 #ifdef CONTROLLINO
 #define modbusSerial Serial3

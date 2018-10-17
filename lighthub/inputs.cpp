@@ -37,7 +37,7 @@ extern PubSubClient mqttClient;
 #ifndef DHT_COUNTER_DISABLE
 static volatile unsigned long nextPollMillisValue[5];
 static volatile int nextPollMillisPin[5] = {0,0,0,0,0};
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 static volatile long counter_value[6];
 #endif
 
@@ -127,7 +127,7 @@ void Input::counterPoll() {
     if(nextPollTime()>millis())
         return;
     if (store->logicState == 0) {
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 #define interrupt_number pin
         if (interrupt_number >= 0 && interrupt_number < 6) {
             const short mega_interrupt_array[6] = {2, 3, 21, 20, 19, 18};
@@ -171,7 +171,7 @@ void Input::counterPoll() {
 void Input::attachInterruptPinIrq(int realPin, int irq) {
     pinMode(realPin, INPUT);
     int real_irq;
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
     real_irq = irq;
 #endif
 #if defined(__SAM3X8E__)
@@ -293,7 +293,7 @@ void Input::onCounterChanged(int i) {
     counter_value[counter_irq_map[i]]++;
 #endif
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
     counter_value[i]++;
 #endif
 }
@@ -326,7 +326,7 @@ void Input::contactPoll() {
 #if defined(ARDUINO_ARCH_STM32F1)
      WiringPinMode inputPinMode;
 #endif
-#if defined(__SAM3X8E__)||defined(__AVR__)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
+#if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
      uint32_t inputPinMode;
 #endif
 

@@ -33,7 +33,7 @@ e-mail    anklimov@gmail.com
 
 #if defined(_dmxout)
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 #include <DmxSimple.h>
 #define DmxWrite DmxSimple.write
 #endif
@@ -56,7 +56,7 @@ extern Artnet *artnet;
 #endif
 
 #ifdef _dmxin
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 #include <DMXSerial.h>
 #endif
 #endif
