@@ -24,12 +24,8 @@ e-mail    anklimov@gmail.com
 #define VAR_NAME_VALUE(var) #var "="  VALUE(var)
 
 #include <Arduino.h>
-#ifdef WITH_STREAMING_LIB
+#include "options.h"
 #include "Streaming.h"
-#else
-#include "PrintEx.h"
-using namespace ios;
-#endif
 
 void PrintBytes(uint8_t* addr, uint8_t count, bool newline);
 void SetBytes(uint8_t* addr, uint8_t count, char * out);

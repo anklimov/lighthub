@@ -91,7 +91,7 @@ public:
 
     boolean isValid();
 
-    void onContactChanged(int val);
+    void onContactChanged(int newValue);
 
     int poll();
 

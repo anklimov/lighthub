@@ -204,21 +204,13 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
 
 void printIPAddress(IPAddress ipAddress) {
     for (byte i = 0; i < 4; i++)
-#ifdef WITH_STREAMING_LIB
             (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i]) << F(", ");
-#else
-            (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : debugSerial << (ipAddress[i])<<F(", ");
-#endif
 }
 
 void printMACAddress() {
     debugSerial<<F("Configured MAC:");
     for (byte i = 0; i < 6; i++)
-#ifdef WITH_STREAMING_LIB
         (i < 5) ?debugSerial<<_HEX(mac[i])<<F(":"):debugSerial<<_HEX(mac[i])<<endl;
-#else
-        (i < 5) ?debugSerial<<hex <<(mac[i])<<F(":"):debugSerial<<hex<<(mac[i])<<endl;
-#endif
 }
 
 void restoreState() {
@@ -440,17 +432,14 @@ void onInitialStateInitLAN() {
     if(!wifiInitialized) {
         WiFi.mode(WIFI_STA);
         WiFi.disconnect();
-        debugSerial<<F("WIFI AP/Password:"));
-        debugSerial<<QUOTE(ESP_WIFI_AP));
-        debugSerial<<F("/"));
-        debugSerial<<QUOTE(ESP_WIFI_PWD));
+        debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD);
         WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
 
         int wifi_connection_wait = 10000;
         while (WiFi.status() != WL_CONNECTED && wifi_connection_wait > 0) {
             delay(500);
             wifi_connection_wait -= 500;
-            debugSerial<<".");
+            debugSerial<<".";
         }
         wifiInitialized = true;
     }
@@ -458,12 +447,10 @@ void onInitialStateInitLAN() {
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
     if (WiFi.status() == WL_CONNECTED) {
-        debugSerial<<F("WiFi connected. IP address: ");
-        debugSerial<<WiFi.localIP();
+        debugSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP();
         lanStatus = HAVE_IP_ADDRESS;//1;
     } else
     {
-
         debugSerial<<F("Problem with WiFi!");
         nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL/5;
     }
@@ -1166,10 +1153,10 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     debugSerial<<F("\n(+)OWIRE");
 #endif
-#ifndef DHT_DISABLE
-    debugSerial<<F("\n(+)DHT");
+#ifndef DHT_COUNTER_DISABLE
+    debugSerial<<F("\n(+)DHT COUNTER");
 #else
-    debugSerial<<F("\n(-)DHT");
+    debugSerial<<F("\n(-)DHT COUNTER");
 #endif
 
 #ifdef SD_CARD_INSERTED

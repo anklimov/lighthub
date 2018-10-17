@@ -115,12 +115,14 @@
 #if defined(ARDUINO_ARCH_ESP8266)
 #undef _dmxin
 #undef _modbus
-#define WITH_STREAMING_LIB
 
 #ifndef DMX_DISABLE
 #define _espdmx
 #endif
 #define modbusSerial Serial1
+#endif
+
+#if defined(ARDUINO_ARCH_ESP32)
 #endif
 
 #ifndef _dmxout
