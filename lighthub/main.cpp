@@ -477,8 +477,8 @@ void onInitialStateInitLAN() {
 #if defined(__AVR__) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32F1)
 #ifdef W5500_CS_PIN
     Ethernet.w5500_cspin = W5500_CS_PIN;
-    debugSerial<<F("Use W5500 pin: "));
-    debugSerial<<Ethernet.w5500_cspin);
+    debugSerial<<"Use W5500 pin: ";
+    debugSerial<<(Ethernet.w5500_cspin);
 #endif
     IPAddress ip, dns, gw, mask;
     int res = 1;
@@ -553,8 +553,8 @@ void softRebootFunc(){
 
 void resetHard() {
 #ifdef RESET_PIN
-    debugSerial<<F("Reset Arduino with digital pin "));
-    debugSerial<<QUOTE(RESET_PIN));
+    debugSerial<<"Reset Arduino with digital pin ";
+    debugSerial<<QUOTE(RESET_PIN);
     delay(500);
     pinMode(RESET_PIN, OUTPUT);
     digitalWrite(RESET_PIN,LOW);
@@ -1182,7 +1182,7 @@ void printFirmwareVersionAndBuildOptions() {
 #endif
 
 #ifdef RESET_PIN
-    debugSerial<<F("\n(+)HARDRESET on pin=")<<F(QUOTE(RESET_PIN);
+    debugSerial<<"\n(+)HARDRESET on pin="<<QUOTE(RESET_PIN);
 #else
     debugSerial<<F("\n(-)HARDRESET, using soft");
 #endif
