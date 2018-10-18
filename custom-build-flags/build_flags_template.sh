@@ -27,5 +27,6 @@
 #export FLAGS="$FLAGS -DSYSLOG_ENABLE"
 #export FLAGS="$FLAGS -DDEVICE_NAME=MYDEVICE"
 #export FLAGS="$FLAGS -DDHT_COUNTER_DISABLE"
+#export FLAGS="$FLAGS -DWITH_PRINTEX_LIB"
  export FLAGS="$FLAGS -DPIO_SRC_REV="$(git log --pretty=format:%h_%ad -1 --date=short)
  echo $FLAGS

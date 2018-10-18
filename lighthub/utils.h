@@ -25,7 +25,12 @@ e-mail    anklimov@gmail.com
 
 #include <Arduino.h>
 #include "options.h"
+#ifdef WITH_PRINTEX_LIB
+#include "PrintEx.h"
+using namespace ios;
+#else
 #include "Streaming.h"
+#endif
 
 void PrintBytes(uint8_t* addr, uint8_t count, bool newline);
 void SetBytes(uint8_t* addr, uint8_t count, char * out);

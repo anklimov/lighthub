@@ -69,8 +69,6 @@ PWM Out
 #include "options.h"
 #include "utils.h"
 
-
-
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
 EthernetClient ethClient;
@@ -204,13 +202,21 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
 
 void printIPAddress(IPAddress ipAddress) {
     for (byte i = 0; i < 4; i++)
+#ifdef WITH_PRINTEX_LIB
+            (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : debugSerial << (ipAddress[i])<<F(", ");
+#else
             (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i]) << F(", ");
+#endif
 }
 
 void printMACAddress() {
     debugSerial<<F("Configured MAC:");
     for (byte i = 0; i < 6; i++)
+#ifdef WITH_PRINTEX_LIB
+        (i < 5) ?debugSerial<<hex <<(mac[i])<<F(":"):debugSerial<<hex<<(mac[i])<<endl;
+#else
         (i < 5) ?debugSerial<<_HEX(mac[i])<<F(":"):debugSerial<<_HEX(mac[i])<<endl;
+#endif
 }
 
 void restoreState() {

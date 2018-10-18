@@ -4,10 +4,9 @@
 .gcc-flags.json
 CMakeListsPrivate.txt
 build_flags_due.sh
-build_flags_due_cheb.sh
-build_flags_due_riko.sh
 build_flags_esp32.sh
 build_flags_esp8266.sh
 build_flags_stm32.sh
 build_flags_due-5500.sh
 build_flags_mega2560.sh
+build_flags_controllino.sh

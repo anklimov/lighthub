@@ -155,6 +155,7 @@ platformio device monitor -b 115200
 * RESTART_LAN_ON_MQTT_ERRORS //reinit LAN if many mqtt errors occured
 * DEVICE_NAME short handy device name which is used instead of mac for download config http://{MY_CONFIG_SERVER}/{DEVICE_NAME}_config.json
 * SYSLOG_ENABLE enable UDP SYSLOG support feature(under DEVELOPMENT) that must be configured through config file
+* WITH_PRINTEX_LIB use PrintEx library (develop experimental feature)
 
 
 
@@ -180,5 +181,6 @@ platformio device monitor -b 115200
 * RESTART_LAN_ON_MQTT_ERRORS disabled
 * DEVICE_NAME disabled
 * SYSLOG_ENABLE disabled
+* WITH_PRINTEX_LIB diabled, using Streaming library
 
 If you've using Arduino IDE to compile & flash firmware, it will use Default options above and you will not able to configure additional compilers options except edit "options.h" file
