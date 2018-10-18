@@ -891,7 +891,7 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
 int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value) {
 
     if (_regType != MODBUS_COIL_REG_TYPE || _regType != MODBUS_HOLDING_REG_TYPE) {
-      
+
     }
 
     if (modbusBusy) {
@@ -933,7 +933,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
         default:
             Serial.println(F("Not supported reg type"));
     }
-    
+
     modbusBusy = 0;
 }
 
@@ -1051,7 +1051,7 @@ boolean Item::checkModbusRetry() {
     if (cmd & CMD_RETRY) {   // if last sending attempt of command was failed
       int val = getVal();
       Serial.println(F("Retrying CMD"));
-      
+
       cmd &= ~CMD_RETRY;     // Clean retry flag
       Ctrl(cmd,1,&val);      // Execute command again
       return true;
@@ -1062,13 +1062,13 @@ return false;
 int Item::checkModbusDimmer() {
     if (modbusBusy) return -1;
     if (checkModbusRetry()) return -2;
-    
+
     short numpar = 0;
     if ((itemArg->type != aJson_Array) || ((numpar = aJson.getArraySize(itemArg)) < 2)) {
         Serial.println(F("Illegal arguments"));
         return -3;
     }
-    
+
     modbusBusy = 1;
 
     uint8_t result;

@@ -34,7 +34,7 @@
 //#define wdt_en()
 //#define wdt_dis()
 //#endif
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 #if defined(WATCH_DOG_TICKER_DISABLE)
 #define wdt_en() wdt_disable()
 #define wdt_dis() wdt_disable()
@@ -75,7 +75,7 @@
 #include <ArduinoHttpClient.h>
 #endif
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 #include "HTTPClient.h"
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
@@ -104,7 +104,7 @@
 
 #endif
 
-#if defined(__AVR__) || defined(__SAM3X8E__) || defined(ESP8266)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined(ESP8266)
 #ifdef Wiz5500
 #include <Ethernet2.h>
 #else

@@ -68,20 +68,13 @@ PWM Out
 #include "main.h"
 #include "options.h"
 #include "utils.h"
-#ifdef WITH_STREAMING_LIB
-#include "Streaming.h"
-#else
-#include "PrintEx.h"
-using namespace ios;
-#endif
-
 
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
 EthernetClient ethClient;
 #endif
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 EthernetClient ethClient;
 #endif
 
@@ -209,20 +202,20 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
 
 void printIPAddress(IPAddress ipAddress) {
     for (byte i = 0; i < 4; i++)
-#ifdef WITH_STREAMING_LIB
-            (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i]) << F(", ");
-#else
+#ifdef WITH_PRINTEX_LIB
             (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : debugSerial << (ipAddress[i])<<F(", ");
+#else
+            (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i]) << F(", ");
 #endif
 }
 
 void printMACAddress() {
     debugSerial<<F("Configured MAC:");
     for (byte i = 0; i < 6; i++)
-#ifdef WITH_STREAMING_LIB
-        (i < 5) ?debugSerial<<_HEX(mac[i])<<F(":"):debugSerial<<_HEX(mac[i])<<endl;
-#else
+#ifdef WITH_PRINTEX_LIB
         (i < 5) ?debugSerial<<hex <<(mac[i])<<F(":"):debugSerial<<hex<<(mac[i])<<endl;
+#else
+        (i < 5) ?debugSerial<<_HEX(mac[i])<<F(":"):debugSerial<<_HEX(mac[i])<<endl;
 #endif
 }
 
@@ -299,7 +292,7 @@ lan_status lanLoop() {
 
 
     {
-#if defined(__AVR__) || defined(__SAM3X8E__)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
         wdt_dis();
         if (lanStatus > 0)
             switch (Ethernet.maintain()) {
@@ -445,17 +438,14 @@ void onInitialStateInitLAN() {
     if(!wifiInitialized) {
         WiFi.mode(WIFI_STA);
         WiFi.disconnect();
-        debugSerial<<F("WIFI AP/Password:"));
-        debugSerial<<QUOTE(ESP_WIFI_AP));
-        debugSerial<<F("/"));
-        debugSerial<<QUOTE(ESP_WIFI_PWD));
+        debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD);
         WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
 
         int wifi_connection_wait = 10000;
         while (WiFi.status() != WL_CONNECTED && wifi_connection_wait > 0) {
             delay(500);
             wifi_connection_wait -= 500;
-            debugSerial<<".");
+            debugSerial<<".";
         }
         wifiInitialized = true;
     }
@@ -463,18 +453,16 @@ void onInitialStateInitLAN() {
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
     if (WiFi.status() == WL_CONNECTED) {
-        debugSerial<<F("WiFi connected. IP address: ");
-        debugSerial<<WiFi.localIP();
+        debugSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP();
         lanStatus = HAVE_IP_ADDRESS;//1;
     } else
     {
-
         debugSerial<<F("Problem with WiFi!");
         nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL/5;
     }
 #endif
 
-#if defined(__AVR__) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32F1)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32F1)
 #ifdef W5500_CS_PIN
     Ethernet.w5500_cspin = W5500_CS_PIN;
     debugSerial<<F("Use W5500 pin: ");
@@ -505,7 +493,7 @@ void onInitialStateInitLAN() {
     else {
         debugSerial<<"\nNo IP data found in flash\n";
         wdt_dis();
-#if defined(__AVR__) || defined(__SAM3X8E__)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
         res = Ethernet.begin(mac, 12000);
 #endif
 #if defined(ARDUINO_ARCH_STM32F1)
@@ -537,7 +525,7 @@ void softRebootFunc() {
 }
 #endif
 
-#if defined(__AVR__) || defined(__SAM3X8E__)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
 void (*softRebootFunc)(void) = 0;
 
 void printCurentLanConfig();
@@ -926,7 +914,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 #endif
     debugSerial<<F("Config URI: http://")<<configServer<<URI<<eol;
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
     FILE *configStream;
     //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
@@ -1171,10 +1159,10 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     debugSerial<<F("\n(+)OWIRE");
 #endif
-#ifndef DHT_DISABLE
-    debugSerial<<F("\n(+)DHT");
+#ifndef DHT_COUNTER_DISABLE
+    debugSerial<<F("\n(+)DHT COUNTER");
 #else
-    debugSerial<<F("\n(-)DHT");
+    debugSerial<<F("\n(-)DHT COUNTER");
 #endif
 
 #ifdef SD_CARD_INSERTED

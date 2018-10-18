@@ -86,7 +86,7 @@ unsigned long freeRam ()
 {return system_get_free_heap_size();}
 #endif
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 unsigned long freeRam ()
 {
   extern int __heap_start, *__brkval;
@@ -141,7 +141,7 @@ void printFloatValueToStr(float value, char *valstr) {
     #if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
     sprintf(valstr, "%2.1f", value);
     #endif
-    #if defined(__AVR__)
+    #if defined(ARDUINO_ARCH_AVR)
     sprintf(valstr, "%d", (int)value);
     int fractional = 10.0*((float)abs(value)-(float)abs((int)value));
     int val_len =strlen(valstr);

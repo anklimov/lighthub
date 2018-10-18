@@ -23,7 +23,7 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 
 #ifdef _dmxin
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 #include <DMXSerial.h>
 #endif
 #endif
@@ -207,7 +207,7 @@ void DMXinSetup(int channels)
 
 #if defined(_dmxin)
    DMXin = new uint8_t [channels];
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
    DMXSerial.init(DMXReceiver,0,channels);
     if (DMXSerial.getBuffer()) {Serial.print(F("Init in ch:"));Serial.println(channels);} else Serial.println(F("DMXin Buffer alloc err"));
    //DMXSerial.maxChannel(channels);
@@ -230,7 +230,7 @@ dmxin.begin();
 void DMXoutSetup(int channels)
 {
 #ifdef _dmxout
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
  DmxSimple.usePin(AVR_DMXOUT_PIN);
  DmxSimple.maxChannel(channels);
 #endif
