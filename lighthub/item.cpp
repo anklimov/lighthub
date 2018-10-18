@@ -888,7 +888,11 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
     modbusBusy = 0;
 }
 
-int Item::modbusDimmerSet(int addr, uint16_t _reg, int _mask, uint16_t value) {
+int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value) {
+
+    if (_regType != MODBUS_COIL_REG_TYPE || _regType != MODBUS_HOLDING_REG_TYPE) {
+
+    }
 
     if (modbusBusy) {
         mb_fail(3, addr, value, 0);
