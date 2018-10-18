@@ -1050,6 +1050,7 @@ boolean Item::checkModbusRetry() {
     int cmd = getCmd(true);
     if (cmd & CMD_RETRY) {   // if last sending attempt of command was failed
       int val = getVal();
+      Serial.println(F("Retrying CMD"));
       
       cmd &= ~CMD_RETRY;     // Clean retry flag
       Ctrl(cmd,1,&val);      // Execute command again
