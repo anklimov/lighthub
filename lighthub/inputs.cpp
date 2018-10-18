@@ -20,6 +20,7 @@ e-mail    anklimov@gmail.com
 
 #include "inputs.h"
 #include "item.h"
+#include "utils.h"
 #include <PubSubClient.h>
 
 #ifndef DHT_DISABLE
