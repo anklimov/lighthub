@@ -554,11 +554,11 @@ void resetHard() {
 
 #ifdef _owire
 
-void Changed(int i, DeviceAddress addr, float val) {
+void Changed(int i, DeviceAddress addr, float currentTemp) {
     char addrstr[32] = "NIL";
     //char addrbuf[17];
     char valstr[16] = "NIL";
-    char *owEmit = NULL;
+    char *owEmitString = NULL;
     char *owItem = NULL;
 
     SetBytes(addr, 8, addrstr);
@@ -566,25 +566,33 @@ void Changed(int i, DeviceAddress addr, float val) {
 
     aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);
     if (owObj) {
-        owEmit = aJson.getObjectItem(owObj, "emit")->valuestring;
+        owEmitString = aJson.getObjectItem(owObj, "emit")->valuestring;
 
-        if (owEmit) {
-          printFloatValueToStr(val,valstr);
-          debugSerial<<owEmit<<F("=")<<valstr<<eol;
+        if (owEmitString) {
+            printFloatValueToStr(currentTemp,valstr);
+            debugSerial<<owEmitString<<F("=")<<valstr<<eol;
+            if ((currentTemp == -127.0) || (currentTemp == 85.0) || (currentTemp == 0.0))  //ToDo: 1-w short circuit mapped to "0" celsium
+                return;
 
-          if ((val == -127.0) || (val == 85.0) || (val == 0.0)) { //ToDo: 1-w short circuit mapped to "0" celsium
-              return;
-          }
+#ifdef WITH_DOMOTICZ
+            aJsonObject *idx = aJson.getObjectItem(owObj, "idx");
+        if (idx && idx->valuestring) {//DOMOTICZ json format support
+            debugSerial << endl << idx->valuestring << F(" Domoticz valstr:");
+            char valstr[50];
+            sprintf(valstr, "{\"idx\":%s,\"svalue\":\"%.1f\"}", idx->valuestring, currentTemp);
+            debugSerial << valstr;
+            mqttClient.publish(owEmitString, valstr);
+            return;
+        }
+#endif
+
             strcpy_P(addrstr, outprefix);
-            strncat(addrstr, owEmit, sizeof(addrstr));
-            //strncat(addrstr, addrbuf, sizeof(addrstr));
-
+            strncat(addrstr, owEmitString, sizeof(addrstr));
             mqttClient.publish(addrstr, valstr);
         }
         owItem = aJson.getObjectItem(owObj, "item")->valuestring;
-        if (owItem) {
-            thermoSetCurTemp(owItem, val);  ///TODO: Refactore using Items interface
-    }
+        if (owItem)
+            thermoSetCurTemp(owItem, currentTemp);  ///TODO: Refactore using Items interface
 
     else debugSerial<<F("1w-item not found in config")<<eol;
   }

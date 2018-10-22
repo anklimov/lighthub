@@ -156,7 +156,7 @@ void restoreState();
 lan_status lanLoop();
 
 #ifndef OWIRE_DISABLE
-void Changed(int i, DeviceAddress addr, float val);
+void Changed(int i, DeviceAddress addr, float currentTemp);
 #endif
 
 void modbusIdle(void);

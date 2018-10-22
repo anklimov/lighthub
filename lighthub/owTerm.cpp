@@ -63,9 +63,7 @@ int owUpdate() {
                 }; //alive
             if (ifind < 0 && sensors) {
                 wstat[t_count] = SW_FIND; //Newly detected
-                debugSerial.print(F("dev#"));
-                debugSerial.print(t_count);
-                debugSerial.print(F(" Addr:"));
+                debugSerial<<F("dev#")<<t_count<<F(" Addr:");
                 PrintBytes(term[t_count], 8,0);
                 debugSerial.println();
                 if (term[t_count][0] == 0x28) {
@@ -78,8 +76,7 @@ int owUpdate() {
         }//if
     } //while
 
-    debugSerial.print(F("1-wire count: "));
-    debugSerial.println(t_count);
+    debugSerial<<F("1-wire count: ")<<t_count;
 #endif
 }
 
@@ -89,7 +86,7 @@ int owSetup(owChangedType owCh) {
     //// todo - move memory allocation to here
     if (net) return true;    // Already initialized
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
-    debugSerial.println(F("DS2482_100_I2C_TO_1W_BRIDGE init"));
+    debugSerial<<F("DS2482_100_I2C_TO_1W_BRIDGE init");
     net = new OneWire;
 #else
     debugSerial.print(F("One wire setup on PIN:"));
@@ -190,9 +187,7 @@ void owAdd(DeviceAddress addr) {
     memcpy(term[t_count], addr, 8);
     //term[t_count]=addr;
 
-    debugSerial.print(F("dev#"));
-    debugSerial.print(t_count);
-    debugSerial.print(F(" Addr:"));
+    debugSerial<<F("dev#")<<t_count<<F(" Addr:");
     PrintBytes(term[t_count], 8,0);
     debugSerial.println();
     if (term[t_count][0] == 0x28) {
