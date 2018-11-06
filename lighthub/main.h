@@ -55,12 +55,16 @@
 #include <SPI.h>
 #include "utils.h"
 #include <string.h>
-#include <ModbusMaster.h>
 #include "aJSON.h"
 #include <Cmd.h>
 #include "stdarg.h"
 #include "item.h"
 #include "inputs.h"
+
+
+#ifndef MODBUS_DISABLE
+#include <ModbusMaster.h>
+#endif
 
 #ifndef ARDUINO_ARCH_STM32F1
 #include "FastLED.h"

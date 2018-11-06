@@ -23,14 +23,15 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 
 #ifdef _dmxout
-
 #include "dmx.h"
 #include "FastLED.h"
-
 #endif
 
+#ifndef MODBUS_DISABLE
 #include <ModbusMaster.h>
+#endif
 #include <PubSubClient.h>
+
 
 
 short modbusBusy = 0;
@@ -1266,7 +1267,10 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
                 if (Par)
                     for (short i = 0; i < n; i++) {
                         char num[4];
+                        #ifndef FLASH_64KB
                         snprintf(num, sizeof(num), "%d", Par[i]);
+                        #endif
+                        itoa(Par[i],num,10);
                         strncat(valstr, num, sizeof(valstr));
                         if (i != n - 1) {
                             strcpy(num, ",");

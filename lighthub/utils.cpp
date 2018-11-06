@@ -100,11 +100,13 @@ extern char _end;
 extern "C" char *sbrk(int i);
 
 unsigned long freeRam() {
+#ifndef DISABLE_FREERAM_PRINT
     char *heapend = sbrk(0);
     register char *stack_ptr asm( "sp" );
     struct mallinfo mi = mallinfo();
-
     return stack_ptr - heapend + mi.fordblks;
+#endif
+    return 7777;
 }
 
 #endif
@@ -155,6 +157,8 @@ void printFloatValueToStr(float value, char *valstr) {
 }
 
 #define ARDBUFFER 16 //Buffer for storing intermediate strings. Performance may vary depending on size.
+
+#ifndef ARDUINO_ARCH_STM32F1
 
 int log(const char *str, ...)//TODO: __FlashStringHelper str support
 {
@@ -207,6 +211,7 @@ int log(const char *str, ...)//TODO: __FlashStringHelper str support
     Serial.println(); //Print trailing newline
     return count + 1; //Return number of arguments detected
 }
+#endif
 
 
 #pragma message(VAR_NAME_VALUE(debugSerial))

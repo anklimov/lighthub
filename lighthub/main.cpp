@@ -94,12 +94,13 @@ WiFiClient ethClient;
 #endif
 
 #ifdef ARDUINO_ARCH_STM32F1
+#include "HttpClient.h"
 //#include <EthernetClient.h>
 //#include "UIPEthernet.h"
 //#include "UIPUdp.h"
 #include <SPI.h>
 #include <Ethernet_STM.h>
-#include "HttpClient.h"
+
 #include "Dns.h"
 //#include "utility/logging.h"
 #include <EEPROM.h>
@@ -126,10 +127,18 @@ aJsonObject *items = NULL;
 aJsonObject *inputs = NULL;
 
 aJsonObject *mqttArr = NULL;
+#ifndef MODBUS_DISABLE
 aJsonObject *modbusArr = NULL;
+#endif
+#ifdef _owire
 aJsonObject *owArr = NULL;
+#endif
+#ifdef _dmxout
 aJsonObject *dmxArr = NULL;
+#endif
+#ifdef SYSLOG_ENABLE
 aJsonObject *udpSyslogArr = NULL;
+#endif
 
 unsigned long nextPollingCheck = 0;
 unsigned long nextInputCheck = 0;
@@ -378,7 +387,6 @@ void ip_ready_config_loaded_connecting_to_broker() {
         mqttClient.setCallback(mqttCallback);
 
         debugSerial<<F("\nAttempting MQTT connection to ")<<servername<<F(":")<<port<<F(" user:")<<user<<F(" ...");
-
         wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
         if (mqttClient.connect(client_id, user, password)) {
             mqttErrorRate = 0;
@@ -619,7 +627,6 @@ void cmdFunctionHelp(int arg_cnt, char **args)
                           "'clear' - clear EEPROM\n"
                           "'reboot' - reboot controller");
 }
-
 void printCurentLanConfig() {
     debugSerial << F("Current LAN config(ip,dns,gw,subnet):");
     printIPAddress(Ethernet.localIP());
@@ -712,7 +719,9 @@ void applyConfig() {
     }
     inputs = aJson.getObjectItem(root, "in");
     mqttArr = aJson.getObjectItem(root, "mqtt");
+#ifdef SYSLOG_ENABLE
     udpSyslogArr = aJson.getObjectItem(root, "syslog");
+#endif
     printConfigSummary();
 }
 
@@ -721,14 +730,20 @@ void printConfigSummary() {
     printBool(items);
     debugSerial<<F("\ninputs ");
     printBool(inputs);
+#ifndef MODBUS_DISABLE
     debugSerial<<F("\nmodbus ");
     printBool(modbusArr);
+#endif
     debugSerial<<F("\nmqtt ");
     printBool(mqttArr);
+#ifdef _owire
     debugSerial<<F("\n1-wire ");
     printBool(owArr);
+#endif
+#ifdef SYSLOG_ENABLE
     debugSerial<<F("\nudp syslog ");
     printBool(udpSyslogArr);
+#endif
     debugSerial << eol;
 }
 
@@ -759,6 +774,7 @@ int loadConfigFromEEPROM()
         debugSerial<<F("\nNo stored config\n");
         return 0;
     }
+    return 0;
 }
 
 void cmdFunctionReq(int arg_cnt, char **args) {
@@ -873,8 +889,7 @@ void cmdFunctionGet(int arg_cnt, char **args) {
     //restoreState();
 }
 
-void printBool(bool arg) { (arg) ? debugSerial<<F("on") : debugSerial<<F("off"); }
-
+void printBool(bool arg) { (arg) ? debugSerial<<F("+") : debugSerial<<F("-"); }
 
 void saveFlash(short n, char *str) {
     short i;
@@ -902,7 +917,6 @@ int ipLoadFromFlash(short n, IPAddress &ip) {
         ip[i] = EEPROM.read(n++);
     return (ip[0] && (ip[0] != 0xff));
 }
-
 lan_status loadConfigFromHttp(int arg_cnt, char **args)
 {
     int responseStatusCode = 0;
@@ -918,7 +932,13 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     snprintf(URI, sizeof(URI), "/%02x-%02x-%02x-%02x-%02x-%02x.config.json", mac[0], mac[1], mac[2], mac[3], mac[4],
              mac[5]);
 #else
+#ifndef FLASH_64KB
     snprintf(URI, sizeof(URI), "/%s_config.json",QUOTE(DEVICE_NAME));
+#else
+    strncpy_P(URI, "/", sizeof(URI));
+    strncat(URI, QUOTE(DEVICE_NAME), sizeof(URI));
+    strncat(URI, "_config.json", sizeof(URI));
+#endif
 #endif
     debugSerial<<F("Config URI: http://")<<configServer<<URI<<eol;
 
@@ -1002,22 +1022,13 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
         if (!root) {
             debugSerial<<F("Config parsing failed\n");
-            // nextLanCheckTime=millis()+15000;
             return READ_RE_CONFIG;//-11; //Load from NVRAM
         } else {
-            /*
-            char * outstr=aJson.print(root);
-            debugSerial<<outstr);
-            free (outstr);
-             */
             debugSerial<<response;
             applyConfig();
-
-
         }
     } else {
         debugSerial<<F("Config retrieving failed\n");
-        //nextLanCheckTime=millis()+15000;
         return READ_RE_CONFIG;//-11; //Load from NVRAM
     }
 #endif
@@ -1225,7 +1236,9 @@ void setupCmdArduino() {
     cmdAdd("save", cmdFunctionSave);
     cmdAdd("load", cmdFunctionLoad);
     cmdAdd("get", cmdFunctionGet);
+#ifndef FLASH_64KB
     cmdAdd("mac", cmdFunctionSetMac);
+#endif
     cmdAdd("kill", cmdFunctionKill);
     cmdAdd("req", cmdFunctionReq);
     cmdAdd("ip", cmdFunctionIp);
@@ -1368,7 +1381,6 @@ void thermoLoop(void) {
     if (millis() < nextThermostatCheck)
         return;
     bool thermostatCheckPrinted = false;
-
     for (aJsonObject *thermoItem = items->child; thermoItem; thermoItem = thermoItem->next) {
         if (isThermostatWithMinArraySize(thermoItem, 5)) {
             aJsonObject *thermoExtensionArray = aJson.getArrayItem(thermoItem, I_EXT);

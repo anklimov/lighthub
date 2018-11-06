@@ -158,6 +158,8 @@
 
 #ifndef Wiz5500
 #define W5100_ETHERNET_SHIELD
+#else
+#define W5500_ETHERNET_SHIELD
 #endif
 
 #define eol "\n"
