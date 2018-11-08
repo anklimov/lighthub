@@ -33,11 +33,11 @@ extern "C" {
 
 void PrintBytes(uint8_t *addr, uint8_t count, bool newline) {
     for (uint8_t i = 0; i < count; i++) {
-        Serial.print(addr[i] >> 4, HEX);
-        Serial.print(addr[i] & 0x0f, HEX);
+        debugSerial<<_HEX(addr[i] >> 4);
+        debugSerial<<_HEX(addr[i] & 0x0f);
     }
     if (newline)
-        Serial.println();
+        debugSerial<<eol;
 }
 
 const char HEXSTR[] = "0123456789ABCDEF";
@@ -100,13 +100,10 @@ extern char _end;
 extern "C" char *sbrk(int i);
 
 unsigned long freeRam() {
-#ifndef DISABLE_FREERAM_PRINT
     char *heapend = sbrk(0);
     register char *stack_ptr asm( "sp" );
     struct mallinfo mi = mallinfo();
     return stack_ptr - heapend + mi.fordblks;
-#endif
-    return 7777;
 }
 
 #endif
@@ -174,7 +171,7 @@ int log(const char *str, ...)//TODO: __FlashStringHelper str support
         {
             //Clear buffer
             temp[j] = '\0';
-            Serial.print(temp);
+            debugSerial<<temp;
             j=0;
             temp[0] = '\0';
 
@@ -208,7 +205,7 @@ int log(const char *str, ...)//TODO: __FlashStringHelper str support
         }
     };
 
-    Serial.println(); //Print trailing newline
+    debugSerial<<eol;
     return count + 1; //Return number of arguments detected
 }
 #endif

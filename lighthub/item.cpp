@@ -84,7 +84,7 @@ void Item::Parse() {
         itemType = aJson.getArrayItem(itemArr, I_TYPE)->valueint;
         itemArg = aJson.getArrayItem(itemArr, I_ARG);
         itemVal = aJson.getArrayItem(itemArr, I_VAL);
-        debugSerial << (F(" Item:") << itemArr->name << F(" T:") << itemType << F(" =") << getArg() << eol;
+        debugSerial << F(" Item:") << itemArr->name << F(" T:") << itemType << F(" =") << getArg() << eol;
     }
 }
 
@@ -154,7 +154,7 @@ long int Item::getVal() //Return Val if val is int or first elem of Value array
 void Item::setVal(short n, int par)  // Only store  if VAL is array defined in config to avoid waste of RAM
 {
   if (!itemVal || itemVal->type!=aJson_Array) return;
-  Serial.print(F(" Store p="));Serial.print(n);Serial.print(F(" Val="));Serial.println(par);
+  debugSerial<<F(" Store p="));debugSerial<<n);debugSerial<<F(" Val="));debugSerial<<par);
   for (int i=aJson.getArraySize(itemVal);i<=n;i++) aJson.addItemToArray(itemVal,aJson.createItem(int(0))); //Enlarge array of Values
 
   aJsonObject *t = aJson.getArrayItem(itemVal,n);
@@ -236,7 +236,7 @@ int Item::Ctrl(char * payload, boolean send){
           //       if (item.getEnableCMD(500) || lanStatus == 4)
          Ctrl(cmd, 0, NULL,
                     send); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
-          //       else Serial.println(F("on Skipped"));
+          //       else debugSerial<<F("on Skipped"));
 
           break;
       default: //some known command
@@ -268,29 +268,26 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
             if (itemType != CH_GROUP) //individual threating of channels. Ignore restore command for groups
                 switch (t = getCmd()) {
                     case CMD_HALT: //previous command was HALT ?
-                        Serial.print(F("Restored from:"));
-                        Serial.println(t);
+                        debugSerial << F("Restored from:") << t << eol;
                         cmd = CMD_ON;    //turning on
                         break;
                     default:
                         return -3;
-                }//switch old cmd
-                break;
-          case CMD_XOFF:
-          if (itemType != CH_GROUP) //individual threating of channels. Ignore restore command for groups
-              switch (t = getCmd()) {
-                  case CMD_XON: //previous command was CMD_XON ?
-                          Serial.print(F("Turned off from:"));
-                          Serial.println(t);
-                          cmd = CMD_OFF;    //turning Off
-                          break;
-                  default:
-                      Serial.print(F("XOFF skipped. Prev cmd:"));
-                      Serial.println(t);
+                }
+            break;
+        case CMD_XOFF:
+            if (itemType != CH_GROUP) //individual threating of channels. Ignore restore command for groups
+                switch (t = getCmd()) {
+                    case CMD_XON: //previous command was CMD_XON ?
+                        debugSerial << F("Turned off from:") << t << eol;
+                        cmd = CMD_OFF;    //turning Off
+                        break;
+                    default:
+                        debugSerial<<F("XOFF skipped. Prev cmd:")<<t<<eol;
                       return -3;
-              }//switch old cmd
+              }
               break;
-    } //switch cmd
+    }
 
     switch (cmd) {
         case 0: //no command
@@ -340,18 +337,18 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
         case CMD_XON:
         if (!isActive())  //if channel was'nt active before CMD_XON
               {
-                Serial.println(F("Turning XON"));
+                debugSerial<<F("Turning XON\n");
 //                setCmd(cmd);
               }
           else
           {  //cmd = CMD_ON;
-            Serial.println(F("Already Active"));
+            debugSerial<<F("Already Active\n");
             if (itemType != CH_GROUP) return -3;
           }
         case CMD_ON:
 
         if (itemType==CH_RGBW && getCmd() == CMD_ON && getEnableCMD(500)) {
-                  Serial.println(F("Force White"));
+                  debugSerial<<F("Force White\n");
                   itemType = CH_WHITE;
                   Par[1] = 0;   //Zero saturation
                   Par[2] = 100; //Full power
@@ -416,9 +413,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                             if (send) SendStatus(cmd);          // Just send ON
                     }//itemtype switch
                 else {// Default settings, values not stored yet
-                    Serial.print(st.aslong);
-                    Serial.println(F(": No stored values - default"));
-
+                    debugSerial<<st.aslong<<F(": No stored values - default\n");
                     switch (itemType) {
                         case CH_VCTEMP:
                         case CH_THERMO:
@@ -454,16 +449,13 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                     }
                 } // default handler
                 for (short i = 0; i < params; i++) {
-                    Serial.print(F("Restored: "));
-                    Serial.print(i);
-                    Serial.print(F("="));
-                    Serial.println(Par[i]);
+                    debugSerial<<F("Restored: ")<<i<<F("=")<<Par[i]<<eol;
                 }
 /*
             } else {  //Double ON - apply special preset - clean white full power
                 if (getEnableCMD(500)) switch (itemType) {
                     case CH_RGBW:
-                        Serial.println(F("Force White"));
+                        debugSerial<<F("Force White"));
                         itemType = CH_WHITE;
                         Par[1] = 0;   //Zero saturation
                         Par[2] = 100; //Full power
@@ -480,7 +472,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                 } //itemtype
             } //else
 */
-            //Serial.print("Sa:");Serial.println(Par[1]);
+            //debugSerial<<"Sa:");debugSerial<<Par[1]);
             if ((itemType == CH_RGBW) && (Par[1] == 0)) itemType = CH_WHITE;
           }
 
@@ -506,7 +498,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                 if (getCmd() == CMD_XON) setCmd(CMD_OFF); //Prevent restoring temporary turned on channels (by XON) 
                     else setCmd(cmd);
                 SendStatus(CMD_OFF); //HALT to OFF mapping - send in any cases
-                Serial.println(F(" Halted"));
+                debugSerial<<F(" Halted\n");
             }
 
 
@@ -519,37 +511,22 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
 
 #ifdef _dmxout
         case CH_DIMMER: //Dimmed light
-
             DmxWrite(iaddr, map(Par[0], 0, 100, 0, 255));
-
             break;
-
-
         case CH_RGBW: //Colour RGBW
         {
             int k;
             DmxWrite(iaddr + 3, k = map((100 - Par[1]) * Par[2], 0, 10000, 0, 255));
-            Serial.print(F("W:"));
-            Serial.println(k);
+            debugSerial<<F("W:")<<k<<eol;
         }
-
-
         case CH_RGB: // RGB
-
         {
-
-
             CRGB rgb = CHSV(map(Par[0], 0, 365, 0, 255), map(Par[1], 0, 100, 0, 255), map(Par[2], 0, 100, 0, 255));
-
             DmxWrite(iaddr, rgb.r);
             DmxWrite(iaddr + 1, rgb.g);
             DmxWrite(iaddr + 2, rgb.b);
-
-
             break;
         }
-
-
         case CH_WHITE:
             DmxWrite(iaddr, 0);
             DmxWrite(iaddr + 1, 0);
@@ -595,10 +572,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
             int k;
             pinMode(iaddr, OUTPUT);
             digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? HIGH : LOW));
-            Serial.print(F("Pin:"));
-            Serial.print(iaddr);
-            Serial.print(F("="));
-            Serial.println(k);
+            debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<eol;
             break;
             case CH_THERMO:
                 ///thermoSet(name,cmd,Par1); all cativities done - update temp & cmd
@@ -634,19 +608,13 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
             if (inverse) k = map(Par[0], 100, 0, 0, 255);
             else k = map(Par[0], 0, 100, 0, 255);
             analogWrite(iaddr, k);
-            Serial.print(F("Pin:"));
-            Serial.print(iaddr);
-            Serial.print(F("="));
-            Serial.println(k);
+            debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<eol;
             break;
         }
 #ifdef _modbus
         case CH_VC:
-
             VacomSetFan(Par[0], cmd);
             break;
-
-
         case CH_VCTEMP: {
             Item it(itemArg->valuestring);
             if (it.isValid() && it.itemType == CH_VC)
@@ -654,12 +622,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
             break;
         }
 #endif
-
-    } // switch itemtype
-    //  break;
-
-
-
+    }
 }
 
 int Item::isActive() {
@@ -667,7 +630,7 @@ int Item::isActive() {
     int val = 0;
 
     if (!isValid()) return -1;
-//Serial.print(itemArr->name);
+//debugSerial<<itemArr->name);
 
     int cmd = getCmd();
 
@@ -677,12 +640,12 @@ int Item::isActive() {
         switch (cmd) {
             case CMD_ON:
             case CMD_XON:
-                //Serial.println(" active");
+                //debugSerial<<" active");
                 return 1;
             case CMD_OFF:
             case CMD_HALT:
             case -1: ///// No last command
-                //Serial.println(" inactive");
+                //debugSerial<<" inactive");
                 return 0;
         }
 
@@ -692,13 +655,13 @@ int Item::isActive() {
     switch (itemType) {
         case CH_GROUP: //make recursive calculation - is it some active in group
             if (itemArg->type == aJson_Array) {
-                Serial.println(F("Grp check: "));
+                debugSerial<<F("Grp check:\n");
                 aJsonObject *i = itemArg->child;
                 while (i) {
                     Item it(i->valuestring);
 
                     if (it.isValid() && it.isActive()) {
-                        Serial.println(F("Active"));
+                        debugSerial<<F("Active\n");
                         return 1;
                     }
                     i = i->next;
@@ -723,8 +686,8 @@ int Item::isActive() {
         case CH_PWM:
             val = st.aslong;
     } //switch
-    //Serial.print(F(":="));
-    //Serial.println(val);
+    //debugSerial<<F(":="));
+    //debugSerial<<val);
     if (val) return 1; else return 0;
 }
 
@@ -796,7 +759,7 @@ POLL  2101x10
 */
 
 void Item::mb_fail(short addr, short op, int val, int cmd) {
-    Serial.println(F("Modbus op failed"));
+    debugSerial<<F("Modbus op failed\n");
 //    int cmd = getCmd();
 //    if (cmd<0) return;
     setCmd(cmd | CMD_RETRY);
@@ -810,18 +773,12 @@ extern ModbusMaster node;
 
 int Item::VacomSetFan(int8_t val, int8_t cmd) {
     int addr = getArg();
-    Serial.print(F("VC#"));
-    Serial.print(addr);
-    Serial.print(F("="));
-    Serial.println(val);
-
-
+    debugSerial<<F("VC#")<<addr<<F("=")<<val<<eol;
     if (modbusBusy) {
         mb_fail(1, addr, val, cmd);
         return -1;
     }
     modbusBusy = 1;
-
     uint8_t j;//, result;
     //uint16_t data[1];
 
@@ -834,22 +791,15 @@ int Item::VacomSetFan(int8_t val, int8_t cmd) {
     } else node.writeSingleRegister(2001 - 1, 0);
     delay(50);
     node.writeSingleRegister(2003 - 1, val * 100);
-
     modbusBusy = 0;
-
 }
 
-#define a 0.1842
-#define b -36.68
+#define a 0.1842f
+#define b -36.68f
 
 int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
 
-    Serial.print(F("VC_heat#"));
-    Serial.print(addr);
-    Serial.print(F("="));
-    Serial.print(val);
-    Serial.print(F(" cmd="));
-    Serial.println(cmd);
+    debugSerial<<F("VC_heat#")<<addr<<F("=")<<val<<F(" cmd=")<<cmd<<eol;
     if (modbusBusy) {
         mb_fail(2, addr, val, cmd);
         return -1;
@@ -871,7 +821,7 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
             regval = round(((float) val - b) * 10 / a);
     }
 
-    //Serial.println(regval);
+    //debugSerial<<regval);
     node.writeSingleRegister(2004 - 1, regval);
     modbusBusy = 0;
 }
@@ -891,8 +841,6 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
 
     modbusSerial.begin(MODBUS_SERIAL_BAUD, dimPar);
     node.begin(addr, modbusSerial);
-
-
     switch (_mask) {
        case 1:
         value <<= 8;
@@ -902,15 +850,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
         value &= 0xff;
         value |= (0xff00);
     }
-
-    Serial.print(addr);
-    Serial.print(F("=>"));
-    Serial.print(_reg, HEX);
-    Serial.print(F("(T:"));
-    Serial.print(_regType);
-    Serial.print(F("):"));
-    Serial.println(value, HEX);
-
+    debugSerial<<addr<<F("=>")<<_HEX(_reg)<<F("(T:")<<_regType<<F("):")<<_HEX(value)<<eol;
     switch (_regType) {
         case MODBUS_HOLDING_REG_TYPE:
             node.writeSingleRegister(_reg, value);
@@ -919,9 +859,8 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
             node.writeSingleCoil(_reg, value);
             break;
         default:
-            Serial.println(F("Not supported reg type"));
+            debugSerial<<F("Not supported reg type\n");
     }
-
     modbusBusy = 0;
 }
 
@@ -953,13 +892,12 @@ int Item::checkFM() {
 
     // do something with data if read is successful
     if (result == node.ku8MBSuccess) {
-        Serial.print(F(" FM Val :"));
+        debugSerial<<F(" FM Val :");
         for (j = 0; j < 10; j++) {
             data = node.getResponseBuffer(j);
-            Serial.print(data, HEX);
-            Serial.print(F("-"));
-
+            debugSerial<<_HEX(data)<<F("-");
         }
+        debugSerial<<eol;
         int RPM;
         //     aJson.addNumberToObject(out,"gsw",    (int) node.getResponseBuffer(1));
         aJson.addNumberToObject(out, "V", (int) node.getResponseBuffer(2) / 100.);
@@ -971,20 +909,17 @@ int Item::checkFM() {
         //     aJson.addNumberToObject(out,"U",      (int) node.getResponseBuffer(8)/10.);
         //     aJson.addNumberToObject(out,"Ui",     (int) node.getResponseBuffer(9));
         aJson.addNumberToObject(out, "sw", (int) node.getResponseBuffer(0));
-
-        if (RPM && itemArg->type == aJson_Array)
-              { aJsonObject *airGateObj = aJson.getArrayItem(itemArg, 1);
-                if (airGateObj) {
-                      int val = 100;
-                      Item item(airGateObj->valuestring);
-                         if (item.isValid()) item.Ctrl(0,1,&val);
-                }
-              }
-        Serial.println();
-    } else {
-        Serial.print(F("Modbus polling error="));
-        Serial.println(result, HEX);
-    }
+        if (RPM && itemArg->type == aJson_Array) {
+            aJsonObject *airGateObj = aJson.getArrayItem(itemArg, 1);
+            if (airGateObj) {
+                int val = 100;
+                Item item(airGateObj->valuestring);
+                if (item.isValid())
+                    item.Ctrl(0, 1, &val);
+            }
+        }
+    } else
+        debugSerial << F("Modbus polling error=") << _HEX(result) << eol;
 
     if (node.getResponseBuffer(0) & 8) //Active fault
     {
@@ -997,40 +932,33 @@ int Item::checkFM() {
 
     // do something with data if read is successful
     if (result == node.ku8MBSuccess) {
-        Serial.print(F(" PI Val :"));
+        debugSerial << F(" PI Val :");
         for (j = 0; j < 4; j++) {
             data = node.getResponseBuffer(j);
-            Serial.print(data);
-            Serial.print(F("-"));
-
+            debugSerial << data << F("-");
         }
-
+        debugSerial << eol;
         int set = node.getResponseBuffer(0);
-        float fset;
-        float ftemp;
-        if (set) aJson.addNumberToObject(out, "set", fset =set * a + b);
-        aJson.addNumberToObject(out, "t", ftemp =(int) node.getResponseBuffer(1) * a + b);
+        float ftemp, fset = set * a + b;
+        if (set)
+            aJson.addNumberToObject(out, "set", fset);
+        aJson.addNumberToObject(out, "t", ftemp = (int) node.getResponseBuffer(1) * a + b);
         //   aJson.addNumberToObject(out,"d",    (int) node.getResponseBuffer(2)*a+b);
         int pwr = node.getResponseBuffer(3);
-        if (pwr > 0) aJson.addNumberToObject(out, "pwr", pwr / 10.); else aJson.addNumberToObject(out, "pwr", 0);
+        if (pwr > 0)
+            aJson.addNumberToObject(out, "pwr", pwr / 10.);
+        else aJson.addNumberToObject(out, "pwr", 0);
 
-         if (ftemp>FM_OVERHEAT_CELSIUS && set)
-            {
+        if (ftemp > FM_OVERHEAT_CELSIUS && set) {
             mqttClient.publish("/alarm/ovrht", itemArr->name);
             Ctrl(CMD_OFF); //Shut down
-            }
-        Serial.println();
-    } else {
-        Serial.print(F("Modbus polling error="));
-        Serial.println(result, HEX);
-    }
-
-
+        }
+    } else
+        debugSerial << F("Modbus polling error=") << _HEX(result);
     outch = aJson.print(out);
     mqttClient.publish(addrstr, outch);
     free(outch);
     aJson.deleteItem(out);
-
     modbusBusy = 0;
 }
 
@@ -1038,7 +966,7 @@ boolean Item::checkModbusRetry() {
     int cmd = getCmd(true);
     if (cmd & CMD_RETRY) {   // if last sending attempt of command was failed
       int val = getVal();
-      Serial.println(F("Retrying CMD"));
+      debugSerial<<F("Retrying CMD\n");
 
       cmd &= ~CMD_RETRY;     // Clean retry flag
       Ctrl(cmd,1,&val);      // Execute command again
@@ -1053,7 +981,7 @@ int Item::checkModbusDimmer() {
 
     short numpar = 0;
     if ((itemArg->type != aJson_Array) || ((numpar = aJson.getArraySize(itemArg)) < 2)) {
-        Serial.println(F("Illegal arguments"));
+        debugSerial<<F("Illegal arguments\n");
         return -3;
     }
 
@@ -1066,13 +994,13 @@ int Item::checkModbusDimmer() {
     int _regType = MODBUS_HOLDING_REG_TYPE;
     if (numpar >= (MODBUS_CMD_ARG_REG_TYPE+1)) _regType = aJson.getArrayItem(itemArg, MODBUS_CMD_ARG_REG_TYPE)->valueint;
   //  short mask = getArg(2);
-    // Serial.print(F("Modbus polling "));
-    // Serial.print(addr);
-    // Serial.print(F("=>"));
-    // Serial.print(reg, HEX);
-    // Serial.print(F("(T:"));
-    // Serial.print(_regType);
-    // Serial.println(F(")"));
+    // debugSerial<<F("Modbus polling "));
+    // debugSerial<<addr);
+    // debugSerial<<F("=>"));
+    // debugSerial<<reg, HEX);
+    // debugSerial<<F("(T:"));
+    // debugSerial<<_regType);
+    // debugSerial<<F(")"));
 
     int data;
 
@@ -1095,21 +1023,15 @@ int Item::checkModbusDimmer() {
             result = node.readInputRegisters(reg, 1);
             break;
         default:
-            Serial.println(F("Not supported reg type"));
+            debugSerial<<F("Not supported reg type\n");
     }
 
     if (result == node.ku8MBSuccess) {
         data = node.getResponseBuffer(0);
-        Serial.print(F("MB: "));
-        Serial.print(itemArr->name);
-        Serial.print(F(" Val: "));
-        Serial.println(data, HEX);
+        debugSerial << F("MB: ") << itemArr->name << F(" Val: ") << _HEX(data) << eol;
         checkModbusDimmer(data);
-    } else {
-        Serial.print(F("Modbus polling error="));
-        Serial.println(result, HEX);
-    }
-
+    } else
+        debugSerial << F("Modbus polling error=") << _HEX(result) << eol;
     modbusBusy = 0;
 
 // Looking 1 step ahead for modbus item, which uses same register
@@ -1118,9 +1040,9 @@ int Item::checkModbusDimmer() {
         nextItem.getArg(1) == reg) {
         nextItem.checkModbusDimmer(data);
         pollingItem = pollingItem->next;
-        if (!pollingItem) pollingItem = items->child;
+        if (!pollingItem)
+            pollingItem = items->child;
     }
-
 }
 
 
@@ -1138,7 +1060,7 @@ int Item::checkModbusDimmer(int data) {
     if (maxVal) d = map(d, 0, maxVal, 0, 100);
 
     int cmd = getCmd();
-    //Serial.println(d);
+    //debugSerial<<d);
     if (getVal() != d || d && cmd == CMD_OFF || d && cmd == CMD_HALT) //volume changed or turned on manualy
     {
         if (d) { // Actually turned on
