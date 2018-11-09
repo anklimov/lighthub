@@ -92,17 +92,17 @@ void Input::Parse()
     inType = 0;
     pin = 0;
     if (inputObj && (inputObj->type == aJson_Object)) {
-        aJsonObject *s;
-        s = aJson.getObjectItem(inputObj, "T");
-        if (s) inType = static_cast<uint8_t>(s->valueint);
+        aJsonObject *itemBuffer;
+        itemBuffer = aJson.getObjectItem(inputObj, "T");
+        if (itemBuffer) inType = static_cast<uint8_t>(itemBuffer->valueint);
         pin = static_cast<uint8_t>(atoi(inputObj->name));
-        s = aJson.getObjectItem(inputObj, "S");
-        if (!s) {
+        itemBuffer = aJson.getObjectItem(inputObj, "S");
+        if (!itemBuffer) {
             debugSerial<<F("In: ")<<pin<<F("/")<<inType<<endl;
             aJson.addNumberToObject(inputObj, "S", 0);
-            s = aJson.getObjectItem(inputObj, "S");
+            itemBuffer = aJson.getObjectItem(inputObj, "S");
         }
-        if (s) store = (inStore *) &s->valueint;
+        if (itemBuffer) store = (inStore *) &itemBuffer->valueint;
     }
 }
 
@@ -222,15 +222,8 @@ void Input::dht22Poll() {
     if (emit && temp && humidity && temp == temp && humidity == humidity) {
         char addrstr[100] = "";
 #ifdef WITH_DOMOTICZ
-        aJsonObject *idx = aJson.getObjectItem(inputObj, "idx");
-        if (idx && idx->valuestring) {//DOMOTICZ json format support
-            debugSerial << endl << idx->valuestring << F(" Domoticz valstr:");
-            char valstr[50];
-            sprintf(valstr, "{\"idx\":%s,\"svalue\":\"%.1f;%.0f;0\"}", idx->valuestring, temp, humidity);
-            debugSerial << valstr;
-            mqttClient.publish(emit->valuestring, valstr);
-            setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
-            debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
+        if(getIdxField()){
+            publishDataToDomoticz(DHT_POLL_DELAY_DEFAULT, emit, "{\"idx\":%s,\"svalue\":\"%.1f;%.0f;0\"}", getIdxField(), temp, humidity);
             return;
         }
 #endif
@@ -276,16 +269,23 @@ void Input::setNextPollTime(unsigned long pollTime) {
 }
 
 void Input::uptimePoll() {
-    if(nextPollTime()>millis())
+    if (nextPollTime() > millis())
         return;
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     if (emit) {
+#ifdef WITH_DOMOTICZ
+        if(getIdxField()){
+                publishDataToDomoticz(DHT_POLL_DELAY_DEFAULT, emit, "{\"idx\":%s,\"svalue\":\"%d\"}", getIdxField(), millis());
+                return;
+            }
+#endif
+
         char valstr[11];
 //        printUlongValueToStr(valstr,millis());
-        printUlongValueToStr(valstr,millis());
+        printUlongValueToStr(valstr, millis());
         mqttClient.publish(emit->valuestring, valstr);
     }
-    setNextPollTime(millis() +UPTIME_POLL_DELAY_DEFAULT);
+    setNextPollTime(millis() + UPTIME_POLL_DELAY_DEFAULT);
 }
 
 void Input::onCounterChanged(int i) {
@@ -370,15 +370,9 @@ void Input::onContactChanged(int newValue) {
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     if (emit) {
 #ifdef WITH_DOMOTICZ
-        aJsonObject *idx = aJson.getObjectItem(inputObj, "idx");
-        if (idx->valuestring) {
-            debugSerial << endl << idx->valuestring << F(" Domoticz valstr:");
-            char valstr[80];
-            char *switchCmd;
-            (newValue)? sprintf(valstr, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}", idx->valuestring)
-            : sprintf(valstr,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",idx->valuestring);
-            debugSerial << valstr;
-            mqttClient.publish(emit->valuestring, valstr);
+        if (getIdxField()) {
+            (newValue)? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}", getIdxField())
+            : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());
         } else
 #endif
         if (newValue) {  //send set command
@@ -422,4 +416,29 @@ void Input::printUlongValueToStr(char *valstr, unsigned long value) {
         valstr[n]=buf[i-n-1];
     }
     valstr[i]='\0';
+}
+bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, const char *format, ...)
+{
+#ifdef WITH_DOMOTICZ
+    debugSerial << F("\nDomoticz valstr:");
+    char valstr[50];
+    va_list args;
+    va_start(args, format);
+    vsnprintf(valstr, sizeof(valstr) - 1, format, args);
+    va_end(args);
+    debugSerial << valstr;
+    mqttClient.publish(emit->valuestring, valstr);
+    if (pollTimeIncrement)
+        setNextPollTime(millis() + pollTimeIncrement);
+    debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
+
+#endif
+    return true;
+}
+
+char* Input::getIdxField() {
+    aJsonObject *idx = aJson.getObjectItem(inputObj, "idx");
+    if(idx&&idx->valuestring)
+        return idx->valuestring;
+    return nullptr;
 }

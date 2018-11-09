@@ -112,7 +112,7 @@ class Item
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array
   uint8_t getCmd(bool ext = false);
-  void setCmd(uint8_t cmd);
+  void setCmd(uint8_t cmdValue);
   //void setVal(uint8_t n, int par);
   void setVal(long int par);
   //void copyPar (aJsonObject *itemV);
