@@ -121,6 +121,7 @@ const char outprefix[] PROGMEM = OUTTOPIC;
 const char inprefix[] PROGMEM = INTOPIC;
 const char configserver[] PROGMEM = CONFIG_SERVER;
 
+unsigned int UniqueID[5] = {0,0,0,0,0};
 
 aJsonObject *root = NULL;
 aJsonObject *items = NULL;
@@ -1200,6 +1201,19 @@ void printFirmwareVersionAndBuildOptions() {
     debugSerial<<F("\n(-)RESTART_LAN_ON_MQTT_ERRORS");
 #endif
 debugSerial<<eol;
+
+
+//    WDT_Disable( WDT ) ;
+
+    Serial.println("Reading 128 bits unique identifier \n\r" ) ;
+    ReadUniqueID( UniqueID ) ;
+
+    Serial.print ("ID: ") ;
+    for (byte b = 0 ; b < 4 ; b++)
+      Serial.print ((unsigned int) UniqueID [b], HEX) ;
+    Serial.println () ;
+
+
 }
 void printFreeRam(){
     debugSerial<<F("\nfree RAM: ")<<freeRam();

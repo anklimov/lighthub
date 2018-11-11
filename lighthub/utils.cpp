@@ -33,11 +33,11 @@ extern "C" {
 
 void PrintBytes(uint8_t *addr, uint8_t count, bool newline) {
     for (uint8_t i = 0; i < count; i++) {
-        debugSerial<<_HEX(addr[i] >> 4);
-        debugSerial<<_HEX(addr[i] & 0x0f);
+        Serial.print(addr[i] >> 4, HEX);
+        Serial.print(addr[i] & 0x0f, HEX);
     }
     if (newline)
-        debugSerial<<eol;
+        Serial.println();
 }
 
 const char HEXSTR[] = "0123456789ABCDEF";
@@ -86,7 +86,7 @@ unsigned long freeRam ()
 {return system_get_free_heap_size();}
 #endif
 
-#if defined(ARDUINO_ARCH_AVR)
+#if defined(__AVR__)
 unsigned long freeRam ()
 {
   extern int __heap_start, *__brkval;
@@ -103,6 +103,7 @@ unsigned long freeRam() {
     char *heapend = sbrk(0);
     register char *stack_ptr asm( "sp" );
     struct mallinfo mi = mallinfo();
+
     return stack_ptr - heapend + mi.fordblks;
 }
 
@@ -140,7 +141,7 @@ void printFloatValueToStr(float value, char *valstr) {
     #if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
     sprintf(valstr, "%2.1f", value);
     #endif
-    #if defined(ARDUINO_ARCH_AVR)
+    #if defined(__AVR__)
     sprintf(valstr, "%d", (int)value);
     int fractional = 10.0*((float)abs(value)-(float)abs((int)value));
     int val_len =strlen(valstr);
@@ -154,8 +155,6 @@ void printFloatValueToStr(float value, char *valstr) {
 }
 
 #define ARDBUFFER 16 //Buffer for storing intermediate strings. Performance may vary depending on size.
-
-#ifndef ARDUINO_ARCH_STM32F1
 
 int log(const char *str, ...)//TODO: __FlashStringHelper str support
 {
@@ -171,7 +170,7 @@ int log(const char *str, ...)//TODO: __FlashStringHelper str support
         {
             //Clear buffer
             temp[j] = '\0';
-            debugSerial<<temp;
+            Serial.print(temp);
             j=0;
             temp[0] = '\0';
 
@@ -205,10 +204,47 @@ int log(const char *str, ...)//TODO: __FlashStringHelper str support
         }
     };
 
-    debugSerial<<eol;
+    Serial.println(); //Print trailing newline
     return count + 1; //Return number of arguments detected
 }
+
+/* Code borrowed from http://forum.arduino.cc/index.php?topic=289190.0
+Awesome work Mark T!*/
+
+
+__attribute__ ((section (".ramfunc")))
+
+void ReadUniqueID( unsigned int * pdwUniqueID )
+{
+    unsigned int status ;
+
+#if defined(__SAM3X8E__)
+
+    /* Send the Start Read unique Identifier command (STUI) by writing the Flash Command Register with the STUI command.*/
+    EFC1->EEFC_FCR = (0x5A << 24) | EFC_FCMD_STUI;
+    do
+    {
+        status = EFC1->EEFC_FSR ;
+    } while ( (status & EEFC_FSR_FRDY) == EEFC_FSR_FRDY ) ;
+
+    /* The Unique Identifier is located in the first 128 bits of the Flash memory mapping. So, at the address 0x400000-0x400003. */
+    pdwUniqueID[0] = *(uint32_t *)IFLASH1_ADDR;
+    pdwUniqueID[1] = *(uint32_t *)(IFLASH1_ADDR + 4);
+    pdwUniqueID[2] = *(uint32_t *)(IFLASH1_ADDR + 8);
+    pdwUniqueID[3] = *(uint32_t *)(IFLASH1_ADDR + 12);
+
+    /* To stop the Unique Identifier mode, the user needs to send the Stop Read unique Identifier
+       command (SPUI) by writing the Flash Command Register with the SPUI command. */
+    EFC1->EEFC_FCR = (0x5A << 24) | EFC_FCMD_SPUI ;
+
+    /* When the Stop read Unique Unique Identifier command (SPUI) has been performed, the
+       FRDY bit in the Flash Programming Status Register (EEFC_FSR) rises. */
+    do
+    {
+        status = EFC1->EEFC_FSR ;
+    } while ( (status & EEFC_FSR_FRDY) != EEFC_FSR_FRDY ) ;
 #endif
+}
 
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
