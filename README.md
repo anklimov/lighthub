@@ -15,12 +15,12 @@ Lighthub allows connecting together:
 
 ![alt text](docs/LightHubAppDiagram.png "LightHub application diagram")
 
-Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from MQTT enabled software. At the moment, LightHub tested with following set of complementary free software:
+Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from MQTT enabled software. At the moment, LightHub tested and perfectly working with following set of complementary free software:
 * [Openhab or Openhab2 Smarthome software](http://www.openhab.org/)
-Openhab provides own native mobile app both, for IoS and Android, and even allow you to use Apple's HomeKit to say "Siri, turn on light in bedroom" but requires some server to be installed (Raspberry PI with [Openhabian](https://docs.openhab.org/installation/openhabian) will good enough)
+Openhab provides own native mobile app both, for IoS and Android, and even allow you to use Apple's HomeKit and Google Home to say "Siri, turn on light in bedroom" or "Hey Google, set bedroom light to Red" but requires some server to be installed in-premises (Raspberry PI with [Openhabian](https://docs.openhab.org/installation/openhabian) will good enough)
 * [HomeRemote mobile client](http://thehomeremote.com/)
-Home Remote mobile applicatios for IoS and Android requires just MQTT broker to be working. Any Cloud-based MQTT broker, like [CloudMQTT](https://www.cloudmqtt.com/) will enough to serve average household, even with free account.
-* [Node-Red](https://nodered.org/)  Possibly, the best solution to deploy event-based authomation and scripting on top of MQTT/LightHub. The easy to use universal and visual tool to wire many different devices in single system. Having own Dashbord which allow control from web/mobile web, even without mobile apps (but excelent co-working with OpenHab and HomeRemote)
+Home Remote mobile applicatios for IoS and Android requires just MQTT broker to be working. Any Cloud-based MQTT broker, like [CloudMQTT](https://www.cloudmqtt.com/) will enough to serve average household, even with free account. 
+* [Node-Red](https://nodered.org/)  Possibly, the best solution to deploy event-based authomation and scripting on top of MQTT/LightHub. The easy to use universal and visual tool to wire many different devices in single system. Having own Dashbord which allow control from web/mobile web, even without mobile apps (excelent co-working with OpenHab and HomeRemote)
 
 Scalability of Lighthub is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab/NodeRed/HomeRemote and propagate commands across network.
 
@@ -70,11 +70,11 @@ Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) done since v 0.96 and test
 
 # Platforms specific details:
 
-AVR version is basic, long tome in production and have all functions
+AVR version is basic, long time in production and have all functions
 *DMX-out is software (DMXSimple) on pin3
 
-**SAM3X8E**: (Tested. Recomended hardware at current moment)
-* default PWM frequency
+**SAM3X8E**: (Tested. In production. Recomended hardware at current moment)
+* default PWM out frequency
 * both, DMX-in and DMX-out are hardware USART based. Use USART1 (pins 18 and 19) for DMX-out and DMX-in
 
 **ESP8266**: (Developed but not tested in production)
@@ -167,7 +167,7 @@ platformio device monitor -b 115200
 * Serial speed 115200
 * Wiznet 5100 (for MEGA & DUE)
 * Free Ram printing enabled
-* de:ad:be:ef:fe:00
+* de:ad:be:ef:fe:ff default MAC address
 * DMX support enabled
 * Modbus support enabled
 * OneWire support enabled
