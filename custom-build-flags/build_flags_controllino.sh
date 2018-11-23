@@ -6,8 +6,8 @@
 # nano  my_build_flags.sh
 # and source it
 # source my_build_flags.sh
- export FLAGS="-DMY_CONFIG_SERVER=lighthub.elistech.ru"
- export FLAGS="$FLAGS -DWATCH_DOG_TICKER_DISABLE"
+ #export FLAGS="-DMY_CONFIG_SERVER=lighthub.elistech.ru"
+ #export FLAGS="$FLAGS -DWATCH_DOG_TICKER_DISABLE"
  #export FLAGS="$FLAGS -DUSE_1W_PIN=12"
  #export FLAGS="$FLAGS -DSD_CARD_INSERTED"
  export FLAGS="$FLAGS -DSERIAL_BAUD=115200"
@@ -20,7 +20,7 @@
  #export FLAGS="$FLAGS -DAVR_DMXOUT_PIN=18"
  #export FLAGS="$FLAGS -DCONTROLLINO"
 # export FLAGS="$FLAGS -DRESET_PIN=8"
- export FLAGS="$FLAGS -DLAN_INIT_DELAY=2000"
+# export FLAGS="$FLAGS -DLAN_INIT_DELAY=2000"
 # export FLAGS="$FLAGS -DESP_WIFI_AP=vent"
 # export FLAGS="$FLAGS -DESP_WIFI_PWD=kk007remont"
 # export FLAGS="$FLAGS -DSYSLOG_ENABLE"

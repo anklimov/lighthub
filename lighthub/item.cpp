@@ -84,7 +84,7 @@ void Item::Parse() {
         itemType = aJson.getArrayItem(itemArr, I_TYPE)->valueint;
         itemArg = aJson.getArrayItem(itemArr, I_ARG);
         itemVal = aJson.getArrayItem(itemArr, I_VAL);
-        debugSerial << F(" Item:") << itemArr->name << F(" T:") << itemType << F(" =") << getArg() << eol;
+//        debugSerial << F(" Item:") << itemArr->name << F(" T:") << itemType << F(" =") << getArg() << eol;
     }
 }
 
@@ -200,6 +200,8 @@ boolean Item::getEnableCMD(int delta) {
 
 
 int Item::Ctrl(char * payload, boolean send){
+  if (!payload) return 0;
+//  debugSerial<<F("'")<<payload<<F("'")<<eol;
   int cmd = txt2cmd(payload);
   switch (cmd) {
       case 0: {
@@ -209,7 +211,7 @@ int Item::Ctrl(char * payload, boolean send){
           while (payload && i < 3)
               Par[i++] = getInt((char **) &payload);
 
-          Ctrl(0, i, Par, send);
+      return   Ctrl(0, i, Par, send);
       }
           break;
 
@@ -226,7 +228,7 @@ int Item::Ctrl(char * payload, boolean send){
               Par[0] = map(hsv.h, 0, 255, 0, 365);
               Par[1] = map(hsv.s, 0, 255, 0, 100);
               Par[2] = map(hsv.v, 0, 255, 0, 100);
-              Ctrl(0, 3, Par, send);
+          return    Ctrl(0, 3, Par, send);
           }
           break;
       }
@@ -234,13 +236,13 @@ int Item::Ctrl(char * payload, boolean send){
       case CMD_ON:
 
           //       if (item.getEnableCMD(500) || lanStatus == 4)
-         Ctrl(cmd, 0, NULL,
+          return Ctrl(cmd, 0, NULL,
                     send); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
           //       else debugSerial<<F("on Skipped"));
 
           break;
       default: //some known command
-          Ctrl(cmd, 0, NULL, send);
+          return Ctrl(cmd, 0, NULL, send);
 
   } //ctrl
 }
@@ -249,12 +251,15 @@ int Item::Ctrl(char * payload, boolean send){
 int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
 
 
-    debugSerial<<F("Cmd=")<<cmd<<F(" MEM=")<<freeRam()<<eol;
+    debugSerial<<F(" MEM=")<<freeRam()<<F(" Cmd=")<<cmd<<F(" Par: ");
 
     int Par[MAXCTRLPAR] = {0, 0, 0};
     if (Parameters)
-            for (short i=0;i<n && i<MAXCTRLPAR;i++) Par[i] = Parameters[i];
-
+            for (short i=0;i<n && i<MAXCTRLPAR;i++){
+              Par[i] = Parameters[i];
+              debugSerial<<Par[i]<<F(",");
+            }
+    debugSerial<<eol;
     int iaddr = getArg();
     HSVstore st;
     switch (cmd) {
@@ -292,13 +297,12 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
     switch (cmd) {
         case 0: //no command
 
-            setCmd(CMD_SET);
+            if (itemType !=CH_THERMO) setCmd(CMD_SET); //prevent ON thermostat by semp set
 
             switch (itemType) {
 
                 case CH_RGBW: //only if configured VAL array
                     if (!Par[1]) itemType = CH_WHITE;
-                case CH_GROUP: //Save for groups as well
                 case CH_RGB:
                 if (n == 3) { // Full triplet passed
                     st.h = Par[0];
@@ -317,7 +321,12 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                   }
                       if (send) SendStatus(0,3,Par,true); // Send back triplet ?
                     break;
-
+                case CH_GROUP: //Save for groups as well
+                    st.h = Par[0];
+                    st.s = Par[1];
+                    st.v = Par[2];
+                    setVal(st.aslong);
+                    break;
                 case CH_PWM:
                 case CH_VC:
                 case CH_DIMMER:
@@ -495,7 +504,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
                 Par[0] = 0;
                 Par[1] = 0;
                 Par[2] = 0;
-                if (getCmd() == CMD_XON) setCmd(CMD_OFF); //Prevent restoring temporary turned on channels (by XON) 
+                if (getCmd() == CMD_XON) setCmd(CMD_OFF); //Prevent restoring temporary turned on channels (by XON)
                     else setCmd(cmd);
                 SendStatus(CMD_OFF); //HALT to OFF mapping - send in any cases
                 debugSerial<<F(" Halted\n");
