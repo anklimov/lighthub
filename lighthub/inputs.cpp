@@ -367,7 +367,10 @@ void Input::contactPoll() {
 
 
 void Input::analogPoll() {
-    uint8_t currentInputState;
+    int16_t  mappedInputVal;
+    aJsonObject *inputMap = aJson.getObjectItem(inputObj, "map");
+    short Noize = ANALOG_NOIZE;
+    short simple = 0;
 
 #if defined(ARDUINO_ARCH_STM32F1)
      WiringPinMode inputPinMode;
@@ -376,28 +379,48 @@ void Input::analogPoll() {
      uint32_t inputPinMode;
 #endif
 
-     uint8_t inputOnLevel;
     if (inType & IN_ACTIVE_HIGH) {
-        inputOnLevel = HIGH;
         inputPinMode = INPUT;
     } else {
-        inputOnLevel = LOW;
         inputPinMode = INPUT_PULLUP;
     }
     pinMode(pin, inputPinMode);
-    currentInputState = map (analogRead(pin),0,900,0,100);
+    mappedInputVal = analogRead(pin);
+    // Mapping
+    if (inputMap && inputMap->type == aJson_Array)
+     {
+     if (aJson.getArraySize(inputMap)>=4)
+        mappedInputVal  = map (mappedInputVal,
+              aJson.getArrayItem(inputMap, 0)->valueint,
+              aJson.getArrayItem(inputMap, 1)->valueint,
+              aJson.getArrayItem(inputMap, 2)->valueint,
+              aJson.getArrayItem(inputMap, 3)->valueint);
+      if (aJson.getArraySize(inputMap)==5) Noize = aJson.getArrayItem(inputMap, 4)->valueint;
 
-    if (abs(currentInputState - store->currentValue)>1) // value changed >1
-    {
-        if (store->bounce) store->bounce = 0;
-    } else // no change
+      if (aJson.getArraySize(inputMap)==2)
+        {
+          simple = 1;
+          if (mappedInputVal < aJson.getArrayItem(inputMap, 0)->valueint) mappedInputVal = 0;
+            else if (mappedInputVal > aJson.getArrayItem(inputMap, 1)->valueint) mappedInputVal = 1;
+                 else mappedInputVal = -1;
+        }
+      }
+    if (simple) {
+       if (mappedInputVal!=-1 && mappedInputVal != store->currentValue)
+       {
+           onContactChanged(mappedInputVal);
+           store->currentValue = mappedInputVal;
+       }}
+    else
+    if (abs(mappedInputVal - store->currentValue)>Noize) // value changed >ANALOG_NOIZE
+        store->bounce = 0;
+     else // no change
         if (store->bounce<ANALOG_STATE_ATTEMPTS) store->bounce ++;
 
-        if (store->bounce<ANALOG_STATE_ATTEMPTS-1 && (currentInputState != store->currentValue))  //confirmed change
+        if (store->bounce<ANALOG_STATE_ATTEMPTS-1 && (mappedInputVal != store->currentValue))  //confirmed change
         {
-            store->logicState = currentInputState;
-            onAnalogChanged(currentInputState);
-            store->currentValue = currentInputState;
+            onAnalogChanged(mappedInputVal);
+            store->currentValue = mappedInputVal;
         }
 
 }
@@ -449,6 +472,8 @@ void Input::onAnalogChanged(int newValue) {
     debugSerial << F("IN:") << (pin) << F("=") << newValue << endl;
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
+
+
     if (emit) {
 
 //#ifdef WITH_DOMOTICZ

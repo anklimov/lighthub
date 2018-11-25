@@ -32,6 +32,7 @@ e-mail    anklimov@gmail.com
 
 #define SAME_STATE_ATTEMPTS 3
 #define ANALOG_STATE_ATTEMPTS 6
+#define ANALOG_NOIZE 1
 
 // in syntaxis
 // "pin": { "T":"N", "emit":"out_emit", item:"out_item", "scmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd":"repeat_command" }
@@ -69,10 +70,9 @@ extern aJsonObject *inputs;
 typedef union {
     long int aslong;
     struct {
-        int8_t reserve;
         int8_t logicState;
         int8_t bounce;
-        int8_t currentValue;
+        int16_t currentValue;
     };
 
 } inStore;
