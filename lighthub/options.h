@@ -161,5 +161,3 @@
 #else
 #define W5500_ETHERNET_SHIELD
 #endif
-
-#define eol "\n"

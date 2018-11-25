@@ -391,7 +391,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
         wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
         if (mqttClient.connect(client_id, user, password)) {
             mqttErrorRate = 0;
-            debugSerial<<F("connected as ")<<client_id <<eol;
+            debugSerial<<F("connected as ")<<client_id <<endl;
             wdt_en();
             configOk = true;
             // ... Temporary subscribe to status topic
@@ -579,7 +579,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
 
         if (owEmitString) {
             printFloatValueToStr(currentTemp,valstr);
-            debugSerial<<owEmitString<<F("=")<<valstr<<eol;
+            debugSerial<<owEmitString<<F("=")<<valstr<<endl;
             if ((currentTemp == -127.0) || (currentTemp == 85.0) || (currentTemp == 0.0))  //ToDo: 1-w short circuit mapped to "0" celsium
                 return;
 
@@ -603,7 +603,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
         if (owItem)
             thermoSetCurTemp(owItem, currentTemp);  ///TODO: Refactore using Items interface
 
-    else debugSerial<<F("1w-item not found in config")<<eol;
+    else debugSerial<<F("1w-item not found in config")<<endl;
   }
 }
 
@@ -745,7 +745,7 @@ void printConfigSummary() {
     debugSerial<<F("\nudp syslog ");
     printBool(udpSyslogArr);
 #endif
-    debugSerial << eol;
+    debugSerial << endl;
 }
 
 void cmdFunctionLoad(int arg_cnt, char **args) {
@@ -941,7 +941,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     strncat(URI, "_config.json", sizeof(URI));
 #endif
 #endif
-    debugSerial<<F("Config URI: http://")<<configServer<<URI<<eol;
+    debugSerial<<F("Config URI: http://")<<configServer<<URI<<endl;
 
 #if defined(ARDUINO_ARCH_AVR)
     FILE *configStream;
@@ -1136,7 +1136,7 @@ void setup_main() {
 }
 
 void printFirmwareVersionAndBuildOptions() {
-    debugSerial<<F("\nLazyhome.ru LightHub controller ")<<F(QUOTE(PIO_SRC_REV))<<F(" C++ version:")<<F(QUOTE(__cplusplus))<<eol;
+    debugSerial<<F("\nLazyhome.ru LightHub controller ")<<F(QUOTE(PIO_SRC_REV))<<F(" C++ version:")<<F(QUOTE(__cplusplus))<<endl;
 #ifdef CONTROLLINO
     debugSerial<<F("\n(+)CONTROLLINO");
 #endif
@@ -1200,7 +1200,7 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     debugSerial<<F("\n(-)RESTART_LAN_ON_MQTT_ERRORS");
 #endif
-debugSerial<<eol;
+debugSerial<<endl;
 
 
 //    WDT_Disable( WDT ) ;

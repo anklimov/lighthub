@@ -31,6 +31,7 @@ e-mail    anklimov@gmail.com
 #define IN_UPTIME       16
 
 #define SAME_STATE_ATTEMPTS 3
+#define ANALOG_STATE_ATTEMPTS 6
 
 // in syntaxis
 // "pin": { "T":"N", "emit":"out_emit", item:"out_item", "scmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd":"repeat_command" }
@@ -92,6 +93,7 @@ public:
     boolean isValid();
 
     void onContactChanged(int newValue);
+    void onAnalogChanged(int newValue);
 
     int poll();
 
@@ -109,6 +111,7 @@ protected:
     void Parse();
 
     void contactPoll();
+    void analogPoll();
 
     void dht22Poll();
 

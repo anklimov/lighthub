@@ -108,18 +108,23 @@ void Input::Parse()
 
 int Input::poll() {
     if (!isValid()) return -1;
+    if (0) ;
+
     #ifndef DHT_COUNTER_DISABLE
-    if (inType & IN_DHT22)
+    else if (inType & IN_DHT22)
         dht22Poll();
     else if (inType & IN_COUNTER)
         counterPoll();
     else if (inType & IN_UPTIME)
         uptimePoll();
+    #endif
+    else if (inType & IN_ANALOG)
+        analogPoll();
     else
         contactPoll();
     return 0;
-    #endif
-    contactPoll();
+
+  //  contactPoll();
 }
 
 #ifndef DHT_COUNTER_DISABLE
@@ -361,6 +366,44 @@ void Input::contactPoll() {
 }
 
 
+void Input::analogPoll() {
+    uint8_t currentInputState;
+
+#if defined(ARDUINO_ARCH_STM32F1)
+     WiringPinMode inputPinMode;
+#endif
+#if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
+     uint32_t inputPinMode;
+#endif
+
+     uint8_t inputOnLevel;
+    if (inType & IN_ACTIVE_HIGH) {
+        inputOnLevel = HIGH;
+        inputPinMode = INPUT;
+    } else {
+        inputOnLevel = LOW;
+        inputPinMode = INPUT_PULLUP;
+    }
+    pinMode(pin, inputPinMode);
+    currentInputState = map (analogRead(pin),0,900,0,100);
+
+    if (abs(currentInputState - store->currentValue)>1) // value changed >1
+    {
+        if (store->bounce) store->bounce = 0;
+    } else // no change
+        if (store->bounce<ANALOG_STATE_ATTEMPTS) store->bounce ++;
+
+        if (store->bounce<ANALOG_STATE_ATTEMPTS-1 && (currentInputState != store->currentValue))  //confirmed change
+        {
+            store->logicState = currentInputState;
+            onAnalogChanged(currentInputState);
+            store->currentValue = currentInputState;
+        }
+
+}
+
+
+
 
 void Input::onContactChanged(int newValue) {
     debugSerial << F("IN:") << (pin) << F("=") << newValue << endl;
@@ -401,6 +444,31 @@ void Input::onContactChanged(int newValue) {
     }
 }
 
+
+void Input::onAnalogChanged(int newValue) {
+    debugSerial << F("IN:") << (pin) << F("=") << newValue << endl;
+    aJsonObject *item = aJson.getObjectItem(inputObj, "item");
+    aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
+    if (emit) {
+
+//#ifdef WITH_DOMOTICZ
+//        if (getIdxField()) {
+//            (newValue)? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}", getIdxField())
+//            : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());
+//        } else
+//#endif
+               char strVal[16];
+               itoa(newValue,strVal,10);
+               mqttClient.publish(emit->valuestring, strVal, true);
+}
+
+    if (item) {
+        Item it(item->valuestring);
+        if (it.isValid()) {
+           it.Ctrl(0, 1, &newValue, true);
+        }
+    }
+}
 
 
 void Input::printUlongValueToStr(char *valstr, unsigned long value) {
