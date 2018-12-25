@@ -13,6 +13,7 @@ Lighthub allows connecting together:
 * Modbus RTU devices (Currently, are deployed two types of Modbus devices: AC Dimmer and Ventilation set (Based on [Vacon 10 controller](http://files.danfoss.com/download/Drives/Vacon-10-Quick-Guide-DPD00714F1-UK.pdf))
 * Simple DMX wall sensor panel [like this](http://ali.pub/2zlohe)
 
+[List of non-expensive compatible components from AliExpress here](http://ppv.alipromo.com/custom/promo.php?hash=pjagwaovaero6vkeabjpkpvy4gznbgkc&landing_id=39661)
 ![alt text](LightHub.png "LightHub application diagram")
 
 Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from MQTT enabled software. At the moment, LightHub tested with following set of complementary free software:
