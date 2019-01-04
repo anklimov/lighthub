@@ -250,9 +250,8 @@ int Item::Ctrl(char * payload, boolean send){
 
 int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
 
-
     debugSerial<<F(" MEM=")<<freeRam()<<F(" Cmd=")<<cmd<<F(" Par: ");
-
+    if (!itemArr) return -1;
     int Par[MAXCTRLPAR] = {0, 0, 0};
     if (Parameters)
             for (short i=0;i<n && i<MAXCTRLPAR;i++){

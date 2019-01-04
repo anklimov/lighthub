@@ -80,7 +80,7 @@
 #endif
 
 #if defined(ARDUINO_ARCH_AVR)
-#include "HTTPClient.h"
+#include "HTTPClientAVR.h"
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
 #include <EEPROM.h>
@@ -241,4 +241,4 @@ void ip_ready_config_loaded_connecting_to_broker();
 
 void printCurentLanConfig();
 
-void printFreeRam();
+//void printFreeRam();

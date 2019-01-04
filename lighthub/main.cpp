@@ -68,6 +68,7 @@ PWM Out
 #include "main.h"
 #include "options.h"
 #include "utils.h"
+#include "homiedef.h"
 
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
@@ -120,6 +121,7 @@ lan_status lanStatus = INITIAL_STATE;
 const char outprefix[] PROGMEM = OUTTOPIC;
 const char inprefix[] PROGMEM = INTOPIC;
 const char configserver[] PROGMEM = CONFIG_SERVER;
+
 
 unsigned int UniqueID[5] = {0,0,0,0,0};
 
@@ -349,6 +351,87 @@ lan_status lanLoop() {
 
 }
 
+
+void onMQTTConnect(){
+  char topic[64] = "";
+  char buf[128] = "";
+
+  // High level homie topics publishing
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, state_P, sizeof(topic));
+  mqttClient.publish_P(topic,ready_P,true);
+
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, homie_P, sizeof(topic));
+  mqttClient.publish_P(topic,homiever_P,true);
+
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, name_P, sizeof(topic));
+  mqttClient.publish_P(topic,nameval_P,true);
+
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, name_P, sizeof(topic));
+  mqttClient.publish_P(topic,nameval_P,true);
+
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, stats_P, sizeof(topic));
+  mqttClient.publish_P(topic,statsval_P,true);
+
+  strncat_P(topic, stats_P, sizeof(topic));
+  if (items) {
+    char datatype[32]="\0";
+    char format [64]="\0";
+      aJsonObject * item = items->child;
+      while (items && item)
+          if (item->type == aJson_Array && aJson.getArraySize(item)>0) {
+
+              strncat_P(buf,item->name,sizeof(buf));
+              strncat(buf,",",sizeof(buf));
+
+                  switch (  aJson.getArrayItem(item, I_TYPE)->valueint) {
+                      case CH_THERMO:
+                      strncat_P(datatype,float_P,sizeof(datatype));
+                      break;
+
+                      case CH_RELAY:
+                      strncpy_P(datatype,enum_P,sizeof(datatype));
+                      strncpy_P(format,enumformat_P,sizeof(format));
+                      break;
+
+                      case  CH_RGBW:
+                      case  CH_RGB:
+                      strncpy_P(datatype,color_P,sizeof(datatype));
+                      strncpy_P(format,hsv_P,sizeof(format));
+                      break;
+                      case  CH_DIMMER:
+                      case  CH_MODBUS:
+                      case  CH_PWM:
+                      case  CH_VCTEMP:
+                      case  CH_VC:
+                      strncpy_P(datatype,int_P,sizeof(datatype));
+                      strncpy_P(format,intformat_P,sizeof(format));
+                      break;
+                  } //switch
+
+                  strncpy_P(topic, outprefix, sizeof(topic));
+                  strncat_P(topic,item->name,sizeof(topic));
+                  strncat(topic,"/",sizeof(topic));
+                  strncat_P(topic,datatype_P,sizeof(topic));
+                  mqttClient.publish(topic,datatype,true);
+
+                  strncpy_P(topic, outprefix, sizeof(topic));
+                  strncat_P(topic,item->name,sizeof(topic));
+                  strncat(topic,"/",sizeof(topic));
+                  strncat_P(topic,format_P,sizeof(topic));
+                  mqttClient.publish(topic,format,true);
+              item = item->next;
+          }  //if
+          strncpy_P(topic, outprefix, sizeof(topic));
+          strncat_P(topic, nodes_P, sizeof(topic));
+          mqttClient.publish(topic,buf,true);
+  }
+}
+
 void ip_ready_config_loaded_connecting_to_broker() {
     short n = 0;
     int port = 1883;
@@ -387,9 +470,18 @@ void ip_ready_config_loaded_connecting_to_broker() {
         mqttClient.setServer(servername, port);
         mqttClient.setCallback(mqttCallback);
 
+        char willMessage[16];
+        char willTopic[32];
+
+        strncpy_P(willMessage,disconnected_P,sizeof(willMessage));
+
+        strncpy_P(willTopic, outprefix, sizeof(willTopic));
+        strncat_P(willTopic, state_P, sizeof(willTopic));
+
+
         debugSerial<<F("\nAttempting MQTT connection to ")<<servername<<F(":")<<port<<F(" user:")<<user<<F(" ...");
         wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
-        if (mqttClient.connect(client_id, user, password)) {
+        if (mqttClient.connect(client_id, user, password,willTopic,MQTTQOS1,true,willMessage)) {
             mqttErrorRate = 0;
             debugSerial<<F("connected as ")<<client_id <<endl;
             wdt_en();
@@ -399,14 +491,15 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
             strncpy_P(buf, outprefix, sizeof(buf));
             strncat(buf, "#", sizeof(buf));
-            mqttClient.subscribe(buf);
+            mqttClient.subscribe(buf,MQTTQOS1);
 
             //Subscribing for command topics
             strncpy_P(buf, inprefix, sizeof(buf));
             strncat(buf, "#", sizeof(buf));
-            mqttClient.subscribe(buf);
+            mqttClient.subscribe(buf,MQTTQOS1);
 
             //restoreState();
+            onMQTTConnect();
             // if (_once) {DMXput(); _once=0;}
             lanStatus = RETAINING_COLLECTING;//4;
             nextLanCheckTime = millis() + 5000;
@@ -616,7 +709,7 @@ void cmdFunctionHelp(int arg_cnt, char **args)
 //    udpSyslog.logf(LOG_INFO, "free RAM: %d",freeRam());
     #endif
     printCurentLanConfig();
-    printFreeRam();
+//    printFreeRam();
     debugSerial<<F("\nUse these commands: 'help' - this text\n"
                           "'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
                           "'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"
@@ -1215,8 +1308,27 @@ debugSerial<<endl;
 
 
 }
-void printFreeRam(){
-    debugSerial<<F("\nfree RAM: ")<<freeRam();
+void publishStat(){
+  long fr = freeRam();
+  char topic[64];
+  char intbuf[16];
+  long ut = millis()/1000;
+
+//    debugSerial<<F("\nfree RAM: ")<<fr;
+
+    strncpy_P(topic, outprefix, sizeof(topic));
+    strncat_P(topic, stats_P, sizeof(topic));
+    strncat(topic, "/", sizeof(topic));
+    strncat_P(topic, freeheap_P, sizeof(topic));
+
+    mqttClient.publish(topic,itoa(fr,intbuf,10),true);
+
+    strncpy_P(topic, outprefix, sizeof(topic));
+    strncat_P(topic, stats_P, sizeof(topic));
+    strncat(topic, "/", sizeof(topic));
+    strncat_P(topic, uptime_P, sizeof(topic));
+
+    mqttClient.publish(topic,itoa(ut,intbuf,10),true);
 }
 
 void setupMacAddress() {
@@ -1438,10 +1550,12 @@ void thermoLoop(void) {
     }
 
     nextThermostatCheck = millis() + THERMOSTAT_CHECK_PERIOD;
-
+publishStat();
 #ifndef DISABLE_FREERAM_PRINT
     (thermostatCheckPrinted) ? debugSerial<<F("\nfree:")<<freeRam()<<" " : debugSerial<<F(" ")<<freeRam()<<F(" ");
 #endif
+
+
 }
 
 short thermoSetCurTemp(char *name, float t) {

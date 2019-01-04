@@ -66,7 +66,7 @@
 #endif
 
 #ifndef OUTTOPIC
-#define OUTTOPIC "/myhome/s_out/"
+#define OUTTOPIC "homie/s_out/"
 #endif
 
 #ifndef CMDTOPIC
