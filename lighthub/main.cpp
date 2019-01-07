@@ -1208,10 +1208,12 @@ debugSerial<<endl;
     Serial.println("Reading 128 bits unique identifier \n\r" ) ;
     ReadUniqueID( UniqueID ) ;
 
+#if defined(__SAM3X8E__)
     Serial.print ("ID: ") ;
     for (byte b = 0 ; b < 4 ; b++)
       Serial.print ((unsigned int) UniqueID [b], HEX) ;
     Serial.println () ;
+#endif
 
 
 }
