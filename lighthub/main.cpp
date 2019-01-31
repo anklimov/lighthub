@@ -468,9 +468,8 @@ void onInitialStateInitLAN() {
     {
         debugSerial<<F("Problem with WiFi!");
 #if defined(ARDUINO_ARCH_ESP8266) and not defined(WIFI_MANAGER_DISABLE)
-        WiFiManager wifiManager;
-        wifiManager.setTimeout(15);
-        wifiManager.autoConnect();
+        debugSerial<<F("Restarting by hitting WifiManager Timeout...");
+        ESP.restart();
 #endif
         nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL/5;
 
