@@ -1124,6 +1124,7 @@ void setup_main() {
 
 #if defined(ARDUINO_ARCH_ESP8266) and not defined(WIFI_MANAGER_DISABLE)
     WiFiManager wifiManager;
+    wifiManager.setConfigPortalTimeout(30000);
 #if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
     wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
 #else
