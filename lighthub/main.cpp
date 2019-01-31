@@ -115,6 +115,10 @@ Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_IETF);
 unsigned long nextSyslogPingTime;
 #endif
 
+#if defined(ARDUINO_ARCH_ESP8266) and not defined(WIFI_MANAGER_DISABLE)
+WiFiManager wifiManager;
+#endif
+
 lan_status lanStatus = INITIAL_STATE;
 
 const char outprefix[] PROGMEM = OUTTOPIC;
@@ -467,7 +471,11 @@ void onInitialStateInitLAN() {
     } else
     {
         debugSerial<<F("Problem with WiFi!");
+#if defined(ARDUINO_ARCH_ESP8266) and not defined(WIFI_MANAGER_DISABLE)
+        wifiManager.autoConnect();
+#endif
         nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL/5;
+
     }
 #endif
 
@@ -1123,7 +1131,6 @@ void setup_main() {
 #endif
 
 #if defined(ARDUINO_ARCH_ESP8266) and not defined(WIFI_MANAGER_DISABLE)
-    WiFiManager wifiManager;
     wifiManager.setConfigPortalTimeout(15);
     wifiManager.autoConnect();
 //    wifiManager.set
