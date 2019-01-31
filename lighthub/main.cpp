@@ -473,7 +473,7 @@ void onInitialStateInitLAN() {
         debugSerial<<F("Problem with WiFi!");
 #if defined(ARDUINO_ARCH_ESP8266) and not defined(WIFI_MANAGER_DISABLE)
         wifiManager = new WiFiManager();
-        wifiManager.autoConnect();
+        wifiManager->autoConnect();
 #endif
         nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL/5;
 
@@ -1133,11 +1133,11 @@ void setup_main() {
 
 #if defined(ARDUINO_ARCH_ESP8266) and not defined(WIFI_MANAGER_DISABLE)
     wifiManager = new WiFiManager();
-    wifiManager.setConfigPortalTimeout(15);
+    wifiManager->setConfigPortalTimeout(15);
 #if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
-    wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
+    wifiManager->autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
 #else
-    wifiManager.autoConnect();
+    wifiManager->autoConnect();
 #endif
 #endif
 
