@@ -5,6 +5,8 @@
             "name": "Mac",
             "macFrameworkPath": [],
             "includePath": [
+                "/Users/andrey/Library/Arduino15/packages/arduino/tools/**",
+                "/Users/andrey/Library/Arduino15/packages/arduino/hardware/sam/1.6.11/**",
                 "/Users/andrey/.platformio/packages/framework-arduinosam/cores/sam",
                 "/Users/andrey/.platformio/packages/framework-arduinosam/system/sam/libsam",
                 "/Users/andrey/.platformio/packages/framework-arduinosam/system/sam/CMSIS/CMSIS/Include",
@@ -31,12 +33,7 @@
                 "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/Streaming_ID560",
                 "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/Syslog/src",
                 "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/aJson",
-                "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/ArduinoJson_ID64/src",
-                "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/AsyncMqttClient_ID346/src",
-                "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/Bounce2_ID1106/src",
-                "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/ESP Async WebServer_ID306/src",
-                "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/Homie_ID555/src",
-                "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/HttpClient_ID66",
+                "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/Ethernet2_ID261/src",
                 "/Users/andrey/.platformio/packages/framework-arduinosam/libraries/__cores__/sam/HID/src",
                 "/Users/andrey/.platformio/packages/tool-unity",
                 "/Users/andrey/Documents/Arduino/lighthub/include",
@@ -73,12 +70,7 @@
                     "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/Streaming_ID560",
                     "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/Syslog/src",
                     "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/aJson",
-                    "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/ArduinoJson_ID64/src",
-                    "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/AsyncMqttClient_ID346/src",
-                    "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/Bounce2_ID1106/src",
-                    "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/ESP Async WebServer_ID306/src",
-                    "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/Homie_ID555/src",
-                    "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/HttpClient_ID66",
+                    "/Users/andrey/Documents/Arduino/lighthub/.piolibdeps/Ethernet2_ID261/src",
                     "/Users/andrey/.platformio/packages/framework-arduinosam/libraries/__cores__/sam/HID/src",
                     "/Users/andrey/.platformio/packages/tool-unity",
                     "/Users/andrey/Documents/Arduino/lighthub/include",
@@ -87,7 +79,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=30603",
+                "PLATFORMIO=40000",
                 "__SAM3X8E__",
                 "ARDUINO_ARCH_SAM",
                 "ARDUINO_SAM_DUE",
@@ -106,7 +98,10 @@
             "intelliSenseMode": "clang-x64",
             "cStandard": "c11",
             "cppStandard": "c++11",
-            "compilerPath": "/Users/andrey/.platformio/packages/toolchain-gccarmnoneeabi@1.40804.0/bin/arm-none-eabi-gcc -mthumb -mcpu=cortex-m3"
+            "compilerPath": "/Users/andrey/.platformio/packages/toolchain-gccarmnoneeabi@1.40804.0/bin/arm-none-eabi-gcc -mthumb -mcpu=cortex-m3",
+            "forcedInclude": [
+                "/Users/andrey/Library/Arduino15/packages/arduino/hardware/sam/1.6.11/cores/arduino/Arduino.h"
+            ]
         }
     ],
     "version": 4

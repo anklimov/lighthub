@@ -110,7 +110,7 @@ unsigned long freeRam() {
 
 #endif
 
-#if defined(__SAM3X8E__)
+#if defined(__SAM3X8E__) 
 extern char _end;
 extern "C" char *sbrk(int i);
 
@@ -125,6 +125,23 @@ unsigned long freeRam() {
 }
 
 #endif
+
+#if  defined(NRF5)
+extern char _end;
+extern "C" char *sbrk(int i);
+
+unsigned long freeRam() {
+    char *ramstart = (char *) 0x20070000;
+    char *ramend = (char *) 0x20088000;
+    char *heapend = sbrk(0);
+    register char *stack_ptr asm( "sp" );
+    //struct mallinfo mi = mallinfo();
+
+    return stack_ptr - heapend;// + mi.fordblks;
+}
+
+#endif
+
 
 void parseBytes(const char *str, char separator, byte *bytes, int maxBytes, int base) {
     for (int i = 0; i < maxBytes; i++) {

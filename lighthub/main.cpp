@@ -109,6 +109,12 @@ WiFiClient ethClient;
 EthernetClient ethClient;
 #endif
 
+#ifdef NRF5
+#include <NRFFlashStorage.h>
+NRFFlashStorage EEPROM;
+EthernetClient ethClient;
+#endif
+
 #ifdef SYSLOG_ENABLE
 #include <Syslog.h>
 EthernetUDP udpSyslogClient;
@@ -491,12 +497,13 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
             strncpy_P(buf, outprefix, sizeof(buf));
             strncat(buf, "#", sizeof(buf));
-            mqttClient.subscribe(buf,MQTTQOS1);
+            mqttClient.subscribe(buf);
 
             //Subscribing for command topics
             strncpy_P(buf, inprefix, sizeof(buf));
             strncat(buf, "#", sizeof(buf));
-            mqttClient.subscribe(buf,MQTTQOS1);
+            Serial.println(buf);
+            mqttClient.subscribe(buf);
 
             //restoreState();
             onMQTTConnect();
@@ -738,7 +745,7 @@ void cmdFunctionKill(int arg_cnt, char **args) {
 
 void cmdFunctionReboot(int arg_cnt, char **args) {
     debugSerial<<F("Soft rebooting...");
-    softRebootFunc();
+   //// softRebootFunc();
 }
 
 void applyConfig() {

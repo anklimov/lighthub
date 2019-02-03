@@ -29,6 +29,12 @@
 #define wdt_dis()
 #endif
 
+#if defined(NRF5)
+#define wdt_res()
+#define wdt_en()
+#define wdt_dis()
+#endif
+
 //#if defined(ESP8266)
 //#define wdt_res()
 //#define wdt_en()
@@ -66,7 +72,7 @@
 #include <ModbusMaster.h>
 #endif
 
-#ifndef ARDUINO_ARCH_STM32F1
+#ifndef DMX_DISABLE
 #include "FastLED.h"
 #endif
 
@@ -108,7 +114,7 @@
 
 #endif
 
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined(ESP8266)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined(ESP8266) || defined(NRF5)
 #ifdef Wiz5500
 #include <Ethernet2.h>
 #else
