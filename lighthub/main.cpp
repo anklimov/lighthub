@@ -1339,11 +1339,17 @@ void publishStat(){
 }
 
 void setupMacAddress() {
-
+#if defined(__SAM3X8E__)
+byte firmwareMacAddress[6];
+firmwareMacAddress[0]=0xDE;
+firmwareMacAddress[1]=0xAD;
+for (byte b = 0 ; b < 4 ; b++)
+              firmwareMacAddress[b+2]=UniqueID [b] ;
+#else
 #ifdef DEFAULT_FIRMWARE_MAC
     byte firmwareMacAddress[6] = DEFAULT_FIRMWARE_MAC;//comma(,) separated hex-array, hard-coded
 #endif
-
+#endif
 #ifdef CUSTOM_FIRMWARE_MAC
     byte firmwareMacAddress[6];
     const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);//colon(:) separated from build options
@@ -1356,7 +1362,7 @@ void setupMacAddress() {
         if (mac[i] != 0 && mac[i] != 0xff) isMacValid = true;
     }
     if (!isMacValid) {
-        debugSerial<<F("Invalid MAC: set firmware's MAC\n");
+        debugSerial<<F("No MAC configured: set firmware's MAC\n");
         memcpy(mac, firmwareMacAddress, 6);
     }
     printMACAddress();
@@ -1424,7 +1430,7 @@ void loop_main() {
 
 void owIdle(void) {
 #ifdef _artnet
-    if (artnet) artnet->read();
+    if (artnet && (lanStatus>=HAVE_IP_ADDRESS)) artnet->read();
 #endif
 
     wdt_res();
