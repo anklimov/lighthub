@@ -673,15 +673,16 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
     SetBytes(addr, 8, addrstr);
     addrstr[17] = 0;
 
+    printFloatValueToStr(currentTemp,valstr);
+    debugSerial<<endl<<F("T:")<<valstr<<F("<");
     aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);
     if (owObj) {
         owEmitString = aJson.getObjectItem(owObj, "emit")->valuestring;
-
-        if (owEmitString) {
-            printFloatValueToStr(currentTemp,valstr);
-            debugSerial<<owEmitString<<F("=")<<valstr<<endl;
-            if ((currentTemp == -127.0) || (currentTemp == 85.0) || (currentTemp == 0.0))  //ToDo: 1-w short circuit mapped to "0" celsium
-                return;
+        debugSerial<<owEmitString<<F(">")<<endl;
+          if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
+          {
+           if (owEmitString)      // publish temperature to MQTT if configured
+            {
 
 #ifdef WITH_DOMOTICZ
             aJsonObject *idx = aJson.getObjectItem(owObj, "idx");
@@ -699,12 +700,14 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
             strncat(addrstr, owEmitString, sizeof(addrstr));
             mqttClient.publish(addrstr, valstr);
         }
+        // And translate temp to internal items
         owItem = aJson.getObjectItem(owObj, "item")->valuestring;
         if (owItem)
             thermoSetCurTemp(owItem, currentTemp);  ///TODO: Refactore using Items interface
+        } // if valid temperature
+  } // if Address in config
+  else debugSerial<<addrstr<<F(">")<<endl; // No item found
 
-    else debugSerial<<F("1w-item not found in config")<<endl;
-  }
 }
 
 #endif //_owire
@@ -1392,7 +1395,7 @@ void loop_main() {
     if (lanLoop() > HAVE_IP_ADDRESS) {
         mqttClient.loop();
 #ifdef _artnet
-        if (artnet) artnet->read();
+        if (artnet) artnet->read();  ///hung
 #endif
     }
 
