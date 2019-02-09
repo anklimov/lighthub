@@ -85,15 +85,14 @@ void Item::Parse() {
         itemArg = aJson.getArrayItem(itemArr, I_ARG);
         itemVal = aJson.getArrayItem(itemArr, I_VAL);
 //        debugSerial << F(" Item:") << itemArr->name << F(" T:") << itemType << F(" =") << getArg() << endl;
-    }
+}
 }
 
 Item::Item(char *name) //Constructor
 {
-    if (name)
+    if (name && items)
         itemArr = aJson.getObjectItem(items, name);
     else itemArr = NULL;
-
     Parse();
 }
 
