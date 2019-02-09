@@ -258,9 +258,6 @@ lan_status lanLoop() {
             if (!configOk)
                 lanStatus = loadConfigFromHttp(0, NULL);
             else lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-#ifdef _artnet
-            if (artnet) artnet->begin();
-#endif
             break;
 
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
@@ -623,6 +620,9 @@ void onInitialStateInitLAN() {
         debugSerial<<F("Got IP address:");
         printIPAddress(Ethernet.localIP());
         lanStatus = HAVE_IP_ADDRESS;//1;
+        #ifdef _artnet
+                    if (artnet) artnet->begin();
+        #endif
     }
   }
     #endif
@@ -759,7 +759,7 @@ void applyConfig() {
     dmxArr = aJson.getObjectItem(root, "dmxin");
     if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
         DMXinSetup(itemsCount * 4);
-        debugSerial<<F("DMX in started. Channels:")<<itemsCount * 4;
+        debugSerial<<F("DMX in started. Channels:")<<itemsCount * 4<<endl;
     }
 #endif
 #ifdef _dmxout
@@ -812,7 +812,7 @@ void applyConfig() {
                             int k;
                             pinMode(pin, OUTPUT);
                             digitalWrite(pin, k = ((cmd == CMD_ON) ? HIGH : LOW));
-                            debugSerial<<F("Pin:")<<pin<<F("=")<<k;
+                            debugSerial<<F("Pin:")<<pin<<F("=")<<k<<F(",");
                         }
                             break;
                     } //switch
