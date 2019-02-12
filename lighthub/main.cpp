@@ -1307,9 +1307,6 @@ void loop_main() {
 //        debugSerial<<F("#"));
 //        udpSyslog.log(LOG_INFO, "Ping syslog:");
 #endif
-#ifdef ARDUINO_ARCH_ESP8266
-    ESP.deepSleep(100000);
-#endif
 }
 
 void owIdle(void) {
