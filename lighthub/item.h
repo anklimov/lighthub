@@ -31,6 +31,7 @@ e-mail    anklimov@gmail.com
 #define CH_VC      9  //Vacom modbus motor regulator
 #define CH_WHITE   127//
 
+
 #define CMD_ON  1
 #define CMD_OFF 2
 #define CMD_RESTORE 3 //on only if was turned off by CMD_HALT

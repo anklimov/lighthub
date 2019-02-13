@@ -1296,7 +1296,6 @@ void loop_main() {
 #endif
     }
 
-
     inputLoop();
 
 #if defined (_espdmx)

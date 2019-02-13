@@ -607,7 +607,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
             //prescaler = 5 ---> PWM frequency is 30 Hz
             //prescaler = 6 ---> PWM frequency is <20 Hz
             int tval = 7;             // this is 111 in binary and is used as an eraser
-#if defined(__AVR_ATmega2560__)
+#if defined(ARDUINO_ARCH_AVR)
             TCCR4B &= ~tval;   // this operation (AND plus NOT),  set the three bits in TCCR2B to 0
             TCCR3B &= ~tval;
             tval = 2;
