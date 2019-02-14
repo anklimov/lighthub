@@ -249,6 +249,8 @@ int Item::Ctrl(char * payload, boolean send){
 
 
 int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
+
+
     debugSerial<<F(" MEM=")<<freeRam()<<F(" Cmd=")<<cmd<<F(" Par: ");
 
     int Par[MAXCTRLPAR] = {0, 0, 0};
@@ -576,10 +578,9 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
         } //case
             break;
         case CH_RELAY: {
+            int k;
             pinMode(iaddr, OUTPUT);
-            boolean isRelayEnabled = (cmd == CMD_ON || cmd == CMD_XON);
-
-            digitalWrite(iaddr, isRelayEnabled ? HIGH : LOW);
+            digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? HIGH : LOW));
             debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
             break;
             case CH_THERMO:

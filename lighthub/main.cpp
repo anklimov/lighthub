@@ -1118,7 +1118,7 @@ void setup_main() {
     //owReady = 0;
 
 #ifdef _owire
-    if (net) net->idle(&owIdle);
+    if (ds2482_OneWire) ds2482_OneWire->idle(&owIdle);
 #endif
 
     mqttClient.setCallback(mqttCallback);

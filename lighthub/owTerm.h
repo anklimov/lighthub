@@ -18,7 +18,6 @@ e-mail    anklimov@gmail.com
 
 */
 
-//define APU_OFF
 
 #define SW_AUX0 0x40
 #define SW_AUX1 0x80
@@ -70,7 +69,7 @@ typedef   void (*owChangedType) (int , DeviceAddress, float) ;
 #include <Wire.h>
 #endif
 
-extern OneWire *net;
+extern OneWire *ds2482_OneWire;
 
 extern DallasTemperature *sensors;
 extern DeviceAddress *term ;
