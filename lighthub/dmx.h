@@ -17,7 +17,6 @@ GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
 
 */
-
 #define D_UPDATED1 1
 #define D_UPDATED2 2
 #define D_UPDATED3 4

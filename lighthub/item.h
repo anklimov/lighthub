@@ -29,6 +29,7 @@ e-mail    anklimov@gmail.com
 #define CH_GROUP   7  //Group pseudochannel
 #define CH_VCTEMP  8  //Vacom PID regulator
 #define CH_VC      9  //Vacom modbus motor regulator
+#define CH_AC_HAIER 10  //AC Haier
 #define CH_WHITE   127//
 
 #define CMD_ON  1

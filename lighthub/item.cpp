@@ -85,15 +85,14 @@ void Item::Parse() {
         itemArg = aJson.getArrayItem(itemArr, I_ARG);
         itemVal = aJson.getArrayItem(itemArr, I_VAL);
 //        debugSerial << F(" Item:") << itemArr->name << F(" T:") << itemType << F(" =") << getArg() << endl;
-    }
+}
 }
 
 Item::Item(char *name) //Constructor
 {
-    if (name)
+    if (name && items)
         itemArr = aJson.getObjectItem(items, name);
     else itemArr = NULL;
-
     Parse();
 }
 
@@ -218,7 +217,7 @@ int Item::Ctrl(char * payload, boolean send){
       case -1: //Not known command
       case -2: //JSON input (not implemented yet
           break;
-#if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266) and not defined(ARDUINO_ARCH_STM32F1)
+#if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266) and not defined(ARDUINO_ARCH_STM32F1) and not defined(DMX_DISABLE)
       case -3: //RGB color in #RRGGBB notation
       {
           CRGB rgb;
@@ -250,9 +249,8 @@ int Item::Ctrl(char * payload, boolean send){
 
 int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
 
-
     debugSerial<<F(" MEM=")<<freeRam()<<F(" Cmd=")<<cmd<<F(" Par: ");
-
+    if (!itemArr) return -1;
     int Par[MAXCTRLPAR] = {0, 0, 0};
     if (Parameters)
             for (short i=0;i<n && i<MAXCTRLPAR;i++){
