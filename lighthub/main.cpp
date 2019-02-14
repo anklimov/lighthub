@@ -312,7 +312,7 @@ lan_status lanLoop() {
         if (lanStatus > 0)
             switch (Ethernet.maintain()) {
                    case NO_LINK:
-                    debugSerial<<F("No link");
+                    debugSerial<<F("No link")<<endl;
                     if (mqttClient.connected()) mqttClient.disconnect();
                     nextLanCheckTime = millis() + 30000;
                     lanStatus = AWAITING_ADDRESS;//-10;
@@ -365,14 +365,6 @@ void onMQTTConnect(){
   mqttClient.publish_P(topic,ready_P,true);
 
   strncpy_P(topic, outprefix, sizeof(topic));
-  strncat_P(topic, homie_P, sizeof(topic));
-  mqttClient.publish_P(topic,homiever_P,true);
-
-  strncpy_P(topic, outprefix, sizeof(topic));
-  strncat_P(topic, name_P, sizeof(topic));
-  mqttClient.publish_P(topic,nameval_P,true);
-
-  strncpy_P(topic, outprefix, sizeof(topic));
   strncat_P(topic, name_P, sizeof(topic));
   mqttClient.publish_P(topic,nameval_P,true);
 
@@ -380,20 +372,25 @@ void onMQTTConnect(){
   strncat_P(topic, stats_P, sizeof(topic));
   mqttClient.publish_P(topic,statsval_P,true);
 
-  strncat_P(topic, stats_P, sizeof(topic));
+  #ifndef NO_HOMIE
+
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, homie_P, sizeof(topic));
+  mqttClient.publish_P(topic,homiever_P,true);
+
   if (items) {
     char datatype[32]="\0";
     char format [64]="\0";
       aJsonObject * item = items->child;
       while (items && item)
           if (item->type == aJson_Array && aJson.getArraySize(item)>0) {
-
-              strncat_P(buf,item->name,sizeof(buf));
+              strncat(buf,item->name,sizeof(buf));
               strncat(buf,",",sizeof(buf));
 
                   switch (  aJson.getArrayItem(item, I_TYPE)->valueint) {
                       case CH_THERMO:
-                      strncat_P(datatype,float_P,sizeof(datatype));
+                      strncpy_P(datatype,float_P,sizeof(datatype));
+                      format[0]="\0";
                       break;
 
                       case CH_RELAY:
@@ -417,22 +414,26 @@ void onMQTTConnect(){
                   } //switch
 
                   strncpy_P(topic, outprefix, sizeof(topic));
-                  strncat_P(topic,item->name,sizeof(topic));
+                  strncat(topic,item->name,sizeof(topic));
                   strncat(topic,"/",sizeof(topic));
                   strncat_P(topic,datatype_P,sizeof(topic));
                   mqttClient.publish(topic,datatype,true);
 
+                  if (strlen(format))
+                  {
                   strncpy_P(topic, outprefix, sizeof(topic));
-                  strncat_P(topic,item->name,sizeof(topic));
+                  strncat(topic,item->name,sizeof(topic));
                   strncat(topic,"/",sizeof(topic));
                   strncat_P(topic,format_P,sizeof(topic));
                   mqttClient.publish(topic,format,true);
+                  }
               item = item->next;
           }  //if
           strncpy_P(topic, outprefix, sizeof(topic));
           strncat_P(topic, nodes_P, sizeof(topic));
           mqttClient.publish(topic,buf,true);
   }
+#endif
 }
 
 void ip_ready_config_loaded_connecting_to_broker() {
@@ -1039,7 +1040,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 #ifndef FLASH_64KB
     snprintf(URI, sizeof(URI), "/%s_config.json",QUOTE(DEVICE_NAME));
 #else
-    strncpy_P(URI, "/", sizeof(URI));
+    strncpy(URI, "/", sizeof(URI));
     strncat(URI, QUOTE(DEVICE_NAME), sizeof(URI));
     strncat(URI, "_config.json", sizeof(URI));
 #endif
