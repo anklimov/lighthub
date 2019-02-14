@@ -3,7 +3,7 @@
 # first make your own copy of template
 # cp build_flags_template.sh build_flags_ENVNAME.sh
 # then edit, change or comment something
- export FLAGS="-DMY_CONFIG_SERVER=lazyhome.ru"
+ export FLAGS="$FLAGS -DMY_CONFIG_SERVER=lazyhome.ru"
  #export FLAGS="$FLAGS -DWATCH_DOG_TICKER_DISABLE"
  #export FLAGS="$FLAGS -DUSE_1W_PIN=12"
  #export FLAGS="$FLAGS -DSD_CARD_INSERTED"

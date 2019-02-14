@@ -6,7 +6,7 @@
 # nano  my_build_flags.sh
 # and source it
 # source my_build_flags.sh
- #export FLAGS="-DMY_CONFIG_SERVER=lighthub.elistech.ru"
+ #export FLAGS="$FLAGS -DMY_CONFIG_SERVER=lighthub.elistech.ru"
  #export FLAGS="$FLAGS -DWATCH_DOG_TICKER_DISABLE"
  #export FLAGS="$FLAGS -DUSE_1W_PIN=12"
  #export FLAGS="$FLAGS -DSD_CARD_INSERTED"

@@ -332,9 +332,9 @@ void Input::contactPoll() {
      WiringPinMode inputPinMode;
 #endif
 #if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
-     uint32_t inputPinMode;
-#endif
 
+#endif
+     uint32_t inputPinMode;
      uint8_t inputOnLevel;
     if (inType & IN_ACTIVE_HIGH) {
         inputOnLevel = HIGH;
@@ -375,10 +375,10 @@ void Input::analogPoll() {
 #if defined(ARDUINO_ARCH_STM32F1)
      WiringPinMode inputPinMode;
 #endif
-#if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
-     uint32_t inputPinMode;
-#endif
 
+#if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
+#endif
+    uint32_t inputPinMode;
     if (inType & IN_ACTIVE_HIGH) {
         inputPinMode = INPUT;
     } else {
@@ -389,24 +389,25 @@ void Input::analogPoll() {
     // Mapping
     if (inputMap && inputMap->type == aJson_Array)
      {
+     int max;   
      if (aJson.getArraySize(inputMap)>=4)
         mappedInputVal  = map (mappedInputVal,
               aJson.getArrayItem(inputMap, 0)->valueint,
               aJson.getArrayItem(inputMap, 1)->valueint,
               aJson.getArrayItem(inputMap, 2)->valueint,
-              aJson.getArrayItem(inputMap, 3)->valueint);
+              max=aJson.getArrayItem(inputMap, 3)->valueint);
       if (aJson.getArraySize(inputMap)==5) Noize = aJson.getArrayItem(inputMap, 4)->valueint;
-
+      if (mappedInputVal>max) mappedInputVal=max;
       if (aJson.getArraySize(inputMap)==2)
         {
           simple = 1;
           if (mappedInputVal < aJson.getArrayItem(inputMap, 0)->valueint) mappedInputVal = 0;
             else if (mappedInputVal > aJson.getArrayItem(inputMap, 1)->valueint) mappedInputVal = 1;
-                 else mappedInputVal = -1;
+                 else return;
         }
       }
     if (simple) {
-       if (mappedInputVal!=-1 && mappedInputVal != store->currentValue)
+       if (mappedInputVal != store->currentValue)
        {
            onContactChanged(mappedInputVal);
            store->currentValue = mappedInputVal;

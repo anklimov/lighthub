@@ -68,6 +68,7 @@ PWM Out
 #include "main.h"
 #include "options.h"
 #include "utils.h"
+#include "homiedef.h"
 
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
@@ -108,6 +109,12 @@ WiFiClient ethClient;
 EthernetClient ethClient;
 #endif
 
+#ifdef NRF5
+#include <NRFFlashStorage.h>
+NRFFlashStorage EEPROM;
+EthernetClient ethClient;
+#endif
+
 #ifdef SYSLOG_ENABLE
 #include <Syslog.h>
 EthernetUDP udpSyslogClient;
@@ -120,6 +127,7 @@ lan_status lanStatus = INITIAL_STATE;
 const char outprefix[] PROGMEM = OUTTOPIC;
 const char inprefix[] PROGMEM = INTOPIC;
 const char configserver[] PROGMEM = CONFIG_SERVER;
+
 
 unsigned int UniqueID[5] = {0,0,0,0,0};
 
@@ -250,9 +258,6 @@ lan_status lanLoop() {
             if (!configOk)
                 lanStatus = loadConfigFromHttp(0, NULL);
             else lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-#ifdef _artnet
-            if (artnet) artnet->begin();
-#endif
             break;
 
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
@@ -349,6 +354,87 @@ lan_status lanLoop() {
 
 }
 
+
+void onMQTTConnect(){
+  char topic[64] = "";
+  char buf[128] = "";
+
+  // High level homie topics publishing
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, state_P, sizeof(topic));
+  mqttClient.publish_P(topic,ready_P,true);
+
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, homie_P, sizeof(topic));
+  mqttClient.publish_P(topic,homiever_P,true);
+
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, name_P, sizeof(topic));
+  mqttClient.publish_P(topic,nameval_P,true);
+
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, name_P, sizeof(topic));
+  mqttClient.publish_P(topic,nameval_P,true);
+
+  strncpy_P(topic, outprefix, sizeof(topic));
+  strncat_P(topic, stats_P, sizeof(topic));
+  mqttClient.publish_P(topic,statsval_P,true);
+
+  strncat_P(topic, stats_P, sizeof(topic));
+  if (items) {
+    char datatype[32]="\0";
+    char format [64]="\0";
+      aJsonObject * item = items->child;
+      while (items && item)
+          if (item->type == aJson_Array && aJson.getArraySize(item)>0) {
+
+              strncat_P(buf,item->name,sizeof(buf));
+              strncat(buf,",",sizeof(buf));
+
+                  switch (  aJson.getArrayItem(item, I_TYPE)->valueint) {
+                      case CH_THERMO:
+                      strncat_P(datatype,float_P,sizeof(datatype));
+                      break;
+
+                      case CH_RELAY:
+                      strncpy_P(datatype,enum_P,sizeof(datatype));
+                      strncpy_P(format,enumformat_P,sizeof(format));
+                      break;
+
+                      case  CH_RGBW:
+                      case  CH_RGB:
+                      strncpy_P(datatype,color_P,sizeof(datatype));
+                      strncpy_P(format,hsv_P,sizeof(format));
+                      break;
+                      case  CH_DIMMER:
+                      case  CH_MODBUS:
+                      case  CH_PWM:
+                      case  CH_VCTEMP:
+                      case  CH_VC:
+                      strncpy_P(datatype,int_P,sizeof(datatype));
+                      strncpy_P(format,intformat_P,sizeof(format));
+                      break;
+                  } //switch
+
+                  strncpy_P(topic, outprefix, sizeof(topic));
+                  strncat_P(topic,item->name,sizeof(topic));
+                  strncat(topic,"/",sizeof(topic));
+                  strncat_P(topic,datatype_P,sizeof(topic));
+                  mqttClient.publish(topic,datatype,true);
+
+                  strncpy_P(topic, outprefix, sizeof(topic));
+                  strncat_P(topic,item->name,sizeof(topic));
+                  strncat(topic,"/",sizeof(topic));
+                  strncat_P(topic,format_P,sizeof(topic));
+                  mqttClient.publish(topic,format,true);
+              item = item->next;
+          }  //if
+          strncpy_P(topic, outprefix, sizeof(topic));
+          strncat_P(topic, nodes_P, sizeof(topic));
+          mqttClient.publish(topic,buf,true);
+  }
+}
+
 void ip_ready_config_loaded_connecting_to_broker() {
     short n = 0;
     int port = 1883;
@@ -387,9 +473,18 @@ void ip_ready_config_loaded_connecting_to_broker() {
         mqttClient.setServer(servername, port);
         mqttClient.setCallback(mqttCallback);
 
+        char willMessage[16];
+        char willTopic[32];
+
+        strncpy_P(willMessage,disconnected_P,sizeof(willMessage));
+
+        strncpy_P(willTopic, outprefix, sizeof(willTopic));
+        strncat_P(willTopic, state_P, sizeof(willTopic));
+
+
         debugSerial<<F("\nAttempting MQTT connection to ")<<servername<<F(":")<<port<<F(" user:")<<user<<F(" ...");
         wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
-        if (mqttClient.connect(client_id, user, password)) {
+        if (mqttClient.connect(client_id, user, password,willTopic,MQTTQOS1,true,willMessage)) {
             mqttErrorRate = 0;
             debugSerial<<F("connected as ")<<client_id <<endl;
             wdt_en();
@@ -404,9 +499,11 @@ void ip_ready_config_loaded_connecting_to_broker() {
             //Subscribing for command topics
             strncpy_P(buf, inprefix, sizeof(buf));
             strncat(buf, "#", sizeof(buf));
+            Serial.println(buf);
             mqttClient.subscribe(buf);
 
             //restoreState();
+            onMQTTConnect();
             // if (_once) {DMXput(); _once=0;}
             lanStatus = RETAINING_COLLECTING;//4;
             nextLanCheckTime = millis() + 5000;
@@ -528,6 +625,9 @@ void onInitialStateInitLAN() {
         debugSerial<<F("Got IP address:");
         printIPAddress(Ethernet.localIP());
         lanStatus = HAVE_IP_ADDRESS;//1;
+        #ifdef _artnet
+                    if (artnet) artnet->begin();
+        #endif
     }
   }
     #endif
@@ -578,15 +678,16 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
     SetBytes(addr, 8, addrstr);
     addrstr[17] = 0;
 
+    printFloatValueToStr(currentTemp,valstr);
+    debugSerial<<endl<<F("T:")<<valstr<<F("<");
     aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);
     if (owObj) {
         owEmitString = aJson.getObjectItem(owObj, "emit")->valuestring;
-
-        if (owEmitString) {
-            printFloatValueToStr(currentTemp,valstr);
-            debugSerial<<owEmitString<<F("=")<<valstr<<endl;
-            if ((currentTemp == -127.0) || (currentTemp == 85.0) || (currentTemp == 0.0))  //ToDo: 1-w short circuit mapped to "0" celsium
-                return;
+        debugSerial<<owEmitString<<F(">")<<endl;
+          if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
+          {
+           if (owEmitString)      // publish temperature to MQTT if configured
+            {
 
 #ifdef WITH_DOMOTICZ
             aJsonObject *idx = aJson.getObjectItem(owObj, "idx");
@@ -604,12 +705,14 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
             strncat(addrstr, owEmitString, sizeof(addrstr));
             mqttClient.publish(addrstr, valstr);
         }
+        // And translate temp to internal items
         owItem = aJson.getObjectItem(owObj, "item")->valuestring;
         if (owItem)
             thermoSetCurTemp(owItem, currentTemp);  ///TODO: Refactore using Items interface
+        } // if valid temperature
+  } // if Address in config
+  else debugSerial<<addrstr<<F(">")<<endl; // No item found
 
-    else debugSerial<<F("1w-item not found in config")<<endl;
-  }
 }
 
 #endif //_owire
@@ -621,7 +724,7 @@ void cmdFunctionHelp(int arg_cnt, char **args)
 //    udpSyslog.logf(LOG_INFO, "free RAM: %d",freeRam());
     #endif
     printCurentLanConfig();
-    printFreeRam();
+//    printFreeRam();
     debugSerial<<F("\nUse these commands: 'help' - this text\n"
                           "'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
                           "'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"
@@ -650,7 +753,7 @@ void cmdFunctionKill(int arg_cnt, char **args) {
 
 void cmdFunctionReboot(int arg_cnt, char **args) {
     debugSerial<<F("Soft rebooting...");
-    softRebootFunc();
+   //// softRebootFunc();
 }
 
 void applyConfig() {
@@ -661,7 +764,7 @@ void applyConfig() {
     dmxArr = aJson.getObjectItem(root, "dmxin");
     if (dmxArr && (itemsCount = aJson.getArraySize(dmxArr))) {
         DMXinSetup(itemsCount * 4);
-        debugSerial<<F("DMX in started. Channels:")<<itemsCount * 4;
+        debugSerial<<F("DMX in started. Channels:")<<itemsCount * 4<<endl;
     }
 #endif
 #ifdef _dmxout
@@ -714,7 +817,7 @@ void applyConfig() {
                             int k;
                             pinMode(pin, OUTPUT);
                             digitalWrite(pin, k = ((cmd == CMD_ON) ? HIGH : LOW));
-                            debugSerial<<F("Pin:")<<pin<<F("=")<<k;
+                            debugSerial<<F("Pin:")<<pin<<F("=")<<k<<F(",");
                         }
                             break;
                     } //switch
@@ -1214,6 +1317,7 @@ debugSerial<<endl;
     Serial.println("Reading 128 bits unique identifier \n\r" ) ;
     ReadUniqueID( UniqueID ) ;
 
+#if defined(__SAM3X8E__)
     Serial.print ("ID: ") ;
     for (byte b = 0 ; b < 4 ; b++)
       Serial.print ((unsigned int) UniqueID [b], HEX) ;
@@ -1222,16 +1326,41 @@ debugSerial<<endl;
 
 
 }
-void printFreeRam(){
-    debugSerial<<F("\nfree RAM: ")<<freeRam();
+void publishStat(){
+  long fr = freeRam();
+  char topic[64];
+  char intbuf[16];
+  long ut = millis()/1000;
+
+//    debugSerial<<F("\nfree RAM: ")<<fr;
+
+    strncpy_P(topic, outprefix, sizeof(topic));
+    strncat_P(topic, stats_P, sizeof(topic));
+    strncat(topic, "/", sizeof(topic));
+    strncat_P(topic, freeheap_P, sizeof(topic));
+
+    mqttClient.publish(topic,itoa(fr,intbuf,10),true);
+
+    strncpy_P(topic, outprefix, sizeof(topic));
+    strncat_P(topic, stats_P, sizeof(topic));
+    strncat(topic, "/", sizeof(topic));
+    strncat_P(topic, uptime_P, sizeof(topic));
+
+    mqttClient.publish(topic,itoa(ut,intbuf,10),true);
 }
 
 void setupMacAddress() {
-
+#if defined(__SAM3X8E__)
+byte firmwareMacAddress[6];
+firmwareMacAddress[0]=0xDE;
+firmwareMacAddress[1]=0xAD;
+for (byte b = 0 ; b < 4 ; b++)
+              firmwareMacAddress[b+2]=UniqueID [b] ;
+#else
 #ifdef DEFAULT_FIRMWARE_MAC
     byte firmwareMacAddress[6] = DEFAULT_FIRMWARE_MAC;//comma(,) separated hex-array, hard-coded
 #endif
-
+#endif
 #ifdef CUSTOM_FIRMWARE_MAC
     byte firmwareMacAddress[6];
     const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);//colon(:) separated from build options
@@ -1244,7 +1373,7 @@ void setupMacAddress() {
         if (mac[i] != 0 && mac[i] != 0xff) isMacValid = true;
     }
     if (!isMacValid) {
-        debugSerial<<F("Invalid MAC: set firmware's MAC\n");
+        debugSerial<<F("No MAC configured: set firmware's MAC\n");
         memcpy(mac, firmwareMacAddress, 6);
     }
     printMACAddress();
@@ -1274,7 +1403,7 @@ void loop_main() {
     if (lanLoop() > HAVE_IP_ADDRESS) {
         mqttClient.loop();
 #ifdef _artnet
-        if (artnet) artnet->read();
+        if (artnet) artnet->read();  ///hung
 #endif
     }
 
@@ -1310,7 +1439,7 @@ void loop_main() {
 
 void owIdle(void) {
 #ifdef _artnet
-    if (artnet) artnet->read();
+    if (artnet && (lanStatus>=HAVE_IP_ADDRESS)) artnet->read();
 #endif
 
     wdt_res();
@@ -1443,10 +1572,12 @@ void thermoLoop(void) {
     }
 
     nextThermostatCheck = millis() + THERMOSTAT_CHECK_PERIOD;
-
+publishStat();
 #ifndef DISABLE_FREERAM_PRINT
     (thermostatCheckPrinted) ? debugSerial<<F("\nfree:")<<freeRam()<<" " : debugSerial<<F(" ")<<freeRam()<<F(" ");
 #endif
+
+
 }
 
 short thermoSetCurTemp(char *name, float t) {

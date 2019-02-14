@@ -176,7 +176,6 @@ int sensors_loop(void) {
 
         case 0x28: // Thermomerer
             t = sensors->getTempC(term[si]);//*10.0;
-            //Serial.println("o");
             if (owChanged) owChanged(si, term[si], t);
             sensors->requestTemperaturesByAddress(term[si]);
             si++;
