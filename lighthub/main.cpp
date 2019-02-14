@@ -362,21 +362,25 @@ void onMQTTConnect(){
   // High level homie topics publishing
   strncpy_P(topic, outprefix, sizeof(topic));
   strncat_P(topic, state_P, sizeof(topic));
-  mqttClient.publish_P(topic,ready_P,true);
+  strncpy_P(buf, ready_P, sizeof(buf));
+  mqttClient.publish(topic,buf,true);
 
   strncpy_P(topic, outprefix, sizeof(topic));
   strncat_P(topic, name_P, sizeof(topic));
-  mqttClient.publish_P(topic,nameval_P,true);
+  strncpy_P(buf, nameval_P, sizeof(buf));
+  mqttClient.publish(topic,buf,true);
 
   strncpy_P(topic, outprefix, sizeof(topic));
   strncat_P(topic, stats_P, sizeof(topic));
-  mqttClient.publish_P(topic,statsval_P,true);
+  strncpy_P(buf, statsval_P, sizeof(buf));
+  mqttClient.publish(topic,buf,true);
 
   #ifndef NO_HOMIE
 
   strncpy_P(topic, outprefix, sizeof(topic));
   strncat_P(topic, homie_P, sizeof(topic));
-  mqttClient.publish_P(topic,homiever_P,true);
+  strncpy_P(buf, homiever_P, sizeof(buf));
+  mqttClient.publish(topic,buf,true);
 
   if (items) {
     char datatype[32]="\0";
@@ -390,10 +394,11 @@ void onMQTTConnect(){
                   switch (  aJson.getArrayItem(item, I_TYPE)->valueint) {
                       case CH_THERMO:
                       strncpy_P(datatype,float_P,sizeof(datatype));
-                      format[0]="\0";
+                      format[0]=0;
                       break;
 
                       case CH_RELAY:
+                      case CH_GROUP:
                       strncpy_P(datatype,enum_P,sizeof(datatype));
                       strncpy_P(format,enumformat_P,sizeof(format));
                       break;
@@ -419,7 +424,7 @@ void onMQTTConnect(){
                   strncat_P(topic,datatype_P,sizeof(topic));
                   mqttClient.publish(topic,datatype,true);
 
-                  if (strlen(format))
+                  if (format[0])
                   {
                   strncpy_P(topic, outprefix, sizeof(topic));
                   strncat(topic,item->name,sizeof(topic));
