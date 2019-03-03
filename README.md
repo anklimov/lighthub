@@ -7,6 +7,7 @@ It may operate both:
 
 Lighthub allows connecting together:
 * Contact sensors (switches, buttons etc)
+* Analog inputs
 * 1-Wire temperature sensors (up to 20 on single bus)
 * Standard nonexpensive Relay board with TTL inputs, [like this](https://aliexpress.com/item/16-Channel-20A-Relay-Control-Module-for-Arduino-UNO-MEGA2560-R3-Raspberry-Pi/32747887693.html) to control AC powered lamps, floor heaters, boilers etc
 * [Standard nonexpensive LED dimmers](https://aliexpress.com/item/30-channel-27channel-Easy-DMX-LED-controller-dmx-decoder-driver-rgb-led-controller/2015743918.html) and [AC DMX-512 dimmers](https://aliexpress.com/item/DMX302-led-DMX-triac-dimmer-brightness-controller-AC90V-240V-Output-3channels-1A-CH-High-voltage-led/32822841266.html)
