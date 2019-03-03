@@ -39,13 +39,13 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 **AVR** version (Arduino Mega) is basic, long time in production and have all functions
 * DMX-out is software (DMXSimple) on pin3, can be re-defined to PIN 18 (USART1 TX)
 * DMX-in - hardware
-* WIZNET 5100 and 5500 are supported
+* WIZNET 5100 and 5500 Ethernets are supported
 * Modbus on USART2
 
-**SAM3X8E**: (Tested. In production. Recomended hardware at current moment)
+**SAM3X8E** (Arduino DUE): (Tested. In production. Recomended hardware at current moment)
 * default PWM out frequency
 * both, DMX-in and DMX-out are hardware USART based. Use USART1 (pins 18 and 19) for DMX-out and DMX-in
-* WIZNET 5100 and 5500 are supported
+* WIZNET 5100 and 5500 Ethernets are supported
 * Modbus on USART2
 
 **ESP8266**: (Developed, working, but not tested in production)
