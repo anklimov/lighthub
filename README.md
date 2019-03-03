@@ -30,25 +30,27 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 * [Channel commands](https://github.com/anklimov/lighthub/wiki/Channel-commands)
 * [OpenHab integration](https://github.com/anklimov/lighthub/wiki/OpenHab--integration)
 
-Finished portation of project to  Arduino DUE and ESP8266 (ESP32 not tested).
-
-
-Portation from AVR Mega 2560 to SAM3X8E (Arduino DUE) done since v 0.96 and tested against Wiznet 5100 Ethernet shield and Wiznet 5500 Ethernet module 
 
 # Platforms specific details:
 
-AVR version is basic, long time in production and have all functions
-*DMX-out is software (DMXSimple) on pin3
+**AVR** version (Arduino Mega) is basic, long time in production and have all functions
+* DMX-out is software (DMXSimple) on pin3, can be re-defined to PIN 18 (USART1 TX)
+* DMX-in - hardware
+* WIZNET 5100 and 5500 are supported
+* Modbus on USART2
 
 **SAM3X8E**: (Tested. In production. Recomended hardware at current moment)
 * default PWM out frequency
 * both, DMX-in and DMX-out are hardware USART based. Use USART1 (pins 18 and 19) for DMX-out and DMX-in
+* WIZNET 5100 and 5500 are supported
+* Modbus on USART2
 
-**ESP8266**: (Developed but not tested in production)
+**ESP8266**: (Developed, working, but not tested in production)
 * DMX-OUT on USART1 TX
-* DMX-IN - not possible to deploy in ESP8266
+* DMX-IN - disabled - not possible to deploy in ESP8266
 * Modbus - disabled. Might be configured in future on USART0 instead CLI/DEBUG
 
+**ESP32**, **NRF52840** : Still early development stage
 
 # Custom build flags
 
@@ -102,4 +104,3 @@ AVR version is basic, long time in production and have all functions
 * SYSLOG_ENABLE disabled
 * WITH_PRINTEX_LIB diabled, using Streaming library
 
-If you've using Arduino IDE to compile & flash firmware, it will use Default options above and you will not able to configure additional compilers options except edit "options.h" file
