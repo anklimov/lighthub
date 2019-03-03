@@ -7,12 +7,13 @@ It may operate both:
 
 Lighthub allows connecting together:
 * Contact sensors (switches, buttons etc)
-* Analog inputs
 * 1-Wire temperature sensors (up to 20 on single bus)
-* Standard nonexpensive Relay board with TTL inputs, [like this](https://aliexpress.com/item/16-Channel-20A-Relay-Control-Module-for-Arduino-UNO-MEGA2560-R3-Raspberry-Pi/32747887693.html) to control AC powered lamps, floor heaters, boilers etc
-* [Standard nonexpensive LED dimmers](https://aliexpress.com/item/30-channel-27channel-Easy-DMX-LED-controller-dmx-decoder-driver-rgb-led-controller/2015743918.html) and [AC DMX-512 dimmers](https://aliexpress.com/item/DMX302-led-DMX-triac-dimmer-brightness-controller-AC90V-240V-Output-3channels-1A-CH-High-voltage-led/32822841266.html)
+* Standard nonexpensive Relay board with TTL inputs, [like this](http://ali.pub/2zlosh) to control AC powered lamps, floor heaters, boilers etc
+* [Standard nonexpensive LED dimmers](http://ali.pub/2zlokp) and [AC DMX-512 dimmers](http://ali.pub/2zlont)
 * Modbus RTU devices (Currently, are deployed two types of Modbus devices: AC Dimmer and Ventilation set (Based on [Vacon 10 controller](http://files.danfoss.com/download/Drives/Vacon-10-Quick-Guide-DPD00714F1-UK.pdf))
-* Simple DMX wall sensor panel [like this](https://aliexpress.com/item/New-Ltech-D8-LED-rgb-RGBW-touch-panel-controller-DMX512-controller-DC12-24V-4-zones-4/32800199589.html)
+* Simple DMX wall sensor panel [like this](http://ali.pub/2zlohe)
+
+[List of non-expensive compatible components from AliExpress here](http://ppv.alipromo.com/custom/promo.php?hash=pjagwaovaero6vkeabjpkpvy4gznbgkc&landing_id=39661)
 
 ![alt text](docs/LightHubAppDiagram.png "LightHub application diagram")
 
