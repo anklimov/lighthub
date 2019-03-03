@@ -7,6 +7,7 @@ It may operate both:
 
 Lighthub allows connecting together:
 * Contact sensors (switches, buttons etc)
+* Analog sensors (Leak detectors, Knobs etc)
 * 1-Wire temperature sensors (up to 20 on single bus)
 * Standard nonexpensive Relay board with TTL inputs, [like this](http://ali.pub/2zlosh) to control AC powered lamps, floor heaters, boilers etc
 * [Standard nonexpensive LED dimmers](http://ali.pub/2zlokp) and [AC DMX-512 dimmers](http://ali.pub/2zlont)
