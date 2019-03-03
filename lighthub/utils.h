@@ -24,6 +24,7 @@ e-mail    anklimov@gmail.com
 #define VAR_NAME_VALUE(var) #var "="  VALUE(var)
 
 #include <Arduino.h>
+#include <IPAddress.h>
 #include "options.h"
 #ifdef WITH_PRINTEX_LIB
 #include "PrintEx.h"

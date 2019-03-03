@@ -928,14 +928,14 @@ void cmdFunctionIp(int arg_cnt, char **args)
 {
     IPAddress ip0(0, 0, 0, 0);
     IPAddress ip;
-
+/*
     #if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined(NRF5)
     DNSClient dns;
     #define inet_aton(cp, addr)   dns.inet_aton(cp, addr)
     #else
     #define inet_aton(cp, addr)   inet_aton(cp, addr)
     #endif
-
+*/
     switch (arg_cnt) {
         case 5:
             if (inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
