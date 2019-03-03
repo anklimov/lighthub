@@ -64,11 +64,9 @@ ESP32
 PWM Out
 
 */
-#include "Arduino.h"
+
 #include "main.h"
-#include "options.h"
-#include "utils.h"
-#include "homiedef.h"
+
 
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
@@ -80,18 +78,12 @@ EthernetClient ethClient;
 #endif
 
 #ifdef ARDUINO_ARCH_ESP8266
-#include <ESP8266WiFi.h>
-#include <user_interface.h>
 WiFiClient ethClient;
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
-#include <WiFiClient.h>
-#include <WiFi.h>
-#include <HTTPClient.h>
-#include <EEPROM.h>
-#include "Ethernet3.h"
 WiFiClient ethClient;
+NRFFlashStorage EEPROM;
 #endif
 
 #ifdef ARDUINO_ARCH_STM32F1
@@ -99,7 +91,7 @@ WiFiClient ethClient;
 //#include <EthernetClient.h>
 //#include "UIPEthernet.h"
 //#include "UIPUdp.h"
-#include <SPI.h>
+//#include <SPI.h>
 #include <Ethernet_STM.h>
 
 #include "Dns.h"
@@ -110,7 +102,6 @@ EthernetClient ethClient;
 #endif
 
 #ifdef NRF5
-#include <NRFFlashStorage.h>
 NRFFlashStorage EEPROM;
 EthernetClient ethClient;
 #endif
@@ -171,7 +162,9 @@ bool wifiInitialized;
 
 int mqttErrorRate;
 
+#if defined(__SAM3X8E__)
 void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
+#endif
 
 void mqttCallback(char *topic, byte *payload, unsigned int length) {
     debugSerial<<F("\n[")<<topic<<F("] ");
@@ -548,7 +541,7 @@ void onInitialStateInitLAN() {
 
 #ifdef ARDUINO_ARCH_ESP32
     if(!wifiInitialized) {
-        WiFi.mode(WIFI_STA);
+    //    WiFi.mode(WIFI_STA);
         WiFi.disconnect();
         debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD);
         WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
@@ -740,7 +733,7 @@ void cmdFunctionHelp(int arg_cnt, char **args)
 void printCurentLanConfig() {
     debugSerial << F("Current LAN config(ip,dns,gw,subnet):");
     printIPAddress(Ethernet.localIP());
-    printIPAddress(Ethernet.dnsServerIP());
+//    printIPAddress(Ethernet.dnsServerIP());
     printIPAddress(Ethernet.gatewayIP());
     printIPAddress(Ethernet.subnetMask());
 }
@@ -935,22 +928,32 @@ void cmdFunctionIp(int arg_cnt, char **args)
 {
     IPAddress ip0(0, 0, 0, 0);
     IPAddress ip;
+
+    #if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined(NRF5)
     DNSClient dns;
+    #define inet_aton(cp, addr)   dns.inet_aton(cp, addr)
+    #else
+    #define inet_aton(cp, addr)   inet_aton(cp, addr)
+    #endif
+
     switch (arg_cnt) {
         case 5:
-            if (dns.inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
+            if (inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
             else saveFlash(OFFSET_MASK, ip0);
         case 4:
-            if (dns.inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
+            if (inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
             else saveFlash(OFFSET_GW, ip0);
         case 3:
-            if (dns.inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
+            if (inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
             else saveFlash(OFFSET_DNS, ip0);
         case 2:
-            if (dns.inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
+            if (inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
             else saveFlash(OFFSET_IP, ip0);
             break;
-        case 1:
+
+        case 1: //dynamic IP
+        saveFlash(OFFSET_IP,ip0);
+/*
             IPAddress current_ip = Ethernet.localIP();
             IPAddress current_mask = Ethernet.subnetMask();
             IPAddress current_gw = Ethernet.gatewayIP();
@@ -963,7 +966,7 @@ void cmdFunctionIp(int arg_cnt, char **args)
             printIPAddress(current_ip);
             printIPAddress(current_dns);
             printIPAddress(current_gw);
-            printIPAddress(current_mask);
+            printIPAddress(current_mask); */
     }
     debugSerial<<F("Saved\n");
 }
@@ -1104,9 +1107,13 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         return READ_RE_CONFIG;//-11;
     }
 #endif
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1)
-    String response;
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1) || defined(ARDUINO_ARCH_ESP32)
+    #if defined(ARDUINO_ARCH_ESP32)
+    WiFiClient configEthClient;
+    #else
     EthernetClient configEthClient;
+    #endif
+      String response;
     HttpClient htclient = HttpClient(configEthClient, configServer, 80);
     //htclient.stop(); //_socket =MAX
     htclient.setHttpResponseTimeout(4000);
@@ -1142,7 +1149,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         return READ_RE_CONFIG;//-11; //Load from NVRAM
     }
 #endif
-#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
+#if defined(ARDUINO_ARCH_ESP8266)
     HTTPClient httpClient;
     String fullURI = "http://";
     fullURI+=configServer;
@@ -1194,6 +1201,8 @@ void postTransmission() {
 }
 
 void setup_main() {
+  //Serial.println("Hello");
+  //delay(1000);
     setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 

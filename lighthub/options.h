@@ -129,6 +129,10 @@
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32)
+#undef _dmxin
+#undef _modbus
+#undef _dmxout
+#undef modbusSerial
 #endif
 
 #ifndef _dmxout

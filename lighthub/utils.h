@@ -42,3 +42,4 @@ void parseBytes(const char* str, char separator, byte* bytes, int maxBytes, int 
 int log(const char *str, ...);
 void printFloatValueToStr(float value, char *valstr);
 void ReadUniqueID( unsigned int * pdwUniqueID );
+int inet_aton(const char* aIPAddrString, IPAddress& aResult);
