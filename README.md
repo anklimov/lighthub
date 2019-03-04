@@ -16,6 +16,9 @@ Lighthub allows connecting together:
 
 [List of non-expensive compatible components from AliExpress here](http://ppv.alipromo.com/custom/promo.php?hash=pjagwaovaero6vkeabjpkpvy4gznbgkc&landing_id=39661)
 
+![alt text](LightHub.png "LightHub application diagram")
+
+
 ![alt text](docs/LightHubAppDiagram.png "LightHub application diagram")
 
 Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from MQTT enabled software. At the moment, LightHub tested and perfectly working with following set of complementary free software:
