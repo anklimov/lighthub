@@ -82,14 +82,17 @@
 #endif
 */
 
+//Default output topic
 #ifndef OUTTOPIC
 #define OUTTOPIC "s_out"
 #endif
 
+//Topic to receive CLI commands
 #ifndef CMDTOPIC
-#define CMDTOPIC "command"
+#define CMDTOPIC "$command"
 #endif
 
+//Default broadcast topic
 #ifndef INTOPIC
 #define INTOPIC  "in"
 #endif

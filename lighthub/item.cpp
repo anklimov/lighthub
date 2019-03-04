@@ -198,7 +198,7 @@ boolean Item::getEnableCMD(int delta) {
 #define MAXCTRLPAR 3
 
 
-int Item::Ctrl(char * payload, boolean send){
+int Item::Ctrl(char * payload, boolean send, char * subItem){
   if (!payload) return 0;
 //  debugSerial<<F("'")<<payload<<F("'")<<endl;
   int cmd = txt2cmd(payload);
@@ -210,7 +210,7 @@ int Item::Ctrl(char * payload, boolean send){
           while (payload && i < 3)
               Par[i++] = getInt((char **) &payload);
 
-      return   Ctrl(0, i, Par, send);
+      return   Ctrl(0, i, Par, send, subItem);
       }
           break;
 
@@ -227,7 +227,7 @@ int Item::Ctrl(char * payload, boolean send){
               Par[0] = map(hsv.h, 0, 255, 0, 365);
               Par[1] = map(hsv.s, 0, 255, 0, 100);
               Par[2] = map(hsv.v, 0, 255, 0, 100);
-          return    Ctrl(0, 3, Par, send);
+          return    Ctrl(0, 3, Par, send, subItem);
           }
           break;
       }
@@ -236,26 +236,26 @@ int Item::Ctrl(char * payload, boolean send){
 
           //       if (item.getEnableCMD(500) || lanStatus == 4)
           return Ctrl(cmd, 0, NULL,
-                    send); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
+                    send, subItem); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
           //       else debugSerial<<F("on Skipped"));
 
           break;
       default: //some known command
-          return Ctrl(cmd, 0, NULL, send);
+          return Ctrl(cmd, 0, NULL, send, subItem);
 
   } //ctrl
 }
 
 
-int Item::Ctrl(short cmd, short n, int *Parameters, boolean send) {
+int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, char * subItem) {
 
-    debugSerial<<F(" MEM=")<<freeRam()<<F(" Cmd=")<<cmd<<F(" Par: ");
+    debugSerial<<F(" MEM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd=")<<cmd<<F(" Par= ");
     if (!itemArr) return -1;
     int Par[MAXCTRLPAR] = {0, 0, 0};
     if (Parameters)
             for (short i=0;i<n && i<MAXCTRLPAR;i++){
               Par[i] = Parameters[i];
-              debugSerial<<Par[i]<<F(",");
+              debugSerial<<F("<")<<Par[i]<<F("> ");
             }
     debugSerial<<endl;
     int iaddr = getArg();
