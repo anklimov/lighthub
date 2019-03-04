@@ -17,7 +17,6 @@ GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
 
 */
-
 #define D_UPDATED1 1
 #define D_UPDATED2 2
 #define D_UPDATED3 4
@@ -33,12 +32,12 @@ e-mail    anklimov@gmail.com
 
 #if defined(_dmxout)
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 #include <DmxSimple.h>
 #define DmxWrite DmxSimple.write
 #endif
 
-#if defined(__ESP__)
+#if defined(ESP8266)
 #include <ESPDMX.h>
 extern DMXESPSerial dmxout;
 #define DmxWrite dmxout.write
@@ -56,7 +55,7 @@ extern Artnet *artnet;
 #endif
 
 #ifdef _dmxin
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 #include <DMXSerial.h>
 #endif
 #endif

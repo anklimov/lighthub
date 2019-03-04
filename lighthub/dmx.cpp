@@ -23,13 +23,15 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 
 #ifdef _dmxin
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 #include <DMXSerial.h>
 #endif
 #endif
 
-#if defined(__ESP__)
+#if defined(ESP8266)
+#ifndef DMX_DISABLE
 DMXESPSerial dmxout;
+#endif
 #endif
 
 uint8_t * DMXin = NULL;
@@ -137,7 +139,7 @@ for (short tch=0; tch<=3 ; tch++)
       {
         D_State |= (1<<tch);
         updated=1;
-        //Serial.print("Changed :"); Serial.print(DMXin[tch*4+trh]); Serial.print(" => "); Serial.print(t);Serial.println();
+        //Serial.print("onContactChanged :"); Serial.print(DMXin[tch*4+trh]); Serial.print(" => "); Serial.print(t);Serial.println();
         DMXin[base+trh]=t;
         //DMXImmediateUpdate(tch,trh,t);
         //break;
@@ -205,7 +207,7 @@ void DMXinSetup(int channels)
 
 #if defined(_dmxin)
    DMXin = new uint8_t [channels];
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
    DMXSerial.init(DMXReceiver,0,channels);
     if (DMXSerial.getBuffer()) {Serial.print(F("Init in ch:"));Serial.println(channels);} else Serial.println(F("DMXin Buffer alloc err"));
    //DMXSerial.maxChannel(channels);
@@ -228,13 +230,13 @@ dmxin.begin();
 void DMXoutSetup(int channels)
 {
 #ifdef _dmxout
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
  DmxSimple.usePin(AVR_DMXOUT_PIN);
  DmxSimple.maxChannel(channels);
 #endif
 
 
-#if defined(__ESP__)
+#if defined(ESP8266)
 dmxout.init(channels);
 #endif
 

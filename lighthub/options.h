@@ -13,10 +13,12 @@
 #define IET_TEMP     0
 #define IET_ATTEMPTS 1
 
-#define THERMO_GIST_CELSIUS 2
-#define THERMO_OVERHEAT_CELSIUS 38
+#define THERMO_GIST_CELSIUS 1.
+#define THERMO_OVERHEAT_CELSIUS 38.
 #define FM_OVERHEAT_CELSIUS 40.
 
+#define MIN_VOLUME 10
+#define INIT_VOLUME 30
 
 #define OFFSET_MAC 0
 #define OFFSET_IP OFFSET_MAC+6
@@ -27,16 +29,26 @@
 #define OFFSET_MQTT_PWD OFFSET_CONFIGSERVER+32
 #define EEPROM_offset OFFSET_MQTT_PWD+16
 
+#ifndef INTERVAL_CHECK_INPUT
 #define INTERVAL_CHECK_INPUT  50
+#endif
 #define INTERVAL_CHECK_MODBUS 2000
 #define INTERVAL_POLLING      100
 #define THERMOSTAT_CHECK_PERIOD 5000
+
+#ifndef OW_UPDATE_INTERVAL
+#define OW_UPDATE_INTERVAL 5000
+#endif
 
 #ifndef MODBUS_SERIAL_BAUD
 #define MODBUS_SERIAL_BAUD 9600
 #endif
 
-#define dimPar SERIAL_8E1
+#ifndef MODBUS_DIMMER_PARAM
+#define MODBUS_DIMMER_PARAM SERIAL_8E1
+#endif
+
+#define dimPar MODBUS_DIMMER_PARAM
 #define fmPar  SERIAL_8N1
 
 #ifndef SERIAL_BAUD
@@ -53,12 +65,33 @@
 #define CONFIG_SERVER QUOTE(MY_CONFIG_SERVER)
 #endif
 
+#ifndef HOMETOPIC
+#define HOMETOPIC  "/myhome"
+#endif
+/*
 #ifndef OUTTOPIC
 #define OUTTOPIC "/myhome/s_out/"
 #endif
 
+#ifndef CMDTOPIC
+#define CMDTOPIC "/myhome/in/command/"
+#endif
+
 #ifndef INTOPIC
 #define INTOPIC  "/myhome/in/"
+#endif
+*/
+
+#ifndef OUTTOPIC
+#define OUTTOPIC "s_out"
+#endif
+
+#ifndef CMDTOPIC
+#define CMDTOPIC "command"
+#endif
+
+#ifndef INTOPIC
+#define INTOPIC  "in"
 #endif
 
 #define MQTT_SUBJECT_LENGTH 20
@@ -81,11 +114,11 @@
 #define _artnet
 #endif
 
-#if defined(ESP8266)
-#define __ESP__
+#ifndef LAN_INIT_DELAY
+#define LAN_INIT_DELAY 500
 #endif
 
-#if defined(__AVR__)
+#if defined(ARDUINO_ARCH_AVR)
 //All options available
 #ifdef CONTROLLINO
 #define modbusSerial Serial3
@@ -102,13 +135,50 @@
 #define dmxin  DmxDue1
 #endif
 
-#if defined(__ESP__)
+#if defined(ARDUINO_ARCH_ESP8266)
 #undef _dmxin
 #undef _modbus
+
+#ifndef DMX_DISABLE
 #define _espdmx
+#endif
 #define modbusSerial Serial1
+#endif
+
+#if defined(ARDUINO_ARCH_ESP32)
+#undef _dmxin
+#undef _modbus
+#undef _dmxout
+#undef modbusSerial
 #endif
 
 #ifndef _dmxout
 #undef _artnet
+#endif
+
+#ifdef WIFI_MANAGER_DISABLE
+#ifndef ESP_WIFI_AP
+#define ESP_WIFI_AP mywifiap
+#endif
+
+#ifndef ESP_WIFI_PWD
+#define ESP_WIFI_PWD mywifipass
+#endif
+#endif
+
+#define DHT_POLL_DELAY_DEFAULT 15000
+#define UPTIME_POLL_DELAY_DEFAULT 30000
+
+#ifdef ARDUINO_ARCH_STM32F1
+#define strncpy_P strncpy
+#endif
+
+#ifndef debugSerial
+#define debugSerial Serial
+#endif
+
+#ifndef Wiz5500
+#define W5100_ETHERNET_SHIELD
+#else
+#define W5500_ETHERNET_SHIELD
 #endif

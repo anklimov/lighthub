@@ -1,0 +1,9 @@
+{
+  "mqtt": ["test_esp","192.168.10.1",1883,"test","test"],
+  "items":{
+    "h_speed0": [6,9],
+    "h_speed1": [6,10]},
+  "in": {
+    "5": {"T":4,"emit": "/myhome/s_out/t_vent_street"}
+  }
+}

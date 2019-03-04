@@ -1,0 +1,4 @@
+{
+    "board": "arduino:sam:arduino_due_x",
+    "port": "/dev/cu.usbmodem1411"
+}

@@ -32,31 +32,36 @@ e-mail    anklimov@gmail.com
 #define recheck_interval 5
 #define check_circle 2000/t_count
 
-#define SW_FIND        1 
+#define SW_FIND        1
 #define SW_DOUBLECHECK 2      //Doublecheck required
-#define SW_PULSE0      4      //Pulse Reset started 
-#define SW_PULSE1      8      //Pulse Reset stsrted 
+#define SW_PULSE0      4      //Pulse Reset started
+#define SW_PULSE1      8      //Pulse Reset stsrted
 #define SW_PULSE_P0    0x10   //Pulse reset in process
 #define SW_PULSE_P1    0x20   //Pulse reset in process
 #define SW_CHANGED_P0  0x40   //Changes while pulse in progress
 #define SW_CHANGED_P1  0x80   //Changes while pulse in progress
-#define SW_PULSE0_R      0x100    //Pulse Reset requested 
-#define SW_PULSE1_R      0x200    //Pulse Reset requested 
+#define SW_PULSE0_R      0x100    //Pulse Reset requested
+#define SW_PULSE1_R      0x200    //Pulse Reset requested
 
 
 #define recheck_interval 5
 #define check_circle 2000/t_count
 
 #define t_max 20 //Maximum number of 1w devices
-#define TEMPERATURE_PRECISION 9
+#define TEMPERATURE_PRECISION 12 //9
 
+#ifndef OWIRE_DISABLE
+
+#ifndef ARDUINO_ARCH_STM32F1
 #include <DS2482_OneWire.h>
+#endif
+
 #include <DallasTemperature.h>
 #include "aJSON.h"
 
 extern aJsonObject *owArr;
 
-typedef   void (*owChangedType) (int , DeviceAddress, int) ;
+typedef   void (*owChangedType) (int , DeviceAddress, float) ;
 #ifndef USE_1W_PIN
 #define DS2482_100_I2C_TO_1W_BRIDGE // HW driver
 #endif
@@ -81,7 +86,8 @@ extern owChangedType  owChanged;
 int  owUpdate();
 int  owSetup(owChangedType owCh);
 void owLoop();
-void owIdle(void) ; 
+void owIdle(void) ;
 int owFind(DeviceAddress addr);
 void owAdd (DeviceAddress addr);
 
+#endif
