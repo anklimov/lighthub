@@ -176,19 +176,18 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         debugSerial<<F("OOM!");
         return;
     }
-
     for (int i = 0; i < length; i++)
         debugSerial<<((char) payload[i]);
     debugSerial<<endl;
 
-
-
     short intopic = 0;
     short pfxlen  = 0;
-    char * itemName;
-    {
-        char buf[MQTT_TOPIC_LENGTH + 1];
-//        strncpy_P(buf, inprefix, sizeof(buf));
+    char * itemName = NULL;
+    char * subItem = NULL;
+
+{
+char buf[MQTT_TOPIC_LENGTH + 1];
+
 
 if  (lanStatus == RETAINING_COLLECTING)
 {
@@ -210,11 +209,7 @@ else
         intopic = strncmp(topic, buf, pfxlen);
         }
 }
-
-
-
-    }
-
+}
     // in Retaining status - trying to restore previous state from retained output topic. Retained input topics are not relevant.
     if (intopic) {
         debugSerial<<F("Skipping..");
@@ -227,21 +222,22 @@ else
         cmd_parse((char *)payload);
         return;
     }
-    //char subtopic[MQTT_SUBJECT_LENGTH] = "";
-    char *t;
-    if (t = strchr(itemName, '/'))
+
+    if (subItem = strchr(itemName, '/'))
       {
-        *t = 0;
-        t++;
-        debugSerial<<F("Subtopic:")<<t<<endl;
-        //strncpy(subtopic, t + 1, MQTT_SUBJECT_LENGTH - 1);
+        *subItem = 0;
+        subItem++;
+        //  debugSerial<<F("Subitem:")<<subItem<<endl;
       }
-      debugSerial<<F("Item:")<<itemName<<endl;
+       // debugSerial<<F("Item:")<<itemName<<endl;
+
+    if (itemName[0]=='$' || subItem[0]=='$') return; //Skipping homie stuff
+
     Item item(itemName);
     if (item.isValid()) {
         if (item.itemType == CH_GROUP && (lanStatus == RETAINING_COLLECTING))
             return; //Do not restore group channels - they consist not relevant data
-        item.Ctrl((char *)payload, !(lanStatus == RETAINING_COLLECTING));
+        item.Ctrl((char *)payload, !(lanStatus == RETAINING_COLLECTING),subItem);
     } //valid item
 }
 
@@ -378,19 +374,19 @@ void onMQTTConnect(){
 
   // High level homie topics publishing
   //strncpy_P(topic, outprefix, sizeof(topic));
-  setTopic(topic,sizeof(topic),T_OUT);
+  setTopic(topic,sizeof(topic),T_DEV);
   strncat_P(topic, state_P, sizeof(topic));
   strncpy_P(buf, ready_P, sizeof(buf));
   mqttClient.publish(topic,buf,true);
 
   //strncpy_P(topic, outprefix, sizeof(topic));
-  setTopic(topic,sizeof(topic),T_OUT);
+  setTopic(topic,sizeof(topic),T_DEV);
   strncat_P(topic, name_P, sizeof(topic));
   strncpy_P(buf, nameval_P, sizeof(buf));
   mqttClient.publish(topic,buf,true);
 
   //strncpy_P(topic, outprefix, sizeof(topic));
-  setTopic(topic,sizeof(topic),T_OUT);
+  setTopic(topic,sizeof(topic),T_DEV);
   strncat_P(topic, stats_P, sizeof(topic));
   strncpy_P(buf, statsval_P, sizeof(buf));
   mqttClient.publish(topic,buf,true);
@@ -398,7 +394,7 @@ void onMQTTConnect(){
   #ifndef NO_HOMIE
 
 //  strncpy_P(topic, outprefix, sizeof(topic));
-  setTopic(topic,sizeof(topic),T_OUT);
+  setTopic(topic,sizeof(topic),T_DEV);
   strncat_P(topic, homie_P, sizeof(topic));
   strncpy_P(buf, homiever_P, sizeof(buf));
   mqttClient.publish(topic,buf,true);
@@ -440,7 +436,7 @@ void onMQTTConnect(){
                   } //switch
 
                   //strncpy_P(topic, outprefix, sizeof(topic));
-                  setTopic(topic,sizeof(topic),T_OUT);
+                  setTopic(topic,sizeof(topic),T_DEV);
 
                   strncat(topic,item->name,sizeof(topic));
                   strncat(topic,"/",sizeof(topic));
@@ -450,7 +446,7 @@ void onMQTTConnect(){
                   if (format[0])
                   {
                   //strncpy_P(topic, outprefix, sizeof(topic));
-                  setTopic(topic,sizeof(topic),T_OUT);
+                  setTopic(topic,sizeof(topic),T_DEV);
 
                   strncat(topic,item->name,sizeof(topic));
                   strncat(topic,"/",sizeof(topic));
@@ -460,7 +456,7 @@ void onMQTTConnect(){
               item = item->next;
           }  //if
           //strncpy_P(topic, outprefix, sizeof(topic));
-          setTopic(topic,sizeof(topic),T_OUT);
+          setTopic(topic,sizeof(topic),T_DEV);
           strncat_P(topic, nodes_P, sizeof(topic));
           mqttClient.publish(topic,buf,true);
   }
@@ -519,7 +515,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
         strncpy_P(willMessage,disconnected_P,sizeof(willMessage));
 
       //  strncpy_P(willTopic, outprefix, sizeof(willTopic));
-        setTopic(willTopic,sizeof(willTopic),T_OUT);
+        setTopic(willTopic,sizeof(willTopic),T_DEV);
 
         strncat_P(willTopic, state_P, sizeof(willTopic));
 
