@@ -161,16 +161,12 @@ enum lan_status {
     DO_NOTHING = -14
 };
 
+
 //void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);
 
-
-void printIPAddress(IPAddress ipAddress);
-
 void printMACAddress();
-
-void restoreState();
 
 lan_status lanLoop();
 

@@ -23,7 +23,7 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 #include <PubSubClient.h>
 
-#ifndef DHT_COUNTER_DISABLE
+#ifndef DHT_DISABLE
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #include <DHTesp.h>
 
@@ -34,7 +34,7 @@ e-mail    anklimov@gmail.com
 
 extern PubSubClient mqttClient;
 
-#ifndef DHT_COUNTER_DISABLE
+#ifndef COUNTER_DISABLE
 static volatile unsigned long nextPollMillisValue[5];
 static volatile int nextPollMillisPin[5] = {0,0,0,0,0};
 #if defined(ARDUINO_ARCH_AVR)
@@ -110,7 +110,7 @@ int Input::poll() {
     if (!isValid()) return -1;
     if (0) ;
 
-    #ifndef DHT_COUNTER_DISABLE
+    #ifndef DHT_DISABLE
     else if (inType & IN_DHT22)
         dht22Poll();
     else if (inType & IN_COUNTER)
@@ -127,7 +127,7 @@ int Input::poll() {
   //  contactPoll();
 }
 
-#ifndef DHT_COUNTER_DISABLE
+#ifndef COUNTER_DISABLE
 void Input::counterPoll() {
     if(nextPollTime()>millis())
         return;
@@ -172,7 +172,7 @@ void Input::counterPoll() {
 }
 #endif
 
-#ifndef DHT_COUNTER_DISABLE
+#ifndef COUNTER_DISABLE
 void Input::attachInterruptPinIrq(int realPin, int irq) {
     pinMode(realPin, INPUT);
     int real_irq;
@@ -389,7 +389,7 @@ void Input::analogPoll() {
     // Mapping
     if (inputMap && inputMap->type == aJson_Array)
      {
-     int max;   
+     int max;
      if (aJson.getArraySize(inputMap)>=4)
         mappedInputVal  = map (mappedInputVal,
               aJson.getArrayItem(inputMap, 0)->valueint,

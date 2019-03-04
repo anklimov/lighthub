@@ -42,7 +42,7 @@ extern aJsonObject *pollingItem;
 
 extern PubSubClient mqttClient;
 //extern char  outprefix[];
-const char outprefix[] PROGMEM = OUTTOPIC;
+//const char outprefix[] PROGMEM = OUTTOPIC;
 
 static unsigned long lastctrl = 0;
 static aJsonObject *lastobj = NULL;
@@ -884,7 +884,9 @@ int Item::checkFM() {
     char *outch;
     char addrstr[32];
 
-    strcpy_P(addrstr, outprefix);
+    //strcpy_P(addrstr, outprefix);
+    setTopic(addrstr,sizeof(addrstr),T_OUT);
+
     strncat(addrstr, itemArr->name, sizeof(addrstr) - 1);
     strncat(addrstr, "_stat", sizeof(addrstr) - 1);
 
@@ -1164,7 +1166,9 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
         //char addrbuf[17];
         char valstr[16] = "";
 
-        strcpy_P(addrstr, outprefix);
+        //strcpy_P(addrstr, outprefix);
+        setTopic(addrstr,sizeof(addrstr),T_OUT);
+
         strncat(addrstr, itemArr->name, sizeof(addrstr));
 
 

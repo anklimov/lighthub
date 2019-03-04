@@ -25,6 +25,7 @@ e-mail    anklimov@gmail.com
 
 #include <Arduino.h>
 #include <IPAddress.h>
+#include "aJSON.h"
 #include "options.h"
 #ifdef WITH_PRINTEX_LIB
 #include "PrintEx.h"
@@ -32,6 +33,12 @@ using namespace ios;
 #else
 #include "Streaming.h"
 #endif
+
+enum topicType {
+    T_DEV = 1,
+    T_BCST= 2,
+    T_OUT = 3
+  };
 
 void PrintBytes(uint8_t* addr, uint8_t count, bool newline);
 void SetBytes(uint8_t* addr, uint8_t count, char * out);
@@ -44,3 +51,6 @@ int log(const char *str, ...);
 void printFloatValueToStr(float value, char *valstr);
 void ReadUniqueID( unsigned int * pdwUniqueID );
 int inet_aton(const char* aIPAddrString, IPAddress& aResult);
+char *inet_ntoa_r(IPAddress addr, char *buf, int buflen);
+void printIPAddress(IPAddress ipAddress);
+char* setTopic(char* buf, int8_t buflen, topicType tt, char* suffix = NULL);

@@ -65,6 +65,10 @@
 #define CONFIG_SERVER QUOTE(MY_CONFIG_SERVER)
 #endif
 
+#ifndef HOMETOPIC
+#define HOMETOPIC  "/myhome"
+#endif
+/*
 #ifndef OUTTOPIC
 #define OUTTOPIC "/myhome/s_out/"
 #endif
@@ -75,6 +79,19 @@
 
 #ifndef INTOPIC
 #define INTOPIC  "/myhome/in/"
+#endif
+*/
+
+#ifndef OUTTOPIC
+#define OUTTOPIC "s_out"
+#endif
+
+#ifndef CMDTOPIC
+#define CMDTOPIC "command"
+#endif
+
+#ifndef INTOPIC
+#define INTOPIC  "in"
 #endif
 
 #define MQTT_SUBJECT_LENGTH 20

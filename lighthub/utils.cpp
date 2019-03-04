@@ -32,6 +32,13 @@ extern "C" {
 }
 #endif
 
+const char outTopic[] PROGMEM = OUTTOPIC;
+const char inTopic[] PROGMEM = INTOPIC;
+const char homeTopic[] PROGMEM = HOMETOPIC;
+extern char *deviceName;
+extern aJsonObject *topics;
+
+
 void PrintBytes(uint8_t *addr, uint8_t count, bool newline) {
     for (uint8_t i = 0; i < count; i++) {
         Serial.print(addr[i] >> 4, HEX);
@@ -326,6 +333,84 @@ int inet_aton(const char* aIPAddrString, IPAddress& aResult)
     }
 }
 
+/**
+ * Same as ipaddr_ntoa, but reentrant since a user-supplied buffer is used.
+ *
+ * @param addr ip address in network order to convert
+ * @param buf target buffer where the string is stored
+ * @param buflen length of buf
+ * @return either pointer to buf which now holds the ASCII
+ *         representation of addr or NULL if buf was too small
+ */
+char *inet_ntoa_r(IPAddress addr, char *buf, int buflen)
+{
+  short n;
+  char intbuf[4];
+
+
+buf[0]=0;
+for(n = 0; n < 4; n++) {
+  if (addr[n]>255) addr[n]=-1;
+  itoa(addr[n],intbuf,10);
+  strncat(buf,intbuf,buflen);
+  if (n<3) strncat(buf,".",buflen);
+}
+  return buf;
+}
+
+
+void printIPAddress(IPAddress ipAddress) {
+    for (byte i = 0; i < 4; i++)
+#ifdef WITH_PRINTEX_LIB
+            (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : debugSerial << (ipAddress[i])<<F(", ");
+#else
+            (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i]) << F(", ");
+#endif
+}
+
+
+char* setTopic(char* buf, int8_t buflen, topicType tt, char* suffix=NULL)
+{
+  aJsonObject *_root = NULL;
+  aJsonObject *_l2 = NULL;
+
+if (topics && topics->type == aJson_Object)
+  {
+    _root = aJson.getObjectItem(topics, "root");
+    switch (tt) {
+      case T_OUT:
+      _l2 = aJson.getObjectItem(topics, "out");
+      break;
+      case T_BCST:
+      _l2 = aJson.getObjectItem(topics, "bcst");
+      break;
+    }
+
+
+    }
+if  (_root) strncpy(buf,_root->valuestring,buflen);
+  else strncpy_P(buf,homeTopic,buflen);
+strncat(buf,"/",buflen);
+
+if (_l2) strncat(buf,_l2->valuestring,buflen);
+  else
+  switch (tt) {
+    case T_DEV:
+    strncat(buf,deviceName,buflen);
+    break;
+    case T_OUT:
+    strncat_P(buf,outTopic,buflen);
+    break;
+    case T_BCST:
+    strncat_P(buf,inTopic,buflen); /////
+    break;
+  }
+strncat(buf,"/",buflen);
+if (suffix) strncat(buf,suffix,buflen);
+
+return buf;
+
+}
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))
