@@ -227,11 +227,13 @@ else
       {
         *subItem = 0;
         subItem++;
+        if (*subItem=='$') return; //Skipping homie stuff
+
         //  debugSerial<<F("Subitem:")<<subItem<<endl;
       }
        // debugSerial<<F("Item:")<<itemName<<endl;
 
-    if (itemName[0]=='$' || subItem[0]=='$') return; //Skipping homie stuff
+    if (itemName[0]=='$') return; //Skipping homie stuff
 
     Item item(itemName);
     if (item.isValid()) {
