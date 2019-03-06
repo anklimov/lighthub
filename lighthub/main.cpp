@@ -117,6 +117,7 @@ lan_status lanStatus = INITIAL_STATE;
 
 
 const char configserver[] PROGMEM = CONFIG_SERVER;
+const char verval_P[] PROGMEM = QUOTE(PIO_SRC_REV);
 
 
 unsigned int UniqueID[5] = {0,0,0,0,0};
@@ -140,10 +141,10 @@ aJsonObject *dmxArr = NULL;
 aJsonObject *udpSyslogArr = NULL;
 #endif
 
-unsigned long nextPollingCheck = 0;
-unsigned long nextInputCheck = 0;
-unsigned long nextLanCheckTime = 0;
-unsigned long nextThermostatCheck = 0;
+uint32_t nextPollingCheck = 0;
+uint32_t nextInputCheck = 0;
+uint32_t nextLanCheckTime = 0;
+uint32_t nextThermostatCheck = 0;
 
 aJsonObject *pollingItem = NULL;
 
@@ -385,6 +386,7 @@ void onMQTTConnect(){
   setTopic(topic,sizeof(topic),T_DEV);
   strncat_P(topic, name_P, sizeof(topic));
   strncpy_P(buf, nameval_P, sizeof(buf));
+  strncat_P(buf,(verval_P),sizeof(buf));
   mqttClient.publish(topic,buf,true);
 
   //strncpy_P(topic, outprefix, sizeof(topic));
@@ -1396,7 +1398,7 @@ void publishStat(){
   long fr = freeRam();
   char topic[64];
   char intbuf[16];
-  long ut = millis()/1000;
+  uint32_t ut = millis()/1000;
 
 //    debugSerial<<F("\nfree RAM: ")<<fr;
     setTopic(topic,sizeof(topic),T_DEV);

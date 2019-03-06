@@ -7,7 +7,7 @@ const char homie_P[] PROGMEM = "$homie";
 const char homiever_P[] PROGMEM = "2.1.0";
 
 const char name_P[] PROGMEM = "$name";
-const char nameval_P[] PROGMEM = "LightHub";
+const char nameval_P[] PROGMEM = "LightHub ";
 
 const char nodes_P[] PROGMEM = "$nodes";
 const char color_P[] PROGMEM = "color";
