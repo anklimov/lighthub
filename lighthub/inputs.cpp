@@ -113,6 +113,8 @@ int Input::poll() {
     #ifndef DHT_DISABLE
     else if (inType & IN_DHT22)
         dht22Poll();
+    #endif
+    #ifndef COUNTER_DISABLE
     else if (inType & IN_COUNTER)
         counterPoll();
     else if (inType & IN_UPTIME)
@@ -497,20 +499,6 @@ void Input::onAnalogChanged(int newValue) {
 }
 
 
-void Input::printUlongValueToStr(char *valstr, unsigned long value) {
-    char buf[11];
-    int i=0;
-    for(;value>0;i++){
-        unsigned long mod = value - ((unsigned long)(value/10))*10;
-        buf[i]=mod+48;
-        value = (unsigned long)(value/10);
-    }
-
-    for(int n=0;n<=i;n++){
-        valstr[n]=buf[i-n-1];
-    }
-    valstr[i]='\0';
-}
 bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, const char *format, ...)
 {
 #ifdef WITH_DOMOTICZ

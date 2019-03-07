@@ -1398,22 +1398,22 @@ void publishStat(){
   long fr = freeRam();
   char topic[64];
   char intbuf[16];
-  uint32_t ut = millis()/1000;
+  uint32_t ut = millis()/1000UL;
 
 //    debugSerial<<F("\nfree RAM: ")<<fr;
     setTopic(topic,sizeof(topic),T_DEV);
     strncat_P(topic, stats_P, sizeof(topic));
     strncat(topic, "/", sizeof(topic));
     strncat_P(topic, freeheap_P, sizeof(topic));
-
-    mqttClient.publish(topic,itoa(fr,intbuf,10),true);
+    printUlongValueToStr(intbuf, fr);
+    mqttClient.publish(topic,intbuf,true);
 
     setTopic(topic,sizeof(topic),T_DEV);
     strncat_P(topic, stats_P, sizeof(topic));
     strncat(topic, "/", sizeof(topic));
     strncat_P(topic, uptime_P, sizeof(topic));
-
-    mqttClient.publish(topic,itoa(ut,intbuf,10),true);
+    printUlongValueToStr(intbuf, ut);
+    mqttClient.publish(topic,intbuf,true);
 }
 
 void setupMacAddress() {

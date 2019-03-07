@@ -126,7 +126,6 @@ protected:
 
     void uptimePoll();
 
-    void printUlongValueToStr(char *valstr, unsigned long value);
     bool publishDataToDomoticz(int , aJsonObject *, const char *format, ...);
 
     char* getIdxField();

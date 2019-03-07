@@ -412,5 +412,22 @@ return buf;
 
 }
 
+
+
+void printUlongValueToStr(char *valstr, unsigned long value) {
+    char buf[11];
+    int i=0;
+    for(;value>0;i++){
+        unsigned long mod = value - ((unsigned long)(value/10))*10;
+        buf[i]=mod+48;
+        value = (unsigned long)(value/10);
+    }
+
+    for(int n=0;n<=i;n++){
+        valstr[n]=buf[i-n-1];
+    }
+    valstr[i]='\0';
+}
+
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

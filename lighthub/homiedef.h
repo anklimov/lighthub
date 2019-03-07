@@ -10,6 +10,12 @@ const char name_P[] PROGMEM = "$name";
 const char nameval_P[] PROGMEM = "LightHub ";
 
 const char nodes_P[] PROGMEM = "$nodes";
+const char localip_P[] PROGMEM = "$localip";
+const char mac_P[] PROGMEM = "$mac";
+const char fwname_P[] PROGMEM = "$fw/name";
+const char fwversion_P[] PROGMEM = "$fw/version";
+const char implementation_P[] PROGMEM =  "$implementation";
+const char interval_P[] PROGMEM =  "$stats/interval";
 const char color_P[] PROGMEM = "color";
 
 const char datatype_P[] PROGMEM = "$datatype";

@@ -54,3 +54,4 @@ int inet_aton(const char* aIPAddrString, IPAddress& aResult);
 char *inet_ntoa_r(IPAddress addr, char *buf, int buflen);
 void printIPAddress(IPAddress ipAddress);
 char* setTopic(char* buf, int8_t buflen, topicType tt, char* suffix = NULL);
+void printUlongValueToStr(char *valstr, unsigned long value);
