@@ -66,7 +66,7 @@
 #endif
 
 #ifndef HOMETOPIC
-#define HOMETOPIC  "/myhome"
+#define HOMETOPIC  "myhome"
 #endif
 /*
 #ifndef OUTTOPIC

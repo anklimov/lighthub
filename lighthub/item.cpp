@@ -17,6 +17,7 @@ GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
 
 */
+
 #include "options.h"
 #include "item.h"
 #include "aJSON.h"
@@ -32,7 +33,28 @@ e-mail    anklimov@gmail.com
 #endif
 #include <PubSubClient.h>
 
+const char ON_P[] PROGMEM = "ON";
+const char OFF_P[] PROGMEM = "OFF";
+const char REST_P[] PROGMEM = "REST";
+const char TOGGLE_P[] PROGMEM = "TOGGLE";
+const char HALT_P[] PROGMEM = "HALT";
+const char XON_P[] PROGMEM = "XON";
+const char XOFF_P[] PROGMEM = "XOFF";
+const char INCREASE_P[] PROGMEM = "INCREASE";
+const char DECREASE_P[] PROGMEM = "DECREASE";
+const char TRUE_P[] PROGMEM = "true";
+const char FALSE_P[] PROGMEM = "false";
 
+const char SET_P[] PROGMEM = "set";
+const char TEMP_P[] PROGMEM = "temp";
+const char MODE_P[] PROGMEM = "mode";
+const char SETPOINT_P[] PROGMEM = "setpoint";
+const char POWER_P[] PROGMEM = "power";
+const char VOL_P[] PROGMEM = "vol";
+const char HEAT_P[] PROGMEM = "heat";
+const char CSV_P[] PROGMEM = "csv";
+const char RGB_P[] PROGMEM = "rgb";
+const char RPM_P[] PROGMEM = "rpm";
 
 short modbusBusy = 0;
 extern aJsonObject *pollingItem;
@@ -51,19 +73,38 @@ int txt2cmd(char *payload) {
     int cmd = -1;
 
     // Check for command
-    if (strcmp(payload, "ON") == 0) cmd = CMD_ON;
-    else if (strcmp(payload, "OFF") == 0) cmd = CMD_OFF;
-    else if (strcmp(payload, "REST") == 0) cmd = CMD_RESTORE;
-    else if (strcmp(payload, "TOGGLE") == 0) cmd = CMD_TOGGLE;
-    else if (strcmp(payload, "HALT") == 0) cmd = CMD_HALT;
-    else if (strcmp(payload, "XON") == 0) cmd = CMD_XON;
-    else if (strcmp(payload, "XOFF") == 0) cmd = CMD_XOFF;
-    else if (strcmp(payload, "INCREASE") == 0) cmd = CMD_UP;
-    else if (strcmp(payload, "DECREASE") == 0) cmd = CMD_DN;
+    if (strcmp_P(payload, ON_P) == 0) cmd = CMD_ON;
+    else if (strcmp_P(payload, OFF_P) == 0) cmd = CMD_OFF;
+    else if (strcmp_P(payload, REST_P) == 0) cmd = CMD_RESTORE;
+    else if (strcmp_P(payload, TOGGLE_P) == 0) cmd = CMD_TOGGLE;
+    else if (strcmp_P(payload, HALT_P) == 0) cmd = CMD_HALT;
+    else if (strcmp_P(payload, XON_P) == 0) cmd = CMD_XON;
+    else if (strcmp_P(payload, XOFF_P) == 0) cmd = CMD_XOFF;
+    else if (strcmp_P(payload, TRUE_P) == 0) cmd = CMD_ON;
+    else if (strcmp_P(payload, FALSE_P) == 0) cmd = CMD_OFF;
+    else if (strcmp_P(payload, INCREASE_P) == 0) cmd = CMD_UP;
+    else if (strcmp_P(payload, DECREASE_P) == 0) cmd = CMD_DN;
     else if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = 0;
     else if (*payload == '{') cmd = -2;
     else if (*payload == '#') cmd = -3;
 
+    return cmd;
+}
+
+
+int txt2subItem(char *payload) {
+    int cmd = -1;
+    if (!payload || !strlen(payload)) return 0;
+    // Check for command
+    if (strcmp_P(payload, SET_P) == 0) cmd = S_SET;
+    else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
+    else if (strcmp_P(payload, MODE_P) == 0) cmd = S_MODE;
+    else if (strcmp_P(payload, SETPOINT_P) == 0) cmd = S_SETPOINT;
+    else if (strcmp_P(payload, POWER_P) == 0) cmd = S_POWER;
+    else if (strcmp_P(payload, VOL_P) == 0) cmd = S_VOL;
+    else if (strcmp_P(payload, HEAT_P) == 0) cmd = S_HEAT;
+    else if (strcmp_P(payload, CSV_P) == 0) cmd = S_CSV;
+    else if (strcmp_P(payload, RGB_P) == 0) cmd = S_RGB;
     return cmd;
 }
 
@@ -200,7 +241,26 @@ boolean Item::getEnableCMD(int delta) {
 
 int Item::Ctrl(char * payload, boolean send, char * subItem){
   if (!payload) return 0;
-//  debugSerial<<F("'")<<payload<<F("'")<<endl;
+
+char* subsubItem = NULL;
+int   subItemN = 0;
+int   subsubItemN = 0;
+bool  isSet = false;
+
+if (subItem && strlen(subItem))
+{
+if (subsubItem = strchr(subItem, '/'))
+  {
+    *subsubItem = 0;
+    subsubItem++;
+    subsubItemN = txt2subItem(subsubItem);
+    }
+  subItemN = txt2subItem(subItem);
+      if (subItemN==S_SET || subsubItemN==S_SET) isSet = true;
+} else isSet = true; /// To be removed - old compatmode
+
+if (isSet)
+{
   int cmd = txt2cmd(payload);
   switch (cmd) {
       case 0: {
@@ -244,6 +304,7 @@ int Item::Ctrl(char * payload, boolean send, char * subItem){
           return Ctrl(cmd, 0, NULL, send, subItem);
 
   } //ctrl
+}
 }
 
 
