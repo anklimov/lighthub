@@ -18,7 +18,7 @@
 #define FM_OVERHEAT_CELSIUS 40.
 
 #define MIN_VOLUME 10
-#define INIT_VOLUME 30
+#define INIT_VOLUME 50
 
 #define OFFSET_MAC 0
 #define OFFSET_IP OFFSET_MAC+6

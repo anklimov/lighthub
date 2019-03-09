@@ -919,8 +919,8 @@ int loadConfigFromEEPROM()
         aJson.deleteItem(root);
         root = aJson.parse(&as);
         if (!root) {
-            debugSerial<<F("\nload failed");
-            return 0;
+            debugSerial<<F("\nload failed\n");
+            return 0;  
         }
         debugSerial<<F("\nLoaded\n");
         applyConfig();
