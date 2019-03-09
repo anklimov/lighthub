@@ -409,8 +409,8 @@ void onMQTTConnect(){
       aJsonObject * item = items->child;
       while (items && item)
           if (item->type == aJson_Array && aJson.getArraySize(item)>0) {
-              strncat(buf,item->name,sizeof(buf));
-              strncat(buf,",",sizeof(buf));
+///              strncat(buf,item->name,sizeof(buf));
+///              strncat(buf,",",sizeof(buf));
 
                   switch (  aJson.getArrayItem(item, I_TYPE)->valueint) {
                       case CH_THERMO:
@@ -462,7 +462,7 @@ void onMQTTConnect(){
           //strncpy_P(topic, outprefix, sizeof(topic));
           setTopic(topic,sizeof(topic),T_DEV);
           strncat_P(topic, nodes_P, sizeof(topic));
-          mqttClient.publish(topic,buf,true);
+    ///      mqttClient.publish(topic,buf,true);
   }
 #endif
 }
@@ -817,7 +817,7 @@ void applyConfig() {
     aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
     if (dmxoutArr && aJson.getArraySize(dmxoutArr) >=1 ) {
         DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, 1)->valueint);
-        debugSerial<<F("DMX out started. Channels: ")<<maxChannels;
+        debugSerial<<F("DMX out started. Channels: ")<<maxChannels<<endl;
     }
 #endif
 #ifdef _modbus
@@ -854,6 +854,7 @@ void applyConfig() {
                 Item it(item);
                 if (it.isValid()) {
                     int pin=it.getArg();
+                    if (pin<0) pin=-pin;
                     int cmd = it.getCmd();
                     switch (it.itemType) {
                         case CH_THERMO:
