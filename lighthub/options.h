@@ -98,7 +98,7 @@
 #endif
 
 #define MQTT_SUBJECT_LENGTH 20
-#define MQTT_TOPIC_LENGTH 20
+#define MQTT_TOPIC_LENGTH 64
 
 #ifndef DMX_DISABLE
 #define _dmxin

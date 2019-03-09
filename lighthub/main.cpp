@@ -1622,15 +1622,15 @@ void thermoLoop(void) {
                             << F(" cmd:") << thermoStateCommand;
                 pinMode(thermoPin, OUTPUT);
                 if (thermoDisabledOrDisconnected(thermoExtensionArray, thermoStateCommand)) {
-                    digitalWrite(thermoPin, LOW);
+                    if (thermoPin<0) digitalWrite(-thermoPin, HIGH); digitalWrite(thermoPin, LOW);
                     debugSerial<<F(" OFF");
                 } else {
                     if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) {
-                        digitalWrite(thermoPin, HIGH);
+                        if (thermoPin<0) digitalWrite(-thermoPin, LOW); digitalWrite(thermoPin, HIGH);
                         debugSerial<<F(" ON");
                     } //too cold
                     else if (curTemp >= thermoSetting) {
-                        digitalWrite(thermoPin, LOW);
+                        if (thermoPin<0) digitalWrite(-thermoPin, HIGH); digitalWrite(thermoPin, LOW);
                         debugSerial<<F(" OFF");
                     } //Reached settings
                     else debugSerial<<F(" -target zone-"); // Nothing to do
@@ -1650,8 +1650,10 @@ publishStat();
 }
 
 short thermoSetCurTemp(char *name, float t) {
+  if (!name || !strlen(name)) return 0;
     if (items) {
         aJsonObject *thermoItem = aJson.getObjectItem(items, name);
+        if (!thermoItem) return 0;
         if (isThermostatWithMinArraySize(thermoItem, 4)) {
             aJsonObject *extArray = NULL;
 
@@ -1672,5 +1674,5 @@ short thermoSetCurTemp(char *name, float t) {
                 att->valueint = (int) T_ATTEMPTS;
             }
         }
-    }
-}
+    return 1;}
+return 0;}

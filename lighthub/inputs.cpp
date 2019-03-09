@@ -162,8 +162,9 @@ void Input::counterPoll() {
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     if (emit) {
         char valstr[10];
-        char addrstr[100] = "";
-        strcat(addrstr, emit->valuestring);
+        char addrstr[MQTT_TOPIC_LENGTH];
+        strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+        if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         sprintf(valstr, "%d", counterValue);
         mqttClient.publish(addrstr, valstr);
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
@@ -225,9 +226,11 @@ void Input::dht22Poll() {
     float humidity = dht.readHumidity();
 #endif
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
+    aJsonObject *item = aJson.getObjectItem(inputObj, "item");
+    if (item) thermoSetCurTemp(item, temp);
     debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") << humidity << F("%");
     if (emit && temp && humidity && temp == temp && humidity == humidity) {
-        char addrstr[100] = "";
+        char addrstr[MQTT_TOPIC_LENGTH] = "";
 #ifdef WITH_DOMOTICZ
         if(getIdxField()){
             publishDataToDomoticz(DHT_POLL_DELAY_DEFAULT, emit, "{\"idx\":%s,\"svalue\":\"%.1f;%.0f;0\"}", getIdxField(), temp, humidity);
@@ -235,7 +238,9 @@ void Input::dht22Poll() {
         }
 #endif
         char valstr[10];
-        strcat(addrstr, emit->valuestring);
+
+        strncpy(addrstr, emit->valuestring, sizeof(addrstr));
+        if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         strcat(addrstr, "T");
         printFloatValueToStr(temp, valstr);
         mqttClient.publish(addrstr, valstr);
@@ -444,13 +449,16 @@ void Input::onContactChanged(int newValue) {
             : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());
         } else
 #endif
+char addrstr[MQTT_TOPIC_LENGTH];
+strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         if (newValue) {  //send set command
-            if (!scmd) mqttClient.publish(emit->valuestring, "ON", true);
+            if (!scmd) mqttClient.publish(addrstr, "ON", true);
             else if (strlen(scmd->valuestring))
-                mqttClient.publish(emit->valuestring, scmd->valuestring, true);
+                mqttClient.publish(addrstr, scmd->valuestring, true);
         } else {  //send reset command
-            if (!rcmd) mqttClient.publish(emit->valuestring, "OFF", true);
-            else if (strlen(rcmd->valuestring))mqttClient.publish(emit->valuestring, rcmd->valuestring, true);
+            if (!rcmd) mqttClient.publish(addrstr, "OFF", true);
+            else if (strlen(rcmd->valuestring))mqttClient.publish(addrstr, rcmd->valuestring, true);
         }
     }
 
@@ -485,9 +493,12 @@ void Input::onAnalogChanged(int newValue) {
 //            : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());
 //        } else
 //#endif
-               char strVal[16];
-               itoa(newValue,strVal,10);
-               mqttClient.publish(emit->valuestring, strVal, true);
+              char addrstr[MQTT_TOPIC_LENGTH];
+              strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+              if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
+              char strVal[16];
+              itoa(newValue,strVal,10);
+              mqttClient.publish(addrstr, strVal, true);
 }
 
     if (item) {

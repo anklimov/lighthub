@@ -116,7 +116,7 @@ class Item
   Item(char * name);
   Item(aJsonObject * obj);
   boolean isValid ();
-  virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, char * subItem=NULL);
+  virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, int subItem=0);
   virtual int Ctrl(char * payload, boolean send=true, char * subItem=NULL);
 
   int getArg(short n=0);

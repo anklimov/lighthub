@@ -287,7 +287,7 @@ if (isSet)
               Par[0] = map(hsv.h, 0, 255, 0, 365);
               Par[1] = map(hsv.s, 0, 255, 0, 100);
               Par[2] = map(hsv.v, 0, 255, 0, 100);
-          return    Ctrl(0, 3, Par, send, subItem);
+          return    Ctrl(0, 3, Par, send, subItemN);
           }
           break;
       }
@@ -296,21 +296,21 @@ if (isSet)
 
           //       if (item.getEnableCMD(500) || lanStatus == 4)
           return Ctrl(cmd, 0, NULL,
-                    send, subItem); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
+                    send, subItemN); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
           //       else debugSerial<<F("on Skipped"));
 
           break;
       default: //some known command
-          return Ctrl(cmd, 0, NULL, send, subItem);
+          return Ctrl(cmd, 0, NULL, send, subItemN);
 
   } //ctrl
 }
 }
 
 
-int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, char * subItem) {
+int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) {
 
-    debugSerial<<F(" MEM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd=")<<cmd<<F(" Par= ");
+    debugSerial<<F(" MEM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItemN<<F(" Cmd=")<<cmd<<F(" Par= ");
     if (!itemArr) return -1;
     int Par[MAXCTRLPAR] = {0, 0, 0};
     if (Parameters)
@@ -630,7 +630,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, char * subItem
                 while (i) {
                     Item it(i->valuestring);
 //            it.copyPar(itemVal);
-                    it.Ctrl(cmd, n, Par, send); //// was true
+                    it.Ctrl(cmd, n, Par, send,subItemN); //// was true
                     i = i->next;
                 } //while
             } //if
