@@ -79,6 +79,7 @@ e-mail    anklimov@gmail.com
 #include "aJSON.h"
 
 extern aJsonObject *items;
+extern short thermoSetCurTemp(char *name, float t);
 
 int txt2cmd (char * payload);
 

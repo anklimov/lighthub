@@ -270,7 +270,7 @@ if (isSet)
           while (payload && i < 3)
               Par[i++] = getInt((char **) &payload);
 
-      return   Ctrl(0, i, Par, send, subItem);
+      return   Ctrl(0, i, Par, send, subItemN);
       }
           break;
 

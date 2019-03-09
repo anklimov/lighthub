@@ -227,7 +227,7 @@ void Input::dht22Poll() {
 #endif
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
-    if (item) thermoSetCurTemp(item, temp);
+    if (item) thermoSetCurTemp(item->valuestring, temp);
     debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") << humidity << F("%");
     if (emit && temp && humidity && temp == temp && humidity == humidity) {
         char addrstr[MQTT_TOPIC_LENGTH] = "";
