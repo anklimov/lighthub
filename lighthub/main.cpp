@@ -1621,9 +1621,11 @@ void thermoLoop(void) {
 
                 debugSerial << endl << thermoItem->name << F(" Set:") << thermoSetting << F(" Cur:") << curTemp
                             << F(" cmd:") << thermoStateCommand;
-                pinMode(thermoPin, OUTPUT);
+                if (thermoPin<0) pinMode(-thermoPin, OUTPUT); else pinMode(thermoPin, OUTPUT);
                 if (thermoDisabledOrDisconnected(thermoExtensionArray, thermoStateCommand)) {
-                    if (thermoPin<0) digitalWrite(-thermoPin, HIGH); digitalWrite(thermoPin, LOW);
+                    if (thermoPin<0) digitalWrite(-thermoPin, LOW); digitalWrite(thermoPin, LOW);
+                    // Caution - for water heaters (negative pin#) if some comes wrong (or no connection with termometers output is LOW - valve OPEN)
+                    // OFF - also VALVE is OPEN (no teat control)
                     debugSerial<<F(" OFF");
                 } else {
                     if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) {
