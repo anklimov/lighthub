@@ -920,7 +920,7 @@ int loadConfigFromEEPROM()
         root = aJson.parse(&as);
         if (!root) {
             debugSerial<<F("\nload failed\n");
-            return 0;  
+            return 0;
         }
         debugSerial<<F("\nLoaded\n");
         applyConfig();
@@ -960,7 +960,7 @@ int mqttConfigResp(char *as) {
     root = aJson.parse(as);
 
     if (!root) {
-        debugSerial<<F("\nload failed");
+        debugSerial<<F("\nload failed\n");
         return 0;
     }
     debugSerial<<F("\nLoaded");
