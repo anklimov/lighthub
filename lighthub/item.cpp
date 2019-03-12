@@ -574,9 +574,9 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) 
 
 
 
-    int whiteOffset=0;
-    int rgbsLimit =100;
-    int rgbvLevel =255;
+
+    int rgbSaturation =map(Par[1], 0, 100, 0, 255);
+    int rgbValue = map(Par[2], 0, 100, 0, 255);
     switch (itemType) {
 
 #ifdef _dmxout
@@ -589,14 +589,17 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) 
         //50..100 RGB
         {
             int k;
-            if (Par[2]<50) { // Using white
+            if (Par[1]<50) { // Using white
                             DmxWrite(iaddr + 3, map((50 - Par[1]) * Par[2], 0, 5000, 0, 255));
-                            rgbvLevel = map (Par[1],0,50,0,255);
-                            rgbsLimit = Par[1];
+                            int rgbvLevel = map (Par[1],0,50,0,255*2);
+                            rgbValue = map(Par[2], 0, 100, 0, rgbvLevel);
+                            rgbSaturation = map(Par[1], 0, 50, 255, 100);
+                            if (rgbValue>255) rgbValue = 255;
                            }
             else
             {
-              rgbsLimit=50;
+              //rgbValue = map(Par[2], 0, 100, 0, 255);
+              rgbSaturation = map(Par[1], 50, 100, 100, 255);
               DmxWrite(iaddr + 3, 0);
             }
             //DmxWrite(iaddr + 3, k = map((100 - Par[1]) * Par[2], 0, 10000, 0, 255));
@@ -604,7 +607,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) 
         }
         case CH_RGB: // RGB
         {
-            CRGB rgb = CHSV(map(Par[0], 0, 365, 0, 255), map(Par[1], 0, rgbsLimit, 0, 255), map(Par[2], 0, 100, 0, rgbvLevel));
+            CRGB rgb = CHSV(map(Par[0], 0, 365, 0, 255), rgbSaturation, rgbValue);
             DmxWrite(iaddr, rgb.r);
             DmxWrite(iaddr + 1, rgb.g);
             DmxWrite(iaddr + 2, rgb.b);
