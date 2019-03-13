@@ -71,6 +71,7 @@ PWM Out
 #include "homiedef.h"
 
 #if defined(__SAM3X8E__)
+
 DueFlashStorage EEPROM;
 EthernetClient ethClient;
 #endif
@@ -639,12 +640,17 @@ void softRebootFunc() {
 }
 #endif
 
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
+#if defined(ARDUINO_ARCH_AVR)
 void (*softRebootFunc)(void) = 0;
 
 void printCurentLanConfig();
 
 #endif
+
+#if defined(__SAM3X8E__)
+//TODO: do soft reboot here
+#endif
+
 
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 void softRebootFunc(){
@@ -753,7 +759,7 @@ void cmdFunctionKill(int arg_cnt, char **args) {
 
 void cmdFunctionReboot(int arg_cnt, char **args) {
     debugSerial<<F("Soft rebooting...");
-   //// softRebootFunc();
+    softRebootFunc();
 }
 
 void applyConfig() {
