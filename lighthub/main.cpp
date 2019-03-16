@@ -648,7 +648,9 @@ void printCurentLanConfig();
 #endif
 
 #if defined(__SAM3X8E__)
-//TODO: do soft reboot here
+void softRebootFunc() {
+    RSTC->RSTC_CR = 0xA5000005;
+}
 #endif
 
 
