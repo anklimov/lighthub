@@ -23,6 +23,7 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <user_interface.h>
+#define Ethernet WiFi
 #endif
 
 #if defined ARDUINO_ARCH_ESP32
