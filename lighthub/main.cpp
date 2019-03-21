@@ -582,18 +582,27 @@ void onInitialStateInitLAN() {
 #if defined(ARDUINO_ARCH_ESP8266) and defined(WIFI_MANAGER_DISABLE)
     if(!wifiInitialized) {
                 WiFi.mode(WIFI_STA);
-                debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD);
+                debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD)<<endl;
+
                 wifi_set_macaddr(STATION_IF,mac);
+                
                 WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
+                int wifi_connection_wait = 10000;
+
+                while (WiFi.status() != WL_CONNECTED && wifi_connection_wait > 0) {
+                    delay(500);
+                    wifi_connection_wait -= 500;
+                    debugSerial<<".";
+                }
                 wifiInitialized = true;
             }
 #endif
 
-#ifdef ARDUINO_ARCH_ESP32
+#if defined(ARDUINO_ARCH_ESP32) and defined(WIFI_MANAGER_DISABLE)
     if(!wifiInitialized) {
     //    WiFi.mode(WIFI_STA);
         WiFi.disconnect();
-        debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD);
+        debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD)<<endl;
         WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
 
         int wifi_connection_wait = 10000;
@@ -1381,6 +1390,7 @@ debugSerial<<endl;
 
 
 //    WDT_Disable( WDT ) ;
+#if defined(__SAM3X8E__)
 
     Serial.println(F("Reading 128 bits unique identifier") ) ;
     ReadUniqueID( UniqueID ) ;
@@ -1389,7 +1399,7 @@ debugSerial<<endl;
     for (byte b = 0 ; b < 4 ; b++)
       Serial.print ((unsigned int) UniqueID [b], HEX) ;
     Serial.println () ;
-
+#endif
 
 }
 
