@@ -476,8 +476,11 @@ void ip_ready_config_loaded_connecting_to_broker() {
     char *password = passwordBuf;
     int syslogPort = 514;
     char syslogDeviceHostname[16];
-    if (mqttArr && (aJson.getArraySize(mqttArr))) deviceName = aJson.getArrayItem(mqttArr, 0)->valuestring;
-
+    if (mqttArr && (aJson.getArraySize(mqttArr)))
+      {
+                deviceName = aJson.getArrayItem(mqttArr, 0)->valuestring;
+                debugSerial<<F("Device Name:")<<deviceName<<endl;
+              }
 #ifdef SYSLOG_ENABLE
     //debugSerial<<"debugSerial:";
     delay(100);
@@ -585,7 +588,7 @@ void onInitialStateInitLAN() {
                 debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD)<<endl;
 
                 wifi_set_macaddr(STATION_IF,mac);
-                
+
                 WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
                 int wifi_connection_wait = 10000;
 
@@ -617,7 +620,7 @@ void onInitialStateInitLAN() {
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
     if (WiFi.status() == WL_CONNECTED) {
-        debugSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP();
+        debugSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP()<<endl;
         lanStatus = HAVE_IP_ADDRESS;//1;
     } else
     {
@@ -1151,7 +1154,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             //    free(outstr);
             debugSerial<<F("Applying.\n");
                 applyConfig();
-
+            debugSerial<<F("Done.\n");
 
             }
 
@@ -1205,6 +1208,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         } else {
             debugSerial<<response;
             applyConfig();
+            debugSerial<<F("Done.\n");
         }
     } else {
         debugSerial<<F("Config retrieving failed\n");
@@ -1231,6 +1235,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             } else {
                 debugSerial<<F("Config OK, Applying\n");
                 applyConfig();
+                debugSerial<<F("Done.\n");
             }
         }
     } else {
@@ -1410,6 +1415,7 @@ void publishStat(){
   char topic[64];
   char intbuf[16];
   uint32_t ut = millis()/1000UL;
+  if (!mqttClient.connected()) return;
 
 //    debugSerial<<F("\nfree RAM: ")<<fr;
     setTopic(topic,sizeof(topic),T_DEV);
@@ -1608,6 +1614,7 @@ bool thermoDisabledOrDisconnected(aJsonObject *thermoExtensionArray, int thermoS
 void thermoLoop(void) {
     if (millis() < nextThermostatCheck)
         return;
+    if (!items) return;
     bool thermostatCheckPrinted = false;
     for (aJsonObject *thermoItem = items->child; thermoItem; thermoItem = thermoItem->next) {
         if (isThermostatWithMinArraySize(thermoItem, 5)) {
