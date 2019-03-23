@@ -51,7 +51,7 @@ static volatile long counter_value[6];
 static volatile long counter_value[6];
 #endif
 
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 static short counter_irq_map[54];
     static long counter_value[54];
     static int counters_count;
@@ -343,12 +343,15 @@ void Input::dht22Poll() {
 
 void Input::contactPoll() {
     boolean currentInputState;
-#if defined(ARDUINO_ARCH_STM32F1)
+/*
+#if defined(ARDUINO_ARCH_STM32)
      WiringPinMode inputPinMode;
 #endif
+
 #if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
 
 #endif
+*/
      uint32_t inputPinMode;
      uint8_t inputOnLevel;
     if (inType & IN_ACTIVE_HIGH) {
@@ -387,12 +390,14 @@ void Input::analogPoll() {
     short Noize = ANALOG_NOIZE;
     short simple = 0;
 
-#if defined(ARDUINO_ARCH_STM32F1)
+/*
+#if defined(ARDUINO_ARCH_STM32)
      WiringPinMode inputPinMode;
 #endif
 
+
 #if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
-#endif
+#endif */
     uint32_t inputPinMode;
     if (inType & IN_ACTIVE_HIGH) {
         inputPinMode = INPUT;

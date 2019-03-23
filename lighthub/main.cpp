@@ -88,6 +88,7 @@ NRFFlashStorage EEPROM;
 
 #ifdef ARDUINO_ARCH_STM32
 EthernetClient ethClient;
+NRFFlashStorage EEPROM;
 #endif
 
 #ifdef NRF5
@@ -618,7 +619,7 @@ void onInitialStateInitLAN() {
     }
 #endif
 
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32F1)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32)
 #ifdef W5500_CS_PIN
     Ethernet.w5500_cspin = W5500_CS_PIN;
     debugSerial<<F("Use W5500 pin: ");
@@ -652,7 +653,7 @@ void onInitialStateInitLAN() {
 #if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
         res = Ethernet.begin(mac, 12000);
 #endif
-#if defined(ARDUINO_ARCH_STM32F1)
+#if defined(ARDUINO_ARCH_STM32)
         res = Ethernet.begin(mac);
 #endif
         wdt_en();
@@ -678,9 +679,10 @@ void onInitialStateInitLAN() {
     #endif
 }
 
-#ifdef ARDUINO_ARCH_STM32F1
+#ifdef ARDUINO_ARCH_STM32
 void softRebootFunc() {
-    nvic_sys_reset();
+    //nvic_sys_reset();
+    Serial.println("not implemented");
 }
 #endif
 
@@ -1162,7 +1164,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         return READ_RE_CONFIG;//-11;
     }
 #endif
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1) || defined(ARDUINO_ARCH_ESP32)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) || defined(ARDUINO_ARCH_ESP32)
     #if defined(ARDUINO_ARCH_ESP32)
     WiFiClient configEthClient;
     #else
@@ -1301,7 +1303,7 @@ void setup_main() {
     ArtnetSetup();
 #endif
 
-#if defined(ARDUINO_ARCH_ESP8266) and not defined(WIFI_MANAGER_DISABLE)
+#if (defined(ARDUINO_ARCH_ESP8266) or defined(ARDUINO_ARCH_ESP32)) and not defined(WIFI_MANAGER_DISABLE)
     WiFiManager wifiManager;
 #if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
     wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));

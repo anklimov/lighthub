@@ -48,7 +48,8 @@
 #ifdef ARDUINO_ARCH_STM32
 #include "HttpClient.h"
 #include "UIPEthernet.h"
-#include <EEPROM.h>
+#include <NRFFlashStorage.h>
+//#include <EEPROM.h>
 #endif
 
 #if defined(__SAM3X8E__)
