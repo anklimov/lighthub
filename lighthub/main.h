@@ -16,7 +16,7 @@
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
-#include <EEPROM.h>
+#include <ESP_EEPROM.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiManager.h>
 #include <DNSServer.h>
@@ -45,14 +45,14 @@
 #include <NRFFlashStorage.h>
 #endif
 
-#if defined(__SAM3X8E__)
-#define wdt_res() watchdogReset()
-#define wdt_en()
-#define wdt_dis()
+#ifdef ARDUINO_ARCH_STM32
+#include "HttpClient.h"
+#include "UIPEthernet.h"
+#include <EEPROM.h>
 #endif
 
-#if defined(ARDUINO_ARCH_STM32F1)
-#define wdt_res()
+#if defined(__SAM3X8E__)
+#define wdt_res() watchdogReset()
 #define wdt_en()
 #define wdt_dis()
 #endif

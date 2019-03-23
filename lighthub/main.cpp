@@ -87,17 +87,6 @@ NRFFlashStorage EEPROM;
 #endif
 
 #ifdef ARDUINO_ARCH_STM32
-#include "HttpClient.h"
-//#include <EthernetClient.h>
-#include "UIPEthernet.h"
-//#include "UIPUdp.h"
-//#include <SPI.h>
-//#include <Ethernet_STM.h>
-
-#include "Dns.h"
-//#include "utility/logging.h"
-#include <EEPROM.h>
-
 EthernetClient ethClient;
 #endif
 
@@ -964,6 +953,7 @@ int mqttConfigRequest(int arg_cnt, char **args)
     strncat(buf, "/req/conf", 25);
     debugSerial<<buf;
     mqttClient.publish(buf, "1");
+    return 1;
 }
 
 
@@ -1277,6 +1267,10 @@ void setup_main() {
     sd_card_w5100_setup();
 #endif
     setupMacAddress();
+
+#if defined(ARDUINO_ARCH_ESP8266)
+      EEPROM.begin(ESP_EEPROM_SIZE);
+#endif
     loadConfigFromEEPROM();
 
 #ifdef _modbus

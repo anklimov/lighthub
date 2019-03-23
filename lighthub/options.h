@@ -4,6 +4,7 @@
 #endif
 
 #define TXEnablePin 13
+#define ESP_EEPROM_SIZE 4096
 
 #ifndef AVR_DMXOUT_PIN
 #define AVR_DMXOUT_PIN 3

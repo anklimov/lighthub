@@ -129,9 +129,9 @@ class Item
   //void setVal(uint8_t n, int par);
   void setVal(long int par);
   //void copyPar (aJsonObject *itemV);
-  inline int On (){Ctrl(CMD_ON);};
-  inline int Off(){Ctrl(CMD_OFF);};
-  inline int Toggle(){Ctrl(CMD_TOGGLE);};
+  inline int On (){return Ctrl(CMD_ON);};
+  inline int Off(){return Ctrl(CMD_OFF);};
+  inline int Toggle(){return Ctrl(CMD_TOGGLE);};
   int Poll();
   int SendStatus(short cmd, short n=0, int * Par=NULL, boolean deferred = false);
 
