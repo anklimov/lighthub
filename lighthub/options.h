@@ -138,6 +138,13 @@
 #define dmxin  DmxDue1
 #endif
 
+#if defined(NRF5)
+//#define modbusSerial Serial1
+#undef _dmxin
+#undef _dmxout
+#undef _modbus
+#endif
+
 #if defined(ARDUINO_ARCH_ESP8266)
 #undef _dmxin
 #undef _modbus

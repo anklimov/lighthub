@@ -3,7 +3,7 @@ export FLAGS="$FLAGS -DWiz5500"
 export FLAGS="$FLAGS -DPIO_SRC_REV="$(git log --pretty=format:%h_%ad -1 --date=short)
 export FLAGS="$FLAGS -DDMX_DISABLE"
 export FLAGS="$FLAGS -DMODBUS_DISABLE"
-export FLAGS="$FLAGS -DOWIRE_DISABLE"
+#export FLAGS="$FLAGS -DOWIRE_DISABLE"
 export FLAGS="$FLAGS -std=gnu++11"
 export FLAGS="$FLAGS -DWIFI_MANAGER_DISABLE"
 export FLAGS="$FLAGS -DCOUNTER_DISABLE"

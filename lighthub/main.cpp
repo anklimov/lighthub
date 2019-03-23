@@ -86,13 +86,13 @@ WiFiClient ethClient;
 NRFFlashStorage EEPROM;
 #endif
 
-#ifdef ARDUINO_ARCH_STM32F1
+#ifdef ARDUINO_ARCH_STM32
 #include "HttpClient.h"
 //#include <EthernetClient.h>
-//#include "UIPEthernet.h"
+#include "UIPEthernet.h"
 //#include "UIPUdp.h"
 //#include <SPI.h>
-#include <Ethernet_STM.h>
+//#include <Ethernet_STM.h>
 
 #include "Dns.h"
 //#include "utility/logging.h"

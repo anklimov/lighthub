@@ -26,7 +26,6 @@ e-mail    anklimov@gmail.com
 #ifndef DHT_DISABLE
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #include <DHTesp.h>
-
 #else
 #include "DHT.h"
 #endif

@@ -22,7 +22,7 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 #include "stdarg.h"
 
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 #include <malloc.h>
 #endif
 
@@ -103,7 +103,7 @@ unsigned long freeRam ()
 }
 #endif
 
-#if defined(ARDUINO_ARCH_STM32F1)
+#if defined(ARDUINO_ARCH_STM32)
 extern char _end;
 extern "C" char *sbrk(int i);
 

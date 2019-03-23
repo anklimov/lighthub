@@ -79,6 +79,12 @@
 #define wdt_dis()
 #endif
 
+#if defined(ARDUINO_ARCH_STM32)
+#define wdt_res()
+#define wdt_en()
+#define wdt_dis()
+#endif
+
 //#if defined(ESP8266)
 //#define wdt_res()
 //#define wdt_en()
