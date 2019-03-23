@@ -1010,6 +1010,7 @@ void cmdFunctionIp(int arg_cnt, char **args)
 
         case 1: //dynamic IP
         saveFlash(OFFSET_IP,ip0);
+        debugSerial<<F("Set dynamic IP\n");
 /*
             IPAddress current_ip = Ethernet.localIP();
             IPAddress current_mask = Ethernet.subnetMask();
@@ -1430,32 +1431,37 @@ void publishStat(){
 }
 
 void setupMacAddress() {
-#if defined(__SAM3X8E__)
-byte firmwareMacAddress[6];
-firmwareMacAddress[0]=0xDE;
-firmwareMacAddress[1]=0xAD;
-for (byte b = 0 ; b < 4 ; b++)
-              firmwareMacAddress[b+2]=UniqueID [b] ;
-#else
-#ifdef DEFAULT_FIRMWARE_MAC
-    byte firmwareMacAddress[6] = DEFAULT_FIRMWARE_MAC;//comma(,) separated hex-array, hard-coded
-#endif
-#endif
-#ifdef CUSTOM_FIRMWARE_MAC
-    byte firmwareMacAddress[6];
-    const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);//colon(:) separated from build options
-    parseBytes(macStr, ':', firmwareMacAddress, 6, 16);
-#endif
-
-    bool isMacValid = false;
-    for (short i = 0; i < 6; i++) {
+//Check MAC, stored in NVRAM
+bool isMacValid = false;
+for (short i = 0; i < 6; i++) {
         mac[i] = EEPROM.read(i);
         if (mac[i] != 0 && mac[i] != 0xff) isMacValid = true;
     }
-    if (!isMacValid) {
-        debugSerial<<F("No MAC configured: set firmware's MAC\n");
-        memcpy(mac, firmwareMacAddress, 6);
+if (!isMacValid) {
+    debugSerial<<F("No MAC configured: set firmware's MAC\n");
+
+    #if defined (CUSTOM_FIRMWARE_MAC) //Forced MAC from compiler's directive
+    const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);//colon(:) separated from build options
+    parseBytes(macStr, ':', mac, 6, 16);
+
+    #elif defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
+    //Using original MPU MAC
+    WiFi.begin();
+    WiFi.macAddress(mac);
+
+    #elif defined(__SAM3X8E__)
+    //Lets make MAC from MPU serial#
+    mac[0]=0xDE;
+    //firmwareMacAddress[1]=0xAD;
+    for (byte b = 0 ; b < 5 ; b++)
+              mac[b+1]=UniqueID [b] ;
+
+    #elif defined DEFAULT_FIRMWARE_MAC
+    uint8_t defaultMac[6] = DEFAULT_FIRMWARE_MAC;//comma(,) separated hex-array, hard-coded
+    memcpy(mac,defaultMac,6);
+    #endif
     }
+
     printMACAddress();
 }
 
