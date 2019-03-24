@@ -237,7 +237,7 @@ else
 
 
 void printMACAddress() {
-    debugSerial<<F("Configured MAC:");
+    debugSerial<<F("MAC:");
     for (byte i = 0; i < 6; i++)
 #ifdef WITH_PRINTEX_LIB
         (i < 5) ?debugSerial<<hex <<(mac[i])<<F(":"):debugSerial<<hex<<(mac[i])<<endl;
@@ -1230,6 +1230,9 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
                 applyConfig();
                 debugSerial<<F("Done.\n");
             }
+        } else {
+            debugSerial<<F("Config retrieving failed\n");
+            return READ_RE_CONFIG;//-11; //Load from NVRAM
         }
     } else {
         debugSerial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(httpResponseCode).c_str());
