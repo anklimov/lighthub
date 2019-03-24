@@ -1,7 +1,11 @@
 #include "main.h"
 void setup(){
-    setup_main();
+  //if (millis()>1000)
+            setup_main();
+  //else Serial.println("Hello");
+  //delay(1000);
 }
 void loop(){
-    loop_main();
+      //if (millis()>10000) 
+      loop_main();
 }

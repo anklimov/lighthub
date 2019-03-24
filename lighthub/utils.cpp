@@ -22,7 +22,7 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 #include "stdarg.h"
 
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 #include <malloc.h>
 #endif
 
@@ -31,6 +31,13 @@ extern "C" {
 #include "user_interface.h"
 }
 #endif
+
+const char outTopic[] PROGMEM = OUTTOPIC;
+const char inTopic[] PROGMEM = INTOPIC;
+const char homeTopic[] PROGMEM = HOMETOPIC;
+extern char *deviceName;
+extern aJsonObject *topics;
+
 
 void PrintBytes(uint8_t *addr, uint8_t count, bool newline) {
     for (uint8_t i = 0; i < count; i++) {
@@ -96,7 +103,7 @@ unsigned long freeRam ()
 }
 #endif
 
-#if defined(ARDUINO_ARCH_STM32F1)
+#if defined(ARDUINO_ARCH_STM32)
 extern char _end;
 extern "C" char *sbrk(int i);
 
@@ -110,7 +117,7 @@ unsigned long freeRam() {
 
 #endif
 
-#if defined(__SAM3X8E__) 
+#if defined(__SAM3X8E__)
 extern char _end;
 extern "C" char *sbrk(int i);
 
@@ -264,6 +271,163 @@ void ReadUniqueID( unsigned int * pdwUniqueID )
 #endif
 }
 
+
+int inet_aton(const char* aIPAddrString, IPAddress& aResult)
+{
+    // See if we've been given a valid IP address
+    const char* p =aIPAddrString;
+    while (*p &&
+           ( (*p == '.') || (*p >= '0') || (*p <= '9') ))
+    {
+        p++;
+    }
+
+    if (*p == '\0')
+    {
+        // It's looking promising, we haven't found any invalid characters
+        p = aIPAddrString;
+        int segment =0;
+        int segmentValue =0;
+        while (*p && (segment < 4))
+        {
+            if (*p == '.')
+            {
+                // We've reached the end of a segment
+                if (segmentValue > 255)
+                {
+                    // You can't have IP address segments that don't fit in a byte
+                    return 0;
+                }
+                else
+                {
+                    aResult[segment] = (byte)segmentValue;
+                    segment++;
+                    segmentValue = 0;
+                }
+            }
+            else
+            {
+                // Next digit
+                segmentValue = (segmentValue*10)+(*p - '0');
+            }
+            p++;
+        }
+        // We've reached the end of address, but there'll still be the last
+        // segment to deal with
+        if ((segmentValue > 255) || (segment > 3))
+        {
+            // You can't have IP address segments that don't fit in a byte,
+            // or more than four segments
+            return 0;
+        }
+        else
+        {
+            aResult[segment] = (byte)segmentValue;
+            return 1;
+        }
+    }
+    else
+
+    {
+        return 0;
+    }
+}
+
+/**
+ * Same as ipaddr_ntoa, but reentrant since a user-supplied buffer is used.
+ *
+ * @param addr ip address in network order to convert
+ * @param buf target buffer where the string is stored
+ * @param buflen length of buf
+ * @return either pointer to buf which now holds the ASCII
+ *         representation of addr or NULL if buf was too small
+ */
+char *inet_ntoa_r(IPAddress addr, char *buf, int buflen)
+{
+  short n;
+  char intbuf[4];
+
+
+buf[0]=0;
+for(n = 0; n < 4; n++) {
+  if (addr[n]>255) addr[n]=-1;
+  itoa(addr[n],intbuf,10);
+  strncat(buf,intbuf,buflen);
+  if (n<3) strncat(buf,".",buflen);
+}
+  return buf;
+}
+
+
+void printIPAddress(IPAddress ipAddress) {
+    for (byte i = 0; i < 4; i++)
+#ifdef WITH_PRINTEX_LIB
+            (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : debugSerial << (ipAddress[i])<<F(", ");
+#else
+            (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i]) << F(", ");
+#endif
+}
+
+
+char* setTopic(char* buf, int8_t buflen, topicType tt, char* suffix)
+{
+  aJsonObject *_root = NULL;
+  aJsonObject *_l2 = NULL;
+
+if (topics && topics->type == aJson_Object)
+  {
+    _root = aJson.getObjectItem(topics, "root");
+    switch (tt) {
+      case T_OUT:
+      _l2 = aJson.getObjectItem(topics, "out");
+      break;
+      case T_BCST:
+      _l2 = aJson.getObjectItem(topics, "bcst");
+      break;
+    }
+
+
+    }
+if  (_root) strncpy(buf,_root->valuestring,buflen);
+  else strncpy_P(buf,homeTopic,buflen);
+strncat(buf,"/",buflen);
+
+if (_l2) strncat(buf,_l2->valuestring,buflen);
+  else
+  switch (tt) {
+    case T_DEV:
+    strncat(buf,deviceName,buflen);
+    break;
+    case T_OUT:
+    strncat_P(buf,outTopic,buflen);
+    break;
+    case T_BCST:
+    strncat_P(buf,inTopic,buflen); /////
+    break;
+  }
+strncat(buf,"/",buflen);
+if (suffix) strncat(buf,suffix,buflen);
+
+return buf;
+
+}
+
+
+
+void printUlongValueToStr(char *valstr, unsigned long value) {
+    char buf[11];
+    int i=0;
+    for(;value>0;i++){
+        unsigned long mod = value - ((unsigned long)(value/10))*10;
+        buf[i]=mod+48;
+        value = (unsigned long)(value/10);
+    }
+
+    for(int n=0;n<=i;n++){
+        valstr[n]=buf[i-n-1];
+    }
+    valstr[i]='\0';
+}
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

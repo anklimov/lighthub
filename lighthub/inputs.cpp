@@ -23,10 +23,9 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 #include <PubSubClient.h>
 
-#ifndef DHT_COUNTER_DISABLE
+#ifndef DHT_DISABLE
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #include <DHTesp.h>
-
 #else
 #include "DHT.h"
 #endif
@@ -34,9 +33,12 @@ e-mail    anklimov@gmail.com
 
 extern PubSubClient mqttClient;
 
-#ifndef DHT_COUNTER_DISABLE
+#if !defined(DHT_DISABLE) || !defined(COUNTER_DISABLE)
 static volatile unsigned long nextPollMillisValue[5];
 static volatile int nextPollMillisPin[5] = {0,0,0,0,0};
+#endif
+
+#ifndef COUNTER_DISABLE
 #if defined(ARDUINO_ARCH_AVR)
 static volatile long counter_value[6];
 #endif
@@ -49,7 +51,7 @@ static volatile long counter_value[6];
 static volatile long counter_value[6];
 #endif
 
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 static short counter_irq_map[54];
     static long counter_value[54];
     static int counters_count;
@@ -110,9 +112,11 @@ int Input::poll() {
     if (!isValid()) return -1;
     if (0) ;
 
-    #ifndef DHT_COUNTER_DISABLE
+    #ifndef DHT_DISABLE
     else if (inType & IN_DHT22)
         dht22Poll();
+    #endif
+    #ifndef COUNTER_DISABLE
     else if (inType & IN_COUNTER)
         counterPoll();
     else if (inType & IN_UPTIME)
@@ -127,7 +131,7 @@ int Input::poll() {
   //  contactPoll();
 }
 
-#ifndef DHT_COUNTER_DISABLE
+#ifndef COUNTER_DISABLE
 void Input::counterPoll() {
     if(nextPollTime()>millis())
         return;
@@ -160,8 +164,9 @@ void Input::counterPoll() {
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     if (emit) {
         char valstr[10];
-        char addrstr[100] = "";
-        strcat(addrstr, emit->valuestring);
+        char addrstr[MQTT_TOPIC_LENGTH];
+        strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+        if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         sprintf(valstr, "%d", counterValue);
         mqttClient.publish(addrstr, valstr);
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
@@ -172,7 +177,7 @@ void Input::counterPoll() {
 }
 #endif
 
-#ifndef DHT_COUNTER_DISABLE
+#ifndef COUNTER_DISABLE
 void Input::attachInterruptPinIrq(int realPin, int irq) {
     pinMode(realPin, INPUT);
     int real_irq;
@@ -208,70 +213,8 @@ void Input::attachInterruptPinIrq(int realPin, int irq) {
 }
 
 
-void Input::dht22Poll() {
-    if (nextPollTime() > millis())
-        return;
-#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
-    DHTesp dhtSensor;
-    dhtSensor.setup(pin, DHTesp::DHT22);
-    TempAndHumidity dhtSensorData = dhtSensor.getTempAndHumidity();
-    float temp = roundf(dhtSensorData.temperature * 10) / 10;
-    float humidity = roundf(dhtSensorData.humidity);
-#else
-    DHT dht(pin, DHT22);
-    float temp = dht.readTemperature();
-    float humidity = dht.readHumidity();
-#endif
-    aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
-    debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") << humidity << F("%");
-    if (emit && temp && humidity && temp == temp && humidity == humidity) {
-        char addrstr[100] = "";
-#ifdef WITH_DOMOTICZ
-        if(getIdxField()){
-            publishDataToDomoticz(DHT_POLL_DELAY_DEFAULT, emit, "{\"idx\":%s,\"svalue\":\"%.1f;%.0f;0\"}", getIdxField(), temp, humidity);
-            return;
-        }
-#endif
-        char valstr[10];
-        strcat(addrstr, emit->valuestring);
-        strcat(addrstr, "T");
-        printFloatValueToStr(temp, valstr);
-        mqttClient.publish(addrstr, valstr);
-        addrstr[strlen(addrstr) - 1] = 'H';
-        printFloatValueToStr(humidity, valstr);
-        mqttClient.publish(addrstr, valstr);
-
-        setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
-        debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
-    } else
-        setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT / 3);
-}
-
-unsigned long Input::nextPollTime() const {
-    for(int i=0;i<5;i++){
-        if(nextPollMillisPin[i]==pin)
-            return nextPollMillisValue[i];
-        else if(nextPollMillisPin[i]==0) {
-            nextPollMillisPin[i]=pin;
-            return nextPollMillisValue[i] = 0;
-        }
-    }
-    return 0;
-}
 
 
-void Input::setNextPollTime(unsigned long pollTime) {
-    for (int i = 0; i < 5; i++) {
-        if (nextPollMillisPin[i] == pin) {
-            nextPollMillisValue[i] = pollTime;
-            return;
-        } else if (nextPollMillisPin[i] == 0) {
-            nextPollMillisPin[i] == pin;
-            nextPollMillisValue[i] = pollTime;
-            return;
-        }
-    }
-}
 
 void Input::uptimePoll() {
     if (nextPollTime() > millis())
@@ -324,16 +267,91 @@ void Input::onCounterChanged5() {
 
 #endif
 
+#if !defined(DHT_DISABLE) || !defined(COUNTER_DISABLE)
+unsigned long Input::nextPollTime() const {
+    for(int i=0;i<5;i++){
+        if(nextPollMillisPin[i]==pin)
+            return nextPollMillisValue[i];
+        else if(nextPollMillisPin[i]==0) {
+            nextPollMillisPin[i]=pin;
+            return nextPollMillisValue[i] = 0;
+        }
+    }
+    return 0;
+}
 
+
+void Input::setNextPollTime(unsigned long pollTime) {
+    for (int i = 0; i < 5; i++) {
+        if (nextPollMillisPin[i] == pin) {
+            nextPollMillisValue[i] = pollTime;
+            return;
+        } else if (nextPollMillisPin[i] == 0) {
+            nextPollMillisPin[i] == pin;
+            nextPollMillisValue[i] = pollTime;
+            return;
+        }
+    }
+}
+#endif
+
+#ifndef DHT_DISABLE
+
+void Input::dht22Poll() {
+    if (nextPollTime() > millis())
+        return;
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+    DHTesp dhtSensor;
+    dhtSensor.setup(pin, DHTesp::DHT22);
+    TempAndHumidity dhtSensorData = dhtSensor.getTempAndHumidity();
+    float temp = roundf(dhtSensorData.temperature * 10) / 10;
+    float humidity = roundf(dhtSensorData.humidity);
+#else
+    DHT dht(pin, DHT22);
+    float temp = dht.readTemperature();
+    float humidity = dht.readHumidity();
+#endif
+    aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
+    aJsonObject *item = aJson.getObjectItem(inputObj, "item");
+    if (item) thermoSetCurTemp(item->valuestring, temp);
+    debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") << humidity << F("%")<<endl;
+    if (emit && temp && humidity && temp == temp && humidity == humidity) {
+        char addrstr[MQTT_TOPIC_LENGTH] = "";
+#ifdef WITH_DOMOTICZ
+        if(getIdxField()){
+            publishDataToDomoticz(DHT_POLL_DELAY_DEFAULT, emit, "{\"idx\":%s,\"svalue\":\"%.1f;%.0f;0\"}", getIdxField(), temp, humidity);
+            return;
+        }
+#endif
+        char valstr[10];
+
+        strncpy(addrstr, emit->valuestring, sizeof(addrstr));
+        if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
+        strcat(addrstr, "T");
+        printFloatValueToStr(temp, valstr);
+        mqttClient.publish(addrstr, valstr);
+        addrstr[strlen(addrstr) - 1] = 'H';
+        printFloatValueToStr(humidity, valstr);
+        mqttClient.publish(addrstr, valstr);
+
+        setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
+        debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
+    } else
+        setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT / 3);
+}
+#endif
 
 void Input::contactPoll() {
     boolean currentInputState;
-#if defined(ARDUINO_ARCH_STM32F1)
+/*
+#if defined(ARDUINO_ARCH_STM32)
      WiringPinMode inputPinMode;
 #endif
+
 #if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
 
 #endif
+*/
      uint32_t inputPinMode;
      uint8_t inputOnLevel;
     if (inType & IN_ACTIVE_HIGH) {
@@ -372,12 +390,14 @@ void Input::analogPoll() {
     short Noize = ANALOG_NOIZE;
     short simple = 0;
 
-#if defined(ARDUINO_ARCH_STM32F1)
+/*
+#if defined(ARDUINO_ARCH_STM32)
      WiringPinMode inputPinMode;
 #endif
 
+
 #if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
-#endif
+#endif */
     uint32_t inputPinMode;
     if (inType & IN_ACTIVE_HIGH) {
         inputPinMode = INPUT;
@@ -389,7 +409,7 @@ void Input::analogPoll() {
     // Mapping
     if (inputMap && inputMap->type == aJson_Array)
      {
-     int max;   
+     int max;
      if (aJson.getArraySize(inputMap)>=4)
         mappedInputVal  = map (mappedInputVal,
               aJson.getArrayItem(inputMap, 0)->valueint,
@@ -442,13 +462,16 @@ void Input::onContactChanged(int newValue) {
             : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());
         } else
 #endif
+char addrstr[MQTT_TOPIC_LENGTH];
+strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         if (newValue) {  //send set command
-            if (!scmd) mqttClient.publish(emit->valuestring, "ON", true);
+            if (!scmd) mqttClient.publish(addrstr, "ON", true);
             else if (strlen(scmd->valuestring))
-                mqttClient.publish(emit->valuestring, scmd->valuestring, true);
+                mqttClient.publish(addrstr, scmd->valuestring, true);
         } else {  //send reset command
-            if (!rcmd) mqttClient.publish(emit->valuestring, "OFF", true);
-            else if (strlen(rcmd->valuestring))mqttClient.publish(emit->valuestring, rcmd->valuestring, true);
+            if (!rcmd) mqttClient.publish(addrstr, "OFF", true);
+            else if (strlen(rcmd->valuestring))mqttClient.publish(addrstr, rcmd->valuestring, true);
         }
     }
 
@@ -483,9 +506,12 @@ void Input::onAnalogChanged(int newValue) {
 //            : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());
 //        } else
 //#endif
-               char strVal[16];
-               itoa(newValue,strVal,10);
-               mqttClient.publish(emit->valuestring, strVal, true);
+              char addrstr[MQTT_TOPIC_LENGTH];
+              strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+              if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
+              char strVal[16];
+              itoa(newValue,strVal,10);
+              mqttClient.publish(addrstr, strVal, true);
 }
 
     if (item) {
@@ -497,20 +523,6 @@ void Input::onAnalogChanged(int newValue) {
 }
 
 
-void Input::printUlongValueToStr(char *valstr, unsigned long value) {
-    char buf[11];
-    int i=0;
-    for(;value>0;i++){
-        unsigned long mod = value - ((unsigned long)(value/10))*10;
-        buf[i]=mod+48;
-        value = (unsigned long)(value/10);
-    }
-
-    for(int n=0;n<=i;n++){
-        valstr[n]=buf[i-n-1];
-    }
-    valstr[i]='\0';
-}
 bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, const char *format, ...)
 {
 #ifdef WITH_DOMOTICZ

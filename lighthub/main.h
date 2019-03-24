@@ -1,14 +1,59 @@
 #pragma once
+
 #include "options.h"
+#if defined(__SAM3X8E__)
+#include <DueFlashStorage.h>
+#include <watchdog.h>
+#include <ArduinoHttpClient.h>
+#endif
+
+#if defined(ARDUINO_ARCH_AVR)
+#include "HTTPClientAVR.h"
+#include <avr/pgmspace.h>
+#include <avr/wdt.h>
+#include <EEPROM.h>
+#endif
+
+#if defined(ARDUINO_ARCH_ESP8266)
+#include <FS.h>                   //this needs to be first, or it all crashes and burns...
+#include <ESP_EEPROM.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiManager.h>
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
+#include <user_interface.h>
+#define Ethernet WiFi
+#endif
+
+#if defined ARDUINO_ARCH_ESP32
+//#include <FS.h>                   //this needs to be first, or it all crashes and burns...
+//#include <EEPROM.h>
+#include <NRFFlashStorage.h>
+#include <HttpClient.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WiFiClientSecure.h>
+#include <WebServer.h>
+#include <WiFiManager.h>
+#include <DNSServer.h>
+
+#define Ethernet WiFi
+#endif
+
+#ifdef NRF5
+#include <NRFFlashStorage.h>
+#endif
+
+#ifdef ARDUINO_ARCH_STM32
+#include "HttpClient.h"
+#include "UIPEthernet.h"
+#include <NRFFlashStorage.h>
+//#include <EEPROM.h>
+#endif
 
 #if defined(__SAM3X8E__)
 #define wdt_res() watchdogReset()
-#define wdt_en()
-#define wdt_dis()
-#endif
-
-#if defined(ARDUINO_ARCH_STM32F1)
-#define wdt_res()
 #define wdt_en()
 #define wdt_dis()
 #endif
@@ -35,6 +80,12 @@
 #define wdt_dis()
 #endif
 
+#if defined(ARDUINO_ARCH_STM32)
+#define wdt_res()
+#define wdt_en()
+#define wdt_dis()
+#endif
+
 //#if defined(ESP8266)
 //#define wdt_res()
 //#define wdt_en()
@@ -56,18 +107,6 @@
 #include "DallasTemperature.h"
 #endif
 
-#include "Arduino.h"
-#include <PubSubClient.h>
-#include <SPI.h>
-#include "utils.h"
-#include <string.h>
-#include "aJSON.h"
-#include <Cmd.h>
-#include "stdarg.h"
-#include "item.h"
-#include "inputs.h"
-
-
 #ifndef MODBUS_DISABLE
 #include <ModbusMaster.h>
 #endif
@@ -76,55 +115,21 @@
 #include "FastLED.h"
 #endif
 
-#include "Dns.h"
-//#include "hsv2rgb.h"
-
-#if defined(__SAM3X8E__)
-#include <DueFlashStorage.h>
-#include <watchdog.h>
-#include <ArduinoHttpClient.h>
-#endif
-
-#if defined(ARDUINO_ARCH_AVR)
-#include "HTTPClientAVR.h"
-#include <avr/pgmspace.h>
-#include <avr/wdt.h>
-#include <EEPROM.h>
-#endif
-
-#if defined(ESP8266)
-#include <FS.h>                   //this needs to be first, or it all crashes and burns...
-#include <EEPROM.h>
-#include <ESP8266HTTPClient.h>
-#include <WiFiManager.h>
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-
-#endif
-
 #ifdef _owire
-
 #include "owTerm.h"
-
 #endif
 
 #if defined(_dmxin) || defined(_dmxout) || defined (_artnet)
-
 #include "dmx.h"
-
 #endif
 
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined(ESP8266) || defined(NRF5)
+
 #ifdef Wiz5500
 #include <Ethernet2.h>
 #else
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined(NRF5)
 #include <Ethernet.h>
 #endif
-#endif
-
-#ifdef ARDUINO_ARCH_ESP32
-#include <SPI.h>
-//#include <Ethernet3.h>
 #endif
 
 
@@ -135,6 +140,18 @@
 #ifdef SD_CARD_INSERTED
 #include "sd_card_w5100.h"
 #endif
+
+#include "Arduino.h"
+#include "utils.h"
+#include "homiedef.h"
+#include <PubSubClient.h>
+#include <SPI.h>
+#include <string.h>
+#include "aJSON.h"
+#include <Cmd.h>
+#include "stdarg.h"
+#include "item.h"
+#include "inputs.h"
 
 #ifdef _artnet
 extern Artnet *artnet;
@@ -152,16 +169,12 @@ enum lan_status {
     DO_NOTHING = -14
 };
 
+
 //void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);
 
-
-void printIPAddress(IPAddress ipAddress);
-
 void printMACAddress();
-
-void restoreState();
 
 lan_status lanLoop();
 
