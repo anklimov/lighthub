@@ -108,27 +108,81 @@ void Input::Parse()
     }
 }
 
-int Input::poll() {
-    if (!isValid()) return -1;
-    if (0) ;
+void Input::setup()
+{
+if (!isValid()) return;
 
+#ifndef CSSHDC_DISABLE
+  in_ccs811  ccs811(this);
+  in_hdc1080 hdc1080(this);
+
+    if (inType == IN_CCS811)
+        ccs811.Setup(pin);
+    else if (inType == IN_HDC1080)
+        hdc1080.Setup(pin);
+// TODO rest types setup
+#endif
+
+}
+
+int Input::poll(short cause) {
+
+if (!isValid()) return -1;
+#ifndef CSSHDC_DISABLE
+  in_ccs811  ccs811(this);
+  in_hdc1080 hdc1080(this);
+#endif
+
+switch (cause)  {
+  case CHECK_INPUT:  //Fast polling
+    switch (inType)
+    {
+      case IN_PUSH_ON:
+      case IN_PUSH_ON     | IN_ACTIVE_HIGH:
+      case IN_PUSH_TOGGLE :
+      case IN_PUSH_TOGGLE | IN_ACTIVE_HIGH:
+      contactPoll();
+      break;
+      case IN_ANALOG:
+      case IN_ANALOG | IN_ACTIVE_HIGH:
+      analogPoll();
+      break;
+
+      // No fast polling
+      case IN_DHT22:
+      case IN_COUNTER:
+      case IN_UPTIME:
+      case IN_CCS811:
+      case IN_HDC1080:
+      break;
+    }
+    break;
+    case CHECK_SENSOR: //Slow polling
+    switch (inType)
+    {
+    #ifndef CSSHDC_DISABLE
+         case IN_CCS811:
+         ccs811.Poll();
+         break;
+         case IN_HDC1080:
+         hdc1080.Poll();
+         break;
+    #endif
     #ifndef DHT_DISABLE
-    else if (inType & IN_DHT22)
-        dht22Poll();
+         case IN_DHT22:
+         dht22Poll();
+         break;
     #endif
     #ifndef COUNTER_DISABLE
-    else if (inType & IN_COUNTER)
-        counterPoll();
-    else if (inType & IN_UPTIME)
-        uptimePoll();
+         case IN_COUNTER:
+         counterPoll();
+         break;
+         case IN_UPTIME:
+         uptimePoll();
+         break;
     #endif
-    else if (inType & IN_ANALOG)
-        analogPoll();
-    else
-        contactPoll();
-    return 0;
-
-  //  contactPoll();
+     }
+  }
 }
 
 #ifndef COUNTER_DISABLE
