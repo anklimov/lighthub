@@ -458,22 +458,27 @@ void Input::onContactChanged(int newValue) {
     if (emit) {
 #ifdef WITH_DOMOTICZ
         if (getIdxField()) {
-            (newValue)? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}", getIdxField())
-            : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());
+            (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
+                                               getIdxField())
+                       : publishDataToDomoticz(0, emit,
+                                               "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",
+                                               getIdxField());
         } else
 #endif
-char addrstr[MQTT_TOPIC_LENGTH];
-strncpy(addrstr,emit->valuestring,sizeof(addrstr));
-if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
-        if (newValue) {  //send set command
-            if (!scmd) mqttClient.publish(addrstr, "ON", true);
-            else if (strlen(scmd->valuestring))
-                mqttClient.publish(addrstr, scmd->valuestring, true);
-        } else {  //send reset command
-            if (!rcmd) mqttClient.publish(addrstr, "OFF", true);
-            else if (strlen(rcmd->valuestring))mqttClient.publish(addrstr, rcmd->valuestring, true);
+        {
+            char addrstr[MQTT_TOPIC_LENGTH];
+            strncpy(addrstr, emit->valuestring, sizeof(addrstr));
+            if (!strchr(addrstr, '/')) setTopic(addrstr, sizeof(addrstr), T_OUT, emit->valuestring);
+            if (newValue) {  //send set command
+                if (!scmd) mqttClient.publish(addrstr, "ON", true);
+                else if (strlen(scmd->valuestring))
+                    mqttClient.publish(addrstr, scmd->valuestring, true);
+            } else {  //send reset command
+                if (!rcmd) mqttClient.publish(addrstr, "OFF", true);
+                else if (strlen(rcmd->valuestring))mqttClient.publish(addrstr, rcmd->valuestring, true);
+            }
         }
-    }
+}
 
     if (item) {
         Item it(item->valuestring);
@@ -500,12 +505,6 @@ void Input::onAnalogChanged(int newValue) {
 
     if (emit) {
 
-//#ifdef WITH_DOMOTICZ
-//        if (getIdxField()) {
-//            (newValue)? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}", getIdxField())
-//            : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());
-//        } else
-//#endif
               char addrstr[MQTT_TOPIC_LENGTH];
               strncpy(addrstr,emit->valuestring,sizeof(addrstr));
               if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
