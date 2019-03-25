@@ -135,6 +135,7 @@ uint32_t nextPollingCheck = 0;
 uint32_t nextInputCheck = 0;
 uint32_t nextLanCheckTime = 0;
 uint32_t nextThermostatCheck = 0;
+uint32_t nextSensorCheck =0;
 
 aJsonObject *pollingItem = NULL;
 
@@ -818,7 +819,6 @@ void cmdFunctionReboot(int arg_cnt, char **args) {
 
 void applyConfig() {
     if (!root) return;
-
 #ifdef _dmxin
     int itemsCount;
     dmxArr = aJson.getObjectItem(root, "dmxin");
@@ -890,6 +890,8 @@ void applyConfig() {
     }
     inputs = aJson.getObjectItem(root, "in");
     mqttArr = aJson.getObjectItem(root, "mqtt");
+
+   inputSetup();
 #ifdef SYSLOG_ENABLE
     udpSyslogArr = aJson.getObjectItem(root, "syslog");
 #endif
@@ -1582,17 +1584,45 @@ void modbusIdle(void) {
 
 void inputLoop(void) {
     if (!inputs) return;
+
+
     if (millis() > nextInputCheck) {
         aJsonObject *input = inputs->child;
         while (input) {
             if ((input->type == aJson_Object)) {
                 Input in(input);
-                in.poll();
+                in.poll(CHECK_INPUT);
             }
             input = input->next;
         }
         nextInputCheck = millis() + INTERVAL_CHECK_INPUT;
     }
+
+    if (millis() > nextSensorCheck) {
+        aJsonObject *input = inputs->child;
+        while (input) {
+            if ((input->type == aJson_Object)) {
+                Input in(input);
+                in.poll(CHECK_SENSOR);
+            }
+            input = input->next;
+        }
+        nextSensorCheck = millis() + INTERVAL_CHECK_SENSOR;
+    }
+
+}
+
+void inputSetup(void) {
+    if (!inputs) return;
+
+        aJsonObject *input = inputs->child;
+        while (input) {
+            if ((input->type == aJson_Object)) {
+                Input in(input);
+                in.setup();
+            }
+            input = input->next;
+        }
 }
 
 #ifndef MODBUS_DISABLE
