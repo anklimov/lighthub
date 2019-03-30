@@ -1,20 +1,24 @@
 # LightHub
-is Flexible, Arduino-Mega/Arduino DUE/ESP8266 open-software and open-hardware SmartHome controller. [RU](https://geektimes.ru/post/295109/) [HOME-site RU](http://lazyhome.ru)
+is Flexible, Arduino-Mega/Arduino DUE/ESP8266/ESP32 open-software and open-hardware SmartHome controller. [RU](https://geektimes.ru/post/295109/) [HOME-site RU](http://lazyhome.ru)
 It may operate both: 
 * On [especially designed hardware board](http://www.lazyhome.ru/index.php/featurerequest) with 16 optocoupled digital inputs, 16 ESD protected digital/analog Inputs/outputs, 8 open-collector outputs (up to 0.5A/50V), DMX IN/OUT, MODBUS RTU and hardware 1-wire support circuit.
-* On plain Arduino MEGA 2560, Arduino DUE, ESP8266 and even on [Controllino](http://controllino.biz/)
-(Controllino and ESP8266 is not tested enough and in experimental stage yet)
+* On plain Arduino MEGA 2560, Arduino DUE, ESP8266, ESP32 and even on [Controllino](http://controllino.biz/)
+(Controllino is not tested enough)
 
 Lighthub allows connecting together:
 * Contact sensors (switches, buttons etc)
 * Analog sensors (Leak detectors, Knobs etc)
 * 1-Wire temperature sensors (up to 20 on single bus)
+* Temperature/Humidity/CO2 sensors: DHT22, CS811, HDC1080
 * Standard nonexpensive Relay board with TTL inputs, [like this](http://ali.pub/2zlosh) to control AC powered lamps, floor heaters, boilers etc
 * [Standard nonexpensive LED dimmers](http://ali.pub/2zlokp) and [AC DMX-512 dimmers](http://ali.pub/2zlont)
 * Modbus RTU devices (Currently, are deployed two types of Modbus devices: AC Dimmer and Ventilation set (Based on [Vacon 10 controller](http://files.danfoss.com/download/Drives/Vacon-10-Quick-Guide-DPD00714F1-UK.pdf))
 * Simple DMX wall sensor panel [like this](http://ali.pub/2zlohe)
 
 [List of non-expensive compatible components from AliExpress here](http://ppv.alipromo.com/custom/promo.php?hash=pjagwaovaero6vkeabjpkpvy4gznbgkc&landing_id=39661)
+
+![alt text](LightHub.png "LightHub application diagram")
+
 
 ![alt text](docs/LightHubAppDiagram.png "LightHub application diagram")
 
@@ -48,12 +52,13 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 * WIZNET 5100 and 5500 Ethernets are supported
 * Modbus on USART2
 
-**ESP8266**: (Developed, working, but not tested in production)
+**ESP8266, ESP32**: (Tested)
 * DMX-OUT on USART1 TX
 * DMX-IN - disabled - not possible to deploy in ESP8266
 * Modbus - disabled. Might be configured in future on USART0 instead CLI/DEBUG
+* Uses Wifi interface instead wired connection
 
-**ESP32**, **NRF52840** : Still early development stage
+**NRF52840** : Still early development stage
 
 # Custom build flags
 
@@ -75,35 +80,38 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 * ESP_WIFI_AP=MYAP // esp wifi access point name
 * ESP_WIFI_PWD=MYPWD // esp wifi access point password
 * WIFI_MANAGER_DISABLE //Disable wifi manager for esp8266
-* DHT_COUNTER_DISABLE //disable DHT, Counter, Uptime input support (for RAM savings on mega2560)
+* COUNTER_DISABLE //disable Counter, Uptime input support (for RAM savings on mega2560)
+* DHT_DISABLE //disable DHT input support (for RAM savings on mega2560)
 * RESTART_LAN_ON_MQTT_ERRORS //reinit LAN if many mqtt errors occured
 * DEVICE_NAME short handy device name which is used instead of mac for download config http://{MY_CONFIG_SERVER}/{DEVICE_NAME}_config.json
 * SYSLOG_ENABLE enable UDP SYSLOG support feature(under DEVELOPMENT) that must be configured through config file
 * WITH_PRINTEX_LIB use PrintEx library (develop experimental feature)
+* CSSHDC_DISABLE //Disable CS811 and HDC1080 sensors support
 
 
 
 # Default compilation behavior:
-* Config server: lazyhome.ru
+* Config server: lazyhome.ru (hosting of config files available for all registred users of portal - see MyDevices tab)
 * Watchdog enabled
 * 1-Wire communication with DS2482-100 I2C driver
 * No SD
 * Serial speed 115200
 * Wiznet 5100 (for MEGA & DUE)
 * Free Ram printing enabled
-* de:ad:be:ef:fe:ff default MAC address
+* de:ad:be:ef:fe:ff default MAC address for MEGA (on ESPx, DUE - using hardware defined MAC by default) 
 * DMX support enabled
 * Modbus support enabled
 * OneWire support enabled
 * Artnet disabled
 * LAN_INIT_DELAY=500 //ms
-* Defailt MQTT input topic: /myhome/in
-* Default MQTT topic to publish device status: /myhome/s_out
-* Default Alarm output topic /alarm
+* Defailt MQTT broadcast input topic: myhome/in
+* Default MQTT topic to publish device status: myhome/s_out
+* Default Alarm output topic: alarm
 * DHT, Counter, Uptime support enabled
-* Wifi manager for esp8266 enabled
+* Wifi manager for esp8266/esp32 enabled
 * RESTART_LAN_ON_MQTT_ERRORS disabled
 * DEVICE_NAME disabled
 * SYSLOG_ENABLE disabled
-* WITH_PRINTEX_LIB diabled, using Streaming library
+* WITH_PRINTEX_LIB disabled, using Streaming library
+* CS811 and HDC1080 sensors support are enabled
 
