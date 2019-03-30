@@ -1,3 +1,6 @@
+#pragma once
+#include "Arduino.h"
+
 class Input;
 class abstractIn {
 public:
@@ -7,5 +10,8 @@ public:
 
 protected:
    Input * in;
+int publish(int value, char* subtopic = NULL);
+int publish(float value, char* subtopic = NULL );
+int publish(char * value, char* subtopic = NULL);
 friend Input;
 };

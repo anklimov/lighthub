@@ -12,7 +12,7 @@
 
 #if defined (ARDUINO_ARCH_ESP8266)
 #define twi_scl D1
-#define WAK_PIN D4
+#define WAK_PIN D3
 
 #define SCL_LOW()   (GPES = (1 << twi_scl))
 #define SCL_HIGH()  (GPEC = (1 << twi_scl))

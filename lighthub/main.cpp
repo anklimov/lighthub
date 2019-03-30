@@ -1180,10 +1180,11 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     wdt_res();
     //debugSerial<<"making GET request");get
     htclient.beginRequest();
-    htclient.get(URI);
+    responseStatusCode = htclient.get(URI);
     htclient.endRequest();
 
-
+    if (responseStatusCode == HTTP_SUCCESS)
+    {
     // read the status code and body of the response
     responseStatusCode = htclient.responseStatusCode();
     response = htclient.responseBody();
@@ -1205,8 +1206,12 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             applyConfig();
             debugSerial<<F("Done.\n");
         }
+      } else  {
+          debugSerial<<F("Config retrieving failed\n");
+          return READ_RE_CONFIG;//-11; //Load from NVRAM
+      }
     } else {
-        debugSerial<<F("Config retrieving failed\n");
+        debugSerial<<F("Connect failed\n");
         return READ_RE_CONFIG;//-11; //Load from NVRAM
     }
 #endif

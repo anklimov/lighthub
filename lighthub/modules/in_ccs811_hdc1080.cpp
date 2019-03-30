@@ -1,4 +1,6 @@
 #include "modules/in_ccs811_hdc1080.h"
+#include "Arduino.h"
+
 #ifndef CSSHDC_DISABLE
 
 CCS811 ccs811(CCS811_ADDR);
@@ -69,8 +71,10 @@ Serial.print(t=hdc1080.readTemperature());
 Serial.print("C, RH=");
 Serial.print(h=hdc1080.readHumidity());
 Serial.print("% Status=");
+publish(t,"/T");
+publish(h,"/H");
 Serial.println(reg=hdc1080.readRegister().rawData,HEX);
-/////// TODO ccs811.setEnvironmentalData(h,t);
+ccs811.setEnvironmentalData(h,t);
 
 if (reg==0xff) //ESP I2C glitch
   {
@@ -87,9 +91,9 @@ return 1;
 
 int in_ccs811::Poll()
 {
-  //#ifdef WAK_PIN
-  //  digitalWrite(WAK_PIN,LOW);
-  //#endif
+  #ifdef WAK_PIN
+    digitalWrite(WAK_PIN,LOW);
+  #endif
 //Check to see if data is ready with .dataAvailable()
   if (ccs811.dataAvailable())
   {
@@ -97,16 +101,21 @@ int in_ccs811::Poll()
     //Get them later
     CCS811Core::status returnCode = ccs811.readAlgorithmResults();
     printDriverError(returnCode);
-
+    float co2,tvoc;
     Serial.print(" CO2[");
     //Returns calculated CO2 reading
-    Serial.print(ccs811.getCO2());
+    Serial.print(co2 = ccs811.getCO2());
     Serial.print("] tVOC[");
     //Returns calculated TVOC reading
 
-    Serial.print(ccs811.getTVOC());
+    Serial.print(tvoc = ccs811.getTVOC());
     Serial.print("] baseline[");
     Serial.print(ccs811Baseline = ccs811.getBaseline());
+
+    publish(co2,"/CO2");
+    publish(tvoc,"/TVOC");
+    publish(ccs811Baseline,"/base");
+
     Serial.print("] millis[");
     //Simply the time since program start
     Serial.print(millis());
@@ -114,9 +123,9 @@ int in_ccs811::Poll()
     Serial.println();
     printSensorError();
 
-    //#ifdef WAK_PIN
-    //  digitalWrite(WAK_PIN,HIGH); //Relax some time
-    //#endif
+    #ifdef WAK_PIN
+      digitalWrite(WAK_PIN,HIGH); //Relax some time
+    #endif
   }
   return 1;
 }

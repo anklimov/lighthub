@@ -362,6 +362,7 @@ void Input::dht22Poll() {
     float humidity = roundf(dhtSensorData.humidity);
 #else
     DHT dht(pin, DHT22);
+    dht.begin();
     float temp = dht.readTemperature();
     float humidity = dht.readHumidity();
 #endif
