@@ -5,7 +5,7 @@
 
 CCS811 ccs811(CCS811_ADDR);
 ClosedCube_HDC1080 hdc1080;
-uint16_t ccs811Baseline;
+long ccs811Baseline;
 
 int  in_ccs811::Setup(int addr)
 {

@@ -79,11 +79,21 @@ EthernetClient ethClient;
 
 #ifdef ARDUINO_ARCH_ESP8266
 WiFiClient ethClient;
+
+#if not defined(WIFI_MANAGER_DISABLE)
+    WiFiManager wifiManager;
+#endif
+
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
 WiFiClient ethClient;
 NRFFlashStorage EEPROM;
+
+#if not defined(WIFI_MANAGER_DISABLE)
+    WiFiManager wifiManager;
+#endif
+
 #endif
 
 #ifdef ARDUINO_ARCH_STM32
@@ -314,6 +324,14 @@ lan_status lanLoop() {
 
 
     {
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+if (WiFi.status() != WL_CONNECTED)
+         {
+          wifiInitialized=false;
+          lanStatus = INITIAL_STATE;
+        }
+#endif
+
 #if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
         wdt_dis();
         if (lanStatus > 0)
@@ -573,12 +591,13 @@ void ip_ready_config_loaded_connecting_to_broker() {
 }
 
 void onInitialStateInitLAN() {
-#if defined(ARDUINO_ARCH_ESP8266) and defined(WIFI_MANAGER_DISABLE)
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+#if defined(WIFI_MANAGER_DISABLE)
     if(!wifiInitialized) {
-                WiFi.mode(WIFI_STA);
+                WiFi.mode(WIFI_STA); // ESP 32 - WiFi.disconnect(); instead
                 debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD)<<endl;
 
-                wifi_set_macaddr(STATION_IF,mac);
+                wifi_set_macaddr(STATION_IF,mac); //ESP32 to check
 
                 WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
                 int wifi_connection_wait = 10000;
@@ -590,8 +609,22 @@ void onInitialStateInitLAN() {
                 }
                 wifiInitialized = true;
             }
+#else
+// Wifi Manager
+if (!wifiInitialized)
+{
+WiFi.disconnect();
+
+#if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
+    wifiInitialized = wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
+#else
+    wifiInitialized = wifiManager.autoConnect();
+#endif
+}
+#endif
 #endif
 
+/*
 #if defined(ARDUINO_ARCH_ESP32) and defined(WIFI_MANAGER_DISABLE)
     if(!wifiInitialized) {
     //    WiFi.mode(WIFI_STA);
@@ -608,6 +641,7 @@ void onInitialStateInitLAN() {
         wifiInitialized = true;
     }
 #endif
+*/
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
     if (WiFi.status() == WL_CONNECTED) {
@@ -616,7 +650,7 @@ void onInitialStateInitLAN() {
     } else
     {
         debugSerial<<F("Problem with WiFi!");
-        nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL/5;
+        nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
     }
 #endif
 
@@ -1315,12 +1349,15 @@ void setup_main() {
 #endif
 
 #if (defined(ARDUINO_ARCH_ESP8266) or defined(ARDUINO_ARCH_ESP32)) and not defined(WIFI_MANAGER_DISABLE)
-    WiFiManager wifiManager;
+//    WiFiManager wifiManager;
+    wifiManager.setTimeout(180);
+
 #if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
-    wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
+    wifiInitialized = wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
 #else
-    wifiManager.autoConnect();
+    wifiInitialized = wifiManager.autoConnect();
 #endif
+
 #endif
 
     delay(LAN_INIT_DELAY);//for LAN-shield initializing

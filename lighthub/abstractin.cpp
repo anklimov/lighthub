@@ -7,7 +7,7 @@
 
 extern PubSubClient mqttClient;
 
-int abstractIn::publish(int value, char* subtopic)
+int abstractIn::publish(long value, char* subtopic)
 {
   char valstr[16];
   printUlongValueToStr(valstr, value);
