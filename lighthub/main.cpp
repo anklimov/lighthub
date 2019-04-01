@@ -593,7 +593,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 void onInitialStateInitLAN() {
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #if defined(WIFI_MANAGER_DISABLE)
-    if(!wifiInitialized) {
+    if(WiFi.status() != WL_CONNECTED) {
                 WiFi.mode(WIFI_STA); // ESP 32 - WiFi.disconnect(); instead
                 debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD)<<endl;
 
@@ -611,9 +611,9 @@ void onInitialStateInitLAN() {
             }
 #else
 // Wifi Manager
-if (!wifiInitialized)
+if (WiFi.status() != WL_CONNECTED)
 {
-WiFi.disconnect();
+//WiFi.disconnect();
 
 #if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
     wifiInitialized = wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
