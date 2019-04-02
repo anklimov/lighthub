@@ -70,7 +70,7 @@ typedef   void (*owChangedType) (int , DeviceAddress, float) ;
 #include <Wire.h>
 #endif
 
-extern OneWire *net;
+extern OneWire *oneWire;
 
 extern DallasTemperature *sensors;
 extern DeviceAddress *term ;

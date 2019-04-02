@@ -26,7 +26,7 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 
 
-OneWire *net = NULL;
+OneWire *oneWire = NULL;
 
 DeviceAddress *term = NULL;
 
@@ -46,12 +46,12 @@ int owUpdate() {
 
 
     Serial.println(F("Searching"));
-    if (net) net->reset_search();
+    if (oneWire) oneWire->reset_search();
     for (short i = 0; i < t_count; i++) wstat[i] &= ~SW_FIND; //absent
 
-    while (net && net->wireSearch(term[t_count]) > 0 && (t_count < t_max) && finish > millis()) {
+    while (oneWire && oneWire->wireSearch(term[t_count]) > 0 && (t_count < t_max) && finish > millis()) {
         short ifind = -1;
-        if (net->crc8(term[t_count], 7) == term[t_count][7]) {
+        if (oneWire->crc8(term[t_count], 7) == term[t_count][7]) {
             for (short i = 0; i < t_count; i++)
                 if (!memcmp(term[i], term[t_count], 8)) {
                     ifind = i;
@@ -68,7 +68,7 @@ int owUpdate() {
                 debugSerial.println();
                 if (term[t_count][0] == 0x28) {
                     sensors->setResolution(term[t_count], TEMPERATURE_PRECISION);
-                    net->setStrongPullup();
+                    oneWire->setStrongPullup();
                     //                sensors.requestTemperaturesByAddress(term[t_count]);
                 }
                 t_count++;
@@ -84,20 +84,20 @@ int owUpdate() {
 int owSetup(owChangedType owCh) {
 #ifndef OWIRE_DISABLE
     //// todo - move memory allocation to here
-    if (net) return true;    // Already initialized
+    if (oneWire) return true;    // Already initialized
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     debugSerial<<F("DS2482_100_I2C_TO_1W_BRIDGE init")<<endl;
-    net = new OneWire;
+    oneWire = new OneWire;
 #else
     debugSerial.print(F("One wire setup on PIN:"));
     debugSerial.println(QUOTE(USE_1W_PIN));
-    net = new OneWire (USE_1W_PIN);
+    oneWire = new OneWire (USE_1W_PIN);
 #endif
 
 
 
 // Pass our oneWire reference to Dallas Temperature.
-    sensors = new DallasTemperature(net);
+    sensors = new DallasTemperature(oneWire);
 
     term = new DeviceAddress[t_max];
 //regs = new    int [t_max];
@@ -106,17 +106,17 @@ int owSetup(owChangedType owCh) {
 
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     Wire.begin();
-    if (net->checkPresence()) {
+    if (oneWire->checkPresence()) {
         debugSerial.println(F("DS2482-100 present"));
-        net->deviceReset();
+        oneWire->deviceReset();
 #ifdef APU_OFF
         debugSerial.println(F("APU off"));
 #else
-        net->setActivePullup();
+        oneWire->setActivePullup();
 #endif
 
         debugSerial.println(F("\tChecking for 1-Wire devices..."));
-        if (net->wireReset())
+        if (oneWire->wireReset())
             debugSerial.println(F("\tReset done"));
 
         sensors->begin();
@@ -191,7 +191,7 @@ void owAdd(DeviceAddress addr) {
     debugSerial.println();
     if (term[t_count][0] == 0x28) {
         sensors->setResolution(term[t_count], TEMPERATURE_PRECISION);
-        net->setStrongPullup();
+        oneWire->setStrongPullup();
         //                sensors.requestTemperaturesByAddress(term[t_count]);
     }
     t_count++;

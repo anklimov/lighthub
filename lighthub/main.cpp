@@ -714,26 +714,6 @@ if (WiFi.status() != WL_CONNECTED)
     #endif
 }
 
-#ifdef ARDUINO_ARCH_STM32
-void softRebootFunc() {
-    //nvic_sys_reset();
-    Serial.println("not implemented");
-}
-#endif
-
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
-void (*softRebootFunc)(void) = 0;
-
-void printCurentLanConfig();
-
-#endif
-
-#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
-void softRebootFunc(){
-    debugSerial<<F("ESP.restart();");
-    ESP.restart();
-}
-#endif
 
 void resetHard() {
 #ifdef RESET_PIN
@@ -836,7 +816,7 @@ void cmdFunctionKill(int arg_cnt, char **args) {
 
 void cmdFunctionReboot(int arg_cnt, char **args) {
     debugSerial<<F("Soft rebooting...");
-   //// softRebootFunc();
+    softRebootFunc();
 }
 
 void applyConfig() {
@@ -1310,6 +1290,8 @@ void setup_main() {
     setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 
+    scan_i2c_bus();
+
 #ifdef SD_CARD_INSERTED
     sd_card_w5100_setup();
 #endif
@@ -1339,7 +1321,7 @@ void setup_main() {
     //owReady = 0;
 
 #ifdef _owire
-    if (net) net->idle(&owIdle);
+    if (oneWire) oneWire->idle(&owIdle);
 #endif
 
     mqttClient.setCallback(mqttCallback);

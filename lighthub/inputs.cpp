@@ -512,11 +512,14 @@ void Input::onContactChanged(int newValue) {
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     if (emit) {
 #ifdef WITH_DOMOTICZ
-        if (getIdxField()) {
-            (newValue)? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}", getIdxField())
-            : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());
-        } else
+        if (getIdxField()) {           (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
+            : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());	                                               getIdxField())
+                       : publishDataToDomoticz(0, emit,
+                                               "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",
+                                               getIdxField());
+                          } else
 #endif
+{
 char addrstr[MQTT_TOPIC_LENGTH];
 strncpy(addrstr,emit->valuestring,sizeof(addrstr));
 if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
@@ -545,7 +548,7 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
         }
     }
 }
-
+}
 
 void Input::onAnalogChanged(int newValue) {
     debugSerial << F("IN:") << (pin) << F("=") << newValue << endl;

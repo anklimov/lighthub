@@ -21,6 +21,7 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 #include "options.h"
 #include "stdarg.h"
+#include <wire.h>
 
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 #include <malloc.h>
@@ -428,6 +429,74 @@ void printUlongValueToStr(char *valstr, unsigned long value) {
     }
     valstr[i]='\0';
 }
+
+
+void scan_i2c_bus() {
+    byte error, address;
+    int nDevices;
+
+     debugSerial<<("Scanning...\n");
+
+     nDevices = 0;
+    for(address = 1; address < 127; address++ )
+    {
+        // The i2c_scanner uses the return value of
+        // the Write.endTransmisstion to see if
+        // a device did acknowledge to the address.
+        Wire.beginTransmission(address);
+        error = Wire.endTransmission();
+
+         if (error == 0)
+        {
+            debugSerial<<("\nI2C device found at address 0x");
+            if (address<16)
+                debugSerial<<("0");
+            debugSerial<<(address,HEX);
+            debugSerial<<("  !");
+
+             nDevices++;
+        }
+        else if (error==4)
+        {
+            debugSerial<<("\nUnknow error at address 0x");
+            if (address<16)
+                debugSerial<<("0");
+            debugSerial<<(address,HEX);
+        }
+    }
+    if (nDevices == 0)
+        debugSerial<<("No I2C devices found\n");
+    else
+        debugSerial<<("done\n");
+}
+
+
+#if defined(__SAM3X8E__)
+void softRebootFunc() {
+    RSTC->RSTC_CR = 0xA5000005;
+}
+#endif
+
+#if defined(NRF5) || defined (ARDUINO_ARCH_STM32)
+void softRebootFunc() {
+    debugSerial<<"Not implemented"<<endl;
+}
+#endif
+
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+void softRebootFunc(){
+    debugSerial<<F("ESP.restart();");
+    ESP.restart();
+}
+#endif
+
+#if defined(ARDUINO_ARCH_AVR)
+void softRebootFunc(){
+void (*RebootFunc)(void) = 0;
+RebootFunc();
+}
+#endif
+
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))
