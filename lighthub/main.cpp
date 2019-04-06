@@ -1170,13 +1170,10 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
 #if defined(ARDUINO_ARCH_AVR)
     FILE *configStream;
-    //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
     HTTPClient hclient(configServer, 80);
-    //HTTPClient hclientPrint(configServer, 80);
     // FILE is the return STREAM type of the HTTPClient
     configStream = hclient.getURI(URI);
-    //Serial.println("got--");delay(500);
     responseStatusCode = hclient.getLastReturnCode();
     wdt_en();
 
@@ -1190,7 +1187,6 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             cleanConf();
             root = aJson.parse(&as);
             interrupts();
-        //    debugSerial<<F("Parsed."));
             hclient.closeStream(configStream);  // this is very important -- be sure to close the STREAM
 
             if (!root) {
@@ -1198,9 +1194,6 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
                 nextLanCheckTime = millis() + 15000;
                 return READ_RE_CONFIG;//-11;
             } else {
-            //    char *outstr = aJson.print(root);
-            //    debugSerial<<outstr);
-            //    free(outstr);
             debugSerial<<F("Applying.\n");
                 applyConfig();
             debugSerial<<F("Done.\n");
@@ -1764,7 +1757,7 @@ void thermoLoop(void) {
     nextThermostatCheck = millis() + THERMOSTAT_CHECK_PERIOD;
 publishStat();
 #ifndef DISABLE_FREERAM_PRINT
-    (thermostatCheckPrinted) ? debugSerial<<F("\nfree:")<<freeRam()<<" " : debugSerial<<F(" ")<<freeRam()<<F(" ");
+    (thermostatCheckPrinted) ? debugSerial<<F("\nRAM=")<<freeRam()<<" " : debugSerial<<F(" ")<<freeRam()<<F(" ");
 #endif
 
 

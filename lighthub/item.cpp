@@ -311,7 +311,7 @@ if (isSet)
 
 int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) {
 
-    debugSerial<<F(" MEM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItemN<<F(" Cmd=")<<cmd<<F(" Par= ");
+    debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItemN<<F(" Cmd=")<<cmd<<F(" Par= ");
     if (!itemArr) return -1;
     int Par[MAXCTRLPAR] = {0, 0, 0};
     if (Parameters)
