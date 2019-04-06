@@ -636,8 +636,7 @@ void onInitialStateInitLAN() {
 // Wifi Manager
 if (WiFi.status() != WL_CONNECTED)
 {
-//WiFi.disconnect();
-
+wifiManager.setTimeout(30);
 #if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
     wifiInitialized = wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
 #else
