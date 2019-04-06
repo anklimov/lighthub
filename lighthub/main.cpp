@@ -175,25 +175,17 @@ void cleanConf()
 debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
     aJson.deleteItem(root);
     root   = NULL;
-
-  //aJson.deleteItem(inputs);
-  inputs = NULL;
-  //aJson.deleteItem(items);
-  items  = NULL;
-  //aJson.deleteItem(topics);
-  topics = NULL;
-  //aJson.deleteItem(mqttArr);
-  mqttArr = NULL;
-  #ifndef DMX_DISABLE
-  //aJson.deleteItem(dmxArr);
+    inputs = NULL;
+    items  = NULL;
+    topics = NULL;
+    mqttArr = NULL;
+  #ifdef _dmxout
   dmxArr = NULL;
   #endif
-  #ifndef OWIRE_DISABLE
-  //aJson.deleteItem(owArr);
+  #ifdef _owire
   owArr = NULL;
   #endif
   #ifndef MODBUS_DISABLE
-  //aJson.deleteItem(modbusArr);
   modbusArr = NULL;
   #endif
      debugSerial<<F(" is ")<<freeRam()<<endl;
@@ -1242,7 +1234,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     //debugSerial<<"GET Response: ");
 
     if (responseStatusCode == 200) {
-        cleanConf()
+        cleanConf();
         root = aJson.parse((char *) response.c_str());
 
         if (!root) {
@@ -1274,7 +1266,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         if (httpResponseCode == HTTP_CODE_OK) {
             String response = httpClient.getString();
             debugSerial<<response;
-            cleanConf()
+            cleanConf();
             root = aJson.parse((char *) response.c_str());
             if (!root) {
                 debugSerial<<F("Config parsing failed\n");

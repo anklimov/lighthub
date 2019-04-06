@@ -671,10 +671,11 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) 
                 digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? HIGH : LOW));
             debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
             break;
-            case CH_THERMO:
-                ///thermoSet(name,cmd,Par1); all cativities done - update temp & cmd
+          }    
+        case CH_THERMO:
+                ///thermoSet(name,cmd,Par1); all activities done - update temp & cmd
                 break;
-        }
+
         case CH_PWM: {
             int k;
             short inverse = 0;
