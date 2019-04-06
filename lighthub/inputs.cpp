@@ -32,6 +32,7 @@ e-mail    anklimov@gmail.com
 #endif
 
 extern PubSubClient mqttClient;
+extern aJsonObject *root;
 
 #if !defined(DHT_DISABLE) || !defined(COUNTER_DISABLE)
 static volatile unsigned long nextPollMillisValue[5];
@@ -93,7 +94,7 @@ void Input::Parse()
     store = NULL;
     inType = 0;
     pin = 0;
-    if (inputObj && (inputObj->type == aJson_Object)) {
+    if (inputObj && (inputObj->type == aJson_Object) && root) {
         aJsonObject *itemBuffer;
         itemBuffer = aJson.getObjectItem(inputObj, "T");
         if (itemBuffer) inType = static_cast<uint8_t>(itemBuffer->valueint);
@@ -110,7 +111,7 @@ void Input::Parse()
 
 void Input::setup()
 {
-if (!isValid()) return;
+if (!isValid() || (!root)) return;
 
 #ifndef CSSHDC_DISABLE
   in_ccs811  ccs811(this);
@@ -222,7 +223,8 @@ void Input::counterPoll() {
         strncpy(addrstr,emit->valuestring,sizeof(addrstr));
         if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         sprintf(valstr, "%d", counterValue);
-        mqttClient.publish(addrstr, valstr);
+        if (mqttClient.connected())
+            mqttClient.publish(addrstr, valstr);
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
         debugSerial<<F(" NextPollMillis=")<<nextPollTime();
     }
@@ -285,7 +287,8 @@ void Input::uptimePoll() {
         char valstr[11];
 //        printUlongValueToStr(valstr,millis());
         printUlongValueToStr(valstr, millis());
-        mqttClient.publish(emit->valuestring, valstr);
+        if (mqttClient.connected())
+           mqttClient.publish(emit->valuestring, valstr);
     }
     setNextPollTime(millis() + UPTIME_POLL_DELAY_DEFAULT);
 }
@@ -384,10 +387,12 @@ void Input::dht22Poll() {
         if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         strcat(addrstr, "T");
         printFloatValueToStr(temp, valstr);
-        mqttClient.publish(addrstr, valstr);
+        if (mqttClient.connected())
+            mqttClient.publish(addrstr, valstr);
         addrstr[strlen(addrstr) - 1] = 'H';
         printFloatValueToStr(humidity, valstr);
-        mqttClient.publish(addrstr, valstr);
+        if (mqttClient.connected())
+            mqttClient.publish(addrstr, valstr);
 
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
         debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
@@ -512,7 +517,8 @@ void Input::onContactChanged(int newValue) {
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     if (emit) {
 #ifdef WITH_DOMOTICZ
-        if (getIdxField()) {           (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
+        if (getIdxField())
+        {  (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
             : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());	                                               getIdxField())
                        : publishDataToDomoticz(0, emit,
                                                "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",
@@ -522,6 +528,8 @@ void Input::onContactChanged(int newValue) {
 {
 char addrstr[MQTT_TOPIC_LENGTH];
 strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+if (mqttClient.connected())
+{
 if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         if (newValue) {  //send set command
             if (!scmd) mqttClient.publish(addrstr, "ON", true);
@@ -531,9 +539,11 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
             if (!rcmd) mqttClient.publish(addrstr, "OFF", true);
             else if (strlen(rcmd->valuestring))mqttClient.publish(addrstr, rcmd->valuestring, true);
         }
-    }
-
+}
+  }
+} // emit
     if (item) {
+      //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
         Item it(item->valuestring);
         if (it.isValid()) {
             if (newValue) {  //send set command
@@ -547,7 +557,6 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
             }
         }
     }
-}
 }
 
 void Input::onAnalogChanged(int newValue) {
@@ -569,7 +578,8 @@ void Input::onAnalogChanged(int newValue) {
               if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
               char strVal[16];
               itoa(newValue,strVal,10);
-              mqttClient.publish(addrstr, strVal, true);
+              if (mqttClient.connected())
+                  mqttClient.publish(addrstr, strVal, true);
 }
 
     if (item) {
@@ -591,7 +601,8 @@ bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, cons
     vsnprintf(valstr, sizeof(valstr) - 1, format, args);
     va_end(args);
     debugSerial << valstr;
-    mqttClient.publish(emit->valuestring, valstr);
+    if (mqttClient.connected())
+        mqttClient.publish(emit->valuestring, valstr);
     if (pollTimeIncrement)
         setNextPollTime(millis() + pollTimeIncrement);
     debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;

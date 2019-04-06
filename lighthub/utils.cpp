@@ -435,7 +435,7 @@ void scan_i2c_bus() {
     byte error, address;
     int nDevices;
 
-     debugSerial<<("Scanning...\n");
+     debugSerial<<(F("Scanning...\n"));
 
      nDevices = 0;
     for(address = 1; address < 127; address++ )
@@ -448,26 +448,25 @@ void scan_i2c_bus() {
 
          if (error == 0)
         {
-            debugSerial<<("\nI2C device found at address 0x");
-            if (address<16)
-                debugSerial<<("0");
-            debugSerial<<(address,HEX);
-            debugSerial<<("  !");
+            debugSerial<<(F("\nI2C device found at address "));
+        //    if (address<16)
+        //        debugSerial<<("0");
+            debugSerial<<(address);
 
              nDevices++;
         }
         else if (error==4)
         {
-            debugSerial<<("\nUnknow error at address 0x");
-            if (address<16)
-                debugSerial<<("0");
-            debugSerial<<(address,HEX);
+            debugSerial<<(F("\nUnknow error at address "));
+      //      if (address<16)
+      //          debugSerial<<("0");
+            debugSerial<<(address);
         }
     }
     if (nDevices == 0)
-        debugSerial<<("No I2C devices found\n");
+        debugSerial<<(F("No I2C devices found\n"));
     else
-        debugSerial<<("done\n");
+        debugSerial<<(F("done\n"));
 }
 
 

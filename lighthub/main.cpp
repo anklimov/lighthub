@@ -168,6 +168,24 @@ int mqttErrorRate;
 void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
 #endif
 
+void cleanConf()
+{
+  root   = NULL;
+  inputs = NULL;
+  items  = NULL;
+  topics = NULL;
+  mqttArr = NULL;
+  #ifndef DMX_DISABLE
+  dmxArr = NULL;
+  #endif
+  #ifndef OWIRE_DISABLE
+  owArr = NULL;
+  #endif
+  #ifndef MODBUS_DISABLE
+  modbusArr = NULL;
+  #endif
+}
+
 void mqttCallback(char *topic, byte *payload, unsigned int length) {
     debugSerial<<F("\n[")<<topic<<F("] ");
     if (!payload) return;
@@ -739,7 +757,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
 
     SetBytes(addr, 8, addrstr);
     addrstr[17] = 0;
-
+    if (!root) return;
     printFloatValueToStr(currentTemp,valstr);
     debugSerial<<endl<<F("T:")<<valstr<<F("<");
     aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);
@@ -758,7 +776,8 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
             char valstr[50];
             sprintf(valstr, "{\"idx\":%s,\"svalue\":\"%.1f\"}", idx->valuestring, currentTemp);
             debugSerial << valstr;
-            mqttClient.publish(owEmitString, valstr);
+            if (mqttClient.connected())
+                  mqttClient.publish(owEmitString, valstr);
             return;
         }
 #endif
@@ -766,7 +785,8 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
             //strcpy_P(addrstr, outprefix);
             setTopic(addrstr,sizeof(addrstr),T_OUT);
             strncat(addrstr, owEmitString, sizeof(addrstr));
-            mqttClient.publish(addrstr, valstr);
+            if (mqttClient.connected())
+                  mqttClient.publish(addrstr, valstr);
         }
         // And translate temp to internal items
         owItem = aJson.getObjectItem(owObj, "item")->valuestring;
@@ -870,8 +890,9 @@ void applyConfig() {
             if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
                 Item it(item);
                 if (it.isValid()) {
+                    short inverse = 0;
                     int pin=it.getArg();
-                    if (pin<0) pin=-pin;
+                    if (pin<0) {pin=-pin; inverse = 1;}
                     int cmd = it.getCmd();
                     switch (it.itemType) {
                         case CH_THERMO:
@@ -880,6 +901,9 @@ void applyConfig() {
                         {
                             int k;
                             pinMode(pin, OUTPUT);
+                            if (inverse)
+                            digitalWrite(pin, k = ((cmd == CMD_ON) ? LOW : HIGH));
+                            else
                             digitalWrite(pin, k = ((cmd == CMD_ON) ? HIGH : LOW));
                             debugSerial<<F("Pin:")<<pin<<F("=")<<k<<F(",");
                         }
@@ -927,26 +951,28 @@ void cmdFunctionLoad(int arg_cnt, char **args) {
   //  restoreState();
 }
 
+
 int loadConfigFromEEPROM()
 {
     char ch;
-    debugSerial<<F("loading Config");
+    debugSerial<<F("Loading Config from EEPROM")<<endl;
 
     ch = EEPROM.read(EEPROM_offset);
     if (ch == '{') {
         aJsonEEPROMStream as = aJsonEEPROMStream(EEPROM_offset);
         aJson.deleteItem(root);
+        cleanConf();
         root = aJson.parse(&as);
         if (!root) {
-            debugSerial<<F("\nload failed\n");
+            debugSerial<<F("load failed")<<endl;
             return 0;
         }
-        debugSerial<<F("\nLoaded\n");
+        debugSerial<<F("Loaded")<<endl;
         applyConfig();
         ethClient.stop(); //Refresh MQTT connect to get retained info
         return 1;
     } else {
-        debugSerial<<F("\nNo stored config\n");
+        debugSerial<<F("No stored config")<<endl;
         return 0;
     }
     return 0;
@@ -1134,9 +1160,10 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     //byte hserver[] = { 192,168,88,2 };
     wdt_dis();
     HTTPClient hclient(configServer, 80);
-    HTTPClient hclientPrint(configServer, 80);
+    //HTTPClient hclientPrint(configServer, 80);
     // FILE is the return STREAM type of the HTTPClient
     configStream = hclient.getURI(URI);
+    Serial.println("got--");delay(500);
     responseStatusCode = hclient.getLastReturnCode();
     wdt_en();
 
@@ -1148,6 +1175,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
             aJson.deleteItem(root);
+            cleanConf();
             root = aJson.parse(&as);
             interrupts();
         //    debugSerial<<F("Parsed."));
@@ -1210,6 +1238,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
     if (responseStatusCode == 200) {
         aJson.deleteItem(root);
+        cleanConf()
         root = aJson.parse((char *) response.c_str());
 
         if (!root) {
@@ -1242,6 +1271,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             String response = httpClient.getString();
             debugSerial<<response;
             aJson.deleteItem(root);
+            cleanConf()
             root = aJson.parse((char *) response.c_str());
             if (!root) {
                 debugSerial<<F("Config parsing failed\n");
@@ -1290,7 +1320,7 @@ void setup_main() {
     setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 
-    scan_i2c_bus();
+  //  scan_i2c_bus();
 
 #ifdef SD_CARD_INSERTED
     sd_card_w5100_setup();

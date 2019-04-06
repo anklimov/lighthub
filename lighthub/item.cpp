@@ -656,8 +656,18 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) 
             break;
         case CH_RELAY: {
             int k;
+            short inverse = 0;
+
+            if (iaddr < 0) {
+                iaddr = -iaddr;
+                inverse = 1;
+            }
             pinMode(iaddr, OUTPUT);
-            digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? HIGH : LOW));
+
+            if (inverse)
+                digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? LOW : HIGH));
+            else
+                digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? HIGH : LOW));
             debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
             break;
             case CH_THERMO:
@@ -667,6 +677,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) 
         case CH_PWM: {
             int k;
             short inverse = 0;
+
             if (iaddr < 0) {
                 iaddr = -iaddr;
                 inverse = 1;
@@ -1038,13 +1049,15 @@ int Item::checkFM() {
         else aJson.addNumberToObject(out, "pwr", 0);
 
         if (ftemp > FM_OVERHEAT_CELSIUS && set) {
-            mqttClient.publish("/alarm/ovrht", itemArr->name);
+          if (mqttClient.connected())
+              mqttClient.publish("/alarm/ovrht", itemArr->name);
             Ctrl(CMD_OFF); //Shut down
         }
     } else
         debugSerial << F("Modbus polling error=") << _HEX(result);
     outch = aJson.print(out);
-    mqttClient.publish(addrstr, outch);
+    if (mqttClient.connected())
+        mqttClient.publish(addrstr, outch);
     free(outch);
     aJson.deleteItem(out);
     modbusBusy = 0;
@@ -1283,7 +1296,8 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
                 return -1;
         }
         debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
-        mqttClient.publish(addrstr, valstr,true);
+        if (mqttClient.connected())
+            mqttClient.publish(addrstr, valstr,true);
         return 0;
     }
 }
