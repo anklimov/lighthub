@@ -33,6 +33,7 @@ e-mail    anklimov@gmail.com
 
 extern PubSubClient mqttClient;
 extern aJsonObject *root;
+extern int8_t ethernetIdleCount;
 
 #if !defined(DHT_DISABLE) || !defined(COUNTER_DISABLE)
 static volatile unsigned long nextPollMillisValue[5];
@@ -223,7 +224,7 @@ void Input::counterPoll() {
         strncpy(addrstr,emit->valuestring,sizeof(addrstr));
         if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         sprintf(valstr, "%d", counterValue);
-        if (mqttClient.connected())
+        if (mqttClient.connected() && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
         debugSerial<<F(" NextPollMillis=")<<nextPollTime();
@@ -287,7 +288,7 @@ void Input::uptimePoll() {
         char valstr[11];
 //        printUlongValueToStr(valstr,millis());
         printUlongValueToStr(valstr, millis());
-        if (mqttClient.connected())
+        if (mqttClient.connected() && !ethernetIdleCount)
            mqttClient.publish(emit->valuestring, valstr);
     }
     setNextPollTime(millis() + UPTIME_POLL_DELAY_DEFAULT);
@@ -387,11 +388,11 @@ void Input::dht22Poll() {
         if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         strcat(addrstr, "T");
         printFloatValueToStr(temp, valstr);
-        if (mqttClient.connected())
+        if (mqttClient.connected()  && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
         addrstr[strlen(addrstr) - 1] = 'H';
         printFloatValueToStr(humidity, valstr);
-        if (mqttClient.connected())
+        if (mqttClient.connected()  && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
 
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
@@ -528,7 +529,7 @@ void Input::onContactChanged(int newValue) {
 {
 char addrstr[MQTT_TOPIC_LENGTH];
 strncpy(addrstr,emit->valuestring,sizeof(addrstr));
-if (mqttClient.connected())
+if (mqttClient.connected() && !ethernetIdleCount)
 {
 if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         if (newValue) {  //send set command
@@ -578,7 +579,7 @@ void Input::onAnalogChanged(int newValue) {
               if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
               char strVal[16];
               itoa(newValue,strVal,10);
-              if (mqttClient.connected())
+              if (mqttClient.connected() && !ethernetIdleCount)
                   mqttClient.publish(addrstr, strVal, true);
 }
 
@@ -601,7 +602,7 @@ bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, cons
     vsnprintf(valstr, sizeof(valstr) - 1, format, args);
     va_end(args);
     debugSerial << valstr;
-    if (mqttClient.connected())
+    if (mqttClient.connected() && !ethernetIdleCount)
         mqttClient.publish(emit->valuestring, valstr);
     if (pollTimeIncrement)
         setNextPollTime(millis() + pollTimeIncrement);

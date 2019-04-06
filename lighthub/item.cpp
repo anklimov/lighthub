@@ -63,6 +63,7 @@ extern aJsonObject *pollingItem;
 //int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value);
 
 extern PubSubClient mqttClient;
+extern int8_t ethernetIdleCount;
 //extern char  outprefix[];
 //const char outprefix[] PROGMEM = OUTTOPIC;
 
@@ -1049,14 +1050,14 @@ int Item::checkFM() {
         else aJson.addNumberToObject(out, "pwr", 0);
 
         if (ftemp > FM_OVERHEAT_CELSIUS && set) {
-          if (mqttClient.connected())
+          if (mqttClient.connected()  && !ethernetIdleCount)
               mqttClient.publish("/alarm/ovrht", itemArr->name);
             Ctrl(CMD_OFF); //Shut down
         }
     } else
         debugSerial << F("Modbus polling error=") << _HEX(result);
     outch = aJson.print(out);
-    if (mqttClient.connected())
+    if (mqttClient.connected()  && !ethernetIdleCount)
         mqttClient.publish(addrstr, outch);
     free(outch);
     aJson.deleteItem(out);
@@ -1296,7 +1297,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
                 return -1;
         }
         debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
-        if (mqttClient.connected())
+        if (mqttClient.connected()  && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr,true);
         return 0;
     }
