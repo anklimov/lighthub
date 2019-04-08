@@ -26,7 +26,7 @@ e-mail    anklimov@gmail.com
 #define S_POWER 5
 #define S_VOL 6
 #define S_HEAT 7
-#define S_CSV 8
+#define S_HSV 8
 #define S_RGB 9
 #define S_RPM 10
 
@@ -43,6 +43,12 @@ e-mail    anklimov@gmail.com
 #define CH_AC_HAIER 10  //AC Haier
 #define CH_WHITE   127//
 
+#define CMD_NUM 0
+#define CMD_UNKNOWN  -1
+#define CMD_JSON -2
+#define CMD_RGB  -3
+#define CMD_HSV  -4
+
 #define CMD_ON  1
 #define CMD_OFF 2
 #define CMD_RESTORE 3 //on only if was turned off by CMD_HALT
@@ -50,8 +56,8 @@ e-mail    anklimov@gmail.com
 #define CMD_HALT 5    //just Off
 #define CMD_XON 6     //just on
 #define CMD_XOFF 7    //off only if was previously turned on by CMD_XON
-#define CMD_UP 8     //just on
-#define CMD_DN 9    //off only if was previously turned on by CMD_XON
+#define CMD_UP 8      //increase
+#define CMD_DN 9      //decrease
 #define CMD_SET 0xe
 #define CMD_MASK 0xf
 

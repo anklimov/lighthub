@@ -52,7 +52,7 @@ const char SETPOINT_P[] PROGMEM = "setpoint";
 const char POWER_P[] PROGMEM = "power";
 const char VOL_P[] PROGMEM = "vol";
 const char HEAT_P[] PROGMEM = "heat";
-const char CSV_P[] PROGMEM = "csv";
+const char HSV_P[] PROGMEM = "hsv";
 const char RGB_P[] PROGMEM = "rgb";
 const char RPM_P[] PROGMEM = "rpm";
 
@@ -85,10 +85,11 @@ int txt2cmd(char *payload) {
     else if (strcmp_P(payload, FALSE_P) == 0) cmd = CMD_OFF;
     else if (strcmp_P(payload, INCREASE_P) == 0) cmd = CMD_UP;
     else if (strcmp_P(payload, DECREASE_P) == 0) cmd = CMD_DN;
-    else if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = 0;
-    else if (*payload == '{') cmd = -2;
-    else if (*payload == '#') cmd = -3;
-
+    else if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = CMD_NUM; //0
+    else if (*payload == '{') cmd = CMD_JSON;
+    else if (*payload == '#') cmd = CMD_RGB;
+    else if (strncmp_P(payload, HSV_P, 3) == 0) cmd = CMD_HSV;
+    else if (strncmp_P(payload, RGB_P, strlen (RGB_P)) == 0) cmd = CMD_RGB;
     return cmd;
 }
 
@@ -104,7 +105,7 @@ int txt2subItem(char *payload) {
     else if (strcmp_P(payload, POWER_P) == 0) cmd = S_POWER;
     else if (strcmp_P(payload, VOL_P) == 0) cmd = S_VOL;
     else if (strcmp_P(payload, HEAT_P) == 0) cmd = S_HEAT;
-    else if (strcmp_P(payload, CSV_P) == 0) cmd = S_CSV;
+    else if (strcmp_P(payload, HSV_P) == 0) cmd = S_HSV;
     else if (strcmp_P(payload, RGB_P) == 0) cmd = S_RGB;
     return cmd;
 }
@@ -263,8 +264,11 @@ if (subsubItem = strchr(subItem, '/'))
 if (isSet)
 {
   int cmd = txt2cmd(payload);
+  debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
   switch (cmd) {
-      case 0: {
+      case CMD_NUM:
+      case CMD_HSV:
+       {
           short i = 0;
           int Par[3];
 
@@ -671,7 +675,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) 
                 digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? HIGH : LOW));
             debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
             break;
-          }    
+          }
         case CH_THERMO:
                 ///thermoSet(name,cmd,Par1); all activities done - update temp & cmd
                 break;

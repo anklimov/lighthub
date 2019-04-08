@@ -18,6 +18,11 @@
 #define SCL_HIGH()  (GPEC = (1 << twi_scl))
 #endif
 
+#if defined(ARDUINO_ARCH_AVR)
+#define WAK_PIN 3  // for LightHub UEXT SCS Pin
+#endif
+
+
 class Input;
 class in_ccs811 : public abstractIn {
 public:

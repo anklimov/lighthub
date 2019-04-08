@@ -78,15 +78,22 @@ void SetAddr(char *out, uint8_t *addr) {
     }
 }
 
-
+// chan is pointer to pointer to string
+// Function return first retrived integer and move pointer to position next after ','
 int getInt(char **chan) {
+    if (chan && *chan && **chan)
+    {
+    //Skip non-numeric values
+    while (**chan && !(**chan == '-' || (**chan >= '0' && **chan<='9'))) *chan += 1;
     int ch = atoi(*chan);
-    *chan = strchr(*chan, ',');
 
+    //Move pointer to next element (after ,)
+    *chan = strchr(*chan, ',');
     if (*chan) *chan += 1;
     //Serial.print(F("Par:")); Serial.println(ch);
     return ch;
-
+   }
+   return 0;
 }
 
 
