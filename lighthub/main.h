@@ -16,13 +16,14 @@
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
-#include <EEPROM.h>
+#include <ESP_EEPROM.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiManager.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <user_interface.h>
+#define Ethernet WiFi
 #endif
 
 #if defined ARDUINO_ARCH_ESP32
@@ -44,14 +45,15 @@
 #include <NRFFlashStorage.h>
 #endif
 
-#if defined(__SAM3X8E__)
-#define wdt_res() watchdogReset()
-#define wdt_en()
-#define wdt_dis()
+#ifdef ARDUINO_ARCH_STM32
+#include "HttpClient.h"
+#include "UIPEthernet.h"
+#include <NRFFlashStorage.h>
+//#include <EEPROM.h>
 #endif
 
-#if defined(ARDUINO_ARCH_STM32F1)
-#define wdt_res()
+#if defined(__SAM3X8E__)
+#define wdt_res() watchdogReset()
 #define wdt_en()
 #define wdt_dis()
 #endif
@@ -73,6 +75,12 @@
 #endif
 
 #if defined(NRF5)
+#define wdt_res()
+#define wdt_en()
+#define wdt_dis()
+#endif
+
+#if defined(ARDUINO_ARCH_STM32)
 #define wdt_res()
 #define wdt_en()
 #define wdt_dis()
@@ -223,6 +231,8 @@ void owIdle(void);
 void modbusIdle(void);
 
 void inputLoop(void);
+
+void inputSetup(void);
 
 void pollingLoop(void);
 

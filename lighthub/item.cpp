@@ -17,6 +17,7 @@ GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
 
 */
+
 #include "options.h"
 #include "item.h"
 #include "aJSON.h"
@@ -32,7 +33,28 @@ e-mail    anklimov@gmail.com
 #endif
 #include <PubSubClient.h>
 
+const char ON_P[] PROGMEM = "ON";
+const char OFF_P[] PROGMEM = "OFF";
+const char REST_P[] PROGMEM = "REST";
+const char TOGGLE_P[] PROGMEM = "TOGGLE";
+const char HALT_P[] PROGMEM = "HALT";
+const char XON_P[] PROGMEM = "XON";
+const char XOFF_P[] PROGMEM = "XOFF";
+const char INCREASE_P[] PROGMEM = "INCREASE";
+const char DECREASE_P[] PROGMEM = "DECREASE";
+const char TRUE_P[] PROGMEM = "true";
+const char FALSE_P[] PROGMEM = "false";
 
+const char SET_P[] PROGMEM = "set";
+const char TEMP_P[] PROGMEM = "temp";
+const char MODE_P[] PROGMEM = "mode";
+const char SETPOINT_P[] PROGMEM = "setpoint";
+const char POWER_P[] PROGMEM = "power";
+const char VOL_P[] PROGMEM = "vol";
+const char HEAT_P[] PROGMEM = "heat";
+const char HSV_P[] PROGMEM = "hsv";
+const char RGB_P[] PROGMEM = "rgb";
+const char RPM_P[] PROGMEM = "rpm";
 
 short modbusBusy = 0;
 extern aJsonObject *pollingItem;
@@ -41,6 +63,7 @@ extern aJsonObject *pollingItem;
 //int modbusSet(int addr, uint16_t _reg, int _mask, uint16_t value);
 
 extern PubSubClient mqttClient;
+extern int8_t ethernetIdleCount;
 //extern char  outprefix[];
 //const char outprefix[] PROGMEM = OUTTOPIC;
 
@@ -51,19 +74,39 @@ int txt2cmd(char *payload) {
     int cmd = -1;
 
     // Check for command
-    if (strcmp(payload, "ON") == 0) cmd = CMD_ON;
-    else if (strcmp(payload, "OFF") == 0) cmd = CMD_OFF;
-    else if (strcmp(payload, "REST") == 0) cmd = CMD_RESTORE;
-    else if (strcmp(payload, "TOGGLE") == 0) cmd = CMD_TOGGLE;
-    else if (strcmp(payload, "HALT") == 0) cmd = CMD_HALT;
-    else if (strcmp(payload, "XON") == 0) cmd = CMD_XON;
-    else if (strcmp(payload, "XOFF") == 0) cmd = CMD_XOFF;
-    else if (strcmp(payload, "INCREASE") == 0) cmd = CMD_UP;
-    else if (strcmp(payload, "DECREASE") == 0) cmd = CMD_DN;
-    else if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = 0;
-    else if (*payload == '{') cmd = -2;
-    else if (*payload == '#') cmd = -3;
+    if (strcmp_P(payload, ON_P) == 0) cmd = CMD_ON;
+    else if (strcmp_P(payload, OFF_P) == 0) cmd = CMD_OFF;
+    else if (strcmp_P(payload, REST_P) == 0) cmd = CMD_RESTORE;
+    else if (strcmp_P(payload, TOGGLE_P) == 0) cmd = CMD_TOGGLE;
+    else if (strcmp_P(payload, HALT_P) == 0) cmd = CMD_HALT;
+    else if (strcmp_P(payload, XON_P) == 0) cmd = CMD_XON;
+    else if (strcmp_P(payload, XOFF_P) == 0) cmd = CMD_XOFF;
+    else if (strcmp_P(payload, TRUE_P) == 0) cmd = CMD_ON;
+    else if (strcmp_P(payload, FALSE_P) == 0) cmd = CMD_OFF;
+    else if (strcmp_P(payload, INCREASE_P) == 0) cmd = CMD_UP;
+    else if (strcmp_P(payload, DECREASE_P) == 0) cmd = CMD_DN;
+    else if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = CMD_NUM; //0
+    else if (*payload == '{') cmd = CMD_JSON;
+    else if (*payload == '#') cmd = CMD_RGB;
+    else if (strncmp_P(payload, HSV_P, 3) == 0) cmd = CMD_HSV;
+    else if (strncmp_P(payload, RGB_P, strlen (RGB_P)) == 0) cmd = CMD_RGB;
+    return cmd;
+}
 
+
+int txt2subItem(char *payload) {
+    int cmd = -1;
+    if (!payload || !strlen(payload)) return 0;
+    // Check for command
+    if (strcmp_P(payload, SET_P) == 0) cmd = S_SET;
+    else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
+    else if (strcmp_P(payload, MODE_P) == 0) cmd = S_MODE;
+    else if (strcmp_P(payload, SETPOINT_P) == 0) cmd = S_SETPOINT;
+    else if (strcmp_P(payload, POWER_P) == 0) cmd = S_POWER;
+    else if (strcmp_P(payload, VOL_P) == 0) cmd = S_VOL;
+    else if (strcmp_P(payload, HEAT_P) == 0) cmd = S_HEAT;
+    else if (strcmp_P(payload, HSV_P) == 0) cmd = S_HSV;
+    else if (strcmp_P(payload, RGB_P) == 0) cmd = S_RGB;
     return cmd;
 }
 
@@ -200,24 +243,46 @@ boolean Item::getEnableCMD(int delta) {
 
 int Item::Ctrl(char * payload, boolean send, char * subItem){
   if (!payload) return 0;
-//  debugSerial<<F("'")<<payload<<F("'")<<endl;
+
+char* subsubItem = NULL;
+int   subItemN = 0;
+int   subsubItemN = 0;
+bool  isSet = false;
+
+if (subItem && strlen(subItem))
+{
+if (subsubItem = strchr(subItem, '/'))
+  {
+    *subsubItem = 0;
+    subsubItem++;
+    subsubItemN = txt2subItem(subsubItem);
+    }
+  subItemN = txt2subItem(subItem);
+      if (subItemN==S_SET || subsubItemN==S_SET) isSet = true;
+} else isSet = true; /// To be removed - old compatmode
+
+if (isSet)
+{
   int cmd = txt2cmd(payload);
+  debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
   switch (cmd) {
-      case 0: {
+      case CMD_NUM:
+      case CMD_HSV:
+       {
           short i = 0;
           int Par[3];
 
           while (payload && i < 3)
               Par[i++] = getInt((char **) &payload);
 
-      return   Ctrl(0, i, Par, send, subItem);
+      return   Ctrl(0, i, Par, send, subItemN);
       }
           break;
 
       case -1: //Not known command
       case -2: //JSON input (not implemented yet
           break;
-#if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266) and not defined(ARDUINO_ARCH_STM32F1) and not defined(DMX_DISABLE)
+#if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266) and not defined(ARDUINO_ARCH_STM32) and not defined(DMX_DISABLE)
       case -3: //RGB color in #RRGGBB notation
       {
           CRGB rgb;
@@ -227,7 +292,7 @@ int Item::Ctrl(char * payload, boolean send, char * subItem){
               Par[0] = map(hsv.h, 0, 255, 0, 365);
               Par[1] = map(hsv.s, 0, 255, 0, 100);
               Par[2] = map(hsv.v, 0, 255, 0, 100);
-          return    Ctrl(0, 3, Par, send, subItem);
+          return    Ctrl(0, 3, Par, send, subItemN);
           }
           break;
       }
@@ -236,20 +301,21 @@ int Item::Ctrl(char * payload, boolean send, char * subItem){
 
           //       if (item.getEnableCMD(500) || lanStatus == 4)
           return Ctrl(cmd, 0, NULL,
-                    send, subItem); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
+                    send, subItemN); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
           //       else debugSerial<<F("on Skipped"));
 
           break;
       default: //some known command
-          return Ctrl(cmd, 0, NULL, send, subItem);
+          return Ctrl(cmd, 0, NULL, send, subItemN);
 
   } //ctrl
 }
+}
 
 
-int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, char * subItem) {
+int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) {
 
-    debugSerial<<F(" MEM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd=")<<cmd<<F(" Par= ");
+    debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItemN<<F(" Cmd=")<<cmd<<F(" Par= ");
     if (!itemArr) return -1;
     int Par[MAXCTRLPAR] = {0, 0, 0};
     if (Parameters)
@@ -514,6 +580,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, char * subItem
 
 
 
+    int rgbSaturation =map(Par[1], 0, 100, 0, 255);
+    int rgbValue = map(Par[2], 0, 100, 0, 255);
     switch (itemType) {
 
 #ifdef _dmxout
@@ -521,14 +589,30 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, char * subItem
             DmxWrite(iaddr, map(Par[0], 0, 100, 0, 255));
             break;
         case CH_RGBW: //Colour RGBW
+        // Saturation 0  - Only white
+        // 0..50 - white + RGB
+        //50..100 RGB
         {
             int k;
-            DmxWrite(iaddr + 3, k = map((100 - Par[1]) * Par[2], 0, 10000, 0, 255));
-            debugSerial<<F("W:")<<k<<endl;
+            if (Par[1]<50) { // Using white
+                            DmxWrite(iaddr + 3, map((50 - Par[1]) * Par[2], 0, 5000, 0, 255));
+                            int rgbvLevel = map (Par[1],0,50,0,255*2);
+                            rgbValue = map(Par[2], 0, 100, 0, rgbvLevel);
+                            rgbSaturation = map(Par[1], 0, 50, 255, 100);
+                            if (rgbValue>255) rgbValue = 255;
+                           }
+            else
+            {
+              //rgbValue = map(Par[2], 0, 100, 0, 255);
+              rgbSaturation = map(Par[1], 50, 100, 100, 255);
+              DmxWrite(iaddr + 3, 0);
+            }
+            //DmxWrite(iaddr + 3, k = map((100 - Par[1]) * Par[2], 0, 10000, 0, 255));
+            //debugSerial<<F("W:")<<k<<endl;
         }
         case CH_RGB: // RGB
         {
-            CRGB rgb = CHSV(map(Par[0], 0, 365, 0, 255), map(Par[1], 0, 100, 0, 255), map(Par[2], 0, 100, 0, 255));
+            CRGB rgb = CHSV(map(Par[0], 0, 365, 0, 255), rgbSaturation, rgbValue);
             DmxWrite(iaddr, rgb.r);
             DmxWrite(iaddr + 1, rgb.g);
             DmxWrite(iaddr + 2, rgb.b);
@@ -569,7 +653,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, char * subItem
                 while (i) {
                     Item it(i->valuestring);
 //            it.copyPar(itemVal);
-                    it.Ctrl(cmd, n, Par, send); //// was true
+                    it.Ctrl(cmd, n, Par, send,subItemN); //// was true
                     i = i->next;
                 } //while
             } //if
@@ -577,17 +661,29 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, char * subItem
             break;
         case CH_RELAY: {
             int k;
+            short inverse = 0;
+
+            if (iaddr < 0) {
+                iaddr = -iaddr;
+                inverse = 1;
+            }
             pinMode(iaddr, OUTPUT);
-            digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? HIGH : LOW));
+
+            if (inverse)
+                digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? LOW : HIGH));
+            else
+                digitalWrite(iaddr, k = ((cmd == CMD_ON || cmd == CMD_XON) ? HIGH : LOW));
             debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
             break;
-            case CH_THERMO:
-                ///thermoSet(name,cmd,Par1); all cativities done - update temp & cmd
+          }
+        case CH_THERMO:
+                ///thermoSet(name,cmd,Par1); all activities done - update temp & cmd
                 break;
-        }
+
         case CH_PWM: {
             int k;
             short inverse = 0;
+
             if (iaddr < 0) {
                 iaddr = -iaddr;
                 inverse = 1;
@@ -959,13 +1055,15 @@ int Item::checkFM() {
         else aJson.addNumberToObject(out, "pwr", 0);
 
         if (ftemp > FM_OVERHEAT_CELSIUS && set) {
-            mqttClient.publish("/alarm/ovrht", itemArr->name);
+          if (mqttClient.connected()  && !ethernetIdleCount)
+              mqttClient.publish("/alarm/ovrht", itemArr->name);
             Ctrl(CMD_OFF); //Shut down
         }
     } else
         debugSerial << F("Modbus polling error=") << _HEX(result);
     outch = aJson.print(out);
-    mqttClient.publish(addrstr, outch);
+    if (mqttClient.connected()  && !ethernetIdleCount)
+        mqttClient.publish(addrstr, outch);
     free(outch);
     aJson.deleteItem(out);
     modbusBusy = 0;
@@ -1204,7 +1302,8 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
                 return -1;
         }
         debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
-        mqttClient.publish(addrstr, valstr,true);
+        if (mqttClient.connected()  && !ethernetIdleCount)
+            mqttClient.publish(addrstr, valstr,true);
         return 0;
     }
 }

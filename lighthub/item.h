@@ -19,6 +19,17 @@ e-mail    anklimov@gmail.com
 */
 #include "options.h"
 
+#define S_SET 1
+#define S_TEMP 2
+#define S_MODE 3
+#define S_SETPOINT 4
+#define S_POWER 5
+#define S_VOL 6
+#define S_HEAT 7
+#define S_HSV 8
+#define S_RGB 9
+#define S_RPM 10
+
 #define CH_DIMMER 0   //DMX 1 ch
 #define CH_RGBW   1   //DMX 4 ch
 #define CH_RGB    2   //DMX 3 ch
@@ -32,6 +43,12 @@ e-mail    anklimov@gmail.com
 #define CH_AC_HAIER 10  //AC Haier
 #define CH_WHITE   127//
 
+#define CMD_NUM 0
+#define CMD_UNKNOWN  -1
+#define CMD_JSON -2
+#define CMD_RGB  -3
+#define CMD_HSV  -4
+
 #define CMD_ON  1
 #define CMD_OFF 2
 #define CMD_RESTORE 3 //on only if was turned off by CMD_HALT
@@ -39,8 +56,8 @@ e-mail    anklimov@gmail.com
 #define CMD_HALT 5    //just Off
 #define CMD_XON 6     //just on
 #define CMD_XOFF 7    //off only if was previously turned on by CMD_XON
-#define CMD_UP 8     //just on
-#define CMD_DN 9    //off only if was previously turned on by CMD_XON
+#define CMD_UP 8      //increase
+#define CMD_DN 9      //decrease
 #define CMD_SET 0xe
 #define CMD_MASK 0xf
 
@@ -68,6 +85,7 @@ e-mail    anklimov@gmail.com
 #include "aJSON.h"
 
 extern aJsonObject *items;
+extern short thermoSetCurTemp(char *name, float t);
 
 int txt2cmd (char * payload);
 
@@ -105,7 +123,7 @@ class Item
   Item(char * name);
   Item(aJsonObject * obj);
   boolean isValid ();
-  virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, char * subItem=NULL);
+  virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, int subItem=0);
   virtual int Ctrl(char * payload, boolean send=true, char * subItem=NULL);
 
   int getArg(short n=0);
@@ -117,9 +135,9 @@ class Item
   //void setVal(uint8_t n, int par);
   void setVal(long int par);
   //void copyPar (aJsonObject *itemV);
-  inline int On (){Ctrl(CMD_ON);};
-  inline int Off(){Ctrl(CMD_OFF);};
-  inline int Toggle(){Ctrl(CMD_TOGGLE);};
+  inline int On (){return Ctrl(CMD_ON);};
+  inline int Off(){return Ctrl(CMD_OFF);};
+  inline int Toggle(){return Ctrl(CMD_TOGGLE);};
   int Poll();
   int SendStatus(short cmd, short n=0, int * Par=NULL, boolean deferred = false);
 

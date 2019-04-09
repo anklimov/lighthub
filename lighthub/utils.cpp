@@ -21,8 +21,9 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 #include "options.h"
 #include "stdarg.h"
+#include <wire.h>
 
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32F1)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 #include <malloc.h>
 #endif
 
@@ -77,15 +78,22 @@ void SetAddr(char *out, uint8_t *addr) {
     }
 }
 
-
+// chan is pointer to pointer to string
+// Function return first retrived integer and move pointer to position next after ','
 int getInt(char **chan) {
+    if (chan && *chan && **chan)
+    {
+    //Skip non-numeric values
+    while (**chan && !(**chan == '-' || (**chan >= '0' && **chan<='9'))) *chan += 1;
     int ch = atoi(*chan);
-    *chan = strchr(*chan, ',');
 
+    //Move pointer to next element (after ,)
+    *chan = strchr(*chan, ',');
     if (*chan) *chan += 1;
     //Serial.print(F("Par:")); Serial.println(ch);
     return ch;
-
+   }
+   return 0;
 }
 
 
@@ -103,7 +111,7 @@ unsigned long freeRam ()
 }
 #endif
 
-#if defined(ARDUINO_ARCH_STM32F1)
+#if defined(ARDUINO_ARCH_STM32)
 extern char _end;
 extern "C" char *sbrk(int i);
 
@@ -411,6 +419,90 @@ if (suffix) strncat(buf,suffix,buflen);
 return buf;
 
 }
+
+
+
+void printUlongValueToStr(char *valstr, unsigned long value) {
+    char buf[11];
+    int i=0;
+    for(;value>0;i++){
+        unsigned long mod = value - ((unsigned long)(value/10))*10;
+        buf[i]=mod+48;
+        value = (unsigned long)(value/10);
+    }
+
+    for(int n=0;n<=i;n++){
+        valstr[n]=buf[i-n-1];
+    }
+    valstr[i]='\0';
+}
+
+
+void scan_i2c_bus() {
+    byte error, address;
+    int nDevices;
+
+     debugSerial<<(F("Scanning...\n"));
+
+     nDevices = 0;
+    for(address = 1; address < 127; address++ )
+    {
+        // The i2c_scanner uses the return value of
+        // the Write.endTransmisstion to see if
+        // a device did acknowledge to the address.
+        Wire.beginTransmission(address);
+        error = Wire.endTransmission();
+
+         if (error == 0)
+        {
+            debugSerial<<(F("\nI2C device found at address "));
+        //    if (address<16)
+        //        debugSerial<<("0");
+            debugSerial<<(address);
+
+             nDevices++;
+        }
+        else if (error==4)
+        {
+            debugSerial<<(F("\nUnknow error at address "));
+      //      if (address<16)
+      //          debugSerial<<("0");
+            debugSerial<<(address);
+        }
+    }
+    if (nDevices == 0)
+        debugSerial<<(F("No I2C devices found\n"));
+    else
+        debugSerial<<(F("done\n"));
+}
+
+
+#if defined(__SAM3X8E__)
+void softRebootFunc() {
+    RSTC->RSTC_CR = 0xA5000005;
+}
+#endif
+
+#if defined(NRF5) || defined (ARDUINO_ARCH_STM32)
+void softRebootFunc() {
+    debugSerial<<"Not implemented"<<endl;
+}
+#endif
+
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+void softRebootFunc(){
+    debugSerial<<F("ESP.restart();");
+    ESP.restart();
+}
+#endif
+
+#if defined(ARDUINO_ARCH_AVR)
+void softRebootFunc(){
+void (*RebootFunc)(void) = 0;
+RebootFunc();
+}
+#endif
+
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

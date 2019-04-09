@@ -17,8 +17,9 @@ GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
 
 */
-
+#pragma once
 #include <aJSON.h>
+#include "modules/in_ccs811_hdc1080.h"
 
 #define IN_ACTIVE_HIGH   2      // High level = PUSHED/ CLOSED/ ON othervise :Low Level. Use INPUT mode instead of INPUT_PULLUP for digital pin
 #define IN_ANALOG        64     // Analog input
@@ -26,13 +27,21 @@ e-mail    anklimov@gmail.com
 
 #define IN_PUSH_ON       0      // PUSH - ON, Release - OFF (ovverrided by pcmd/rcmd) - DEFAULT
 #define IN_PUSH_TOGGLE   1      // Used for push buttons. Every physicall push toggle logical switch  on/off. Toggle on leading edge
+
 #define IN_DHT22         4
+#define IN_CCS811        5
+#define IN_HDC1080       6
+
 #define IN_COUNTER       8
 #define IN_UPTIME       16
+
 
 #define SAME_STATE_ATTEMPTS 3
 #define ANALOG_STATE_ATTEMPTS 6
 #define ANALOG_NOIZE 1
+
+#define CHECK_INPUT  1
+#define CHECK_SENSOR 2
 
 // in syntaxis
 // "pin": { "T":"N", "emit":"out_emit", item:"out_item", "scmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd":"repeat_command" }
@@ -69,6 +78,7 @@ extern aJsonObject *inputs;
 
 typedef union {
     long int aslong;
+    uint32_t timestamp;
     struct {
         int8_t logicState;
         int8_t bounce;
@@ -95,7 +105,8 @@ public:
     void onContactChanged(int newValue);
     void onAnalogChanged(int newValue);
 
-    int poll();
+    int poll(short cause);
+    void setup();
 
     static void inline onCounterChanged(int i);
     static void onCounterChanged0();
@@ -126,7 +137,6 @@ protected:
 
     void uptimePoll();
 
-    void printUlongValueToStr(char *valstr, unsigned long value);
     bool publishDataToDomoticz(int , aJsonObject *, const char *format, ...);
 
     char* getIdxField();

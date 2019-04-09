@@ -4,6 +4,7 @@
 #endif
 
 #define TXEnablePin 13
+#define ESP_EEPROM_SIZE 2048
 
 #ifndef AVR_DMXOUT_PIN
 #define AVR_DMXOUT_PIN 3
@@ -18,7 +19,7 @@
 #define FM_OVERHEAT_CELSIUS 40.
 
 #define MIN_VOLUME 10
-#define INIT_VOLUME 30
+#define INIT_VOLUME 50
 
 #define OFFSET_MAC 0
 #define OFFSET_IP OFFSET_MAC+6
@@ -32,6 +33,11 @@
 #ifndef INTERVAL_CHECK_INPUT
 #define INTERVAL_CHECK_INPUT  50
 #endif
+
+#ifndef INTERVAL_CHECK_SENSOR
+#define INTERVAL_CHECK_SENSOR  5000
+#endif
+
 #define INTERVAL_CHECK_MODBUS 2000
 #define INTERVAL_POLLING      100
 #define THERMOSTAT_CHECK_PERIOD 5000
@@ -66,7 +72,7 @@
 #endif
 
 #ifndef HOMETOPIC
-#define HOMETOPIC  "/myhome"
+#define HOMETOPIC  "myhome"
 #endif
 /*
 #ifndef OUTTOPIC
@@ -98,7 +104,7 @@
 #endif
 
 #define MQTT_SUBJECT_LENGTH 20
-#define MQTT_TOPIC_LENGTH 20
+#define MQTT_TOPIC_LENGTH 64
 
 #ifndef DMX_DISABLE
 #define _dmxin
@@ -136,6 +142,13 @@
 #define modbusSerial Serial2
 #define dmxout DmxDue1
 #define dmxin  DmxDue1
+#endif
+
+#if defined(NRF5)
+//#define modbusSerial Serial1
+#undef _dmxin
+#undef _dmxout
+#undef _modbus
 #endif
 
 #if defined(ARDUINO_ARCH_ESP8266)
