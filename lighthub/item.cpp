@@ -88,7 +88,7 @@ int txt2cmd(char *payload) {
     else if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = CMD_NUM; //0
     else if (*payload == '{') cmd = CMD_JSON;
     else if (*payload == '#') cmd = CMD_RGB;
-    else if (strncmp_P(payload, HSV_P, 3) == 0) cmd = CMD_HSV;
+    else if (strncmp_P(payload, HSV_P, strlen (HSV_P)) == 0) cmd = CMD_HSV;
     else if (strncmp_P(payload, RGB_P, strlen (RGB_P)) == 0) cmd = CMD_RGB;
     return cmd;
 }
