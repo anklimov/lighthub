@@ -901,6 +901,10 @@ void applyConfig() {
                     switch (it.itemType) {
                         case CH_THERMO:
                             if (cmd<1) it.setCmd(CMD_OFF);
+                            pinMode(pin, OUTPUT);
+                            digitalWrite(pin, false); //Initially, all thermostates are LOW (OFF for electho heaters, open for water NO)
+                            debugSerial<<F("Thermo:")<<pin<<F("=LOW")<<F(",");
+                            break;
                         case CH_RELAY:
                         {
                             int k;
@@ -1199,8 +1203,8 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         }
 
     } else {
-        debugSerial<<F("failed to connect");
-        debugSerial<<F(" try again in 5 seconds\n");
+        debugSerial<<F("failed to connect\n");
+//        debugSerial<<F(" try again in 5 seconds\n");
         nextLanCheckTime = millis() + 5000;
         return READ_RE_CONFIG;//-11;
     }
