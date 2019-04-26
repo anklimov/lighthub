@@ -245,7 +245,8 @@ else
 
     itemName=topic+pfxlen;
 
-    if(!strcmp(itemName,CMDTOPIC)) {
+    if(!strcmp(itemName,CMDTOPIC) && payload && (strlen((char*) payload)>1)) {
+      //  mqttClient.publish(topic, "");
         cmd_parse((char *)payload);
         return;
     }
