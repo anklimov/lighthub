@@ -119,8 +119,10 @@ lan_status lanStatus = INITIAL_STATE;
 const char configserver[] PROGMEM = CONFIG_SERVER;
 const char verval_P[] PROGMEM = QUOTE(PIO_SRC_REV);
 
+#if defined(__SAM3X8E__)
+UID UniqueID;
+#endif
 
-unsigned int UniqueID[5] = {0,0,0,0,0};
 char *deviceName = NULL;
 aJsonObject *topics = NULL;
 aJsonObject *root = NULL;
@@ -273,11 +275,14 @@ else
 void printMACAddress() {
     debugSerial<<F("MAC:");
     for (byte i = 0; i < 6; i++)
+{
+  if (mac[i]<16) debugSerial<<"0";
 #ifdef WITH_PRINTEX_LIB
         (i < 5) ?debugSerial<<hex <<(mac[i])<<F(":"):debugSerial<<hex<<(mac[i])<<endl;
 #else
         (i < 5) ?debugSerial<<_HEX(mac[i])<<F(":"):debugSerial<<_HEX(mac[i])<<endl;
 #endif
+}
 }
 
 
@@ -1142,7 +1147,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 {
     int responseStatusCode = 0;
     char ch;
-    char URI[40];
+    char URI[64];
     char configServer[32]="";
     if (arg_cnt > 1) {
         strncpy(configServer, args[1], sizeof(configServer) - 1);
@@ -1150,13 +1155,13 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     } else if (!loadFlash(OFFSET_CONFIGSERVER, configServer))
         strncpy_P(configServer,configserver,sizeof(configServer));
 #ifndef DEVICE_NAME
-    snprintf(URI, sizeof(URI), "/%02x-%02x-%02x-%02x-%02x-%02x.config.json", mac[0], mac[1], mac[2], mac[3], mac[4],
+    snprintf(URI, sizeof(URI), "/cnf/%02x-%02x-%02x-%02x-%02x-%02x.config.json", mac[0], mac[1], mac[2], mac[3], mac[4],
              mac[5]);
 #else
 #ifndef FLASH_64KB
-    snprintf(URI, sizeof(URI), "/%s_config.json",QUOTE(DEVICE_NAME));
+    snprintf(URI, sizeof(URI), "/cnf/%s_config.json",QUOTE(DEVICE_NAME));
 #else
-    strncpy(URI, "/", sizeof(URI));
+    strncpy(URI, "/cnf/", sizeof(URI));
     strncat(URI, QUOTE(DEVICE_NAME), sizeof(URI));
     strncat(URI, "_config.json", sizeof(URI));
 #endif
@@ -1233,7 +1238,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     htclient.stop();
     wdt_res();
     debugSerial<<F("HTTP Status code: ");
-    debugSerial<<responseStatusCode;
+    debugSerial<<responseStatusCode<<" ";
     //debugSerial<<"GET Response: ");
 
     if (responseStatusCode == 200) {
@@ -1315,6 +1320,10 @@ void postTransmission() {
 void setup_main() {
   //Serial.println("Hello");
   //delay(1000);
+  #if defined(__SAM3X8E__)
+  memset(&UniqueID,0,sizeof(UniqueID));
+  #endif
+
     setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 
@@ -1452,11 +1461,11 @@ debugSerial<<endl;
 #if defined(__SAM3X8E__)
 
     Serial.println(F("Reading 128 bits unique identifier") ) ;
-    ReadUniqueID( UniqueID ) ;
+    ReadUniqueID( UniqueID.UID_Long ) ;
 
     Serial.print ("ID: ") ;
     for (byte b = 0 ; b < 4 ; b++)
-      Serial.print ((unsigned int) UniqueID [b], HEX) ;
+      Serial.print ((unsigned int) UniqueID.UID_Long [b], HEX) ;
     Serial.println () ;
 #endif
 
@@ -1509,9 +1518,9 @@ if (!isMacValid) {
     #elif defined(__SAM3X8E__)
     //Lets make MAC from MPU serial#
     mac[0]=0xDE;
-    //firmwareMacAddress[1]=0xAD;
+
     for (byte b = 0 ; b < 5 ; b++)
-              mac[b+1]=UniqueID [b] ;
+              mac[b+1]=UniqueID.UID_Byte [b*3] + UniqueID.UID_Byte [b*3+1] + UniqueID.UID_Byte [b*3+2];
 
     #elif defined DEFAULT_FIRMWARE_MAC
     uint8_t defaultMac[6] = DEFAULT_FIRMWARE_MAC;//comma(,) separated hex-array, hard-coded

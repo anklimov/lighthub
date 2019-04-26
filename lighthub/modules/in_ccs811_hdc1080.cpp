@@ -61,31 +61,24 @@ int in_hdc1080::Poll()
   float h,t;
   int reg;
 
-//  #ifdef WAK_PIN
-//    digitalWrite(WAK_PIN,LOW);
-//  #endif
-
-
-Serial.print("T=");
-Serial.print(t=hdc1080.readTemperature());
-Serial.print("C, RH=");
-Serial.print(h=hdc1080.readHumidity());
-Serial.print("% Status=");
-publish(t,"/T");
-publish(h,"/H");
+Serial.print("HDC Status=");
 Serial.println(reg=hdc1080.readRegister().rawData,HEX);
-ccs811.setEnvironmentalData(h,t);
-
-if (reg==0xff) //ESP I2C glitch
+if (reg!=0xff)
+{
+  Serial.print("T=");
+  Serial.print(t=hdc1080.readTemperature());
+  Serial.print("C, RH=");
+  Serial.print(h=hdc1080.readHumidity());
+  Serial.print("%");
+  publish(t,"/T");
+  publish(h,"/H");
+  ccs811.setEnvironmentalData(h,t);
+}
+else //ESP I2C glitch
   {
     Serial.println("I2C Reset");
     i2cReset();
   }
-
-delay(100);
-//#ifdef WAK_PIN
-//  digitalWrite(WAK_PIN,HIGH);
-//#endif
 return 1;
 }
 

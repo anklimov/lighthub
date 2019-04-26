@@ -169,6 +169,10 @@ enum lan_status {
     DO_NOTHING = -14
 };
 
+typedef union {
+    uint32_t  UID_Long[5];
+    uint8_t   UID_Byte[20];
+} UID;
 
 //void watchdogSetup(void);
 
