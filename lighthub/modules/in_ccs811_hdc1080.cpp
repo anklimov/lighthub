@@ -7,6 +7,9 @@ CCS811 ccs811(CCS811_ADDR);
 ClosedCube_HDC1080 hdc1080;
 long ccs811Baseline;
 
+bool CCS811ready = false;
+bool HDC1080ready = false;
+
 int  in_ccs811::Setup(int addr)
 {
 #ifdef WAK_PIN
@@ -15,7 +18,7 @@ int  in_ccs811::Setup(int addr)
 #endif
 
 Serial.println("CCS811 Init");
-
+if (CCS811ready) return 0;
 Wire.begin(); //Inialize I2C Harware
 
   //It is recommended to check return status on .begin(), but it is not
@@ -28,11 +31,13 @@ Wire.begin(); //Inialize I2C Harware
     return 0;
   }
 ccs811.setBaseline(62000);
+CCS811ready = true;
 return 1;
 }
 
 int in_hdc1080::Setup(int addr)
 {
+if (HDC1080ready) return 0;
 Serial.println("HDC1080 Init ");
 Wire.begin(); //Inialize I2C Harware
 // Default settings:
@@ -44,6 +49,7 @@ Serial.println(hdc1080.readManufacturerId(), HEX); // 0x5449 ID of Texas Instrum
 Serial.print("Device ID=0x");
 Serial.println(hdc1080.readDeviceId(), HEX); // 0x1050 ID of the device
 printSerialNumber();
+HDC1080ready = true;
 return 1;
 }
 
@@ -60,37 +66,31 @@ int in_hdc1080::Poll()
 {
   float h,t;
   int reg;
-
-//  #ifdef WAK_PIN
-//    digitalWrite(WAK_PIN,LOW);
-//  #endif
-
-
-Serial.print("T=");
-Serial.print(t=hdc1080.readTemperature());
-Serial.print("C, RH=");
-Serial.print(h=hdc1080.readHumidity());
-Serial.print("% Status=");
-publish(t,"/T");
-publish(h,"/H");
+if (!HDC1080ready) return 0;
+Serial.print("HDC Status=");
 Serial.println(reg=hdc1080.readRegister().rawData,HEX);
-ccs811.setEnvironmentalData(h,t);
-
-if (reg==0xff) //ESP I2C glitch
+if (reg!=0xff)
+{
+  Serial.print("T=");
+  Serial.print(t=hdc1080.readTemperature());
+  Serial.print("C, RH=");
+  Serial.print(h=hdc1080.readHumidity());
+  Serial.print("%");
+  publish(t,"/T");
+  publish(h,"/H");
+  ccs811.setEnvironmentalData(h,t);
+}
+else //ESP I2C glitch
   {
     Serial.println("I2C Reset");
     i2cReset();
   }
-
-delay(100);
-//#ifdef WAK_PIN
-//  digitalWrite(WAK_PIN,HIGH);
-//#endif
 return 1;
 }
 
 int in_ccs811::Poll()
 {
+  if (!CCS811ready) return 0;
   #ifdef WAK_PIN
     digitalWrite(WAK_PIN,LOW);
   #endif

@@ -18,6 +18,8 @@
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 #include <ESP_EEPROM.h>
 #include <ESP8266HTTPClient.h>
+//#include <ArduinoHttpClient.h>
+//#include "HttpClient.h"
 #include <WiFiManager.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
@@ -27,10 +29,12 @@
 #endif
 
 #if defined ARDUINO_ARCH_ESP32
-//#include <FS.h>                   //this needs to be first, or it all crashes and burns...
+#include <FS.h>                   //this needs to be first, or it all crashes and burns...
 //#include <EEPROM.h>
 #include <NRFFlashStorage.h>
-#include <HttpClient.h>
+//#include "HttpClient.h"
+//#include <ArduinoHttpClient.h>
+#include <HTTPClient.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
@@ -169,6 +173,10 @@ enum lan_status {
     DO_NOTHING = -14
 };
 
+typedef union {
+    uint32_t  UID_Long[5];
+    uint8_t   UID_Byte[20];
+} UID;
 
 //void watchdogSetup(void);
 

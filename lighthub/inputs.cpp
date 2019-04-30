@@ -115,13 +115,16 @@ void Input::setup()
 if (!isValid() || (!root)) return;
 
 #ifndef CSSHDC_DISABLE
-  in_ccs811  ccs811(this);
-  in_hdc1080 hdc1080(this);
-
     if (inType == IN_CCS811)
+      {
+        in_ccs811  ccs811(this);
         ccs811.Setup(pin);
+      }
     else if (inType == IN_HDC1080)
+      {
+        in_hdc1080 hdc1080(this);
         hdc1080.Setup(pin);
+       }
 // TODO rest types setup
 #endif
 
@@ -470,7 +473,7 @@ void Input::analogPoll() {
     // Mapping
     if (inputMap && inputMap->type == aJson_Array)
      {
-     int max;
+     int max=1024;
      if (aJson.getArraySize(inputMap)>=4)
         mappedInputVal  = map (mappedInputVal,
               aJson.getArrayItem(inputMap, 0)->valueint,

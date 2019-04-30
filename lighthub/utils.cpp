@@ -247,7 +247,7 @@ Awesome work Mark T!*/
 
 __attribute__ ((section (".ramfunc")))
 
-void ReadUniqueID( unsigned int * pdwUniqueID )
+void ReadUniqueID( uint32_t * pdwUniqueID )
 {
     unsigned int status ;
 
