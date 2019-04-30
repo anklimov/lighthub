@@ -566,6 +566,11 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
 
         debugSerial<<F("\nAttempting MQTT connection to ")<<servername<<F(":")<<port<<F(" user:")<<user<<F(" ...");
+        if (!strlen(user))
+          {
+            user = NULL;
+            password= NULL;
+          }
         //    wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
         if (mqttClient.connect(deviceName, user, password,willTopic,MQTTQOS1,true,willMessage)) {
             mqttErrorRate = 0;
@@ -599,7 +604,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
             nextLanCheckTime = millis() + 5000;
             debugSerial<<F("Awaiting for retained topics");
         } else {
-            debugSerial<<F("failed, rc=")<<mqttClient.state()<<F(" try again in 5 seconds");
+            debugSerial<<F("failed, rc=")<<mqttClient.state()<<F(" try again in 5 seconds")<<endl;
             nextLanCheckTime = millis() + 5000;
 #ifdef RESTART_LAN_ON_MQTT_ERRORS
             mqttErrorRate++;
@@ -636,7 +641,7 @@ void onInitialStateInitLAN() {
                     wifi_connection_wait -= 500;
                     debugSerial<<".";
                 }
-                wifiInitialized = true;
+                wifiInitialized = true; //???
             }
 #else
 // Wifi Manager
@@ -1215,13 +1220,13 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         return READ_RE_CONFIG;//-11;
     }
 #endif
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) || defined(ARDUINO_ARCH_ESP32)
-    #if defined(ARDUINO_ARCH_ESP32)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) //|| defined(ARDUINO_ARCH_ESP32) //|| defined(ARDUINO_ARCH_ESP8266)
+    #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
     WiFiClient configEthClient;
     #else
     EthernetClient configEthClient;
     #endif
-      String response;
+    String response;
     HttpClient htclient = HttpClient(configEthClient, configServer, 80);
     //htclient.stop(); //_socket =MAX
     htclient.setHttpResponseTimeout(4000);
@@ -1263,7 +1268,8 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         return READ_RE_CONFIG;//-11; //Load from NVRAM
     }
 #endif
-#if defined(ARDUINO_ARCH_ESP8266)
+
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
     HTTPClient httpClient;
     String fullURI = "http://";
     fullURI+=configServer;

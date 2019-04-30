@@ -470,7 +470,7 @@ void Input::analogPoll() {
     // Mapping
     if (inputMap && inputMap->type == aJson_Array)
      {
-     int max;
+     int max=1024;
      if (aJson.getArraySize(inputMap)>=4)
         mappedInputVal  = map (mappedInputVal,
               aJson.getArrayItem(inputMap, 0)->valueint,
