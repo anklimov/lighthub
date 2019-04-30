@@ -115,13 +115,16 @@ void Input::setup()
 if (!isValid() || (!root)) return;
 
 #ifndef CSSHDC_DISABLE
-  in_ccs811  ccs811(this);
-  in_hdc1080 hdc1080(this);
-
     if (inType == IN_CCS811)
+      {
+        in_ccs811  ccs811(this);
         ccs811.Setup(pin);
+      }
     else if (inType == IN_HDC1080)
+      {
+        in_hdc1080 hdc1080(this);
         hdc1080.Setup(pin);
+       }
 // TODO rest types setup
 #endif
 
