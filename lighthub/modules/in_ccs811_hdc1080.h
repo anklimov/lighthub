@@ -12,14 +12,24 @@
 
 #if defined (ARDUINO_ARCH_ESP8266)
 #define twi_scl D1
+#ifndef WAK_PIN
 #define WAK_PIN D3
+#endif
 
 #define SCL_LOW()   (GPES = (1 << twi_scl))
 #define SCL_HIGH()  (GPEC = (1 << twi_scl))
 #endif
 
+#if defined (ARDUINO_ARCH_ESP32)
+#ifndef WAK_PIN
+#define WAK_PIN 17
+#endif
+#endif
+
 #if defined(ARDUINO_ARCH_AVR)
+#ifndef WAK_PIN
 #define WAK_PIN 3  // for LightHub UEXT SCS Pin
+#endif
 #endif
 
 
