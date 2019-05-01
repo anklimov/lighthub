@@ -1,5 +1,7 @@
 #include "modules/in_ccs811_hdc1080.h"
 #include "Arduino.h"
+#include "options.h"
+#include "Streaming.h"
 
 #ifndef CSSHDC_DISABLE
 
@@ -7,18 +9,21 @@ CCS811 ccs811(CCS811_ADDR);
 ClosedCube_HDC1080 hdc1080;
 long ccs811Baseline;
 
-bool CCS811ready = false;
-bool HDC1080ready = false;
+static bool HDC1080ready = false;
+static bool CCS811ready = false;
+
 
 int  in_ccs811::Setup(int addr)
 {
+  if (CCS811ready) {debugSerial<<F("ccs811 is already initialized")<<endl; return 0;}
+
 #ifdef WAK_PIN
   pinMode(WAK_PIN,OUTPUT);
   digitalWrite(WAK_PIN,LOW);
 #endif
 
 Serial.println("CCS811 Init");
-if (CCS811ready) return 0;
+
 Wire.begin(); //Inialize I2C Harware
 
   //It is recommended to check return status on .begin(), but it is not
@@ -37,7 +42,7 @@ return 1;
 
 int in_hdc1080::Setup(int addr)
 {
-if (HDC1080ready) return 0;
+if (HDC1080ready)  {debugSerial<<F("hdc1080 is already initialized")<<endl; return 0;}
 Serial.println("HDC1080 Init ");
 Wire.begin(); //Inialize I2C Harware
 // Default settings:
@@ -66,19 +71,19 @@ int in_hdc1080::Poll()
 {
   float h,t;
   int reg;
-if (!HDC1080ready) return 0;
+if (!HDC1080ready) {debugSerial<<F("HDC1080 not initialized")<<endl; return 0;}
 Serial.print("HDC Status=");
-Serial.println(reg=hdc1080.readRegister().rawData,HEX);
+Serial.print(reg=hdc1080.readRegister().rawData,HEX);
 if (reg!=0xff)
 {
-  Serial.print("T=");
+  Serial.print(" T=");
   Serial.print(t=hdc1080.readTemperature());
   Serial.print("C, RH=");
   Serial.print(h=hdc1080.readHumidity());
-  Serial.print("%");
+  Serial.println("%");
   publish(t,"/T");
   publish(h,"/H");
-  ccs811.setEnvironmentalData(h,t);
+  if (CCS811ready) ccs811.setEnvironmentalData(h,t);
 }
 else //ESP I2C glitch
   {
@@ -90,7 +95,7 @@ return 1;
 
 int in_ccs811::Poll()
 {
-  if (!CCS811ready) return 0;
+  if (!CCS811ready) {debugSerial<<F("ccs811 not initialized")<<endl; return 0;}
   #ifdef WAK_PIN
     digitalWrite(WAK_PIN,LOW);
   #endif
@@ -126,14 +131,14 @@ int in_ccs811::Poll()
     #ifdef WAK_PIN
       digitalWrite(WAK_PIN,HIGH); //Relax some time
     #endif
-  }
+  } else {debugSerial<<F("ccs811: data not available")<<endl; return 0;}
   return 1;
 }
 
 void in_hdc1080::printSerialNumber() {
 Serial.print("Device Serial Number=");
 HDC1080_SerialNumber sernum = hdc1080.readSerialNumber();
-char format[12];
+char format[16];
 sprintf(format, "%02X-%04X-%04X", sernum.serialFirst, sernum.serialMid, sernum.serialLast);
 Serial.println(format);
 }
