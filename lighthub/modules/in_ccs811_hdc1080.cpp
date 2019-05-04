@@ -120,12 +120,7 @@ int in_ccs811::Poll()
     publish(co2,"/CO2");
     publish(tvoc,"/TVOC");
     publish(ccs811Baseline,"/base");
-
-    Serial.print("] millis[");
-    //Simply the time since program start
-    Serial.print(millis());
-    Serial.print("]");
-    Serial.println();
+    Serial.println("]");
     printSensorError();
 
     #ifdef WAK_PIN
