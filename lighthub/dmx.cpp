@@ -245,7 +245,10 @@ dmxout.begin();
 dmxout.setTxMaxChannels(channels);
 #endif
 #endif
+
+#ifndef DMX_DISABLE
 for (int i=1;i<=channels;i++) DmxWrite(i,0);
+#endif
 }
 
 void ArtnetSetup()

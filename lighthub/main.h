@@ -47,6 +47,7 @@
 
 #ifdef NRF5
 #include <NRFFlashStorage.h>
+#include <ArduinoHttpClient.h>
 #endif
 
 #ifdef ARDUINO_ARCH_STM32
