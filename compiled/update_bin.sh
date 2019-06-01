@@ -1,0 +1,11 @@
+cp ../.pioenvs/controllino/firmware.hex controllino
+cp ../.pioenvs/m5stack/firmware.bin m5stack
+cp ../.pioenvs/mega2560dmx-5100/firmware.hex mega2560dmx-5100
+cp ../.pioenvs/due-5100/firmware.bin due-5100
+cp ../.pioenvs/mega2560onewire-5100/firmware.hex mega2560onewire-5100
+cp ../.pioenvs/due-5500/firmware.bin due-5500
+cp ../.pioenvs/nrf52840-5500/firmware.hex nrf52840-5500
+cp ../.pioenvs/esp32-wifi/firmware.bin esp32-wifi
+cp ../.pioenvs/stm32-enc2860/firmware.bin stm32-enc2860
+cp ../.pioenvs/esp8266-wifi/firmware.bin esp8266-wifi
+cp ../.pioenvs/lighthub21/firmware.bin lighthub21
