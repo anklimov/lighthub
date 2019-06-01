@@ -24,8 +24,9 @@
 # export FLAGS="$FLAGS -DESP_WIFI_AP=vent"
 # export FLAGS="$FLAGS -DESP_WIFI_PWD=kk007remont"
 # export FLAGS="$FLAGS -DSYSLOG_ENABLE"
- export FLAGS="$FLAGS -DDEVICE_NAME=kk007_mega2560"
-export FLAGS="$FLAGS -DDHT_COUNTER_DISABLE"
+export FLAGS="$FLAGS -DDEVICE_NAME=kk007_mega2560"
+export FLAGS="$FLAGS -DCOUNTER_DISABLE"
+export FLAGS="$FLAGS -DDHT_DISABLE"
 #export FLAGS="$FLAGS -DWITH_DOMOTICZ"
 #export FLAGS="$FLAGS -DWITH_PRINTEX_LIB"
  export FLAGS="$FLAGS -DPIO_SRC_REV="$(git log --pretty=format:%h_%ad -1 --date=short)

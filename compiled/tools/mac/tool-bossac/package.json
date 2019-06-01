@@ -1,0 +1,7 @@
+{
+    "description": "Basic Open Source SAM-BA Application (BOSSA)",
+    "name": "tool-bossac",
+    "system": "darwin_x86_64",
+    "url": "https://github.com/shumatech/BOSSA",
+    "version": "1.10700.0"
+}

@@ -1,0 +1,10 @@
+{
+    "description": "AVRDUDE",
+    "name": "tool-avrdude",
+    "system": [
+        "darwin_x86_64",
+        "darwin_i386"
+    ],
+    "url": "http://www.nongnu.org/avrdude/",
+    "version": "1.60300.190424"
+}
