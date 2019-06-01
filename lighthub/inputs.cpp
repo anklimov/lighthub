@@ -134,8 +134,8 @@ int Input::poll(short cause) {
 
 if (!isValid()) return -1;
 #ifndef CSSHDC_DISABLE
-  in_ccs811  ccs811(this);
-  in_hdc1080 hdc1080(this);
+  in_ccs811  _ccs811(this);
+  in_hdc1080 _hdc1080(this);
 #endif
 
 switch (cause)  {
@@ -167,10 +167,10 @@ switch (cause)  {
     {
     #ifndef CSSHDC_DISABLE
          case IN_CCS811:
-         ccs811.Poll();
+         _ccs811.Poll();
          break;
          case IN_HDC1080:
-         hdc1080.Poll();
+         _hdc1080.Poll();
          break;
     #endif
     #ifndef DHT_DISABLE

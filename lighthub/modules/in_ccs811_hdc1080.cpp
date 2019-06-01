@@ -3,10 +3,14 @@
 #include "options.h"
 #include "Streaming.h"
 
-#ifndef CSSHDC_DISABLE
+#if defined(M5STACK)
+#include <M5Stack.h>
+#endif
 
-CCS811 ccs811(CCS811_ADDR);
-ClosedCube_HDC1080 hdc1080;
+#ifndef CSSHDC_DISABLE
+static ClosedCube_HDC1080 hdc1080;
+static CCS811 ccs811(CCS811_ADDR);
+
 long ccs811Baseline;
 
 static bool HDC1080ready = false;
@@ -35,8 +39,16 @@ Wire.begin(); //Inialize I2C Harware
     printDriverError(returnCode);
     return 0;
   }
-ccs811.setBaseline(62000);
+//ccs811.setBaseline(62000);
 CCS811ready = true;
+
+//returnCode = ccs811.setDriveMode(1);
+//printDriverError(returnCode);
+
+delay(2000);Poll();
+delay(2000);Poll();
+delay(2000);Poll();
+delay(2000);
 return 1;
 }
 
@@ -81,6 +93,19 @@ if (reg!=0xff)
   Serial.print("C, RH=");
   Serial.print(h=hdc1080.readHumidity());
   Serial.println("%");
+
+
+  #ifdef M5STACK
+    M5.Lcd.print(" T=");
+  //Returns calculated CO2 reading
+    M5.Lcd.print(t=hdc1080.readTemperature());
+    M5.Lcd.print("C, RH=");
+  //Returns calculated TVOC reading
+
+    M5.Lcd.print(h=hdc1080.readHumidity());
+    M5.Lcd.print("%\n");
+  #endif
+
   publish(t,"/T");
   publish(h,"/H");
   if (CCS811ready) ccs811.setEnvironmentalData(h,t);
@@ -99,8 +124,10 @@ int in_ccs811::Poll()
   #ifdef WAK_PIN
     digitalWrite(WAK_PIN,LOW);
   #endif
+  delay(1);
 //Check to see if data is ready with .dataAvailable()
   if (ccs811.dataAvailable())
+//if (1)
   {
     //If so, have the sensor read and calculate the results.
     //Get them later
@@ -116,6 +143,19 @@ int in_ccs811::Poll()
     Serial.print(tvoc = ccs811.getTVOC());
     Serial.print("] baseline[");
     Serial.print(ccs811Baseline = ccs811.getBaseline());
+
+    #ifdef M5STACK
+      M5.Lcd.print(" CO2[");
+    //Returns calculated CO2 reading
+      M5.Lcd.print(co2 = ccs811.getCO2());
+      M5.Lcd.print("] tVOC[");
+    //Returns calculated TVOC reading
+
+      M5.Lcd.print(tvoc = ccs811.getTVOC());
+      M5.Lcd.print("]\n");
+    #endif
+
+
 
     publish(co2,"/CO2");
     publish(tvoc,"/TVOC");

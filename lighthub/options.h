@@ -164,7 +164,11 @@
 #if defined(ARDUINO_ARCH_ESP32)
 #undef _dmxin
 #undef _modbus
-#undef _dmxout
+
+#ifndef DMX_DISABLE
+#define _espdmx
+#endif
+//#undef _dmxout
 #undef modbusSerial
 #endif
 
@@ -188,6 +192,10 @@
 #ifdef ARDUINO_ARCH_STM32F1
 #define strncpy_P strncpy
 #endif
+
+//#ifdef M5STACK
+//#define debugSerial M5.Lcd
+//#endif
 
 #ifndef debugSerial
 #define debugSerial Serial

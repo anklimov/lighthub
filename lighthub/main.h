@@ -1,6 +1,11 @@
 #pragma once
 
 #include "options.h"
+
+#if defined(M5STACK)
+#include <M5Stack.h>
+#endif
+
 #if defined(__SAM3X8E__)
 #include <DueFlashStorage.h>
 #include <watchdog.h>

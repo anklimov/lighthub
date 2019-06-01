@@ -28,7 +28,7 @@ e-mail    anklimov@gmail.com
 #endif
 #endif
 
-#if defined(ESP8266)
+#if defined(ESP8266) ||  defined(ARDUINO_ARCH_ESP32)
 #ifndef DMX_DISABLE
 DMXESPSerial dmxout;
 #endif

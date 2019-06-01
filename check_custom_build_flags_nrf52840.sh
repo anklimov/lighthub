@@ -1,5 +1,6 @@
 #! /bin/bash
 export FLAGS="$FLAGS -DWiz5500"
+#export FLAGS="$FLAGS -DW5500_CS_PIN=10"
 export FLAGS="$FLAGS -DPIO_SRC_REV="$(git log --pretty=format:%h_%ad -1 --date=short)
 export FLAGS="$FLAGS -DDMX_DISABLE"
 export FLAGS="$FLAGS -DMODBUS_DISABLE"

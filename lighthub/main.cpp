@@ -691,7 +691,7 @@ wifiManager.setTimeout(30);
 #ifdef W5500_CS_PIN
     Ethernet.w5500_cspin = W5500_CS_PIN;
     debugSerial<<F("Use W5500 pin: ");
-    debugSerial<<(Ethernet.w5500_cspin);
+    debugSerial<<(Ethernet.w5500_cspin)<<endl;
 #endif
     IPAddress ip, dns, gw, mask;
     int res = 1;
@@ -1331,6 +1331,11 @@ void setup_main() {
   memset(&UniqueID,0,sizeof(UniqueID));
   #endif
 
+  #if defined(M5STACK)
+   // Initialize the M5Stack object
+   M5.begin();
+  #endif
+
     setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 
@@ -1557,6 +1562,11 @@ void setupCmdArduino() {
 }
 
 void loop_main() {
+  #if defined(M5STACK)
+   // Initialize the M5Stack object
+   M5.update();
+  #endif
+
     wdt_res();
     cmdPoll();
     if (lanLoop() > HAVE_IP_ADDRESS) {
