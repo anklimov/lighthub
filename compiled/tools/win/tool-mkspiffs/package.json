@@ -1,0 +1,11 @@
+{
+    "description": "Tool to build and unpack SPIFFS images",
+    "name": "tool-mkspiffs",
+    "system": [
+        "windows",
+        "windows_amd64",
+        "windows_x86"
+    ],
+    "url": "https://github.com/igrr/mkspiffs",
+    "version": "2.230.0"
+}
