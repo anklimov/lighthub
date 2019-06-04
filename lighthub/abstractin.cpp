@@ -4,7 +4,9 @@
 #include "utils.h"
 #include <aJSON.h>
 #include "inputs.h"
+#include "main.h"
 
+extern lan_status lanStatus;
 extern PubSubClient mqttClient;
 
 int abstractIn::publish(long value, char* subtopic)
@@ -32,7 +34,7 @@ int abstractIn::publish(char * value, char* subtopic)
        strncpy(addrstr,emit->valuestring,sizeof(addrstr));
        if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
        strncat(addrstr,subtopic,sizeof(addrstr));
-       if (mqttClient.connected())
+       if (mqttClient.connected() && lanStatus == OPERATION)
                        {
                         mqttClient.publish(addrstr, value, true);
                         return 1;

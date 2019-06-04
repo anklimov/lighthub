@@ -28,7 +28,7 @@ e-mail    anklimov@gmail.com
 #endif
 #endif
 
-#if defined(ESP8266)
+#if defined(ESP8266) ||  defined(ARDUINO_ARCH_ESP32)
 #ifndef DMX_DISABLE
 DMXESPSerial dmxout;
 #endif
@@ -244,6 +244,10 @@ dmxout.init(channels);
 dmxout.begin();
 dmxout.setTxMaxChannels(channels);
 #endif
+#endif
+
+#ifndef DMX_DISABLE
+for (int i=1;i<=channels;i++) DmxWrite(i,0);
 #endif
 }
 

@@ -43,6 +43,12 @@ extern DMXESPSerial dmxout;
 #define DmxWrite dmxout.write
 #endif
 
+#if defined(ARDUINO_ARCH_ESP32)
+#include <ESPDMX.h>
+extern DMXESPSerial dmxout;
+#define DmxWrite dmxout.write
+#endif
+
 #if defined(__SAM3X8E__)
 #include <DmxDue.h>
 #define DmxWrite dmxout.write

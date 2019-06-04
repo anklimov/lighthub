@@ -361,7 +361,7 @@ if (WiFi.status() != WL_CONNECTED)
         }
 #endif
 
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined (NRF5)
         wdt_dis();
         if (lanStatus > 0)
             switch (Ethernet.maintain()) {
@@ -687,11 +687,11 @@ wifiManager.setTimeout(30);
     }
 #endif
 
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32) || defined (NRF5)
 #ifdef W5500_CS_PIN
     Ethernet.w5500_cspin = W5500_CS_PIN;
     debugSerial<<F("Use W5500 pin: ");
-    debugSerial<<(Ethernet.w5500_cspin);
+    debugSerial<<(Ethernet.w5500_cspin)<<endl;
 #endif
     IPAddress ip, dns, gw, mask;
     int res = 1;
@@ -718,7 +718,7 @@ wifiManager.setTimeout(30);
     else {
         debugSerial<<"\nNo IP data found in flash\n";
         wdt_dis();
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)
+#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined (NRF5)
         res = Ethernet.begin(mac, 12000);
 #endif
 #if defined(ARDUINO_ARCH_STM32)
@@ -1220,7 +1220,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         return READ_RE_CONFIG;//-11;
     }
 #endif
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) //|| defined(ARDUINO_ARCH_ESP32) //|| defined(ARDUINO_ARCH_ESP8266)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) || defined (NRF5) //|| defined(ARDUINO_ARCH_ESP32) //|| defined(ARDUINO_ARCH_ESP8266)
     #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
     WiFiClient configEthClient;
     #else
@@ -1269,7 +1269,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     }
 #endif
 
-#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32) //|| defined (NRF5)
     HTTPClient httpClient;
     String fullURI = "http://";
     fullURI+=configServer;
@@ -1329,6 +1329,11 @@ void setup_main() {
   //delay(1000);
   #if defined(__SAM3X8E__)
   memset(&UniqueID,0,sizeof(UniqueID));
+  #endif
+
+  #if defined(M5STACK)
+   // Initialize the M5Stack object
+   M5.begin();
   #endif
 
     setupCmdArduino();
@@ -1557,6 +1562,11 @@ void setupCmdArduino() {
 }
 
 void loop_main() {
+  #if defined(M5STACK)
+   // Initialize the M5Stack object
+   M5.update();
+  #endif
+
     wdt_res();
     cmdPoll();
     if (lanLoop() > HAVE_IP_ADDRESS) {

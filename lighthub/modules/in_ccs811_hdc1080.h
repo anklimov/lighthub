@@ -21,9 +21,10 @@
 #endif
 
 #if defined (ARDUINO_ARCH_ESP32)
-#ifndef WAK_PIN
-#define WAK_PIN 17
-#endif
+#undef WAK_PIN
+//#ifndef WAK_PIN
+//#define WAK_PIN 17
+//#endif
 #endif
 
 #if defined(ARDUINO_ARCH_AVR)

@@ -30,4 +30,5 @@
 # export FLAGS="$FLAGS -DCOUNTER_DISABLE"
 # export FLAGS="$FLAGS -DWITH_PRINTEX_LIB"
 # export FLAGS="$FLAGS -DPIO_SRC_REV="$(git log --pretty=format:%h_%ad -1 --date=short)
+# export FLAGS="$FLAGS -DCSSHDC_DISABLE"
  echo $FLAGS

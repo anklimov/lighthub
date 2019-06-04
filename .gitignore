@@ -1,7 +1,9 @@
 .pioenvs
 .piolibdeps
+.pio
 .clang_complete
 .gcc-flags.json
+.DS_Store
 CMakeListsPrivate.txt
 custom-build-flags/*
 build_flags_due.sh
@@ -10,5 +12,6 @@ build_flags_esp8266.sh
 build_flags_stm32.sh
 build_flags_due-5500.sh
 build_flags_mega2560.sh
+build_flags_mega2560-net.sh
 build_flags_controllino.sh
 build_flags_nrf52840.sh
