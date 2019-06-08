@@ -1,0 +1,11 @@
+{
+    "description": "esptool-ck",
+    "name": "tool-esptool",
+    "system": [
+        "windows",
+        "windows_amd64",
+        "windows_x86"
+    ],
+    "url": "https://github.com/igrr/esptool-ck",
+    "version": "1.413.0"
+}

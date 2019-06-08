@@ -1,0 +1,11 @@
+{
+    "name": "tool-avrdude",
+    "description": "AVRDUDE",
+    "system": [
+        "windows",
+        "windows_amd64",
+        "windows_x86"
+    ],
+    "url": "http://www.nongnu.org/avrdude/",
+    "version": "1.60300.190424"
+}
