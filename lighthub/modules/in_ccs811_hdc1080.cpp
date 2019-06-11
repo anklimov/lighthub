@@ -44,11 +44,11 @@ CCS811ready = true;
 
 //returnCode = ccs811.setDriveMode(1);
 //printDriverError(returnCode);
-
+/*
 delay(2000);Poll();
 delay(2000);Poll();
 delay(2000);Poll();
-delay(2000);
+delay(2000); */
 return 1;
 }
 

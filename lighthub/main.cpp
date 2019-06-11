@@ -1033,14 +1033,41 @@ int mqttConfigResp(char *as) {
     return 1;
 }
 
+#if defined(__SAM3X8E__)
+
+#define saveBufLen 16000
+void cmdFunctionSave(int arg_cnt, char **args)
+{
+  char* outBuf = (char*) malloc(saveBufLen); /* XXX: Dynamic size. */
+  if (outBuf == NULL)
+    {
+      return;
+    }
+  debugSerial<<F("Saving config to EEPROM..");
+  aJsonStringStream stringStream(NULL, outBuf, saveBufLen);
+  aJson.print(root, &stringStream);
+  int len = strlen(outBuf);
+  outBuf[len++]= EOF;
+  EEPROM.write(EEPROM_offset,(byte*) outBuf,len);
+
+  free (outBuf);
+  debugSerial<<F("Saved to EEPROM");
+}
+
+#else
 void cmdFunctionSave(int arg_cnt, char **args)
 {
     aJsonEEPROMStream jsonEEPROMStream = aJsonEEPROMStream(EEPROM_offset);
     debugSerial<<F("Saving config to EEPROM..");
+
     aJson.print(root, &jsonEEPROMStream);
     jsonEEPROMStream.putEOF();
+
+
     debugSerial<<F("Saved to EEPROM");
 }
+
+#endif
 
 void cmdFunctionIp(int arg_cnt, char **args)
 {
