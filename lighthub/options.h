@@ -28,7 +28,8 @@
 #define OFFSET_MASK OFFSET_GW+4
 #define OFFSET_CONFIGSERVER OFFSET_MASK+4
 #define OFFSET_MQTT_PWD OFFSET_CONFIGSERVER+32
-#define EEPROM_offset OFFSET_MQTT_PWD+16
+#define EEPROM_offset_NotAlligned OFFSET_MQTT_PWD+16
+#define EEPROM_offset EEPROM_offset_NotAlligned + (4 -(EEPROM_offset_NotAlligned & 3))
 
 #ifndef INTERVAL_CHECK_INPUT
 #define INTERVAL_CHECK_INPUT  50
