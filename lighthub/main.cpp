@@ -695,7 +695,7 @@ wifiManager.setTimeout(30);
 #endif
     IPAddress ip, dns, gw, mask;
     int res = 1;
-    debugSerial<<F("Starting lan");
+    debugSerial<<F("Starting lan")<<endl;
     if (ipLoadFromFlash(OFFSET_IP, ip)) {
         debugSerial<<"Loaded from flash IP:";
         printIPAddress(ip);
@@ -714,6 +714,9 @@ wifiManager.setTimeout(30);
         } else Ethernet.begin(mac, ip);
     debugSerial<<endl;
     lanStatus = HAVE_IP_ADDRESS;
+    #ifdef _artnet
+                if (artnet) artnet->begin();
+    #endif
     }
     else {
         debugSerial<<"\nNo IP data found in flash\n";
@@ -1081,24 +1084,28 @@ void cmdFunctionIp(int arg_cnt, char **args)
     #define inet_aton(cp, addr)   inet_aton(cp, addr)
     #endif
 */
-    switch (arg_cnt) {
-        case 5:
-            if (inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
-            else saveFlash(OFFSET_MASK, ip0);
-        case 4:
-            if (inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
-            else saveFlash(OFFSET_GW, ip0);
-        case 3:
-            if (inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
-            else saveFlash(OFFSET_DNS, ip0);
-        case 2:
-            if (inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
-            else saveFlash(OFFSET_IP, ip0);
-            break;
 
-        case 1: //dynamic IP
+  //  switch (arg_cnt) {
+    //    case 5:
+            if (arg_cnt>4 && inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
+            else saveFlash(OFFSET_MASK, ip0);
+    //    case 4:
+            if (arg_cnt>3 && inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
+            else saveFlash(OFFSET_GW, ip0);
+    //    case 3:
+            if (arg_cnt>2 && inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
+            else saveFlash(OFFSET_DNS, ip0);
+    //    case 2:
+            if (arg_cnt>1 && inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
+            else saveFlash(OFFSET_IP, ip0);
+    //        break;
+
+    //    case 1: //dynamic IP
+       if (arg_cnt==1)
+       {
         saveFlash(OFFSET_IP,ip0);
         debugSerial<<F("Set dynamic IP\n");
+      }
 /*
             IPAddress current_ip = Ethernet.localIP();
             IPAddress current_mask = Ethernet.subnetMask();
@@ -1113,7 +1120,7 @@ void cmdFunctionIp(int arg_cnt, char **args)
             printIPAddress(current_dns);
             printIPAddress(current_gw);
             printIPAddress(current_mask); */
-    }
+    //}
     debugSerial<<F("Saved\n");
 }
 
@@ -1174,7 +1181,7 @@ void saveFlash(short n, IPAddress& ip) {
 int ipLoadFromFlash(short n, IPAddress &ip) {
     for (int i = 0; i < 4; i++)
         ip[i] = EEPROM.read(n++);
-    return (ip[0] && (ip[0] != 0xff));
+    return (ip[0] && ((ip[0] != 0xff) || (ip[1] != 0xff) || (ip[2] != 0xff) || (ip[3] != 0xff)));
 }
 lan_status loadConfigFromHttp(int arg_cnt, char **args)
 {
