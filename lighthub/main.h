@@ -224,7 +224,7 @@ void printBool(bool arg);
 
 void saveFlash(short n, char *str);
 
-int loadFlash(short n, char *str, short l=32);
+int loadFlash(short n, char *str, short l=MAXFLASHSTR);
 
 void saveFlash(short n, IPAddress& ip);
 

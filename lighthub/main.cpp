@@ -1158,11 +1158,16 @@ void cmdFunctionGet(int arg_cnt, char **args) {
 void printBool(bool arg) { (arg) ? debugSerial<<F("+") : debugSerial<<F("-"); }
 
 void saveFlash(short n, char *str) {
-    short i;
     short len=strlen(str);
-    if (len>31) len=31;
+    if (len>MAXFLASHSTR-1) len=MAXFLASHSTR-1;
     for(int i=0;i<len;i++) EEPROM.write(n+i,str[i]);
     EEPROM.write(n+len,0);
+    
+   #if defined(ARDUINO_ARCH_ESP8266)
+  // write the data to EEPROM
+   short res  = EEPROM.commitReset();
+  Serial.println((res) ? "EEPROM Commit OK" : "Commit failed");
+  #endif.
 }
 
 int loadFlash(short n, char *str, short l) {
@@ -1176,6 +1181,12 @@ int loadFlash(short n, char *str, short l) {
 
 void saveFlash(short n, IPAddress& ip) {
     for(int i=0;i<4;i++) EEPROM.write(n++,ip[i]);
+
+    #if defined(ARDUINO_ARCH_ESP8266)
+   // write the data to EEPROM
+    short res  = EEPROM.commitReset();
+   Serial.println((res) ? "EEPROM Commit OK" : "Commit failed");
+   #endif.
 }
 
 int ipLoadFromFlash(short n, IPAddress &ip) {
@@ -1192,8 +1203,12 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     if (arg_cnt > 1) {
         strncpy(configServer, args[1], sizeof(configServer) - 1);
         saveFlash(OFFSET_CONFIGSERVER, configServer);
+        debugSerial<<configServer<<F(" Saved")<<endl;
     } else if (!loadFlash(OFFSET_CONFIGSERVER, configServer))
+        {
         strncpy_P(configServer,configserver,sizeof(configServer));
+        debugSerial<<F(" Default config server used: ")<<configServer<<endl;
+      }
 #ifndef DEVICE_NAME
     snprintf(URI, sizeof(URI), "/cnf/%02x-%02x-%02x-%02x-%02x-%02x.config.json", mac[0], mac[1], mac[2], mac[3], mac[4],
              mac[5]);
