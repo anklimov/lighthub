@@ -103,7 +103,7 @@ public:
     boolean isValid();
 
     void onContactChanged(int newValue);
-    void onAnalogChanged(int newValue);
+    void onAnalogChanged(float newValue);
 
     int poll(short cause);
     void setup();
