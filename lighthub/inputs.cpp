@@ -499,16 +499,16 @@ void Input::analogPoll() {
        }}
     else
     //if (abs(mappedInputVal - store->currentValue)>Noize || mappedInputVal == min || mappedInputVal ==max) // value changed >ANALOG_NOIZE
-    if (abs(inputVal - store->currentValue)>Noize || mappedInputVal == min || mappedInputVal ==max) // value changed >ANALOG_NOIZE
+    if (abs(inputVal - store->currentValue)>Noize ) // value changed >ANALOG_NOIZE
         store->bounce = 0;
      else // no change
         if (store->bounce<ANALOG_STATE_ATTEMPTS) store->bounce ++;
 
-        if (store->bounce<ANALOG_STATE_ATTEMPTS-1 && (mappedInputVal != store->currentValue))  //confirmed change
+    if ((store->bounce<ANALOG_STATE_ATTEMPTS-1 || mappedInputVal == min || mappedInputVal ==max )&& (inputVal != store->currentValue))//confirmed change
         {
             onAnalogChanged(mappedInputVal/100.);
       //      store->currentValue = mappedInputVal;
-            store->currentValue = mappedInputVal;
+            store->currentValue = inputVal;
         }
 
 }
