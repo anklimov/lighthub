@@ -450,12 +450,12 @@ void Input::contactPoll() {
 
 void Input::analogPoll() {
     int16_t   inputVal;
-    int32_t   mappedInputVal; // 100x inputVal
+    int32_t   mappedInputVal; // 10x inputVal
     aJsonObject *inputMap = aJson.getObjectItem(inputObj, "map");
     int16_t Noize = ANALOG_NOIZE;
     short simple = 0;
     uint32_t inputPinMode;
-    int max=1024*100;
+    int max=1024*10;
     int min=0;
 
 
@@ -474,9 +474,9 @@ void Input::analogPoll() {
         mappedInputVal  = map (inputVal,
               aJson.getArrayItem(inputMap, 0)->valueint,
               aJson.getArrayItem(inputMap, 1)->valueint,
-              min=aJson.getArrayItem(inputMap, 2)->valueint*100,
-              max=aJson.getArrayItem(inputMap, 3)->valueint*100);
-      else mappedInputVal =  inputVal*100;
+              min=aJson.getArrayItem(inputMap, 2)->valueint*10,
+              max=aJson.getArrayItem(inputMap, 3)->valueint*10);
+      else mappedInputVal =  inputVal*10;
 
       if (aJson.getArraySize(inputMap)==5) Noize = aJson.getArrayItem(inputMap, 4)->valueint;
 
@@ -506,7 +506,7 @@ void Input::analogPoll() {
 
     if ((store->bounce<ANALOG_STATE_ATTEMPTS-1 || mappedInputVal == min || mappedInputVal ==max )&& (inputVal != store->currentValue))//confirmed change
         {
-            onAnalogChanged(mappedInputVal/100.);
+            onAnalogChanged(mappedInputVal/10.);
       //      store->currentValue = mappedInputVal;
             store->currentValue = inputVal;
         }
