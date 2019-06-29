@@ -486,11 +486,12 @@ void Input::analogPoll() {
       if (aJson.getArraySize(inputMap)==2)
         {
           simple = 1;
-          if (mappedInputVal < aJson.getArrayItem(inputMap, 0)->valueint) mappedInputVal = 0;
-            else if (mappedInputVal > aJson.getArrayItem(inputMap, 1)->valueint) mappedInputVal = 1;
+          if (inputVal < aJson.getArrayItem(inputMap, 0)->valueint) mappedInputVal = 0;
+            else if (inputVal > aJson.getArrayItem(inputMap, 1)->valueint) mappedInputVal = 1;
                  else return;
         }
-      }
+      } else mappedInputVal =  inputVal*10; //No mapping arguments
+
     if (simple) {
        if (mappedInputVal != store->currentValue)
        {
@@ -498,6 +499,7 @@ void Input::analogPoll() {
            store->currentValue = mappedInputVal;
        }}
     else
+    {
     //if (abs(mappedInputVal - store->currentValue)>Noize || mappedInputVal == min || mappedInputVal ==max) // value changed >ANALOG_NOIZE
     if (abs(inputVal - store->currentValue)>Noize ) // value changed >ANALOG_NOIZE
         store->bounce = 0;
@@ -510,7 +512,7 @@ void Input::analogPoll() {
       //      store->currentValue = mappedInputVal;
             store->currentValue = inputVal;
         }
-
+     }
 }
 
 
