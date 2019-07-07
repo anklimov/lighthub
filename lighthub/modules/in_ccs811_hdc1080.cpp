@@ -85,7 +85,7 @@ int in_hdc1080::Poll()
   int reg;
 if (!HDC1080ready) {debugSerial<<F("HDC1080 not initialized")<<endl; return 0;}
 Serial.print("HDC Status=");
-Serial.print(reg=hdc1080.readRegister().rawData,HEX);
+Serial.println(reg=hdc1080.readRegister().rawData,HEX);
 if (reg!=0xff)
 {
   Serial.print(" T=");

@@ -449,47 +449,49 @@ void Input::contactPoll() {
 
 
 void Input::analogPoll() {
-    int16_t  mappedInputVal;
+    int16_t   inputVal;
+    int32_t   mappedInputVal; // 10x inputVal
     aJsonObject *inputMap = aJson.getObjectItem(inputObj, "map");
-    short Noize = ANALOG_NOIZE;
+    int16_t Noize = ANALOG_NOIZE;
     short simple = 0;
-
-/*
-#if defined(ARDUINO_ARCH_STM32)
-     WiringPinMode inputPinMode;
-#endif
-
-
-#if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
-#endif */
     uint32_t inputPinMode;
+    int max=1024*10;
+    int min=0;
+
+
     if (inType & IN_ACTIVE_HIGH) {
         inputPinMode = INPUT;
     } else {
         inputPinMode = INPUT_PULLUP;
     }
     pinMode(pin, inputPinMode);
-    mappedInputVal = analogRead(pin);
+    inputVal = analogRead(pin);
     // Mapping
     if (inputMap && inputMap->type == aJson_Array)
      {
-     int max=1024;
+
      if (aJson.getArraySize(inputMap)>=4)
-        mappedInputVal  = map (mappedInputVal,
+        mappedInputVal  = map (inputVal,
               aJson.getArrayItem(inputMap, 0)->valueint,
               aJson.getArrayItem(inputMap, 1)->valueint,
-              aJson.getArrayItem(inputMap, 2)->valueint,
-              max=aJson.getArrayItem(inputMap, 3)->valueint);
+              min=aJson.getArrayItem(inputMap, 2)->valueint*10,
+              max=aJson.getArrayItem(inputMap, 3)->valueint*10);
+      else mappedInputVal =  inputVal*10;
+
       if (aJson.getArraySize(inputMap)==5) Noize = aJson.getArrayItem(inputMap, 4)->valueint;
-      if (mappedInputVal>max) mappedInputVal=max;
+
+      if (mappedInputVal>max) mappedInputVal = max;
+      if (mappedInputVal<min) mappedInputVal = min;
+
       if (aJson.getArraySize(inputMap)==2)
         {
           simple = 1;
-          if (mappedInputVal < aJson.getArrayItem(inputMap, 0)->valueint) mappedInputVal = 0;
-            else if (mappedInputVal > aJson.getArrayItem(inputMap, 1)->valueint) mappedInputVal = 1;
+          if (inputVal < aJson.getArrayItem(inputMap, 0)->valueint) mappedInputVal = 0;
+            else if (inputVal > aJson.getArrayItem(inputMap, 1)->valueint) mappedInputVal = 1;
                  else return;
         }
-      }
+      } else mappedInputVal =  inputVal*10; //No mapping arguments
+
     if (simple) {
        if (mappedInputVal != store->currentValue)
        {
@@ -497,17 +499,20 @@ void Input::analogPoll() {
            store->currentValue = mappedInputVal;
        }}
     else
-    if (abs(mappedInputVal - store->currentValue)>Noize) // value changed >ANALOG_NOIZE
+    {
+    //if (abs(mappedInputVal - store->currentValue)>Noize || mappedInputVal == min || mappedInputVal ==max) // value changed >ANALOG_NOIZE
+    if (abs(inputVal - store->currentValue)>Noize ) // value changed >ANALOG_NOIZE
         store->bounce = 0;
      else // no change
         if (store->bounce<ANALOG_STATE_ATTEMPTS) store->bounce ++;
 
-        if (store->bounce<ANALOG_STATE_ATTEMPTS-1 && (mappedInputVal != store->currentValue))  //confirmed change
+    if ((store->bounce<ANALOG_STATE_ATTEMPTS-1 || mappedInputVal == min || mappedInputVal ==max )&& (inputVal != store->currentValue))//confirmed change
         {
-            onAnalogChanged(mappedInputVal);
-            store->currentValue = mappedInputVal;
+            onAnalogChanged(mappedInputVal/10.);
+      //      store->currentValue = mappedInputVal;
+            store->currentValue = inputVal;
         }
-
+     }
 }
 
 
@@ -563,7 +568,7 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
     }
 }
 
-void Input::onAnalogChanged(int newValue) {
+void Input::onAnalogChanged(float newValue) {
     debugSerial << F("IN:") << (pin) << F("=") << newValue << endl;
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
@@ -581,15 +586,17 @@ void Input::onAnalogChanged(int newValue) {
               strncpy(addrstr,emit->valuestring,sizeof(addrstr));
               if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
               char strVal[16];
-              itoa(newValue,strVal,10);
+              //itoa(newValue,strVal,10);
+              printFloatValueToStr(newValue, strVal);
               if (mqttClient.connected() && !ethernetIdleCount)
                   mqttClient.publish(addrstr, strVal, true);
 }
 
     if (item) {
+        int intNewValue = round(newValue);
         Item it(item->valuestring);
         if (it.isValid()) {
-           it.Ctrl(0, 1, &newValue, true);
+           it.Ctrl(0, 1, &intNewValue, true);
         }
     }
 }
