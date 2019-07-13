@@ -1,10 +1,11 @@
 #pragma once
 #include "Arduino.h"
+#include "abstractch.h"
 
 class Input;
-class abstractIn {
+class abstractIn : public abstractCh{
 public:
-    abstractIn(Input * _in){in=_in;};
+    abstractIn(Input * _in):abstractCh(){in=_in;};
     virtual int Setup(int addr) = 0;
     virtual int Poll() = 0;
 
