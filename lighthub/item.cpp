@@ -1137,19 +1137,21 @@ int Item::checkModbusDimmer() {
         data = node.getResponseBuffer(0);
         debugSerial << F("MB: ") << itemArr->name << F(" Val: ") << _HEX(data) << endl;
         checkModbusDimmer(data);
+
+        // Looking 1 step ahead for modbus item, which uses same register
+            Item nextItem(pollingItem->next);
+            if (pollingItem && nextItem.isValid() && nextItem.itemType == CH_MODBUS && nextItem.getArg(0) == addr &&
+                nextItem.getArg(1) == reg) {
+                nextItem.checkModbusDimmer(data);
+                pollingItem = pollingItem->next;
+                if (!pollingItem)
+                    pollingItem = items->child;
+            }
     } else
         debugSerial << F("Modbus polling error=") << _HEX(result) << endl;
     modbusBusy = 0;
 
-// Looking 1 step ahead for modbus item, which uses same register
-    Item nextItem(pollingItem->next);
-    if (pollingItem && nextItem.isValid() && nextItem.itemType == CH_MODBUS && nextItem.getArg(0) == addr &&
-        nextItem.getArg(1) == reg) {
-        nextItem.checkModbusDimmer(data);
-        pollingItem = pollingItem->next;
-        if (!pollingItem)
-            pollingItem = items->child;
-    }
+
 }
 
 
