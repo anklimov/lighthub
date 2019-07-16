@@ -15,3 +15,4 @@ build_flags_mega2560.sh
 build_flags_mega2560-net.sh
 build_flags_controllino.sh
 build_flags_nrf52840.sh
+.vscode/*
