@@ -17,7 +17,7 @@ static bool HDC1080ready = false;
 static bool CCS811ready = false;
 
 
-int  in_ccs811::Setup(int addr)
+int  in_ccs811::Setup()
 {
   if (CCS811ready) {debugSerial<<F("ccs811 is already initialized")<<endl; return 0;}
 
@@ -52,7 +52,7 @@ delay(2000); */
 return 1;
 }
 
-int in_hdc1080::Setup(int addr)
+int in_hdc1080::Setup()
 {
 if (HDC1080ready)  {debugSerial<<F("hdc1080 is already initialized")<<endl; return 0;}
 Serial.println("HDC1080 Init ");

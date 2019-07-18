@@ -1,12 +1,12 @@
 #pragma once
 #include "Arduino.h"
+#include "abstractch.h"
 
-
+class Item;
 class abstractOut  : public abstractCh{
 public:
-    abstractOut(Input * _in):abstractCh(){in=_in;};
-    virtual int Setup(int addr) = 0;
-    virtual int Poll() = 0;
+    abstractOut(Item * _item):abstractCh(){item=_item;};
+    virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, int suffixCode=0, char* subItem=NULL) =0;
 protected:
-
+      Item * item;
 };

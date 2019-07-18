@@ -33,6 +33,8 @@ e-mail    anklimov@gmail.com
 #endif
 #include <PubSubClient.h>
 
+#include "modules/out_spiled.h"
+
 const char ON_P[] PROGMEM = "ON";
 const char OFF_P[] PROGMEM = "OFF";
 const char REST_P[] PROGMEM = "REST";
@@ -95,8 +97,8 @@ int txt2cmd(char *payload) {
 
 
 int txt2subItem(char *payload) {
-    int cmd = -1;
-    if (!payload || !strlen(payload)) return 0;
+    int cmd = S_NOTFOUND;
+    if (!payload || !strlen(payload)) return S_NOTFOUND;
     // Check for command
     if (strcmp_P(payload, SET_P) == 0) cmd = S_SET;
     else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
@@ -115,6 +117,7 @@ const short defval[4] = {0, 0, 0, 0}; //Type,Arg,Val,Cmd
 Item::Item(aJsonObject *obj)//Constructor
 {
     itemArr = obj;
+    driver = NULL;
     Parse();
 }
 
@@ -127,17 +130,31 @@ void Item::Parse() {
         itemType = aJson.getArrayItem(itemArr, I_TYPE)->valueint;
         itemArg = aJson.getArrayItem(itemArr, I_ARG);
         itemVal = aJson.getArrayItem(itemArr, I_VAL);
+
+        switch (itemType)
+        {
+          case CH_SPILED:
+          driver = new out_SPILed (this);
+          break;
+        }
 //        debugSerial << F(" Item:") << itemArr->name << F(" T:") << itemType << F(" =") << getArg() << endl;
+ }
 }
+
+Item::~Item()
+{
+  if (driver) delete driver;
 }
 
 Item::Item(char *name) //Constructor
 {
+    driver = NULL;
     if (name && items)
         itemArr = aJson.getObjectItem(items, name);
     else itemArr = NULL;
     Parse();
 }
+
 
 uint8_t Item::getCmd(bool ext) {
     aJsonObject *t = aJson.getArrayItem(itemArr, I_CMD);
@@ -240,34 +257,50 @@ boolean Item::getEnableCMD(int delta) {
 
 #define MAXCTRLPAR 3
 
-
+// myhome/dev/item/subItem
 int Item::Ctrl(char * payload, boolean send, char * subItem){
   if (!payload) return 0;
 
-char* subsubItem = NULL;
-int   subItemN = 0;
-int   subsubItemN = 0;
+char* suffix = NULL;
+//int   subItemN = 0;
+int   suffixCode = 0;
 bool  isSet = false;
 
 if (subItem && strlen(subItem))
 {
-if (subsubItem = strchr(subItem, '/'))
+if (suffix = strrchr(subItem, '/')) //Trying to retrieving right part
   {
-    *subsubItem = 0;
-    subsubItem++;
-    subsubItemN = txt2subItem(subsubItem);
+    *suffix= 0; //Truncate subItem string
+    suffix++;
+    suffixCode = txt2subItem(suffix);
+    // myhome/dev/item/sub.....Item/suffix
     }
-  subItemN = txt2subItem(subItem);
-      if (subItemN==S_SET || subsubItemN==S_SET) isSet = true;
-} else isSet = true; /// To be removed - old compatmode
+else
+  {
+    suffix = subItem;
+    suffixCode = txt2subItem(suffix);
+    if (suffixCode)
+          subItem = NULL;
+          // myhome/dev/item/suffix
 
-if (isSet)
-{
-  int cmd = txt2cmd(payload);
-  debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
+    else //Invalid suffix - fallback to Subitem notation
+          suffix = NULL;
+    // myhome/dev/item/subItem
+  }
+
+
+//if (suffixCode==S_SET) isSet = true;
+} else suffixCode=S_SET; /// no subItem - To be removed - old compatmode
+
+int cmd = txt2cmd(payload);
+debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
+
+//if (isSet)
+//{
   switch (cmd) {
-      case CMD_NUM:
       case CMD_HSV:
+       suffixCode=S_HSV; //override code for known payload
+      case CMD_NUM:
        {
           short i = 0;
           int Par[3];
@@ -275,7 +308,7 @@ if (isSet)
           while (payload && i < 3)
               Par[i++] = getInt((char **) &payload);
 
-      return   Ctrl(0, i, Par, send, subItemN);
+      return   Ctrl(0, i, Par, send, suffixCode, subItem);
       }
           break;
 
@@ -285,6 +318,7 @@ if (isSet)
 #if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266) and not defined(ARDUINO_ARCH_STM32) and not defined(DMX_DISABLE)
       case -3: //RGB color in #RRGGBB notation
       {
+          suffixCode=S_HSV; //override code for known payload
           CRGB rgb;
           if (sscanf((const char*)payload, "#%2X%2X%2X", &rgb.r, &rgb.g, &rgb.b) == 3) {
               int Par[3];
@@ -292,7 +326,7 @@ if (isSet)
               Par[0] = map(hsv.h, 0, 255, 0, 365);
               Par[1] = map(hsv.s, 0, 255, 0, 100);
               Par[2] = map(hsv.v, 0, 255, 0, 100);
-          return    Ctrl(0, 3, Par, send, subItemN);
+          return    Ctrl(0, 3, Par, send, suffixCode, subItem);
           }
           break;
       }
@@ -301,21 +335,21 @@ if (isSet)
 
           //       if (item.getEnableCMD(500) || lanStatus == 4)
           return Ctrl(cmd, 0, NULL,
-                    send, subItemN); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
+                    send, suffixCode, subItem); //Accept ON command not earlier then 500 ms after set settings (Homekit hack)
           //       else debugSerial<<F("on Skipped"));
 
           break;
       default: //some known command
-          return Ctrl(cmd, 0, NULL, send, subItemN);
+          return Ctrl(cmd, 0, NULL, send, suffixCode, subItem);
 
   } //ctrl
+//}
 }
-}
 
 
-int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) {
+int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode, char *subItem) {
 
-    debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItemN<<F(" Cmd=")<<cmd<<F(" Par= ");
+    debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Suff=")<<suffixCode<<F(" Cmd=")<<cmd<<F(" Par= ");
     if (!itemArr) return -1;
     int Par[MAXCTRLPAR] = {0, 0, 0};
     if (Parameters)
@@ -324,6 +358,9 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) 
               debugSerial<<F("<")<<Par[i]<<F("> ");
             }
     debugSerial<<endl;
+
+    if (driver)  return driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem); 
+
     int iaddr = getArg();
     HSVstore st;
     switch (cmd) {
@@ -653,7 +690,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int subItemN) 
                 while (i) {
                     Item it(i->valuestring);
 //            it.copyPar(itemVal);
-                    it.Ctrl(cmd, n, Par, send,subItemN); //// was true
+                    it.Ctrl(cmd, n, Par, send,suffixCode,subItem); //// was true
                     i = i->next;
                 } //while
             } //if

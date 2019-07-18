@@ -18,7 +18,9 @@ e-mail    anklimov@gmail.com
 
 */
 #include "options.h"
+#include "abstractout.h"
 
+#define S_NOTFOUND  0
 #define S_SET 1
 #define S_TEMP 2
 #define S_MODE 3
@@ -41,6 +43,7 @@ e-mail    anklimov@gmail.com
 #define CH_VCTEMP  8  //Vacom PID regulator
 #define CH_VC      9  //Vacom modbus motor regulator
 #define CH_AC_HAIER 10  //AC Haier
+#define CH_SPILED 11
 #define CH_WHITE   127//
 
 #define CMD_NUM 0
@@ -118,12 +121,15 @@ class Item
   public:
   aJsonObject *itemArr, *itemArg,*itemVal;
   uint8_t itemType;
+  abstractOut * driver;
 
 
   Item(char * name);
   Item(aJsonObject * obj);
+  ~Item();
+
   boolean isValid ();
-  virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, int subItem=0);
+  virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, int suffixCode=0, char* subItem=NULL);
   virtual int Ctrl(char * payload, boolean send=true, char * subItem=NULL);
 
   int getArg(short n=0);

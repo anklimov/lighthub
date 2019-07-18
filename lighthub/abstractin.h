@@ -6,8 +6,6 @@ class Input;
 class abstractIn : public abstractCh{
 public:
     abstractIn(Input * _in):abstractCh(){in=_in;};
-    virtual int Setup(int addr) = 0;
-    virtual int Poll() = 0;
 
 protected:
    Input * in;

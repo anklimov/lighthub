@@ -8,21 +8,21 @@
 extern lan_status lanStatus;
 extern PubSubClient mqttClient;
 
-int abstractCh::publish(char* topic, long value, char* subtopic)
+int abstractCh::publishTopic(char* topic, long value, char* subtopic)
 {
   char valstr[16];
   printUlongValueToStr(valstr, value);
-  return publish(topic, valstr,subtopic);
+  return publishTopic(topic, valstr,subtopic);
 };
 
-int abstractCh::publish(char* topic, float value, char* subtopic)
+int abstractCh::publishTopic(char* topic, float value, char* subtopic)
 {
   char valstr[16];
   printFloatValueToStr(value, valstr);
-  return publish(topic, valstr,subtopic);
+  return publishTopic(topic, valstr,subtopic);
 };
 
-int abstractCh::publish(char* topic, char * value, char* subtopic)
+int abstractCh::publishTopic(char* topic, char * value, char* subtopic)
 {
   char addrstr[MQTT_TOPIC_LENGTH];
 

@@ -1,5 +1,6 @@
 
 #include "abstractin.h"
+#include "abstractch.h"
 #include <PubSubClient.h>
 #include "utils.h"
 #include <aJSON.h>
@@ -31,7 +32,7 @@ int abstractIn::publish(char * value, char* subtopic)
   aJsonObject *emit = aJson.getObjectItem(in->inputObj, "emit");
     if (emit)
      {
-       return publish(emit->valuestring,value,subtopic);
+       return publishTopic(emit->valuestring,value,subtopic);
      }
   }
 return 0;

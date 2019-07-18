@@ -118,12 +118,12 @@ if (!isValid() || (!root)) return;
     if (inType == IN_CCS811)
       {
         in_ccs811  ccs811(this);
-        ccs811.Setup(pin);
+        ccs811.Setup();
       }
     else if (inType == IN_HDC1080)
       {
         in_hdc1080 hdc1080(this);
-        hdc1080.Setup(pin);
+        hdc1080.Setup();
        }
 // TODO rest types setup
 #endif
