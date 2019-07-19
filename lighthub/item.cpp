@@ -135,15 +135,33 @@ void Item::Parse() {
         {
           case CH_SPILED:
           driver = new out_SPILed (this);
+          debugSerial<<F("SPILED driver created")<<endl;
+
           break;
         }
 //        debugSerial << F(" Item:") << itemArr->name << F(" T:") << itemType << F(" =") << getArg() << endl;
  }
 }
 
+boolean Item::Setup()
+{
+
+if (driver)
+       {
+        if (driver->Status()) driver->Stop();
+        driver->Setup();
+        return true;
+       }
+else return false;
+}
+
 Item::~Item()
 {
-  if (driver) delete driver;
+  if (driver)
+              {
+              delete driver;
+              debugSerial<<F("Driver destroyed")<<endl;
+              }
 }
 
 Item::Item(char *name) //Constructor
@@ -359,7 +377,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             }
     debugSerial<<endl;
 
-    if (driver)  return driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem); 
+    if (driver)  return driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
 
     int iaddr = getArg();
     HSVstore st;
@@ -1222,6 +1240,13 @@ int Item::checkModbusDimmer(int data) {
 }
 
 int Item::Poll() {
+
+    if (driver && driver->Status())
+                        {
+                        driver->Poll();
+                        return INTERVAL_POLLING; //TODO refactoring 
+                        }
+    // Legacy polling
     switch (itemType) {
         case CH_MODBUS:
             checkModbusDimmer();

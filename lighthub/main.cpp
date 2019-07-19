@@ -907,7 +907,8 @@ void applyConfig() {
         while (items && item)
             if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
                 Item it(item);
-                if (it.isValid()) {
+                if (it.isValid() && !it.Setup()) {
+                  //Legacy Setup
                     short inverse = 0;
                     int pin=it.getArg();
                     if (pin<0) {pin=-pin; inverse = 1;}
@@ -1162,7 +1163,7 @@ void saveFlash(short n, char *str) {
     if (len>MAXFLASHSTR-1) len=MAXFLASHSTR-1;
     for(int i=0;i<len;i++) EEPROM.write(n+i,str[i]);
     EEPROM.write(n+len,0);
-    
+
    #if defined(ARDUINO_ARCH_ESP8266)
   // write the data to EEPROM
    short res  = EEPROM.commitReset();

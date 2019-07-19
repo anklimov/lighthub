@@ -7,15 +7,32 @@
 #include "FastLED.h"
 
 #define NUM_LEDS 60
-#define DATA_PIN 11
+#define DATA_PIN 4
+
 CRGB leds[NUM_LEDS];
+static int driverStatus = CST_UNKNOWN;
 
 int  out_SPILed::Setup()
 {
 Serial.println("SPI-LED Init");
 FastLED.addLeds<TM1809, DATA_PIN, BRG>(leds, NUM_LEDS);
+driverStatus = CST_INITIALIZED;
 return 1;
 }
+
+int  out_SPILed::Stop()
+{
+Serial.println("SPI-LED De-Init");
+FastLED.addLeds<TM1809, DATA_PIN, BRG>(leds, NUM_LEDS);
+driverStatus = CST_UNKNOWN;
+return 1;
+}
+
+int  out_SPILed::Status()
+{
+return driverStatus;
+}
+
 
 int out_SPILed::Poll()
 {
@@ -32,7 +49,7 @@ if (subItem)
   from=atoi(subItem);
   to=from;
 }
-
+debugSerial<<from<<F("-")<<to<<F(" cmd=")<<cmd<<endl;
   for (n=from;n<=to;n++)
   {
 

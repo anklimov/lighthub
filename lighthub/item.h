@@ -129,6 +129,7 @@ class Item
   ~Item();
 
   boolean isValid ();
+  boolean Setup();
   virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, int suffixCode=0, char* subItem=NULL);
   virtual int Ctrl(char * payload, boolean send=true, char * subItem=NULL);
 
