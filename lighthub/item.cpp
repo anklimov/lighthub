@@ -135,7 +135,7 @@ void Item::Parse() {
         {
           case CH_SPILED:
           driver = new out_SPILed (this);
-          debugSerial<<F("SPILED driver created")<<endl;
+//          debugSerial<<F("SPILED driver created")<<endl;
 
           break;
         }
@@ -160,7 +160,7 @@ Item::~Item()
   if (driver)
               {
               delete driver;
-              debugSerial<<F("Driver destroyed")<<endl;
+//              debugSerial<<F("Driver destroyed")<<endl;
               }
 }
 
@@ -377,8 +377,6 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             }
     debugSerial<<endl;
 
-    if (driver)  return driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
-
     int iaddr = getArg();
     HSVstore st;
     switch (cmd) {
@@ -409,9 +407,14 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                     default:
                         debugSerial<<F("XOFF skipped. Prev cmd:")<<t<<endl;
                       return -3;
+
               }
               break;
+        
     }
+
+    if (driver)  return driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
+    // Legacy code
 
     switch (cmd) {
         case 0: //no command
@@ -790,6 +793,7 @@ int Item::isActive() {
     if (!isValid()) return -1;
 //debugSerial<<itemArr->name);
 
+
     int cmd = getCmd();
 
 
@@ -808,6 +812,7 @@ int Item::isActive() {
         }
 
 // Last time was not a command but parameters set. Looking inside
+    if (driver) return driver->isActive();
     st.aslong = getVal();
 
     switch (itemType) {
@@ -1244,7 +1249,7 @@ int Item::Poll() {
     if (driver && driver->Status())
                         {
                         driver->Poll();
-                        return INTERVAL_POLLING; //TODO refactoring 
+                        return INTERVAL_POLLING; //TODO refactoring
                         }
     // Legacy polling
     switch (itemType) {

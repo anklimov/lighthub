@@ -5,11 +5,12 @@
 #include "options.h"
 #include "Streaming.h"
 #include "FastLED.h"
+#include "item.h"
 
-#define NUM_LEDS 60
+#define NUM_LEDS 150
 #define DATA_PIN 4
 
-CRGB leds[NUM_LEDS];
+static CRGB leds[NUM_LEDS];
 static int driverStatus = CST_UNKNOWN;
 
 int  out_SPILed::Setup()
@@ -23,7 +24,8 @@ return 1;
 int  out_SPILed::Stop()
 {
 Serial.println("SPI-LED De-Init");
-FastLED.addLeds<TM1809, DATA_PIN, BRG>(leds, NUM_LEDS);
+//FastLED.addLeds<TM1809, DATA_PIN, BRG>(leds, NUM_LEDS);
+FastLED.clear(true);
 driverStatus = CST_UNKNOWN;
 return 1;
 }
@@ -33,10 +35,14 @@ int  out_SPILed::Status()
 return driverStatus;
 }
 
+int out_SPILed::isActive() 
+{
+
+}
 
 int out_SPILed::Poll()
 {
-  FastLED.show();
+  //FastLED.show();
 return 1;
 };
 
@@ -50,36 +56,41 @@ if (subItem)
   to=from;
 }
 debugSerial<<from<<F("-")<<to<<F(" cmd=")<<cmd<<endl;
-  for (n=from;n<=to;n++)
+  for (int i=from;i<=to;i++)
   {
-
+//    debugSerial<<F(".");
     switch(cmd)
     {
-    CMD_ON:
-    leds[n] = CRGB::White;
+    case CMD_ON:
+    debugSerial<<F("Ch: ")<<i<<F(" White")<<endl;
+    leds[i] = CRGB::White;
     break;
-    CMD_OFF:
-    leds[n] = CRGB::Black;
+    case CMD_OFF:
+    debugSerial<<F("Ch: ")<<i<<F(" Black")<<endl;
+    leds[i] = CRGB::Black;
     break;
-    CMD_NUM:
+    case CMD_NUM:
     switch (suffixCode)
     {
 
-      S_POWER:
-      S_VOL:
+      case S_POWER:
+      case S_VOL:
       //leds[n].setBrightness(Parameters[0]);
       break;
-      S_SET:
-      S_HSV:
-      leds[n] = CHSV(Parameters[0],Parameters[1],Parameters[2]);
+      case S_SET:
+      case S_HSV:
+      debugSerial<<F("HSV: ")<<i<<F(" :")<<Parameters[0]<<Parameters[1]<<Parameters[2]<<endl;
+      leds[i] = CHSV(Parameters[0],Parameters[1],Parameters[2]);
       break;
-      S_RGB:
-      leds[n] = CRGB(Parameters[0],Parameters[1],Parameters[2]);
+      case S_RGB:
+      debugSerial<<F("RGB: ")<<i<<F(" :")<<Parameters[0]<<Parameters[1]<<Parameters[2]<<endl;
+      leds[i] = CRGB(Parameters[0],Parameters[1],Parameters[2]);
       break;
   }
   }
  }
  FastLED.show();
+ debugSerial<<F("Show ")<<endl;
 return 1;
 }
 
