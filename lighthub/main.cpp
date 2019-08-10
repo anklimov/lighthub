@@ -317,7 +317,7 @@ lan_status lanLoop() {
                 //Unsubscribe from status topics..
                 //strncpy_P(buf, outprefix, sizeof(buf));
                 setTopic(buf,sizeof(buf),T_OUT);
-                strncat(buf, "#", sizeof(buf));
+                strncat(buf, "+/+/#", sizeof(buf)); // Subscribing only on separated command/parameters topics
                 mqttClient.unsubscribe(buf);
 
                 lanStatus = OPERATION;//3;
@@ -582,7 +582,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
   //          strncpy_P(buf, outprefix, sizeof(buf));
             setTopic(buf,sizeof(buf),T_OUT);
-            strncat(buf, "#", sizeof(buf));
+            strncat(buf, "+/+/#", sizeof(buf));      // Only on separated cmd/val topics
             mqttClient.subscribe(buf);
 
             //Subscribing for command topics

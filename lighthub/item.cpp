@@ -48,6 +48,7 @@ const char TRUE_P[] PROGMEM = "true";
 const char FALSE_P[] PROGMEM = "false";
 
 const char SET_P[] PROGMEM = "set";
+const char CMD_P[] PROGMEM = "cmd";
 const char TEMP_P[] PROGMEM = "temp";
 const char MODE_P[] PROGMEM = "mode";
 const char SETPOINT_P[] PROGMEM = "setpoint";
@@ -101,6 +102,7 @@ int txt2subItem(char *payload) {
     if (!payload || !strlen(payload)) return S_NOTFOUND;
     // Check for command
     if (strcmp_P(payload, SET_P) == 0) cmd = S_SET;
+    else if (strcmp_P(payload, CMD_P) == 0) cmd = S_CMD;
     else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
     else if (strcmp_P(payload, MODE_P) == 0) cmd = S_MODE;
     else if (strcmp_P(payload, SETPOINT_P) == 0) cmd = S_SETPOINT;
@@ -282,7 +284,7 @@ int Item::Ctrl(char * payload, boolean send, char * subItem){
 char* suffix = NULL;
 //int   subItemN = 0;
 int   suffixCode = 0;
-bool  isSet = false;
+int   setCommand = CMD_SET;  //default SET behavior now - not turn on channels
 
 if (subItem && strlen(subItem))
 {
@@ -308,7 +310,11 @@ else
 
 
 //if (suffixCode==S_SET) isSet = true;
-} else suffixCode=S_SET; /// no subItem - To be removed - old compatmode
+} else
+{
+suffixCode=S_SET; /// no subItem - To be removed - old compatmode
+setCommand = 0; /// Old-style - turn ON by set value
+}
 
 int cmd = txt2cmd(payload);
 debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
@@ -326,7 +332,7 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
           while (payload && i < 3)
               Par[i++] = getInt((char **) &payload);
 
-      return   Ctrl(0, i, Par, send, suffixCode, subItem);
+      return   Ctrl(setCommand, i, Par, send, suffixCode, subItem);
       }
           break;
 
@@ -344,7 +350,7 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
               Par[0] = map(hsv.h, 0, 255, 0, 365);
               Par[1] = map(hsv.s, 0, 255, 0, 100);
               Par[2] = map(hsv.v, 0, 255, 0, 100);
-          return    Ctrl(0, 3, Par, send, suffixCode, subItem);
+          return    Ctrl(setCommand, 3, Par, send, suffixCode, subItem);
           }
           break;
       }
@@ -410,16 +416,17 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
               }
               break;
-        
+
     }
 
     if (driver)  return driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
     // Legacy code
 
     switch (cmd) {
-        case 0: //no command
+        case 0:       // old style SET - with turning ON
+        case CMD_SET: // new style SET - w/o turning ON
 
-            if (itemType !=CH_THERMO) setCmd(CMD_SET); //prevent ON thermostat by semp set
+    //        if (itemType !=CH_THERMO) setCmd(CMD_SET); //prevent ON thermostat by semp set ????
 
             switch (itemType) {
 
@@ -431,17 +438,25 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                     st.s = Par[1];
                     st.v = Par[2];
                     setVal(st.aslong);
-                  } else  // Just volume passed
-                  {
-                    st.aslong = getVal(); // restore Colour
-                    st.v = Par[0]; // override volume
+                  } else
+                  {  //Uncomplete triplet passed
+                    st.aslong = getVal(); // restore CSV triplet
+
+                    switch (n) {
+                      case 1:
+                              st.v = Par[0]; // Just volume passed // override volume
+                      break;
+                      case 2:
+                              st.h = Par[0];
+                              st.s = Par[1];
+                     }
                     setVal(st.aslong); // Save back
                     Par[0] = st.h;
                     Par[1] = st.s;
                     Par[2] = st.v;
                     n = 3;
                   }
-                      if (send) SendStatus(0,3,Par,true); // Send back triplet ?
+                      if (send) SendStatus(cmd,3,Par,true); // Send back triplet ?
                     break;
                 case CH_GROUP: //Save for groups as well
                     st.h = Par[0];
@@ -454,15 +469,16 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 case CH_DIMMER:
                 case CH_MODBUS:
                 case CH_VCTEMP:
-                    if (send) SendStatus(0, 1, Par,true);  // Send back parameter for channel above this line
+                    if (send) SendStatus(cmd, 1, Par,true);  // Send back parameter for channel above this line
                 case CH_THERMO:
                     setVal(Par[0]);          // Store value
 
             }//itemtype
-
+/*
             lastctrl = millis(); //last controlled object ond timestamp update
             lastobj = itemArr;
-
+*/
+            if (cmd == CMD_SET && itemType !=CH_GROUP && !isActive()) return 1; // Parameters are stored, no further action required
             break;
 
         case CMD_XON:
@@ -478,7 +494,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
           }
         case CMD_ON:
 
-        if (itemType==CH_RGBW && getCmd() == CMD_ON && getEnableCMD(500)) {
+        if (itemType==CH_RGBW && getCmd() == CMD_ON /*&& getEnableCMD(500) */) {
                   debugSerial<<F("Force White\n");
                   itemType = CH_WHITE;
                   Par[1] = 0;   //Zero saturation
@@ -494,6 +510,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         } // if forcewhite
 
       //  if (itemType!=CH_RGBW || getCmd() != CMD_ON) {
+       if (isActive()) return 1;
         {
                 short params = 0;
                 setCmd(cmd);
@@ -516,7 +533,9 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 if (st.aslong > 0)  //Stored smthng
 
                     switch (itemType) {
-                        //case CH_GROUP:
+                        case CH_GROUP:
+                            if (send && !isActive()) SendStatus(cmd);          // Just send ON, suppress send back ON of chan already active
+                            break;
                         case CH_RGBW:
                         case CH_RGB:
                             Par[0] = st.h;
@@ -1090,6 +1109,7 @@ int Item::checkFM() {
     {
         result = node.readHoldingRegisters(2111 - 1, 1);
         if (result == node.ku8MBSuccess) aJson.addNumberToObject(out, "flt", (int) node.getResponseBuffer(0));
+        Ctrl(CMD_OFF); //Shut down ///
     } else aJson.addNumberToObject(out, "flt", 0);
 
     delay(50);
@@ -1109,7 +1129,7 @@ int Item::checkFM() {
             aJson.addNumberToObject(out, "set", fset);
         aJson.addNumberToObject(out, "t", ftemp = (int) node.getResponseBuffer(1) * a + b);
         //   aJson.addNumberToObject(out,"d",    (int) node.getResponseBuffer(2)*a+b);
-        int pwr = node.getResponseBuffer(3);
+        int16_t pwr =  node.getResponseBuffer(3);
         if (pwr > 0)
             aJson.addNumberToObject(out, "pwr", pwr / 10.);
         else aJson.addNumberToObject(out, "pwr", 0);
@@ -1326,51 +1346,100 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
         return 0;
         // Todo: Parameters?  Now expected that parameters already stored by setVal()
     }
-    else {  //publush to MQTT
-        char addrstr[32];
-        //char addrbuf[17];
-        char valstr[16] = "";
+    else {
 
-        //strcpy_P(addrstr, outprefix);
+      char addrstr[48];
+      char valstr[16] = "";
+      char cmdstr[8] = "";
+      bool isParam = false;
+      bool isCommand = false;
+
+   // Preparing parameters payload //////////
+      if (Par)
+          for (short i = 0; i < n; i++) {
+              char num[4];
+#ifndef FLASH_64KB
+              snprintf(num, sizeof(num), "%d", Par[i]);
+#else
+              itoa(Par[i],num,10);
+#endif
+              strncat(valstr, num, sizeof(valstr));
+              isParam = true;
+              if (i != n - 1) {
+                  strcpy(num, ",");
+                  strncat(valstr, num, sizeof(valstr));
+              }
+          }
+
+    // Preparing Command payload  //////////////
+    switch (cmd) {
+        case CMD_ON:
+        case CMD_XON:
+            strcpy(cmdstr, "ON");
+            isCommand = true;
+            break;
+        case CMD_OFF:
+        case CMD_HALT:
+            strcpy(cmdstr, "OFF");
+            isCommand = true;
+            break;
+            // TODO send Par
+        case 0:
+        case CMD_SET:
+            break;
+        default:
+            debugSerial<<F("Unknown cmd \n");
+            return -1;
+    }
+
+      //publish to MQTT - OpenHab Legacy style to myhome/s_out/item flat values
         setTopic(addrstr,sizeof(addrstr),T_OUT);
-
         strncat(addrstr, itemArr->name, sizeof(addrstr));
 
+              if (mqttClient.connected()  && !ethernetIdleCount)
 
-        switch (cmd) {
-            case CMD_ON:
-            case CMD_XON:
-                strcpy(valstr, "ON");
-                break;
-            case CMD_OFF:
-            case CMD_HALT:
-                strcpy(valstr, "OFF");
-                break;
-                // TODO send Par
-            case 0:
-            case CMD_SET:
-                if (Par)
-                    for (short i = 0; i < n; i++) {
-                        char num[4];
-#ifndef FLASH_64KB
-                        snprintf(num, sizeof(num), "%d", Par[i]);
-#else
-                        itoa(Par[i],num,10);
-#endif
-                        strncat(valstr, num, sizeof(valstr));
-                        if (i != n - 1) {
-                            strcpy(num, ",");
-                            strncat(valstr, num, sizeof(valstr));
-                        }
-                    }
-                break;
-            default:
-                debugSerial<<F("Unknown cmd \n");
-                return -1;
-        }
-        debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
-        if (mqttClient.connected()  && !ethernetIdleCount)
-            mqttClient.publish(addrstr, valstr,true);
+                      if (isCommand)
+                      {
+                        mqttClient.publish(addrstr, cmdstr, true);
+                        debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
+                      }
+                      else
+                      {
+                        mqttClient.publish(addrstr, valstr, true);
+                        debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
+                      }
+
+            // publush to MQTT - New style to
+            // myhome/s_out/item/cmd
+            // myhome/s_out/item/set
+
+          if (isParam)
+             {
+              setTopic(addrstr,sizeof(addrstr),T_OUT);
+              strncat(addrstr, itemArr->name, sizeof(addrstr));
+              strncat(addrstr, "/", sizeof(addrstr));
+              strncat_P(addrstr, SET_P, sizeof(addrstr));
+
+
+              debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
+              if (mqttClient.connected()  && !ethernetIdleCount)
+                  mqttClient.publish(addrstr, valstr,true);
+              }
+
+
+              if (isCommand)
+              {
+              setTopic(addrstr,sizeof(addrstr),T_OUT);
+              strncat(addrstr, itemArr->name, sizeof(addrstr));
+              strncat(addrstr, "/", sizeof(addrstr));
+              strncat_P(addrstr, CMD_P, sizeof(addrstr));
+
+              debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
+              if (mqttClient.connected()  && !ethernetIdleCount)
+                  mqttClient.publish(addrstr, cmdstr,true);
+              }
+
+
         return 0;
     }
 }
