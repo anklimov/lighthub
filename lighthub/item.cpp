@@ -270,10 +270,11 @@ void analogWrite(int pin, int val)
 }
 #endif
 
-
+/*
 boolean Item::getEnableCMD(int delta) {
     return ((millis() - lastctrl > (unsigned long) delta));// || ((void *)itemArr != (void *) lastobj));
 }
+*/
 
 #define MAXCTRLPAR 3
 
@@ -299,7 +300,7 @@ else
   {
     suffix = subItem;
     suffixCode = txt2subItem(suffix);
-    if (suffixCode)
+    if (suffixCode)  // some known suffix
           subItem = NULL;
           // myhome/dev/item/suffix
 
@@ -312,7 +313,7 @@ else
 //if (suffixCode==S_SET) isSet = true;
 } else
 {
-suffixCode=S_SET; /// no subItem - To be removed - old compatmode
+//suffixCode=S_SET; /// no subItem - To be removed - old compatmode
 setCommand = 0; /// Old-style - turn ON by set value
 }
 
@@ -332,15 +333,15 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
           while (payload && i < 3)
               Par[i++] = getInt((char **) &payload);
 
-      return   Ctrl(setCommand, i, Par, send, suffixCode, subItem);
+          return   Ctrl(setCommand, i, Par, send, suffixCode, subItem);
       }
           break;
 
-      case -1: //Not known command
-      case -2: //JSON input (not implemented yet
+      case CMD_UNKNOWN: //Not known command
+      case CMD_JSON: //JSON input (not implemented yet
           break;
 #if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266) and not defined(ARDUINO_ARCH_STM32) and not defined(DMX_DISABLE)
-      case -3: //RGB color in #RRGGBB notation
+      case CMD_RGB: //RGB color in #RRGGBB notation
       {
           suffixCode=S_HSV; //override code for known payload
           CRGB rgb;
@@ -355,6 +356,7 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
           break;
       }
 #endif
+/*
       case CMD_ON:
 
           //       if (item.getEnableCMD(500) || lanStatus == 4)
@@ -363,6 +365,7 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
           //       else debugSerial<<F("on Skipped"));
 
           break;
+*/
       default: //some known command
           return Ctrl(cmd, 0, NULL, send, suffixCode, subItem);
 
@@ -370,6 +373,14 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
 //}
 }
 
+short Item::cmd2changeActivity(int lastActivity, short defaultCmd)
+{
+  if  (isActive())
+     if (lastActivity) return defaultCmd;
+     else return CMD_ON;
+  else if (lastActivity) return CMD_OFF;
+       else return defaultCmd;
+}
 
 int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode, char *subItem) {
 
@@ -384,11 +395,12 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
     debugSerial<<endl;
 
     int iaddr = getArg();
+    int chActive =isActive();
     HSVstore st;
     switch (cmd) {
         int t;
         case CMD_TOGGLE:
-            if (isActive()) cmd = CMD_OFF;
+            if (chActive>0) cmd = CMD_OFF;
             else cmd = CMD_ON;
             break;
 
@@ -426,7 +438,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         case 0:       // old style SET - with turning ON
         case CMD_SET: // new style SET - w/o turning ON
 
-    //        if (itemType !=CH_THERMO) setCmd(CMD_SET); //prevent ON thermostat by semp set ????
+          if (itemType !=CH_THERMO) setCmd(CMD_SET); //prevent ON thermostat by semp set ????
 
             switch (itemType) {
 
@@ -456,33 +468,35 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                     Par[2] = st.v;
                     n = 3;
                   }
-                      if (send) SendStatus(cmd,3,Par,true); // Send back triplet ?
+                      if (send) SendStatus(cmd2changeActivity(chActive,cmd),3,Par,true); // Send back triplet ?
                     break;
                 case CH_GROUP: //Save for groups as well
                     st.h = Par[0];
                     st.s = Par[1];
                     st.v = Par[2];
                     setVal(st.aslong);
+                    if (send) SendStatus(cmd2changeActivity(chActive,cmd),n,Par,true); //// Send back triplet for grp?
                     break;
                 case CH_PWM:
                 case CH_VC:
                 case CH_DIMMER:
                 case CH_MODBUS:
                 case CH_VCTEMP:
-                    if (send) SendStatus(cmd, 1, Par,true);  // Send back parameter for channel above this line
-                case CH_THERMO:
+                case CH_THERMO:  ///? wasnt send before/ now will ///
                     setVal(Par[0]);          // Store value
+                    if (send) SendStatus(cmd2changeActivity(chActive,cmd), 1, Par,true);  // Send back parameter for channel above this line
+
 
             }//itemtype
 /*
             lastctrl = millis(); //last controlled object ond timestamp update
             lastobj = itemArr;
 */
-            if (cmd == CMD_SET && itemType !=CH_GROUP && !isActive()) return 1; // Parameters are stored, no further action required
+            if (cmd == CMD_SET && itemType !=CH_GROUP && !chActive>0) return 1; // Parameters are stored, no further action required
             break;
 
         case CMD_XON:
-        if (!isActive())  //if channel was'nt active before CMD_XON
+        if (!chActive>0)  //if channel was'nt active before CMD_XON
               {
                 debugSerial<<F("Turning XON\n");
 //                setCmd(cmd);
@@ -505,12 +519,12 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                   st.v = Par[2];
                   setVal(st.aslong);
                   //Send to OH
-                  if (send) SendStatus(0, 3, Par);
+                  if (send) SendStatus(cmd, 3, Par);
           break;
         } // if forcewhite
 
       //  if (itemType!=CH_RGBW || getCmd() != CMD_ON) {
-       if (isActive()) return 1;
+       if (chActive>0) return 1;
         {
                 short params = 0;
                 setCmd(cmd);
@@ -542,7 +556,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                             Par[1] = st.s;
                             Par[2] = st.v;
                             params = 3;
-                            SendStatus(0, params, Par,true); // Send restored triplet. In any cases
+                            SendStatus(cmd, params, Par,true); // Send restored triplet. In any cases
                             break;
 
                         case CH_VCTEMP:
@@ -552,7 +566,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                         case CH_VC:
                             Par[0] = st.aslong;
                             params = 1;
-                            SendStatus(0, params, Par, true);  // Send restored parameter, even if send=false - no problem, loop will be supressed at next hop
+                            SendStatus(cmd, params, Par, true);  // Send restored parameter, even if send=false - no problem, loop will be supressed at next hop
                             break;
                         case CH_THERMO:
                             Par[0] = st.aslong;
@@ -570,7 +584,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                             Par[0] = 20;   //20 degrees celsium - safe temperature
                             params = 1;
                             setVal(20);
-                            SendStatus(0, params, Par);
+                            SendStatus(cmd, params, Par);
                             break;
                         case CH_RGBW:
                         case CH_RGB:
@@ -583,7 +597,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                             st.s = Par[1];
                             st.v = Par[2];
                             setVal(st.aslong);
-                            SendStatus(0, params, Par,true);
+                            SendStatus(cmd, params, Par,true);
                             break;
                         case CH_RELAY:
                             Par[0] = 100;
@@ -595,7 +609,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                             Par[0] = 100;
                             params = 1;
                             setVal(100);
-                            SendStatus(0, params, Par);
+                            SendStatus(cmd, params, Par);
                     }
                 } // default handler
                 for (short i = 0; i < params; i++) {
@@ -641,7 +655,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
         case CMD_HALT:
 
-            if (isActive() > 0) {
+            if (chActive>0) {
                 Par[0] = 0;
                 Par[1] = 0;
                 Par[2] = 0;
@@ -1252,7 +1266,7 @@ int Item::checkModbusDimmer(int data) {
     {
         if (d) { // Actually turned on
             if (cmd == CMD_OFF || cmd == CMD_HALT) SendStatus(CMD_ON); //update OH with ON if it was turned off before
-            SendStatus(0, 1, &d); //update OH with value
+            SendStatus(CMD_ON, 1, &d); //update OH with value
             if (cmd != CMD_XON && cmd != CMD_ON) setCmd(CMD_ON);  //store command
             setVal(d);       //store value
         } else {
@@ -1311,7 +1325,7 @@ void Item::sendDelayedStatus(){
                             Par[1] = st.s;
                             Par[2] = st.v;
                             params = 3;
-                            SendStatus(0, params, Par); // Send restored triplet.
+                            SendStatus(cmd, params, Par); // Send restored triplet.
                             break;
 
                         case CH_VCTEMP:
@@ -1324,7 +1338,7 @@ void Item::sendDelayedStatus(){
 
                             Par[0] = st.aslong;
                             params = 1;
-                            SendStatus(0, params, Par);  // Send restored parameter
+                            SendStatus(cmd, params, Par);  // Send restored parameter
                             break;
                         default:
                             SendStatus(cmd);          // Just send CMD
@@ -1336,14 +1350,11 @@ void Item::sendDelayedStatus(){
 
 #endif
 int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
-
-/// ToDo: relative patches, configuration
     int chancmd=getCmd(true);
     if (deffered) {
         setCmd(chancmd | CMD_REPORT);
         debugSerial<<F("Status deffered\n");
-        //     mqttClient.publish("/push", "1");
-        return 0;
+        return -1;
         // Todo: Parameters?  Now expected that parameters already stored by setVal()
     }
     else {
@@ -1372,7 +1383,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
           }
 
     // Preparing Command payload  //////////////
-    switch (cmd) {
+    switch (cmd & CMD_MASK) {
         case CMD_ON:
         case CMD_XON:
             strcpy(cmdstr, "ON");
@@ -1385,11 +1396,15 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
             break;
             // TODO send Par
         case 0:
+            if (isActive())
+                  strcpy(cmdstr, "ON");
+            else  strcpy(cmdstr, "OFF");
+            isCommand = true;
         case CMD_SET:
             break;
         default:
             debugSerial<<F("Unknown cmd \n");
-            return -1;
+            return 0;
     }
 
       //publish to MQTT - OpenHab Legacy style to myhome/s_out/item flat values
@@ -1398,7 +1413,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
 
               if (mqttClient.connected()  && !ethernetIdleCount)
 
-                      if (isCommand)
+                      if (!isParam) //remake
                       {
                         mqttClient.publish(addrstr, cmdstr, true);
                         debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
@@ -1408,6 +1423,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
                         mqttClient.publish(addrstr, valstr, true);
                         debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
                       }
+              else return 0;
 
             // publush to MQTT - New style to
             // myhome/s_out/item/cmd
@@ -1424,6 +1440,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
               if (mqttClient.connected()  && !ethernetIdleCount)
                   mqttClient.publish(addrstr, valstr,true);
+              else return 0;
               }
 
 
@@ -1437,9 +1454,8 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
               if (mqttClient.connected()  && !ethernetIdleCount)
                   mqttClient.publish(addrstr, cmdstr,true);
+              else return 0;
               }
-
-
-        return 0;
+        return 1;
     }
 }

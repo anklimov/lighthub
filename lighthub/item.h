@@ -21,6 +21,7 @@ e-mail    anklimov@gmail.com
 #include "abstractout.h"
 
 #define S_NOTFOUND  0
+#define S_SETnCMD 0
 #define S_CMD 1
 #define S_SET 2
 #define S_TEMP 3
@@ -113,9 +114,9 @@ typedef union
         int8_t  r;
         int8_t  g;
         int8_t  b;
-        int8_t  v;
+        int8_t  w;
       };
-} RGBVstore;
+} RGBWstore;
 
 class Item
 {
@@ -135,7 +136,7 @@ class Item
   virtual int Ctrl(char * payload, boolean send=true, char * subItem=NULL);
 
   int getArg(short n=0);
-  boolean getEnableCMD(int delta);
+  //boolean getEnableCMD(int delta);
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array
   uint8_t getCmd(bool ext = false);
@@ -150,6 +151,7 @@ class Item
   int SendStatus(short cmd, short n=0, int * Par=NULL, boolean deferred = false);
 
   protected:
+  short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
   int VacomSetFan (int8_t  val, int8_t  cmd=0);
   int VacomSetHeat(int addr, int8_t  val, int8_t  cmd=0);
   int modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value);
