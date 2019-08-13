@@ -176,12 +176,10 @@ Item::Item(char *name) //Constructor
 }
 
 
-uint8_t Item::getCmd(bool ext) {
+uint8_t Item::getCmd() {
     aJsonObject *t = aJson.getArrayItem(itemArr, I_CMD);
     if (t)
-        if (ext)
-        return t->valueint;
-        else  return t->valueint & CMD_MASK;
+      return t->valueint & CMD_MASK;
     else return -1;
 }
 
@@ -190,10 +188,41 @@ void Item::setCmd(uint8_t cmdValue) {
     aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
     if (itemCmd)
     {
-        itemCmd->valueint = cmdValue;
+        itemCmd->valueint = cmdValue & CMD_MASK | itemCmd->valueint & FLAG_MASK;   // Preserve special bits
         debugSerial<<F("SetCmd:")<<cmdValue<<endl;
       }
 }
+
+short Item::getFlag   (short flag)
+{
+  aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
+  if (itemCmd)
+  {
+      return itemCmd->valueint & flag & FLAG_MASK;
+    }
+}
+
+void Item::setFlag   (short flag)
+{
+  aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
+  if (itemCmd)
+  {
+      itemCmd->valueint |= flag & FLAG_MASK;   // Preserve CMD bits
+      debugSerial<<F("SetFlag:")<<flag<<endl;
+    }
+
+}
+
+void Item::clearFlag (short flag)
+{
+  aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
+  if (itemCmd)
+  {
+      itemCmd->valueint &= CMD_MASK | ~(flag & FLAG_MASK);    // Preserve CMD bits
+      debugSerial<<F("ClrFlag:")<<flag<<endl;
+    }
+}
+
 
 int Item::getArg(short n) //Return arg int or first array element if Arg is array
 {
@@ -468,14 +497,16 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                     Par[2] = st.v;
                     n = 3;
                   }
-                      if (send) SendStatus(cmd2changeActivity(chActive,cmd),3,Par,true); // Send back triplet ?
+                      setCmd(cmd2changeActivity(chActive,cmd));
+                      if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED); // Send back triplet ?
                     break;
                 case CH_GROUP: //Save for groups as well
                     st.h = Par[0];
                     st.s = Par[1];
                     st.v = Par[2];
                     setVal(st.aslong);
-                    if (send) SendStatus(cmd2changeActivity(chActive,cmd),n,Par,true); //// Send back triplet for grp?
+                    setCmd(cmd2changeActivity(chActive,cmd));
+                    if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);//// Send back triplet for grp?
                     break;
                 case CH_PWM:
                 case CH_VC:
@@ -484,7 +515,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 case CH_VCTEMP:
                 case CH_THERMO:  ///? wasnt send before/ now will ///
                     setVal(Par[0]);          // Store value
-                    if (send) SendStatus(cmd2changeActivity(chActive,cmd), 1, Par,true);  // Send back parameter for channel above this line
+                    setCmd(cmd2changeActivity(chActive,cmd));
+                    if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED); // Send back parameter for channel above this line
 
 
             }//itemtype
@@ -518,8 +550,9 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                   st.s = Par[1];
                   st.v = Par[2];
                   setVal(st.aslong);
+                  setCmd(cmd);
                   //Send to OH
-                  if (send) SendStatus(cmd, 3, Par);
+                  if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS );
           break;
         } // if forcewhite
 
@@ -548,7 +581,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
                     switch (itemType) {
                         case CH_GROUP:
-                            if (send && !isActive()) SendStatus(cmd);          // Just send ON, suppress send back ON of chan already active
+                            if (send && !isActive()) SendStatus(SEND_COMMAND);          // Just send ON, suppress send back ON of chan already active
                             break;
                         case CH_RGBW:
                         case CH_RGB:
@@ -556,7 +589,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                             Par[1] = st.s;
                             Par[2] = st.v;
                             params = 3;
-                            SendStatus(cmd, params, Par,true); // Send restored triplet. In any cases
+                            SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED); // Send restored triplet. In any cases
                             break;
 
                         case CH_VCTEMP:
@@ -566,15 +599,15 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                         case CH_VC:
                             Par[0] = st.aslong;
                             params = 1;
-                            SendStatus(cmd, params, Par, true);  // Send restored parameter, even if send=false - no problem, loop will be supressed at next hop
+                            SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);  // Send restored parameter, even if send=false - no problem, loop will be supressed at next hop
                             break;
                         case CH_THERMO:
                             Par[0] = st.aslong;
                             params = 0;
-                            if (send) SendStatus(CMD_ON);  // Just ON (switch)
+                            if (send) SendStatus(SEND_COMMAND);  //  Just ON (switch)
                             break;
                         default:
-                            if (send) SendStatus(cmd);          // Just send ON
+                            if (send) SendStatus(SEND_COMMAND);          // Just send ON
                     }//itemtype switch
                 else {// Default settings, values not stored yet
                     debugSerial<<st.aslong<<F(": No stored values - default\n");
@@ -584,7 +617,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                             Par[0] = 20;   //20 degrees celsium - safe temperature
                             params = 1;
                             setVal(20);
-                            SendStatus(cmd, params, Par);
+                            SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
                             break;
                         case CH_RGBW:
                         case CH_RGB:
@@ -597,19 +630,19 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                             st.s = Par[1];
                             st.v = Par[2];
                             setVal(st.aslong);
-                            SendStatus(cmd, params, Par,true);
+                            SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
                             break;
                         case CH_RELAY:
                             Par[0] = 100;
                             params = 1;
                             setVal(100);
-                            if (send) SendStatus(CMD_ON);
+                            if (send) SendStatus(SEND_COMMAND);
                             break;
                       default:
                             Par[0] = 100;
                             params = 1;
                             setVal(100);
-                            SendStatus(cmd, params, Par);
+                            SendStatus(SEND_COMMAND | SEND_PARAMETERS);
                     }
                 } // default handler
                 for (short i = 0; i < params; i++) {
@@ -649,7 +682,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 Par[1] = 0;
                 Par[2] = 0;
                 setCmd(cmd);
-                if (send) SendStatus(cmd);
+                if (send) SendStatus(SEND_COMMAND);
             }
             break;
 
@@ -661,7 +694,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 Par[2] = 0;
                 if (getCmd() == CMD_XON) setCmd(CMD_OFF); //Prevent restoring temporary turned on channels (by XON)
                     else setCmd(cmd);
-                SendStatus(CMD_OFF); //HALT to OFF mapping - send in any cases
+                SendStatus(SEND_COMMAND); //HALT to OFF mapping - send in any cases
                 debugSerial<<F(" Halted\n");
             }
 
@@ -954,12 +987,9 @@ POLL  2101x10
 
 */
 
-void Item::mb_fail(short addr, short op, int val, int cmd) {
+void Item::mb_fail() {
     debugSerial<<F("Modbus op failed\n");
-//    int cmd = getCmd();
-//    if (cmd<0) return;
-    setCmd(cmd | CMD_RETRY);
-    setVal(val);
+    setFlag(SEND_RETRY);
 }
 
 #ifndef MODBUS_DISABLE
@@ -971,7 +1001,9 @@ int Item::VacomSetFan(int8_t val, int8_t cmd) {
     int addr = getArg();
     debugSerial<<F("VC#")<<addr<<F("=")<<val<<endl;
     if (modbusBusy) {
-        mb_fail(1, addr, val, cmd);
+        setCmd(cmd);
+        setVal(val);
+        mb_fail();
         return -1;
     }
     modbusBusy = 1;
@@ -997,7 +1029,9 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
 
     debugSerial<<F("VC_heat#")<<addr<<F("=")<<val<<F(" cmd=")<<cmd<<endl;
     if (modbusBusy) {
-        mb_fail(2, addr, val, cmd);
+      setCmd(cmd);
+      setVal(val);
+      mb_fail();
         return -1;
     }
     modbusBusy = 1;
@@ -1029,8 +1063,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
     }
 
     if (modbusBusy) {
-        mb_fail(3, addr, value, 0);
-
+      mb_fail();
         return -1;
     };
     modbusBusy = 1;
@@ -1164,12 +1197,11 @@ int Item::checkFM() {
 }
 
 boolean Item::checkModbusRetry() {
-    int cmd = getCmd(true);
-    if (cmd & CMD_RETRY) {   // if last sending attempt of command was failed
+    int cmd = getCmd();
+    if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
       int val = getVal();
       debugSerial<<F("Retrying CMD\n");
-
-      cmd &= ~CMD_RETRY;     // Clean retry flag
+      clearFlag(SEND_RETRY);     // Clean retry flag
       Ctrl(cmd,1,&val);      // Execute command again
       return true;
     }
@@ -1265,14 +1297,14 @@ int Item::checkModbusDimmer(int data) {
     if (getVal() != d || d && cmd == CMD_OFF || d && cmd == CMD_HALT) //volume changed or turned on manualy
     {
         if (d) { // Actually turned on
-            if (cmd == CMD_OFF || cmd == CMD_HALT) SendStatus(CMD_ON); //update OH with ON if it was turned off before
-            SendStatus(CMD_ON, 1, &d); //update OH with value
             if (cmd != CMD_XON && cmd != CMD_ON) setCmd(CMD_ON);  //store command
             setVal(d);       //store value
+            if (cmd == CMD_OFF || cmd == CMD_HALT) SendStatus(SEND_COMMAND); //update OH with ON if it was turned off before
+            SendStatus(SEND_PARAMETERS); //update OH with value
         } else {
             if (cmd != CMD_HALT && cmd != CMD_OFF) {
                 setCmd(CMD_OFF); // store command (not value)
-                SendStatus(CMD_OFF);// update OH
+                SendStatus(SEND_COMMAND);// update OH
             }
         }
     } //if data changed
@@ -1308,112 +1340,87 @@ int Item::Poll() {
     return INTERVAL_POLLING;
 }
 
-void Item::sendDelayedStatus(){
-      HSVstore st;
-      int cmd=getCmd(true);
-      short params = 0;
-      int Par[3];
-      if (cmd & CMD_REPORT)
+void Item::sendDelayedStatus()
+{
+      if (getFlag(SEND_COMMAND | SEND_PARAMETERS))
       {
-                //retrive stored values
-      st.aslong = getVal();
-      switch (itemType) {
-                        //case CH_GROUP:
-                        case CH_RGBW:
-                        case CH_RGB:
-                            Par[0] = st.h;
-                            Par[1] = st.s;
-                            Par[2] = st.v;
-                            params = 3;
-                            SendStatus(cmd, params, Par); // Send restored triplet.
-                            break;
-
-                        case CH_VCTEMP:
-                        case CH_PWM:
-                        case CH_DIMMER:         //Everywhere, in flat VAL
-                        case CH_MODBUS:
-                        case CH_VC:
-                        case CH_THERMO:
-
-
-                            Par[0] = st.aslong;
-                            params = 1;
-                            SendStatus(cmd, params, Par);  // Send restored parameter
-                            break;
-                        default:
-                            SendStatus(cmd);          // Just send CMD
-                    }//itemtype
-      cmd &= ~CMD_REPORT;     // Clean report flag
-      setCmd(cmd);
+      SendStatus(SEND_COMMAND | SEND_PARAMETERS);
+      clearFlag(SEND_COMMAND | SEND_PARAMETERS);
       }
 }
 
 #endif
-int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
-    int chancmd=getCmd(true);
-    if (deffered) {
-        setCmd(chancmd | CMD_REPORT);
+int Item::SendStatus(int sendFlags) {
+    int chancmd=getCmd();
+    if (sendFlags & SEND_DEFFERED) {
+        setFlag(sendFlags & (SEND_COMMAND | SEND_PARAMETERS));
         debugSerial<<F("Status deffered\n");
         return -1;
-        // Todo: Parameters?  Now expected that parameters already stored by setVal()
     }
     else {
 
       char addrstr[48];
       char valstr[16] = "";
       char cmdstr[8] = "";
-      bool isParam = false;
-      bool isCommand = false;
+    //  bool isParam = false;
+    //  bool isCommand = false;
 
-   // Preparing parameters payload //////////
-      if (Par)
-          for (short i = 0; i < n; i++) {
-              char num[4];
-#ifndef FLASH_64KB
-              snprintf(num, sizeof(num), "%d", Par[i]);
-#else
-              itoa(Par[i],num,10);
-#endif
-              strncat(valstr, num, sizeof(valstr));
-              isParam = true;
-              if (i != n - 1) {
-                  strcpy(num, ",");
-                  strncat(valstr, num, sizeof(valstr));
-              }
-          }
-
+      if (sendFlags & SEND_PARAMETERS)
+      {
+      // Preparing parameters payload //////////
+       HSVstore st;
+       //retrive stored values
+       st.aslong = getVal();
+       switch (itemType) {
+               //case CH_GROUP:
+               case CH_RGBW:
+               case CH_RGB:
+               snprintf(valstr, sizeof(valstr), "%d,%d,%d", st.h,st.s,st.v);
+            break;
+/*
+               case CH_VCTEMP:
+               case CH_PWM:
+               case CH_DIMMER:         //Everywhere, in flat VAL
+               case CH_MODBUS:
+               case CH_VC:
+               case CH_THERMO:
+               snprintf(valstr, sizeof(valstr), "%d", st.aslong);
+            break; */
+               default:
+               snprintf(valstr, sizeof(valstr), "%d", st.aslong);
+           }//itemtype
+        }
+    if (sendFlags & SEND_COMMAND)
+    {
     // Preparing Command payload  //////////////
-    switch (cmd & CMD_MASK) {
+    switch (chancmd) {
         case CMD_ON:
         case CMD_XON:
             strcpy(cmdstr, "ON");
-            isCommand = true;
+//            isCommand = true;
             break;
         case CMD_OFF:
         case CMD_HALT:
             strcpy(cmdstr, "OFF");
-            isCommand = true;
+//            isCommand = true;
             break;
             // TODO send Par
         case 0:
-            if (isActive())
-                  strcpy(cmdstr, "ON");
-            else  strcpy(cmdstr, "OFF");
-            isCommand = true;
         case CMD_SET:
+        sendFlags &= ~SEND_COMMAND;
             break;
         default:
             debugSerial<<F("Unknown cmd \n");
-            return 0;
+            sendFlags &= ~SEND_COMMAND;
     }
-
+   }
       //publish to MQTT - OpenHab Legacy style to myhome/s_out/item flat values
         setTopic(addrstr,sizeof(addrstr),T_OUT);
         strncat(addrstr, itemArr->name, sizeof(addrstr));
 
               if (mqttClient.connected()  && !ethernetIdleCount)
 
-                      if (!isParam) //remake
+                      if (!(sendFlags & SEND_PARAMETERS))
                       {
                         mqttClient.publish(addrstr, cmdstr, true);
                         debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
@@ -1429,7 +1436,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
             // myhome/s_out/item/cmd
             // myhome/s_out/item/set
 
-          if (isParam)
+          if (sendFlags & SEND_PARAMETERS)
              {
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr));
@@ -1444,7 +1451,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
               }
 
 
-              if (isCommand)
+              if (sendFlags & SEND_COMMAND)
               {
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr));
@@ -1454,7 +1461,7 @@ int Item::SendStatus(short cmd, short n, int *Par, boolean deffered) {
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
               if (mqttClient.connected()  && !ethernetIdleCount)
                   mqttClient.publish(addrstr, cmdstr,true);
-              else return 0;
+              else return 0; //Todo MQTT retry flag
               }
         return 1;
     }

@@ -64,11 +64,18 @@ e-mail    anklimov@gmail.com
 #define CMD_UP 8      //increase
 #define CMD_DN 9      //decrease
 #define CMD_SET 0xe
+#define CMD_CURTEMP 0xf
 #define CMD_MASK 0xf
+#define FLAG_MASK 0xf0
 
-#define CMD_CURTEMP 127
-#define CMD_RETRY 64
-#define CMD_REPORT 32
+
+#define SEND_COMMAND 16
+#define SEND_PARAMETERS 32
+#define SEND_RETRY 64
+#define SEND_DEFFERED 128
+
+
+//#define CMD_REPORT 32
 
 #define I_TYPE 0 //Type of item
 #define I_ARG  1 //Chanel-type depended argument or array of arguments (pin, address etc)
@@ -86,6 +93,9 @@ e-mail    anklimov@gmail.com
 #define MODBUS_DISCRETE_REG_TYPE 1
 #define MODBUS_HOLDING_REG_TYPE 2
 #define MODBUS_INPUT_REG_TYPE 3
+
+
+
 
 #include "aJSON.h"
 
@@ -139,8 +149,11 @@ class Item
   //boolean getEnableCMD(int delta);
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array
-  uint8_t getCmd(bool ext = false);
+  uint8_t getCmd();
   void setCmd(uint8_t cmdValue);
+  short getFlag   (short flag=FLAG_MASK);
+  void setFlag   (short flag);
+  void clearFlag (short flag);
   //void setVal(uint8_t n, int par);
   void setVal(long int par);
   //void copyPar (aJsonObject *itemV);
@@ -148,14 +161,14 @@ class Item
   inline int Off(){return Ctrl(CMD_OFF);};
   inline int Toggle(){return Ctrl(CMD_TOGGLE);};
   int Poll();
-  int SendStatus(short cmd, short n=0, int * Par=NULL, boolean deferred = false);
+  int SendStatus(int sendFlags);
 
   protected:
   short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
   int VacomSetFan (int8_t  val, int8_t  cmd=0);
   int VacomSetHeat(int addr, int8_t  val, int8_t  cmd=0);
   int modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value);
-  void mb_fail(short addr, short op, int val, int cmd);
+  void mb_fail();
   int isActive();
   void Parse();
   int checkModbusDimmer();
