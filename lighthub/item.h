@@ -63,6 +63,9 @@ e-mail    anklimov@gmail.com
 #define CMD_XOFF 7    //off only if was previously turned on by CMD_XON
 #define CMD_UP 8      //increase
 #define CMD_DN 9      //decrease
+#define CMD_HEAT 0xa
+#define CMD_COOL 0xb
+#define CMD_AUTO 0xc
 #define CMD_SET 0xe
 #define CMD_CURTEMP 0xf
 #define CMD_MASK 0xf
@@ -94,9 +97,6 @@ e-mail    anklimov@gmail.com
 #define MODBUS_HOLDING_REG_TYPE 2
 #define MODBUS_INPUT_REG_TYPE 3
 
-
-
-
 #include "aJSON.h"
 
 extern aJsonObject *items;
@@ -114,7 +114,6 @@ typedef union
         int8_t  v;
       };
 } HSVstore;
-
 
 typedef union
 {
@@ -135,7 +134,6 @@ class Item
   uint8_t itemType;
   abstractOut * driver;
 
-
   Item(char * name);
   Item(aJsonObject * obj);
   ~Item();
@@ -146,7 +144,6 @@ class Item
   virtual int Ctrl(char * payload, boolean send=true, char * subItem=NULL);
 
   int getArg(short n=0);
-  //boolean getEnableCMD(int delta);
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array
   uint8_t getCmd();
@@ -179,32 +176,3 @@ class Item
   int checkFM();
 
 };
-
-
-/*
-
-class PooledItem : public Item
-{
-  public:
-  virtual int onContactChanged() = 0;
-  virtual void Idle ();
-  protected:
-  int PoolingInterval;
-  unsigned long next;
-  virtual int Pool() =0;
-
-};
-
-
-
-
-
-class Vacon : public Item
-{
-public:
-int Pool ();
-virtual int Ctrl(short cmd, short n=0, int * Par=NULL);
-protected:
-};
-
-*/

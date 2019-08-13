@@ -1744,9 +1744,10 @@ void inputSetup(void) {
         }
 }
 
-#ifndef MODBUS_DISABLE
+//#ifndef MODBUS_DISABLE
 void pollingLoop(void) {
     boolean done = false;
+    if (lanStatus == RETAINING_COLLECTING) return;
     if (millis() > nextPollingCheck) {
         while (pollingItem && !done) {
             if (pollingItem->type == aJson_Array) {
@@ -1762,7 +1763,7 @@ void pollingLoop(void) {
         } //while
     }//if
 }
-#endif
+//#endif
 
 bool isThermostatWithMinArraySize(aJsonObject *item, int minimalArraySize) {
     return (item->type == aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint == CH_THERMO) &&
@@ -1770,8 +1771,15 @@ bool isThermostatWithMinArraySize(aJsonObject *item, int minimalArraySize) {
 }
 
 bool thermoDisabledOrDisconnected(aJsonObject *thermoExtensionArray, int thermoStateCommand) {
-    return thermoStateCommand == CMD_OFF || thermoStateCommand == CMD_HALT ||
-           aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint == 0;
+  if (aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint == 0) return true;
+  switch (thermoStateCommand) {
+  case CMD_ON:
+  case CMD_XON:
+  case CMD_AUTO:
+  case CMD_HEAT:
+  return false;
+     default: return true;
+   }
 }
 
 
