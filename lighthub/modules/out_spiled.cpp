@@ -7,7 +7,7 @@
 #include "FastLED.h"
 #include "item.h"
 
-#define NUM_LEDS 150
+#define NUM_LEDS 15
 #define DATA_PIN 4
 
 static CRGB leds[NUM_LEDS];
@@ -35,7 +35,7 @@ int  out_SPILed::Status()
 return driverStatus;
 }
 
-int out_SPILed::isActive() 
+int out_SPILed::isActive()
 {
 
 }

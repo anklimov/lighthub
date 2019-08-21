@@ -35,24 +35,26 @@ e-mail    anklimov@gmail.com
 
 #include "modules/out_spiled.h"
 
-const char ON_P[] PROGMEM = "ON";
-const char OFF_P[] PROGMEM = "OFF";
+const char ON_P[]   PROGMEM = "ON";
+const char OFF_P[]  PROGMEM = "OFF";
 const char REST_P[] PROGMEM = "REST";
 const char TOGGLE_P[] PROGMEM = "TOGGLE";
 const char HALT_P[] PROGMEM = "HALT";
-const char XON_P[] PROGMEM = "XON";
+const char XON_P[]  PROGMEM = "XON";
 const char XOFF_P[] PROGMEM = "XOFF";
 const char INCREASE_P[] PROGMEM = "INCREASE";
 const char DECREASE_P[] PROGMEM = "DECREASE";
-const char TRUE_P[] PROGMEM = "true";
-const char FALSE_P[] PROGMEM = "false";
+const char TRUE_P[]  PROGMEM = "TRUE";
+const char FALSE_P[] PROGMEM = "FALSE";
 
 const char HEAT_P[] PROGMEM = "HEAT";
 const char COOL_P[] PROGMEM = "COOL";
 const char AUTO_P[] PROGMEM = "AUTO";
+const char FAN_P[]  PROGMEM = "FAN_ONLY";
+const char DRY_P[]  PROGMEM = "DRY";
 
-const char SET_P[] PROGMEM = "set";
-const char CMD_P[] PROGMEM = "cmd";
+const char SET_P[]  PROGMEM = "set";
+const char CMD_P[]  PROGMEM = "cmd";
 const char MODE_P[] PROGMEM = "mode";
 /*
 const char TEMP_P[] PROGMEM = "temp";
@@ -61,9 +63,9 @@ const char POWER_P[] PROGMEM = "power";
 const char VOL_P[] PROGMEM = "vol";
 const char HEAT_P[] PROGMEM = "heat";
 */
-const char HSV_P[] PROGMEM = "hsv";
-const char RGB_P[] PROGMEM = "rgb";
-const char RPM_P[] PROGMEM = "rpm";
+const char HSV_P[]   PROGMEM = "hsv";
+const char RGB_P[]   PROGMEM = "rgb";
+const char RPM_P[]   PROGMEM = "rpm";
 const char STATE_P[] PROGMEM = "state";
 
 short modbusBusy = 0;
@@ -89,6 +91,8 @@ int txt2cmd(char *payload) {
     else if (strcmp_P(payload, HEAT_P) == 0) cmd = CMD_HEAT;
     else if (strcmp_P(payload, COOL_P) == 0) cmd = CMD_COOL;
     else if (strcmp_P(payload, AUTO_P) == 0) cmd = CMD_AUTO;
+    else if (strcmp_P(payload, FAN_P) == 0) cmd = CMD_FAN;
+    else if (strcmp_P(payload, DRY_P) == 0) cmd = CMD_DRY;
     else if (strcmp_P(payload, TRUE_P) == 0) cmd = CMD_ON;
     else if (strcmp_P(payload, FALSE_P) == 0) cmd = CMD_OFF;
     else if (strcmp_P(payload, INCREASE_P) == 0) cmd = CMD_UP;
@@ -351,6 +355,9 @@ else
 setCommand = 0; /// Old-style - turn ON by set value
 }
 
+int i=0;
+while (payload[i]) {payload[i]=toupper(payload[i]);i++;};
+
 int cmd = txt2cmd(payload);
 debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
 
@@ -421,6 +428,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
     if (itemType == CH_GROUP && !send)
       {
         debugSerial<<F("Skip Grp")<<endl;
+        return -1;  
       }
 
     int iaddr = getArg();
@@ -462,9 +470,10 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
     if (driver)  return driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
     // Legacy code
-
+    bool instantON = false;
     switch (cmd) {
         case 0:       // old style SET - with turning ON
+        instantON = true;
         case CMD_SET: // new style SET - w/o turning ON
 
         if (itemType !=CH_THERMO) setCmd(CMD_SET); //prevent ON thermostat by semp set ????
@@ -474,6 +483,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 case CH_RGBW: //only if configured VAL array
                     if (!Par[1] && (n == 3)) itemType = CH_WHITE;
                 case CH_RGB:
+/*
                 if (n == 3) { // Full triplet passed
                     st.h = Par[0];
                     st.s = Par[1];
@@ -499,11 +509,34 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                   }
                       setCmd(cmd2changeActivity(chActive,cmd));
                       if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED); // Send back triplet ?
-                    break;
+                    break; */
                 case CH_GROUP: //Save for groups as well
-                setVal(Par[n-1]); //Last/only parameter should contain volume
-                if (chActive && !Par[n-1]) setCmd(CMD_OFF);
-                if (!chActive && Par[n-1]) setCmd(CMD_ON);
+                st.aslong = getVal();
+                   switch (n)
+                  {
+                   case 1:
+                      st.v = Par[0]; //Volume only
+                      Par[0] = st.h;
+                      Par[1] = st.s;
+                      Par[2] = st.v;
+                      n = 3;
+                      break;
+                   case 2: // Just hue and saturation
+                      st.h = Par[0];
+                      st.s = Par[1];
+                      Par[2] = st.v;
+                      st.hsv_flag = 1;
+                      n = 3;
+                      break;
+                   case 3: //complete triplet
+                      st.h = Par[0];
+                      st.s = Par[1];
+                      st.v = Par[2];
+                      st.hsv_flag = 1;
+                   }
+                setVal(st.aslong);
+                if (chActive && !st.v) setCmd(CMD_OFF);
+                if (!chActive && st.v) setCmd(CMD_ON);
                 if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);//// Send back volume for grp?
                     break;
                 case CH_PWM:
@@ -523,7 +556,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
             }//itemtype
 
-            if (cmd == CMD_SET && itemType !=CH_GROUP && !chActive>0) return 1; // Parameters are stored, no further action required
+            if (getCmd() == CMD_SET && itemType !=CH_GROUP && !chActive>0) return 1; // Parameters are stored, no further action required
             break;
 
         case CMD_XON:
@@ -557,8 +590,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                   if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS );
           break;
         } // if forcewhite
-        
-       if (chActive>0) return 1;
+
+       if (chActive>0) {SendStatus(SEND_COMMAND);return 1;}
         {
                 short params = 0;
                 setCmd(cmd);
@@ -1158,7 +1191,9 @@ int Item::checkFM() {
     {
         result = node.readHoldingRegisters(2111 - 1, 1);
         if (result == node.ku8MBSuccess) aJson.addNumberToObject(out, "flt", (int) node.getResponseBuffer(0));
-        Ctrl(CMD_OFF); //Shut down ///
+        modbusBusy=0;
+        if (isActive()) Ctrl(CMD_OFF); //Shut down ///
+        modbusBusy=1;
     } else aJson.addNumberToObject(out, "flt", 0);
 
     delay(50);
@@ -1331,12 +1366,14 @@ int Item::Poll() {
             sendDelayedStatus();
             return INTERVAL_CHECK_MODBUS;
             break;
-        case CH_RGB:    //All channels with slider generate too many updates
+      /*  case CH_RGB:    //All channels with slider generate too many updates
         case CH_RGBW:
         case CH_DIMMER:
         case CH_PWM:
         case CH_VCTEMP:
         case CH_THERMO:
+        case CH_GROUP:*/
+             default:
             sendDelayedStatus();
     }
     return INTERVAL_POLLING;
@@ -1377,9 +1414,12 @@ int Item::SendStatus(int sendFlags) {
                case CH_RGB:
                snprintf(valstr, sizeof(valstr), "%d,%d,%d", st.h,st.s,st.v);
             break;
-//               case CH_GROUP:
-//               sendFlags &= ~SEND_PARAMETERS; // Not send params for Group
-//            break;
+               case CH_GROUP:
+               if (st.hsv_flag)
+                snprintf(valstr, sizeof(valstr), "%d,%d,%d", st.h,st.s,st.v);
+               else
+                snprintf(valstr, sizeof(valstr), "%d", st.v);
+            break;
                default:
                snprintf(valstr, sizeof(valstr), "%d", st.aslong);
            }//itemtype
@@ -1413,18 +1453,19 @@ int Item::SendStatus(int sendFlags) {
         strncat(addrstr, itemArr->name, sizeof(addrstr));
 
               if (mqttClient.connected()  && !ethernetIdleCount)
-
+                      {
                       if (sendFlags & SEND_PARAMETERS && chancmd != CMD_OFF && chancmd != CMD_HALT)
                       {
                         mqttClient.publish(addrstr, valstr, true);
                         debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
 
                       }
-                      else
+                      else if (sendFlags & SEND_COMMAND)
                       {
                         mqttClient.publish(addrstr, cmdstr, true);
                         debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
 
+                      }
                       }
               else
                       {
@@ -1471,6 +1512,9 @@ int Item::SendStatus(int sendFlags) {
                     case CMD_COOL:
                           strcpy_P(cmdstr, COOL_P);
                         break;
+                    case CMD_ON:
+                    case CMD_XON:
+                          if (itemType == CH_THERMO) strcpy_P(cmdstr, HEAT_P);
                    }
 
               setTopic(addrstr,sizeof(addrstr),T_OUT);

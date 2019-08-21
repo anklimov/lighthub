@@ -66,7 +66,9 @@ e-mail    anklimov@gmail.com
 #define CMD_HEAT 0xa
 #define CMD_COOL 0xb
 #define CMD_AUTO 0xc
-#define CMD_SET 0xe
+#define CMD_FAN 0xd
+#define CMD_DRY 0xe
+#define CMD_SET 0xf
 #define CMD_CURTEMP 0xf
 #define CMD_MASK 0xf
 #define FLAG_MASK 0xf0
@@ -104,16 +106,19 @@ extern short thermoSetCurTemp(char *name, float t);
 
 int txt2cmd (char * payload);
 
+#pragma pack(push, 1)
 typedef union
 {
   long int aslong;
   struct
       {
-        int16_t h;
+        int16_t hsv_flag:1;
+        int16_t h:15;
         int8_t  s;
         int8_t  v;
       };
 } HSVstore;
+
 
 typedef union
 {
@@ -126,6 +131,7 @@ typedef union
         int8_t  w;
       };
 } RGBWstore;
+#pragma pack(pop)
 
 class Item
 {
