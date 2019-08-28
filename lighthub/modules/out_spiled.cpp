@@ -73,10 +73,10 @@ debugSerial<<from<<F("-")<<to<<F(" cmd=")<<cmd<<endl;
     switch (suffixCode)
     {
 
-      case S_POWER:
-      case S_VOL:
+  //    case S_POWER:
+  //    case S_VOL:
       //leds[n].setBrightness(Parameters[0]);
-      break;
+  //    break;
       case S_SET:
       case S_HSV:
       debugSerial<<F("HSV: ")<<i<<F(" :")<<Parameters[0]<<Parameters[1]<<Parameters[2]<<endl;

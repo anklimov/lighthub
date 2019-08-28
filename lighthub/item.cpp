@@ -31,10 +31,11 @@ e-mail    anklimov@gmail.com
 #ifndef MODBUS_DISABLE
 #include <ModbusMaster.h>
 #endif
-#include <PubSubClient.h>
 
+#include <PubSubClient.h>
 #include "modules/out_spiled.h"
 
+//Commands
 const char ON_P[]   PROGMEM = "ON";
 const char OFF_P[]  PROGMEM = "OFF";
 const char REST_P[] PROGMEM = "REST";
@@ -50,12 +51,14 @@ const char FALSE_P[] PROGMEM = "FALSE";
 const char HEAT_P[] PROGMEM = "HEAT";
 const char COOL_P[] PROGMEM = "COOL";
 const char AUTO_P[] PROGMEM = "AUTO";
-const char FAN_P[]  PROGMEM = "FAN_ONLY";
+const char FAN_ONLY_P[]  PROGMEM = "FAN_ONLY";
 const char DRY_P[]  PROGMEM = "DRY";
 
+// SubTopics
 const char SET_P[]  PROGMEM = "set";
 const char CMD_P[]  PROGMEM = "cmd";
 const char MODE_P[] PROGMEM = "mode";
+const char FAN_P[]  PROGMEM = "fan";
 /*
 const char TEMP_P[] PROGMEM = "temp";
 const char SETPOINT_P[] PROGMEM = "setpoint";
@@ -65,9 +68,10 @@ const char HEAT_P[] PROGMEM = "heat";
 */
 const char HSV_P[]   PROGMEM = "hsv";
 const char RGB_P[]   PROGMEM = "rgb";
+/*
 const char RPM_P[]   PROGMEM = "rpm";
 const char STATE_P[] PROGMEM = "state";
-
+*/
 short modbusBusy = 0;
 extern aJsonObject *pollingItem;
 extern PubSubClient mqttClient;
@@ -91,7 +95,7 @@ int txt2cmd(char *payload) {
     else if (strcmp_P(payload, HEAT_P) == 0) cmd = CMD_HEAT;
     else if (strcmp_P(payload, COOL_P) == 0) cmd = CMD_COOL;
     else if (strcmp_P(payload, AUTO_P) == 0) cmd = CMD_AUTO;
-    else if (strcmp_P(payload, FAN_P) == 0) cmd = CMD_FAN;
+    else if (strcmp_P(payload, FAN_ONLY_P) == 0) cmd = CMD_FAN;
     else if (strcmp_P(payload, DRY_P) == 0) cmd = CMD_DRY;
     else if (strcmp_P(payload, TRUE_P) == 0) cmd = CMD_ON;
     else if (strcmp_P(payload, FALSE_P) == 0) cmd = CMD_OFF;
@@ -111,9 +115,10 @@ int txt2subItem(char *payload) {
     // Check for command
     if (strcmp_P(payload, SET_P) == 0) cmd = S_SET;
     else if (strcmp_P(payload, CMD_P) == 0) cmd = S_CMD;
-    else if (strcmp_P(payload, MODE_P) == 0) cmd = S_MODE;
+//    else if (strcmp_P(payload, MODE_P) == 0) cmd = S_MODE;
     else if (strcmp_P(payload, HSV_P) == 0) cmd = S_HSV;
     else if (strcmp_P(payload, RGB_P) == 0) cmd = S_RGB;
+        else if (strcmp_P(payload, FAN_P) == 0) cmd = S_FAN;
   /*  UnUsed now
     else if (strcmp_P(payload, SETPOINT_P) == 0) cmd = S_SETPOINT;
     else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
@@ -428,7 +433,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
     if (itemType == CH_GROUP && !send)
       {
         debugSerial<<F("Skip Grp")<<endl;
-        return -1;  
+        return -1;
       }
 
     int iaddr = getArg();

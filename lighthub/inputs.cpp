@@ -435,13 +435,15 @@ void Input::contactPoll() {
             if (inType & IN_PUSH_TOGGLE) {
                 if (currentInputState) { //react on leading edge only (change from 0 to 1)
                     store->logicState = !store->logicState;
+                    store->currentValue = currentInputState;
                     onContactChanged(store->logicState);
                 }
             } else {
                 store->logicState = currentInputState;
+                store->currentValue = currentInputState;
                 onContactChanged(currentInputState);
             }
-            store->currentValue = currentInputState;
+    //        store->currentValue = currentInputState;
         }
     } else // no change
         store->bounce = SAME_STATE_ATTEMPTS;

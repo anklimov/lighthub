@@ -24,16 +24,18 @@ e-mail    anklimov@gmail.com
 #define S_SETnCMD 0
 #define S_CMD 1
 #define S_SET 2
-#define S_TEMP 3
+#define S_HSV 3
+#define S_RGB 4
+#define S_FAN 5
+/*
 #define S_MODE 4
+#define S_RPM 11
+#define S_TEMP 3
 #define S_SETPOINT 5
 #define S_POWER 6
 #define S_VOL 7
 #define S_HEAT 8
-#define S_HSV 9
-#define S_RGB 10
-#define S_RPM 11
-
+*/
 #define CH_DIMMER 0   //DMX 1 ch
 #define CH_RGBW   1   //DMX 4 ch
 #define CH_RGB    2   //DMX 3 ch
