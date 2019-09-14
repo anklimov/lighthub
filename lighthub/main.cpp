@@ -265,8 +265,9 @@ else
 
     Item item(itemName);
     if (item.isValid()) {
+      /*
         if (item.itemType == CH_GROUP && (lanStatus == RETAINING_COLLECTING))
-            return; //Do not restore group channels - they consist not relevant data
+            return; //Do not restore group channels - they consist not relevant data */
         item.Ctrl((char *)payload, !(lanStatus == RETAINING_COLLECTING),subItem);
     } //valid item
 }

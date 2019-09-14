@@ -431,14 +431,15 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
               debugSerial<<F("<")<<Par[i]<<F(">");
             }
     debugSerial<<F(")")<<endl;
+    int itemCategory = itemType;
 
-/*
+
     if (itemType == CH_GROUP && !send)
       {
         debugSerial<<F("Skip Grp")<<endl;
         return -1;
       }
-*/
+
 
     int iaddr = getArg();
     int chActive =isActive();
