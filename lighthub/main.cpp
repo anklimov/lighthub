@@ -1142,7 +1142,7 @@ void cmdFunctionPwd(int arg_cnt, char **args)
 }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
-    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%с", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) < 6) {
+    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%c", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) < 6) {
         debugSerial<<F("could not parse: ")<<args[1];
         return;
     }
@@ -1169,7 +1169,7 @@ void saveFlash(short n, char *str) {
   // write the data to EEPROM
    short res  = EEPROM.commitReset();
   Serial.println((res) ? "EEPROM Commit OK" : "Commit failed");
-  #endif.
+  #endif
 }
 
 int loadFlash(short n, char *str, short l) {
@@ -1188,7 +1188,7 @@ void saveFlash(short n, IPAddress& ip) {
    // write the data to EEPROM
     short res  = EEPROM.commitReset();
    Serial.println((res) ? "EEPROM Commit OK" : "Commit failed");
-   #endif.
+   #endif
 }
 
 int ipLoadFromFlash(short n, IPAddress &ip) {

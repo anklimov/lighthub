@@ -188,6 +188,7 @@ switch (cause)  {
     #endif
      }
   }
+  return 0;
 }
 
 #ifndef COUNTER_DISABLE
@@ -226,7 +227,7 @@ void Input::counterPoll() {
         char addrstr[MQTT_TOPIC_LENGTH];
         strncpy(addrstr,emit->valuestring,sizeof(addrstr));
         if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
-        sprintf(valstr, "%d", counterValue);
+        sprintf(valstr, "%ld", counterValue);
         if (mqttClient.connected() && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);

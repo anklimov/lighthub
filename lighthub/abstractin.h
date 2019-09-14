@@ -9,8 +9,8 @@ public:
 
 protected:
    Input * in;
-int publish(long value, char* subtopic = NULL);
-int publish(float value, char* subtopic = NULL );
-int publish(char * value, char* subtopic = NULL);
+int publish(long value, const char* subtopic = NULL);
+int publish(float value, const char* subtopic = NULL );
+int publish(char * value, const char* subtopic = NULL);
 friend Input;
 };

@@ -27,8 +27,10 @@ e-mail    anklimov@gmail.com
 #define S_HSV 3
 #define S_RGB 4
 #define S_FAN 5
+#define S_MODE 6
+#define S_ADDITIONAL 64
 /*
-#define S_MODE 4
+
 #define S_RPM 11
 #define S_TEMP 3
 #define S_SETPOINT 5
@@ -46,7 +48,7 @@ e-mail    anklimov@gmail.com
 #define CH_GROUP   7  //Group pseudochannel
 #define CH_VCTEMP  8  //Vacom PID regulator
 #define CH_VC      9  //Vacom modbus motor regulator
-#define CH_AC_HAIER 10  //AC Haier
+#define CH_AC 10  //AC Haier
 #define CH_SPILED 11
 #define CH_WHITE   127//
 
@@ -112,27 +114,31 @@ int txt2cmd (char * payload);
 typedef union
 {
   long int aslong;
+  float asfloat;
+  struct
+      { uint8_t  v;
+        uint8_t  s;
+        uint16_t h:15;
+        uint16_t hsv_flag:1;
+      };
   struct
       {
-        int16_t hsv_flag:1;
-        int16_t h:15;
-        int8_t  s;
-        int8_t  v;
+        uint8_t  r;
+        uint8_t  g;
+        uint8_t  b;
+        uint8_t  w:7;
+        uint8_t  rgb_flag:1;
       };
-} HSVstore;
+} CHstore;
 
-
+/*
 typedef union
 {
   long int aslong;
   struct
-      {
-        int8_t  r;
-        int8_t  g;
-        int8_t  b;
-        int8_t  w;
-      };
+
 } RGBWstore;
+*/
 #pragma pack(pop)
 
 class Item

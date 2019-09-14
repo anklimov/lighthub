@@ -34,6 +34,7 @@ e-mail    anklimov@gmail.com
 
 #include <PubSubClient.h>
 #include "modules/out_spiled.h"
+#include "modules/out_ac.h"
 
 //Commands
 const char ON_P[]   PROGMEM = "ON";
@@ -48,11 +49,11 @@ const char DECREASE_P[] PROGMEM = "DECREASE";
 const char TRUE_P[]  PROGMEM = "TRUE";
 const char FALSE_P[] PROGMEM = "FALSE";
 
-const char HEAT_P[] PROGMEM = "HEAT";
-const char COOL_P[] PROGMEM = "COOL";
-const char AUTO_P[] PROGMEM = "AUTO";
-const char FAN_ONLY_P[]  PROGMEM = "FAN_ONLY";
-const char DRY_P[]  PROGMEM = "DRY";
+char HEAT_P[] PROGMEM = "HEAT";
+char COOL_P[] PROGMEM = "COOL";
+char AUTO_P[] PROGMEM = "AUTO";
+char FAN_ONLY_P[]  PROGMEM = "FAN_ONLY";
+char DRY_P[]  PROGMEM = "DRY";
 
 // SubTopics
 const char SET_P[]  PROGMEM = "set";
@@ -81,7 +82,7 @@ static unsigned long lastctrl = 0;
 static aJsonObject *lastobj = NULL;
 
 int txt2cmd(char *payload) {
-    int cmd = -1;
+    int cmd = CMD_UNKNOWN;
 
     // Check for command
     if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = CMD_NUM;
@@ -115,16 +116,16 @@ int txt2subItem(char *payload) {
     // Check for command
     if (strcmp_P(payload, SET_P) == 0) cmd = S_SET;
     else if (strcmp_P(payload, CMD_P) == 0) cmd = S_CMD;
-//    else if (strcmp_P(payload, MODE_P) == 0) cmd = S_MODE;
+    else if (strcmp_P(payload, MODE_P) == 0) cmd = S_MODE;
     else if (strcmp_P(payload, HSV_P) == 0) cmd = S_HSV;
     else if (strcmp_P(payload, RGB_P) == 0) cmd = S_RGB;
-        else if (strcmp_P(payload, FAN_P) == 0) cmd = S_FAN;
+    else if (strcmp_P(payload, FAN_P) == 0) cmd = S_FAN;
   /*  UnUsed now
     else if (strcmp_P(payload, SETPOINT_P) == 0) cmd = S_SETPOINT;
     else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
     else if (strcmp_P(payload, POWER_P) == 0) cmd = S_POWER;
     else if (strcmp_P(payload, VOL_P) == 0) cmd = S_VOL;
-    else if (strcmp_P(payload, HEAT_P) == 0) cmd = S_HEAT; */
+  */
     return cmd;
 }
 
@@ -152,7 +153,14 @@ void Item::Parse() {
 #ifndef   SPILED_DISABLE
           case CH_SPILED:
           driver = new out_SPILed (this);
-//          debugSerial<<F("SPILED driver created")<<endl;
+          debugSerial<<F("SPILED driver created")<<endl;
+          break;
+#endif
+
+#ifndef   AC_DISABLE
+          case CH_AC:
+          driver = new out_AC (this);
+          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
           default: ;
@@ -178,7 +186,7 @@ Item::~Item()
   if (driver)
               {
               delete driver;
-//              debugSerial<<F("Driver destroyed")<<endl;
+              debugSerial<<F("Driver destroyed")<<endl;
               }
 }
 
@@ -443,7 +451,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
     int iaddr = getArg();
     int chActive =isActive();
-    HSVstore st;
+    CHstore st;
     switch (cmd) {
         int t;
         case CMD_TOGGLE:
@@ -870,7 +878,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 }
 
 int Item::isActive() {
-    HSVstore st;
+    CHstore st;
     int val = 0;
 
     if (!isValid()) return -1;
@@ -1422,7 +1430,7 @@ int Item::SendStatus(int sendFlags) {
       if (sendFlags & SEND_PARAMETERS)
       {
       // Preparing parameters payload //////////
-       HSVstore st;
+       CHstore st;
        //retrive stored values
        st.aslong = getVal();
        switch (itemType) {
@@ -1554,3 +1562,7 @@ int Item::SendStatus(int sendFlags) {
         return 1;
     }
 }
+
+
+
+/////////////////////////////////////////
