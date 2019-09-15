@@ -118,12 +118,12 @@ if (!isValid() || (!root)) return;
     if (inType == IN_CCS811)
       {
         in_ccs811  ccs811(this);
-        ccs811.Setup(pin);
+        ccs811.Setup();
       }
     else if (inType == IN_HDC1080)
       {
         in_hdc1080 hdc1080(this);
-        hdc1080.Setup(pin);
+        hdc1080.Setup();
        }
 // TODO rest types setup
 #endif
@@ -188,6 +188,7 @@ switch (cause)  {
     #endif
      }
   }
+  return 0;
 }
 
 #ifndef COUNTER_DISABLE
@@ -226,7 +227,7 @@ void Input::counterPoll() {
         char addrstr[MQTT_TOPIC_LENGTH];
         strncpy(addrstr,emit->valuestring,sizeof(addrstr));
         if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
-        sprintf(valstr, "%d", counterValue);
+        sprintf(valstr, "%ld", counterValue);
         if (mqttClient.connected() && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
@@ -435,13 +436,15 @@ void Input::contactPoll() {
             if (inType & IN_PUSH_TOGGLE) {
                 if (currentInputState) { //react on leading edge only (change from 0 to 1)
                     store->logicState = !store->logicState;
+                    store->currentValue = currentInputState;
                     onContactChanged(store->logicState);
                 }
             } else {
                 store->logicState = currentInputState;
+                store->currentValue = currentInputState;
                 onContactChanged(currentInputState);
             }
-            store->currentValue = currentInputState;
+    //        store->currentValue = currentInputState;
         }
     } else // no change
         store->bounce = SAME_STATE_ATTEMPTS;
