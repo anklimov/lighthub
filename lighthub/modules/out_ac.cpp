@@ -254,7 +254,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
           if (set_tmp >= 0 && set_tmp <= 30)
           {
             data[B_SET_TMP] = set_tmp;
-            if (send) publishTopic(item->itemArr->name,(long)set_tmp,"/set");
+            if (send) publishTopic(item->itemArr->name,(long)Parameters[0],"/set");
             }
       break;
 
