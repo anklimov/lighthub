@@ -238,7 +238,7 @@ return 1;
 };
 
 int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixCode, char* subItem)
-{
+{char s_mode[10];
  // Some additional Subitems
        if (strcmp_P(subItem, LOCK_P) == 0) suffixCode = S_LOCK;
   else if (strcmp_P(subItem, SWING_P) == 0) suffixCode = S_SWING;
@@ -254,67 +254,84 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
           if (set_tmp >= 0 && set_tmp <= 30)
           {
             data[B_SET_TMP] = set_tmp;
+            if (send) publishTopic(item->itemArr->name,(long)set_tmp,"/set");
             }
       break;
 
       case S_CMD:
+      s_mode[0]='\0';
             switch (cmd)
                 {
                   case CMD_ON:
                       data[B_POWER] |= 1;
                       SendData(on, sizeof(on)/sizeof(byte));
+                      if (send) publishTopic(item->itemArr->name,"ON","/cmd");
                       return 1;
                   break;
                   case CMD_OFF:
                   case CMD_HALT:
                       data[B_POWER] &= ~1;
                       SendData(off, sizeof(off)/sizeof(byte));
+                      if (send) publishTopic(item->itemArr->name,"OFF","/cmd");
                       return 1;
                   break;
                   case CMD_AUTO:
                       data[B_MODE] = 0;
                       data[B_POWER] |= 1;
+                      strcpy_P(s_mode,AUTO_P);
                   break;
                   case CMD_COOL:
                       data[B_MODE] = 1;
                       data[B_POWER] |= 1;
+                      strcpy_P(s_mode,COOL_P);
                   break;
                   case CMD_HEAT:
                       data[B_MODE] = 2;
                       data[B_POWER] |= 1;
+                      strcpy_P(s_mode,HEAT_P);
                   break;
                   case CMD_DRY:
                       data[B_MODE] = 4;
                       data[B_POWER] |= 1;
+                      strcpy_P(s_mode,DRY_P);
                   break;
                   case CMD_FAN:
                       data[B_MODE] = 3;
                       data[B_POWER] |= 1;
+                      strcpy_P(s_mode,FAN_ONLY_P);
                   break;
                   case CMD_UNKNOWN:
                   return -1;
                   break;
                 }
+                if (send) publishTopic(item->itemArr->name,s_mode,"/cmd");
       break;
 
       case S_FAN:
+      s_mode[0]='\0';
       switch (cmd)
       {
       case CMD_AUTO:
       data[B_FAN_SPD] = 3;
+      strcpy_P(s_mode,AUTO_P);
       break;
       case CMD_HIGH:
       data[B_FAN_SPD] = 0;
+      strcpy_P(s_mode,HIGH_P);
       break;
       case CMD_MED:
       data[B_FAN_SPD] = 1;
+      strcpy_P(s_mode,MED_P);
       break;
       case CMD_LOW:
       data[B_FAN_SPD] = 2;
+      strcpy_P(s_mode,LOW_P);
       break;
       default:
       if (n) data[B_FAN_SPD] = Parameters[0];
+      //TODO - mapping digits to speed
       }
+      if (send) publishTopic(item->itemArr->name,s_mode,"/fan");
       break;
 
       case S_MODE:
@@ -413,7 +430,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
     data[10] = 77;
     data[11] = 95;
     SendData(data, sizeof(data)/sizeof(byte));
-    InsertData(data, sizeof(data)/sizeof(byte));
+    //InsertData(data, sizeof(data)/sizeof(byte));
 
     return 1;
 }

@@ -49,6 +49,9 @@ const char DECREASE_P[] PROGMEM = "DECREASE";
 const char TRUE_P[]  PROGMEM = "TRUE";
 const char FALSE_P[] PROGMEM = "FALSE";
 
+const char ENABLED_P[]  PROGMEM = "ENABLED";
+const char DISABLED_P[] PROGMEM = "DISABLED";
+
 char HEAT_P[] PROGMEM = "HEAT";
 char COOL_P[] PROGMEM = "COOL";
 char AUTO_P[] PROGMEM = "AUTO";
@@ -102,6 +105,8 @@ int txt2cmd(char *payload) {
     else if (strcmp_P(payload, DRY_P) == 0) cmd = CMD_DRY;
     else if (strcmp_P(payload, TRUE_P) == 0) cmd = CMD_ON;
     else if (strcmp_P(payload, FALSE_P) == 0) cmd = CMD_OFF;
+    else if (strcmp_P(payload, ENABLED_P) == 0) cmd = CMD_ON;
+    else if (strcmp_P(payload, DISABLED_P) == 0) cmd = CMD_OFF;
     else if (strcmp_P(payload, INCREASE_P) == 0) cmd = CMD_UP;
     else if (strcmp_P(payload, DECREASE_P) == 0) cmd = CMD_DN;
     else if (strcmp_P(payload, HIGH_P) == 0) cmd = CMD_HIGH;
@@ -500,7 +505,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         case CMD_SET: // new style SET - w/o turning ON
 
         //if (/*itemType !=CH_THERMO && */send) setCmd(CMD_SET); //prevent ON thermostat by semp set ????
-
+        setCmd(CMD_SET); ///??? trying
             switch (itemType) {
 
                 case CH_RGBW: //only if configured VAL array
@@ -578,9 +583,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             if (itemType != CH_GROUP) return -3;
           }
         case CMD_ON:
-        case CMD_COOL:
-        case CMD_AUTO:
-        case CMD_HEAT:
+
 
         if (itemType==CH_RGBW && getCmd() == CMD_ON && send /*&& getEnableCMD(500) */) {
                   debugSerial<<F("Force White\n");
@@ -597,6 +600,10 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                   if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS );
           break;
         } // if forcewhite
+
+       case CMD_COOL:
+       case CMD_AUTO:
+       case CMD_HEAT:
        setCmd(cmd);
        if (chActive>0 && send)
                           {
