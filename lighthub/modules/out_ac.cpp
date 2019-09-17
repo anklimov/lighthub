@@ -26,18 +26,22 @@ byte qstn[] = {255,255,10,0,0,0,0,0,1,1,77,1,90}; // Команда опроса
 byte data[37] = {}; //Массив данных
 byte on[]   = {255,255,10,0,0,0,0,0,1,1,77,2,91}; // Включение кондиционера
 byte off[]  = {255,255,10,0,0,0,0,0,1,1,77,3,92}; // Выключение кондиционера
-// byte lock[] = {255,255,10,0,0,0,0,0,1,3,0,0,14};  // Блокировка пульта
+byte lock[] = {255,255,10,0,0,0,0,0,1,3,0,0,14};  // Блокировка пульта
 
 //Extended subItem set
 const char LOCK_P[]   PROGMEM = "lock";
 const char QUIET_P[]  PROGMEM = "queit";
 const char SWING_P[]  PROGMEM = "swing";
 const char RAW_P[]    PROGMEM = "raw";
+//const char IDLE_P[]   PROGMEM = "IDLE";
 extern char HEAT_P[] PROGMEM;
 extern char COOL_P[] PROGMEM;
 extern char AUTO_P[] PROGMEM;
 extern char FAN_ONLY_P[] PROGMEM;
 extern char DRY_P[] PROGMEM;
+extern char HIGH_P[] PROGMEM;
+extern char MED_P[]  PROGMEM;
+extern char LOW_P[]  PROGMEM;
 
 void out_AC::InsertData(byte data[], size_t size){
 
@@ -80,20 +84,33 @@ void out_AC::InsertData(byte data[], size_t size){
   else  publishTopic(item->itemArr->name, "OFF" , "/quiet");
 
 
-  if (power == 3 || power == 2)
-      publishTopic(item->itemArr->name, "on","/compressor");
+  if (power & 0x02) //Compressor on
+      publishTopic(item->itemArr->name, "ON","/compressor");
   else
-    publishTopic(item->itemArr->name, "off","/compressor");
+      publishTopic(item->itemArr->name, "OFF","/compressor");
 
 
   publishTopic(item->itemArr->name, (long) swing,"/swing");
-  publishTopic(item->itemArr->name, (long) fan_spd,"/fan");
+  //publishTopic(item->itemArr->name, (long) fan_spd,"/fan");
 
   /////////////////////////////////
-/*
-  if (swing == 0x00){
-      publishTopic(item->itemArr->name, "off","swing");
+  if (fan_spd == 0x00){
+      publishTopic(item->itemArr->name, "high","/fan");
   }
+  if (fan_spd == 0x01){
+      publishTopic(item->itemArr->name, "medium","/fan");
+  }
+  if (fan_spd == 0x02){
+      publishTopic(item->itemArr->name, "low","/fan");
+  }
+  if (fan_spd == 0x03){
+      publishTopic(item->itemArr->name, "auto","/fan");
+  }
+
+  if (swing == 0x00)
+       publishTopic(item->itemArr->name, "OFF","/swing");
+  else publishTopic(item->itemArr->name, "ON","/swing");
+  /*
   if (swing == 0x01){
       publishTopic(item->itemArr->name, "ud","swing");
   }
@@ -102,21 +119,7 @@ void out_AC::InsertData(byte data[], size_t size){
   }
   if (swing == 0x03){
       publishTopic(item->itemArr->name, "all","swing");
-  }
-  /////////////////////////////////
-  if (fan_spd == 0x00){
-      publishTopic(item->itemArr->name, "max","fan");
-  }
-  if (fan_spd == 0x01){
-      publishTopic(item->itemArr->name, "mid","fan");
-  }
-  if (fan_spd == 0x02){
-      publishTopic(item->itemArr->name, "min","fan");
-  }
-  if (fan_spd == 0x03){
-      publishTopic(item->itemArr->name, "auto","fan");
-  }
-  */
+  }*/
   /////////////////////////////////
 
   publishTopic(item->itemArr->name,(long)set_tmp,"/set");
@@ -213,8 +216,6 @@ return (power & 1);
 
 int out_AC::Poll()
 {
-  //debugSerial<<".";
-
 long now = millis();
   if (now - prevPolling > INTERVAL_AC_POLLING) {
     prevPolling = now;
@@ -266,7 +267,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
                   break;
                   case CMD_OFF:
                   case CMD_HALT:
-                      data[B_POWER] = 0;
+                      data[B_POWER] &= ~1;
                       SendData(off, sizeof(off)/sizeof(byte));
                       return 1;
                   break;
@@ -297,7 +298,23 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
       break;
 
       case S_FAN:
-      data[B_FAN_SPD] = Parameters[0];
+      switch (cmd)
+      {
+      case CMD_AUTO:
+      data[B_FAN_SPD] = 3;
+      break;
+      case CMD_HIGH:
+      data[B_FAN_SPD] = 0;
+      break;
+      case CMD_MED:
+      data[B_FAN_SPD] = 1;
+      break;
+      case CMD_LOW:
+      data[B_FAN_SPD] = 2;
+      break;
+      default:
+      if (n) data[B_FAN_SPD] = Parameters[0];
+      }
       break;
 
       case S_MODE:
@@ -317,7 +334,17 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
       break;
 
       case S_SWING:
-        data[B_SWING] = Parameters[0];
+      switch (cmd)
+          {
+            case CMD_ON:
+            data[B_LOCK_REM] = 3;
+            break;
+            case CMD_OFF:
+            data[B_LOCK_REM] = 0;
+            break;
+            default:
+            if (n) data[B_SWING] = Parameters[0];
+          }
       break;
 
       case S_QUIET:
@@ -345,12 +372,8 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
           hexbyte[0] = buf[i] ;
           hexbyte[1] = buf[i+1] ;
           data[i/2] = (toHex(hexbyte[0]) << 4) | toHex(hexbyte[1]);
-
-
-
         AC_Serial.write(data, 37);
         AC_Serial.flush();
-
         publishTopic("RAW", buf);
       }
       */
@@ -364,21 +387,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
 
 /*
     //////////
-    if (strTopic == "/myhome/in/Conditioner/Fan_Speed"){
-       if (strPayload == "max"){
-        data[B_FAN_SPD] = 0;
-      }
-      if (strPayload == "mid"){
-          data[B_FAN_SPD] = 1;
-      }
-      if (strPayload == "min"){
-          data[B_FAN_SPD] = 2;
-      }
-      if (strPayload == "auto"){
-          data[B_FAN_SPD] = 3;
-      }
-    }
-    ////////
+
     if (strTopic == "/myhome/in/Conditioner/Swing"){
        if (strPayload == "off"){
         data[B_SWING] = 0;
@@ -394,30 +403,9 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
       }
     }
     ////////
-    if (strTopic == "/myhome/in/Conditioner/Lock_Remote"){
-       if (strPayload == "true"){
-        data[B_LOCK_REM] = 80;
-      }
-      if (strPayload == "false"){
-          data[B_LOCK_REM] = 0;
-      }
-    }
-    ////////
-    if (strTopic == "/myhome/in/Conditioner/Power"){
-       if (strPayload == "off" || strPayload == "false" || strPayload == "0"){
-        SendData(off, sizeof(off)/sizeof(byte));
-        return;
-      }
-      if (strPayload == "on" || strPayload == "true" || strPayload == "1"){
-        SendData(on, sizeof(on)/sizeof(byte));
-        return;
-      }
-      if (strPayload == "quiet"){
-          data[B_POWER] = 9;
-      }
-    }
+
     */
-    ////////
+
     //if (strTopic == "/myhome/in/Conditioner/RAW")
 
     data[B_CMD] = 0;
@@ -425,6 +413,8 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
     data[10] = 77;
     data[11] = 95;
     SendData(data, sizeof(data)/sizeof(byte));
+    InsertData(data, sizeof(data)/sizeof(byte));
+
     return 1;
 }
 

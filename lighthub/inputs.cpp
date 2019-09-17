@@ -231,7 +231,7 @@ void Input::counterPoll() {
         if (mqttClient.connected() && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
-        debugSerial<<F(" NextPollMillis=")<<nextPollTime();
+      //  debugSerial<<F(" NextPollMillis=")<<nextPollTime();
     }
     else
         debugSerial<<F(" No emit data!");
@@ -400,7 +400,7 @@ void Input::dht22Poll() {
             mqttClient.publish(addrstr, valstr);
 
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
-        debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
+  //      debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
     } else
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT / 3);
 }
@@ -619,7 +619,7 @@ bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, cons
         mqttClient.publish(emit->valuestring, valstr);
     if (pollTimeIncrement)
         setNextPollTime(millis() + pollTimeIncrement);
-    debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
+//    debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
 
 #endif
     return true;

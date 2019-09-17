@@ -73,15 +73,18 @@ e-mail    anklimov@gmail.com
 #define CMD_FAN 0xd
 #define CMD_DRY 0xe
 #define CMD_SET 0xf
-#define CMD_CURTEMP 0xf
-#define CMD_MASK 0xf
-#define FLAG_MASK 0xf0
+#define CMD_HIGH 0x10
+#define CMD_MED 0x11
+#define CMD_LOW 0x12
+//#define CMD_CURTEMP 0xf
+#define CMD_MASK 0xff
+#define FLAG_MASK 0x0f00
 
 
-#define SEND_COMMAND 16
-#define SEND_PARAMETERS 32
-#define SEND_RETRY 64
-#define SEND_DEFFERED 128
+#define SEND_COMMAND 0x100
+#define SEND_PARAMETERS 0x200
+#define SEND_RETRY 0x400
+#define SEND_DEFFERED 0x800
 
 
 //#define CMD_REPORT 32

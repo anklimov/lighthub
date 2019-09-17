@@ -54,7 +54,9 @@ char COOL_P[] PROGMEM = "COOL";
 char AUTO_P[] PROGMEM = "AUTO";
 char FAN_ONLY_P[]  PROGMEM = "FAN_ONLY";
 char DRY_P[]  PROGMEM = "DRY";
-
+char HIGH_P[] PROGMEM = "HIGH";
+char MED_P[]  PROGMEM = "MEDIUM";
+char LOW_P[]  PROGMEM = "LOW";
 // SubTopics
 const char SET_P[]  PROGMEM = "set";
 const char CMD_P[]  PROGMEM = "cmd";
@@ -102,6 +104,9 @@ int txt2cmd(char *payload) {
     else if (strcmp_P(payload, FALSE_P) == 0) cmd = CMD_OFF;
     else if (strcmp_P(payload, INCREASE_P) == 0) cmd = CMD_UP;
     else if (strcmp_P(payload, DECREASE_P) == 0) cmd = CMD_DN;
+    else if (strcmp_P(payload, HIGH_P) == 0) cmd = CMD_HIGH;
+    else if (strcmp_P(payload, MED_P) == 0) cmd = CMD_MED;
+    else if (strcmp_P(payload, LOW_P) == 0) cmd = CMD_LOW;
     else if (*payload == '{') cmd = CMD_JSON;
     else if (*payload == '#') cmd = CMD_RGB;
     else if (strncmp_P(payload, HSV_P, strlen (HSV_P)) == 0) cmd = CMD_HSV;
@@ -153,14 +158,14 @@ void Item::Parse() {
 #ifndef   SPILED_DISABLE
           case CH_SPILED:
           driver = new out_SPILed (this);
-          debugSerial<<F("SPILED driver created")<<endl;
+//          debugSerial<<F("SPILED driver created")<<endl;
           break;
 #endif
 
 #ifndef   AC_DISABLE
           case CH_AC:
           driver = new out_AC (this);
-          debugSerial<<F("AC driver created")<<endl;
+//          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
           default: ;
@@ -186,7 +191,7 @@ Item::~Item()
   if (driver)
               {
               delete driver;
-              debugSerial<<F("Driver destroyed")<<endl;
+//              debugSerial<<F("Driver destroyed")<<endl;
               }
 }
 
@@ -250,12 +255,12 @@ void Item::clearFlag (short flag)
 
 int Item::getArg(short n) //Return arg int or first array element if Arg is array
 {
-    if (!itemArg) return -1;
+    if (!itemArg) return 0;//-1;
     if (itemArg->type == aJson_Int){
-        if (!n) return itemArg->valueint; else return -1;
+        if (!n) return itemArg->valueint; else return 0;//-1;
     }
     if ((itemArg->type == aJson_Array) && ( n < aJson.getArraySize(itemArg))) return aJson.getArrayItem(itemArg, n)->valueint;
-    else return -2;
+    else return 0;//-2;
 }
 
 /*
@@ -273,13 +278,13 @@ int Item::getVal(short n) //Return Val from Value array
 
 long int Item::getVal() //Return Val if val is int or first elem of Value array
 {
-    if (!itemVal) return -1;
+    if (!itemVal) return 0;//-1;
     if (itemVal->type == aJson_Int) return itemVal->valueint;
     else if (itemVal->type == aJson_Array) {
         aJsonObject *t = aJson.getArrayItem(itemVal, 0);
         if (t) return t->valueint;
-        else return -3;
-    } else return -2;
+        else return 0;//-3;
+    } else return 0;//-2;
 }
 
 /*
@@ -577,7 +582,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         case CMD_AUTO:
         case CMD_HEAT:
 
-        if (itemType==CH_RGBW && getCmd() == CMD_ON /*&& getEnableCMD(500) */) {
+        if (itemType==CH_RGBW && getCmd() == CMD_ON && send /*&& getEnableCMD(500) */) {
                   debugSerial<<F("Force White\n");
                   itemType = CH_WHITE;
                   Par[1] = 0;   //Zero saturation
@@ -616,7 +621,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                   setVal(st.aslong);
                 }
 
-                if (st.aslong > 0)  //Stored smthng
+                if (st.aslong )  //Stored smthng
 
                     switch (itemType) {
                         case CH_GROUP:
@@ -749,6 +754,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
 #ifdef _dmxout
         case CH_DIMMER: //Dimmed light
+            if (iaddr>0)
             DmxWrite(iaddr, map(Par[0], 0, 100, 0, 255));
             break;
         case CH_RGBW: //Colour RGBW
@@ -757,7 +763,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         //50..100 RGB
         {
             int k;
-            if (Par[1]<50) { // Using white
+            if (Par[1]<50 && iaddr>0) { // Using white
                             DmxWrite(iaddr + 3, map((50 - Par[1]) * Par[2], 0, 5000, 0, 255));
                             int rgbvLevel = map (Par[1],0,50,0,255*2);
                             rgbValue = map(Par[2], 0, 100, 0, rgbvLevel);
@@ -768,12 +774,13 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             {
               //rgbValue = map(Par[2], 0, 100, 0, 255);
               rgbSaturation = map(Par[1], 50, 100, 100, 255);
-              DmxWrite(iaddr + 3, 0);
+              if (iaddr>0) DmxWrite(iaddr + 3, 0);
             }
             //DmxWrite(iaddr + 3, k = map((100 - Par[1]) * Par[2], 0, 10000, 0, 255));
             //debugSerial<<F("W:")<<k<<endl;
         }
         case CH_RGB: // RGB
+        if (iaddr>0)
         {
             CRGB rgb = CHSV(map(Par[0], 0, 365, 0, 255), rgbSaturation, rgbValue);
             DmxWrite(iaddr, rgb.r);
@@ -782,11 +789,14 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             break;
         }
         case CH_WHITE:
+        if (iaddr>0)
+        {
             DmxWrite(iaddr, 0);
             DmxWrite(iaddr + 1, 0);
             DmxWrite(iaddr + 2, 0);
             DmxWrite(iaddr + 3, map(Par[2], 0, 100, 0, 255));
             break;
+          }
 #endif
 
 #ifdef _modbus
@@ -808,7 +818,9 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             } //if
         } //case
             break;
-        case CH_RELAY: {
+        case CH_RELAY:
+           if (iaddr)
+           {
             int k;
             short inverse = 0;
 
@@ -829,7 +841,9 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 ///thermoSet(name,cmd,Par1); all activities done - update temp & cmd
                 break;
 
-        case CH_PWM: {
+        case CH_PWM:
+           if (iaddr)
+           {
             int k;
             short inverse = 0;
 
