@@ -496,7 +496,12 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
     }
 
-    if (driver)  return driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
+    if (driver)
+            {
+              int res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
+              setCmd(cmd);
+              return res;
+            }
     // Legacy code
     bool toExecute = (chActive>0); //if channel is already active - unconditionally propogate changes
     switch (cmd) {

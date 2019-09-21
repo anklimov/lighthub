@@ -250,11 +250,11 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
       switch(suffixCode)
       {
       case S_SET:
-          set_tmp = Parameters[0]-16;
-          if (set_tmp >= 0 && set_tmp <= 30)
+          set_tmp = Parameters[0];
+          if (set_tmp >= 10 && set_tmp <= 30)
           {
-            data[B_SET_TMP] = set_tmp;
-            if (send) publishTopic(item->itemArr->name,(long)Parameters[0],"/set");
+            data[B_SET_TMP] = set_tmp -16;
+            if (send) publishTopic(item->itemArr->name,(long) set_tmp,"/set");
             }
       break;
 
@@ -263,6 +263,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
             switch (cmd)
                 {
                   case CMD_ON:
+                  case CMD_XON:
                       data[B_POWER] |= 1;
                       SendData(on, sizeof(on)/sizeof(byte));
                       if (send) publishTopic(item->itemArr->name,"ON","/cmd");
