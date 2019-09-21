@@ -496,13 +496,56 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
     }
 
-    if (driver)
+    if (driver) //New style modular code
             {
-              int res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
-              setCmd(cmd);
+              int res = -1;
+              switch (cmd)
+              {
+                case CMD_XON:
+                if (!chActive>0)  //if channel was'nt active before CMD_XON
+                      {
+                        debugSerial<<F("Turning XON\n");
+                        res = driver->Ctrl(CMD_ON, n, Parameters, send, suffixCode, subItem);
+                        setCmd(CMD_XON);
+                      }
+                  else
+                  {  //cmd = CMD_ON;
+                    debugSerial<<F("Already Active\n");
+                    return -3;
+                  }
+                break;
+                case CMD_HALT:
+                if (chActive>0)  //if channel was active before CMD_HALT
+                      {
+                        res = driver->Ctrl(CMD_OFF, n, Parameters, send, suffixCode, subItem);
+                        setCmd(CMD_HALT);
+                        return res;
+                      }
+                else
+                      {
+                        debugSerial<<F("Already Inactive\n");
+                        return -3;
+                      }
+                break;
+                case CMD_OFF:
+                if (getCmd() != CMD_HALT) //Halted, ignore OFF
+                     {
+                       res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
+                       setCmd(CMD_OFF);
+                     }
+                else
+                      {
+                        debugSerial<<F("Already Halted\n");
+                        return -3;
+                      }
+                break;
+                default:
+                res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
+                setCmd(cmd);
+              }
               return res;
             }
-    // Legacy code
+    // Legacy monolite core code
     bool toExecute = (chActive>0); //if channel is already active - unconditionally propogate changes
     switch (cmd) {
         case 0:       // old style SET - with turning ON
