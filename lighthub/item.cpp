@@ -539,6 +539,10 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                         return -3;
                       }
                 break;
+                case CMD_SET:
+                res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
+                break;
+
                 default:
                 res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
                 setCmd(cmd);
