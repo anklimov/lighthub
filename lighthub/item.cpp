@@ -72,8 +72,8 @@ const char POWER_P[] PROGMEM = "power";
 const char VOL_P[] PROGMEM = "vol";
 const char HEAT_P[] PROGMEM = "heat";
 */
-const char HSV_P[]   PROGMEM = "hsv";
-const char RGB_P[]   PROGMEM = "rgb";
+const char HSV_P[]   PROGMEM = "HSV";
+const char RGB_P[]   PROGMEM = "RGB";
 /*
 const char RPM_P[]   PROGMEM = "rpm";
 const char STATE_P[] PROGMEM = "state";
@@ -557,7 +557,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         case CMD_SET: // new style SET - w/o turning ON
 
         //if (/*itemType !=CH_THERMO && */send) setCmd(CMD_SET); //prevent ON thermostat by semp set ????
-        setCmd(CMD_SET); ///??? trying
+      ////////  setCmd(CMD_SET); ///??? trying... no
             switch (itemType) {
 
                 case CH_RGBW: //only if configured VAL array
@@ -593,8 +593,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 setVal(st.aslong);
                 if (toExecute)
                           { //
-                            if (chActive && !st.v) setCmd(CMD_OFF);
-                            if (!chActive && st.v) setCmd(CMD_ON);
+                            if (chActive>0 && !st.v) setCmd(CMD_OFF);
+                            if (chActive==0 && st.v) setCmd(CMD_ON);
                             SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
                           }
                 else    SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
@@ -607,8 +607,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 //                    setCmd(cmd2changeActivity(chActive,cmd));
                     if (toExecute)
                               { // Not restoring, working
-                                if (chActive && !Par[0]) setCmd(CMD_OFF);
-                                if (!chActive && Par[0]) setCmd(CMD_ON);
+                                if (chActive>0 && !Par[0]) setCmd(CMD_OFF);
+                                if (chActive==0 && Par[0]) setCmd(CMD_ON);
                                 SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED); // Send back parameter for channel above this line
                               }
                   else    SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
@@ -684,7 +684,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
                     switch (itemType) {
                         case CH_GROUP:
-                            if (send && !isActive()) SendStatus(SEND_COMMAND);          // Just send ON, suppress send back ON of chan already active
+                            if (send && isActive()==0) SendStatus(SEND_COMMAND);          // Just send ON, suppress send back ON of chan already active
                             break;
                         case CH_RGBW:
                         case CH_RGB:
@@ -954,10 +954,13 @@ int Item::isActive() {
     CHstore st;
     int val = 0;
 
-    if (!isValid()) return -1;
+
     debugSerial<<itemArr->name;
-
-
+    if (!isValid())
+                      {
+                      debugSerial<<F(" invalid")<<endl;
+                      return -1;
+                      }
     int cmd = getCmd();
 
 
@@ -990,7 +993,7 @@ int Item::isActive() {
                 while (i) {
                     Item it(i->valuestring);
 
-                    if (it.isValid() && it.isActive()) {
+                    if (it.isValid() && it.isActive()>0) {
                         debugSerial<<F(" active\n");
                         return 1;
                     }
@@ -1289,7 +1292,7 @@ int Item::checkFM() {
         result = node.readHoldingRegisters(2111 - 1, 1);
         if (result == node.ku8MBSuccess) aJson.addNumberToObject(out, "flt", (int) node.getResponseBuffer(0));
         modbusBusy=0;
-        if (isActive()) Ctrl(CMD_OFF); //Shut down ///
+        if (isActive()>0) Ctrl(CMD_OFF); //Shut down ///
         modbusBusy=1;
     } else aJson.addNumberToObject(out, "flt", 0);
 
