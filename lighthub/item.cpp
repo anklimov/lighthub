@@ -22,7 +22,7 @@ e-mail    anklimov@gmail.com
 #include "item.h"
 #include "aJSON.h"
 #include "utils.h"
-#include "homiedef.h"
+#include "textconst.h"
 
 #ifdef _dmxout
 #include "dmx.h"
