@@ -180,6 +180,20 @@ void SendData(byte req[], size_t size){
   AC_Serial.write(req, size - 1);
   AC_Serial.write(getCRC(req, size-1));
   AC_Serial.flush();
+
+ Serial.print("<<");
+  for (int i=0; i < size-1; i++)
+  {
+     if (req[i] < 10){
+       Serial.print("0");
+       Serial.print(req[i], HEX);
+     }
+        else
+             {
+             Serial.print(req[i], HEX);
+             }
+  }
+Serial.println();
 }
 
 inline unsigned char toHex( char ch ){
@@ -245,7 +259,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
   else if (strcmp_P(subItem, QUIET_P) == 0) suffixCode = S_QUIET;
   else if (strcmp_P(subItem, RAW_P) == 0) suffixCode = S_RAW;
 
- data[B_POWER] = power;
+ //data[B_POWER] = power;
   //    debugSerial<<F(".");
       switch(suffixCode)
       {
@@ -264,6 +278,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
                 {
                   case CMD_ON:
                   case CMD_XON:
+                      data[B_POWER] = power;
                       data[B_POWER] |= 1;
                       SendData(on, sizeof(on)/sizeof(byte));
                       if (send) publishTopic(item->itemArr->name,"ON","/cmd");
@@ -271,6 +286,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
                   break;
                   case CMD_OFF:
                   case CMD_HALT:
+                      data[B_POWER] = power;
                       data[B_POWER] &= ~1;
                       SendData(off, sizeof(off)/sizeof(byte));
                       if (send) publishTopic(item->itemArr->name,"OFF","/cmd");
@@ -278,26 +294,32 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
                   break;
                   case CMD_AUTO:
                       data[B_MODE] = 0;
+                      data[B_POWER] = power;
                       data[B_POWER] |= 1;
                       strcpy_P(s_mode,AUTO_P);
                   break;
                   case CMD_COOL:
                       data[B_MODE] = 1;
+                      data[B_POWER] = power;
                       data[B_POWER] |= 1;
                       strcpy_P(s_mode,COOL_P);
                   break;
                   case CMD_HEAT:
                       data[B_MODE] = 2;
+                      data[B_POWER] = power;
                       data[B_POWER] |= 1;
                       strcpy_P(s_mode,HEAT_P);
                   break;
                   case CMD_DRY:
                       data[B_MODE] = 4;
+                      data[B_POWER] = power;
                       data[B_POWER] |= 1;
                       strcpy_P(s_mode,DRY_P);
                   break;
                   case CMD_FAN:
                       data[B_MODE] = 3;
+                      debugSerial<<"fan\n";
+                      data[B_POWER] = power;
                       data[B_POWER] |= 1;
                       strcpy_P(s_mode,FAN_ONLY_P);
                   break;
