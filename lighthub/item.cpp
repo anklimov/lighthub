@@ -22,6 +22,7 @@ e-mail    anklimov@gmail.com
 #include "item.h"
 #include "aJSON.h"
 #include "utils.h"
+#include "homiedef.h"
 
 #ifdef _dmxout
 #include "dmx.h"
@@ -36,48 +37,6 @@ e-mail    anklimov@gmail.com
 #include "modules/out_spiled.h"
 #include "modules/out_ac.h"
 
-//Commands
-const char ON_P[]   PROGMEM = "ON";
-const char OFF_P[]  PROGMEM = "OFF";
-const char REST_P[] PROGMEM = "REST";
-const char TOGGLE_P[] PROGMEM = "TOGGLE";
-const char HALT_P[] PROGMEM = "HALT";
-const char XON_P[]  PROGMEM = "XON";
-const char XOFF_P[] PROGMEM = "XOFF";
-const char INCREASE_P[] PROGMEM = "INCREASE";
-const char DECREASE_P[] PROGMEM = "DECREASE";
-const char TRUE_P[]  PROGMEM = "TRUE";
-const char FALSE_P[] PROGMEM = "FALSE";
-
-const char ENABLED_P[]  PROGMEM = "ENABLED";
-const char DISABLED_P[] PROGMEM = "DISABLED";
-
-char HEAT_P[] PROGMEM = "HEAT";
-char COOL_P[] PROGMEM = "COOL";
-char AUTO_P[] PROGMEM = "AUTO";
-char FAN_ONLY_P[]  PROGMEM = "FAN_ONLY";
-char DRY_P[]  PROGMEM = "DRY";
-char HIGH_P[] PROGMEM = "HIGH";
-char MED_P[]  PROGMEM = "MEDIUM";
-char LOW_P[]  PROGMEM = "LOW";
-// SubTopics
-const char SET_P[]  PROGMEM = "set";
-const char CMD_P[]  PROGMEM = "cmd";
-const char MODE_P[] PROGMEM = "mode";
-const char FAN_P[]  PROGMEM = "fan";
-/*
-const char TEMP_P[] PROGMEM = "temp";
-const char SETPOINT_P[] PROGMEM = "setpoint";
-const char POWER_P[] PROGMEM = "power";
-const char VOL_P[] PROGMEM = "vol";
-const char HEAT_P[] PROGMEM = "heat";
-*/
-const char HSV_P[]   PROGMEM = "HSV";
-const char RGB_P[]   PROGMEM = "RGB";
-/*
-const char RPM_P[]   PROGMEM = "rpm";
-const char STATE_P[] PROGMEM = "state";
-*/
 short modbusBusy = 0;
 extern aJsonObject *pollingItem;
 extern PubSubClient mqttClient;

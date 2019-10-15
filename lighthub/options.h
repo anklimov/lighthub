@@ -135,8 +135,10 @@
 //All options available
 #ifdef CONTROLLINO
 #define modbusSerial Serial3
+#define AC_Serial Serial2
 #else
 #define modbusSerial Serial2
+#define AC_Serial Serial3
 #endif
 #define dmxin DMXSerial
 #define dmxout DmxSimple
@@ -144,6 +146,7 @@
 
 #if defined(__SAM3X8E__)
 #define modbusSerial Serial2
+#define AC_Serial Serial3
 #define dmxout DmxDue1
 #define dmxin  DmxDue1
 #endif
@@ -162,7 +165,9 @@
 #ifndef DMX_DISABLE
 #define _espdmx
 #endif
+
 #define modbusSerial Serial1
+#define AC_Serial Serial1
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32)

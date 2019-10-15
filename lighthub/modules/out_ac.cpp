@@ -5,8 +5,12 @@
 #include "options.h"
 #include "Streaming.h"
 #include "item.h"
+#include "homiedef.h"
 
+#ifndef AC_Serial
 #define AC_Serial Serial3
+#endif
+
 #define INTERVAL_AC_POLLING      5000L
 
 static int driverStatus = CST_UNKNOWN;
@@ -34,15 +38,16 @@ const char QUIET_P[]  PROGMEM = "queit";
 const char SWING_P[]  PROGMEM = "swing";
 const char RAW_P[]    PROGMEM = "raw";
 //const char IDLE_P[]   PROGMEM = "IDLE";
-extern char HEAT_P[] PROGMEM;
-extern char COOL_P[] PROGMEM;
-extern char AUTO_P[] PROGMEM;
-extern char FAN_ONLY_P[] PROGMEM;
-extern char DRY_P[] PROGMEM;
-extern char HIGH_P[] PROGMEM;
-extern char MED_P[]  PROGMEM;
-extern char LOW_P[]  PROGMEM;
-
+/*
+extern const char HEAT_P[] PROGMEM;
+extern const char COOL_P[] PROGMEM;
+extern const char AUTO_P[] PROGMEM;
+extern const char FAN_ONLY_P[] PROGMEM;
+extern const char DRY_P[] PROGMEM;
+extern const char HIGH_P[] PROGMEM;
+extern const char MED_P[]  PROGMEM;
+extern const char LOW_P[]  PROGMEM;
+*/
 void out_AC::InsertData(byte data[], size_t size){
 
     char s_mode[10];
