@@ -153,7 +153,7 @@
 
 #include "Arduino.h"
 #include "utils.h"
-#include "homiedef.h"
+#include "textconst.h"
 #include <PubSubClient.h>
 #include <SPI.h>
 #include <string.h>

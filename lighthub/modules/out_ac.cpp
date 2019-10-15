@@ -5,7 +5,7 @@
 #include "options.h"
 #include "Streaming.h"
 #include "item.h"
-#include "homiedef.h"
+#include "textconst.h"
 
 #ifndef AC_Serial
 #define AC_Serial Serial3

@@ -22,7 +22,7 @@ e-mail    anklimov@gmail.com
 #include "item.h"
 #include "aJSON.h"
 #include "utils.h"
-#include "homiedef.h"
+#include "textconst.h"
 
 #ifdef _dmxout
 #include "dmx.h"
@@ -285,14 +285,14 @@ void Item::copyPar (aJsonObject *itemV)
 }
 */
 
-/*
+
 #if defined(ARDUINO_ARCH_ESP32)
 void analogWrite(int pin, int val)
 {
   //TBD
 }
 #endif
-*/
+
 
 /*
 boolean Item::getEnableCMD(int delta) {
