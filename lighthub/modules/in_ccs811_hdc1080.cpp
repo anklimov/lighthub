@@ -156,10 +156,11 @@ int in_ccs811::Poll()
     #endif
 
 
-
+    if (co2<10000.) //Spontaneous calculation error suppress
+    {
     publish(co2,"/CO2");
     publish(tvoc,"/TVOC");
-    publish(ccs811Baseline,"/base");
+    publish(ccs811Baseline,"/base");}
     Serial.println("]");
     printSensorError();
 
