@@ -9,6 +9,8 @@ export FLAGS="$FLAGS -std=gnu++11"
 export FLAGS="$FLAGS -DWIFI_MANAGER_DISABLE"
 export FLAGS="$FLAGS -DCOUNTER_DISABLE"
 export FLAGS="$FLAGS -DCSSHDC_DISABLE"
+export FLAGS="$FLAGS -DSPILED_DISABLE"
+export FLAGS="$FLAGS -DAC_DISABLE"
 
 CUSTOM_BUILD_FLAGS_FILE=custom-build-flags/build_flags_nrf52840.sh
 if [ -f $CUSTOM_BUILD_FLAGS_FILE ]; then
