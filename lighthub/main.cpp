@@ -265,8 +265,9 @@ else
 
     Item item(itemName);
     if (item.isValid()) {
+      /*
         if (item.itemType == CH_GROUP && (lanStatus == RETAINING_COLLECTING))
-            return; //Do not restore group channels - they consist not relevant data
+            return; //Do not restore group channels - they consist not relevant data */
         item.Ctrl((char *)payload, !(lanStatus == RETAINING_COLLECTING),subItem);
     } //valid item
 }
@@ -317,7 +318,7 @@ lan_status lanLoop() {
                 //Unsubscribe from status topics..
                 //strncpy_P(buf, outprefix, sizeof(buf));
                 setTopic(buf,sizeof(buf),T_OUT);
-                strncat(buf, "#", sizeof(buf));
+                strncat(buf, "+/+/#", sizeof(buf)); // Subscribing only on separated command/parameters topics
                 mqttClient.unsubscribe(buf);
 
                 lanStatus = OPERATION;//3;
@@ -582,7 +583,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
   //          strncpy_P(buf, outprefix, sizeof(buf));
             setTopic(buf,sizeof(buf),T_OUT);
-            strncat(buf, "#", sizeof(buf));
+            strncat(buf, "+/+/#", sizeof(buf));      // Only on separated cmd/val topics
             mqttClient.subscribe(buf);
 
             //Subscribing for command topics
@@ -907,7 +908,8 @@ void applyConfig() {
         while (items && item)
             if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
                 Item it(item);
-                if (it.isValid()) {
+                if (it.isValid() && !it.Setup()) {
+                  //Legacy Setup
                     short inverse = 0;
                     int pin=it.getArg();
                     if (pin<0) {pin=-pin; inverse = 1;}
@@ -1140,7 +1142,7 @@ void cmdFunctionPwd(int arg_cnt, char **args)
 }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
-    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%с", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) < 6) {
+    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%c", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) < 6) {
         debugSerial<<F("could not parse: ")<<args[1];
         return;
     }
@@ -1162,12 +1164,12 @@ void saveFlash(short n, char *str) {
     if (len>MAXFLASHSTR-1) len=MAXFLASHSTR-1;
     for(int i=0;i<len;i++) EEPROM.write(n+i,str[i]);
     EEPROM.write(n+len,0);
-    
+
    #if defined(ARDUINO_ARCH_ESP8266)
   // write the data to EEPROM
    short res  = EEPROM.commitReset();
   Serial.println((res) ? "EEPROM Commit OK" : "Commit failed");
-  #endif.
+  #endif
 }
 
 int loadFlash(short n, char *str, short l) {
@@ -1186,7 +1188,7 @@ void saveFlash(short n, IPAddress& ip) {
    // write the data to EEPROM
     short res  = EEPROM.commitReset();
    Serial.println((res) ? "EEPROM Commit OK" : "Commit failed");
-   #endif.
+   #endif
 }
 
 int ipLoadFromFlash(short n, IPAddress &ip) {
@@ -1743,9 +1745,10 @@ void inputSetup(void) {
         }
 }
 
-#ifndef MODBUS_DISABLE
+//#ifndef MODBUS_DISABLE
 void pollingLoop(void) {
     boolean done = false;
+    if (lanStatus == RETAINING_COLLECTING) return;
     if (millis() > nextPollingCheck) {
         while (pollingItem && !done) {
             if (pollingItem->type == aJson_Array) {
@@ -1761,7 +1764,7 @@ void pollingLoop(void) {
         } //while
     }//if
 }
-#endif
+//#endif
 
 bool isThermostatWithMinArraySize(aJsonObject *item, int minimalArraySize) {
     return (item->type == aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint == CH_THERMO) &&
@@ -1769,8 +1772,15 @@ bool isThermostatWithMinArraySize(aJsonObject *item, int minimalArraySize) {
 }
 
 bool thermoDisabledOrDisconnected(aJsonObject *thermoExtensionArray, int thermoStateCommand) {
-    return thermoStateCommand == CMD_OFF || thermoStateCommand == CMD_HALT ||
-           aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint == 0;
+  if (aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint == 0) return true;
+  switch (thermoStateCommand) {
+  case CMD_ON:
+  case CMD_XON:
+  case CMD_AUTO:
+  case CMD_HEAT:
+  return false;
+     default: return true;
+   }
 }
 
 

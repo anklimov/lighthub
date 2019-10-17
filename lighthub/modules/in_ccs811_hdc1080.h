@@ -40,7 +40,7 @@ public:
     //CCS811 ccs811(CCS811_ADDR);
     //uint16_t ccs811Baseline;
     in_ccs811(Input * _in):abstractIn(_in){};
-    int Setup(int addr) override;
+    int Setup() override;
     int Poll() override;
 
 protected:
@@ -52,7 +52,7 @@ class in_hdc1080 : public abstractIn {
 public:
     //ClosedCube_HDC1080 hdc1080;
     in_hdc1080(Input * _in):abstractIn(_in){};
-    int Setup(int addr) override;
+    int Setup() override;
     int Poll() override;
 
 protected:

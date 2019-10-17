@@ -1,0 +1,33 @@
+
+# usage:
+# first make your own copy of template
+# cp build_flags_template build_flags_ENVNAME
+# then edit, change or comment something
+# place to custom-build-flags dir if you would like have your own private settings
+# -DMY_CONFIG_SERVER=lazyhome.ru
+# -DWATCH_DOG_TICKER_DISABLE
+# -DUSE_1W_PIN=12
+# -DSD_CARD_INSERTED
+# -DSERIAL_BAUD=115200
+# -DWiz5500
+# -DDISABLE_FREERAM_PRINT
+# -DCUSTOM_FIRMWARE_MAC=de:ad:be:ef:fe:ff
+# -DDMX_DISABLE
+# -DMODBUS_DISABLE
+# -DOWIRE_DISABLE
+# -DAVR_DMXOUT_PIN=18
+# -DLAN_INIT_DELAY=2000
+# -DCONTROLLINO
+# -DESP_WIFI_AP=MYAP
+# -DESP_WIFI_PWD=MYPWD
+# -DWIFI_MANAGER_DISABLE
+# -DRESET_PIN=5
+# -DDHCP_RETRY_INTERVAL=60000
+# -DRESTART_LAN_ON_MQTT_ERRORS
+# -DW5500_CS_PIN=53
+# -DSYSLOG_ENABLE
+# -DDEVICE_NAME=MYDEVICE
+# -DDHT_DISABLE
+# -DCOUNTER_DISABLE
+# -DWITH_PRINTEX_LIB
+# -DCSSHDC_DISABLE

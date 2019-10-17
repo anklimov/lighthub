@@ -377,7 +377,7 @@ void printIPAddress(IPAddress ipAddress) {
 }
 
 
-char* setTopic(char* buf, int8_t buflen, topicType tt, char* suffix)
+char* setTopic(char* buf, int8_t buflen, topicType tt, const char* suffix)
 {
   aJsonObject *_root = NULL;
   aJsonObject *_l2 = NULL;
