@@ -1566,6 +1566,7 @@ for (short i = 0; i < 6; i++) {
         mac[i] = EEPROM.read(i);
         if (mac[i] != 0 && mac[i] != 0xff) isMacValid = true;
     }
+
 if (!isMacValid) {
     debugSerial<<F("No MAC configured: set firmware's MAC\n");
 

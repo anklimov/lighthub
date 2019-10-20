@@ -17,6 +17,7 @@ GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
 
 */
+#pragma once
 #include "options.h"
 #include "abstractout.h"
 
@@ -73,7 +74,7 @@ e-mail    anklimov@gmail.com
 #define CMD_FAN 0xd
 #define CMD_DRY 0xe
 #define CMD_SET 0xf
-#define CMD_HIGH 0x10
+#define CMD_HIGH 0x10  //AC fan leve
 #define CMD_MED 0x11
 #define CMD_LOW 0x12
 //#define CMD_CURTEMP 0xf
@@ -176,7 +177,7 @@ class Item
   inline int Toggle(){return Ctrl(CMD_TOGGLE);};
   int Poll();
   int SendStatus(int sendFlags);
-
+  int isActive();
   protected:
   short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
   int VacomSetFan (int8_t  val, int8_t  cmd=0);
@@ -184,7 +185,6 @@ class Item
   int modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value);
   int modbusDimmerSet(uint16_t value);
   void mb_fail();
-  int isActive();
   void Parse();
   int checkModbusDimmer();
   int checkModbusDimmer(int data);
