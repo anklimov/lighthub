@@ -53,6 +53,11 @@ int out_SPILed::Poll()
 return 1;
 };
 
+int out_SPILed::getChanType()
+{
+  return CH_RGB;
+}
+
 int out_SPILed::PixelCtrl(CHstore *st, short cmd, int from, int to, bool show, bool rgb)
 {
   //debugSerial<<F("cmd: ")<<cmd<<endl;
@@ -181,6 +186,7 @@ else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
 return 1;
 //break;
 case S_CMD:
+      item->setCmd(cmd);
       switch (cmd)
           {
           case CMD_ON:

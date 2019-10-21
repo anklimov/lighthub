@@ -1468,9 +1468,11 @@ int Item::SendStatus(int sendFlags) {
       {
       // Preparing parameters payload //////////
        CHstore st;
+       int chanType = itemType;
+        if (driver) chanType = driver->getChanType();
        //retrive stored values
        st.aslong = getVal();
-       switch (itemType) {
+       switch (chanType) {
                //case CH_GROUP:
                case CH_RGBW:
                case CH_RGB:
@@ -1481,6 +1483,9 @@ int Item::SendStatus(int sendFlags) {
                 snprintf(valstr, sizeof(valstr), "%d,%d,%d", st.h,st.s,st.v);
                else
                 snprintf(valstr, sizeof(valstr), "%d", st.v);
+            break;
+              case CH_RELAY:
+                sendFlags &= ~SEND_PARAMETERS;  //No need to send value for relay
             break;
                default:
                snprintf(valstr, sizeof(valstr), "%d", st.aslong);
