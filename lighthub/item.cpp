@@ -26,7 +26,11 @@ e-mail    anklimov@gmail.com
 
 #ifdef _dmxout
 #include "dmx.h"
+#ifdef ADAFRUIT_LED
+#include <Adafruit_NeoPixel.h>
+#else
 #include "FastLED.h"
+#endif
 #endif
 
 #ifndef MODBUS_DISABLE
@@ -364,8 +368,10 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
       case CMD_JSON: //JSON input (not implemented yet
           break;
 #if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266) and not defined(ARDUINO_ARCH_STM32) and not defined(DMX_DISABLE)
+    #ifndef ADAFRUIT_LED
       case CMD_RGB: //RGB color in #RRGGBB notation
       {
+
           suffixCode=S_HSV; //override code for known payload
           CRGB rgb;
           if (sscanf((const char*)payload, "#%2X%2X%2X", &rgb.r, &rgb.g, &rgb.b) == 3) {
@@ -378,6 +384,7 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
           }
           break;
       }
+  #endif
 #endif
       default: //some known command
           return Ctrl(cmd, 0, NULL, send, suffixCode, subItem);
@@ -800,10 +807,18 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         case CH_RGB: // RGB
         if (iaddr>0)
         {
+          #ifdef ADAFRUIT_LED
+            Adafruit_NeoPixel strip(0, 0, 0);
+            uint32_t rgb = strip.ColorHSV(map(Par[0], 0, 365, 0, 655535), rgbSaturation, rgbValue);
+            DmxWrite(iaddr, (rgb >> 16)& 0xFF);
+            DmxWrite(iaddr + 1, (rgb >> 8) & 0xFF);
+            DmxWrite(iaddr + 2, rgb & 0xFF);
+          #else
             CRGB rgb = CHSV(map(Par[0], 0, 365, 0, 255), rgbSaturation, rgbValue);
             DmxWrite(iaddr, rgb.r);
             DmxWrite(iaddr + 1, rgb.g);
             DmxWrite(iaddr + 2, rgb.b);
+          #endif
             break;
         }
         case CH_WHITE:

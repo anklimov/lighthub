@@ -1,13 +1,29 @@
 // Configuration of drivers enabled
-#ifndef PIO_SRC_REV
-#define PIO_SRC_REV v0.999
+
+#ifndef FASTLED
+#define ADAFRUIT_LED
+#endif
+// ADAFRUIT library allow to dynamically configure SPI LED Strip Parameters
+
+// If not defined ADAFRUIT_LED - FastLED library will be used instead
+// And strip type, pin, order must defined on compilation time
+#ifndef CONTROLLER
+#define CONTROLLER TM1809
+#endif
+
+#ifndef DATA_PIN
+#define DATA_PIN 4
+#endif
+
+#ifndef ORDER
+#define ORDER BRG
 #endif
 
 #define TXEnablePin 13
 #define ESP_EEPROM_SIZE 2048
 
 #ifndef AVR_DMXOUT_PIN
-#define AVR_DMXOUT_PIN 3
+#define AVR_DMXOUT_PIN 18
 #endif
 
 #define T_ATTEMPTS 200
@@ -78,19 +94,6 @@
 #ifndef HOMETOPIC
 #define HOMETOPIC  "myhome"
 #endif
-/*
-#ifndef OUTTOPIC
-#define OUTTOPIC "/myhome/s_out/"
-#endif
-
-#ifndef CMDTOPIC
-#define CMDTOPIC "/myhome/in/command/"
-#endif
-
-#ifndef INTOPIC
-#define INTOPIC  "/myhome/in/"
-#endif
-*/
 
 //Default output topic
 #ifndef OUTTOPIC

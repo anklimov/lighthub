@@ -121,9 +121,9 @@
 #include <ModbusMaster.h>
 #endif
 
-#ifndef DMX_DISABLE
-#include "FastLED.h"
-#endif
+//#ifndef DMX_DISABLE
+//#include "FastLED.h"
+//#endif
 
 #ifdef _owire
 #include "owTerm.h"

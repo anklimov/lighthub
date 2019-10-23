@@ -4,23 +4,63 @@
 #include "Arduino.h"
 #include "options.h"
 #include "Streaming.h"
-#include "FastLED.h"
+
 #include "item.h"
 
-#define NUM_LEDS 43
-#define DATA_PIN 4
+#ifdef ADAFRUIT_LED
 
-//static CRGB leds[NUM_LEDS];
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+ #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
+#endif
+Adafruit_NeoPixel *leds = NULL;
+
+#else
+#include "FastLED.h"
 static CRGB *leds = NULL;
+
+#endif
+
+#define NUM_LEDS 43
+
 static int driverStatus = CST_UNKNOWN;
+
+void out_SPILed::getConfig()
+{
+  pin=item->getArg(0);
+  if(pin<=0) pin=3;
+
+  numLeds=item->getArg(1);
+  if (numLeds<=0) numLeds=NUM_LEDS;
+
+  ledsType=item->getArg(2);
+  #ifdef ADAFRUIT_LED
+  if (ledsType<=0) ledsType= NEO_BRG + NEO_KHZ800;
+  #endif
+}
+
 
 int  out_SPILed::Setup()
 {
+getConfig();
 Serial.println("SPI-LED Init");
 
-leds = new CRGB [NUM_LEDS]; //Allocate dynamic memory for LED objects
+if (!leds)
+{
+#ifdef ADAFRUIT_LED
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+  clock_prescale_set(clock_div_1);
+#endif
+leds = new Adafruit_NeoPixel(numLeds, pin, ledsType);
+leds->begin();
+#else
+leds = new CRGB [numLeds]; //Allocate dynamic memory for LED objects
+//template< CONTROLLER = TM1809, uint8_t DATA_PIN = pin, EOrder ORDER = BRG >
+//FastLED.addLeds<TM1809, pin, BRG>(leds, numLeds);
+FastLED.addLeds<CONTROLLER, DATA_PIN, ORDER>(leds, numLeds);
+#endif
+}
 
-FastLED.addLeds<TM1809, DATA_PIN, BRG>(leds, NUM_LEDS);
 driverStatus = CST_INITIALIZED;
 return 1;
 }
@@ -29,9 +69,15 @@ int  out_SPILed::Stop()
 {
 Serial.println("SPI-LED De-Init");
 //FastLED.addLeds<TM1809, DATA_PIN, BRG>(leds, NUM_LEDS);
+#ifdef ADAFRUIT_LED
+leds->clear();
+delete leds;
+#else
 FastLED.clear(true);
-driverStatus = CST_UNKNOWN;
 delete [] leds;
+#endif
+driverStatus = CST_UNKNOWN;
+
 return 1;
 }
 
@@ -55,52 +101,88 @@ return 1;
 
 int out_SPILed::getChanType()
 {
-  return CH_RGB;
+  if  ((ledsType>>4) == (ledsType>>6))
+   return CH_RGB;
+  else
+   return CH_RGBW;
 }
 
 int out_SPILed::PixelCtrl(CHstore *st, short cmd, int from, int to, bool show, bool rgb)
 {
   //debugSerial<<F("cmd: ")<<cmd<<endl;
-  CRGB pixel;
+#ifdef ADAFRUIT_LED
+uint32_t pixel;
+#else
+CRGB pixel;
+#endif
   if (!rgb)
   {
   int Saturation = map(st->s, 0, 100, 0, 255);
   int Value      = map(st->v, 0, 100, 0, 255);
+
+#ifdef ADAFRUIT_LED
+  uint16_t Hue        = map(st->h, 0, 365, 0, 655535);
+  pixel      = leds->ColorHSV(Hue, Saturation, Value);
+#else
   int Hue        = map(st->h, 0, 365, 0, 255);
   pixel      = CHSV(Hue, Saturation, Value);
+#endif
+
   debugSerial<<F("hsv: ")<<st->h<<F(",")<<st->s<<F(",")<<st->v<<endl;
   }
-  if (to>NUM_LEDS-1) to=NUM_LEDS-1;
+  if (to>numLeds-1) to=numLeds-1;
   if (from<0) from=0;
 
   for (int i=from;i<=to;i++)
   {
     switch (cmd) {
       case CMD_ON:
+
+      #ifdef ADAFRUIT_LED
+      if (!leds->getPixelColor(i)) leds->setPixelColor(i, leds->Color(255, 255, 255));
+      #else
       if (!leds[i].r && !leds[i].g &&!leds[i].b) leds[i] = CRGB::White;
-      // FastLED.show();
+      #endif
+
+
       break;
       case CMD_OFF:
-       //pixel     = leds[i];
+       #ifdef ADAFRUIT_LED
+       leds->setPixelColor(i, leds->Color(0, 0, 0));
+       #else
        leds[i] = CRGB::Black;
-       //FastLED.show();
-       //leds[i] = pixel;
+       #endif
+
        break;
       default:
     if (rgb)
     {
+    #ifdef ADAFRUIT_LED
+      leds->setPixelColor(i, leds->Color(st->r,st->g,st->b));
+    #else
       leds[i] = CRGB(st->r,st->g,st->b);
+    #endif
     }
     else
     {
+    #ifdef ADAFRUIT_LED
+      leds->setPixelColor(i, pixel);
+    #else
       leds[i] = pixel;
+    #endif
+
     }
 
    }
   } //for
      if (show)
           {
+          #ifdef ADAFRUIT_LED
+          leds->show();
+          #else
           FastLED.show();
+          #endif
+
           debugSerial<<F("Show")<<endl;
           }
 return 1;
@@ -113,7 +195,7 @@ bool toExecute = (chActive>0);
 CHstore st;
 if (cmd>0 && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
-int from=0, to=NUM_LEDS-1; //All LEDs on the strip by default
+int from=0, to=numLeds-1; //All LEDs on the strip by default
 // retrive LEDs range from suffix
 if (subItem)
 { //Just single LED to control todo - range
