@@ -49,6 +49,8 @@ extern int8_t ethernetIdleCount;
 static unsigned long lastctrl = 0;
 static aJsonObject *lastobj = NULL;
 
+int retrieveCode(char **psubItem);
+
 int txt2cmd(char *payload) {
     int cmd = CMD_UNKNOWN;
 
@@ -165,9 +167,29 @@ Item::~Item()
 
 Item::Item(char *name) //Constructor
 {
+    char * pDefaultSubItem = defaultSubItem;
     driver = NULL;
+    defaultSubItem[0] =0;
+    defaultSuffixCode = 0;
     if (name && items)
+    {   char* sub;
+        if (sub=strchr(name,'/'))
+        {
+        char  buf [MQTT_SUBJECT_LENGTH];
+        short i;
+        for(i=0;(name[i] && (name[i]!='/') && (i<MQTT_SUBJECT_LENGTH));i++)
+            buf[i]=name[i];
+        buf[i]=0;
+        itemArr = aJson.getObjectItem(items, buf);
+        sub++;
+        strncpy(defaultSubItem,sub,sizeof(defaultSubItem));
+        defaultSuffixCode = retrieveCode (&pDefaultSubItem);
+        if (!pDefaultSubItem) defaultSubItem[0] =0; //Zero string
+        //debugSerial<<F("defaultSubItem: ")<<defaultSubItem<<F(" defaultSuffixCode:")<<defaultSuffixCode<<endl;
+        }
+        else
         itemArr = aJson.getObjectItem(items, name);
+    }
     else itemArr = NULL;
     Parse();
 }
@@ -304,19 +326,16 @@ boolean Item::getEnableCMD(int delta) {
 }
 */
 
-#define MAXCTRLPAR 3
+// If retrieving subitem code ok - return it
+// parameter will point on the rest truncated part of subitem
+// or pointer to NULL of whole string converted to subitem code
 
-// myhome/dev/item/subItem
-int Item::Ctrl(char * payload, boolean send, char * subItem){
-  if (!payload) return 0;
-
-char* suffix = NULL;
-int   suffixCode = 0;
-int   setCommand = CMD_SET;  //default SET behavior now - not turn on channels
-
-if (subItem && strlen(subItem))
+int retrieveCode(char **psubItem)
 {
-if (suffix = strrchr(subItem, '/')) //Trying to retrieving right part
+int   suffixCode;
+char* suffix;
+
+if (suffix = strrchr(*psubItem, '/')) //Trying to retrieve right part
   {
     *suffix= 0; //Truncate subItem string
     suffix++;
@@ -325,21 +344,41 @@ if (suffix = strrchr(subItem, '/')) //Trying to retrieving right part
     }
 else
   {
-    suffix = subItem;
+    suffix = *psubItem;
     suffixCode = txt2subItem(suffix);
     if (suffixCode)  // some known suffix
-          subItem = NULL;
+          *psubItem = NULL;
           // myhome/dev/item/suffix
 
     else //Invalid suffix - fallback to Subitem notation
           suffix = NULL;
     // myhome/dev/item/subItem
   }
-} else
-{
-//suffixCode=S_SET; /// no subItem - To be removed - old compatmode
-setCommand = 0; /// Old-style - turn ON by set value
+return suffixCode;
 }
+
+#define MAXCTRLPAR 3
+
+// myhome/dev/item/subItem
+int Item::Ctrl(char * payload, boolean send, char * subItem){
+  if (!payload) return 0;
+
+
+int   suffixCode = 0;
+//int   setCommand = CMD_SET;  //default SET behavior now - not turn on channels
+int setCommand = 0;
+if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
+    subItem = defaultSubItem;  /// possible problem here with truncated default
+
+if (subItem && strlen(subItem))
+    suffixCode = retrieveCode(&subItem);
+
+if (!suffixCode && defaultSuffixCode)
+        suffixCode = defaultSuffixCode;
+
+//if (!suffixCode)
+//        setCommand = 0; /// Old-style - turn ON by set value
+
 
 int i=0;
 while (payload[i]) {payload[i]=toupper(payload[i]);i++;};
@@ -405,6 +444,16 @@ short Item::cmd2changeActivity(int lastActivity, short defaultCmd)
 */
 
 int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode, char *subItem) {
+
+  if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
+      subItem = defaultSubItem;  /// possible problem here with truncated default
+
+  if (subItem && strlen(subItem))
+      suffixCode = retrieveCode(&subItem);
+
+  if (!suffixCode && defaultSuffixCode)
+      suffixCode = defaultSuffixCode;
+
 
     debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Suff=")<<suffixCode<<F(" Cmd=")<<cmd<<F(" Par=(");
     if (!itemArr) return -1;
@@ -505,10 +554,11 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                         return -3;
                       }
                 break;
+                /*
                 case CMD_SET:
                 res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
                 break;
-
+*/
                 default:
                 res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
                 setCmd(cmd);
@@ -517,11 +567,12 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             }
     // Legacy monolite core code
     bool toExecute = (chActive>0); //if channel is already active - unconditionally propogate changes
-    switch (cmd) {
-        case 0:       // old style SET - with turning ON
-        toExecute = true;
-        case CMD_SET: // new style SET - w/o turning ON
 
+    switch (cmd) {
+        case 0:      // No command - set params
+  //      toExecute = true;
+  //      case CMD_SET: // new style SET - w/o turning ON
+    if (!suffixCode) toExecute= true;
         //if (/*itemType !=CH_THERMO && */send) setCmd(CMD_SET); //prevent ON thermostat by semp set ????
       ////////  setCmd(CMD_SET); ///??? trying... no
             switch (itemType) {
@@ -1522,7 +1573,7 @@ int Item::SendStatus(int sendFlags) {
             strcpy_P(cmdstr, OFF_P);
             break;
         case 0:
-        case CMD_SET:
+    ///    case CMD_SET:
         sendFlags &= ~SEND_COMMAND; // Not send command for parametrized req
             break;
         default:

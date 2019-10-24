@@ -73,7 +73,7 @@ e-mail    anklimov@gmail.com
 #define CMD_AUTO 0xc
 #define CMD_FAN 0xd
 #define CMD_DRY 0xe
-#define CMD_SET 0xf
+//#define CMD_SET 0xf
 #define CMD_HIGH 0x10  //AC fan leve
 #define CMD_MED 0x11
 #define CMD_LOW 0x12
@@ -179,7 +179,7 @@ class Item
   int SendStatus(int sendFlags);
   int isActive();
   protected:
-  short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
+  //short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
   int VacomSetFan (int8_t  val, int8_t  cmd=0);
   int VacomSetHeat(int addr, int8_t  val, int8_t  cmd=0);
   int modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value);
@@ -192,5 +192,7 @@ class Item
   void sendDelayedStatus();
 
   int checkFM();
+  char defaultSubItem[10];
+  int  defaultSuffixCode;
 
 };
