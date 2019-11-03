@@ -21,6 +21,10 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 #include "abstractout.h"
 
+#define POLLING_SLOW 1
+#define POLLING_FAST 2
+#define POLLING_INT  3
+
 #define S_NOTFOUND  0
 #define S_SETnCMD 0
 #define S_CMD 1
@@ -51,6 +55,12 @@ e-mail    anklimov@gmail.com
 #define CH_VC      9  //Vacom modbus motor regulator
 #define CH_AC 10  //AC Haier
 #define CH_SPILED 11
+#define CH_MOTOR  12
+//#define CHANNEL_TYPES 13
+
+//static uint32_t pollInterval[CHANNEL_TYPES] = {0,0,0,0,MODB};
+//static uint32_t nextPollTime[CHANNEL_TYPES] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+
 #define CH_WHITE   127//
 
 #define CMD_NUM 0
@@ -79,14 +89,14 @@ e-mail    anklimov@gmail.com
 #define CMD_LOW 0x12
 //#define CMD_CURTEMP 0xf
 #define CMD_MASK 0xff
-#define FLAG_MASK 0x0f00
+#define FLAG_MASK 0xff00
 
 
 #define SEND_COMMAND 0x100
 #define SEND_PARAMETERS 0x200
 #define SEND_RETRY 0x400
 #define SEND_DEFFERED 0x800
-
+#define ACTION_NEEDED 0x1000
 
 //#define CMD_REPORT 32
 
@@ -148,7 +158,7 @@ typedef union
 class Item
 {
   public:
-  aJsonObject *itemArr, *itemArg,*itemVal;
+  aJsonObject *itemArr, *itemArg,*itemVal,*itemExt;
   uint8_t itemType;
   abstractOut * driver;
 
@@ -165,6 +175,8 @@ class Item
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array
   uint8_t getCmd();
+  long int getExt(); //From int val OR array
+  void setExt(long int par);
   void setCmd(uint8_t cmdValue);
   short getFlag   (short flag=FLAG_MASK);
   void setFlag   (short flag);
@@ -175,7 +187,7 @@ class Item
   inline int On (){return Ctrl(CMD_ON);};
   inline int Off(){return Ctrl(CMD_OFF);};
   inline int Toggle(){return Ctrl(CMD_TOGGLE);};
-  int Poll();
+  int Poll(short cause);
   int SendStatus(int sendFlags);
   int isActive();
   protected:

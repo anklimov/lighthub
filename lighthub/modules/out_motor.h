@@ -1,20 +1,17 @@
-
 #pragma once
 #include "options.h"
-#ifndef SPILED_DISABLE
+#ifndef MOTOR_DISABLE
 #include <abstractout.h>
 #include <item.h>
-#ifdef ADAFRUIT_LED
 
-#include <Adafruit_NeoPixel.h>
-#else
-#include "FastLED.h"
+#ifndef POS_ERR
+#define POS_ERR 2
 #endif
 
-class out_SPILed : public abstractOut {
+class out_Motor : public abstractOut {
 public:
 
-    out_SPILed(Item * _item):abstractOut(_item){getConfig();};
+    out_Motor(Item * _item):abstractOut(_item){getConfig();};
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;
@@ -22,10 +19,13 @@ public:
     int isActive() override;
     int getChanType() override;
     int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, int suffixCode=0, char* subItem=NULL) override;
-    int PixelCtrl(CHstore *st, short cmd, int from =0 , int to = 1024, bool show = 1, bool rgb = 0);
-    int numLeds;
-    int8_t pin;
-    int ledsType;
+
+    int8_t pinUp;
+    int8_t pinDown;
+    int8_t pinFeedback;
+    int16_t maxOnTime;
+    uint16_t feedbackOpen;
+    uint16_t feedbackClosed;
 protected:
     void getConfig();
 };

@@ -94,9 +94,9 @@ debugSerial<< F(" val:")<<st.v<<endl;
 return st.v;
 }
 
-int out_SPILed::Poll()
+int out_SPILed::Poll(short cause)
 {
-return 1;
+return 0;
 };
 
 int out_SPILed::getChanType()

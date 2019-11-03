@@ -1746,16 +1746,34 @@ void inputSetup(void) {
         }
 }
 
-//#ifndef MODBUS_DISABLE
+
 void pollingLoop(void) {
+// FAST POLLINT - as often AS possible every item
+if (items) {
+    aJsonObject * item = items->child;
+    while (items && item)
+        if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
+            Item it(item);
+            if (it.isValid()) {
+              it.Poll(POLLING_FAST);
+            } //isValid
+            item = item->next;
+        }  //if
+}
+
+// SLOW POLLING
     boolean done = false;
     if (lanStatus == RETAINING_COLLECTING) return;
     if (millis() > nextPollingCheck) {
         while (pollingItem && !done) {
             if (pollingItem->type == aJson_Array) {
                 Item it(pollingItem);
-                nextPollingCheck = millis() + it.Poll();    //INTERVAL_CHECK_MODBUS;
-                done = true;
+                uint32_t ret = it.Poll(POLLING_SLOW);
+                if (ret)
+                {
+                  nextPollingCheck = millis() +  ret;  //INTERVAL_CHECK_MODBUS;
+                  done = true;
+                }
             }//if
             pollingItem = pollingItem->next;
             if (!pollingItem) {
@@ -1765,7 +1783,6 @@ void pollingLoop(void) {
         } //while
     }//if
 }
-//#endif
 
 bool isThermostatWithMinArraySize(aJsonObject *item, int minimalArraySize) {
     return (item->type == aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint == CH_THERMO) &&

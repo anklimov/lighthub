@@ -25,7 +25,7 @@ public:
 
     out_AC(Item * _item):abstractOut(_item){};
     int Setup() override;
-    int Poll() override;
+    int Poll(short cause) override;
     int Stop() override;
     int Status() override;
     int isActive() override;

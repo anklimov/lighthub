@@ -167,10 +167,10 @@ switch (cause)  {
     {
     #ifndef CSSHDC_DISABLE
          case IN_CCS811:
-         _ccs811.Poll();
+         _ccs811.Poll(POLLING_SLOW);
          break;
          case IN_HDC1080:
-         _hdc1080.Poll();
+         _hdc1080.Poll(POLLING_SLOW);
          break;
     #endif
     #ifndef DHT_DISABLE

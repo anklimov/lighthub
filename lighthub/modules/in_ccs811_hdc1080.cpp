@@ -2,6 +2,7 @@
 #include "Arduino.h"
 #include "options.h"
 #include "Streaming.h"
+#include "item.h"
 
 #if defined(M5STACK)
 #include <M5Stack.h>
@@ -79,10 +80,11 @@ SCL_HIGH();
 #endif
 }
 
-int in_hdc1080::Poll()
+int in_hdc1080::Poll(short cause)
 {
   float h,t;
   int reg;
+if (cause!=POLLING_SLOW) return 0;
 if (!HDC1080ready) {debugSerial<<F("HDC1080 not initialized")<<endl; return 0;}
 Serial.print("HDC Status=");
 Serial.println(reg=hdc1080.readRegister().rawData,HEX);
@@ -115,10 +117,10 @@ else //ESP I2C glitch
     Serial.println("I2C Reset");
     i2cReset();
   }
-return 1;
+return INTERVAL_POLLING;
 }
 
-int in_ccs811::Poll()
+int in_ccs811::Poll(short cause)
 {
   if (!CCS811ready) {debugSerial<<F("ccs811 not initialized")<<endl; return 0;}
   #ifdef WAK_PIN

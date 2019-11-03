@@ -233,8 +233,10 @@ int out_AC::isActive()
 return (power & 1);
 }
 
-int out_AC::Poll()
+int out_AC::Poll(short cause)
 {
+if (cause!=POLLING_SLOW) return 0;
+
 long now = millis();
   if (now - prevPolling > INTERVAL_AC_POLLING) {
     prevPolling = now;
@@ -253,7 +255,7 @@ delay(100);
       InsertData(data, 37);
     }
   }
-return 1;
+return INTERVAL_POLLING;
 };
 
 int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixCode, char* subItem)

@@ -41,7 +41,7 @@ public:
     //uint16_t ccs811Baseline;
     in_ccs811(Input * _in):abstractIn(_in){};
     int Setup() override;
-    int Poll() override;
+    int Poll(short cause) override;
 
 protected:
    void printDriverError( CCS811Core::status errorCode );
@@ -53,7 +53,7 @@ public:
     //ClosedCube_HDC1080 hdc1080;
     in_hdc1080(Input * _in):abstractIn(_in){};
     int Setup() override;
-    int Poll() override;
+    int Poll(short cause) override;
 
 protected:
     void printSerialNumber();
