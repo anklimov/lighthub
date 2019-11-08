@@ -722,12 +722,12 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 switch (itemType) {
                   case CH_DIMMER:
                   case CH_MODBUS:
-                  if (st.aslong<MIN_VOLUME) st.aslong=INIT_VOLUME;
+                  if (st.aslong<MIN_VOLUME && send) st.aslong=INIT_VOLUME;
                   setVal(st.aslong);
                   break;
                   case CH_RGB:
                   case CH_RGBW:
-                  if (st.aslong && (st.v<MIN_VOLUME)) st.v=INIT_VOLUME;
+                  if (st.aslong && (st.v<MIN_VOLUME) && send) st.v=INIT_VOLUME;
                   setVal(st.aslong);
                 }
 
@@ -894,7 +894,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         {
           #ifdef ADAFRUIT_LED
             Adafruit_NeoPixel strip(0, 0, 0);
-            uint32_t rgb = strip.ColorHSV(map(Par[0], 0, 365, 0, 655535), rgbSaturation, rgbValue);
+            uint32_t rgb = strip.ColorHSV(map(Par[0], 0, 365, 0, 65535), rgbSaturation, rgbValue);
             DmxWrite(iaddr, (rgb >> 16)& 0xFF);
             DmxWrite(iaddr + 1, (rgb >> 8) & 0xFF);
             DmxWrite(iaddr + 2, rgb & 0xFF);
@@ -1548,7 +1548,7 @@ switch (cause)
 
 void Item::sendDelayedStatus()
 { long int flags = getFlag(SEND_COMMAND | SEND_PARAMETERS);
-  debugSerial<<flags<<F(" Delayed Status ")<<itemArr->name<<endl;
+//  debugSerial<<flags<<F(" Delayed Status ")<<itemArr->name<<endl;
       if (flags)
       {
       SendStatus(SEND_COMMAND | SEND_PARAMETERS);

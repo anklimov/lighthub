@@ -187,7 +187,7 @@ case S_SET:
             if (chActive>0 && !st) item->setCmd(CMD_OFF);
             if (chActive==0 && st) item->setCmd(CMD_ON);
             item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
-            item->setExt(millis()+maxOnTime); //Extend motor time
+            if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
           }
           else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
 
@@ -211,7 +211,7 @@ case S_CMD:
            st = item->getVal();
 
 
-            if (st && (st<MIN_VOLUME)) st=INIT_VOLUME;
+            if (st && (st<MIN_VOLUME) && send) st=INIT_VOLUME;
             item->setVal(st);
 
             if (st)  //Stored smthng
@@ -227,12 +227,12 @@ case S_CMD:
               item->setVal(st);
               if (send) item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             }
-            item->setExt(millis()+maxOnTime); //Extend motor time
+            if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
             return 1;
 
             case CMD_OFF:
               if (send) item->SendStatus(SEND_COMMAND);
-              item->setExt(millis()+maxOnTime); //Extend motor time
+              if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
             return 1;
 
 } //switch cmd

@@ -121,7 +121,7 @@ CRGB pixel;
   int Value      = map(st->v, 0, 100, 0, 255);
 
 #ifdef ADAFRUIT_LED
-  uint16_t Hue        = map(st->h, 0, 365, 0, 655535);
+  uint16_t Hue        = map(st->h, 0, 365, 0, 65535);
   pixel      = leds->ColorHSV(Hue, Saturation, Value);
 #else
   int Hue        = map(st->h, 0, 365, 0, 255);
@@ -287,7 +287,7 @@ case S_CMD:
                       PixelCtrl(&st,CMD_ON,from,to);
            else  //whole strip
             {
-            if (st.aslong && (st.v<MIN_VOLUME)) st.v=INIT_VOLUME;
+            if (st.aslong && (st.v<MIN_VOLUME) && send) st.v=INIT_VOLUME;
             item->setVal(st.aslong);
 
             if (st.aslong )  //Stored smthng
