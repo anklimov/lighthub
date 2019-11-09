@@ -182,7 +182,7 @@ debugSerial<<F("Forced execution");
 case S_SET:
           if (!Parameters || n==0) return 0;
           item->setVal(st=Parameters[0]); //Store
-          if (toExecute)
+          if (!suffixCode)
           {
             if (chActive>0 && !st) item->setCmd(CMD_OFF);
             if (chActive==0 && st) item->setCmd(CMD_ON);

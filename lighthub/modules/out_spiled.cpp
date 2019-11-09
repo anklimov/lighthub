@@ -240,7 +240,7 @@ case S_HSV:
           if (!subItem) //Whole strip
           {
           item->setVal(st.aslong); //Store
-          if (toExecute)
+          if (!suffixCode)
           {
             if (chActive>0 && !st.v) item->setCmd(CMD_OFF);
             if (chActive==0 && st.v) item->setCmd(CMD_ON);
@@ -258,7 +258,7 @@ case S_RGB:
   st.hsv_flag = 0;
 PixelCtrl(&st,0,from,to,toExecute,true);
 //item->setVal(st.aslong); //Store
-if (toExecute)
+if (!suffixCode)
 {
   if (chActive>0 && !st.aslong) item->setCmd(CMD_OFF);
   if (chActive==0 && st.aslong) item->setCmd(CMD_ON);

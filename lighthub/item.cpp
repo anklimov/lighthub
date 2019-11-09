@@ -604,11 +604,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
     switch (cmd) {
         case 0:      // No command - set params
-  //      toExecute = true;
-  //      case CMD_SET: // new style SET - w/o turning ON
+
     if (!suffixCode) toExecute= true;
-        //if (/*itemType !=CH_THERMO && */send) setCmd(CMD_SET); //prevent ON thermostat by semp set ????
-      ////////  setCmd(CMD_SET); ///??? trying... no
             switch (itemType) {
 
                 case CH_RGBW: //only if configured VAL array
@@ -642,7 +639,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                       st.hsv_flag = 1;
                    }
                 setVal(st.aslong);
-                if (toExecute)
+                if (!suffixCode)
                           { //
                             if (chActive>0 && !st.v) setCmd(CMD_OFF);
                             if (chActive==0 && st.v) setCmd(CMD_ON);
@@ -656,7 +653,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 case CH_MODBUS:
                     setVal(Par[0]);          // Store value
 //                    setCmd(cmd2changeActivity(chActive,cmd));
-                    if (toExecute)
+                    if (!suffixCode)
                               { // Not restoring, working
                                 if (chActive>0 && !Par[0]) setCmd(CMD_OFF);
                                 if (chActive==0 && Par[0]) setCmd(CMD_ON);
@@ -1192,13 +1189,14 @@ extern ModbusMaster node;
 
 
 int Item::VacomSetFan(int8_t val, int8_t cmd) {
+    uint8_t result;
     int addr = getArg();
     debugSerial<<F("VC#")<<addr<<F("=")<<val<<endl;
     if (modbusBusy) {
         setCmd(cmd);
         setVal(val);
         mb_fail();
-        return -1;
+        return 0;
     }
     modbusBusy = 1;
     uint8_t j;//, result;
@@ -1212,21 +1210,25 @@ int Item::VacomSetFan(int8_t val, int8_t cmd) {
         //node.writeSingleRegister(2001-1,1);
     } else node.writeSingleRegister(2001 - 1, 0);
     delay(50);
-    node.writeSingleRegister(2003 - 1, val * 100);
+    result = node.writeSingleRegister(2003 - 1, val * 100);
     modbusBusy = 0;
+
+    if (result == node.ku8MBSuccess) return 1;
+    mb_fail();
+    return 0;
 }
 
 #define a 0.1842f
 #define b -36.68f
 
 int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
-
+    uint8_t result;
     debugSerial<<F("VC_heat#")<<addr<<F("=")<<val<<F(" cmd=")<<cmd<<endl;
     if (modbusBusy) {
       setCmd(cmd);
       setVal(val);
       mb_fail();
-        return -1;
+      return 0;
     }
     modbusBusy = 1;
 
@@ -1246,19 +1248,23 @@ int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
     }
 
     //debugSerial<<regval);
-    node.writeSingleRegister(2004 - 1, regval);
+    result=node.writeSingleRegister(2004 - 1, regval);
     modbusBusy = 0;
+    if (result == node.ku8MBSuccess) return 1;
+    mb_fail();
+    return 0;
+
 }
 
 int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value) {
-
+    uint8_t result = 0;
     if (_regType != MODBUS_COIL_REG_TYPE || _regType != MODBUS_HOLDING_REG_TYPE) {
 
     }
 
     if (modbusBusy) {
       mb_fail();
-        return -1;
+        return 0;
     };
     modbusBusy = 1;
 
@@ -1276,15 +1282,20 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
     debugSerial<<addr<<F("=>")<<_HEX(_reg)<<F("(T:")<<_regType<<F("):")<<_HEX(value)<<endl;
     switch (_regType) {
         case MODBUS_HOLDING_REG_TYPE:
-            node.writeSingleRegister(_reg, value);
+            result = node.writeSingleRegister(_reg, value);
             break;
         case MODBUS_COIL_REG_TYPE:
-            node.writeSingleCoil(_reg, value);
+            result = node.writeSingleCoil(_reg, value);
             break;
         default:
             debugSerial<<F("Not supported reg type\n");
     }
     modbusBusy = 0;
+
+    if (result == node.ku8MBSuccess) return 1;
+    mb_fail();
+    return 0;
+
 }
 
 int Item::checkFM() {
