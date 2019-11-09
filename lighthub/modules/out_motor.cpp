@@ -86,7 +86,7 @@ switch (item->getCmd())
   break;
 }
 
-if (pinFeedback && (g_APinDescription[pinFeedback].ulPinAttribute & PIN_ATTR_ANALOG) == PIN_ATTR_ANALOG)
+if (pinFeedback && isAnalogPin(pinFeedback))
 {
 curPos=map(analogRead(pinFeedback),feedbackClosed,feedbackOpen,0,100);
 if (curPos<0) curPos=0;
@@ -113,7 +113,7 @@ if (dif<-POS_ERR)
   //PIN_ATTR_ANALOG
   //  uint32_t attr = g_APinDescription[pinUp].ulPinAttribute;
   //  if ((attr & PIN_ATTR_PWM) == PIN_ATTR_PWM) ;
-
+#ifndef ESP32
 if (digitalPinHasPWM(pinUp))
     {
       int velocity = map(-dif, 0, 10, 0, 255);
@@ -121,6 +121,7 @@ if (digitalPinHasPWM(pinUp))
       analogWrite(pinUp,velocity);
     }
 else
+#endif
    {
      digitalWrite(pinUp,HIGH);
    }
@@ -132,6 +133,7 @@ if (dif>POS_ERR)
 digitalWrite(pinUp,LOW);
 
 if (!item->getExt()) item->setExt(millis()+maxOnTime);
+#ifndef ESP32
 if (digitalPinHasPWM(pinDown))
 {
   int velocity = map(dif, 0, 10, 0, 255);
@@ -139,6 +141,7 @@ if (digitalPinHasPWM(pinDown))
   analogWrite(pinDown,velocity);
 }
 else
+#endif
 {
  digitalWrite(pinDown,HIGH);
 }

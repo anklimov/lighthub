@@ -1517,6 +1517,33 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     debugSerial<<F("\n(-)RESTART_LAN_ON_MQTT_ERRORS");
 #endif
+
+
+#ifdef CSSHDC_DISABLE
+    debugSerial<<F("\n(-)CCS811 & HDC1080");
+#else
+    debugSerial<<F("\n(+)CCS811 & HDC1080");
+#endif
+#ifndef AC_DISABLE
+    debugSerial<<F("\n(+)AC HAIER");
+#else
+    debugSerial<<F("\n(-)AC HAIER");
+#endif
+#ifndef MOTOR_DISABLE
+    debugSerial<<F("\n(+)MOTOR CTR");
+#else
+    debugSerial<<F("\n(-)MOTOR CTR");
+#endif
+#ifndef SPILED_DISABLE
+    debugSerial<<F("\n(+)SPI LED");
+#else
+    debugSerial<<F("\n(-)SPI LED");
+#endif
+#ifndef FASTLED
+    debugSerial<<F("\n(+)FASTLED");
+#else
+    debugSerial<<F("\n(+)ADAFRUIT LED");
+#endif
 debugSerial<<endl;
 
 

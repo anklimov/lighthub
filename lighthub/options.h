@@ -218,3 +218,33 @@
 #else
 #define W5500_ETHERNET_SHIELD
 #endif
+
+
+#if defined(ARDUINO_ARCH_AVR)
+#define PINS_COUNT NUM_DIGITAL_PINS
+#define isAnalogPin(p)  ((p >= 54) && (p<=69))
+#endif
+
+#if defined(__SAM3X8E__)
+#define isAnalogPin(p)  (g_APinDescription[p].ulPinAttribute & PIN_ATTR_ANALOG) == PIN_ATTR_ANALOG
+#endif
+
+#if defined(ARDUINO_ARCH_STM32)
+#define PINS_COUNT NUM_DIGITAL_PINS
+#define isAnalogPin(p)  ((p >= 44) && (p<=57))
+#endif
+
+#if defined(ESP8266)
+#define PINS_COUNT NUM_DIGITAL_PINS
+#define isAnalogPin(p)  ( p ==17 )
+#endif
+
+#if defined(ARDUINO_ARCH_ESP32)
+#define PINS_COUNT NUM_DIGITAL_PINS
+#define isAnalogPin(p)  ((p ==4) || (p>=12)&& (p<=15) || (p>=25)&& (p<=27)||(p>=32)&& (p<=33) || (p>=37)&& (p<=38))
+#endif
+
+#if defined(NRF5)
+#define PINS_COUNT NUM_DIGITAL_PINS
+#define isAnalogPin(p)  ((p >= 14) && (p<=21))
+#endif
