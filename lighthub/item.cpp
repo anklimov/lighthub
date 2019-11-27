@@ -685,7 +685,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         case CMD_ON:
 
 
-        if (itemType==CH_RGBW && getCmd() == CMD_ON && send /*&& getEnableCMD(500) */) {
+        if (itemType==CH_RGBW && getCmd() == CMD_ON && send  && (chActive>0)/*&& getEnableCMD(500) */) {
                   debugSerial<<F("Force White\n");
                   itemType = CH_WHITE;
                   Par[1] = 0;   //Zero saturation
@@ -869,7 +869,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         // 0..50 - white + RGB
         //50..100 RGB
         {
-            int k;
+  //          int k;
             if (Par[1]<50 && iaddr>0) { // Using white
                             DmxWrite(iaddr + 3, map((50 - Par[1]) * Par[2], 0, 5000, 0, 255));
                             int rgbvLevel = map (Par[1],0,50,0,255*2);
@@ -978,8 +978,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             //prescaler = 4 ---> PWM frequency is 120 Hz
             //prescaler = 5 ---> PWM frequency is 30 Hz
             //prescaler = 6 ---> PWM frequency is <20 Hz
-            int tval = 7;             // this is 111 in binary and is used as an eraser
 #if defined(__AVR_ATmega2560__)
+            int tval = 7;             // this is 111 in binary and is used as an eraser
             TCCR4B &= ~tval;   // this operation (AND plus NOT),  set the three bits in TCCR2B to 0
             TCCR3B &= ~tval;
             tval = 2;
@@ -997,9 +997,9 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             VacomSetFan(Par[0], cmd);
             break;
         case CH_VCTEMP: {
-            Item it(itemArg->valuestring);
-            if (it.isValid() && it.itemType == CH_VC)
-                VacomSetHeat(it.getArg(), Par[0], cmd);
+//            Item it(itemArg->valuestring);
+//            if (it.isValid() && it.itemType == CH_VC)
+            VacomSetHeat(Par[0], cmd);
             break;
         }
 #endif
@@ -1172,8 +1172,8 @@ int Item::modbusDimmerSet(uint16_t value)
                 if (numpar >= (MODBUS_CMD_ARG_MAX_SCALE+1)) _maxval = aJson.getArrayItem(itemArg, MODBUS_CMD_ARG_MAX_SCALE)->valueint;
                 int _regType = MODBUS_HOLDING_REG_TYPE;
                 if (numpar >= (MODBUS_CMD_ARG_REG_TYPE+1)) _regType = aJson.getArrayItem(itemArg, MODBUS_CMD_ARG_REG_TYPE)->valueint;
-                if (_maxval) modbusDimmerSet(_addr, _reg, _regType, _mask, map(value, 0, 100, 0, _maxval));
-                             else modbusDimmerSet(_addr, _reg, _regType, _mask, value);
+                if (_maxval) return modbusDimmerSet(_addr, _reg, _regType, _mask, map(value, 0, 100, 0, _maxval));
+                             else return modbusDimmerSet(_addr, _reg, _regType, _mask, value);
             }
         }
 #endif
@@ -1221,8 +1221,14 @@ int Item::VacomSetFan(int8_t val, int8_t cmd) {
 #define a 0.1842f
 #define b -36.68f
 
-int Item::VacomSetHeat(int addr, int8_t val, int8_t cmd) {
+int Item::VacomSetHeat(int8_t val, int8_t cmd) {
     uint8_t result;
+    int addr;
+
+    Item it(itemArg->valuestring);
+    if (it.isValid() && it.itemType == CH_VC) addr=it.getArg();
+    else return 0;
+
     debugSerial<<F("VC_heat#")<<addr<<F("=")<<val<<F(" cmd=")<<cmd<<endl;
     if (modbusBusy) {
       setCmd(cmd);
@@ -1300,7 +1306,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
 
 int Item::checkFM() {
     if (modbusBusy) return -1;
-    if (checkModbusRetry()) return -2;
+    if (checkVCRetry()) return -2;
     modbusBusy = 1;
 
     uint8_t j, result;
@@ -1404,13 +1410,39 @@ int Item::checkFM() {
 }
 
 boolean Item::checkModbusRetry() {
+  if (modbusBusy) return false;
+//    int cmd = getCmd();
+    if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
+      int val = getVal();
+      debugSerial<<F("Retrying dimmer CMD\n");
+      clearFlag(SEND_RETRY);     // Clean retry flag
+      modbusDimmerSet(val);
+      return true;
+    }
+return false;
+}
+
+boolean Item::checkVCRetry() {
+    if (modbusBusy) return false;
     int cmd = getCmd();
     if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
       int val = getVal();
-      debugSerial<<F("Retrying CMD\n");
+      debugSerial<<F("Retrying VC CMD\n");
       clearFlag(SEND_RETRY);     // Clean retry flag
-      //Ctrl(cmd,1,&val);      // Execute command again
-      modbusDimmerSet(val);
+      VacomSetFan(val,cmd);
+      return true;
+    }
+return false;
+}
+
+boolean Item::checkHeatRetry() {
+    if (modbusBusy) return false;
+    int cmd = getCmd();
+    if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
+      int val = getVal();
+      debugSerial<<F("Retrying VC temp CMD\n");
+      clearFlag(SEND_RETRY);     // Clean retry flag
+      VacomSetHeat(val,cmd);
       return true;
     }
 return false;
@@ -1534,6 +1566,11 @@ switch (cause)
             break;
         case CH_VC:
             checkFM();
+            sendDelayedStatus();
+            return INTERVAL_CHECK_MODBUS;
+            break;
+        case CH_VCTEMP:
+            checkHeatRetry();
             sendDelayedStatus();
             return INTERVAL_CHECK_MODBUS;
             break;

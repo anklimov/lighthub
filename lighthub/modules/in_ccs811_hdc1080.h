@@ -18,7 +18,16 @@
 
 #define SCL_LOW()   (GPES = (1 << twi_scl))
 #define SCL_HIGH()  (GPEC = (1 << twi_scl))
+#define SCL_RESET
 #endif
+
+/*
+#if defined (__SAM3X8E__)
+#define SCL_LOW()   digitalWrite(21,LOW)
+#define SCL_HIGH()  digitalWrite(21,HIGH)
+#define SCL_RESET
+#endif
+*/
 
 #if defined (ARDUINO_ARCH_ESP32)
 #undef WAK_PIN

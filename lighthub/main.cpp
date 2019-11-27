@@ -67,6 +67,9 @@ PWM Out
 
 #include "main.h"
 
+#if defined(OTA)
+#include <ArduinoOTA.h>
+#endif
 
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
@@ -301,6 +304,11 @@ lan_status lanLoop() {
             break;
 
         case HAVE_IP_ADDRESS:
+        #ifdef OTA
+        // start the OTEthernet library with internal (flash) based storage
+        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+        #endif
+
             if (!configOk)
                 lanStatus = loadConfigFromHttp(0, NULL);
             else lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
@@ -308,12 +316,15 @@ lan_status lanLoop() {
 
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
             wdt_res();
+
+
+
             ip_ready_config_loaded_connecting_to_broker();
             break;
 
         case RETAINING_COLLECTING:
             if (millis() > nextLanCheckTime) {
-                char buf[MQTT_TOPIC_LENGTH];
+                char buf[MQTT_TOPIC_LENGTH+1];
 
                 //Unsubscribe from status topics..
                 //strncpy_P(buf, outprefix, sizeof(buf));
@@ -579,7 +590,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
         //    wdt_en();
             configOk = true;
             // ... Temporary subscribe to status topic
-            char buf[MQTT_TOPIC_LENGTH];
+            char buf[MQTT_TOPIC_LENGTH+1];
 
   //          strncpy_P(buf, outprefix, sizeof(buf));
             setTopic(buf,sizeof(buf),T_OUT);
@@ -1641,6 +1652,10 @@ void setupCmdArduino() {
 }
 
 void loop_main() {
+  #if defined(OTA)
+  ArduinoOTA.poll();
+  #endif
+
   #if defined(M5STACK)
    // Initialize the M5Stack object
    M5.update();
