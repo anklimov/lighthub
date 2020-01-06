@@ -51,7 +51,7 @@
 #define EEPROM_offset EEPROM_offset_NotAlligned + (4 -(EEPROM_offset_NotAlligned & 3))
 
 #ifndef INTERVAL_CHECK_INPUT
-#define INTERVAL_CHECK_INPUT  50
+#define INTERVAL_CHECK_INPUT  15
 #endif
 
 #ifndef INTERVAL_CHECK_SENSOR

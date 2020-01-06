@@ -504,5 +504,13 @@ RebootFunc();
 #endif
 
 
+bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo)
+{
+  uint32_t endTime=(timestamp + time) % modulo;
+  return   ((currTime>endTime) && (currTime <timestamp)) ||
+              ((timestamp<endTime) && ((currTime>endTime) || (currTime <timestamp)));
+}
+
+
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

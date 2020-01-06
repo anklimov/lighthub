@@ -59,3 +59,4 @@ char* setTopic(char* buf, int8_t buflen, topicType tt, const char* suffix = NULL
 void printUlongValueToStr(char *valstr, unsigned long value);
 void scan_i2c_bus();
 void softRebootFunc();
+bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo = 0xFFFFFFFF);
