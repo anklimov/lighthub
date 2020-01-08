@@ -665,7 +665,9 @@ void Input::contactPoll(short cause) {
 switch (store->state) //Timer based transitions
 {
   case IS_PRESSED:
-      if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF)) changeState(IS_LONG, cause);
+      if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
+      if (!aJson.getObjectItem(inputObj, "lcmd") && !aJson.getObjectItem(inputObj, "rpcmd")) changeState(IS_WAITRELEASE, cause);
+         else changeState(IS_LONG, cause);
       break;
 
   case IS_LONG:
@@ -685,7 +687,9 @@ switch (store->state) //Timer based transitions
           break;
 
   case IS_PRESSED2:
-          if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF)) changeState(IS_LONG2, cause);
+          if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
+              if (!aJson.getObjectItem(inputObj, "lcmd2") && !aJson.getObjectItem(inputObj, "rpcmd2")) changeState(IS_WAITRELEASE, cause);
+              else changeState(IS_LONG2, cause);
               break;
 
   case IS_LONG2:
@@ -758,13 +762,13 @@ switch (store->state) //Timer based transitions
                 {
                   case IS_IDLE:
                        res = changeState(IS_PRESSED, cause);
-                       if (!aJson.getObjectItem(inputObj, "lcmd") && !aJson.getObjectItem(inputObj, "rpcmd")) changeState(IS_WAITRELEASE, cause);
+
                        break;
 
                   case IS_RELEASED:
                   case IS_WAITPRESS:
                        res = changeState(IS_PRESSED2, cause);
-                       if (!aJson.getObjectItem(inputObj, "lcmd2") && !aJson.getObjectItem(inputObj, "rpcmd2")) changeState(IS_WAITRELEASE, cause);
+
                        break;
 
                   case IS_RELEASED2:
@@ -776,12 +780,13 @@ switch (store->state) //Timer based transitions
           switch (store->state)  //Button released state transitions
           {
                 case IS_PRESSED:
-                case IS_WAITRELEASE:
+
                 res = changeState(IS_RELEASED, cause);
                 break;
 
                 case IS_LONG:
                 case IS_REPEAT:
+                case IS_WAITRELEASE:
                 res = changeState(IS_WAITPRESS, cause);
                 break;
 
