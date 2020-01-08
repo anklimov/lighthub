@@ -551,6 +551,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
               break;
       case CMD_DN:
       case CMD_UP:
+      {
       if (itemType == CH_GROUP) break;
       if (!n || !Par[0]) Par[0] = DEFAULT_INC_STEP;
       if (cmd == CMD_DN) Par[0]=-Par[0];
@@ -596,7 +597,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
                       modified = true;
                       break;
-                   }
+                   } //switch suffix
 
                  if (modified)
                  {
@@ -611,9 +612,27 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                  cmd=CMD_NUM;
                  suffixCode=S_SET;
                  debugSerial<<"to: h="<<Par[0]<<" s="<<Par[1] <<" v="<<Par[2]<<endl;
-                 }
-                }
+               } // if modified
+               } //RGBx channel
+              }
+              break;
+       case CMD_NUM:
+                   if (itemType == CH_GROUP || n!=1) break;
+                   st.aslong = getVal();
+                   switch (suffixCode)
+                   {
+                     case S_SAT:
+                     Par[1] = Par[0];
+                     Par[0] = st.h;
+                     Par[2] = st.v;
+                     n=3;
+                     break;
 
+                     case S_HUE:
+                     Par[1] = st.s;
+                     Par[2] = st.v;
+                     n=3;
+                   }
 
     }
 

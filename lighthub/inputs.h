@@ -62,9 +62,9 @@ e-mail    anklimov@gmail.com
 
 
 #define T_LONG 1000
-#define T_IDLE 600
+#define T_IDLE 700
 #define T_RPT 300
-#define T_RPT_PULSE 200
+#define T_RPT_PULSE 150
 
 
 
