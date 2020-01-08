@@ -134,6 +134,8 @@
 #define LAN_INIT_DELAY 500
 #endif
 
+#define DEFAULT_INC_STEP 5
+
 #if defined(ARDUINO_ARCH_AVR)
 //All options available
 #ifdef CONTROLLINO

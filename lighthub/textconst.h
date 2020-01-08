@@ -67,6 +67,8 @@ const char SET_P[]  PROGMEM = "set";
 const char CMD_P[]  PROGMEM = "cmd";
 const char MODE_P[] PROGMEM = "mode";
 const char FAN_P[]  PROGMEM = "fan";
+const char HUE_P[]   PROGMEM = "hue";
+const char SAT_P[]   PROGMEM = "sat";
 /*
 const char TEMP_P[] PROGMEM = "temp";
 const char SETPOINT_P[] PROGMEM = "setpoint";
@@ -76,6 +78,7 @@ const char HEAT_P[] PROGMEM = "heat";
 */
 const char HSV_P[]   PROGMEM = "HSV";
 const char RGB_P[]   PROGMEM = "RGB";
+
 /*
 const char RPM_P[]   PROGMEM = "rpm";
 const char STATE_P[] PROGMEM = "state";

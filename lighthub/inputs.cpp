@@ -452,7 +452,7 @@ void Input::dht22Poll() {
 }
 #endif
 
-bool Input::executeCommand(aJsonObject* cmd, char* defCmd)
+bool Input::executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
 {
   if (!cmd) return false;
 
@@ -465,7 +465,7 @@ bool Input::executeCommand(aJsonObject* cmd, char* defCmd)
     aJsonObject * command = cmd->child;
     while (command)
             {
-            executeCommand(command,defCmd);
+            executeCommand(command,toggle,defCmd);
             command = command->next;
             }
     }
@@ -474,15 +474,19 @@ bool Input::executeCommand(aJsonObject* cmd, char* defCmd)
   {
   aJsonObject *item = aJson.getObjectItem(cmd, "item");
   aJsonObject *icmd = aJson.getObjectItem(cmd, "icmd");
+  aJsonObject *irev = aJson.getObjectItem(cmd, "irev");
   aJsonObject *ecmd = aJson.getObjectItem(cmd, "ecmd");
+  aJsonObject *erev = aJson.getObjectItem(cmd, "erev");
   aJsonObject *emit = aJson.getObjectItem(cmd, "emit");
 
   char * itemCommand;
-  if(icmd) itemCommand = icmd->valuestring;
+  if (irev && toggle) itemCommand = irev->valuestring;
+  else if(icmd) itemCommand = icmd->valuestring;
     else    itemCommand = defCmd;
 
   char * emitCommand;
-  if(ecmd) emitCommand = ecmd->valuestring;
+  if (erev && toggle) itemCommand = erev->valuestring;
+  else if(ecmd) emitCommand = ecmd->valuestring;
     else    emitCommand = defCmd;
 
   debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
@@ -546,6 +550,7 @@ else if (store->delayedState)
             return false; //State changing is postponed already (( giving up
 
 aJsonObject *cmd = NULL;
+int8_t toggle=0;
 
   switch (newState)
   {
@@ -554,12 +559,15 @@ aJsonObject *cmd = NULL;
         {
         case IS_RELEASED:  //click
         cmd = aJson.getObjectItem(inputObj, "click");
+        toggle=store->toggle1;
         break;
         case IS_RELEASED2: //doubleclick
         cmd = aJson.getObjectItem(inputObj, "dclick");
+        toggle=store->toggle2;
         break;
         case IS_PRESSED3:  //tripple click
         cmd = aJson.getObjectItem(inputObj, "tclick");
+        toggle=store->toggle3;
         break;
         case IS_WAITPRESS: //do nothing
         break;
@@ -570,37 +578,50 @@ aJsonObject *cmd = NULL;
         break;
     case IS_PRESSED: //scmd
         cmd = aJson.getObjectItem(inputObj, "scmd");
+        toggle=store->toggle1;
+        store->toggle1 = !store->toggle1;
         break;
     case IS_PRESSED2: //scmd2
         cmd = aJson.getObjectItem(inputObj, "scmd2");
+        toggle=store->toggle2;
+        store->toggle2 = !store->toggle2;
         break;
     case IS_PRESSED3: //scmd3
         cmd = aJson.getObjectItem(inputObj, "scmd3");
+        toggle=store->toggle3;
+        store->toggle3 = !store->toggle3;
         break;
 
     case IS_RELEASED: //rcmd
     case IS_WAITPRESS:
     case IS_RELEASED2:
         cmd = aJson.getObjectItem(inputObj, "rcmd");
+  //      toggle=state->toggle1;
 
         break;
     case IS_LONG: //lcmd
         cmd = aJson.getObjectItem(inputObj, "lcmd");
+        toggle=store->toggle1;
         break;
     case IS_REPEAT: //rpcmd
         cmd = aJson.getObjectItem(inputObj, "rpcmd");
+        toggle=store->toggle1;
         break;
     case IS_LONG2: //lcmd2
         cmd = aJson.getObjectItem(inputObj, "lcmd2");
+        toggle=store->toggle2;
         break;
     case IS_REPEAT2: //rpcmd2
         cmd = aJson.getObjectItem(inputObj, "rpcmd2");
+        toggle=store->toggle2;
         break;
     case IS_LONG3: //lcmd3
         cmd = aJson.getObjectItem(inputObj, "lcmd3");
+        toggle=store->toggle3;
         break;
     case IS_REPEAT3: //rpcmd3
         cmd = aJson.getObjectItem(inputObj, "rpcmd3");
+        toggle=store->toggle3;
         break;
 
   }
@@ -611,9 +632,9 @@ aJsonObject *cmd = NULL;
   }
   if (cause != CHECK_INTERRUPT)
   {
-    executeCommand(cmd);
-    //Executed
     store->state=newState;
+    executeCommand(cmd,toggle);
+    //Executed  
     store->delayedState=false;
     return true;
   }
@@ -721,9 +742,9 @@ switch (store->state) //Timer based transitions
 
             if (inType & IN_PUSH_TOGGLE) { //To refactore
                 if (currentInputState) { //react on leading edge only (change from 0 to 1)
-                    store->logicState = !store->logicState;
+                    //store->logicState = !store->logicState;
                     store->lastValue = currentInputState;
-                    onContactChanged(store->logicState);
+                    onContactChanged(store->toggle1);
                 }
             } else
 
@@ -774,7 +795,7 @@ switch (store->state) //Timer based transitions
                 break;
         }
        if (res) { //State changed or postponed
-                  store->logicState = currentInputState;
+                //  store->logicState = currentInputState;
                   store->lastValue = currentInputState;
                 }
             }

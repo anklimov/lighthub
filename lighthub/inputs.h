@@ -56,10 +56,10 @@ e-mail    anklimov@gmail.com
 #define ANALOG_STATE_ATTEMPTS 6
 #define ANALOG_NOIZE 1
 
-#define CHECK_INPUT  1
-#define CHECK_SENSOR 2
+#define CHECK_SENSOR 1
+#define CHECK_INPUT  2
 #define CHECK_INTERRUPT 3
-#define CHECK_DELAYED 4
+
 
 #define T_LONG 1000
 #define T_IDLE 600
@@ -107,16 +107,17 @@ typedef union {
     // Analog input structure
     struct {
         uint8_t reserved;
-        uint8_t reserved2;
+        uint8_t logicState;
         int16_t currentValue;
     };
     // Digital input structure
     struct {
-        uint8_t  reserved3:1;
+        uint8_t  toggle1:1;
+        uint8_t  toggle2:1;
+        uint8_t  toggle3:1;
         uint8_t  lastValue:1;
-        uint8_t  logicState:1;
         uint8_t  delayedState:1;
-        uint8_t  bounce:4;
+        uint8_t  bounce:3;
         uint8_t  state:4;
         uint8_t  reqState:4;
         uint16_t timestamp16;
@@ -179,5 +180,5 @@ protected:
 
     char* getIdxField();
     bool changeState(uint8_t newState, short cause);
-    bool executeCommand(aJsonObject* cmd, char* defCmd = NULL);
+    bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
 };

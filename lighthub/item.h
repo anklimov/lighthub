@@ -33,6 +33,8 @@ e-mail    anklimov@gmail.com
 #define S_RGB 4
 #define S_FAN 5
 #define S_MODE 6
+#define S_HUE 7
+#define S_SAT 8
 #define S_ADDITIONAL 64
 /*
 
@@ -190,6 +192,7 @@ class Item
   int Poll(short cause);
   int SendStatus(int sendFlags);
   int isActive();
+  int getChanType();
   protected:
   //short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
   int VacomSetFan (int8_t  val, int8_t  cmd=0);

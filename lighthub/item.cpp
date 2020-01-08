@@ -57,6 +57,7 @@ int txt2cmd(char *payload) {
 
     // Check for command
     if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = CMD_NUM;
+    else if (*payload == '%') cmd = CMD_UP;
     else if (strcmp_P(payload, ON_P) == 0) cmd = CMD_ON;
     else if (strcmp_P(payload, OFF_P) == 0) cmd = CMD_OFF;
     else if (strcmp_P(payload, REST_P) == 0) cmd = CMD_RESTORE;
@@ -96,6 +97,8 @@ int txt2subItem(char *payload) {
     else if (strcmp_P(payload, HSV_P) == 0) cmd = S_HSV;
     else if (strcmp_P(payload, RGB_P) == 0) cmd = S_RGB;
     else if (strcmp_P(payload, FAN_P) == 0) cmd = S_FAN;
+    else if (strcmp_P(payload, HUE_P) == 0) cmd = S_HUE;
+    else if (strcmp_P(payload, SAT_P) == 0) cmd = S_SAT;
   /*  UnUsed now
     else if (strcmp_P(payload, SETPOINT_P) == 0) cmd = S_SETPOINT;
     else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
@@ -423,9 +426,13 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
 //if (isSet)
 //{
   switch (cmd) {
+      case CMD_UP:
+      case CMD_DN:
+      setCommand=cmd;
       case CMD_HSV:
-       suffixCode=S_HSV; //override code for known payload
+      // suffixCode=S_HSV; //override code for known payload
       case CMD_NUM:
+
        {
           short i = 0;
           int Par[3];
@@ -542,6 +549,71 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
               }
               break;
+      case CMD_DN:
+      case CMD_UP:
+      if (itemType == CH_GROUP) break;
+      if (!n || !Par[0]) Par[0] = DEFAULT_INC_STEP;
+      if (cmd == CMD_DN) Par[0]=-Par[0];
+      st.aslong = getVal();
+      debugSerial<<"from: h="<<st.h<<" s="<<st.s <<" v="<<st.v<<endl;
+                switch (suffixCode)
+                {
+                  case S_NOTFOUND:
+                  case S_SET:
+                  Par[0] += st.v;
+                  if (Par[0]>100) Par[0]=100;
+                  if (Par[0]<0) Par[0]=0;
+                  n=1;
+                  cmd=CMD_NUM;
+                  debugSerial<<" to v="<<Par[0]<<endl;
+                  break;
+                 }
+                int cType=getChanType();
+                if ( cType == CH_RGB || cType == CH_RGBW)
+                  {
+                  bool modified = false;
+                  switch (suffixCode)
+                    {
+                      case S_HSV:
+                      Par[0] += st.h;
+                      Par[1] += st.s;
+                      Par[2] += st.v;
+                      modified = true;
+                      break;
+
+                      case S_HUE:
+                      Par[0] += st.h;
+                      Par[1] = st.s;
+                      Par[2] = st.v;
+
+                      modified = true;
+                      break;
+
+                      case S_SAT:
+                      Par[1] = st.s + Par[0];
+                      Par[0] = st.h;
+                      Par[2] = st.v;
+
+                      modified = true;
+                      break;
+                   }
+
+                 if (modified)
+                 {
+                 if (Par[0]>365 ) Par[0]=0;
+                 if (Par[0]<0) Par[0]=365;
+                 if (Par[1]>100) Par[1]=100;
+                 if (Par[1]<0) Par[1]=0;
+                 if (Par[2]>100) Par[2]=100;
+                 if (Par[2]<0) Par[2]=0;
+
+                 n=3;
+                 cmd=CMD_NUM;
+                 suffixCode=S_SET;
+                 debugSerial<<"to: h="<<Par[0]<<" s="<<Par[1] <<" v="<<Par[2]<<endl;
+                 }
+                }
+
 
     }
 
@@ -554,7 +626,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 if (!chActive>0)  //if channel was'nt active before CMD_XON
                       {
                         debugSerial<<F("Turning XON\n");
-                        res = driver->Ctrl(CMD_ON, n, Parameters, send, suffixCode, subItem);
+                        res = driver->Ctrl(CMD_ON, n, Par, send, suffixCode, subItem);
                         setCmd(CMD_XON);
                       }
                   else
@@ -566,7 +638,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 case CMD_HALT:
                 if (chActive>0)  //if channel was active before CMD_HALT
                       {
-                        res = driver->Ctrl(CMD_OFF, n, Parameters, send, suffixCode, subItem);
+                        res = driver->Ctrl(CMD_OFF, n, Par, send, suffixCode, subItem);
                         setCmd(CMD_HALT);
                         return res;
                       }
@@ -579,7 +651,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 case CMD_OFF:
                 if (getCmd() != CMD_HALT) //Halted, ignore OFF
                      {
-                       res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
+                       res = driver->Ctrl(cmd, n, Par, send, suffixCode, subItem);
                        setCmd(CMD_OFF);
                      }
                 else
@@ -594,7 +666,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 break;
 */
                 default:
-                res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
+                res = driver->Ctrl(cmd, n, Par, send, suffixCode, subItem);
                 if (cmd) setCmd(cmd);
               }
               return res;
@@ -1759,6 +1831,10 @@ int Item::SendStatus(int sendFlags) {
     }
 }
 
-
+int Item::getChanType()
+{
+if (driver) return driver->getChanType();
+return itemType;
+}
 
 /////////////////////////////////////////
