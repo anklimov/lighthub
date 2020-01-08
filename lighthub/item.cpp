@@ -649,16 +649,23 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                          switch (suffixCode)
                          {
                                case S_SAT:
-                               Par[1] = Par[0];
+                               st.s = Par[0];
+
                                Par[0] = st.h;
+                               Par[1] = st.s;
                                Par[2] = st.v;
+
                                n=3;
+                               setVal(st.aslong);
                                break;
 
                                case S_HUE:
+                               st.h = Par[0];
                                Par[1] = st.s;
                                Par[2] = st.v;
+                               
                                n=3;
+                               setVal(st.aslong);
                              }
                          }
                     else // Non-color channel
@@ -770,7 +777,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                           }
                 else
                           {
-                          setCmd(0);  
+                          setCmd(0);
                           SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
                           }
                     break;
