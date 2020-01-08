@@ -35,7 +35,7 @@
 #define FM_OVERHEAT_CELSIUS 40.
 
 #define MIN_VOLUME 25
-#define INIT_VOLUME 50
+#define INIT_VOLUME 40
 
 #define MAXFLASHSTR 32
 #define PWDFLASHSTR 16

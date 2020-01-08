@@ -551,7 +551,7 @@ else if (store->delayedState)
 
 aJsonObject *cmd = NULL;
 int8_t toggle=0;
-
+if (newState!=store->state) debugSerial<<F("#")<<pin<<F(" ")<<store->state<<F("->") <<newState<<endl;
   switch (newState)
   {
     case IS_IDLE:
@@ -612,7 +612,7 @@ int8_t toggle=0;
         toggle=store->toggle2;
         break;
     case IS_REPEAT2: //rpcmd2
-        cmd = aJson.getObjectItem(inputObj, "rpcmd2");
+          cmd = aJson.getObjectItem(inputObj, "rpcmd2");
         toggle=store->toggle2;
         break;
     case IS_LONG3: //lcmd3
@@ -634,7 +634,7 @@ int8_t toggle=0;
   {
     store->state=newState;
     executeCommand(cmd,toggle);
-    //Executed  
+    //Executed
     store->delayedState=false;
     return true;
   }
@@ -758,11 +758,13 @@ switch (store->state) //Timer based transitions
                 {
                   case IS_IDLE:
                        res = changeState(IS_PRESSED, cause);
+                       if (!aJson.getObjectItem(inputObj, "lcmd") && !aJson.getObjectItem(inputObj, "rpcmd")) changeState(IS_WAITRELEASE, cause);
                        break;
 
                   case IS_RELEASED:
                   case IS_WAITPRESS:
                        res = changeState(IS_PRESSED2, cause);
+                       if (!aJson.getObjectItem(inputObj, "lcmd2") && !aJson.getObjectItem(inputObj, "rpcmd2")) changeState(IS_WAITRELEASE, cause);
                        break;
 
                   case IS_RELEASED2:
@@ -774,6 +776,7 @@ switch (store->state) //Timer based transitions
           switch (store->state)  //Button released state transitions
           {
                 case IS_PRESSED:
+                case IS_WAITRELEASE:
                 res = changeState(IS_RELEASED, cause);
                 break;
 

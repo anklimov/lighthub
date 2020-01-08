@@ -520,6 +520,29 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
     CHstore st;
     switch (cmd) {
         int t;
+       case CMD_ON:
+              if (getChanType()==CH_RGBW && getCmd() == CMD_ON && send  && (chActive>0)) {
+                          debugSerial<<F("Force White\n");
+                          st.aslong = getVal();
+                          //itemType = CH_WHITE;
+                          Par[0] = st.h;
+                          Par[1] = 0;   //Zero saturation
+                          Par[2] = 100; //Full power
+                          n=3;
+                          cmd=CMD_NUM;
+                          // Store
+/*
+                          st.h = Par[0];
+                          st.s = Par[1];
+                          st.v = Par[2];
+                          setVal(st.aslong);
+                          setCmd(cmd);
+                          //Send to OH
+                          if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS ); */
+                } // if forcewhite
+        break;
+
+
         case CMD_TOGGLE:
             if (chActive>0) cmd = CMD_OFF;
             else cmd = CMD_ON;
@@ -618,21 +641,28 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
               break;
        case CMD_NUM:
                    if (itemType == CH_GROUP || n!=1) break;
-                   st.aslong = getVal();
-                   switch (suffixCode)
-                   {
-                     case S_SAT:
-                     Par[1] = Par[0];
-                     Par[0] = st.h;
-                     Par[2] = st.v;
-                     n=3;
-                     break;
 
-                     case S_HUE:
-                     Par[1] = st.s;
-                     Par[2] = st.v;
-                     n=3;
-                   }
+                   int cType=getChanType();
+                   if ( cType == CH_RGB || cType == CH_RGBW)
+                   {
+                         st.aslong = getVal();
+                         switch (suffixCode)
+                         {
+                               case S_SAT:
+                               Par[1] = Par[0];
+                               Par[0] = st.h;
+                               Par[2] = st.v;
+                               n=3;
+                               break;
+
+                               case S_HUE:
+                               Par[1] = st.s;
+                               Par[2] = st.v;
+                               n=3;
+                             }
+                         }
+                    else // Non-color channel
+                    if (suffixCode == S_SAT || suffixCode == S_HUE) return -3;
 
     }
 
@@ -697,6 +727,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         case 0:      // No command - set params
 
     if (!suffixCode) toExecute= true;
+            if (suffixCode == S_HUE || suffixCode == S_SAT) break;
             switch (itemType) {
 
                 case CH_RGBW: //only if configured VAL array
@@ -733,10 +764,15 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 if (!suffixCode)
                           { //
                             if (chActive>0 && !st.v) setCmd(CMD_OFF);
-                            if (chActive==0 && st.v) setCmd(CMD_ON);
+                            else if (chActive==0 && st.v) setCmd(CMD_ON);
+                            else setCmd(0);
                             SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
                           }
-                else    SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                else
+                          {
+                          setCmd(0);  
+                          SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                          }
                     break;
                 case CH_PWM:
                 case CH_VC:
@@ -773,25 +809,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             debugSerial<<F("Already Active\n");
             if (itemType != CH_GROUP) return -3;
           }
-        case CMD_ON:
-
-
-        if (itemType==CH_RGBW && getCmd() == CMD_ON && send  && (chActive>0)/*&& getEnableCMD(500) */) {
-                  debugSerial<<F("Force White\n");
-                  itemType = CH_WHITE;
-                  Par[1] = 0;   //Zero saturation
-                  Par[2] = 100; //Full power
-                  // Store
-                  st.h = Par[0];
-                  st.s = Par[1];
-                  st.v = Par[2];
-                  setVal(st.aslong);
-                  setCmd(cmd);
-                  //Send to OH
-                  if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS );
-          break;
-        } // if forcewhite
-
+       case CMD_ON:
        case CMD_COOL:
        case CMD_AUTO:
        case CMD_HEAT:
@@ -890,28 +908,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 for (short i = 0; i < params; i++) {
                     debugSerial<<F("Restored: ")<<i<<F("=")<<Par[i]<<endl;
                 }
-/*
-            } else {  //Double ON - apply special preset - clean white full power
-                if (getEnableCMD(500)) switch (itemType) {
-                    case CH_RGBW:
-                        debugSerial<<F("Force White"));
-                        itemType = CH_WHITE;
-                        Par[1] = 0;   //Zero saturation
-                        Par[2] = 100; //Full power
 
-                        // Store
-                        st.h = Par[0];
-                        st.s = Par[1];
-                        st.v = Par[2];
-                        setVal(st.aslong);
-
-                        //Send to OH
-                        if (send) SendStatus(0, 3, Par);
-                        break;
-                } //itemtype
-            } //else
-*/
-            //debugSerial<<"Sa:");debugSerial<<Par[1]);
             if ((itemType == CH_RGBW) && (Par[1] == 0)) itemType = CH_WHITE;
           }
 

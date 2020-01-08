@@ -48,6 +48,7 @@ e-mail    anklimov@gmail.com
 #define IS_PRESSED3 10u
 #define IS_LONG3 11u
 #define IS_REPEAT3 12u
+#define IS_WAITRELEASE 13u
 #define IS_REQSTATE 0xFF
 
 
@@ -62,7 +63,7 @@ e-mail    anklimov@gmail.com
 
 
 #define T_LONG 1000
-#define T_IDLE 700
+#define T_IDLE 600
 #define T_RPT 300
 #define T_RPT_PULSE 150
 
