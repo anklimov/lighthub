@@ -559,7 +559,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
     delay(100);
     if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
       char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
-      if (n>1) syslogPort = getStringFromConfig(udpSyslogArr, 1);
+      if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
 
        inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
 /*
@@ -579,7 +579,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
     if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
     //    char *client_id = aJson.getArrayItem(mqttArr, 0)->valuestring;
         char *servername = getStringFromConfig(mqttArr, 1);
-        if (n >= 3) port = getStringFromConfig(mqttArr, 2);
+        if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
         if (n >= 4) user = getStringFromConfig(mqttArr, 3);
         if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5)) {
             password = getStringFromConfig(mqttArr, 4);
