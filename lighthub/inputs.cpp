@@ -268,7 +268,7 @@ void Input::counterPoll() {
     debugSerial<<F("IN:")<<(pin)<<F(" Counter type. val=")<<counterValue;
 
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
-    if (emit) {
+    if (emit && emit->type == aJson_String) {
         char valstr[10];
         char addrstr[MQTT_TOPIC_LENGTH];
         strncpy(addrstr,emit->valuestring,sizeof(addrstr));
@@ -327,7 +327,7 @@ void Input::uptimePoll() {
     if (nextPollTime() > millis())
         return;
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
-    if (emit) {
+    if (emit && emit->type == aJson_String) {
 #ifdef WITH_DOMOTICZ
         if(getIdxField()){
                 publishDataToDomoticz(DHT_POLL_DELAY_DEFAULT, emit, "{\"idx\":%s,\"svalue\":\"%d\"}", getIdxField(), millis());
@@ -422,9 +422,9 @@ void Input::dht22Poll() {
 #endif
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
-    if (item) thermoSetCurTemp(item->valuestring, temp);
+    if (item && item->type == aJson_String) thermoSetCurTemp(item->valuestring, temp);
     debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") << humidity << F("%")<<endl;
-    if (emit && temp && humidity && temp == temp && humidity == humidity) {
+    if (emit && emit->type == aJson_String && temp && humidity && temp == temp && humidity == humidity) {
         char addrstr[MQTT_TOPIC_LENGTH] = "";
 #ifdef WITH_DOMOTICZ
         if(getIdxField()){
@@ -480,13 +480,13 @@ bool Input::executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
   aJsonObject *emit = aJson.getObjectItem(cmd, "emit");
 
   char * itemCommand;
-  if (irev && toggle) itemCommand = irev->valuestring;
-  else if(icmd) itemCommand = icmd->valuestring;
+  if (irev && toggle && irev->type == aJson_String) itemCommand = irev->valuestring;
+  else if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
     else    itemCommand = defCmd;
 
   char * emitCommand;
-  if (erev && toggle) itemCommand = erev->valuestring;
-  else if(ecmd) emitCommand = ecmd->valuestring;
+  if (erev && toggle && erev->type == aJson_String) itemCommand = erev->valuestring;
+  else if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
     else    emitCommand = defCmd;
 
   debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
@@ -496,7 +496,7 @@ if (emit) debugSerial << emit->valuestring<< F(" -> ")<<emitCommand<<endl;
 
 
 
-  if (emit && emitCommand) {
+  if (emit && emitCommand && emit->type == aJson_String) {
 /*
 TODO implement
 #ifdef WITH_DOMOTICZ
@@ -520,7 +520,7 @@ if (mqttClient.connected() && !ethernetIdleCount)
 }
 }
 } // emit
-  if (item && itemCommand) {
+  if (item && itemCommand && item->type == aJson_String) {
     //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
       Item it(item->valuestring);
       if (it.isValid()) it.Ctrl(itemCommand, true);
@@ -895,7 +895,7 @@ void Input::onContactChanged(int newValue) {
     aJsonObject *scmd = aJson.getObjectItem(inputObj, "scmd");
     aJsonObject *rcmd = aJson.getObjectItem(inputObj, "rcmd");
     debugSerial << F("LEGACY IN:") << (pin) << F("=") << newValue << endl;
-    if (emit) {
+    if (emit && emit->type == aJson_String) {
 #ifdef WITH_DOMOTICZ
         if (getIdxField())
         {  (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
@@ -912,26 +912,26 @@ if (mqttClient.connected() && !ethernetIdleCount)
 {
 if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         if (newValue) {  //send set command
-            if (!scmd) mqttClient.publish(addrstr, "ON", true);
+            if (!scmd || scmd->type != aJson_String) mqttClient.publish(addrstr, "ON", true);
             else if (strlen(scmd->valuestring))
                 mqttClient.publish(addrstr, scmd->valuestring, true);
         } else {  //send reset command
-            if (!rcmd) mqttClient.publish(addrstr, "OFF", true);
+            if (!rcmd || rcmd->type == aJson_String) mqttClient.publish(addrstr, "OFF", true);
             else if (strlen(rcmd->valuestring))mqttClient.publish(addrstr, rcmd->valuestring, true);
         }
 }
   }
 } // emit
-    if (item) {
+    if (item && item->type == aJson_String) {
       //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
         Item it(item->valuestring);
         if (it.isValid()) {
             if (newValue) {  //send set command
-                if (!scmd) it.Ctrl(CMD_ON, 0, NULL, true);
+                if (!scmd || scmd->type != aJson_String) it.Ctrl(CMD_ON, 0, NULL, true);
                 else if (strlen(scmd->valuestring))
                     it.Ctrl(scmd->valuestring, true);
             } else {  //send reset command
-                if (!rcmd) it.Ctrl(CMD_OFF, 0, NULL, true);
+                if (!rcmd || rcmd->type == aJson_String) it.Ctrl(CMD_OFF, 0, NULL, true);
                 else if (strlen(rcmd->valuestring))
                     it.Ctrl(rcmd->valuestring, true);
             }
@@ -945,7 +945,7 @@ void Input::onAnalogChanged(float newValue) {
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
 
 
-    if (emit) {
+    if (emit && emit->type == aJson_String) {
 
 //#ifdef WITH_DOMOTICZ
 //        if (getIdxField()) {
@@ -963,7 +963,7 @@ void Input::onAnalogChanged(float newValue) {
                   mqttClient.publish(addrstr, strVal, true);
 }
 
-    if (item) {
+    if (item && item->type == aJson_String) {
         int intNewValue = round(newValue);
         Item it(item->valuestring);
         if (it.isValid()) {
@@ -976,6 +976,8 @@ void Input::onAnalogChanged(float newValue) {
 bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, const char *format, ...)
 {
 #ifdef WITH_DOMOTICZ
+if (emit && emit->type == aJson_String)
+{
     debugSerial << F("\nDomoticz valstr:");
     char valstr[50];
     va_list args;
@@ -988,6 +990,7 @@ bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, cons
     if (pollTimeIncrement)
         setNextPollTime(millis() + pollTimeIncrement);
 //    debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
+}
 
 #endif
     return true;
@@ -995,7 +998,7 @@ bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, cons
 
 char* Input::getIdxField() {
     aJsonObject *idx = aJson.getObjectItem(inputObj, "idx");
-    if(idx&&idx->valuestring)
+    if(idx&& idx->type == aJson_String && idx->valuestring)
         return idx->valuestring;
     return nullptr;
 }

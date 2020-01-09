@@ -663,7 +663,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                                st.h = Par[0];
                                Par[1] = st.s;
                                Par[2] = st.v;
-                               
+
                                n=3;
                                setVal(st.aslong);
                              }
@@ -1021,8 +1021,11 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             if (itemArg->type == aJson_Array) {
                 aJsonObject *i = itemArg->child;
                 while (i) {
-                    Item it(i->valuestring);
-                    it.Ctrl(cmd, n, Par, send,suffixCode,subItem); //// was true
+                    if (i->type == aJson_String)
+                      {
+                      Item it(i->valuestring);
+                      it.Ctrl(cmd, n, Par, send,suffixCode,subItem); //// was true
+                      }
                     i = i->next;
                 } //while
             } //if
@@ -1142,11 +1145,14 @@ int Item::isActive() {
                 debugSerial<<F(" Grp:");
                 aJsonObject *i = itemArg->child;
                 while (i) {
-                    Item it(i->valuestring);
+                    if (i->type == aJson_String)
+                    {
+                        Item it(i->valuestring);
 
-                    if (it.isValid() && it.isActive()>0) {
-                        debugSerial<<F(" active\n");
-                        return 1;
+                        if (it.isValid() && it.isActive()>0) {
+                            debugSerial<<F(" active\n");
+                            return 1;
+                        }
                     }
                     i = i->next;
                 } //while
@@ -1319,6 +1325,7 @@ int Item::VacomSetFan(int8_t val, int8_t cmd) {
 int Item::VacomSetHeat(int8_t val, int8_t cmd) {
     uint8_t result;
     int addr;
+    if (itemArg->type != aJson_String) return 0;
 
     Item it(itemArg->valuestring);
     if (it.isValid() && it.itemType == CH_VC) addr=it.getArg();
@@ -1448,7 +1455,7 @@ int Item::checkFM() {
         aJson.addNumberToObject(out, "sw", (int) node.getResponseBuffer(0));
         if (RPM && itemArg->type == aJson_Array) {
             aJsonObject *airGateObj = aJson.getArrayItem(itemArg, 1);
-            if (airGateObj) {
+            if (airGateObj && airGateObj->type == aJson_String) {
                 int val = 100;
                 Item item(airGateObj->valuestring);
                 if (item.isValid())

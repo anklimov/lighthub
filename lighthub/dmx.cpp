@@ -85,7 +85,7 @@ int itemCtrl2(char* name,int r,int g, int b, int w)
         { aJsonObject *i =groupArr->child;
           while (i)
             { //Serial.println(i->valuestring);
-            itemCtrl2(i->valuestring,r,g,b,w);
+            if (i->type == aJson_String) itemCtrl2(i->valuestring,r,g,b,w);
               i=i->next;}
         }
        } //itemtype
@@ -100,7 +100,9 @@ void DMXImmediateUpdate(short tch,short r, short g, short b, short w) {
        if (dmxArr && (dmxArr->type==aJson_Array))
 
         {
-        char* itemname = aJson.getArrayItem(dmxArr,tch)->valuestring;
+        aJsonObject *DMXch =   aJson.getArrayItem(dmxArr,tch);
+        char* itemname = NULL;
+        if (DMXch->type == aJson_String) itemname=DMXch->valuestring;
         if (itemname) itemCtrl2(itemname,r,g,b,w);
         }
 }

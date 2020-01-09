@@ -517,6 +517,29 @@ void onMQTTConnect(){
 #endif
 }
 
+char* getStringFromConfig(aJsonObject * a, int i)
+{
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Array)
+  element = aJson.getArrayItem(a, i);
+// TODO - human readable JSON objects as alias
+
+  if (element && element->type == aJson_String) return element->valuestring;
+  return NULL;
+}
+
+char* getStringFromConfig(aJsonObject * a, char * name)
+{
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Object)
+  element = aJson.getObjectItem(a, name);
+  if (element && element->type == aJson_String) return element->valuestring;
+  return NULL;
+}
+
+
 void ip_ready_config_loaded_connecting_to_broker() {
     short n = 0;
     int port = 1883;
@@ -528,15 +551,15 @@ void ip_ready_config_loaded_connecting_to_broker() {
     char syslogDeviceHostname[16];
     if (mqttArr && (aJson.getArraySize(mqttArr)))
       {
-                deviceName = aJson.getArrayItem(mqttArr, 0)->valuestring;
+                deviceName = getStringFromConfig(mqttArr, 0);
                 debugSerial<<F("Device Name:")<<deviceName<<endl;
               }
 #ifdef SYSLOG_ENABLE
     //debugSerial<<"debugSerial:";
     delay(100);
     if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
-      char *syslogServer = aJson.getArrayItem(udpSyslogArr, 0)->valuestring;
-      if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
+      char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
+      if (n>1) syslogPort = getStringFromConfig(udpSyslogArr, 1);
 
        inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
 /*
@@ -555,11 +578,11 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
     if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
     //    char *client_id = aJson.getArrayItem(mqttArr, 0)->valuestring;
-        char *servername = aJson.getArrayItem(mqttArr, 1)->valuestring;
-        if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
-        if (n >= 4) user = aJson.getArrayItem(mqttArr, 3)->valuestring;
+        char *servername = getStringFromConfig(mqttArr, 1);
+        if (n >= 3) port = getStringFromConfig(mqttArr, 2);
+        if (n >= 4) user = getStringFromConfig(mqttArr, 3);
         if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5)) {
-            password = aJson.getArrayItem(mqttArr, 4)->valuestring;
+            password = getStringFromConfig(mqttArr, 4);
             debugSerial<<F("Using MQTT password from config");
         }
 
@@ -792,7 +815,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
     debugSerial<<endl<<F("T:")<<valstr<<F("<");
     aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);
     if (owObj) {
-        owEmitString = aJson.getObjectItem(owObj, "emit")->valuestring;
+        owEmitString = getStringFromConfig(owObj, "emit");
         debugSerial<<owEmitString<<F(">")<<endl;
           if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
           {
@@ -801,7 +824,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
 
 #ifdef WITH_DOMOTICZ
             aJsonObject *idx = aJson.getObjectItem(owObj, "idx");
-        if (idx && idx->valuestring) {//DOMOTICZ json format support
+        if (idx && && idx->type ==aJson_String && idx->valuestring) {//DOMOTICZ json format support
             debugSerial << endl << idx->valuestring << F(" Domoticz valstr:");
             char valstr[50];
             sprintf(valstr, "{\"idx\":%s,\"svalue\":\"%.1f\"}", idx->valuestring, currentTemp);
@@ -819,7 +842,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
                   mqttClient.publish(addrstr, valstr);
         }
         // And translate temp to internal items
-        owItem = aJson.getObjectItem(owObj, "item")->valuestring;
+        owItem = getStringFromConfig(owObj, "item");
         if (owItem)
             thermoSetCurTemp(owItem, currentTemp);  ///TODO: Refactore using Items interface
         } // if valid temperature

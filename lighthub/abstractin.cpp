@@ -30,7 +30,7 @@ int abstractIn::publish(char * value, const char* subtopic)
   if (in)
   {
   aJsonObject *emit = aJson.getObjectItem(in->inputObj, "emit");
-    if (emit)
+    if (emit && emit->type == aJson_String)
      {
        return publishTopic(emit->valuestring,value,subtopic);
      }

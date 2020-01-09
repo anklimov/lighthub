@@ -396,11 +396,11 @@ if (topics && topics->type == aJson_Object)
 
 
     }
-if  (_root) strncpy(buf,_root->valuestring,buflen);
+if  (_root && _root->type == aJson_String) strncpy(buf,_root->valuestring,buflen);
   else strncpy_P(buf,homeTopic,buflen);
 strncat(buf,"/",buflen);
 
-if (_l2) strncat(buf,_l2->valuestring,buflen);
+if (_l2 && _l2->type == aJson_String) strncat(buf,_l2->valuestring,buflen);
   else
   switch (tt) {
     case T_DEV:
