@@ -488,7 +488,7 @@ bool Input::executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
     else    itemCommand = defCmd;
 
   char * emitCommand;
-  if (erev && toggle && erev->type == aJson_String) itemCommand = erev->valuestring;
+  if (erev && toggle && erev->type == aJson_String) emitCommand = erev->valuestring;
   else if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
     else    emitCommand = defCmd;
 
