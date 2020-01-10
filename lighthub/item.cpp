@@ -23,6 +23,7 @@ e-mail    anklimov@gmail.com
 #include "aJSON.h"
 #include "utils.h"
 #include "textconst.h"
+#include "main.h"
 
 #ifdef _dmxout
 #include "dmx.h"
@@ -47,6 +48,7 @@ extern aJsonObject *pollingItem;
 extern PubSubClient mqttClient;
 extern int8_t ethernetIdleCount;
 extern int8_t configLocked;
+extern lan_status lanStatus;
 
 static unsigned long lastctrl = 0;
 static aJsonObject *lastobj = NULL;
@@ -1702,7 +1704,7 @@ switch (cause)
 void Item::sendDelayedStatus()
 { long int flags = getFlag(SEND_COMMAND | SEND_PARAMETERS);
 //  debugSerial<<flags<<F(" Delayed Status ")<<itemArr->name<<endl;
-      if (flags)
+      if (flags && lanStatus==OPERATION)
       {
       SendStatus(SEND_COMMAND | SEND_PARAMETERS);
       clearFlag(SEND_COMMAND | SEND_PARAMETERS);
@@ -1712,7 +1714,7 @@ void Item::sendDelayedStatus()
 #endif
 int Item::SendStatus(int sendFlags) {
     int chancmd=getCmd();
-    if (sendFlags & SEND_DEFFERED) {
+    if ((sendFlags & SEND_DEFFERED) || (lanStatus==RETAINING_COLLECTING)) {
         setFlag(sendFlags & (SEND_COMMAND | SEND_PARAMETERS));
         debugSerial<<F("Status deffered\n");
         return -1;
