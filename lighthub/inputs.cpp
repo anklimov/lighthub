@@ -34,6 +34,7 @@ e-mail    anklimov@gmail.com
 extern PubSubClient mqttClient;
 extern aJsonObject *root;
 extern int8_t ethernetIdleCount;
+extern int8_t configLocked;
 
 #if !defined(DHT_DISABLE) || !defined(COUNTER_DISABLE)
 static volatile unsigned long nextPollMillisValue[5];
@@ -462,12 +463,14 @@ bool Input::executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
     break;
     case aJson_Array:  //array - recursive iterate
     {
+    configLocked++;
     aJsonObject * command = cmd->child;
     while (command)
             {
             executeCommand(command,toggle,defCmd);
             command = command->next;
             }
+    configLocked--;
     }
     break;
     case aJson_Object:

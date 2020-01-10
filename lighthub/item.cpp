@@ -46,6 +46,7 @@ short modbusBusy = 0;
 extern aJsonObject *pollingItem;
 extern PubSubClient mqttClient;
 extern int8_t ethernetIdleCount;
+extern int8_t configLocked;
 
 static unsigned long lastctrl = 0;
 static aJsonObject *lastobj = NULL;
@@ -1020,6 +1021,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         {
             if (itemArg->type == aJson_Array) {
                 aJsonObject *i = itemArg->child;
+                configLocked++;
                 while (i) {
                     if (i->type == aJson_String)
                       {
@@ -1028,6 +1030,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                       }
                     i = i->next;
                 } //while
+                configLocked--;
             } //if
         } //case
             break;
