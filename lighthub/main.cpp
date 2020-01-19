@@ -934,9 +934,10 @@ configLocked++;
 #endif
 #ifdef _dmxout
     int maxChannels;
+    short numParams;
     aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
-    if (dmxoutArr && aJson.getArraySize(dmxoutArr) >=1 ) {
-        DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, 1)->valueint);
+    if (dmxoutArr &&  (numParams=aJson.getArraySize(dmxoutArr)) >=1 ) {
+        DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, numParams-1)->valueint);
         debugSerial<<F("DMX out started. Channels: ")<<maxChannels<<endl;
     }
 #endif
@@ -1209,7 +1210,8 @@ void cmdFunctionPwd(int arg_cnt, char **args)
 }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
-    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%c", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) < 6) {
+    char dummy;
+    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%c", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5], &dummy) < 6) {
         debugSerial<<F("could not parse: ")<<args[1];
         return;
     }

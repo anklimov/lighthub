@@ -32,6 +32,35 @@ e-mail    anklimov@gmail.com
 
 #if defined(_dmxout)
 
+#if defined DMX_SMOOTH
+
+#if defined(ARDUINO_ARCH_AVR)
+#include <DmxSimple.h>
+#define DmxWrite DmxSimple.write
+//#define DmxWrite  DmxWriteBuf
+#endif
+
+#if defined(ESP8266)
+#include <ESPDMX.h>
+extern DMXESPSerial dmxout;
+#define DmxWrite dmxout.write
+//#define DmxWrite  DmxWriteBuf
+#endif
+
+#if defined(ARDUINO_ARCH_ESP32)
+#include <ESPDMX.h>
+extern DMXESPSerial dmxout;
+#define DmxWrite dmxout.write
+//#define DmxWrite  DmxWriteBuf
+#endif
+
+#if defined(__SAM3X8E__)
+#include <DmxDue.h>
+#define DmxWrite2 dmxout.write
+#define DmxWrite  DmxWriteBuf
+#endif
+
+#else
 #if defined(ARDUINO_ARCH_AVR)
 #include <DmxSimple.h>
 #define DmxWrite DmxSimple.write
@@ -52,6 +81,8 @@ extern DMXESPSerial dmxout;
 #if defined(__SAM3X8E__)
 #include <DmxDue.h>
 #define DmxWrite dmxout.write
+#endif
+
 #endif
 #endif
 
@@ -78,3 +109,5 @@ void ArtnetSetup();
 void DMXCheck(void);
 int itemCtrl2(char* name,int r,int g, int b, int w);
 void ArtnetSetup();
+void DmxWriteBuf(uint16_t chan,uint8_t val);
+void DMXOUT_propagate();

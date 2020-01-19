@@ -189,7 +189,7 @@ Item::Item(char *name) //Constructor
     {   char* sub;
         if (sub=strchr(name,'/'))
         {
-        char  buf [MQTT_SUBJECT_LENGTH];
+        char  buf [MQTT_SUBJECT_LENGTH+1];
         short i;
         for(i=0;(name[i] && (name[i]!='/') && (i<MQTT_SUBJECT_LENGTH));i++)
             buf[i]=name[i];

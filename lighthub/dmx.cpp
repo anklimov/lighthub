@@ -21,6 +21,7 @@ e-mail    anklimov@gmail.com
 //#include <DmxSimple.h>
 //#include <DMXSerial.h>
 #include "options.h"
+#include "item.h"
 
 #ifdef _dmxin
 #if defined(ARDUINO_ARCH_AVR)
@@ -35,6 +36,13 @@ DMXESPSerial dmxout;
 #endif
 
 uint8_t * DMXin = NULL;
+
+#ifdef DMX_SMOOTH
+uint8_t * DMXinterimBuf = NULL;
+uint16_t DMXOUT_Channels=0;
+uint32_t checkTimestamp=0L;
+#endif
+
 int D_State=0;
 
 unsigned long D_checkT=0;
@@ -61,16 +69,16 @@ int itemCtrl2(char* name,int r,int g, int b, int w)
         short itemaddr = aJson.getArrayItem(itemArr,1)->valueint;
        switch (itemtype){
 #ifdef _dmxout
-       case 0: //Dimmed light
+       case CH_DIMMER: //Dimmed light
 
        DmxWrite(itemaddr, w);
        break;
 
 
-       case 1: //Colour RGBW
+       case CH_RGBW: //Colour RGBW
         DmxWrite(itemaddr+3, w);
 
-       case 2: // RGB
+       case CH_RGB: // RGB
       {
 
         DmxWrite(itemaddr,   r);
@@ -79,7 +87,7 @@ int itemCtrl2(char* name,int r,int g, int b, int w)
 
          break; }
 #endif
-        case 7: //Group
+        case CH_GROUP: //Group
         aJsonObject *groupArr= aJson.getArrayItem(itemArr, 1);
         if (groupArr && (groupArr->type==aJson_Array))
         { aJsonObject *i =groupArr->child;
@@ -162,6 +170,7 @@ for (short tch=0; tch<=3 ; tch++)
 {
 //  CHSV hsv;
 //  CRGB rgb;
+DMXOUT_propagate();
 #if defined(_dmxin)
 
 short t,tch;
@@ -251,7 +260,41 @@ dmxout.setTxMaxChannels(channels);
 #ifndef DMX_DISABLE
 for (int i=1;i<=channels;i++) DmxWrite(i,0);
 #endif
+
+#ifdef DMX_SMOOTH
+if (DMXinterimBuf) delete DMXinterimBuf;
+DMXinterimBuf = new uint8_t [channels];
+DMXOUT_Channels=channels;
+for (int i=1;i<=channels;i++) DMXinterimBuf[i]=0;
+#endif
 }
+
+void DMXOUT_propagate()
+{
+  #ifdef DMX_SMOOTH
+  uint32_t now = millis();
+  if (now<checkTimestamp) return;
+
+  for(int i=1;i<=DMXOUT_Channels;i++)
+  {
+  uint8_t currLevel=dmxout.getTx(i);
+  uint16_t delta = currLevel-DMXinterimBuf[i-1];
+  if (delta)
+        {
+        uint16_t step  = abs(delta) >> 4;
+        if (!step) step=1;
+
+        if (delta<0)
+                        DmxWrite2(i,currLevel+step);
+
+        if (delta>0)
+                        DmxWrite2(i,currLevel-step);
+        }
+  }
+  checkTimestamp=now+DMX_SMOOTH_DELAY;
+  #endif
+}
+
 
 void ArtnetSetup()
 {
@@ -259,5 +302,14 @@ void ArtnetSetup()
  if (!artnet)  artnet = new Artnet;
     // this will be called for each packet received
   if (artnet) artnet->setArtDmxCallback(onDmxFrame);
+#endif
+}
+
+
+void DmxWriteBuf(uint16_t chan,uint8_t val)
+{
+#ifdef DMX_SMOOTH
+if (chan && chan<=DMXOUT_Channels)
+          DMXinterimBuf[chan-1] = val;
 #endif
 }

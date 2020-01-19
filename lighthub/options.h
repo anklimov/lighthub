@@ -207,6 +207,10 @@
 #define strncpy_P strncpy
 #endif
 
+#ifndef DMX_SMOOTH_DELAY
+#define DMX_SMOOTH_DELAY 10
+#endif
+
 //#ifdef M5STACK
 //#define debugSerial M5.Lcd
 //#endif
