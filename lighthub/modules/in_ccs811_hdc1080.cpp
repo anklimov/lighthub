@@ -34,9 +34,12 @@ Wire.begin(); //Inialize I2C Harware
   //It is recommended to check return status on .begin(), but it is not
   //required.
   CCS811Core::status returnCode = ccs811.begin();
+  //CCS811Core::CC811_Status_e returnCode = ccs811.beginWithStatus();
   if (returnCode != CCS811Core::SENSOR_SUCCESS)
+  //if (returnCode != CCS811Core::CCS811_Stat_SUCCESS)
   {
-    Serial.println("CCS811 Init error");
+    Serial.print("CCS811 Init error ");
+    //Serial.println(ccs811.statusString(returnCode));
     printDriverError(returnCode);
     return 0;
   }
