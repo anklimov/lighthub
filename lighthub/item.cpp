@@ -89,6 +89,26 @@ int txt2cmd(char *payload) {
     return cmd;
 }
 
+int subitem2cmd(char *payload) {
+    int cmd = 0;
+
+    // Check for command
+    if (payload)
+    if (strcmp_P(payload, ON_P) == 0) cmd = CMD_ON;
+    else if (strcmp_P(payload, OFF_P) == 0) cmd = CMD_OFF;
+    //else if (strcmp_P(payload, REST_P) == 0) cmd = CMD_RESTORE;
+    //else if (strcmp_P(payload, TOGGLE_P) == 0) cmd = CMD_TOGGLE;
+    else if (strcmp_P(payload, HALT_P) == 0) cmd = CMD_HALT;
+    else if (strcmp_P(payload, XON_P) == 0) cmd = CMD_XON;
+    //else if (strcmp_P(payload, XOFF_P) == 0) cmd = CMD_XOFF;
+    else if (strcmp_P(payload, HEAT_P) == 0) cmd = CMD_HEAT;
+    else if (strcmp_P(payload, COOL_P) == 0) cmd = CMD_COOL;
+    else if (strcmp_P(payload, AUTO_P) == 0) cmd = CMD_AUTO;
+    else if (strcmp_P(payload, FAN_ONLY_P) == 0) cmd = CMD_FAN;
+    else if (strcmp_P(payload, DRY_P) == 0) cmd = CMD_DRY;
+
+    return cmd;
+}
 
 int txt2subItem(char *payload) {
     int cmd = S_NOTFOUND;
@@ -501,6 +521,18 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
     debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Suff=")<<suffixCode<<F(" Cmd=")<<cmd<<F(" Par=(");
     if (!itemArr) return -1;
+
+    if (itemType != CH_GROUP )
+    {
+    //Check if subitem is some sort of command
+    int subitemCmd = subitem2cmd(subItem);
+    if (subitemCmd && subitemCmd != getCmd())
+        {
+          debugSerial<<F("Ignored, stored cmd=")<<getCmd()<<endl;
+          return -1;
+        }
+    }
+
     int Par[MAXCTRLPAR] = {0, 0, 0};
     if (Parameters)
             for (short i=0;i<n && i<MAXCTRLPAR;i++){
@@ -556,7 +588,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 switch (t = getCmd()) {
                     case CMD_HALT: //previous command was HALT ?
                         debugSerial << F("Restored from:") << t << endl;
-                        cmd = CMD_ON;    //turning on
+                        if (itemType == CH_THERMO) cmd = CMD_AUTO;
+                            else cmd = CMD_ON;    //turning on
                         break;
                     default:
                         return -3;
@@ -1842,7 +1875,7 @@ int Item::SendStatus(int sendFlags) {
                         break;
                     case CMD_ON:
                     case CMD_XON:
-                          if (itemType == CH_THERMO) strcpy_P(cmdstr, HEAT_P);
+                          if (itemType == CH_THERMO) strcpy_P(cmdstr, AUTO_P);
                    }
 
               setTopic(addrstr,sizeof(addrstr),T_OUT);
