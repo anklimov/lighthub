@@ -806,14 +806,22 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 setVal(st.aslong);
                 if (!suffixCode)
                           { //
-                            if (chActive>0 && !st.v) setCmd(CMD_OFF);
-                            else if (chActive==0 && st.v) setCmd(CMD_ON);
-                            else setCmd(0);
-                            SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
+                            if (chActive>0 && !st.v)
+                                      {
+                                      setCmd(CMD_OFF);
+                                      SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
+                                    }
+                            else if (chActive==0 && st.v)
+                                      {
+                                      setCmd(CMD_ON);
+                                      SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
+                                      }
+                          ////  else setCmd(0);
+                            SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
                           }
                 else
                           {
-                          setCmd(0);
+                        ////  setCmd(0);
                           SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
                           }
                     break;
@@ -1739,7 +1747,7 @@ void Item::sendDelayedStatus()
 //  debugSerial<<flags<<F(" Delayed Status ")<<itemArr->name<<endl;
       if (flags && lanStatus==OPERATION)
       {
-      SendStatus(SEND_COMMAND | SEND_PARAMETERS);
+      SendStatus(flags);//(SEND_COMMAND | SEND_PARAMETERS);
       clearFlag(SEND_COMMAND | SEND_PARAMETERS);
       }
 }
