@@ -934,7 +934,7 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
                 else if (strlen(scmd->valuestring))
                     it.Ctrl(scmd->valuestring, true);
             } else {  //send reset command
-                if (!rcmd || rcmd->type == aJson_String) it.Ctrl(CMD_OFF, 0, NULL, true);
+                if (!rcmd || rcmd->type != aJson_String) it.Ctrl(CMD_OFF, 0, NULL, true);
                 else if (strlen(rcmd->valuestring))
                     it.Ctrl(rcmd->valuestring, true);
             }
