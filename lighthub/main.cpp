@@ -1637,7 +1637,7 @@ void publishStat(){
   char topic[64];
   char intbuf[16];
   uint32_t ut = millis()/1000UL;
-  if (!mqttClient.connected()) return;
+  if (!mqttClient.connected()  || ethernetIdleCount) return;
 
 //    debugSerial<<F("\nfree RAM: ")<<fr;
     setTopic(topic,sizeof(topic),T_DEV);
@@ -1670,6 +1670,9 @@ if (!isMacValid) {
     const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);//colon(:) separated from build options
     parseBytes(macStr, ':', mac, 6, 16);
 
+    mac[0]&=0xFE;
+    mac[0]|=2;
+
     #elif defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
     //Using original MPU MAC
     WiFi.begin();
@@ -1687,6 +1690,7 @@ if (!isMacValid) {
     memcpy(mac,defaultMac,6);
     #endif
     }
+
 
     printMACAddress();
 }
@@ -1937,17 +1941,17 @@ void thermoLoop(void) {
                             << F(" cmd:") << thermoStateCommand;
                 if (thermoPin<0) pinMode(-thermoPin, OUTPUT); else pinMode(thermoPin, OUTPUT);
                 if (thermoDisabledOrDisconnected(thermoExtensionArray, thermoStateCommand)) {
-                    if (thermoPin<0) digitalWrite(-thermoPin, LOW); digitalWrite(thermoPin, LOW);
+                    if (thermoPin<0) digitalWrite(-thermoPin, LOW); else digitalWrite(thermoPin, LOW);
                     // Caution - for water heaters (negative pin#) if some comes wrong (or no connection with termometers output is LOW - valve OPEN)
                     // OFF - also VALVE is OPEN (no teat control)
                     debugSerial<<F(" OFF");
                 } else {
                     if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) {
-                        if (thermoPin<0) digitalWrite(-thermoPin, LOW); digitalWrite(thermoPin, HIGH);
+                        if (thermoPin<0) digitalWrite(-thermoPin, LOW); else digitalWrite(thermoPin, HIGH);
                         debugSerial<<F(" ON");
                     } //too cold
                     else if (curTemp >= thermoSetting) {
-                        if (thermoPin<0) digitalWrite(-thermoPin, HIGH); digitalWrite(thermoPin, LOW);
+                        if (thermoPin<0) digitalWrite(-thermoPin, HIGH); else digitalWrite(thermoPin, LOW);
                         debugSerial<<F(" OFF");
                     } //Reached settings
                     else debugSerial<<F(" -target zone-"); // Nothing to do

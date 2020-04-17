@@ -555,6 +555,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
     CHstore st;
     switch (cmd) {
         int t;
+/*
        case CMD_ON:
               if (getChanType()==CH_RGBW && getCmd() == CMD_ON && send  && (chActive>0)) {
                           debugSerial<<F("Force White\n");
@@ -564,7 +565,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                           Par[1] = 0;   //Zero saturation
                           Par[2] = 100; //Full power
                           n=3;
-                          cmd=CMD_NUM;
+                          cmd=CMD_NUM; */
                           // Store
 /*
                           st.h = Par[0];
@@ -574,8 +575,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                           setCmd(cmd);
                           //Send to OH
                           if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS ); */
-                } // if forcewhite
-        break;
+//                } // if forcewhite
+//        break;
 
 
         case CMD_TOGGLE:

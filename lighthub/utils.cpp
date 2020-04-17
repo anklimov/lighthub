@@ -21,7 +21,7 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 #include "options.h"
 #include "stdarg.h"
-#include <wire.h>
+#include <Wire.h>
 
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 #include <malloc.h>

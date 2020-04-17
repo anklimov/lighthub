@@ -852,8 +852,15 @@ void Input::analogPoll(short cause) {
 
       if (aJson.getArraySize(inputMap)==5) Noize = aJson.getArrayItem(inputMap, 4)->valueint;
 
-      if (mappedInputVal>max) mappedInputVal = max;
-      if (mappedInputVal<min) mappedInputVal = min;
+      if (mappedInputVal>max)
+                              {
+                              mappedInputVal = max;
+                              inputVal = 1023;
+                              }
+      if (mappedInputVal<min) {
+                              mappedInputVal = min;
+                              inputVal = 0;
+                              }
 
       if (aJson.getArraySize(inputMap)==2)
         {
