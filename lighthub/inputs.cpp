@@ -712,7 +712,15 @@ switch (store->state) //Timer based transitions
           break;
 
   case IS_PRESSED3:
-          if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF)) changeState(IS_LONG3, cause);
+          if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
+          {
+          if (!aJson.getObjectItem(inputObj, "lcmd3") && !aJson.getObjectItem(inputObj, "rpcmd3")) //No longpress handlers
+                {
+                if (aJson.getObjectItem(inputObj, "scmd3")) changeState(IS_WAITRELEASE, cause); //was used
+                   else changeState(IS_PRESSED2, cause); // completely empty trippleClick section - fallback to first click handler
+                 }
+          else changeState(IS_LONG3, cause);
+          }
           break;
 
   case IS_LONG3:

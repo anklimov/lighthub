@@ -106,6 +106,9 @@ int subitem2cmd(char *payload) {
     else if (strcmp_P(payload, AUTO_P) == 0) cmd = CMD_AUTO;
     else if (strcmp_P(payload, FAN_ONLY_P) == 0) cmd = CMD_FAN;
     else if (strcmp_P(payload, DRY_P) == 0) cmd = CMD_DRY;
+    //else if (strcmp_P(payload, HIGH_P) == 0) cmd = CMD_HIGH;
+    //else if (strcmp_P(payload, MED_P) == 0) cmd = CMD_MED;
+    //else if (strcmp_P(payload, LOW_P) == 0) cmd = CMD_LOW;
 
     return cmd;
 }
@@ -394,12 +397,13 @@ int retrieveCode(char **psubItem)
 {
 int   suffixCode;
 char* suffix;
-
+//debugSerial<<F("*psubItem:")<<*psubItem<<endl;
 if (suffix = strrchr(*psubItem, '/')) //Trying to retrieve right part
   {
     *suffix= 0; //Truncate subItem string
     suffix++;
     suffixCode = txt2subItem(suffix);
+    debugSerial<<F("suffixCode:")<<suffixCode<<endl;
     // myhome/dev/item/sub.....Item/suffix
     }
 else
@@ -435,10 +439,6 @@ if (subItem && strlen(subItem))
 
 if (!suffixCode && defaultSuffixCode)
         suffixCode = defaultSuffixCode;
-
-//if (!suffixCode)
-//        setCommand = 0; /// Old-style - turn ON by set value
-
 
 int i=0;
 while (payload[i]) {payload[i]=toupper(payload[i]);i++;};
@@ -512,7 +512,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
   if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
       subItem = defaultSubItem;  /// possible problem here with truncated default
 
-  if (subItem && strlen(subItem))
+  if (!suffixCode && subItem && strlen(subItem))
       suffixCode = retrieveCode(&subItem);
 
   if (!suffixCode && defaultSuffixCode)
@@ -522,17 +522,6 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
     debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Suff=")<<suffixCode<<F(" Cmd=")<<cmd<<F(" Par=(");
     if (!itemArr) return -1;
 
-    if (itemType != CH_GROUP )
-    {
-    //Check if subitem is some sort of command
-    int subitemCmd = subitem2cmd(subItem);
-    if (subitemCmd && subitemCmd != getCmd())
-        {
-          debugSerial<<F("Ignored, stored cmd=")<<getCmd()<<endl;
-          return -1;
-        }
-    }
-
     int Par[MAXCTRLPAR] = {0, 0, 0};
     if (Parameters)
             for (short i=0;i<n && i<MAXCTRLPAR;i++){
@@ -540,8 +529,19 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
               debugSerial<<F("<")<<Par[i]<<F(">");
             }
     debugSerial<<F(")")<<endl;
-    int itemCategory = itemType;
 
+    if (itemType != CH_GROUP )
+    {
+    //Check if subitem is some sort of command
+    int subitemCmd = subitem2cmd(subItem);
+    if (subitemCmd && subitemCmd != getCmd())
+        {
+          debugSerial<<F("Ignored, channel cmd=")<<getCmd()<<endl;
+          return -1;
+        }
+    }
+
+    //int itemCategory = itemType;
 
     if (itemType == CH_GROUP && !send)
       {
@@ -616,6 +616,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
       if (!n || !Par[0]) Par[0] = DEFAULT_INC_STEP;
       if (cmd == CMD_DN) Par[0]=-Par[0];
       st.aslong = getVal();
+      int cType=getChanType();
+
       debugSerial<<"from: h="<<st.h<<" s="<<st.s <<" v="<<st.v<<endl;
                 switch (suffixCode)
                 {
@@ -628,8 +630,11 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                   cmd=CMD_NUM;
                   debugSerial<<" to v="<<Par[0]<<endl;
                   break;
+                  case S_HUE:
+                  case S_SAT:
+                    if ( cType != CH_RGB && cType != CH_RGBW && cType != CH_GROUP) return 0; //HUE and SAT only applicable for RGBx channels
                  }
-                int cType=getChanType();
+
                 if ( cType == CH_RGB || cType == CH_RGBW)
                   {
                   bool modified = false;
