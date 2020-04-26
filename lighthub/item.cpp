@@ -1825,7 +1825,7 @@ int Item::SendStatus(int sendFlags) {
    }
       //publish to MQTT - OpenHab Legacy style to myhome/s_out/item flat values
         setTopic(addrstr,sizeof(addrstr),T_OUT);
-        strncat(addrstr, itemArr->name, sizeof(addrstr));
+        strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
 
               if (mqttClient.connected()  && !ethernetIdleCount)
                       {
@@ -1855,7 +1855,7 @@ int Item::SendStatus(int sendFlags) {
           if (sendFlags & SEND_PARAMETERS)
              {
               setTopic(addrstr,sizeof(addrstr),T_OUT);
-              strncat(addrstr, itemArr->name, sizeof(addrstr));
+              strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
               strncat(addrstr, "/", sizeof(addrstr));
               strncat_P(addrstr, SET_P, sizeof(addrstr));
 
@@ -1893,7 +1893,7 @@ int Item::SendStatus(int sendFlags) {
                    }
 
               setTopic(addrstr,sizeof(addrstr),T_OUT);
-              strncat(addrstr, itemArr->name, sizeof(addrstr));
+              strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
               strncat(addrstr, "/", sizeof(addrstr));
               strncat_P(addrstr, CMD_P, sizeof(addrstr));
 
