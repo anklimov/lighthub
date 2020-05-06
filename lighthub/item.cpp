@@ -1005,7 +1005,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
   //Vebler-Heffler law
   //  float x = Par[2]/25.-3.;
   //  int rgbValue = round(exp(x)/(exp(1)/255));
-  int rgbValue = getBright(Par[1]);
+  int rgbValue = getBright(Par[2]);
 
     switch (itemType) {
 
@@ -1739,7 +1739,7 @@ switch (cause)
             sendDelayedStatus();
             return INTERVAL_CHECK_MODBUS;
             break;
-        #endif    
+        #endif
       /*  case CH_RGB:    //All channels with slider generate too many updates
         case CH_RGBW:
         case CH_DIMMER:
