@@ -67,6 +67,9 @@ PWM Out
 
 #include "main.h"
 
+#if defined(OTA)
+#include <ArduinoOTA.h>
+#endif
 
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
@@ -154,6 +157,7 @@ aJsonObject *pollingItem = NULL;
 bool owReady = false;
 bool configOk = false;
 int8_t ethernetIdleCount =0;
+int8_t configLocked = 0;
 
 #ifdef _modbus
 ModbusMaster node;
@@ -174,6 +178,24 @@ void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init f
 void cleanConf()
 {
   if (!root) return;
+debugSerial<<F("Unlocking config ...");
+while (configLocked)
+{
+          //wdt_res();
+          cmdPoll();
+          #ifdef _owire
+          if (owReady && owArr) owLoop();
+          #endif
+          #ifdef _dmxin
+          DMXCheck();
+          #endif
+          if (lanStatus != RETAINING_COLLECTING) pollingLoop();
+          thermoLoop();
+          inputLoop();
+}
+
+pollingItem = NULL;;
+
 debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
     aJson.deleteItem(root);
     root   = NULL;
@@ -301,6 +323,8 @@ lan_status lanLoop() {
             break;
 
         case HAVE_IP_ADDRESS:
+
+            if (configLocked) return HAVE_IP_ADDRESS;
             if (!configOk)
                 lanStatus = loadConfigFromHttp(0, NULL);
             else lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
@@ -308,12 +332,15 @@ lan_status lanLoop() {
 
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
             wdt_res();
+
+
+
             ip_ready_config_loaded_connecting_to_broker();
             break;
 
         case RETAINING_COLLECTING:
             if (millis() > nextLanCheckTime) {
-                char buf[MQTT_TOPIC_LENGTH];
+                char buf[MQTT_TOPIC_LENGTH+1];
 
                 //Unsubscribe from status topics..
                 //strncpy_P(buf, outprefix, sizeof(buf));
@@ -441,7 +468,7 @@ void onMQTTConnect(){
   strncat_P(topic, homie_P, sizeof(topic));
   strncpy_P(buf, homiever_P, sizeof(buf));
   mqttClient.publish(topic,buf,true);
-
+  configLocked++;
   if (items) {
     char datatype[32]="\0";
     char format [64]="\0";
@@ -503,8 +530,32 @@ void onMQTTConnect(){
           strncat_P(topic, nodes_P, sizeof(topic));
     ///      mqttClient.publish(topic,buf,true);
   }
+configLocked--;
 #endif
 }
+
+char* getStringFromConfig(aJsonObject * a, int i)
+{
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Array)
+  element = aJson.getArrayItem(a, i);
+// TODO - human readable JSON objects as alias
+
+  if (element && element->type == aJson_String) return element->valuestring;
+  return NULL;
+}
+
+char* getStringFromConfig(aJsonObject * a, char * name)
+{
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Object)
+  element = aJson.getObjectItem(a, name);
+  if (element && element->type == aJson_String) return element->valuestring;
+  return NULL;
+}
+
 
 void ip_ready_config_loaded_connecting_to_broker() {
     short n = 0;
@@ -517,14 +568,14 @@ void ip_ready_config_loaded_connecting_to_broker() {
     char syslogDeviceHostname[16];
     if (mqttArr && (aJson.getArraySize(mqttArr)))
       {
-                deviceName = aJson.getArrayItem(mqttArr, 0)->valuestring;
+                deviceName = getStringFromConfig(mqttArr, 0);
                 debugSerial<<F("Device Name:")<<deviceName<<endl;
               }
 #ifdef SYSLOG_ENABLE
     //debugSerial<<"debugSerial:";
     delay(100);
     if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
-      char *syslogServer = aJson.getArrayItem(udpSyslogArr, 0)->valuestring;
+      char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
       if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
 
        inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
@@ -544,11 +595,11 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
     if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
     //    char *client_id = aJson.getArrayItem(mqttArr, 0)->valuestring;
-        char *servername = aJson.getArrayItem(mqttArr, 1)->valuestring;
+        char *servername = getStringFromConfig(mqttArr, 1);
         if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
-        if (n >= 4) user = aJson.getArrayItem(mqttArr, 3)->valuestring;
+        if (n >= 4) user = getStringFromConfig(mqttArr, 3);
         if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5)) {
-            password = aJson.getArrayItem(mqttArr, 4)->valuestring;
+            password = getStringFromConfig(mqttArr, 4);
             debugSerial<<F("Using MQTT password from config");
         }
 
@@ -579,7 +630,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
         //    wdt_en();
             configOk = true;
             // ... Temporary subscribe to status topic
-            char buf[MQTT_TOPIC_LENGTH];
+            char buf[MQTT_TOPIC_LENGTH+1];
 
   //          strncpy_P(buf, outprefix, sizeof(buf));
             setTopic(buf,sizeof(buf),T_OUT);
@@ -681,6 +732,10 @@ wifiManager.setTimeout(30);
     if (WiFi.status() == WL_CONNECTED) {
         debugSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP()<<endl;
         lanStatus = HAVE_IP_ADDRESS;//1;
+#ifdef OTA
+        // start the OTEthernet library with internal (flash) based storage
+        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+#endif
     } else
     {
         debugSerial<<F("Problem with WiFi!");
@@ -715,6 +770,10 @@ wifiManager.setTimeout(30);
         } else Ethernet.begin(mac, ip);
     debugSerial<<endl;
     lanStatus = HAVE_IP_ADDRESS;
+    #ifdef OTA
+    // start the OTEthernet library with internal (flash) based storage
+    ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+    #endif
     #ifdef _artnet
                 if (artnet) artnet->begin();
     #endif
@@ -743,6 +802,10 @@ wifiManager.setTimeout(30);
         debugSerial<<F("Got IP address:");
         printIPAddress(Ethernet.localIP());
         lanStatus = HAVE_IP_ADDRESS;//1;
+        #ifdef OTA
+        // start the OTEthernet library with internal (flash) based storage
+        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+        #endif
         #ifdef _artnet
                     if (artnet) artnet->begin();
         #endif
@@ -781,7 +844,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
     debugSerial<<endl<<F("T:")<<valstr<<F("<");
     aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);
     if (owObj) {
-        owEmitString = aJson.getObjectItem(owObj, "emit")->valuestring;
+        owEmitString = getStringFromConfig(owObj, "emit");
         debugSerial<<owEmitString<<F(">")<<endl;
           if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
           {
@@ -790,7 +853,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
 
 #ifdef WITH_DOMOTICZ
             aJsonObject *idx = aJson.getObjectItem(owObj, "idx");
-        if (idx && idx->valuestring) {//DOMOTICZ json format support
+        if (idx && && idx->type ==aJson_String && idx->valuestring) {//DOMOTICZ json format support
             debugSerial << endl << idx->valuestring << F(" Domoticz valstr:");
             char valstr[50];
             sprintf(valstr, "{\"idx\":%s,\"svalue\":\"%.1f\"}", idx->valuestring, currentTemp);
@@ -808,7 +871,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
                   mqttClient.publish(addrstr, valstr);
         }
         // And translate temp to internal items
-        owItem = aJson.getObjectItem(owObj, "item")->valuestring;
+        owItem = getStringFromConfig(owObj, "item");
         if (owItem)
             thermoSetCurTemp(owItem, currentTemp);  ///TODO: Refactore using Items interface
         } // if valid temperature
@@ -860,6 +923,7 @@ void cmdFunctionReboot(int arg_cnt, char **args) {
 
 void applyConfig() {
     if (!root) return;
+configLocked++;
 #ifdef _dmxin
     int itemsCount;
     dmxArr = aJson.getObjectItem(root, "dmxin");
@@ -870,9 +934,10 @@ void applyConfig() {
 #endif
 #ifdef _dmxout
     int maxChannels;
+    short numParams;
     aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
-    if (dmxoutArr && aJson.getArraySize(dmxoutArr) >=1 ) {
-        DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, 1)->valueint);
+    if (dmxoutArr &&  (numParams=aJson.getArraySize(dmxoutArr)) >=1 ) {
+        DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, numParams-1)->valueint);
         debugSerial<<F("DMX out started. Channels: ")<<maxChannels<<endl;
     }
 #endif
@@ -887,6 +952,7 @@ void applyConfig() {
         owReady = owSetup(&Changed);
         if (owReady) debugSerial<<F("One wire Ready\n");
         t_count = 0;
+
         while (item && owReady) {
             if ((item->type == aJson_Object)) {
                 DeviceAddress addr;
@@ -946,6 +1012,8 @@ void applyConfig() {
     udpSyslogArr = aJson.getObjectItem(root, "syslog");
 #endif
     printConfigSummary();
+
+configLocked--;
 }
 
 void printConfigSummary() {
@@ -1142,7 +1210,8 @@ void cmdFunctionPwd(int arg_cnt, char **args)
 }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
-    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%c", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]) < 6) {
+    char dummy;
+    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%c", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5], &dummy) < 6) {
         debugSerial<<F("could not parse: ")<<args[1];
         return;
     }
@@ -1517,6 +1586,33 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     debugSerial<<F("\n(-)RESTART_LAN_ON_MQTT_ERRORS");
 #endif
+
+
+#ifdef CSSHDC_DISABLE
+    debugSerial<<F("\n(-)CCS811 & HDC1080");
+#else
+    debugSerial<<F("\n(+)CCS811 & HDC1080");
+#endif
+#ifndef AC_DISABLE
+    debugSerial<<F("\n(+)AC HAIER");
+#else
+    debugSerial<<F("\n(-)AC HAIER");
+#endif
+#ifndef MOTOR_DISABLE
+    debugSerial<<F("\n(+)MOTOR CTR");
+#else
+    debugSerial<<F("\n(-)MOTOR CTR");
+#endif
+#ifndef SPILED_DISABLE
+    debugSerial<<F("\n(+)SPI LED");
+#else
+    debugSerial<<F("\n(-)SPI LED");
+#endif
+#ifndef FASTLED
+    debugSerial<<F("\n(+)FASTLED");
+#else
+    debugSerial<<F("\n(+)ADAFRUIT LED");
+#endif
 debugSerial<<endl;
 
 
@@ -1541,7 +1637,7 @@ void publishStat(){
   char topic[64];
   char intbuf[16];
   uint32_t ut = millis()/1000UL;
-  if (!mqttClient.connected()) return;
+  if (!mqttClient.connected()  || ethernetIdleCount) return;
 
 //    debugSerial<<F("\nfree RAM: ")<<fr;
     setTopic(topic,sizeof(topic),T_DEV);
@@ -1566,12 +1662,16 @@ for (short i = 0; i < 6; i++) {
         mac[i] = EEPROM.read(i);
         if (mac[i] != 0 && mac[i] != 0xff) isMacValid = true;
     }
+
 if (!isMacValid) {
     debugSerial<<F("No MAC configured: set firmware's MAC\n");
 
     #if defined (CUSTOM_FIRMWARE_MAC) //Forced MAC from compiler's directive
     const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);//colon(:) separated from build options
     parseBytes(macStr, ':', mac, 6, 16);
+
+    mac[0]&=0xFE;
+    mac[0]|=2;
 
     #elif defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
     //Using original MPU MAC
@@ -1590,6 +1690,7 @@ if (!isMacValid) {
     memcpy(mac,defaultMac,6);
     #endif
     }
+
 
     printMACAddress();
 }
@@ -1613,6 +1714,10 @@ void setupCmdArduino() {
 }
 
 void loop_main() {
+  #if defined(OTA)
+  ArduinoOTA.poll();
+  #endif
+
   #if defined(M5STACK)
    // Initialize the M5Stack object
    M5.update();
@@ -1637,9 +1742,9 @@ void loop_main() {
 #endif
 
     if (items) {
-        #ifndef MODBUS_DISABLE
+//        #ifndef MODBUS_DISABLE
         if (lanStatus != RETAINING_COLLECTING) pollingLoop();
-        #endif
+//        #endif
 //#ifdef _owire
         thermoLoop();
 //#endif
@@ -1705,13 +1810,14 @@ void modbusIdle(void) {
 void inputLoop(void) {
     if (!inputs) return;
 
-
+configLocked++;
     if (millis() > nextInputCheck) {
         aJsonObject *input = inputs->child;
+
         while (input) {
             if ((input->type == aJson_Object)) {
                 Input in(input);
-                in.poll(CHECK_INPUT);
+                in.Poll(CHECK_INPUT);
             }
             input = input->next;
         }
@@ -1723,18 +1829,18 @@ void inputLoop(void) {
         while (input) {
             if ((input->type == aJson_Object)) {
                 Input in(input);
-                in.poll(CHECK_SENSOR);
+                in.Poll(CHECK_SENSOR);
             }
             input = input->next;
         }
         nextSensorCheck = millis() + INTERVAL_CHECK_SENSOR;
     }
-
+configLocked--;
 }
 
 void inputSetup(void) {
     if (!inputs) return;
-
+configLocked++;
         aJsonObject *input = inputs->child;
         while (input) {
             if ((input->type == aJson_Object)) {
@@ -1743,19 +1849,40 @@ void inputSetup(void) {
             }
             input = input->next;
         }
+configLocked--;
 }
 
-//#ifndef MODBUS_DISABLE
+
 void pollingLoop(void) {
+// FAST POLLINT - as often AS possible every item
+configLocked++;
+if (items) {
+    aJsonObject * item = items->child;
+    while (items && item)
+        if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
+            Item it(item);
+            if (it.isValid()) {
+               it.Poll(POLLING_FAST);
+            } //isValid
+            item = item->next;
+        }  //if
+}
+configLocked--;
+// SLOW POLLING
     boolean done = false;
     if (lanStatus == RETAINING_COLLECTING) return;
     if (millis() > nextPollingCheck) {
         while (pollingItem && !done) {
             if (pollingItem->type == aJson_Array) {
                 Item it(pollingItem);
-                nextPollingCheck = millis() + it.Poll();    //INTERVAL_CHECK_MODBUS;
-                done = true;
+                uint32_t ret = it.Poll(POLLING_SLOW);
+                if (ret)
+                {
+                  nextPollingCheck = millis() +  ret;  //INTERVAL_CHECK_MODBUS;
+                  done = true;
+                }
             }//if
+            if (!pollingItem) return; //Config was re-readed
             pollingItem = pollingItem->next;
             if (!pollingItem) {
                 pollingItem = items->child;
@@ -1764,7 +1891,6 @@ void pollingLoop(void) {
         } //while
     }//if
 }
-//#endif
 
 bool isThermostatWithMinArraySize(aJsonObject *item, int minimalArraySize) {
     return (item->type == aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint == CH_THERMO) &&
@@ -1790,6 +1916,7 @@ void thermoLoop(void) {
         return;
     if (!items) return;
     bool thermostatCheckPrinted = false;
+   configLocked++;
     for (aJsonObject *thermoItem = items->child; thermoItem; thermoItem = thermoItem->next) {
         if (isThermostatWithMinArraySize(thermoItem, 5)) {
             aJsonObject *thermoExtensionArray = aJson.getArrayItem(thermoItem, I_EXT);
@@ -1814,17 +1941,17 @@ void thermoLoop(void) {
                             << F(" cmd:") << thermoStateCommand;
                 if (thermoPin<0) pinMode(-thermoPin, OUTPUT); else pinMode(thermoPin, OUTPUT);
                 if (thermoDisabledOrDisconnected(thermoExtensionArray, thermoStateCommand)) {
-                    if (thermoPin<0) digitalWrite(-thermoPin, LOW); digitalWrite(thermoPin, LOW);
+                    if (thermoPin<0) digitalWrite(-thermoPin, LOW); else digitalWrite(thermoPin, LOW);
                     // Caution - for water heaters (negative pin#) if some comes wrong (or no connection with termometers output is LOW - valve OPEN)
                     // OFF - also VALVE is OPEN (no teat control)
                     debugSerial<<F(" OFF");
                 } else {
                     if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) {
-                        if (thermoPin<0) digitalWrite(-thermoPin, LOW); digitalWrite(thermoPin, HIGH);
+                        if (thermoPin<0) digitalWrite(-thermoPin, LOW); else digitalWrite(thermoPin, HIGH);
                         debugSerial<<F(" ON");
                     } //too cold
                     else if (curTemp >= thermoSetting) {
-                        if (thermoPin<0) digitalWrite(-thermoPin, HIGH); digitalWrite(thermoPin, LOW);
+                        if (thermoPin<0) digitalWrite(-thermoPin, HIGH); else digitalWrite(thermoPin, LOW);
                         debugSerial<<F(" OFF");
                     } //Reached settings
                     else debugSerial<<F(" -target zone-"); // Nothing to do
@@ -1833,7 +1960,7 @@ void thermoLoop(void) {
             }
         }
     }
-
+  configLocked--;
     nextThermostatCheck = millis() + THERMOSTAT_CHECK_PERIOD;
 publishStat();
 #ifndef DISABLE_FREERAM_PRINT

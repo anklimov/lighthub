@@ -7,6 +7,7 @@
 
 extern lan_status lanStatus;
 extern PubSubClient mqttClient;
+extern int8_t ethernetIdleCount;
 
 int abstractCh::publishTopic(const char* topic, long value, const char* subtopic)
 {
@@ -31,11 +32,11 @@ int abstractCh::publishTopic(const char* topic, const char * value, const char* 
        strncpy(addrstr,topic,sizeof(addrstr));
        if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,topic);
        strncat(addrstr,subtopic,sizeof(addrstr));
-       if (mqttClient.connected() && lanStatus == OPERATION)
+       if (mqttClient.connected() && lanStatus == OPERATION  && !ethernetIdleCount)
                        {
                         mqttClient.publish(addrstr, value, true);
                         return 1;
                       }
      }
-
+return 0;
 };

@@ -35,13 +35,39 @@ e-mail    anklimov@gmail.com
 #define IN_COUNTER       8
 #define IN_UPTIME       16
 
+#define IS_IDLE 0
+#define IS_PRESSED 1
+#define IS_RELEASED 2
+#define IS_LONG 3
+#define IS_REPEAT 4
+#define IS_WAITPRESS 5
+#define IS_PRESSED2 6
+#define IS_RELEASED2 7
+#define IS_LONG2 8u
+#define IS_REPEAT2 9u
+#define IS_PRESSED3 10u
+#define IS_LONG3 11u
+#define IS_REPEAT3 12u
+#define IS_WAITRELEASE 13u
+#define IS_REQSTATE 0xFF
+
+
 
 #define SAME_STATE_ATTEMPTS 3
 #define ANALOG_STATE_ATTEMPTS 6
 #define ANALOG_NOIZE 1
 
-#define CHECK_INPUT  1
-#define CHECK_SENSOR 2
+#define CHECK_SENSOR 1
+#define CHECK_INPUT  2
+#define CHECK_INTERRUPT 3
+
+
+#define T_LONG 1000
+#define T_IDLE 600
+#define T_RPT 300
+#define T_RPT_PULSE 150
+
+
 
 // in syntaxis
 // "pin": { "T":"N", "emit":"out_emit", item:"out_item", "scmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd":"repeat_command" }
@@ -79,10 +105,24 @@ extern aJsonObject *inputs;
 typedef union {
     long int aslong;
     uint32_t timestamp;
+    // Analog input structure
     struct {
-        int8_t logicState;
-        int8_t bounce;
+        uint8_t reserved;
+        uint8_t logicState;
         int16_t currentValue;
+    };
+    // Digital input structure
+    struct {
+        uint8_t  toggle1:1;
+        uint8_t  toggle2:1;
+        uint8_t  toggle3:1;
+        uint8_t  lastValue:1;
+        uint8_t  delayedState:1;
+        uint8_t  bounce:3;
+        uint8_t  state:4;
+        uint8_t  reqState:4;
+        uint16_t timestamp16;
+
     };
 
 } inStore;
@@ -105,7 +145,7 @@ public:
     void onContactChanged(int newValue);
     void onAnalogChanged(float newValue);
 
-    int poll(short cause);
+    int Poll(short cause);
     void setup();
 
     static void inline onCounterChanged(int i);
@@ -121,8 +161,8 @@ public:
 protected:
     void Parse();
 
-    void contactPoll();
-    void analogPoll();
+    void contactPoll(short cause);
+    void analogPoll(short cause);
 
     void dht22Poll();
 
@@ -140,4 +180,6 @@ protected:
     bool publishDataToDomoticz(int , aJsonObject *, const char *format, ...);
 
     char* getIdxField();
+    bool changeState(uint8_t newState, short cause);
+    bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
 };

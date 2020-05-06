@@ -34,6 +34,7 @@ e-mail    anklimov@gmail.com
 extern PubSubClient mqttClient;
 extern aJsonObject *root;
 extern int8_t ethernetIdleCount;
+extern int8_t configLocked;
 
 #if !defined(DHT_DISABLE) || !defined(COUNTER_DISABLE)
 static volatile unsigned long nextPollMillisValue[5];
@@ -113,7 +114,7 @@ void Input::Parse()
 void Input::setup()
 {
 if (!isValid() || (!root)) return;
-
+/*
 #ifndef CSSHDC_DISABLE
     if (inType == IN_CCS811)
       {
@@ -127,10 +128,55 @@ if (!isValid() || (!root)) return;
        }
 // TODO rest types setup
 #endif
+*/
+store->aslong=0;
+uint8_t inputPinMode = INPUT; //if IN_ACTIVE_HIGH
+switch (inType)
+{
+  case IN_PUSH_ON:
+  case IN_PUSH_TOGGLE :
+  inputPinMode = INPUT_PULLUP;
+
+  case IN_PUSH_ON     | IN_ACTIVE_HIGH:
+  case IN_PUSH_TOGGLE | IN_ACTIVE_HIGH:
+  pinMode(pin, inputPinMode);
+
+  store->state=IS_IDLE;
+  break;
+
+  case IN_ANALOG:
+  inputPinMode = INPUT_PULLUP;
+
+  case IN_ANALOG | IN_ACTIVE_HIGH:
+  pinMode(pin, inputPinMode);
+  break;
+
+  case IN_DHT22:
+  case IN_COUNTER:
+  case IN_UPTIME:
+  break;
+
+  #ifndef CSSHDC_DISABLE
+  case IN_CCS811:
+  {
+    in_ccs811  ccs811(this);
+    ccs811.Setup();
+  }
+  break;
+
+  case IN_HDC1080:
+  {
+    in_hdc1080 hdc1080(this);
+    hdc1080.Setup();
+   }
+  break;
+  #endif
+
+} //switch
 
 }
 
-int Input::poll(short cause) {
+int Input::Poll(short cause) {
 
 if (!isValid()) return -1;
 #ifndef CSSHDC_DISABLE
@@ -140,17 +186,18 @@ if (!isValid()) return -1;
 
 switch (cause)  {
   case CHECK_INPUT:  //Fast polling
+  case CHECK_INTERRUPT: //Realtime polling
     switch (inType)
     {
       case IN_PUSH_ON:
       case IN_PUSH_ON     | IN_ACTIVE_HIGH:
       case IN_PUSH_TOGGLE :
       case IN_PUSH_TOGGLE | IN_ACTIVE_HIGH:
-      contactPoll();
+      contactPoll(cause);
       break;
       case IN_ANALOG:
       case IN_ANALOG | IN_ACTIVE_HIGH:
-      analogPoll();
+      analogPoll(cause);
       break;
 
       // No fast polling
@@ -167,10 +214,10 @@ switch (cause)  {
     {
     #ifndef CSSHDC_DISABLE
          case IN_CCS811:
-         _ccs811.Poll();
+         _ccs811.Poll(POLLING_SLOW);
          break;
          case IN_HDC1080:
-         _hdc1080.Poll();
+         _hdc1080.Poll(POLLING_SLOW);
          break;
     #endif
     #ifndef DHT_DISABLE
@@ -222,7 +269,7 @@ void Input::counterPoll() {
     debugSerial<<F("IN:")<<(pin)<<F(" Counter type. val=")<<counterValue;
 
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
-    if (emit) {
+    if (emit && emit->type == aJson_String) {
         char valstr[10];
         char addrstr[MQTT_TOPIC_LENGTH];
         strncpy(addrstr,emit->valuestring,sizeof(addrstr));
@@ -281,7 +328,7 @@ void Input::uptimePoll() {
     if (nextPollTime() > millis())
         return;
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
-    if (emit) {
+    if (emit && emit->type == aJson_String) {
 #ifdef WITH_DOMOTICZ
         if(getIdxField()){
                 publishDataToDomoticz(DHT_POLL_DELAY_DEFAULT, emit, "{\"idx\":%s,\"svalue\":\"%d\"}", getIdxField(), millis());
@@ -376,9 +423,9 @@ void Input::dht22Poll() {
 #endif
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
-    if (item) thermoSetCurTemp(item->valuestring, temp);
+    if (item && item->type == aJson_String) thermoSetCurTemp(item->valuestring, temp);
     debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") << humidity << F("%")<<endl;
-    if (emit && temp && humidity && temp == temp && humidity == humidity) {
+    if (emit && emit->type == aJson_String && temp && humidity && temp == temp && humidity == humidity) {
         char addrstr[MQTT_TOPIC_LENGTH] = "";
 #ifdef WITH_DOMOTICZ
         if(getIdxField()){
@@ -406,43 +453,375 @@ void Input::dht22Poll() {
 }
 #endif
 
-void Input::contactPoll() {
-    boolean currentInputState;
+bool Input::executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
+{
+  if (!cmd) return false;
+
+  switch (cmd->type)
+  {
+    case aJson_String: //legacy - no action
+    break;
+    case aJson_Array:  //array - recursive iterate
+    {
+    configLocked++;
+    aJsonObject * command = cmd->child;
+    while (command)
+            {
+            executeCommand(command,toggle,defCmd);
+            command = command->next;
+            }
+    configLocked--;
+    }
+    break;
+    case aJson_Object:
+  {
+  aJsonObject *item = aJson.getObjectItem(cmd, "item");
+  aJsonObject *icmd = aJson.getObjectItem(cmd, "icmd");
+  aJsonObject *irev = aJson.getObjectItem(cmd, "irev");
+  aJsonObject *ecmd = aJson.getObjectItem(cmd, "ecmd");
+  aJsonObject *erev = aJson.getObjectItem(cmd, "erev");
+  aJsonObject *emit = aJson.getObjectItem(cmd, "emit");
+
+  char * itemCommand;
+  if (irev && toggle && irev->type == aJson_String) itemCommand = irev->valuestring;
+  else if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
+    else    itemCommand = defCmd;
+
+  char * emitCommand;
+  if (erev && toggle && erev->type == aJson_String) emitCommand = erev->valuestring;
+  else if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
+    else    emitCommand = defCmd;
+
+  debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
+if (item) debugSerial << item->valuestring<< F(" -> ")<<itemCommand<<endl;
+if (emit) debugSerial << emit->valuestring<< F(" -> ")<<emitCommand<<endl;
+
+
+
+
+  if (emit && emitCommand && emit->type == aJson_String) {
 /*
-#if defined(ARDUINO_ARCH_STM32)
-     WiringPinMode inputPinMode;
-#endif
-
-#if defined(__SAM3X8E__)||defined(ARDUINO_ARCH_AVR)||defined(ARDUINO_ARCH_ESP8266)||defined(ARDUINO_ARCH_ESP32)
-
+TODO implement
+#ifdef WITH_DOMOTICZ
+      if (getIdxField())
+      {  (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
+          : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());	                                               getIdxField())
+                     : publishDataToDomoticz(0, emit,
+                                             "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",
+                                             getIdxField());
+                        } else
 #endif
 */
-     uint32_t inputPinMode;
-     uint8_t inputOnLevel;
-    if (inType & IN_ACTIVE_HIGH) {
-        inputOnLevel = HIGH;
-        inputPinMode = INPUT;
-    } else {
-        inputOnLevel = LOW;
-        inputPinMode = INPUT_PULLUP;
+
+{
+char addrstr[MQTT_TOPIC_LENGTH];
+strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+if (mqttClient.connected() && !ethernetIdleCount)
+{
+  if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
+  mqttClient.publish(addrstr, emitCommand , true);
+}
+}
+} // emit
+  if (item && itemCommand && item->type == aJson_String) {
+    //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
+      Item it(item->valuestring);
+      if (it.isValid()) it.Ctrl(itemCommand, true);
+      }
+return true;
+}
+default:
+return false;
+} //switch type
+return false;
+}
+
+// TODO Polling via timed interrupt with CHECK_INTERRUPT cause
+bool Input::changeState(uint8_t newState, short cause)
+{
+if (!inputObj ||  !store) return false;
+
+if (newState == IS_REQSTATE)
+  if (store->delayedState && cause != CHECK_INTERRUPT)
+    {
+      // Requested delayed change State and safe moment
+      newState=store->reqState; //Retrieve requested state
+      debugSerial<<F("Pended state retrieved:")<<newState;
+
     }
-    pinMode(pin, inputPinMode);
+  else return true;   // No pended State
+else if (store->delayedState)
+            return false; //State changing is postponed already (( giving up
+
+aJsonObject *cmd = NULL;
+int8_t toggle=0;
+if (newState!=store->state) debugSerial<<F("#")<<pin<<F(" ")<<store->state<<F("->") <<newState<<endl;
+  switch (newState)
+  {
+    case IS_IDLE:
+        switch (store->state)
+        {
+        case IS_RELEASED:  //click
+        cmd = aJson.getObjectItem(inputObj, "click");
+        toggle=store->toggle1;
+        break;
+        case IS_RELEASED2: //doubleclick
+        cmd = aJson.getObjectItem(inputObj, "dclick");
+        toggle=store->toggle2;
+        break;
+        case IS_PRESSED3:  //tripple click
+        cmd = aJson.getObjectItem(inputObj, "tclick");
+        toggle=store->toggle3;
+        break;
+        case IS_WAITPRESS: //do nothing
+        break;
+        default: //rcmd
+        cmd = aJson.getObjectItem(inputObj, "rcmd");
+          ;
+        }
+        break;
+    case IS_PRESSED: //scmd
+        cmd = aJson.getObjectItem(inputObj, "scmd");
+        toggle=store->toggle1;
+        store->toggle1 = !store->toggle1;
+        break;
+    case IS_PRESSED2: //scmd2
+        cmd = aJson.getObjectItem(inputObj, "scmd2");
+        toggle=store->toggle2;
+        store->toggle2 = !store->toggle2;
+        break;
+    case IS_PRESSED3: //scmd3
+        cmd = aJson.getObjectItem(inputObj, "scmd3");
+        toggle=store->toggle3;
+        store->toggle3 = !store->toggle3;
+        break;
+
+    case IS_RELEASED: //rcmd
+    case IS_WAITPRESS:
+    case IS_RELEASED2:
+        cmd = aJson.getObjectItem(inputObj, "rcmd");
+  //      toggle=state->toggle1;
+
+        break;
+    case IS_LONG: //lcmd
+        cmd = aJson.getObjectItem(inputObj, "lcmd");
+        toggle=store->toggle1;
+        break;
+    case IS_REPEAT: //rpcmd
+        cmd = aJson.getObjectItem(inputObj, "rpcmd");
+        toggle=store->toggle1;
+        break;
+    case IS_LONG2: //lcmd2
+        cmd = aJson.getObjectItem(inputObj, "lcmd2");
+        toggle=store->toggle2;
+        break;
+    case IS_REPEAT2: //rpcmd2
+          cmd = aJson.getObjectItem(inputObj, "rpcmd2");
+        toggle=store->toggle2;
+        break;
+    case IS_LONG3: //lcmd3
+        cmd = aJson.getObjectItem(inputObj, "lcmd3");
+        toggle=store->toggle3;
+        break;
+    case IS_REPEAT3: //rpcmd3
+        cmd = aJson.getObjectItem(inputObj, "rpcmd3");
+        toggle=store->toggle3;
+        break;
+
+  }
+  if (!cmd)
+  {
+  store->state=newState;
+  return true; //nothing to do
+  }
+  if (cause != CHECK_INTERRUPT)
+  {
+    store->state=newState;
+    executeCommand(cmd,toggle);
+    //Executed
+    store->delayedState=false;
+    return true;
+  }
+  else
+  {
+    //Postpone actual execution
+    store->reqState=store->state;
+    store->delayedState=true;
+    return true;
+  }
+
+}
+
+void Input::contactPoll(short cause) {
+    boolean currentInputState;
+    if (!store) return;
+
+    changeState(IS_REQSTATE,cause); //Check for postponed states transitions
+
+
+     uint8_t inputOnLevel;
+    if (inType & IN_ACTIVE_HIGH) inputOnLevel = HIGH;
+                            else inputOnLevel = LOW;
+
+
     currentInputState = (digitalRead(pin) == inputOnLevel);
-    if (currentInputState != store->currentValue) // value changed
+
+switch (store->state) //Timer based transitions
+{
+  case IS_PRESSED:
+      if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
+      {
+      if (!aJson.getObjectItem(inputObj, "lcmd") && !aJson.getObjectItem(inputObj, "rpcmd")) changeState(IS_WAITRELEASE, cause);
+         else changeState(IS_LONG, cause);
+       }
+      break;
+
+  case IS_LONG:
+      if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT,0xFFFF))
+                        {
+                        changeState(IS_REPEAT, cause);
+                        store->timestamp16 = millis() & 0xFFFF;
+                        }
+      break;
+
+  case IS_REPEAT:
+      if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT_PULSE,0xFFFF))
+                        {
+                          changeState(IS_REPEAT, cause);
+                          store->timestamp16 = millis() & 0xFFFF;
+                        }
+          break;
+
+  case IS_PRESSED2:
+          if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
+            {
+              if (!aJson.getObjectItem(inputObj, "lcmd2") && !aJson.getObjectItem(inputObj, "rpcmd2")) changeState(IS_WAITRELEASE, cause);
+              else changeState(IS_LONG2, cause);
+            }
+              break;
+
+  case IS_LONG2:
+          if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT,0xFFFF))
+                          {
+                            changeState(IS_REPEAT2, cause);
+                            store->timestamp16 = millis() & 0xFFFF;
+                         }
+              break;
+
+  case IS_REPEAT2:
+          if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT_PULSE,0xFFFF))
+                          {
+                            changeState(IS_REPEAT2, cause);
+                            store->timestamp16 = millis() & 0xFFFF;
+                          }
+          break;
+
+  case IS_PRESSED3:
+          if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
+          {
+          if (!aJson.getObjectItem(inputObj, "lcmd3") && !aJson.getObjectItem(inputObj, "rpcmd3")) //No longpress handlers
+                {
+                if (aJson.getObjectItem(inputObj, "scmd3")) changeState(IS_WAITRELEASE, cause); //was used
+                   else changeState(IS_PRESSED2, cause); // completely empty trippleClick section - fallback to first click handler
+                 }
+          else changeState(IS_LONG3, cause);
+          }
+          break;
+
+  case IS_LONG3:
+          if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT,0xFFFF))
+                            {
+                              changeState(IS_REPEAT3, cause);
+                              store->timestamp16 = millis() & 0xFFFF;
+                            }
+          break;
+
+  case IS_REPEAT3:
+          if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT_PULSE,0xFFFF))
+                            {
+                                changeState(IS_REPEAT3, cause);
+                                store->timestamp16 = millis() & 0xFFFF;
+                            }
+          break;
+
+  case IS_RELEASED:
+  case IS_RELEASED2:
+  case IS_WAITPRESS:
+
+
+      if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_IDLE,0xFFFF)) changeState(IS_IDLE, cause);
+      break;
+}
+
+    if (currentInputState != store->lastValue) // value changed
     {
         if (store->bounce) store->bounce = store->bounce - 1;
         else //confirmed change
         {
-            if (inType & IN_PUSH_TOGGLE) {
+           store->timestamp16 = millis() & 0xFFFF; //Saving timestamp of changing
+
+            if (inType & IN_PUSH_TOGGLE) { //To refactore
                 if (currentInputState) { //react on leading edge only (change from 0 to 1)
-                    store->logicState = !store->logicState;
-                    store->currentValue = currentInputState;
-                    onContactChanged(store->logicState);
+                    //store->logicState = !store->logicState;
+                    store->lastValue = currentInputState;
+                    onContactChanged(store->toggle1);
                 }
-            } else {
-                store->logicState = currentInputState;
-                store->currentValue = currentInputState;
-                onContactChanged(currentInputState);
+            } else
+
+            {
+                onContactChanged(currentInputState); //Legacy input - to remove later
+
+          bool res = true;
+          if (currentInputState)  //Button pressed state transitions
+
+                switch (store->state)
+                {
+                  case IS_IDLE:
+                       res = changeState(IS_PRESSED, cause);
+
+                       break;
+
+                  case IS_RELEASED:
+                  case IS_WAITPRESS:
+                       res = changeState(IS_PRESSED2, cause);
+
+                       break;
+
+                  case IS_RELEASED2:
+
+                       res = changeState(IS_PRESSED3, cause);
+                       break;
+              }
+          else
+          switch (store->state)  //Button released state transitions
+          {
+                case IS_PRESSED:
+
+                res = changeState(IS_RELEASED, cause);
+                break;
+
+                case IS_LONG:
+                case IS_REPEAT:
+                case IS_WAITRELEASE:
+                res = changeState(IS_WAITPRESS, cause);
+                break;
+
+                case IS_PRESSED2:
+                res = changeState(IS_RELEASED2, cause);
+                break;
+
+                case IS_LONG2:
+                case IS_REPEAT2:
+                case IS_LONG3:
+                case IS_REPEAT3:
+                case IS_PRESSED3:
+                res = changeState(IS_IDLE, cause);
+                break;
+        }
+       if (res) { //State changed or postponed
+                //  store->logicState = currentInputState;
+                  store->lastValue = currentInputState;
+                }
             }
     //        store->currentValue = currentInputState;
         }
@@ -451,23 +830,26 @@ void Input::contactPoll() {
 }
 
 
-void Input::analogPoll() {
+
+void Input::analogPoll(short cause) {
     int16_t   inputVal;
     int32_t   mappedInputVal; // 10x inputVal
     aJsonObject *inputMap = aJson.getObjectItem(inputObj, "map");
     int16_t Noize = ANALOG_NOIZE;
     short simple = 0;
-    uint32_t inputPinMode;
+//    uint32_t inputPinMode;
     int max=1024*10;
     int min=0;
 
-
+/*
     if (inType & IN_ACTIVE_HIGH) {
         inputPinMode = INPUT;
     } else {
         inputPinMode = INPUT_PULLUP;
     }
+
     pinMode(pin, inputPinMode);
+*/
     inputVal = analogRead(pin);
     // Mapping
     if (inputMap && inputMap->type == aJson_Array)
@@ -483,8 +865,15 @@ void Input::analogPoll() {
 
       if (aJson.getArraySize(inputMap)==5) Noize = aJson.getArrayItem(inputMap, 4)->valueint;
 
-      if (mappedInputVal>max) mappedInputVal = max;
-      if (mappedInputVal<min) mappedInputVal = min;
+      if (mappedInputVal>max)
+                              {
+                              mappedInputVal = max;
+                              inputVal = 1023;
+                              }
+      if (mappedInputVal<min) {
+                              mappedInputVal = min;
+                              inputVal = 0;
+                              }
 
       if (aJson.getArraySize(inputMap)==2)
         {
@@ -522,12 +911,14 @@ void Input::analogPoll() {
 
 
 void Input::onContactChanged(int newValue) {
-    debugSerial << F("IN:") << (pin) << F("=") << newValue << endl;
+
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
+    aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
+    if (!item && !emit) return;
     aJsonObject *scmd = aJson.getObjectItem(inputObj, "scmd");
     aJsonObject *rcmd = aJson.getObjectItem(inputObj, "rcmd");
-    aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
-    if (emit) {
+    debugSerial << F("LEGACY IN:") << (pin) << F("=") << newValue << endl;
+    if (emit && emit->type == aJson_String) {
 #ifdef WITH_DOMOTICZ
         if (getIdxField())
         {  (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
@@ -544,26 +935,26 @@ if (mqttClient.connected() && !ethernetIdleCount)
 {
 if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         if (newValue) {  //send set command
-            if (!scmd) mqttClient.publish(addrstr, "ON", true);
+            if (!scmd || scmd->type != aJson_String) mqttClient.publish(addrstr, "ON", true);
             else if (strlen(scmd->valuestring))
                 mqttClient.publish(addrstr, scmd->valuestring, true);
         } else {  //send reset command
-            if (!rcmd) mqttClient.publish(addrstr, "OFF", true);
+            if (!rcmd || rcmd->type == aJson_String) mqttClient.publish(addrstr, "OFF", true);
             else if (strlen(rcmd->valuestring))mqttClient.publish(addrstr, rcmd->valuestring, true);
         }
 }
   }
 } // emit
-    if (item) {
+    if (item && item->type == aJson_String) {
       //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
         Item it(item->valuestring);
         if (it.isValid()) {
             if (newValue) {  //send set command
-                if (!scmd) it.Ctrl(CMD_ON, 0, NULL, true);
+                if (!scmd || scmd->type != aJson_String) it.Ctrl(CMD_ON, 0, NULL, true);
                 else if (strlen(scmd->valuestring))
                     it.Ctrl(scmd->valuestring, true);
             } else {  //send reset command
-                if (!rcmd) it.Ctrl(CMD_OFF, 0, NULL, true);
+                if (!rcmd || rcmd->type != aJson_String) it.Ctrl(CMD_OFF, 0, NULL, true);
                 else if (strlen(rcmd->valuestring))
                     it.Ctrl(rcmd->valuestring, true);
             }
@@ -577,7 +968,7 @@ void Input::onAnalogChanged(float newValue) {
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
 
 
-    if (emit) {
+    if (emit && emit->type == aJson_String) {
 
 //#ifdef WITH_DOMOTICZ
 //        if (getIdxField()) {
@@ -595,7 +986,7 @@ void Input::onAnalogChanged(float newValue) {
                   mqttClient.publish(addrstr, strVal, true);
 }
 
-    if (item) {
+    if (item && item->type == aJson_String) {
         int intNewValue = round(newValue);
         Item it(item->valuestring);
         if (it.isValid()) {
@@ -608,6 +999,8 @@ void Input::onAnalogChanged(float newValue) {
 bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, const char *format, ...)
 {
 #ifdef WITH_DOMOTICZ
+if (emit && emit->type == aJson_String)
+{
     debugSerial << F("\nDomoticz valstr:");
     char valstr[50];
     va_list args;
@@ -620,6 +1013,7 @@ bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, cons
     if (pollTimeIncrement)
         setNextPollTime(millis() + pollTimeIncrement);
 //    debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
+}
 
 #endif
     return true;
@@ -627,7 +1021,7 @@ bool Input::publishDataToDomoticz(int pollTimeIncrement, aJsonObject *emit, cons
 
 char* Input::getIdxField() {
     aJsonObject *idx = aJson.getObjectItem(inputObj, "idx");
-    if(idx&&idx->valuestring)
+    if(idx&& idx->type == aJson_String && idx->valuestring)
         return idx->valuestring;
     return nullptr;
 }

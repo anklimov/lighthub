@@ -21,6 +21,7 @@
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
+//#include "SPIFFS.h"
 #include <ESP_EEPROM.h>
 #include <ESP8266HTTPClient.h>
 //#include <ArduinoHttpClient.h>
@@ -35,6 +36,7 @@
 
 #if defined ARDUINO_ARCH_ESP32
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
+//#include "SPIFFS.h"
 //#include <EEPROM.h>
 #include <NRFFlashStorage.h>
 //#include "HttpClient.h"
@@ -121,9 +123,9 @@
 #include <ModbusMaster.h>
 #endif
 
-#ifndef DMX_DISABLE
-#include "FastLED.h"
-#endif
+//#ifndef DMX_DISABLE
+//#include "FastLED.h"
+//#endif
 
 #ifdef _owire
 #include "owTerm.h"
@@ -171,8 +173,8 @@ enum lan_status {
     INITIAL_STATE = 0,
     HAVE_IP_ADDRESS = 1,
     IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER = 2,
-    OPERATION = 3,
-    RETAINING_COLLECTING = 4,
+    RETAINING_COLLECTING = 3,
+    OPERATION = 4,
     AWAITING_ADDRESS = -10,
     RECONNECT = 12,
     READ_RE_CONFIG = -11,

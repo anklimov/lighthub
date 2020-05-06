@@ -42,9 +42,13 @@ owChangedType owChanged;
 int owUpdate() {
 #ifndef OWIRE_DISABLE
     unsigned long finish = millis() + OW_UPDATE_INTERVAL;
-    short sr;
-
-
+/*
+    if (oneWire->getError() == DS2482_ERROR_SHORT)
+       {
+         debugSerial<<F("1-wire shorted.")<<endl;
+         return false;
+       }
+*/
     Serial.println(F("Searching"));
     if (oneWire) oneWire->reset_search();
     for (short i = 0; i < t_count; i++) wstat[i] &= ~SW_FIND; //absent
@@ -78,6 +82,7 @@ int owUpdate() {
 
     debugSerial<<F("1-wire count: ")<<t_count<<endl;
 #endif
+return true;
 }
 
 
@@ -119,6 +124,12 @@ int owSetup(owChangedType owCh) {
         if (oneWire->wireReset())
             debugSerial.println(F("\tReset done"));
 
+            if (oneWire->getError() == DS2482_ERROR_SHORT)
+               {
+                 debugSerial<<F("1-wire shorted.")<<endl;
+                 return false;
+               }
+
         sensors->begin();
         owChanged = owCh;
         //owUpdate();
@@ -141,7 +152,13 @@ int owSetup(owChangedType owCh) {
 
 
 int sensors_loop(void) {
-    if (!sensors) return -1;
+    if (!sensors) return 100000;
+    if (oneWire->getError() == DS2482_ERROR_SHORT)
+       {
+         debugSerial<<F("1-wire disabled (shorted)")<<endl;
+         return 100000;
+       }
+
     if (si >= t_count) {
         owUpdate(); //every check circle - scan for new devices
         si = 0;

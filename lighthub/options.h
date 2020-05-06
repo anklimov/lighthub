@@ -1,13 +1,29 @@
 // Configuration of drivers enabled
-#ifndef PIO_SRC_REV
-#define PIO_SRC_REV v0.999
+
+#ifndef FASTLED
+#define ADAFRUIT_LED
+#endif
+// ADAFRUIT library allow to dynamically configure SPI LED Strip Parameters
+
+// If not defined ADAFRUIT_LED - FastLED library will be used instead
+// And strip type, pin, order must defined on compilation time
+#ifndef CONTROLLER
+#define CONTROLLER TM1809
+#endif
+
+#ifndef DATA_PIN
+#define DATA_PIN 4
+#endif
+
+#ifndef ORDER
+#define ORDER BRG
 #endif
 
 #define TXEnablePin 13
 #define ESP_EEPROM_SIZE 2048
 
 #ifndef AVR_DMXOUT_PIN
-#define AVR_DMXOUT_PIN 3
+#define AVR_DMXOUT_PIN 18
 #endif
 
 #define T_ATTEMPTS 200
@@ -19,7 +35,7 @@
 #define FM_OVERHEAT_CELSIUS 40.
 
 #define MIN_VOLUME 25
-#define INIT_VOLUME 50
+#define INIT_VOLUME 40
 
 #define MAXFLASHSTR 32
 #define PWDFLASHSTR 16
@@ -35,7 +51,7 @@
 #define EEPROM_offset EEPROM_offset_NotAlligned + (4 -(EEPROM_offset_NotAlligned & 3))
 
 #ifndef INTERVAL_CHECK_INPUT
-#define INTERVAL_CHECK_INPUT  50
+#define INTERVAL_CHECK_INPUT  15
 #endif
 
 #ifndef INTERVAL_CHECK_SENSOR
@@ -78,19 +94,6 @@
 #ifndef HOMETOPIC
 #define HOMETOPIC  "myhome"
 #endif
-/*
-#ifndef OUTTOPIC
-#define OUTTOPIC "/myhome/s_out/"
-#endif
-
-#ifndef CMDTOPIC
-#define CMDTOPIC "/myhome/in/command/"
-#endif
-
-#ifndef INTOPIC
-#define INTOPIC  "/myhome/in/"
-#endif
-*/
 
 //Default output topic
 #ifndef OUTTOPIC
@@ -130,6 +133,8 @@
 #ifndef LAN_INIT_DELAY
 #define LAN_INIT_DELAY 500
 #endif
+
+#define DEFAULT_INC_STEP 5
 
 #if defined(ARDUINO_ARCH_AVR)
 //All options available
@@ -202,6 +207,10 @@
 #define strncpy_P strncpy
 #endif
 
+#ifndef DMX_SMOOTH_DELAY
+#define DMX_SMOOTH_DELAY 10
+#endif
+
 //#ifdef M5STACK
 //#define debugSerial M5.Lcd
 //#endif
@@ -214,4 +223,34 @@
 #define W5100_ETHERNET_SHIELD
 #else
 #define W5500_ETHERNET_SHIELD
+#endif
+
+
+#if defined(ARDUINO_ARCH_AVR)
+#define PINS_COUNT NUM_DIGITAL_PINS
+#define isAnalogPin(p)  ((p >= 54) && (p<=69))
+#endif
+
+#if defined(__SAM3X8E__)
+#define isAnalogPin(p)  (g_APinDescription[p].ulPinAttribute & PIN_ATTR_ANALOG) == PIN_ATTR_ANALOG
+#endif
+
+#if defined(ARDUINO_ARCH_STM32)
+#define PINS_COUNT NUM_DIGITAL_PINS
+#define isAnalogPin(p)  ((p >= 44) && (p<=57))
+#endif
+
+#if defined(ESP8266)
+#define PINS_COUNT NUM_DIGITAL_PINS
+#define isAnalogPin(p)  ( p ==17 )
+#endif
+
+#if defined(ARDUINO_ARCH_ESP32)
+#define PINS_COUNT NUM_DIGITAL_PINS
+#define isAnalogPin(p)  ((p ==4) || (p>=12)&& (p<=15) || (p>=25)&& (p<=27)||(p>=32)&& (p<=33) || (p>=37)&& (p<=38))
+#endif
+
+#if defined(NRF5)
+#define PINS_COUNT NUM_DIGITAL_PINS
+#define isAnalogPin(p)  ((p >= 14) && (p<=21))
 #endif

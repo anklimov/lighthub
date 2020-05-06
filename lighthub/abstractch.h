@@ -8,7 +8,7 @@ class abstractCh {
 public:
     abstractCh(){};
     virtual ~abstractCh(){};
-    virtual int Poll() = 0;
+    virtual int Poll(short cause) = 0;
     virtual int Setup() =0;        //Should initialize hardware and reserve resources
     virtual int Anounce () {return 0;};
     virtual int Stop() {return 0;};         //Should free resources

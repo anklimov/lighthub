@@ -1,4 +1,4 @@
-/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2020 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,8 +17,13 @@ GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
 
 */
+#pragma once
 #include "options.h"
 #include "abstractout.h"
+
+#define POLLING_SLOW 1
+#define POLLING_FAST 2
+#define POLLING_INT  3
 
 #define S_NOTFOUND  0
 #define S_SETnCMD 0
@@ -28,16 +33,10 @@ e-mail    anklimov@gmail.com
 #define S_RGB 4
 #define S_FAN 5
 #define S_MODE 6
+#define S_HUE 7
+#define S_SAT 8
 #define S_ADDITIONAL 64
-/*
 
-#define S_RPM 11
-#define S_TEMP 3
-#define S_SETPOINT 5
-#define S_POWER 6
-#define S_VOL 7
-#define S_HEAT 8
-*/
 #define CH_DIMMER 0   //DMX 1 ch
 #define CH_RGBW   1   //DMX 4 ch
 #define CH_RGB    2   //DMX 3 ch
@@ -50,6 +49,12 @@ e-mail    anklimov@gmail.com
 #define CH_VC      9  //Vacom modbus motor regulator
 #define CH_AC 10  //AC Haier
 #define CH_SPILED 11
+#define CH_MOTOR  12
+//#define CHANNEL_TYPES 13
+
+//static uint32_t pollInterval[CHANNEL_TYPES] = {0,0,0,0,MODB};
+//static uint32_t nextPollTime[CHANNEL_TYPES] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+
 #define CH_WHITE   127//
 
 #define CMD_NUM 0
@@ -72,20 +77,21 @@ e-mail    anklimov@gmail.com
 #define CMD_AUTO 0xc
 #define CMD_FAN 0xd
 #define CMD_DRY 0xe
-#define CMD_SET 0xf
-#define CMD_HIGH 0x10
+//#define CMD_SET 0xf
+#define CMD_HIGH 0x10  //AC fan leve
 #define CMD_MED 0x11
 #define CMD_LOW 0x12
 //#define CMD_CURTEMP 0xf
 #define CMD_MASK 0xff
-#define FLAG_MASK 0x0f00
+#define FLAG_MASK 0xff00
 
 
 #define SEND_COMMAND 0x100
 #define SEND_PARAMETERS 0x200
 #define SEND_RETRY 0x400
 #define SEND_DEFFERED 0x800
-
+#define ACTION_NEEDED 0x1000
+#define ACTION_IN_PROCESS 0x2000
 
 //#define CMD_REPORT 32
 
@@ -147,7 +153,7 @@ typedef union
 class Item
 {
   public:
-  aJsonObject *itemArr, *itemArg,*itemVal;
+  aJsonObject *itemArr, *itemArg,*itemVal,*itemExt;
   uint8_t itemType;
   abstractOut * driver;
 
@@ -164,33 +170,38 @@ class Item
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array
   uint8_t getCmd();
+  long int getExt(); //From int val OR array
+  void setExt(long int par);
   void setCmd(uint8_t cmdValue);
   short getFlag   (short flag=FLAG_MASK);
   void setFlag   (short flag);
   void clearFlag (short flag);
-  //void setVal(uint8_t n, int par);
   void setVal(long int par);
-  //void copyPar (aJsonObject *itemV);
+  int Poll(int cause);
+  int SendStatus(int sendFlags);
+  int isActive();
+  int getChanType();
   inline int On (){return Ctrl(CMD_ON);};
   inline int Off(){return Ctrl(CMD_OFF);};
   inline int Toggle(){return Ctrl(CMD_TOGGLE);};
-  int Poll();
-  int SendStatus(int sendFlags);
 
   protected:
-  short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
+  //short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
   int VacomSetFan (int8_t  val, int8_t  cmd=0);
-  int VacomSetHeat(int addr, int8_t  val, int8_t  cmd=0);
+  int VacomSetHeat(int8_t  val, int8_t  cmd=0);
   int modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value);
   int modbusDimmerSet(uint16_t value);
   void mb_fail();
-  int isActive();
   void Parse();
   int checkModbusDimmer();
   int checkModbusDimmer(int data);
   boolean checkModbusRetry();
+  boolean checkVCRetry();
+  boolean checkHeatRetry();
   void sendDelayedStatus();
 
   int checkFM();
+  char defaultSubItem[10];
+  int  defaultSuffixCode;
 
 };

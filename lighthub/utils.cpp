@@ -21,7 +21,7 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 #include "options.h"
 #include "stdarg.h"
-#include <wire.h>
+#include <Wire.h>
 
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 #include <malloc.h>
@@ -396,11 +396,11 @@ if (topics && topics->type == aJson_Object)
 
 
     }
-if  (_root) strncpy(buf,_root->valuestring,buflen);
+if  (_root && _root->type == aJson_String) strncpy(buf,_root->valuestring,buflen);
   else strncpy_P(buf,homeTopic,buflen);
 strncat(buf,"/",buflen);
 
-if (_l2) strncat(buf,_l2->valuestring,buflen);
+if (_l2 && _l2->type == aJson_String) strncat(buf,_l2->valuestring,buflen);
   else
   switch (tt) {
     case T_DEV:
@@ -502,6 +502,14 @@ void (*RebootFunc)(void) = 0;
 RebootFunc();
 }
 #endif
+
+
+bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo)
+{
+  uint32_t endTime=(timestamp + time) % modulo;
+  return   ((currTime>endTime) && (currTime <timestamp)) ||
+              ((timestamp<endTime) && ((currTime>endTime) || (currTime <timestamp)));
+}
 
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
