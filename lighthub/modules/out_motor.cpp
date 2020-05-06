@@ -12,10 +12,10 @@ static int driverStatus = CST_UNKNOWN;
 void out_Motor::getConfig()
 {
   pinUp=item->getArg(0);
-  if(pinUp<=0 || pinFeedback>=PINS_COUNT) pinUp=32;
+  if(pinUp<=0 || pinUp>=PINS_COUNT) pinUp=32;
 
   pinDown=item->getArg(1);
-  if (pinDown<=0 || pinFeedback>=PINS_COUNT) pinDown=33;
+  if (pinDown<=0 || pinDown>=PINS_COUNT) pinDown=33;
 
   pinFeedback=item->getArg(2);
   if (pinFeedback<0 || pinFeedback>=PINS_COUNT) pinFeedback=0;
@@ -35,12 +35,16 @@ int  out_Motor::Setup()
 {
 getConfig();
 Serial.println("Motor Init");
+pinMode(pinUp,OUTPUT);
+pinMode(pinDown,OUTPUT);
 digitalWrite(pinUp,LOW);
 digitalWrite(pinDown,LOW);
 pinMode(pinFeedback, INPUT);
 item->setExt(0);
 item->clearFlag(ACTION_NEEDED);
+item->clearFlag(ACTION_IN_PROCESS);
 driverStatus = CST_INITIALIZED;
+motorQuote = MOTOR_QUOTE;
 return 1;
 }
 
@@ -70,6 +74,16 @@ int curPos = -1;
 int targetPos = -1;
 int dif;
 if (!item->getFlag(ACTION_NEEDED)) return 0;
+
+if (!item->getFlag(ACTION_IN_PROCESS))
+    {
+    if (motorQuote)
+      {
+        item->setFlag(ACTION_IN_PROCESS);
+        motorQuote--;
+      }
+    else return 0;
+    }
 
 uint32_t motorOfftime = item->getExt();
 
@@ -116,13 +130,27 @@ if (dif<-POS_ERR)
 #ifndef ESP32
 if (digitalPinHasPWM(pinUp))
     {
+//Serial.println("pinUP PWM");
       int velocity = map(-dif, 0, 10, 0, 255);
       if (velocity>255) velocity=255;
+      if (velocity<0) velocity=0;
       analogWrite(pinUp,velocity);
     }
+
+else if (digitalPinHasPWM(pinDown))
+        {
+  //        Serial.println("pinDown PWM fallback");
+          digitalWrite(pinUp,HIGH);
+          int velocity = map(-dif, 0, 10, 255, 0);
+          if (velocity>255) velocity=255;
+          if (velocity<0) velocity=0;
+          analogWrite(pinDown,velocity);
+        }
 else
 #endif
    {
+  //   Serial.print(pinUp);
+  //   Serial.println(" pinUP noPWM");
      digitalWrite(pinUp,HIGH);
    }
 }
@@ -136,24 +164,39 @@ if (!item->getExt()) item->setExt(millis()+maxOnTime);
 #ifndef ESP32
 if (digitalPinHasPWM(pinDown))
 {
+  //Serial.println("pinDown PWM");
   int velocity = map(dif, 0, 10, 0, 255);
   if (velocity>255) velocity=255;
+  if (velocity<0) velocity=0;
   analogWrite(pinDown,velocity);
+}
+else
+if (digitalPinHasPWM(pinUp))
+{
+  //Serial.println("pinUP PWM fallback");
+  digitalWrite(pinDown,HIGH);
+  int velocity = map(dif, 0, 10, 255, 0);
+  if (velocity>255) velocity=255;
+  if (velocity<0) velocity=0;
+  analogWrite(pinUp,velocity);
 }
 else
 #endif
 {
+  //Serial.print(pinDown);
+  //Serial.println(" pinDown noPWM");
  digitalWrite(pinDown,HIGH);
 }
 
 }
 else //Target zone
-{
+{ Serial.println("Target");
   digitalWrite(pinUp,LOW);
   digitalWrite(pinDown,LOW);
   item->setExt(0);
   item->clearFlag(ACTION_NEEDED);
-
+  item->clearFlag(ACTION_IN_PROCESS);
+  motorQuote++;
 }
 
 
@@ -202,14 +245,6 @@ case S_CMD:
       switch (cmd)
           {
           case CMD_ON:
-
-            /*
-            if (chActive>0 && send)
-                               {
-                                 SendStatus(SEND_COMMAND);
-                                 return 1;
-                               }
-            */
            //retrive stored values
            st = item->getVal();
 

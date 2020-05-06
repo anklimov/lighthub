@@ -8,6 +8,13 @@
 #define POS_ERR 2
 #endif
 
+// The number of simultaniusly working motors
+#ifndef MOTOR_QUOTE
+#define MOTOR_QUOTE 2
+#endif
+
+static int8_t motorQuote = MOTOR_QUOTE;
+
 class out_Motor : public abstractOut {
 public:
 
