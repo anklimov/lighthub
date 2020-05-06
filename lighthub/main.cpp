@@ -1817,7 +1817,7 @@ configLocked++;
         while (input) {
             if ((input->type == aJson_Object)) {
                 Input in(input);
-                in.poll(CHECK_INPUT);
+                in.Poll(CHECK_INPUT);
             }
             input = input->next;
         }
@@ -1829,7 +1829,7 @@ configLocked++;
         while (input) {
             if ((input->type == aJson_Object)) {
                 Input in(input);
-                in.poll(CHECK_SENSOR);
+                in.Poll(CHECK_SENSOR);
             }
             input = input->next;
         }
@@ -1862,7 +1862,7 @@ if (items) {
         if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
             Item it(item);
             if (it.isValid()) {
-              it.Poll(POLLING_FAST);
+               it.Poll(POLLING_FAST);
             } //isValid
             item = item->next;
         }  //if

@@ -145,7 +145,7 @@ public:
     void onContactChanged(int newValue);
     void onAnalogChanged(float newValue);
 
-    int poll(short cause);
+    int Poll(short cause);
     void setup();
 
     static void inline onCounterChanged(int i);

@@ -24,6 +24,7 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 #include "textconst.h"
 #include "main.h"
+#include "bright.h"
 
 #ifdef _dmxout
 #include "dmx.h"
@@ -49,9 +50,6 @@ extern PubSubClient mqttClient;
 extern int8_t ethernetIdleCount;
 extern int8_t configLocked;
 extern lan_status lanStatus;
-
-static unsigned long lastctrl = 0;
-static aJsonObject *lastobj = NULL;
 
 int retrieveCode(char **psubItem);
 
@@ -94,6 +92,7 @@ int subitem2cmd(char *payload) {
 
     // Check for command
     if (payload)
+    {
     if (strcmp_P(payload, ON_P) == 0) cmd = CMD_ON;
     else if (strcmp_P(payload, OFF_P) == 0) cmd = CMD_OFF;
     //else if (strcmp_P(payload, REST_P) == 0) cmd = CMD_RESTORE;
@@ -109,7 +108,7 @@ int subitem2cmd(char *payload) {
     //else if (strcmp_P(payload, HIGH_P) == 0) cmd = CMD_HIGH;
     //else if (strcmp_P(payload, MED_P) == 0) cmd = CMD_MED;
     //else if (strcmp_P(payload, LOW_P) == 0) cmd = CMD_LOW;
-
+    }
     return cmd;
 }
 
@@ -256,6 +255,7 @@ short Item::getFlag   (short flag)
   {
       return itemCmd->valueint & flag & FLAG_MASK;
     }
+return 0;
 }
 
 void Item::setFlag   (short flag)
@@ -493,7 +493,7 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
           return Ctrl(cmd, 0, NULL, send, suffixCode, subItem);
 
   } //ctrl
-//}
+return 0;
 }
 
 /*
@@ -612,7 +612,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
       case CMD_DN:
       case CMD_UP:
       {
-      if (itemType == CH_GROUP) break;
+      if (itemType == CH_GROUP) break; ////bug here
       if (!n || !Par[0]) Par[0] = DEFAULT_INC_STEP;
       if (cmd == CMD_DN) Par[0]=-Par[0];
       st.aslong = getVal();
@@ -1001,13 +1001,19 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
 
     int rgbSaturation =map(Par[1], 0, 100, 0, 255);
-    int rgbValue = map(Par[2], 0, 100, 0, 255);
+  //  int rgbValue = map(Par[2], 0, 100, 0, 255);
+  //Vebler-Heffler law
+  //  float x = Par[2]/25.-3.;
+  //  int rgbValue = round(exp(x)/(exp(1)/255));
+  int rgbValue = getBright(Par[1]);
+
     switch (itemType) {
 
 #ifdef _dmxout
         case CH_DIMMER: //Dimmed light
             if (iaddr>0)
-            DmxWrite(iaddr, map(Par[0], 0, 100, 0, 255));
+            // DmxWrite(iaddr, map(Par[0], 0, 100, 0, 255));
+            DmxWrite(iaddr, getBright(Par[0]));
             break;
         case CH_RGBW: //Colour RGBW
         // Saturation 0  - Only white
@@ -1016,9 +1022,9 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         {
   //          int k;
             if (Par[1]<50 && iaddr>0) { // Using white
-                            DmxWrite(iaddr + 3, map((50 - Par[1]) * Par[2], 0, 5000, 0, 255));
+                            DmxWrite(iaddr + 3, getBright255(map((50 - Par[1]) * Par[2], 0, 5000, 0, 255)));
                             int rgbvLevel = map (Par[1],0,50,0,255*2);
-                            rgbValue = map(Par[2], 0, 100, 0, rgbvLevel);
+                            rgbValue = map(getBright(Par[2]), 0, 255, 0, rgbvLevel);
                             rgbSaturation = map(Par[1], 0, 50, 255, 100);
                             if (rgbValue>255) rgbValue = 255;
                            }
@@ -1054,7 +1060,8 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
             DmxWrite(iaddr, 0);
             DmxWrite(iaddr + 1, 0);
             DmxWrite(iaddr + 2, 0);
-            DmxWrite(iaddr + 3, map(Par[2], 0, 100, 0, 255));
+        //    DmxWrite(iaddr + 3, map(Par[2], 0, 100, 0, 255));
+        DmxWrite(iaddr + 3,rgbValue);
             break;
           }
 #endif
@@ -1154,6 +1161,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
         }
 #endif
     }
+return 1;
 }
 
 int Item::isActive() {
@@ -1706,13 +1714,16 @@ int Item::checkModbusDimmer(int data) {
     } //if data changed
 }
 
-int Item::Poll(short cause) {
+#endif
+
+int Item::Poll(int cause) {
 
 switch (cause)
 {
   case POLLING_SLOW:
     // Legacy polling
     switch (itemType) {
+      #ifndef MODBUS_DISABLE
         case CH_MODBUS:
             checkModbusDimmer();
             sendDelayedStatus();
@@ -1728,6 +1739,7 @@ switch (cause)
             sendDelayedStatus();
             return INTERVAL_CHECK_MODBUS;
             break;
+        #endif    
       /*  case CH_RGB:    //All channels with slider generate too many updates
         case CH_RGBW:
         case CH_DIMMER:
@@ -1758,7 +1770,7 @@ void Item::sendDelayedStatus()
       }
 }
 
-#endif
+
 int Item::SendStatus(int sendFlags) {
     int chancmd=getCmd();
     if ((sendFlags & SEND_DEFFERED) || (lanStatus==RETAINING_COLLECTING)) {

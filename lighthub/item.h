@@ -1,4 +1,4 @@
-/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2020 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,15 +36,7 @@ e-mail    anklimov@gmail.com
 #define S_HUE 7
 #define S_SAT 8
 #define S_ADDITIONAL 64
-/*
 
-#define S_RPM 11
-#define S_TEMP 3
-#define S_SETPOINT 5
-#define S_POWER 6
-#define S_VOL 7
-#define S_HEAT 8
-*/
 #define CH_DIMMER 0   //DMX 1 ch
 #define CH_RGBW   1   //DMX 4 ch
 #define CH_RGB    2   //DMX 3 ch
@@ -99,6 +91,7 @@ e-mail    anklimov@gmail.com
 #define SEND_RETRY 0x400
 #define SEND_DEFFERED 0x800
 #define ACTION_NEEDED 0x1000
+#define ACTION_IN_PROCESS 0x2000
 
 //#define CMD_REPORT 32
 
@@ -183,16 +176,15 @@ class Item
   short getFlag   (short flag=FLAG_MASK);
   void setFlag   (short flag);
   void clearFlag (short flag);
-  //void setVal(uint8_t n, int par);
   void setVal(long int par);
-  //void copyPar (aJsonObject *itemV);
-  inline int On (){return Ctrl(CMD_ON);};
-  inline int Off(){return Ctrl(CMD_OFF);};
-  inline int Toggle(){return Ctrl(CMD_TOGGLE);};
-  int Poll(short cause);
+  int Poll(int cause);
   int SendStatus(int sendFlags);
   int isActive();
   int getChanType();
+  inline int On (){return Ctrl(CMD_ON);};
+  inline int Off(){return Ctrl(CMD_OFF);};
+  inline int Toggle(){return Ctrl(CMD_TOGGLE);};
+
   protected:
   //short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
   int VacomSetFan (int8_t  val, int8_t  cmd=0);

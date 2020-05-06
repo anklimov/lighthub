@@ -21,6 +21,7 @@
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
+//#include "SPIFFS.h"
 #include <ESP_EEPROM.h>
 #include <ESP8266HTTPClient.h>
 //#include <ArduinoHttpClient.h>
@@ -35,6 +36,7 @@
 
 #if defined ARDUINO_ARCH_ESP32
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
+//#include "SPIFFS.h"
 //#include <EEPROM.h>
 #include <NRFFlashStorage.h>
 //#include "HttpClient.h"

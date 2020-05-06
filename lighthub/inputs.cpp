@@ -176,7 +176,7 @@ switch (inType)
 
 }
 
-int Input::poll(short cause) {
+int Input::Poll(short cause) {
 
 if (!isValid()) return -1;
 #ifndef CSSHDC_DISABLE
@@ -533,6 +533,7 @@ return true;
 default:
 return false;
 } //switch type
+return false;
 }
 
 // TODO Polling via timed interrupt with CHECK_INTERRUPT cause
@@ -669,8 +670,10 @@ switch (store->state) //Timer based transitions
 {
   case IS_PRESSED:
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
+      {
       if (!aJson.getObjectItem(inputObj, "lcmd") && !aJson.getObjectItem(inputObj, "rpcmd")) changeState(IS_WAITRELEASE, cause);
          else changeState(IS_LONG, cause);
+       }
       break;
 
   case IS_LONG:
@@ -691,8 +694,10 @@ switch (store->state) //Timer based transitions
 
   case IS_PRESSED2:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
+            {
               if (!aJson.getObjectItem(inputObj, "lcmd2") && !aJson.getObjectItem(inputObj, "rpcmd2")) changeState(IS_WAITRELEASE, cause);
               else changeState(IS_LONG2, cause);
+            }
               break;
 
   case IS_LONG2:

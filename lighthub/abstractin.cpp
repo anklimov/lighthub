@@ -26,7 +26,6 @@ int abstractIn::publish(float value, const  char* subtopic)
 
 int abstractIn::publish(char * value, const char* subtopic)
 {
-  char addrstr[MQTT_TOPIC_LENGTH];
   if (in)
   {
   aJsonObject *emit = aJson.getObjectItem(in->inputObj, "emit");

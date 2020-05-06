@@ -38,5 +38,5 @@ int abstractCh::publishTopic(const char* topic, const char * value, const char* 
                         return 1;
                       }
      }
-
+return 0;
 };
