@@ -102,7 +102,7 @@ int owSetup(owChangedType owCh) {
 
 
 // Pass our oneWire reference to Dallas Temperature.
-    sensors = new DallasTemperature(oneWire);
+//    sensors = new DallasTemperature(oneWire);
 
     term = new DeviceAddress[t_max];
 //regs = new    int [t_max];
@@ -119,23 +119,22 @@ int owSetup(owChangedType owCh) {
 #else
         oneWire->setActivePullup();
 #endif
+        owChanged = owCh;
 
         debugSerial.println(F("\tChecking for 1-Wire devices..."));
         if (oneWire->wireReset())
             debugSerial.println(F("\tReset done"));
 
+      /*
             if (oneWire->getError() == DS2482_ERROR_SHORT)
                {
                  debugSerial<<F("1-wire shorted.")<<endl;
                  return false;
                }
-
+        sensors = new DallasTemperature(oneWire);
         sensors->begin();
-        owChanged = owCh;
-        //owUpdate();
-        //debugSerial.println(F("\t1-w Updated"));
         sensors->setWaitForConversion(false);
-
+        */
 
         return true;
     }
@@ -152,11 +151,20 @@ int owSetup(owChangedType owCh) {
 
 
 int sensors_loop(void) {
-    if (!sensors) return 100000;
+
     if (oneWire->getError() == DS2482_ERROR_SHORT)
        {
-         debugSerial<<F("1-wire disabled (shorted)")<<endl;
-         return 100000;
+         debugSerial<<F("1-wire shorted")<<endl;
+         oneWire->wireReset();
+         return 10000;
+       }
+
+    if (!sensors)
+       {
+         sensors = new DallasTemperature(oneWire);
+         sensors->begin();
+         sensors->setWaitForConversion(false);
+    //    return 100000;
        }
 
     if (si >= t_count) {
@@ -207,7 +215,7 @@ void owAdd(DeviceAddress addr) {
     PrintBytes(term[t_count], 8,0);
     debugSerial.println();
     if (term[t_count][0] == 0x28) {
-        sensors->setResolution(term[t_count], TEMPERATURE_PRECISION);
+  ////      sensors->setResolution(term[t_count], TEMPERATURE_PRECISION);
         oneWire->setStrongPullup();
         //                sensors.requestTemperaturesByAddress(term[t_count]);
     }
