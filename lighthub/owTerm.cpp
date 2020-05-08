@@ -99,15 +99,13 @@ int owSetup(owChangedType owCh) {
     oneWire = new OneWire (USE_1W_PIN);
 #endif
 
-
-
 // Pass our oneWire reference to Dallas Temperature.
 //    sensors = new DallasTemperature(oneWire);
 
     term = new DeviceAddress[t_max];
 //regs = new    int [t_max];
     wstat = new uint16_t[t_max];
-
+    owChanged = owCh;
 
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     Wire.begin();
@@ -119,34 +117,23 @@ int owSetup(owChangedType owCh) {
 #else
         oneWire->setActivePullup();
 #endif
-        owChanged = owCh;
 
         debugSerial.println(F("\tChecking for 1-Wire devices..."));
         if (oneWire->wireReset())
             debugSerial.println(F("\tReset done"));
-
-      /*
-            if (oneWire->getError() == DS2482_ERROR_SHORT)
-               {
-                 debugSerial<<F("1-wire shorted.")<<endl;
-                 return false;
-               }
-        sensors = new DallasTemperature(oneWire);
-        sensors->begin();
-        sensors->setWaitForConversion(false);
-        */
-
         return true;
     }
-#endif
     debugSerial.println(F("\tDS2482 error"));
     return false;
-    // IC Default 9 bit. If you have troubles consider upping it 12. Ups the delay giving the IC more time to process the temperature measurement
+#else
+   // software driver
+   oneWire->deviceReset();
+   delay(500);
+   return true;
+#endif //DS2482-100
 
-
-    delay(500);
-
-#endif
+#endif //1w is not disabled
+return false;
 }
 
 
@@ -161,10 +148,12 @@ int sensors_loop(void) {
 
     if (!sensors)
        {
+         // Setup sensors library and resolution
          sensors = new DallasTemperature(oneWire);
          sensors->begin();
+         // IC Default 9 bit. If you have troubles consider upping it 12. Ups the delay giving the IC more time to process the temperature measurement
+         for (short i = 0; i < t_count; i++) sensors->setResolution(term[i],TEMPERATURE_PRECISION);
          sensors->setWaitForConversion(false);
-    //    return 100000;
        }
 
     if (si >= t_count) {
@@ -209,16 +198,12 @@ void owAdd(DeviceAddress addr) {
   if (t_count>=t_max) return;
     wstat[t_count] = SW_FIND; //Newly detected
     memcpy(term[t_count], addr, 8);
-    //term[t_count]=addr;
 
     debugSerial<<F("dev#")<<t_count<<F(" Addr:");
     PrintBytes(term[t_count], 8,0);
     debugSerial.println();
-    if (term[t_count][0] == 0x28) {
-  ////      sensors->setResolution(term[t_count], TEMPERATURE_PRECISION);
-        oneWire->setStrongPullup();
-        //                sensors.requestTemperaturesByAddress(term[t_count]);
-    }
+    if (term[t_count][0] == 0x28)
+                  oneWire->setStrongPullup();
     t_count++;
 #endif
 }
