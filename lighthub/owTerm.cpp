@@ -72,7 +72,9 @@ int owUpdate() {
                 debugSerial.println();
                 if (term[t_count][0] == 0x28) {
                     sensors->setResolution(term[t_count], TEMPERATURE_PRECISION);
+                    #ifdef DS2482_100_I2C_TO_1W_BRIDGE
                     oneWire->setStrongPullup();
+                    #endif
                     //                sensors.requestTemperaturesByAddress(term[t_count]);
                 }
                 t_count++;
@@ -127,7 +129,7 @@ int owSetup(owChangedType owCh) {
     return false;
 #else
    // software driver
-   oneWire->deviceReset();
+   oneWire->reset();
    delay(500);
    return true;
 #endif //DS2482-100
@@ -138,13 +140,14 @@ return false;
 
 
 int sensors_loop(void) {
-
+#ifdef DS2482_100_I2C_TO_1W_BRIDGE
     if (oneWire->getError() == DS2482_ERROR_SHORT)
        {
          debugSerial<<F("1-wire shorted")<<endl;
          oneWire->wireReset();
          return 10000;
        }
+#endif
 
     if (!sensors)
        {
@@ -202,9 +205,18 @@ void owAdd(DeviceAddress addr) {
     debugSerial<<F("dev#")<<t_count<<F(" Addr:");
     PrintBytes(term[t_count], 8,0);
     debugSerial.println();
+    #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     if (term[t_count][0] == 0x28)
                   oneWire->setStrongPullup();
+    #endif
     t_count++;
 #endif
 }
 #endif
+
+void setupOwIdle (void (*ptr)())
+{
+  #ifdef DS2482_100_I2C_TO_1W_BRIDGE
+      if (oneWire) oneWire->idle(ptr);
+  #endif
+}
