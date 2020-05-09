@@ -1489,9 +1489,9 @@ void setup_main() {
     delay(20);
     //owReady = 0;
 
-#ifdef _owire
-    if (oneWire) oneWire->idle(&owIdle);
-#endif
+    #ifdef _owire
+        setupOwIdle(&owIdle);
+    #endif
 
     mqttClient.setCallback(mqttCallback);
 

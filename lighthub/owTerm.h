@@ -1,4 +1,4 @@
-/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2020 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ e-mail    anklimov@gmail.com
 */
 
 //define APU_OFF
+#pragma once
 
 #define SW_AUX0 0x40
 #define SW_AUX1 0x80
@@ -52,23 +53,25 @@ e-mail    anklimov@gmail.com
 
 #ifndef OWIRE_DISABLE
 
-#ifndef ARDUINO_ARCH_STM32F1
-#include <DS2482_OneWire.h>
-#endif
-
 #include <DallasTemperature.h>
 #include "aJSON.h"
 
 extern aJsonObject *owArr;
 
 typedef   void (*owChangedType) (int , DeviceAddress, float) ;
+
 #ifndef USE_1W_PIN
 #define DS2482_100_I2C_TO_1W_BRIDGE // HW driver
+#include <Wire.h>
+  #ifndef ARDUINO_ARCH_STM32F1
+  #include <DS2482_OneWire.h>
+  #endif
+#else
+#include <OneWire.h> //Software driver
+#define wireReset reset
+#define wireSearch search
 #endif
 
-#ifdef DS2482_100_I2C_TO_1W_BRIDGE
-#include <Wire.h>
-#endif
 
 extern OneWire *oneWire;
 
@@ -86,7 +89,7 @@ extern owChangedType  owChanged;
 int  owUpdate();
 int  owSetup(owChangedType owCh);
 void owLoop();
-void owIdle(void) ;
+void setupOwIdle(void (*)()) ;
 int owFind(DeviceAddress addr);
 void owAdd (DeviceAddress addr);
 
