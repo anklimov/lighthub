@@ -50,6 +50,7 @@ e-mail    anklimov@gmail.com
 #define CH_AC 10  //AC Haier
 #define CH_SPILED 11
 #define CH_MOTOR  12
+#define CH_MBUS  14
 //#define CHANNEL_TYPES 13
 
 //static uint32_t pollInterval[CHANNEL_TYPES] = {0,0,0,0,MODB};
@@ -172,6 +173,8 @@ class Item
   uint8_t getCmd();
   long int getExt(); //From int val OR array
   void setExt(long int par);
+  chPersistent * getPersistent();
+  chPersistent * setPersistent(chPersistent * par);
   void setCmd(uint8_t cmdValue);
   short getFlag   (short flag=FLAG_MASK);
   void setFlag   (short flag);

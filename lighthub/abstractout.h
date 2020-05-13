@@ -3,6 +3,7 @@
 #include "abstractch.h"
 
 class Item;
+class chPersistent {};
 class abstractOut  : public abstractCh{
 public:
     abstractOut(Item * _item):abstractCh(){item=_item;};

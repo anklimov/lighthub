@@ -134,7 +134,7 @@ aJsonObject *inputs = NULL;
 
 aJsonObject *mqttArr = NULL;
 #ifndef MODBUS_DISABLE
-aJsonObject *modbusArr = NULL;
+aJsonObject *modbusObj = NULL;
 #endif
 #ifdef _owire
 aJsonObject *owArr = NULL;
@@ -210,7 +210,7 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
   owArr = NULL;
   #endif
   #ifndef MODBUS_DISABLE
-  modbusArr = NULL;
+  modbusObj = NULL;
   #endif
      debugSerial<<F(" is ")<<freeRam()<<endl;
 }
@@ -942,7 +942,7 @@ configLocked++;
     }
 #endif
 #ifdef _modbus
-    modbusArr = aJson.getObjectItem(root, "modbus");
+    modbusObj = aJson.getObjectItem(root, "modbus");
 #endif
 
 #ifdef _owire
@@ -1023,7 +1023,7 @@ void printConfigSummary() {
     printBool(inputs);
 #ifndef MODBUS_DISABLE
     debugSerial<<F("\nmodbus ");
-    printBool(modbusArr);
+    printBool(modbusObj);
 #endif
     debugSerial<<F("\nmqtt ");
     printBool(mqttArr);

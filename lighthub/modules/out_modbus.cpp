@@ -1,0 +1,360 @@
+#ifndef MBUS_DISABLE
+
+#include "modules/out_modbus.h"
+#include "Arduino.h"
+#include "options.h"
+#include "utils.h"
+#include "Streaming.h"
+
+#include "item.h"
+#include <ModbusMaster.h>
+
+extern aJsonObject *modbusObj;
+extern ModbusMaster node;
+extern short modbusBusy;
+extern void modbusIdle(void) ;
+
+/*
+const char float_P[] PROGMEM = "i16";
+const char hsv_P[]   PROGMEM = "i32";
+const char int_P[]   PROGMEM = "u16";
+const char enum_P[]   PROGMEM = "u32";
+const char format_P[] PROGMEM = "i8h";
+const char true_P[]  PROGMEM = "i8l";
+const char false_P[] PROGMEM = "false";
+
+const char 8E1_P[] PROGMEM = "8E1";
+const char 8N1_P[]   PROGMEM = "8N1";
+const char int_P[]   PROGMEM = "8O1";
+const char enum_P[]   PROGMEM = "u32";
+const char format_P[] PROGMEM = "$i8h";
+const char true_P[]  PROGMEM = "i8l";
+const char false_P[] PROGMEM = "false";
+*/
+struct reg_t
+{
+  const char verb[4];
+  const uint8_t id;
+};
+
+struct serial_t
+{
+  const char verb[4];
+  const int mode;
+};
+
+#define PAR_I16 1
+#define PAR_I32 2
+#define PAR_U16 3
+#define PAR_U32 4
+#define PAR_I8H 5
+#define PAR_I8L 6
+#define PAR_U8H 7
+#define PAR_U8L 8
+
+
+const reg_t regSize_P[] PROGMEM =
+{
+  { "i16", (int) PAR_I16 },
+  { "i32", (int) PAR_I32 },
+  { "u16", (int) PAR_U16 },
+  { "u32", (int) PAR_U32 },
+  { "i8h", (int) PAR_I8H },
+  { "i8l", (int) PAR_I8L },
+  { "u8h", (int) PAR_U8H },
+  { "u8l", (int) PAR_U8L }
+} ;
+#define regSizeNum sizeof(regSize_P)/sizeof(reg_t)
+
+const serial_t serialModes_P[] PROGMEM =
+{
+  { "8E1", SERIAL_8E1 },
+  { "8N1", SERIAL_8N1 },
+  { "8O1", SERIAL_8O1 },
+  { "8M1", SERIAL_8M1 },
+  { "8S1", SERIAL_8S1 }
+} ;
+
+#define serialModesNum sizeof(serialModes_P)/sizeof(serial_t)
+
+int  str2SerialParam(char * str)
+{
+  for(uint8_t i=0; i<serialModesNum;i++)
+      if (strcmp_P(str, serialModes_P[i].verb) == 0)
+           return pgm_read_byte_near(serialModes_P[i].mode);
+  return (int) SERIAL_8N1;
+}
+
+int  str2regSize(char * str)
+{
+  for(uint8_t i=0; i<regSizeNum;i++)
+      if (strcmp_P(str, regSize_P[i].verb) == 0)
+           return pgm_read_byte_near(regSize_P[i].id);
+  return (int) PAR_I16;
+}
+
+bool out_Modbus::getConfig()
+{
+  // Retrieve and store template values from global modbus settings
+  if (!store || !item || !item->itemArg || (item->itemArg->type != aJson_Array) || aJson.getArraySize(item->itemArg)<2) return false;
+
+  aJsonObject * templateIdObj = aJson.getArrayItem(item->itemArg, 1);
+  if (templateIdObj->type != aJson_String || !templateIdObj->valuestring) return false;
+
+  aJsonObject * templateObj = aJson.getObjectItem(modbusObj, templateIdObj->valuestring);
+  if (! templateObj)
+            {
+              debugSerial<<F("Modbus template not found: ")<<templateIdObj->valuestring<<endl;
+              return false;
+            }
+
+  aJsonObject * serialParamObj=aJson.getObjectItem(templateObj, "serial");
+  if (serialParamObj && serialParamObj->type == aJson_String && serialParamObj->valuestring) store->serialParam = (UARTClass::UARTModes) str2SerialParam(serialParamObj->valuestring);
+     else store->serialParam = SERIAL_8N1;
+
+  aJsonObject * baudObj=aJson.getObjectItem(templateObj, "baud");
+  if (baudObj && baudObj->type == aJson_Int && baudObj->valueint) store->baud = baudObj->valueint;
+     else store->baud = 9600;
+  aJsonObject * pollObj=aJson.getObjectItem(templateObj, "poll");
+  if (pollObj && pollObj->type == aJson_Object)
+    {
+      store->pollingRegisters=aJson.getObjectItem(pollObj, "regs");
+      store->pollingInterval =aJson.getObjectItem(pollObj, "delay")->valueint;
+    }
+  else {store->pollingRegisters=NULL;store->pollingInterval = 1000;}
+
+  store->parameters=aJson.getObjectItem(templateObj, "par");
+
+  //store->addr=item->getArg(0);
+  }
+
+
+int  out_Modbus::Setup()
+{
+Serial.println("Modbus Init");
+if (!store) store= (mbPersistent *)item->setPersistent(new mbPersistent);
+if (!store) return 0;
+store->timestamp=millis();
+if (getConfig())
+    {
+        //item->clearFlag(ACTION_NEEDED);
+        //item->clearFlag(ACTION_IN_PROCESS);
+        debugSerial<<F("Modbus config loaded")<<endl;
+        store->driverStatus = CST_INITIALIZED;
+        return 1;
+      }
+else
+ {  debugSerial<<F("Modbus config error")<<endl;
+    store->driverStatus = CST_FAILED;
+    return 0;
+  }
+
+}
+
+int  out_Modbus::Stop()
+{
+Serial.println("Modbus De-Init");
+
+delete store;
+item->setPersistent(NULL);
+store = NULL;
+
+//driverStatus = CST_UNKNOWN;
+return 1;
+}
+
+int  out_Modbus::Status()
+{
+if (store)
+    return store->driverStatus;
+return CST_UNKNOWN;
+}
+
+int out_Modbus::isActive()
+{
+return item->getVal();
+}
+
+
+bool readModbus(uint16_t reg, int regType, int count)
+{
+uint8_t result;
+switch (regType) {
+    case MODBUS_HOLDING_REG_TYPE:
+        result = node.readHoldingRegisters(reg, count);
+        break;
+    case MODBUS_COIL_REG_TYPE:
+        result = node.readCoils(reg, count);
+        break;
+    case MODBUS_DISCRETE_REG_TYPE:
+        result = node.readDiscreteInputs(reg, count);
+        break;
+    case MODBUS_INPUT_REG_TYPE:
+        result = node.readInputRegisters(reg, count);
+        break;
+    default:
+        debugSerial<<F("Not supported reg type\n");
+ }
+
+return (result == node.ku8MBSuccess);
+}
+
+
+
+int out_Modbus::findRegister(int registerNum, int posInBuffer)
+{
+  aJsonObject * paramObj = store->parameters->child;
+  while (paramObj)
+          {
+            aJsonObject *regObj = aJson.getObjectItem(paramObj, "reg");
+            if (regObj && regObj->valueint ==registerNum)
+                    {
+                    aJsonObject *typeObj = aJson.getObjectItem(paramObj, "type");
+                    aJsonObject *mapObj = aJson.getObjectItem(paramObj, "map");
+                    uint16_t data = node.getResponseBuffer(posInBuffer);
+                    debugSerial << F("MB got ")<<data<< F(" from ")<<paramObj->name<<endl;
+                    return 1;
+                    }
+            paramObj=paramObj->next;
+          }
+return 0;
+}
+
+int out_Modbus::Poll(short cause)
+{
+if (store->pollingRegisters && !modbusBusy && (Status() == CST_INITIALIZED) && isTimeOver(store->timestamp,millis(),store->pollingInterval))
+  {
+    debugSerial<<F("Poll ")<< item->itemArr->name << endl;
+    modbusBusy=1;
+    modbusSerial.begin(store->baud, store->serialParam);
+    node.begin(item->getArg(0), modbusSerial);
+
+    aJsonObject * reg = store->pollingRegisters->child;
+    while (reg)
+            {
+            switch (reg->type)
+              {
+                case aJson_Int:
+                {
+                int registerNum = reg->valueint;
+                if (readModbus(registerNum,MODBUS_HOLDING_REG_TYPE,1))
+                  {
+                    findRegister(registerNum,0);
+                //    data = node.getResponseBuffer(j);
+                  }
+                }
+                break;
+                case aJson_Array:
+                if (aJson.getArraySize(reg)==2)
+                {
+                  int registerFrom=aJson.getArrayItem(reg, 0)->valueint;
+                  int registerTo=aJson.getArrayItem(reg, 1)->valueint;
+
+                  if (readModbus(registerFrom,MODBUS_HOLDING_REG_TYPE,registerTo-registerFrom+1))
+                    {
+                      for(int i=registerFrom;i<=registerTo;i++)
+                        {
+                          findRegister(i,i-registerFrom);
+                        }
+                      //data = node.getResponseBuffer(j);
+                    }
+
+                }
+
+              }
+            reg = reg->next;
+            }
+
+  store->timestamp=millis();
+  debugSerial<<F("endPoll ")<< item->itemArr->name << endl;
+
+  //Non blocking waiting to release line
+  uint32_t time = millis()+50;
+  while (millis()<time)
+             modbusIdle();
+
+  modbusBusy =0;
+  }
+
+return store->pollingInterval;
+};
+
+int out_Modbus::getChanType()
+{
+   return CH_MODBUS;
+}
+
+
+
+int out_Modbus::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixCode, char* subItem)
+{
+int chActive = item->isActive();
+bool toExecute = (chActive>0);
+long st;
+if (cmd>0 && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
+
+//item->setFlag(ACTION_NEEDED);
+
+switch(suffixCode)
+{
+case S_NOTFOUND:
+  // turn on  and set
+toExecute = true;
+debugSerial<<F("Forced execution");
+case S_SET:
+          if (!Parameters || n==0) return 0;
+          item->setVal(st=Parameters[0]); //Store
+          if (!suffixCode)
+          {
+            if (chActive>0 && !st) item->setCmd(CMD_OFF);
+            if (chActive==0 && st) item->setCmd(CMD_ON);
+            item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
+//            if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+          }
+          else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+
+          return 1;
+          //break;
+
+case S_CMD:
+      item->setCmd(cmd);
+      switch (cmd)
+          {
+          case CMD_ON:
+           //retrive stored values
+           st = item->getVal();
+
+
+            if (st && (st<MIN_VOLUME) && send) st=INIT_VOLUME;
+            item->setVal(st);
+
+            if (st)  //Stored smthng
+            {
+              if (send) item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
+              debugSerial<<F("Restored: ")<<st<<endl;
+            }
+            else
+            {
+              debugSerial<<st<<F(": No stored values - default\n");
+              // Store
+              st=100;
+              item->setVal(st);
+              if (send) item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
+            }
+  //          if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+            return 1;
+
+            case CMD_OFF:
+              if (send) item->SendStatus(SEND_COMMAND);
+  //            if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+            return 1;
+
+} //switch cmd
+
+break;
+} //switch suffix
+debugSerial<<F("Unknown cmd")<<endl;
+return 0;
+}
+
+#endif
