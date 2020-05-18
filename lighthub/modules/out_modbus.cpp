@@ -14,23 +14,6 @@ extern ModbusMaster node;
 extern short modbusBusy;
 extern void modbusIdle(void) ;
 
-/*
-const char float_P[] PROGMEM = "i16";
-const char hsv_P[]   PROGMEM = "i32";
-const char int_P[]   PROGMEM = "u16";
-const char enum_P[]   PROGMEM = "u32";
-const char format_P[] PROGMEM = "i8h";
-const char true_P[]  PROGMEM = "i8l";
-const char false_P[] PROGMEM = "false";
-
-const char 8E1_P[] PROGMEM = "8E1";
-const char 8N1_P[]   PROGMEM = "8N1";
-const char int_P[]   PROGMEM = "8O1";
-const char enum_P[]   PROGMEM = "u32";
-const char format_P[] PROGMEM = "$i8h";
-const char true_P[]  PROGMEM = "i8l";
-const char false_P[] PROGMEM = "false";
-*/
 struct reg_t
 {
   const char verb[4];
@@ -40,7 +23,7 @@ struct reg_t
 struct serial_t
 {
   const char verb[4];
-  const int mode;
+  const uint16_t mode;
 };
 
 #define PAR_I16 1
@@ -68,28 +51,35 @@ const reg_t regSize_P[] PROGMEM =
 
 const serial_t serialModes_P[] PROGMEM =
 {
-  { "8E1", SERIAL_8E1 },
-  { "8N1", SERIAL_8N1 },
-  { "8O1", SERIAL_8O1 },
-  { "8M1", SERIAL_8M1 },
-  { "8S1", SERIAL_8S1 }
+  { "8E1", SERIAL_8E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
+  { "8N1", SERIAL_8N1},
+  { "8E2", SERIAL_8E2},
+  { "8N2", SERIAL_8N2},
+  { "8O1", SERIAL_8O1},
+  { "8O2", SERIAL_8O2},
+  { "8M1", SERIAL_8M1},
+  { "8S1", SERIAL_8S1}
 } ;
 
 #define serialModesNum sizeof(serialModes_P)/sizeof(serial_t)
 
-int  str2SerialParam(char * str)
-{
-  for(uint8_t i=0; i<serialModesNum;i++)
+uint16_t  str2SerialParam(char * str)
+{ debugSerial<<str<<F(" =>");
+  for(uint8_t i=0; i<serialModesNum && str;i++)
       if (strcmp_P(str, serialModes_P[i].verb) == 0)
-           return pgm_read_byte_near(serialModes_P[i].mode);
-  return (int) SERIAL_8N1;
-}
+           {
 
+           debugSerial<< i << F(" ") << pgm_read_word_near(&serialModes_P[i].mode)<< endl;
+           return pgm_read_word_near(&serialModes_P[i].mode);
+         }
+  debugSerial<< F("Default serial mode N81 used");
+  return static_cast<uint16_t> (SERIAL_8N1);
+}
 int  str2regSize(char * str)
 {
-  for(uint8_t i=0; i<regSizeNum;i++)
+  for(uint8_t i=0; i<regSizeNum&& str;i++)
       if (strcmp_P(str, regSize_P[i].verb) == 0)
-           return pgm_read_byte_near(regSize_P[i].id);
+           return pgm_read_byte_near(&regSize_P[i].id);
   return (int) PAR_I16;
 }
 
@@ -109,7 +99,7 @@ bool out_Modbus::getConfig()
             }
 
   aJsonObject * serialParamObj=aJson.getObjectItem(templateObj, "serial");
-  if (serialParamObj && serialParamObj->type == aJson_String && serialParamObj->valuestring) store->serialParam = (UARTClass::UARTModes) str2SerialParam(serialParamObj->valuestring);
+  if (serialParamObj && serialParamObj->type == aJson_String) store->serialParam = str2SerialParam(serialParamObj->valuestring);
      else store->serialParam = SERIAL_8N1;
 
   aJsonObject * baudObj=aJson.getObjectItem(templateObj, "baud");
@@ -131,7 +121,6 @@ bool out_Modbus::getConfig()
 
 int  out_Modbus::Setup()
 {
-Serial.println("Modbus Init");
 if (!store) store= (mbPersistent *)item->setPersistent(new mbPersistent);
 if (!store) return 0;
 store->timestamp=millis();
@@ -139,7 +128,7 @@ if (getConfig())
     {
         //item->clearFlag(ACTION_NEEDED);
         //item->clearFlag(ACTION_IN_PROCESS);
-        debugSerial<<F("Modbus config loaded")<<endl;
+        debugSerial<<F("Modbus config loaded ")<< item->itemArr->name<<endl;
         store->driverStatus = CST_INITIALIZED;
         return 1;
       }
@@ -158,8 +147,6 @@ Serial.println("Modbus De-Init");
 delete store;
 item->setPersistent(NULL);
 store = NULL;
-
-//driverStatus = CST_UNKNOWN;
 return 1;
 }
 
@@ -226,7 +213,9 @@ if (store->pollingRegisters && !modbusBusy && (Status() == CST_INITIALIZED) && i
   {
     debugSerial<<F("Poll ")<< item->itemArr->name << endl;
     modbusBusy=1;
-    modbusSerial.begin(store->baud, store->serialParam);
+    //store->serialParam=(USARTClass::USARTModes) SERIAL_8N1;
+    modbusSerial.begin(store->baud, static_cast <USARTClass::USARTModes> (store->serialParam));
+    debugSerial<< store->baud << F("---")<< store->serialParam<<endl;
     node.begin(item->getArg(0), modbusSerial);
 
     aJsonObject * reg = store->pollingRegisters->child;

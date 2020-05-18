@@ -452,7 +452,7 @@ void Input::dht22Poll() {
         setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT / 3);
 }
 #endif
-
+/*
 bool Input::executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
 {
   if (!cmd) return false;
@@ -500,7 +500,8 @@ if (emit) debugSerial << emit->valuestring<< F(" -> ")<<emitCommand<<endl;
 
 
   if (emit && emitCommand && emit->type == aJson_String) {
-/*
+
+// *
 TODO implement
 #ifdef WITH_DOMOTICZ
       if (getIdxField())
@@ -511,7 +512,7 @@ TODO implement
                                              getIdxField());
                         } else
 #endif
-*/
+* //
 
 {
 char addrstr[MQTT_TOPIC_LENGTH];
@@ -535,6 +536,7 @@ return false;
 } //switch type
 return false;
 }
+*/
 
 // TODO Polling via timed interrupt with CHECK_INTERRUPT cause
 bool Input::changeState(uint8_t newState, short cause)

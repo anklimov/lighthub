@@ -23,6 +23,14 @@ e-mail    anklimov@gmail.com
 #include "stdarg.h"
 #include <Wire.h>
 
+#include "item.h"
+#include <PubSubClient.h>
+extern int8_t configLocked;
+extern int8_t ethernetIdleCount;
+extern PubSubClient mqttClient;
+
+
+
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 #include <malloc.h>
 #endif
@@ -510,6 +518,101 @@ bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t m
   return   ((currTime>endTime) && (currTime <timestamp)) ||
               ((timestamp<endTime) && ((currTime>endTime) || (currTime <timestamp)));
 }
+
+
+bool executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
+{
+switch (cmd->type)
+{
+  case aJson_String: //legacy - no action
+  break;
+  case aJson_Array:  //array - recursive iterate
+  {
+  configLocked++;
+  aJsonObject * command = cmd->child;
+  while (command)
+          {
+          executeCommand(command,toggle,defCmd);
+          command = command->next;
+          }
+  configLocked--;
+  }
+  break;
+  case aJson_Object:
+{
+aJsonObject *item = aJson.getObjectItem(cmd, "item");
+aJsonObject *icmd = aJson.getObjectItem(cmd, "icmd");
+
+aJsonObject *emit = aJson.getObjectItem(cmd, "emit");
+aJsonObject *ecmd = aJson.getObjectItem(cmd, "ecmd");
+
+
+aJsonObject *irev = NULL;
+aJsonObject *erev = NULL;
+
+if (toggle>0){
+aJsonObject *irev = aJson.getObjectItem(cmd, "irev");
+aJsonObject *erev = aJson.getObjectItem(cmd, "erev");
+}
+
+char * itemCommand;
+if (irev && toggle && irev->type == aJson_String) itemCommand = irev->valuestring;
+else if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
+  else    itemCommand = defCmd;
+
+char * emitCommand;
+if (erev && toggle && erev->type == aJson_String) emitCommand = erev->valuestring;
+else if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
+  else    emitCommand = defCmd;
+
+//debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
+if (item) debugSerial << item->valuestring<< F(" -> ")<<itemCommand<<endl;
+if (emit) debugSerial << emit->valuestring<< F(" -> ")<<emitCommand<<endl;
+
+
+
+
+if (emit && emitCommand && emit->type == aJson_String) {
+/*
+TODO implement
+#ifdef WITH_DOMOTICZ
+    if (getIdxField())
+    {  (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
+        : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());	                                               getIdxField())
+                   : publishDataToDomoticz(0, emit,
+                                           "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",
+                                           getIdxField());
+                      } else
+#endif
+*/
+
+{
+char addrstr[MQTT_TOPIC_LENGTH];
+strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+if (mqttClient.connected() && !ethernetIdleCount)
+{
+if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
+mqttClient.publish(addrstr, emitCommand , true);
+}
+}
+} // emit
+if (item && itemCommand && item->type == aJson_String) {
+  //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
+    Item it(item->valuestring);
+    if (it.isValid()) it.Ctrl(itemCommand, true);
+    }
+return true;
+}
+default:
+return false;
+} //switch type
+return false;
+}
+
+
+
+
+
 
 
 #pragma message(VAR_NAME_VALUE(debugSerial))

@@ -181,5 +181,5 @@ protected:
 
     char* getIdxField();
     bool changeState(uint8_t newState, short cause);
-    bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
+    //bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
 };

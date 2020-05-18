@@ -11,7 +11,7 @@ public:
 //  int addr
   int8_t driverStatus;
   int baud;
-  UARTClass::UARTModes serialParam;
+  uint16_t serialParam;
   uint16_t pollingInterval;
   uint32_t timestamp;
   aJsonObject * pollingRegisters;
