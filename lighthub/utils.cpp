@@ -541,28 +541,30 @@ switch (cmd->type)
   case aJson_Object:
 {
 aJsonObject *item = aJson.getObjectItem(cmd, "item");
-aJsonObject *icmd = aJson.getObjectItem(cmd, "icmd");
-
 aJsonObject *emit = aJson.getObjectItem(cmd, "emit");
-aJsonObject *ecmd = aJson.getObjectItem(cmd, "ecmd");
+aJsonObject *icmd = NULL;
+aJsonObject *ecmd = NULL;
 
-
-aJsonObject *irev = NULL;
-aJsonObject *erev = NULL;
-
-if (toggle>0){
-aJsonObject *irev = aJson.getObjectItem(cmd, "irev");
-aJsonObject *erev = aJson.getObjectItem(cmd, "erev");
-}
+switch (toggle)
+    {
+    case 0:
+    icmd = aJson.getObjectItem(cmd, "icmd");
+    ecmd = aJson.getObjectItem(cmd, "ecmd");
+    break;
+    case 1:
+    icmd = aJson.getObjectItem(cmd, "irev");
+    ecmd = aJson.getObjectItem(cmd, "erev");
+    //no *rev parameters - fallback
+    if (!icmd) icmd = aJson.getObjectItem(cmd, "icmd");
+    if (!ecmd) ecmd = aJson.getObjectItem(cmd, "ecmd");
+  }
 
 char * itemCommand;
-if (irev && toggle && irev->type == aJson_String) itemCommand = irev->valuestring;
-else if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
+if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
   else    itemCommand = defCmd;
 
 char * emitCommand;
-if (erev && toggle && erev->type == aJson_String) emitCommand = erev->valuestring;
-else if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
+if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
   else    emitCommand = defCmd;
 
 //debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
@@ -599,7 +601,7 @@ mqttClient.publish(addrstr, emitCommand , true);
 if (item && itemCommand && item->type == aJson_String) {
   //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
     Item it(item->valuestring);
-    if (it.isValid()) it.Ctrl(itemCommand, true);
+    if (it.isValid()) it.Ctrl(itemCommand);
     }
 return true;
 }

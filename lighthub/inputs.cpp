@@ -952,13 +952,13 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
         Item it(item->valuestring);
         if (it.isValid()) {
             if (newValue) {  //send set command
-                if (!scmd || scmd->type != aJson_String) it.Ctrl(CMD_ON, 0, NULL, true);
+                if (!scmd || scmd->type != aJson_String) it.Ctrl(CMD_ON, 0, NULL);
                 else if (strlen(scmd->valuestring))
-                    it.Ctrl(scmd->valuestring, true);
+                    it.Ctrl(scmd->valuestring);
             } else {  //send reset command
-                if (!rcmd || rcmd->type != aJson_String) it.Ctrl(CMD_OFF, 0, NULL, true);
+                if (!rcmd || rcmd->type != aJson_String) it.Ctrl(CMD_OFF, 0, NULL);
                 else if (strlen(rcmd->valuestring))
-                    it.Ctrl(rcmd->valuestring, true);
+                    it.Ctrl(rcmd->valuestring);
             }
         }
     }

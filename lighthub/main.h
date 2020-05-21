@@ -186,6 +186,7 @@ typedef union {
     uint8_t   UID_Byte[20];
 } UID;
 
+bool isNotRetainingStatus(); 
 //void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);

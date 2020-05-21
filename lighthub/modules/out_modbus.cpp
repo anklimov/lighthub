@@ -58,7 +58,15 @@ const serial_t serialModes_P[] PROGMEM =
   { "8O1", SERIAL_8O1},
   { "8O2", SERIAL_8O2},
   { "8M1", SERIAL_8M1},
-  { "8S1", SERIAL_8S1}
+  { "8S1", SERIAL_8S1},
+  { "7E1", SERIAL_7E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
+  { "7N1", SERIAL_7N1},
+  { "7E2", SERIAL_7E2},
+  { "7N2", SERIAL_7N2},
+  { "7O1", SERIAL_7O1},
+  { "7O2", SERIAL_7O2},
+  { "7M1", SERIAL_7M1},
+  { "7S1", SERIAL_7S1}
 } ;
 
 #define serialModesNum sizeof(serialModes_P)/sizeof(serial_t)
@@ -275,7 +283,7 @@ int out_Modbus::getChanType()
 
 
 
-int out_Modbus::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixCode, char* subItem)
+int out_Modbus::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
 {
 int chActive = item->isActive();
 bool toExecute = (chActive>0);
@@ -314,12 +322,12 @@ case S_CMD:
            st = item->getVal();
 
 
-            if (st && (st<MIN_VOLUME) && send) st=INIT_VOLUME;
+            if (st && (st<MIN_VOLUME) /* && send */) st=INIT_VOLUME;
             item->setVal(st);
 
             if (st)  //Stored smthng
             {
-              if (send) item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
+              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
               debugSerial<<F("Restored: ")<<st<<endl;
             }
             else
@@ -328,13 +336,13 @@ case S_CMD:
               // Store
               st=100;
               item->setVal(st);
-              if (send) item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
+              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             }
   //          if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
             return 1;
 
             case CMD_OFF:
-              if (send) item->SendStatus(SEND_COMMAND);
+              item->SendStatus(SEND_COMMAND);
   //            if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
             return 1;
 

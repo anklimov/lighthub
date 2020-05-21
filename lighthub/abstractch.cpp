@@ -26,7 +26,7 @@ int abstractCh::publishTopic(const char* topic, float value, const char* subtopi
 int abstractCh::publishTopic(const char* topic, const char * value, const char* subtopic)
 {
   char addrstr[MQTT_TOPIC_LENGTH];
-
+ if (!isNotRetainingStatus()) return 0;
     if (topic)
      {
        strncpy(addrstr,topic,sizeof(addrstr));

@@ -120,6 +120,20 @@ extern short thermoSetCurTemp(char *name, float t);
 
 int txt2cmd (char * payload);
 
+enum itemStoreType {
+ST_VOID         = 0,
+ST_PERCENTS     = 1,
+ST_HS           = 2,
+ST_HSV          = 3,
+ST_FLOAT_CELSIUS= 4,
+ST_FLOAT_FARENHEIT= 5,
+ST_RGB          = 6,
+ST_RGBW         = 7,
+ST_PERCENTS255  = 8,
+ST_HSV255       = 9
+
+};
+
 #pragma pack(push, 1)
 typedef union
 {
@@ -136,10 +150,10 @@ typedef union
         uint8_t  r;
         uint8_t  g;
         uint8_t  b;
-        uint8_t  w:7;
-        uint8_t  rgb_flag:1;
+        uint8_t  w;//:7;
+//        uint8_t  rgb_flag:1;
       };
-} CHstore;
+} itemStore;
 
 /*
 typedef union
@@ -164,8 +178,8 @@ class Item
 
   boolean isValid ();
   boolean Setup();
-  virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, int suffixCode=0, char* subItem=NULL);
-  virtual int Ctrl(char * payload, boolean send=true, char * subItem=NULL);
+  int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL);
+  int Ctrl(char * payload,  char * subItem=NULL);
 
   int getArg(short n=0);
   //int getVal(short n); //From VAL array. Negative if no array

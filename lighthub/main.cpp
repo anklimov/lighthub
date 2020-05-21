@@ -189,7 +189,7 @@ while (configLocked)
           #ifdef _dmxin
           DMXCheck();
           #endif
-          if (lanStatus != RETAINING_COLLECTING) pollingLoop();
+          if (isNotRetainingStatus())  pollingLoop();
           thermoLoop();
           inputLoop();
 }
@@ -213,6 +213,10 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
   modbusObj = NULL;
   #endif
      debugSerial<<F(" is ")<<freeRam()<<endl;
+}
+
+bool isNotRetainingStatus() {
+  return (lanStatus != RETAINING_COLLECTING);
 }
 
 void mqttCallback(char *topic, byte *payload, unsigned int length) {
@@ -290,7 +294,7 @@ else
       /*
         if (item.itemType == CH_GROUP && (lanStatus == RETAINING_COLLECTING))
             return; //Do not restore group channels - they consist not relevant data */
-        item.Ctrl((char *)payload, !(lanStatus == RETAINING_COLLECTING),subItem);
+        item.Ctrl((char *)payload,subItem);
     } //valid item
 }
 
@@ -1743,7 +1747,7 @@ void loop_main() {
 
     if (items) {
 //        #ifndef MODBUS_DISABLE
-        if (lanStatus != RETAINING_COLLECTING) pollingLoop();
+        if (isNotRetainingStatus()) pollingLoop();
 //        #endif
 //#ifdef _owire
         thermoLoop();

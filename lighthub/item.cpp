@@ -456,9 +456,10 @@ return suffixCode;
 #define MAXCTRLPAR 3
 
 // myhome/dev/item/subItem
-int Item::Ctrl(char * payload, boolean send, char * subItem){
+int Item::Ctrl(char * payload, char * subItem){
   if (!payload) return 0;
 
+bool send =  isNotRetainingStatus() ;
 
 int   suffixCode = 0;
 //int   setCommand = CMD_SET;  //default SET behavior now - not turn on channels
@@ -495,7 +496,7 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
           while (payload && i < 3)
               Par[i++] = getInt((char **) &payload);
 
-          return   Ctrl(setCommand, i, Par, send, suffixCode, subItem);
+          return   Ctrl(setCommand, i, Par,  suffixCode, subItem);
       }
           break;
 
@@ -515,14 +516,14 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
               Par[0] = map(hsv.h, 0, 255, 0, 365);
               Par[1] = map(hsv.s, 0, 255, 0, 100);
               Par[2] = map(hsv.v, 0, 255, 0, 100);
-          return    Ctrl(setCommand, 3, Par, send, suffixCode, subItem);
+          return    Ctrl(setCommand, 3, Par,  suffixCode, subItem);
           }
           break;
       }
   #endif
 #endif
       default: //some known command
-          return Ctrl(cmd, 0, NULL, send, suffixCode, subItem);
+          return Ctrl(cmd, 0, NULL,  suffixCode, subItem);
 
   } //ctrl
 return 0;
@@ -539,8 +540,8 @@ short Item::cmd2changeActivity(int lastActivity, short defaultCmd)
 }
 */
 
-int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode, char *subItem) {
-
+int Item::Ctrl(short cmd, short n, int *Parameters,  int suffixCode, char *subItem) {
+bool send = isNotRetainingStatus() ;
   if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
       subItem = defaultSubItem;  /// possible problem here with truncated default
 
@@ -584,7 +585,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
 
     int iaddr = getArg();
     int chActive =isActive();
-    CHstore st;
+    itemStore st;
     switch (cmd) {
         int t;
 /*
@@ -756,7 +757,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 if (!chActive>0)  //if channel was'nt active before CMD_XON
                       {
                         debugSerial<<F("Turning XON\n");
-                        res = driver->Ctrl(CMD_ON, n, Par, send, suffixCode, subItem);
+                        res = driver->Ctrl(CMD_ON, n, Par, suffixCode, subItem);
                         setCmd(CMD_XON);
                       }
                   else
@@ -768,7 +769,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 case CMD_HALT:
                 if (chActive>0)  //if channel was active before CMD_HALT
                       {
-                        res = driver->Ctrl(CMD_OFF, n, Par, send, suffixCode, subItem);
+                        res = driver->Ctrl(CMD_OFF, n, Par, suffixCode, subItem);
                         setCmd(CMD_HALT);
                         return res;
                       }
@@ -781,7 +782,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 case CMD_OFF:
                 if (getCmd() != CMD_HALT) //Halted, ignore OFF
                      {
-                       res = driver->Ctrl(cmd, n, Par, send, suffixCode, subItem);
+                       res = driver->Ctrl(cmd, n, Par,  suffixCode, subItem);
                        setCmd(CMD_OFF);
                      }
                 else
@@ -796,7 +797,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                 break;
 */
                 default:
-                res = driver->Ctrl(cmd, n, Par, send, suffixCode, subItem);
+                res = driver->Ctrl(cmd, n, Par,  suffixCode, subItem);
                 if (cmd) setCmd(cmd);
               }
               return res;
@@ -1114,7 +1115,7 @@ int Item::Ctrl(short cmd, short n, int *Parameters, boolean send, int suffixCode
                     if (i->type == aJson_String)
                       {
                       Item it(i->valuestring);
-                      it.Ctrl(cmd, n, Par, send,suffixCode,subItem); //// was true
+                      it.Ctrl(cmd, n, Par, suffixCode,subItem); //// was true
                       }
                     i = i->next;
                 } //while
@@ -1197,7 +1198,7 @@ return 1;
 }
 
 int Item::isActive() {
-    CHstore st;
+    itemStore st;
     int val = 0;
 
 
@@ -1804,13 +1805,14 @@ void Item::sendDelayedStatus()
 
 
 int Item::SendStatus(int sendFlags) {
-    int chancmd=getCmd();
-    if ((sendFlags & SEND_DEFFERED) || (lanStatus==RETAINING_COLLECTING)) {
+
+    if ((sendFlags & SEND_DEFFERED) || (!isNotRetainingStatus() )) {
         setFlag(sendFlags & (SEND_COMMAND | SEND_PARAMETERS));
         debugSerial<<F("Status deffered\n");
         return -1;
     }
     else {
+      int chancmd=getCmd();
       sendFlags |= getFlag(SEND_COMMAND | SEND_PARAMETERS); //if some delayed status is pending
       char addrstr[48];
       char valstr[16] = "";
@@ -1819,7 +1821,7 @@ int Item::SendStatus(int sendFlags) {
       if (sendFlags & SEND_PARAMETERS)
       {
       // Preparing parameters payload //////////
-       CHstore st;
+       itemStore st;
        int chanType = itemType;
         if (driver) chanType = driver->getChanType();
        //retrive stored values

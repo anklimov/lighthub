@@ -258,7 +258,7 @@ delay(100);
 return INTERVAL_POLLING;
 };
 
-int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixCode, char* subItem)
+int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
 {char s_mode[10];
  // Some additional Subitems
        if (strcmp_P(subItem, LOCK_P) == 0) suffixCode = S_LOCK;
@@ -275,7 +275,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
           if (set_tmp >= 10 && set_tmp <= 30)
           {
             data[B_SET_TMP] = set_tmp -16;
-            if (send) publishTopic(item->itemArr->name,(long) set_tmp,"/set");
+            publishTopic(item->itemArr->name,(long) set_tmp,"/set");
             }
       break;
 
@@ -288,7 +288,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
                       data[B_POWER] = power;
                       data[B_POWER] |= 1;
                       SendData(on, sizeof(on)/sizeof(byte));
-                      if (send) publishTopic(item->itemArr->name,"ON","/cmd");
+                      publishTopic(item->itemArr->name,"ON","/cmd");
                       return 1;
                   break;
                   case CMD_OFF:
@@ -296,7 +296,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
                       data[B_POWER] = power;
                       data[B_POWER] &= ~1;
                       SendData(off, sizeof(off)/sizeof(byte));
-                      if (send) publishTopic(item->itemArr->name,"OFF","/cmd");
+                      publishTopic(item->itemArr->name,"OFF","/cmd");
                       return 1;
                   break;
                   case CMD_AUTO:
@@ -334,7 +334,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
                   return -1;
                   break;
                 }
-                if (send) publishTopic(item->itemArr->name,s_mode,"/cmd");
+                publishTopic(item->itemArr->name,s_mode,"/cmd");
       break;
 
       case S_FAN:
@@ -361,7 +361,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixC
       if (n) data[B_FAN_SPD] = Parameters[0];
       //TODO - mapping digits to speed
       }
-      if (send) publishTopic(item->itemArr->name,s_mode,"/fan");
+      publishTopic(item->itemArr->name,s_mode,"/fan");
       break;
 
       case S_MODE:
