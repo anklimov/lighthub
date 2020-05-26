@@ -30,6 +30,7 @@ int  in_ccs811::Setup()
 Serial.println("CCS811 Init");
 
 Wire.begin(); //Inialize I2C Harware
+Wire.setClock(4000);
 
   //It is recommended to check return status on .begin(), but it is not
   //required.

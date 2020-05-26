@@ -200,6 +200,15 @@ if (driver)
 else return false;
 }
 
+void Item::Stop()
+{
+if (driver)
+       {
+        driver->Stop();
+       }
+return;
+}
+
 Item::~Item()
 {
   if (driver)
@@ -459,7 +468,6 @@ return suffixCode;
 int Item::Ctrl(char * payload, char * subItem){
   if (!payload) return 0;
 
-bool send =  isNotRetainingStatus() ;
 
 int   suffixCode = 0;
 //int   setCommand = CMD_SET;  //default SET behavior now - not turn on channels
@@ -715,12 +723,13 @@ bool send = isNotRetainingStatus() ;
               }
               break;
        case CMD_NUM:
-                   if (itemType == CH_GROUP || n!=1) break;
-
+                   //if (itemType == CH_GROUP || n!=1) break;
+                   if (n!=1) break;
                    int cType=getChanType();
-                   if ( cType == CH_RGB || cType == CH_RGBW)
+                   if ( cType == CH_RGB || cType == CH_RGBW || cType == CH_GROUP )
                    {
                          st.aslong = getVal();
+                         st.hsv_flag=1;
                          switch (suffixCode)
                          {
                                case S_SAT:
@@ -742,6 +751,7 @@ bool send = isNotRetainingStatus() ;
                                n=3;
                                setVal(st.aslong);
                              }
+                           //if (itemType == CH_GROUP) break;
                          }
                     else // Non-color channel
                     if (suffixCode == S_SAT || suffixCode == S_HUE) return -3;

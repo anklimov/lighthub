@@ -194,7 +194,20 @@ while (configLocked)
           inputLoop();
 }
 
-pollingItem = NULL;;
+//Stoping the channels
+aJsonObject * item = items->child;
+while (items && item)
+   {
+    if (item->type == aJson_Array && aJson.getArraySize(item)>0)
+    {
+        Item it(item->name);
+        if (it.isValid()) it.Stop();
+
+
+    }
+   item = item->next;
+  }
+pollingItem = NULL;
 
 debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
     aJson.deleteItem(root);
@@ -393,10 +406,27 @@ if (WiFi.status() != WL_CONNECTED)
         }
 #endif
 
+#ifndef wiz5500
+
+#define DHCP_CHECK_RENEW_FAIL 1
+#define DHCP_CHECK_RENEW_OK 2
+#define DHCP_CHECK_REBIND_FAIL 3
+#define DHCP_CHECK_REBIND_OK 4
+#define NO_LINK 5
+
+#endif
+
+
 #if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined (NRF5)
         wdt_dis();
         if (lanStatus > 0)
-            switch (Ethernet.maintain()) {
+        {
+        int etherStatus = Ethernet.maintain();
+
+        #ifdef ETHENET_GENERIC
+        if (Ethernet.linkStatus() == LinkOFF) etherStatus = NO_LINK;
+        #endif
+            switch (etherStatus) {
                    case NO_LINK:
                     debugSerial<<F("No link")<<endl;
                     if (mqttClient.connected()) mqttClient.disconnect();
@@ -431,7 +461,7 @@ if (WiFi.status() != WL_CONNECTED)
                     break;
 
             }
-
+          }
         wdt_en();
 #endif
     }
@@ -680,6 +710,15 @@ void ip_ready_config_loaded_connecting_to_broker() {
     }
 }
 
+void setupOTA(void)
+{
+#ifdef OTA
+        // start the OTEthernet library with internal (flash) based storage
+        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+#endif
+}
+
+
 void onInitialStateInitLAN() {
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
 #if defined(WIFI_MANAGER_DISABLE)
@@ -736,10 +775,8 @@ wifiManager.setTimeout(30);
     if (WiFi.status() == WL_CONNECTED) {
         debugSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP()<<endl;
         lanStatus = HAVE_IP_ADDRESS;//1;
-#ifdef OTA
-        // start the OTEthernet library with internal (flash) based storage
-        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
-#endif
+setupOTA();
+
     } else
     {
         debugSerial<<F("Problem with WiFi!");
@@ -749,9 +786,13 @@ wifiManager.setTimeout(30);
 
 #if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32) || defined (NRF5)
 #ifdef W5500_CS_PIN
+ #ifndef Wiz5500
+    Ethernet.init(W5500_CS_PIN);
+ #else
     Ethernet.w5500_cspin = W5500_CS_PIN;
+ #endif
     debugSerial<<F("Use W5500 pin: ");
-    debugSerial<<(Ethernet.w5500_cspin)<<endl;
+    debugSerial<<QUOTE(W5500_CS_PIN)<<endl;
 #endif
     IPAddress ip, dns, gw, mask;
     int res = 1;
@@ -774,10 +815,7 @@ wifiManager.setTimeout(30);
         } else Ethernet.begin(mac, ip);
     debugSerial<<endl;
     lanStatus = HAVE_IP_ADDRESS;
-    #ifdef OTA
-    // start the OTEthernet library with internal (flash) based storage
-    ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
-    #endif
+    setupOTA();
     #ifdef _artnet
                 if (artnet) artnet->begin();
     #endif
@@ -806,10 +844,9 @@ wifiManager.setTimeout(30);
         debugSerial<<F("Got IP address:");
         printIPAddress(Ethernet.localIP());
         lanStatus = HAVE_IP_ADDRESS;//1;
-        #ifdef OTA
-        // start the OTEthernet library with internal (flash) based storage
-        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
-        #endif
+
+        setupOTA();
+
         #ifdef _artnet
                     if (artnet) artnet->begin();
         #endif
@@ -1524,10 +1561,10 @@ void printFirmwareVersionAndBuildOptions() {
 #ifdef CONTROLLINO
     debugSerial<<F("\n(+)CONTROLLINO");
 #endif
-#ifdef WATCH_DOG_TICKER_DISABLE
-    debugSerial<<F("\n(-)WATCHDOG");
-#else
+#ifndef WATCH_DOG_TICKER_DISABLE
     debugSerial<<F("\n(+)WATCHDOG");
+#else
+    debugSerial<<F("\n(-)WATCHDOG");
 #endif
     debugSerial<<F("\nConfig server:")<<F(CONFIG_SERVER)<<F("\nFirmware MAC Address ")<<F(QUOTE(CUSTOM_FIRMWARE_MAC));
 #ifdef DISABLE_FREERAM_PRINT
@@ -1546,22 +1583,22 @@ void printFirmwareVersionAndBuildOptions() {
     debugSerial<<F("\n(+)WizNet5500");
 #endif
 
-#ifdef DMX_DISABLE
-    debugSerial<<F("\n(-)DMX");
-#else
+#ifndef DMX_DISABLE
     debugSerial<<F("\n(+)DMX");
+#else
+    debugSerial<<F("\n(-)DMX");
 #endif
 
-#ifdef MODBUS_DISABLE
-    debugSerial<<F("\n(-)MODBUS");
-#else
+#ifndef MODBUS_DISABLE
     debugSerial<<F("\n(+)MODBUS");
+#else
+    debugSerial<<F("\n(-)MODBUS");
 #endif
 
-#ifdef OWIRE_DISABLE
-    debugSerial<<F("\n(-)OWIRE");
-#else
+#ifndef OWIRE_DISABLE
     debugSerial<<F("\n(+)OWIRE");
+#else
+    debugSerial<<F("\n(-)OWIRE");
 #endif
 #ifndef DHT_DISABLE
     debugSerial<<F("\n(+)DHT");
@@ -1592,10 +1629,10 @@ void printFirmwareVersionAndBuildOptions() {
 #endif
 
 
-#ifdef CSSHDC_DISABLE
-    debugSerial<<F("\n(-)CCS811 & HDC1080");
-#else
+#ifndef CSSHDC_DISABLE
     debugSerial<<F("\n(+)CCS811 & HDC1080");
+#else
+    debugSerial<<F("\n(-)CCS811 & HDC1080");
 #endif
 #ifndef AC_DISABLE
     debugSerial<<F("\n(+)AC HAIER");
@@ -1612,14 +1649,20 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     debugSerial<<F("\n(-)SPI LED");
 #endif
-#ifndef FASTLED
+#ifdef FASTLED
     debugSerial<<F("\n(+)FASTLED");
 #else
     debugSerial<<F("\n(+)ADAFRUIT LED");
 #endif
 debugSerial<<endl;
 
+#ifdef OTA
+    debugSerial<<F("\n(+)OTA");
+#else
+    debugSerial<<F("\n(-)OTA");
+#endif
 
+debugSerial<<endl;
 //    WDT_Disable( WDT ) ;
 #if defined(__SAM3X8E__)
 
@@ -1718,9 +1761,7 @@ void setupCmdArduino() {
 }
 
 void loop_main() {
-  #if defined(OTA)
-  ArduinoOTA.poll();
-  #endif
+
 
   #if defined(M5STACK)
    // Initialize the M5Stack object
@@ -1731,6 +1772,11 @@ void loop_main() {
     cmdPoll();
     if (lanLoop() > HAVE_IP_ADDRESS) {
         mqttClient.loop();
+
+        #if defined(OTA)
+        ArduinoOTA.poll();
+        #endif
+
 #ifdef _artnet
         if (artnet) artnet->read();  ///hung
 #endif

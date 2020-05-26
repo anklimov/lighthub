@@ -178,6 +178,7 @@ class Item
 
   boolean isValid ();
   boolean Setup();
+  void Stop();
   int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL);
   int Ctrl(char * payload,  char * subItem=NULL);
 
