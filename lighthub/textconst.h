@@ -116,3 +116,4 @@ const char RGB_P[]   PROGMEM = "RGB";
 const char RPM_P[]   PROGMEM = "rpm";
 const char STATE_P[] PROGMEM = "state";
 */
+const char EEPROM_signature[] = EEPROM_SIGNATURE;

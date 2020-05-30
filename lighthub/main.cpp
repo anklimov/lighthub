@@ -66,7 +66,7 @@ PWM Out
 */
 
 #include "main.h"
-
+#include <Dhcp.h>
 #if defined(OTA)
 #include <ArduinoOTA.h>
 #endif
@@ -406,16 +406,6 @@ if (WiFi.status() != WL_CONNECTED)
         }
 #endif
 
-#ifndef wiz5500
-
-#define DHCP_CHECK_RENEW_FAIL 1
-#define DHCP_CHECK_RENEW_OK 2
-#define DHCP_CHECK_REBIND_FAIL 3
-#define DHCP_CHECK_REBIND_OK 4
-#define NO_LINK 5
-
-#endif
-
 
 #if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined (NRF5)
         wdt_dis();
@@ -423,9 +413,11 @@ if (WiFi.status() != WL_CONNECTED)
         {
         int etherStatus = Ethernet.maintain();
 
-        #ifdef ETHENET_GENERIC
+        #ifndef Wiz5500
+        #define NO_LINK 5
         if (Ethernet.linkStatus() == LinkOFF) etherStatus = NO_LINK;
         #endif
+
             switch (etherStatus) {
                    case NO_LINK:
                     debugSerial<<F("No link")<<endl;
@@ -1091,9 +1083,9 @@ int loadConfigFromEEPROM()
     char ch;
     debugSerial<<F("Loading Config from EEPROM")<<endl;
 
-    ch = EEPROM.read(EEPROM_offset);
+    ch = EEPROM.read(EEPROM_offsetJSON);
     if (ch == '{') {
-        aJsonEEPROMStream as = aJsonEEPROMStream(EEPROM_offset);
+        aJsonEEPROMStream as = aJsonEEPROMStream(EEPROM_offsetJSON);
         cleanConf();
         root = aJson.parse(&as);
         if (!root) {
@@ -1162,7 +1154,7 @@ void cmdFunctionSave(int arg_cnt, char **args)
   aJson.print(root, &stringStream);
   int len = strlen(outBuf);
   outBuf[len++]= EOF;
-  EEPROM.write(EEPROM_offset,(byte*) outBuf,len);
+  EEPROM.write(EEPROM_offsetJSON,(byte*) outBuf,len);
 
   free (outBuf);
   debugSerial<<F("Saved to EEPROM");
@@ -1171,7 +1163,7 @@ void cmdFunctionSave(int arg_cnt, char **args)
 #else
 void cmdFunctionSave(int arg_cnt, char **args)
 {
-    aJsonEEPROMStream jsonEEPROMStream = aJsonEEPROMStream(EEPROM_offset);
+    aJsonEEPROMStream jsonEEPROMStream = aJsonEEPROMStream(EEPROM_offsetJSON);
     debugSerial<<F("Saving config to EEPROM..");
 
     aJson.print(root, &jsonEEPROMStream);
@@ -1236,8 +1228,12 @@ void cmdFunctionIp(int arg_cnt, char **args)
 }
 
 void cmdFunctionClearEEPROM(int arg_cnt, char **args){
-    for (int i = 0; i < 512; i++)
+    for (int i = OFFSET_MAC; i < OFFSET_MAC+EEPROM_FIX_PART_LEN; i++)
         EEPROM.write(i, 0);
+
+        for (int i = 0; i < sizeof(EEPROM_signature); i++)
+            EEPROM.write(i+OFFSET_SIGNATURE,EEPROM_signature[i]);
+
     debugSerial<<F("EEPROM cleared\n");
 
 }
@@ -1486,8 +1482,9 @@ void postTransmission() {
 }
 
 void setup_main() {
-  //Serial.println("Hello");
-  //delay(1000);
+
+
+
   #if defined(__SAM3X8E__)
   memset(&UniqueID,0,sizeof(UniqueID));
   #endif
@@ -1500,6 +1497,13 @@ void setup_main() {
     setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 
+    //Checkin EEPROM integrity (signature)
+    for (int i=OFFSET_SIGNATURE;i<OFFSET_SIGNATURE+sizeof(EEPROM_SIGNATURE);i++)
+        if (EEPROM.read(i)!=EEPROM_signature[i])
+                      {
+                      cmdFunctionClearEEPROM(0,NULL);
+                      break;
+                       }
   //  scan_i2c_bus();
 
 #ifdef SD_CARD_INSERTED
@@ -1581,6 +1585,8 @@ void printFirmwareVersionAndBuildOptions() {
 
 #ifdef Wiz5500
     debugSerial<<F("\n(+)WizNet5500");
+#else
+    debugSerial<<F("\n(+)Wiznet5x00");
 #endif
 
 #ifndef DMX_DISABLE
