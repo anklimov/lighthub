@@ -64,6 +64,9 @@
 //#include <EEPROM.h>
 #endif
 
+#include "streamlog.h"
+extern Streamlog  debugSerial;
+
 #if defined(__SAM3X8E__)
 #define wdt_res() watchdogReset()
 #define wdt_en()
@@ -186,7 +189,7 @@ typedef union {
     uint8_t   UID_Byte[20];
 } UID;
 
-bool isNotRetainingStatus(); 
+bool isNotRetainingStatus();
 //void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);

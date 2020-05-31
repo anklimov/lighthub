@@ -8,6 +8,7 @@
 
 #include "item.h"
 #include <ModbusMaster.h>
+#include "main.h"
 
 extern aJsonObject *modbusObj;
 extern ModbusMaster node;

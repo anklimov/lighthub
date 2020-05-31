@@ -3,6 +3,7 @@
 #include "options.h"
 #include "Streaming.h"
 #include "item.h"
+#include "main.h"
 
 #if defined(M5STACK)
 #include <M5Stack.h>

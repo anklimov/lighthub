@@ -66,6 +66,7 @@ PWM Out
 */
 
 #include "main.h"
+
 #include <Dhcp.h>
 #if defined(OTA)
 #include <ArduinoOTA.h>
@@ -109,12 +110,26 @@ NRFFlashStorage EEPROM;
 EthernetClient ethClient;
 #endif
 
+
+
+
 #ifdef SYSLOG_ENABLE
 #include <Syslog.h>
 EthernetUDP udpSyslogClient;
-Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_IETF);
+Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_BSD);
 unsigned long nextSyslogPingTime;
+
+Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog);
+Streamlog errorSerial(&debugSerialPort,LOG_ERROR,&udpSyslog);
+Streamlog infoSerial (&debugSerialPort,LOG_INFO,&udpSyslog);
+#else
+Streamlog debugSerial(&debugSerialPort,LOG_DEBUG);
+Streamlog errorSerial(&debugSerialPort,LOG_ERROR);
+Streamlog infoSerial (&debugSerialPort,LOG_INFO);
 #endif
+
+
+
 
 lan_status lanStatus = INITIAL_STATE;
 
@@ -598,8 +613,9 @@ void ip_ready_config_loaded_connecting_to_broker() {
                 debugSerial<<F("Device Name:")<<deviceName<<endl;
               }
 #ifdef SYSLOG_ENABLE
-    //debugSerial<<"debugSerial:";
-    delay(100);
+
+  udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
+
     if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
       char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
       if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
@@ -620,7 +636,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 #endif
 
     if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
-    //    char *client_id = aJson.getArrayItem(mqttArr, 0)->valuestring;
+    //    char *client_id = aJson.getArrayItemartnet(mqttArr, 0)->valuestring;
         char *servername = getStringFromConfig(mqttArr, 1);
         if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
         if (n >= 4) user = getStringFromConfig(mqttArr, 3);
@@ -1231,7 +1247,7 @@ void cmdFunctionClearEEPROM(int arg_cnt, char **args){
     for (int i = OFFSET_MAC; i < OFFSET_MAC+EEPROM_FIX_PART_LEN; i++)
         EEPROM.write(i, 0);
 
-        for (int i = 0; i < sizeof(EEPROM_signature); i++)
+        for (int i = 0; i < EEPROM_SIGNATURE_LENGTH; i++)
             EEPROM.write(i+OFFSET_SIGNATURE,EEPROM_signature[i]);
 
     debugSerial<<F("EEPROM cleared\n");
@@ -1483,8 +1499,6 @@ void postTransmission() {
 
 void setup_main() {
 
-
-
   #if defined(__SAM3X8E__)
   memset(&UniqueID,0,sizeof(UniqueID));
   #endif
@@ -1498,8 +1512,8 @@ void setup_main() {
     printFirmwareVersionAndBuildOptions();
 
     //Checkin EEPROM integrity (signature)
-    for (int i=OFFSET_SIGNATURE;i<OFFSET_SIGNATURE+sizeof(EEPROM_SIGNATURE);i++)
-        if (EEPROM.read(i)!=EEPROM_signature[i])
+    for (int i=0;i<EEPROM_SIGNATURE_LENGTH;i++)
+        if (EEPROM.read(i+OFFSET_SIGNATURE)!=EEPROM_signature[i])
                       {
                       cmdFunctionClearEEPROM(0,NULL);
                       break;
@@ -1811,11 +1825,6 @@ void loop_main() {
 
 #if defined (_espdmx)
     dmxout.update();
-#endif
-
-#ifdef SYSLOG_ENABLE
-//        debugSerial<<F("#"));
-//        udpSyslog.log(LOG_INFO, "Ping syslog:");
 #endif
 
 }

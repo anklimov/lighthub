@@ -6,6 +6,7 @@
 #include "Streaming.h"
 
 #include "item.h"
+#include "main.h"
 
 #ifdef ADAFRUIT_LED
 

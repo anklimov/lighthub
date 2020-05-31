@@ -6,6 +6,7 @@
 #include "Streaming.h"
 #include "item.h"
 #include "textconst.h"
+#include "main.h"
 
 #ifndef AC_Serial
 #define AC_Serial Serial3

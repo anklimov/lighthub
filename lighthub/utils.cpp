@@ -22,6 +22,7 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 #include "stdarg.h"
 #include <Wire.h>
+#include "main.h"
 
 #include "item.h"
 #include <PubSubClient.h>

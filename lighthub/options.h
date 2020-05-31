@@ -1,4 +1,5 @@
 // Configuration of drivers enabled
+#define SYSLOG_LOCAL_SOCKET 514
 
 #ifndef FASTLED
 #define ADAFRUIT_LED
@@ -39,6 +40,8 @@
 
 #define MAXFLASHSTR 32
 #define PWDFLASHSTR 16
+#define EEPROM_SIGNATURE "LHCF"
+#define EEPROM_SIGNATURE_LENGTH 4
 
 #define OFFSET_MAC 0
 #define OFFSET_IP OFFSET_MAC+6
@@ -48,10 +51,10 @@
 #define OFFSET_CONFIGSERVER OFFSET_MASK+4
 #define OFFSET_MQTT_PWD OFFSET_CONFIGSERVER+MAXFLASHSTR
 #define OFFSET_SIGNATURE OFFSET_MQTT_PWD+PWDFLASHSTR
-#define EEPROM_offset_NotAlligned OFFSET_SIGNATURE+4
+#define EEPROM_offset_NotAlligned OFFSET_SIGNATURE+EEPROM_SIGNATURE_LENGTH
 #define EEPROM_offsetJSON EEPROM_offset_NotAlligned + (4 -(EEPROM_offset_NotAlligned & 3))
 #define EEPROM_FIX_PART_LEN EEPROM_offsetJSON-OFFSET_MAC
-#define EEPROM_SIGNATURE "LHCF"
+
 
 #ifndef INTERVAL_CHECK_INPUT
 #define INTERVAL_CHECK_INPUT  15
@@ -218,9 +221,10 @@
 //#define debugSerial M5.Lcd
 //#endif
 
-#ifndef debugSerial
-#define debugSerial Serial
+#ifndef debugSerialPort
+#define debugSerialPort Serial
 #endif
+
 
 #ifndef Wiz5500
 #define W5100_ETHERNET_SHIELD
