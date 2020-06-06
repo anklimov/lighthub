@@ -29,6 +29,7 @@ e-mail    anklimov@gmail.com
 #include <IPAddress.h>
 #include "aJSON.h"
 #include "options.h"
+#include "item.h"
 #ifdef WITH_PRINTEX_LIB
 #include "PrintEx.h"
 using namespace ios;
@@ -60,4 +61,7 @@ void printUlongValueToStr(char *valstr, unsigned long value);
 void scan_i2c_bus();
 void softRebootFunc();
 bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo = 0xFFFFFFFF);
-bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
+//bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
+bool executeCommand(aJsonObject* cmd, int8_t toggle = -1);
+bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd);
+itemCmd mapInt(int32_t arg, aJsonObject* map);

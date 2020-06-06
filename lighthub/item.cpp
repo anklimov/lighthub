@@ -54,12 +54,91 @@ extern lan_status lanStatus;
 
 int retrieveCode(char **psubItem);
 
+
+
+  itemCmd itemCmd::Percents(int i)
+      {
+        type=ST_PERCENTS;
+        param.aslong=i;
+        return *this;
+      }
+
+  itemCmd itemCmd::Int(int32_t i)
+          {
+            type=ST_INT32;
+            param.asInt32=i;
+            return *this;
+          }
+
+  itemCmd itemCmd::Int(uint32_t i)
+                  {
+                    type=ST_UINT32;
+                    param.asUint32=i;
+                    return *this;
+                  }
+
+
+  itemCmd itemCmd::Cmd(uint8_t i)
+      {
+            type=ST_COMMAND;
+            param.cmd_code=i;
+            return *this;
+      }
+
+  char * itemCmd::toString(char * Buffer, int bufLen)
+       {
+         if (!Buffer) return NULL;
+         switch (type)
+         {
+           case ST_VOID:
+                return NULL;
+
+           case ST_PERCENTS:
+           case ST_PERCENTS255:
+           case ST_UINT32:
+              snprintf(Buffer, bufLen, "%u", param.asUint32);
+           break;
+           case ST_INT32:
+              snprintf(Buffer, bufLen, "%d", param.asInt32);
+
+           break;
+           case ST_HS:
+           case ST_HSV:
+           case ST_HSV255:
+           snprintf(Buffer, bufLen, "%d,%d,%d", param.h, param.s, param.v);
+
+           break;
+           case ST_FLOAT_CELSIUS:
+           case ST_FLOAT_FARENHEIT:
+           case ST_FLOAT:
+           snprintf(Buffer, bufLen, "%d", param.asfloat);
+           break;
+           case ST_RGB:
+           snprintf(Buffer, bufLen, "%d,%d,%d", param.r, param.g, param.b);
+           break;
+
+           case ST_RGBW:
+           snprintf(Buffer, bufLen, "%d,%d,%d", param.r, param.g, param.b,param.w);
+           break;
+
+           case ST_STRING:
+           strncpy(Buffer, param.asString,bufLen);
+
+           break;
+           case ST_COMMAND:
+           strncpy_P(Buffer, commands_P[param.cmd_code], bufLen);
+         }
+        return Buffer;
+       }
+
 int txt2cmd(char *payload) {
     int cmd = CMD_UNKNOWN;
+    if (!payload || !payload[0]) return cmd;
 
     // Check for command
     if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = CMD_NUM;
     else if (*payload == '%') cmd = CMD_UP;
+/*
     else if (strcmp_P(payload, ON_P) == 0) cmd = CMD_ON;
     else if (strcmp_P(payload, OFF_P) == 0) cmd = CMD_OFF;
     else if (strcmp_P(payload, REST_P) == 0) cmd = CMD_RESTORE;
@@ -81,10 +160,26 @@ int txt2cmd(char *payload) {
     else if (strcmp_P(payload, HIGH_P) == 0) cmd = CMD_HIGH;
     else if (strcmp_P(payload, MED_P) == 0) cmd = CMD_MED;
     else if (strcmp_P(payload, LOW_P) == 0) cmd = CMD_LOW;
+*/
     else if (*payload == '{') cmd = CMD_JSON;
     else if (*payload == '#') cmd = CMD_RGB;
+    else
+    {
+      for(uint8_t i=1; i<commandsNum ;i++)
+          if (strcmp_P(payload, commands_P[i]) == 0)
+               {
+  //             debugSerial<< i << F(" ") << pgm_read_word_near(&serialModes_P[i].mode)<< endl;
+               return i;
+             }
+  //    debugSerial<< F("Default serial mode N81 used");
+  //    return static_cast<uint16_t> (SERIAL_8N1);
+    }
+
+    /*
     else if (strncmp_P(payload, HSV_P, strlen (HSV_P)) == 0) cmd = CMD_HSV;
     else if (strncmp_P(payload, RGB_P, strlen (RGB_P)) == 0) cmd = CMD_RGB;
+    */
+
     return cmd;
 }
 

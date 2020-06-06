@@ -71,7 +71,9 @@ const char freeheap_P[]  PROGMEM = "freeheap";
 */
 
 
+
 //Commands
+
 const char ON_P[]   PROGMEM = "ON";
 const char OFF_P[]  PROGMEM = "OFF";
 const char REST_P[] PROGMEM = "REST";
@@ -79,6 +81,7 @@ const char TOGGLE_P[] PROGMEM = "TOGGLE";
 const char HALT_P[] PROGMEM = "HALT";
 const char XON_P[]  PROGMEM = "XON";
 const char XOFF_P[] PROGMEM = "XOFF";
+/*
 const char INCREASE_P[] PROGMEM = "INCREASE";
 const char DECREASE_P[] PROGMEM = "DECREASE";
 const char TRUE_P[]  PROGMEM = "TRUE";
@@ -86,15 +89,20 @@ const char FALSE_P[] PROGMEM = "FALSE";
 
 const char ENABLED_P[]  PROGMEM = "ENABLED";
 const char DISABLED_P[] PROGMEM = "DISABLED";
-
+*/
 const char HEAT_P[] PROGMEM = "HEAT";
 const char COOL_P[] PROGMEM = "COOL";
 const static char AUTO_P[] PROGMEM = "AUTO";
+
+
 const char FAN_ONLY_P[]  PROGMEM = "FAN_ONLY";
 const char DRY_P[]  PROGMEM = "DRY";
 const char HIGH_P[] PROGMEM = "HIGH";
 const char MED_P[]  PROGMEM = "MEDIUM";
 const char LOW_P[]  PROGMEM = "LOW";
+
+
+
 // SubTopics
 const char SET_P[]  PROGMEM = "set";
 const char CMD_P[]  PROGMEM = "cmd";
@@ -102,13 +110,7 @@ const char MODE_P[] PROGMEM = "mode";
 const char FAN_P[]  PROGMEM = "fan";
 const char HUE_P[]   PROGMEM = "hue";
 const char SAT_P[]   PROGMEM = "sat";
-/*
-const char TEMP_P[] PROGMEM = "temp";
-const char SETPOINT_P[] PROGMEM = "setpoint";
-const char POWER_P[] PROGMEM = "power";
-const char VOL_P[] PROGMEM = "vol";
-const char HEAT_P[] PROGMEM = "heat";
-*/
+
 const char HSV_P[]   PROGMEM = "HSV";
 const char RGB_P[]   PROGMEM = "RGB";
 

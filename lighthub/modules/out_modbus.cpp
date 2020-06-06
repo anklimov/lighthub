@@ -39,14 +39,14 @@ struct serial_t
 
 const reg_t regSize_P[] PROGMEM =
 {
-  { "i16", (int) PAR_I16 },
-  { "i32", (int) PAR_I32 },
-  { "u16", (int) PAR_U16 },
-  { "u32", (int) PAR_U32 },
-  { "i8h", (int) PAR_I8H },
-  { "i8l", (int) PAR_I8L },
-  { "u8h", (int) PAR_U8H },
-  { "u8l", (int) PAR_U8L }
+  { "i16", (uint8_t) PAR_I16 },
+  { "i32", (uint8_t) PAR_I32 },
+  { "u16", (uint8_t) PAR_U16 },
+  { "u32", (uint8_t) PAR_U32 },
+  { "i8h", (uint8_t) PAR_I8H },
+  { "i8l", (uint8_t) PAR_I8L },
+  { "u8h", (uint8_t) PAR_U8H },
+  { "u8l", (uint8_t) PAR_U8L }
 } ;
 #define regSizeNum sizeof(regSize_P)/sizeof(reg_t)
 
@@ -86,7 +86,7 @@ uint16_t  str2SerialParam(char * str)
 }
 int  str2regSize(char * str)
 {
-  for(uint8_t i=0; i<regSizeNum&& str;i++)
+  for(uint8_t i=0; i<regSizeNum && str;i++)
       if (strcmp_P(str, regSize_P[i].verb) == 0)
            return pgm_read_byte_near(&regSize_P[i].id);
   return (int) PAR_I16;
@@ -200,6 +200,7 @@ return (result == node.ku8MBSuccess);
 int out_Modbus::findRegister(int registerNum, int posInBuffer)
 {
   aJsonObject * paramObj = store->parameters->child;
+  bool is8bit = false;
   while (paramObj)
           {
             aJsonObject *regObj = aJson.getObjectItem(paramObj, "reg");
@@ -207,13 +208,50 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer)
                     {
                     aJsonObject *typeObj = aJson.getObjectItem(paramObj, "type");
                     aJsonObject *mapObj = aJson.getObjectItem(paramObj, "map");
+                    aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
                     uint16_t data = node.getResponseBuffer(posInBuffer);
-                    debugSerial << F("MB got ")<<data<< F(" from ")<<paramObj->name<<endl;
-                    return 1;
+                    int8_t    regType = PAR_I16;
+                    uint32_t  param =0;
+                    itemCmd   mappedParam;
+                    bool isSigned=false;
+                    if (typeObj && typeObj->type == aJson_String) regType=str2regSize(typeObj->valuestring);
+                    switch(regType) {
+
+                      case PAR_I16:
+                      isSigned=true;
+                      case PAR_U16:
+                      param=data;
+                      break;
+                      case PAR_I32:
+                      isSigned=true;
+                      case PAR_U32:
+                      param = data | (node.getResponseBuffer(posInBuffer+1)<<16);
+                      break;
+                      case PAR_U8L:
+                      is8bit=true;
+                      param = data & 0xFF;
+                      break;
+                      case PAR_U8H:
+                      is8bit=true;
+                      param = data << 8;
+                    }
+
+                    if (mapObj && (mapObj->type==aJson_Array || mapObj->type==aJson_Object))
+                       mappedParam = mapInt(param,mapObj);
+                    else  mappedParam.Int(param);
+
+                    if (itemParametersObj && itemParametersObj->type ==aJson_Object)
+                          {
+                          aJsonObject *execObj = aJson.getObjectItem(itemParametersObj,paramObj->name);
+                          if (execObj) executeCommand(execObj, -1, mappedParam);
+                          }
+                    debugSerial << F("MB got ")<<param<< F(" from ")<<regType<<F(":")<<paramObj->name<<endl;
+
+                    if (!is8bit) return 1;
                     }
             paramObj=paramObj->next;
           }
-return 0;
+return is8bit;
 }
 
 int out_Modbus::Poll(short cause)

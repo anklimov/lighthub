@@ -521,7 +521,17 @@ bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t m
 }
 
 
-bool executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
+
+
+bool executeCommand(aJsonObject* cmd, int8_t toggle)
+{
+  itemCmd _itemCmd;
+  _itemCmd.type = ST_VOID;
+  return executeCommand(cmd,toggle,_itemCmd);
+}
+
+bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd)
+//bool executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
 {
 switch (cmd->type)
 {
@@ -533,7 +543,7 @@ switch (cmd->type)
   aJsonObject * command = cmd->child;
   while (command)
           {
-          executeCommand(command,toggle,defCmd);
+          executeCommand(command,toggle,_itemCmd);
           command = command->next;
           }
   configLocked--;
@@ -561,12 +571,13 @@ switch (toggle)
   }
 
 char * itemCommand;
+char Buffer[16];
 if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
-  else    itemCommand = defCmd;
+  else    itemCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
 
 char * emitCommand;
 if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
-  else    emitCommand = defCmd;
+  else    emitCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
 
 //debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
 if (item) debugSerial << item->valuestring<< F(" -> ")<<itemCommand<<endl;
@@ -613,7 +624,11 @@ return false;
 }
 
 
-
+itemCmd mapInt(int32_t arg, aJsonObject* map)
+{
+  itemCmd _itemCmd;
+  return _itemCmd.Int(arg);
+}
 
 
 
