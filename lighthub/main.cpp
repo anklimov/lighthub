@@ -449,7 +449,7 @@ if (WiFi.status() != WL_CONNECTED)
                     break;
 
                 case DHCP_CHECK_RENEW_OK:
-                    errorSerial<<F("Renewed success. IP address:");
+                    infoSerial<<F("Renewed success. IP address:");
                     printIPAddress(Ethernet.localIP());
                     break;
 
@@ -461,7 +461,7 @@ if (WiFi.status() != WL_CONNECTED)
                     break;
 
                 case DHCP_CHECK_REBIND_OK:
-                    errorSerial<<F("Rebind success. IP address:");
+                    infoSerial<<F("Rebind success. IP address:");
                     printIPAddress(Ethernet.localIP());
                     break;
 
@@ -630,7 +630,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
       udpSyslog.deviceHostname(syslogDeviceHostname);
       if (deviceName) udpSyslog.appName(deviceName);
       udpSyslog.defaultPriority(LOG_KERN);
-      udpSyslog.log(LOG_INFO, F("UDP Syslog initialized!"));
+      //udpSyslog.log(LOG_INFO, F("UDP Syslog initialized!"));
         infoSerial<<F("UDP Syslog initialized!\n");
     }
 #endif
@@ -1678,6 +1678,12 @@ void printFirmwareVersionAndBuildOptions() {
     infoSerial<<F("\n(+)OTA");
 #else
     infoSerial<<F("\n(-)OTA");
+#endif
+
+#ifdef ARTNET_ENABLE
+infoSerial<<F("\n(+)ARTNET");
+#else
+infoSerial<<F("\n(-)ARTNET");
 #endif
 
 infoSerial<<endl;
