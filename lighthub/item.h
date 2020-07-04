@@ -200,6 +200,7 @@ public:
   itemCmd Int(uint32_t i);
   itemCmd Cmd(uint8_t i);
   char * toString(char * Buffer, int bufLen);
+  short  toCmd();
   } ;
 
 #pragma pack(pop)
@@ -219,6 +220,7 @@ class Item
   boolean Setup();
   void Stop();
   int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL);
+  int Ctrl(itemCmd cmd, int suffixCode=0, char* subItem=NULL);
   int Ctrl(char * payload,  char * subItem=NULL);
 
   int getArg(short n=0);

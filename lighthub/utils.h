@@ -65,3 +65,32 @@ bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t m
 bool executeCommand(aJsonObject* cmd, int8_t toggle = -1);
 bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd);
 itemCmd mapInt(int32_t arg, aJsonObject* map);
+
+#define ledRED 1
+#define ledGREEN 2
+#define ledBLUE 4
+#define ledBLINK 8
+#define ledFASTBLINK 16
+#define ledParams (ledRED | ledGREEN | ledBLUE | ledBLINK | ledFASTBLINK)
+
+#define ledFlash 32
+#define ledHidden 64
+
+#define pinRED 50
+#define pinGREEN 51
+#define pinBLUE 52
+
+#define ledDelayms 1000UL
+#define ledFastDelayms 300UL
+
+class statusLED {
+public:
+  statusLED(uint8_t pattern = 0);
+  void set (uint8_t pattern);
+  void show (uint8_t pattern);
+  void poll();
+  void flash(uint8_t pattern);
+private:
+  uint8_t curStat;
+  uint32_t timestamp;
+};

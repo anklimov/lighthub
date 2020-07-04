@@ -129,7 +129,7 @@ Streamlog errorSerial(&debugSerialPort,LOG_ERROR);
 Streamlog infoSerial (&debugSerialPort,LOG_INFO);
 #endif
 
-
+statusLED LED(ledRED);
 
 
 lan_status lanStatus = INITIAL_STATE;
@@ -172,6 +172,7 @@ aJsonObject *pollingItem = NULL;
 
 bool owReady = false;
 bool configOk = false;
+bool configLoaded = false;
 int8_t ethernetIdleCount =0;
 int8_t configLocked = 0;
 
@@ -258,6 +259,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         debugSerial<<F("OOM!");
         return;
     }
+    LED.flash(ledBLUE);
     for (int i = 0; i < length; i++)
         debugSerial<<((char) payload[i]);
     debugSerial<<endl;
@@ -351,12 +353,13 @@ lan_status lanLoop() {
 
     switch (lanStatus) {
         case INITIAL_STATE:
+            LED.set(ledRED|((configLoaded)?ledBLINK:0));
             if (millis() > nextLanCheckTime)
                 onInitialStateInitLAN();
             break;
 
         case HAVE_IP_ADDRESS:
-
+            LED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
             if (configLocked) return HAVE_IP_ADDRESS;
             if (!configOk)
                 lanStatus = loadConfigFromHttp(0, NULL);
@@ -365,9 +368,7 @@ lan_status lanLoop() {
 
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
             wdt_res();
-
-
-
+            LED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
             ip_ready_config_loaded_connecting_to_broker();
             break;
 
@@ -387,10 +388,12 @@ lan_status lanLoop() {
             }
 
         case OPERATION:
+            LED.set(ledGREEN|((configLoaded)?ledBLINK:0));
             if (!mqttClient.connected()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             break;
 
         case AWAITING_ADDRESS:
+            LED.set(ledRED|((configLoaded)?ledBLINK:0));
             if (millis() > nextLanCheckTime)
                 lanStatus = INITIAL_STATE;//0;
             break;
@@ -1061,7 +1064,7 @@ configLocked++;
     udpSyslogArr = aJson.getObjectItem(root, "syslog");
 #endif
     printConfigSummary();
-
+configLoaded=true;
 configLocked--;
 }
 
@@ -1786,7 +1789,7 @@ void setupCmdArduino() {
 }
 
 void loop_main() {
-
+  LED.poll();
 
   #if defined(M5STACK)
    // Initialize the M5Stack object

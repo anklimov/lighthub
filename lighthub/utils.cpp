@@ -630,7 +630,64 @@ itemCmd mapInt(int32_t arg, aJsonObject* map)
   return _itemCmd.Int(arg);
 }
 
+statusLED::statusLED(uint8_t pattern)
+{
+  pinMode(pinRED, OUTPUT);
+  pinMode(pinGREEN, OUTPUT);
+  pinMode(pinBLUE, OUTPUT);
+  set(pattern);
+  timestamp=0;
+}
 
+void statusLED::show (uint8_t pattern)
+{
+    digitalWrite(pinRED,(pattern & ledRED)?HIGH:LOW );
+    digitalWrite(pinGREEN,(pattern & ledGREEN)?HIGH:LOW);
+    digitalWrite(pinBLUE,(pattern & ledBLUE)?HIGH:LOW);
+}
+
+void statusLED::set (uint8_t pattern)
+{
+    short newStat = pattern & ledParams;
+
+    if (newStat!=(curStat & ledParams))
+    {
+    //if (!(curStat & ledHidden))
+    show(pattern);
+    curStat=newStat | (curStat & ~ledParams);
+    }
+}
+
+void statusLED::flash(uint8_t pattern)
+{
+  show(pattern);
+  curStat|=ledFlash;
+}
+
+void statusLED::poll()
+
+{
+  if (curStat & ledFlash)
+    {
+      curStat&=~ledFlash;
+      show(curStat);
+    }
+if (millis()>timestamp)
+  {
+
+        if (curStat & ledFASTBLINK) timestamp=millis()+ledFastDelayms;
+                            else    timestamp=millis()+ledDelayms;
+
+    if (( curStat & ledBLINK) || (curStat & ledFASTBLINK))
+    {
+    curStat^=ledHidden;
+    if (curStat & ledHidden)
+        show(0);
+    else show(curStat);
+   }
+  }
+
+}
 
 
 #pragma message(VAR_NAME_VALUE(debugSerial))

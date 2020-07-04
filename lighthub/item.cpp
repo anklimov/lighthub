@@ -643,6 +643,259 @@ short Item::cmd2changeActivity(int lastActivity, short defaultCmd)
 }
 */
 
+int Ctrl(itemCmd cmd, int suffixCode, char* subItem)
+{
+  /*
+  char stringBuffer[16];
+  bool operation = isNotRetainingStatus() ;
+
+    if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
+        subItem = defaultSubItem;  /// possible problem here with truncated default
+
+    if (!suffixCode && subItem && strlen(subItem))
+        suffixCode = retrieveCode(&subItem);
+
+    if (!suffixCode && defaultSuffixCode)
+        suffixCode = defaultSuffixCode;
+
+
+      debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Suff=")<<suffixCode<<F(" Cmd=")<<cmd.toCmd()<<F(" Par=")<<cmd.toString(stringBuffer, sizeof(stringBuffer));
+      if (!itemArr) return -1;
+
+
+          if (itemType != CH_GROUP )
+          {
+          //Check if subitem is some sort of command
+          int subitemCmd = subitem2cmd(subItem);
+          if (subitemCmd && subitemCmd != getCmd())
+              {
+                debugSerial<<F("Ignored, channel cmd=")<<getCmd()<<endl;
+                return -1;
+              }
+          }
+          else
+          // Group channel
+          if (! operation) return -1;
+
+
+
+          int   iaddr = getArg();
+          bool  chActive =(isActive()>0);
+
+          switch (cmd.toCmd()) {
+              int t;
+              case CMD_TOGGLE:
+                  if (chActive) cmd.Cmd(CMD_OFF);
+                  else cmd.Cmd(CMD_ON);
+                  break;
+
+              case CMD_RESTORE:
+                  if (itemType != CH_GROUP) //individual threating of channels. Ignore restore command for groups
+                      switch (t = getCmd()) {
+                          case CMD_HALT: //previous command was HALT ?
+                              debugSerial << F("Restored from:") << t << endl;
+                              if (itemType == CH_THERMO) cmd.Cmd(CMD_AUTO);
+                                  else cmd.Cmd(CMD_ON);    //turning on
+                              break;
+                          default:
+                              return -3;
+                      }
+                  break;
+              case CMD_XOFF:
+                  if (itemType != CH_GROUP) //individual threating of channels. Ignore restore command for groups
+                      switch (t = getCmd()) {
+                          case CMD_XON: //previous command was CMD_XON ?
+                              debugSerial << F("Turned off from:") << t << endl;
+                              cmd.Cmd(CMD_OFF);    //turning Off
+                              break;
+                          default:
+                              debugSerial<<F("XOFF skipped. Prev cmd:")<<t<<endl;
+                            return -3;
+
+                    }
+                    break;
+            case CMD_DN:
+            case CMD_UP:
+            {
+            if (itemType == CH_GROUP) break; ////bug here
+            if (!n || !Par[0]) Par[0] = DEFAULT_INC_STEP;
+            if (cmd == CMD_DN) Par[0]=-Par[0];
+            st.aslong = getVal();
+            int cType=getChanType();
+
+            debugSerial<<"from: h="<<st.h<<" s="<<st.s <<" v="<<st.v<<endl;
+                      switch (suffixCode)
+                      {
+                        case S_NOTFOUND:
+                        case S_SET:
+                        Par[0] += st.v;
+                        if (Par[0]>100) Par[0]=100;
+                        if (Par[0]<0) Par[0]=0;
+                        n=1;
+                        cmd=CMD_NUM;
+                        debugSerial<<" to v="<<Par[0]<<endl;
+                        break;
+                        case S_HUE:
+                        case S_SAT:
+                          if ( cType != CH_RGB && cType != CH_RGBW && cType != CH_GROUP) return 0; //HUE and SAT only applicable for RGBx channels
+                       }
+
+                      if ( cType == CH_RGB || cType == CH_RGBW)
+                        {
+                        bool modified = false;
+                        switch (suffixCode)
+                          {
+                            case S_HSV:
+                            Par[0] += st.h;
+                            Par[1] += st.s;
+                            Par[2] += st.v;
+                            modified = true;
+                            break;
+
+                            case S_HUE:
+                            Par[0] += st.h;
+                            Par[1] = st.s;
+                            Par[2] = st.v;
+
+                            modified = true;
+                            break;
+
+                            case S_SAT:
+                            Par[1] = st.s + Par[0];
+                            Par[0] = st.h;
+                            Par[2] = st.v;
+
+                            modified = true;
+                            break;
+                         } //switch suffix
+
+                       if (modified)
+                       {
+                       if (Par[0]>365 ) Par[0]=0;
+                       if (Par[0]<0) Par[0]=365;
+                       if (Par[1]>100) Par[1]=100;
+                       if (Par[1]<0) Par[1]=0;
+                       if (Par[2]>100) Par[2]=100;
+                       if (Par[2]<0) Par[2]=0;
+
+                       n=3;
+                       cmd=CMD_NUM;
+                       suffixCode=S_SET;
+                       debugSerial<<"to: h="<<Par[0]<<" s="<<Par[1] <<" v="<<Par[2]<<endl;
+                     } // if modified
+                     } //RGBx channel
+                    }
+                    break;
+             case CMD_NUM:
+                         //if (itemType == CH_GROUP || n!=1) break;
+                         if (n!=1) break;
+                         int cType=getChanType();
+                         if ( cType == CH_RGB || cType == CH_RGBW || cType == CH_GROUP )
+                         {
+                               st.aslong = getVal();
+                               st.hsv_flag=1;
+                               switch (suffixCode)
+                               {
+                                     case S_SAT:
+                                     st.s = Par[0];
+
+                                     Par[0] = st.h;
+                                     Par[1] = st.s;
+                                     Par[2] = st.v;
+
+                                     n=3;
+                                     setVal(st.aslong);
+                                     break;
+
+                                     case S_HUE:
+                                     st.h = Par[0];
+                                     Par[1] = st.s;
+                                     Par[2] = st.v;
+
+                                     n=3;
+                                     setVal(st.aslong);
+                                   }
+                                 //if (itemType == CH_GROUP) break;
+                               }
+                          else // Non-color channel
+                          if (suffixCode == S_SAT || suffixCode == S_HUE) return -3;
+
+          }
+
+
+
+
+=========
+  int chActive = item->isActive();
+  bool toExecute = (chActive>0);
+  long st;
+  if (cmd>0 && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
+
+
+
+  switch(suffixCode)
+  {
+  case S_NOTFOUND:
+    // turn on  and set
+  toExecute = true;
+  debugSerial<<F("Forced execution");
+  case S_SET:
+            if (!Parameters || n==0) return 0;
+            item->setVal(st=Parameters[0]); //Store
+            if (!suffixCode)
+            {
+              if (chActive>0 && !st) item->setCmd(CMD_OFF);
+              if (chActive==0 && st) item->setCmd(CMD_ON);
+              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
+              if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+            }
+            else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+
+            return 1;
+            //break;
+
+  case S_CMD:
+        item->setCmd(cmd);
+        switch (cmd)
+            {
+            case CMD_ON:
+             //retrive stored values
+             st = item->getVal();
+
+
+              if (st && (st<MIN_VOLUME) ) st=INIT_VOLUME; // & send
+              item->setVal(st);
+
+              if (st)  //Stored smthng
+              {
+                item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
+                debugSerial<<F("Restored: ")<<st<<endl;
+              }
+              else
+              {
+                debugSerial<<st<<F(": No stored values - default\n");
+                // Store
+                st=100;
+                item->setVal(st);
+                item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
+              }
+              if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+              return 1;
+
+              case CMD_OFF:
+                item->SendStatus(SEND_COMMAND);
+                if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+              return 1;
+
+  } //switch cmd
+
+  break;
+  } //switch suffix
+  debugSerial<<F("Unknown cmd")<<endl;
+  return 0;
+*/
+}
+
 int Item::Ctrl(short cmd, short n, int *Parameters,  int suffixCode, char *subItem) {
 bool send = isNotRetainingStatus() ;
   if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
