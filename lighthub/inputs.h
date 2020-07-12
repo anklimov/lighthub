@@ -24,6 +24,7 @@ e-mail    anklimov@gmail.com
 #define IN_ACTIVE_HIGH   2      // High level = PUSHED/ CLOSED/ ON othervise :Low Level. Use INPUT mode instead of INPUT_PULLUP for digital pin
 #define IN_ANALOG        64     // Analog input
 #define IN_RE            32     // Rotary Encoder (for further use)
+#define IN_I2C           128    // MCP23017
 
 #define IN_PUSH_ON       0      // PUSH - ON, Release - OFF (ovverrided by pcmd/rcmd) - DEFAULT
 #define IN_PUSH_TOGGLE   1      // Used for push buttons. Every physicall push toggle logical switch  on/off. Toggle on leading edge

@@ -632,22 +632,27 @@ itemCmd mapInt(int32_t arg, aJsonObject* map)
 
 statusLED::statusLED(uint8_t pattern)
 {
+#if defined (STATUSLED)
   pinMode(pinRED, OUTPUT);
   pinMode(pinGREEN, OUTPUT);
   pinMode(pinBLUE, OUTPUT);
   set(pattern);
   timestamp=0;
+#endif
 }
 
 void statusLED::show (uint8_t pattern)
 {
+#if defined (STATUSLED)
     digitalWrite(pinRED,(pattern & ledRED)?HIGH:LOW );
     digitalWrite(pinGREEN,(pattern & ledGREEN)?HIGH:LOW);
     digitalWrite(pinBLUE,(pattern & ledBLUE)?HIGH:LOW);
+#endif
 }
 
 void statusLED::set (uint8_t pattern)
 {
+#if defined (STATUSLED)
     short newStat = pattern & ledParams;
 
     if (newStat!=(curStat & ledParams))
@@ -656,17 +661,20 @@ void statusLED::set (uint8_t pattern)
     show(pattern);
     curStat=newStat | (curStat & ~ledParams);
     }
+#endif
 }
 
 void statusLED::flash(uint8_t pattern)
 {
+#if defined (STATUSLED)
   show(pattern);
   curStat|=ledFlash;
+#endif
 }
 
 void statusLED::poll()
-
 {
+#if defined (STATUSLED)
   if (curStat & ledFlash)
     {
       curStat&=~ledFlash;
@@ -686,7 +694,7 @@ if (millis()>timestamp)
     else show(curStat);
    }
   }
-
+#endif
 }
 
 

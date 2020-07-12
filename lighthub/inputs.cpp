@@ -32,6 +32,11 @@ e-mail    anklimov@gmail.com
 #endif
 #endif
 
+#ifdef MCP23017
+#include "Adafruit_MCP23017.h"
+Adafruit_MCP23017 mcp;
+#endif
+
 extern PubSubClient mqttClient;
 extern aJsonObject *root;
 extern int8_t ethernetIdleCount;
@@ -89,7 +94,7 @@ Input::Input(int pin)
 
 boolean Input::isValid ()
 {
- return  (pin && store);
+ return  (store);
 }
 
 void Input::Parse()
@@ -115,21 +120,7 @@ void Input::Parse()
 void Input::setup()
 {
 if (!isValid() || (!root)) return;
-/*
-#ifndef CSSHDC_DISABLE
-    if (inType == IN_CCS811)
-      {
-        in_ccs811  ccs811(this);
-        ccs811.Setup();
-      }
-    else if (inType == IN_HDC1080)
-      {
-        in_hdc1080 hdc1080(this);
-        hdc1080.Setup();
-       }
-// TODO rest types setup
-#endif
-*/
+
 store->aslong=0;
 uint8_t inputPinMode = INPUT; //if IN_ACTIVE_HIGH
 switch (inType)
@@ -144,6 +135,24 @@ switch (inType)
 
   store->state=IS_IDLE;
   break;
+
+  #ifdef MCP23017
+
+  case IN_I2C | IN_PUSH_ON:
+  case IN_I2C | IN_PUSH_TOGGLE :
+
+  inputPinMode = INPUT_PULLUP;
+
+  case IN_I2C | IN_PUSH_ON     | IN_ACTIVE_HIGH:
+  case IN_I2C | IN_PUSH_TOGGLE | IN_ACTIVE_HIGH:
+
+  mcp.begin();
+  mcp.pinMode(pin, INPUT);
+  if (inputPinMode == INPUT_PULLUP) mcp.pullUp(0, HIGH);  // turn on a 100K pullup internally
+
+  store->state=IS_IDLE;
+  break;
+  #endif
 
   case IN_ANALOG:
   inputPinMode = INPUT_PULLUP;
@@ -194,6 +203,10 @@ switch (cause)  {
       case IN_PUSH_ON     | IN_ACTIVE_HIGH:
       case IN_PUSH_TOGGLE :
       case IN_PUSH_TOGGLE | IN_ACTIVE_HIGH:
+      case IN_I2C | IN_PUSH_ON:
+      case IN_I2C | IN_PUSH_ON     | IN_ACTIVE_HIGH:
+      case IN_I2C | IN_PUSH_TOGGLE :
+      case IN_I2C | IN_PUSH_TOGGLE | IN_ACTIVE_HIGH:
       contactPoll(cause);
       break;
       case IN_ANALOG:
@@ -667,8 +680,12 @@ void Input::contactPoll(short cause) {
                             else inputOnLevel = LOW;
 
 
+#ifdef MCP23017
+if (inType & IN_I2C)
+    currentInputState = (mcp.digitalRead(pin) == inputOnLevel);
+else
+#endif
     currentInputState = (digitalRead(pin) == inputOnLevel);
-
 switch (store->state) //Timer based transitions
 {
   case IS_PRESSED:

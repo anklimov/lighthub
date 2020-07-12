@@ -1457,7 +1457,7 @@ bool send = isNotRetainingStatus() ;
           }
 #endif
 
-#ifdef _modbus
+#ifndef MODBUS_DISABLE
         case CH_MODBUS:
         modbusDimmerSet(Par[0]);
         break;
@@ -1540,7 +1540,7 @@ bool send = isNotRetainingStatus() ;
             debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
             break;
         }
-#ifdef _modbus
+#ifndef MODBUS_DISABLE
         case CH_VC:
             VacomSetFan(Par[0], cmd);
             break;
@@ -1703,7 +1703,7 @@ POLL  2101x10
 [22:27:29] => poll: 0A 03 08 34 00 0A 87 18
 
 */
-#ifdef _modbus
+#ifndef MODBUS_DISABLE
 int Item::modbusDimmerSet(uint16_t value)
         {
           switch (getCmd())

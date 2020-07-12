@@ -23,15 +23,15 @@
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 //#include "SPIFFS.h"
 #include <ESP_EEPROM.h>
-#include <ESP8266HTTPClient.h>
+//#include <ESP8266HTTPClient.h>
 //#include <ArduinoHttpClient.h>
 //#include "HttpClient.h"
-#include <WiFiManager.h>
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
+//#include <WiFiManager.h>
+//#include <DNSServer.h>
+//#include <ESP8266WebServer.h>
+//#include <ESP8266WiFi.h>
 #include <user_interface.h>
-#define Ethernet WiFi
+//#define Ethernet WiFi
 #endif
 
 #if defined ARDUINO_ARCH_ESP32
@@ -41,15 +41,15 @@
 #include <NRFFlashStorage.h>
 //#include "HttpClient.h"
 //#include <ArduinoHttpClient.h>
-#include <HTTPClient.h>
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WiFiClientSecure.h>
-#include <WebServer.h>
-#include <WiFiManager.h>
-#include <DNSServer.h>
+//#include <HTTPClient.h>
+//#include <WiFi.h>
+//#include <WiFiClient.h>
+//#include <WiFiClientSecure.h>
+//#include <WebServer.h>
+//#include <WiFiManager.h>
+//include <DNSServer.h>
 
-#define Ethernet WiFi
+//#define Ethernet WiFi
 #endif
 
 #ifdef NRF5
@@ -122,7 +122,7 @@ extern Streamlog  debugSerial;
 #include "DallasTemperature.h"
 #endif
 
-#ifndef MODBUS_DISABLE
+#ifdef _modbus
 #include <ModbusMaster.h>
 #endif
 
@@ -138,13 +138,29 @@ extern Streamlog  debugSerial;
 #include "dmx.h"
 #endif
 
+#ifdef WIFI_ENABLE
 
-#ifdef Wiz5500
-#include <Ethernet2.h>
-#else
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined(NRF5)
-#include <Ethernet.h>
-#endif
+  #if defined(ARDUINO_ARCH_ESP32)
+        #include <WiFi.h>
+        #include <HTTPClient.h>
+        #include <WiFiClient.h>
+        #include <WiFiClientSecure.h>
+        #include <WiFiManager.h>
+        #include <WebServer.h>
+  #else
+        #include <ESP8266WiFi.h>
+        #include <ESP8266HTTPClient.h>
+        #include <WiFiManager.h>
+        #include <DNSServer.h>
+        #include <ESP8266WebServer.h>
+  #endif
+#define Ethernet WiFi
+#else  //Wired connection
+        #ifdef Wiz5500
+        #include <Ethernet2.h>
+        #else
+        #include <Ethernet.h>
+        #endif
 #endif
 
 

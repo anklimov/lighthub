@@ -67,55 +67,45 @@ PWM Out
 
 #include "main.h"
 
+#ifdef WIFI_ENABLE
+WiFiClient ethClient;
+
+    #if not defined(WIFI_MANAGER_DISABLE)
+        WiFiManager wifiManager;
+    #endif
+
+#else
 #include <Dhcp.h>
+EthernetClient ethClient;
+#endif
+
 #if defined(OTA)
 #include <ArduinoOTA.h>
 #endif
 
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
-EthernetClient ethClient;
-#endif
-
-#if defined(ARDUINO_ARCH_AVR)
-EthernetClient ethClient;
-#endif
-
-#ifdef ARDUINO_ARCH_ESP8266
-WiFiClient ethClient;
-
-#if not defined(WIFI_MANAGER_DISABLE)
-    WiFiManager wifiManager;
-#endif
-
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
-WiFiClient ethClient;
 NRFFlashStorage EEPROM;
-
-#if not defined(WIFI_MANAGER_DISABLE)
-    WiFiManager wifiManager;
-#endif
-
 #endif
 
 #ifdef ARDUINO_ARCH_STM32
-EthernetClient ethClient;
 NRFFlashStorage EEPROM;
 #endif
 
 #ifdef NRF5
 NRFFlashStorage EEPROM;
-EthernetClient ethClient;
 #endif
-
-
-
 
 #ifdef SYSLOG_ENABLE
 #include <Syslog.h>
-EthernetUDP udpSyslogClient;
+    #ifndef WIFI_ENABLE
+    EthernetUDP udpSyslogClient;
+    #else
+    WiFiUDP udpSyslogClient;
+    #endif
 Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_BSD);
 unsigned long nextSyslogPingTime;
 static char syslogDeviceHostname[16];
@@ -149,7 +139,7 @@ aJsonObject *items = NULL;
 aJsonObject *inputs = NULL;
 
 aJsonObject *mqttArr = NULL;
-#ifndef MODBUS_DISABLE
+#ifdef _modbus
 aJsonObject *modbusObj = NULL;
 #endif
 #ifdef _owire
@@ -176,7 +166,7 @@ bool configLoaded = false;
 int8_t ethernetIdleCount =0;
 int8_t configLocked = 0;
 
-#ifdef _modbus
+#if defined (_modbus)
 ModbusMaster node;
 #endif
 
@@ -239,7 +229,7 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
   #ifdef _owire
   owArr = NULL;
   #endif
-  #ifndef MODBUS_DISABLE
+  #ifdef _modbus
   modbusObj = NULL;
   #endif
      debugSerial<<F(" is ")<<freeRam()<<endl;
@@ -417,7 +407,7 @@ lan_status lanLoop() {
 
 
     {
-#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+#if defined(WIFI_ENABLE)
 if (WiFi.status() != WL_CONNECTED)
          {
           wifiInitialized=false;
@@ -731,7 +721,7 @@ void setupOTA(void)
 
 
 void onInitialStateInitLAN() {
-#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+#if defined(WIFI_ENABLE)
 #if defined(WIFI_MANAGER_DISABLE)
     if(WiFi.status() != WL_CONNECTED) {
                 WiFi.mode(WIFI_STA); // ESP 32 - WiFi.disconnect(); instead
@@ -782,7 +772,7 @@ wifiManager.setTimeout(30);
 #endif
 */
 
-#if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
+#if defined(WIFI_ENABLE)
     if (WiFi.status() == WL_CONNECTED) {
         infoSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP()<<endl;
         lanStatus = HAVE_IP_ADDRESS;//1;
@@ -1073,7 +1063,7 @@ void printConfigSummary() {
     printBool(items);
     infoSerial<<F("\ninputs ");
     printBool(inputs);
-#ifndef MODBUS_DISABLE
+#ifdef _modbus
     infoSerial<<F("\nmodbus ");
     printBool(modbusObj);
 #endif
@@ -1397,7 +1387,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     }
 #endif
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) || defined (NRF5) //|| defined(ARDUINO_ARCH_ESP32) //|| defined(ARDUINO_ARCH_ESP8266)
-    #if defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
+    #if defined(WIFI_ENABLE)
     WiFiClient configEthClient;
     #else
     EthernetClient configEthClient;
@@ -1561,7 +1551,7 @@ void setup_main() {
     ArtnetSetup();
 #endif
 
-#if (defined(ARDUINO_ARCH_ESP8266) or defined(ARDUINO_ARCH_ESP32)) and not defined(WIFI_MANAGER_DISABLE)
+#if defined(WIFI_ENABLE) and not defined(WIFI_MANAGER_DISABLE)
 //    WiFiManager wifiManager;
     wifiManager.setTimeout(180);
 
@@ -1612,7 +1602,7 @@ void printFirmwareVersionAndBuildOptions() {
     infoSerial<<F("\n(-)DMX");
 #endif
 
-#ifndef MODBUS_DISABLE
+#ifdef _modbus
     infoSerial<<F("\n(+)MODBUS");
 #else
     infoSerial<<F("\n(-)MODBUS");
@@ -1748,7 +1738,7 @@ if (!isMacValid) {
     mac[0]&=0xFE;
     mac[0]|=2;
 
-    #elif defined(ARDUINO_ARCH_ESP32) || defined(ARDUINO_ARCH_ESP8266)
+    #elif defined(WIFI_ENABLE)
     //Using original MPU MAC
     WiFi.begin();
     WiFi.macAddress(mac);

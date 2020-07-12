@@ -1,12 +1,20 @@
 #include "streamlog.h"
 #include <Arduino.h>
 
-Streamlog::Streamlog (UARTClass * _serialPort, int _severity , Syslog * _syslog )
+#ifdef SYSLOG_ENABLE
+Streamlog::Streamlog (HardwareSerial * _serialPort, int _severity , Syslog * _syslog )
 {
       serialPort=_serialPort;
       severity=_severity;
       syslog=_syslog;
 }
+#else
+Streamlog::Streamlog (HardwareSerial * _serialPort, int _severity)
+{
+      serialPort=_serialPort;
+      severity=_severity;
+}
+#endif
 
 void Streamlog::begin(unsigned long speed)
 {

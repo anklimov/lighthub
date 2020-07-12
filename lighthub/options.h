@@ -128,7 +128,7 @@
 #define _owire
 #endif
 
-#ifndef MODBUS_DISABLE
+#if !(defined  (MODBUS_DISABLE) && defined (MBUS_DISABLE))
 #define _modbus
 #endif
 
@@ -171,7 +171,7 @@
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #undef _dmxin
-#undef _modbus
+//#undef _modbus
 
 #ifndef DMX_DISABLE
 #define _espdmx
@@ -183,13 +183,14 @@
 
 #if defined(ARDUINO_ARCH_ESP32)
 #undef _dmxin
-#undef _modbus
+//#undef _modbus
 
 #ifndef DMX_DISABLE
 #define _espdmx
 #endif
 //#undef _dmxout
-#undef modbusSerial
+//#undef modbusSerial
+#define modbusSerial Serial2
 #endif
 
 #ifndef _dmxout

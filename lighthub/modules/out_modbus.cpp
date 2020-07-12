@@ -9,6 +9,7 @@
 #include "item.h"
 #include <ModbusMaster.h>
 #include "main.h"
+#include <HardwareSerial.h>
 
 extern aJsonObject *modbusObj;
 extern ModbusMaster node;
@@ -52,22 +53,22 @@ const reg_t regSize_P[] PROGMEM =
 
 const serial_t serialModes_P[] PROGMEM =
 {
-  { "8E1", SERIAL_8E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
-  { "8N1", SERIAL_8N1},
-  { "8E2", SERIAL_8E2},
-  { "8N2", SERIAL_8N2},
-  { "8O1", SERIAL_8O1},
-  { "8O2", SERIAL_8O2},
-  { "8M1", SERIAL_8M1},
-  { "8S1", SERIAL_8S1},
-  { "7E1", SERIAL_7E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
-  { "7N1", SERIAL_7N1},
-  { "7E2", SERIAL_7E2},
-  { "7N2", SERIAL_7N2},
-  { "7O1", SERIAL_7O1},
-  { "7O2", SERIAL_7O2},
-  { "7M1", SERIAL_7M1},
-  { "7S1", SERIAL_7S1}
+  { "8E1", (uint16_t) SERIAL_8E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
+  { "8N1", (uint16_t) SERIAL_8N1},
+  { "8E2", (uint16_t) SERIAL_8E2},
+  { "8N2", (uint16_t) SERIAL_8N2},
+  { "8O1", (uint16_t) SERIAL_8O1},
+  { "8O2", (uint16_t) SERIAL_8O2},
+//  { "8M1", SERIAL_8M1},
+//  { "8S1", SERIAL_8S1},
+  { "7E1", (uint16_t) SERIAL_7E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
+  { "7N1", (uint16_t) SERIAL_7N1},
+  { "7E2", (uint16_t) SERIAL_7E2},
+  { "7N2", (uint16_t) SERIAL_7N2},
+  { "7O1", (uint16_t) SERIAL_7O1},
+  { "7O2", (uint16_t) SERIAL_7O2}
+//  { "7M1", SERIAL_7M1},
+//  { "7S1", SERIAL_7S1}
 } ;
 
 #define serialModesNum sizeof(serialModes_P)/sizeof(serial_t)
@@ -261,7 +262,13 @@ if (store->pollingRegisters && !modbusBusy && (Status() == CST_INITIALIZED) && i
     debugSerial<<F("Poll ")<< item->itemArr->name << endl;
     modbusBusy=1;
     //store->serialParam=(USARTClass::USARTModes) SERIAL_8N1;
+    #if defined (__SAM3X8E__)
     modbusSerial.begin(store->baud, static_cast <USARTClass::USARTModes> (store->serialParam));
+    #elif defined (ARDUINO_ARCH_ESP8266)
+    modbusSerial.begin(store->baud, static_cast <SerialConfig>(store->serialParam));
+    #else
+    modbusSerial.begin(store->baud, (store->serialParam));
+    #endif
     debugSerial<< store->baud << F("---")<< store->serialParam<<endl;
     node.begin(item->getArg(0), modbusSerial);
 
