@@ -20,7 +20,12 @@
 #define ORDER BRG
 #endif
 
+#ifndef MODBUS_TX_PIN
 #define TXEnablePin 13
+#else
+#define TXEnablePin MODBUS_TX_PIN
+#endif
+
 #define ESP_EEPROM_SIZE 2048
 
 #ifndef AVR_DMXOUT_PIN
@@ -191,6 +196,7 @@
 //#undef _dmxout
 //#undef modbusSerial
 #define modbusSerial Serial2
+#define AC_Serial Serial2
 #endif
 
 #ifndef _dmxout

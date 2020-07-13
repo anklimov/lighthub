@@ -959,7 +959,7 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
             else if (strlen(scmd->valuestring))
                 mqttClient.publish(addrstr, scmd->valuestring, true);
         } else {  //send reset command
-            if (!rcmd || rcmd->type == aJson_String) mqttClient.publish(addrstr, "OFF", true);
+            if (!rcmd || rcmd->type != aJson_String) mqttClient.publish(addrstr, "OFF", true);
             else if (strlen(rcmd->valuestring))mqttClient.publish(addrstr, rcmd->valuestring, true);
         }
 }

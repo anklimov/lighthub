@@ -1561,7 +1561,9 @@ void printFirmwareVersionAndBuildOptions() {
     infoSerial<<F("\n(+)DS2482-100");
 #endif
 
-#ifdef Wiz5500
+#ifdef WIFI_ENABLE
+    infoSerial<<F("\n(+)WiFi");
+#elif Wiz5500
     infoSerial<<F("\n(+)WizNet5500");
 #else
     infoSerial<<F("\n(+)Wiznet5x00");
@@ -1648,6 +1650,12 @@ void printFirmwareVersionAndBuildOptions() {
 infoSerial<<F("\n(+)ARTNET");
 #else
 infoSerial<<F("\n(-)ARTNET");
+#endif
+
+#ifdef MCP23017
+infoSerial<<F("\n(+)MCP23017");
+#else
+infoSerial<<F("\n(-)MCP23017");
 #endif
 
 infoSerial<<endl;
