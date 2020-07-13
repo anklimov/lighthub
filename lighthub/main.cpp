@@ -722,6 +722,7 @@ void setupOTA(void)
 
 void onInitialStateInitLAN() {
 #if defined(WIFI_ENABLE)
+
 #if defined(WIFI_MANAGER_DISABLE)
     if(WiFi.status() != WL_CONNECTED) {
                 WiFi.mode(WIFI_STA); // ESP 32 - WiFi.disconnect(); instead
@@ -739,59 +740,29 @@ void onInitialStateInitLAN() {
                 }
                 wifiInitialized = true; //???
             }
-#else
-// Wifi Manager
-if (WiFi.status() != WL_CONNECTED)
-{
-wifiManager.setTimeout(30);
-#if defined(ESP_WIFI_AP) and defined(ESP_WIFI_PWD)
-    wifiInitialized = wifiManager.autoConnect(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
-#else
-    wifiInitialized = wifiManager.autoConnect();
-#endif
-}
-#endif
 #endif
 
-/*
-#if defined(ARDUINO_ARCH_ESP32) and defined(WIFI_MANAGER_DISABLE)
-    if(!wifiInitialized) {
-    //    WiFi.mode(WIFI_STA);
-        WiFi.disconnect();
-        debugSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD)<<endl;
-        WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
 
-        int wifi_connection_wait = 10000;
-        while (WiFi.status() != WL_CONNECTED && wifi_connection_wait > 0) {
-            delay(500);
-            wifi_connection_wait -= 500;
-            debugSerial<<".";
-        }
-        wifiInitialized = true;
-    }
-#endif
-*/
-
-#if defined(WIFI_ENABLE)
-    if (WiFi.status() == WL_CONNECTED) {
+if (WiFi.status() == WL_CONNECTED) {
         infoSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP()<<endl;
+        wifiInitialized = true;
         lanStatus = HAVE_IP_ADDRESS;//1;
 setupOTA();
 
     } else
     {
-        errorSerial<<F("Problem with WiFi!");
+        errorSerial<<F("\nProblem with WiFi!");
         nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
     }
-#endif
 
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__)||defined(ARDUINO_ARCH_STM32) || defined (NRF5)
+#else // Ethernet connection
+
 #ifdef W5500_CS_PIN
- #ifndef Wiz5500
-    Ethernet.init(W5500_CS_PIN);
- #else
-    Ethernet.w5500_cspin = W5500_CS_PIN;
- #endif
+     #ifndef Wiz5500
+        Ethernet.init(W5500_CS_PIN);
+     #else
+        Ethernet.w5500_cspin = W5500_CS_PIN;
+     #endif
     infoSerial<<F("Use W5500 pin: ");
     infoSerial<<QUOTE(W5500_CS_PIN)<<endl;
 #endif
@@ -824,12 +795,12 @@ setupOTA();
     else {
         infoSerial<<"\nNo IP data found in flash\n";
         wdt_dis();
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined (NRF5)
-        res = Ethernet.begin(mac, 12000);
-#endif
-#if defined(ARDUINO_ARCH_STM32)
-        res = Ethernet.begin(mac);
-#endif
+
+        #if defined(ARDUINO_ARCH_STM32)
+                res = Ethernet.begin(mac);
+        #else
+                res = Ethernet.begin(mac, 12000);
+        #endif
         wdt_en();
         wdt_res();
 
