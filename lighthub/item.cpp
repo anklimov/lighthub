@@ -907,7 +907,7 @@ bool send = isNotRetainingStatus() ;
   if (!suffixCode && defaultSuffixCode)
       suffixCode = defaultSuffixCode;
 
-
+    yield();
     debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Suff=")<<suffixCode<<F(" Cmd=")<<cmd<<F(" Par=(");
     if (!itemArr) return -1;
 

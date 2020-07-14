@@ -199,6 +199,7 @@ while (configLocked)
           if (isNotRetainingStatus())  pollingLoop();
           thermoLoop();
           inputLoop();
+          yield();
 }
 
 //Stoping the channels
@@ -209,7 +210,7 @@ while (items && item)
     {
         Item it(item->name);
         if (it.isValid()) it.Stop();
-
+        yield();
 
     }
    item = item->next;
@@ -246,7 +247,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     payload[length] = 0;
     int fr = freeRam();
     if (fr < 250) {
-        debugSerial<<F("OOM!");
+        errorSerial<<F("OutOfMemory!")<<endl;
         return;
     }
     LED.flash(ledBLUE);
@@ -558,6 +559,7 @@ void onMQTTConnect(){
                   strncat_P(topic,format_P,sizeof(topic));
                   mqttClient.publish(topic,format,true);
                   }
+              yield();
               item = item->next;
           }  //if
           //strncpy_P(topic, outprefix, sizeof(topic));
@@ -737,6 +739,7 @@ void onInitialStateInitLAN() {
                     delay(500);
                     wifi_connection_wait -= 500;
                     debugSerial<<".";
+                    yield();
                 }
                 wifiInitialized = true; //???
             }
@@ -973,6 +976,7 @@ configLocked++;
                 SetAddr(item->name, addr);
                 owAdd(addr);
             }
+            yield();
             item = item->next;
         }
     }
@@ -1013,6 +1017,7 @@ configLocked++;
                             break;
                     } //switch
                 } //isValid
+                yield();
                 item = item->next;
             }  //if
         pollingItem = items->child;
@@ -1762,29 +1767,34 @@ void loop_main() {
 
   #if defined(M5STACK)
    // Initialize the M5Stack object
+   yield();
    M5.update();
   #endif
 
     wdt_res();
+    yield();
     cmdPoll();
     if (lanLoop() > HAVE_IP_ADDRESS) {
         mqttClient.loop();
 
         #if defined(OTA)
+        yield();
         ArduinoOTA.poll();
         #endif
 
 #ifdef _artnet
+        yield();
         if (artnet) artnet->read();  ///hung
 #endif
     }
 
 #ifdef _owire
+    yield();
     if (owReady && owArr) owLoop();
 #endif
 
 #ifdef _dmxin
-    //    unsigned long lastpacket = DMXSerial.noDataSince();
+    yield();
     DMXCheck();
 #endif
 
@@ -1793,14 +1803,16 @@ void loop_main() {
         if (isNotRetainingStatus()) pollingLoop();
 //        #endif
 //#ifdef _owire
+        yield();
         thermoLoop();
 //#endif
     }
 
-
+    yield();
     inputLoop();
 
 #if defined (_espdmx)
+    yield();
     dmxout.update();
 #endif
 
@@ -1815,16 +1827,19 @@ void owIdle(void) {
     return;
 
 #ifdef _dmxin
+    yield();
     DMXCheck();
 #endif
 
 #if defined (_espdmx)
+    yield();
     dmxout.update();
 #endif
 }
 void ethernetIdle(void){
 ethernetIdleCount++;
     wdt_res();
+    yield();
     inputLoop();
 ethernetIdleCount--;
 };
@@ -1832,10 +1847,12 @@ ethernetIdleCount--;
 void modbusIdle(void) {
     wdt_res();
     if (lanLoop() > 1) {
+        yield();
         mqttClient.loop();
 #ifdef _artnet
         if (artnet) artnet->read();
 #endif
+        yield();
         inputLoop();
     }
 
@@ -1861,6 +1878,7 @@ configLocked++;
                 Input in(input);
                 in.Poll(CHECK_INPUT);
             }
+            yield();
             input = input->next;
         }
         nextInputCheck = millis() + INTERVAL_CHECK_INPUT;
@@ -1873,6 +1891,7 @@ configLocked++;
                 Input in(input);
                 in.Poll(CHECK_SENSOR);
             }
+            yield();
             input = input->next;
         }
         nextSensorCheck = millis() + INTERVAL_CHECK_SENSOR;
@@ -1889,6 +1908,7 @@ configLocked++;
                 Input in(input);
                 in.setup();
             }
+            yield();
             input = input->next;
         }
 configLocked--;
@@ -1906,6 +1926,7 @@ if (items) {
             if (it.isValid()) {
                it.Poll(POLLING_FAST);
             } //isValid
+            yield();
             item = item->next;
         }  //if
 }
@@ -1925,6 +1946,7 @@ configLocked--;
                 }
             }//if
             if (!pollingItem) return; //Config was re-readed
+            yield();
             pollingItem = pollingItem->next;
             if (!pollingItem) {
                 pollingItem = items->child;
