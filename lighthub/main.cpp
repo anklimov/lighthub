@@ -1002,7 +1002,7 @@ configLocked++;
                             if (cmd<1) it.setCmd(CMD_OFF);
                             pinMode(pin, OUTPUT);
                             digitalWrite(pin, false); //Initially, all thermostates are LOW (OFF for electho heaters, open for water NO)
-                            debugSerial<<F("Thermo:")<<pin<<F("=LOW")<<F(",");
+                            debugSerial<<F("Thermo:")<<pin<<F("=LOW")<<F(";");
                             break;
                         case CH_RELAY:
                         {
@@ -1012,7 +1012,7 @@ configLocked++;
                             digitalWrite(pin, k = ((cmd == CMD_ON) ? LOW : HIGH));
                             else
                             digitalWrite(pin, k = ((cmd == CMD_ON) ? HIGH : LOW));
-                            debugSerial<<F("Pin:")<<pin<<F("=")<<k<<F(",");
+                            debugSerial<<F("Pin:")<<pin<<F("=")<<k<<F(";");
                         }
                             break;
                     } //switch
@@ -1022,6 +1022,7 @@ configLocked++;
             }  //if
         pollingItem = items->child;
     }
+    debugSerial<<endl;
     inputs = aJson.getObjectItem(root, "in");
     mqttArr = aJson.getObjectItem(root, "mqtt");
 
@@ -1039,8 +1040,12 @@ void printConfigSummary() {
     printBool(items);
     infoSerial<<F("\ninputs ");
     printBool(inputs);
-#ifdef _modbus
-    infoSerial<<F("\nmodbus ");
+#ifndef MODBUS_DISABLE
+    infoSerial<<F("\nmodbus v1 (+)");
+//    printBool(modbusObj);
+#endif
+#ifndef MBUS_DISABLE
+    infoSerial<<F("\nmodbus v2");
     printBool(modbusObj);
 #endif
     infoSerial<<F("\nmqtt ");

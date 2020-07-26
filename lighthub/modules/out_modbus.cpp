@@ -96,15 +96,21 @@ int  str2regSize(char * str)
 bool out_Modbus::getConfig()
 {
   // Retrieve and store template values from global modbus settings
-  if (!store || !item || !item->itemArg || (item->itemArg->type != aJson_Array) || aJson.getArraySize(item->itemArg)<2) return false;
-
+  if (!store || !item || !item->itemArg || (item->itemArg->type != aJson_Array) || aJson.getArraySize(item->itemArg)<2)
+  {
+    errorSerial<<F("MBUS: config failed:")<<(bool)store<<F(",")<<(bool)item<<F(",")<<(bool)item->itemArg<<F(",")<<(item->itemArg->type != aJson_Array)<<F(",")<< (aJson.getArraySize(item->itemArg)<2)<<endl;
+    return false;
+  }
   aJsonObject * templateIdObj = aJson.getArrayItem(item->itemArg, 1);
-  if (templateIdObj->type != aJson_String || !templateIdObj->valuestring) return false;
-
+  if (templateIdObj->type != aJson_String || !templateIdObj->valuestring)
+            {
+              errorSerial<<F("Invalid template.")<<endl;
+              return false;
+            }
   aJsonObject * templateObj = aJson.getObjectItem(modbusObj, templateIdObj->valuestring);
   if (! templateObj)
             {
-              debugSerial<<F("Modbus template not found: ")<<templateIdObj->valuestring<<endl;
+              errorSerial<<F("Modbus template not found: ")<<templateIdObj->valuestring<<endl;
               return false;
             }
 
@@ -124,7 +130,7 @@ bool out_Modbus::getConfig()
   else {store->pollingRegisters=NULL;store->pollingInterval = 1000;}
 
   store->parameters=aJson.getObjectItem(templateObj, "par");
-
+  return true;
   //store->addr=item->getArg(0);
   }
 
@@ -132,18 +138,21 @@ bool out_Modbus::getConfig()
 int  out_Modbus::Setup()
 {
 if (!store) store= (mbPersistent *)item->setPersistent(new mbPersistent);
-if (!store) return 0;
+if (!store)
+              { errorSerial<<F("MBUS: Out of memory")<<endl;
+                return 0;}
+
 store->timestamp=millis();
 if (getConfig())
     {
         //item->clearFlag(ACTION_NEEDED);
         //item->clearFlag(ACTION_IN_PROCESS);
-        debugSerial<<F("Modbus config loaded ")<< item->itemArr->name<<endl;
+        infoSerial<<F("Modbus config loaded ")<< item->itemArr->name<<endl;
         store->driverStatus = CST_INITIALIZED;
         return 1;
       }
 else
- {  debugSerial<<F("Modbus config error")<<endl;
+ {  errorSerial<<F("Modbus config error")<<endl;
     store->driverStatus = CST_FAILED;
     return 0;
   }

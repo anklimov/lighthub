@@ -66,6 +66,8 @@
 
 #include "streamlog.h"
 extern Streamlog  debugSerial;
+extern Streamlog  infoSerial;
+extern Streamlog  errorSerial;
 
 #if defined(__SAM3X8E__)
 #define wdt_res() watchdogReset()
