@@ -68,7 +68,7 @@ typedef  char cmdstr[9];
 
 const cmdstr commands_P[] PROGMEM =
 {
-"","ON","OFF","RESTORE","TOGGLE","HALT","XON","XOFF","INCREASE","DECREASE",
+"","ON","OFF","REST","TOGGLE","HALT","XON","XOFF","INCREASE","DECREASE",
 "HEAT","COOL","AUTO","FAN_ONLY","DRY","STOP","HIGH","MEDIUM","LOW",
 "TRUE","FALSE","ENABLED","DISABLED","RGB","HSV"
 };
