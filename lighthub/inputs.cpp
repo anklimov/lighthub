@@ -67,6 +67,7 @@ static short counter_irq_map[54];
 #endif
 #endif
 
+readCache inCache;
 
 Input::Input(char * name) //Constructor
 {
@@ -78,17 +79,10 @@ Input::Input(char * name) //Constructor
 }
 
 
-Input::Input(int pin)
-{
- // TODO
-}
-
-
- Input::Input(aJsonObject * obj)
+ Input::Input(aJsonObject * obj, aJsonObject * parent)
 {
   inputObj= obj;
-  Parse();
-
+  Parse(parent);
 }
 
 
@@ -97,16 +91,29 @@ boolean Input::isValid ()
  return  (store);
 }
 
-void Input::Parse()
+
+void Input::Parse(aJsonObject * configObj)
 {
+    aJsonObject *itemBuffer;
     store = NULL;
     inType = 0;
     pin = 0;
-    if (inputObj && (inputObj->type == aJson_Object) && root) {
-        aJsonObject *itemBuffer;
-        itemBuffer = aJson.getObjectItem(inputObj, "T");
+
+    if (!inputObj || !root) return;
+    if (!configObj) configObj = inputObj;
+
+    if (configObj->type == aJson_Object)
+        {
+        // Retreive type and pin#
+        itemBuffer = aJson.getObjectItem(configObj, "T");
         if (itemBuffer) inType = static_cast<uint8_t>(itemBuffer->valueint);
-        pin = static_cast<uint8_t>(atoi(inputObj->name));
+
+        itemBuffer = aJson.getObjectItem(configObj, "#");
+        if (itemBuffer) pin = static_cast<uint8_t>(itemBuffer->valueint);
+           else pin = static_cast<uint8_t>(atoi(configObj->name));
+        }
+
+        // Persistant storage
         itemBuffer = aJson.getObjectItem(inputObj, "S");
         if (!itemBuffer) {
             debugSerial<<F("In: ")<<pin<<F("/")<<inType<<endl;
@@ -114,12 +121,39 @@ void Input::Parse()
             itemBuffer = aJson.getObjectItem(inputObj, "S");
         }
         if (itemBuffer) store = (inStore *) &itemBuffer->valueint;
+
+}
+
+void cleanStore(aJsonObject * input)
+{
+if (input->type == aJson_Object)  {
+    // Check for nested inputs
+    aJsonObject * inputArray = aJson.getObjectItem(input, "act");
+    if  (inputArray && (inputArray->type == aJson_Array))
+        {
+          aJsonObject *inputObj = inputArray->child;
+
+          while(inputObj)
+            {
+              Input in(inputObj,input);
+              in.store->aslong = 0;
+
+              yield();
+              inputObj = inputObj->next;
+            }
+        }
+    else
+    {
+     Input in(input);
+     in.Poll(CHECK_INPUT);
     }
+}
 }
 
 void Input::setup()
 {
 if (!isValid() || (!root)) return;
+cleanStore(inputObj);
 
 store->aslong=0;
 uint8_t inputPinMode = INPUT; //if IN_ACTIVE_HIGH
@@ -146,7 +180,7 @@ switch (inType)
   case IN_I2C | IN_PUSH_ON     | IN_ACTIVE_HIGH:
   case IN_I2C | IN_PUSH_TOGGLE | IN_ACTIVE_HIGH:
 
-  mcp.begin();
+  mcp.begin(); //TBD - multiple chip
   mcp.pinMode(pin, INPUT);
   if (inputPinMode == INPUT_PULLUP) mcp.pullUp(0, HIGH);  // turn on a 100K pullup internally
 
@@ -676,16 +710,24 @@ void Input::contactPoll(short cause) {
 
 
      uint8_t inputOnLevel;
+     aJsonObject * mapObj;
     if (inType & IN_ACTIVE_HIGH) inputOnLevel = HIGH;
                             else inputOnLevel = LOW;
 
 
 #ifdef MCP23017
 if (inType & IN_I2C)
-    currentInputState = (mcp.digitalRead(pin) == inputOnLevel);
+    currentInputState = (inCache.I2CReadBit(IN_I2C,0,pin) == inputOnLevel);
 else
 #endif
-    currentInputState = (digitalRead(pin) == inputOnLevel);
+    if (isAnalogPin(pin) && (mapObj=aJson.getObjectItem(inputObj, "map")) && mapObj->type == aJson_Array)
+      {
+       int value = inCache.analogReadCached(pin);
+       if (value >= aJson.getArrayItem(mapObj, 0)->valueint && value <= aJson.getArrayItem(mapObj, 1)->valueint)
+          currentInputState = true;
+        else  currentInputState = false;
+      }
+    else currentInputState = (digitalRead(pin) == inputOnLevel);
 switch (store->state) //Timer based transitions
 {
   case IS_PRESSED:
@@ -870,7 +912,7 @@ void Input::analogPoll(short cause) {
 
     pinMode(pin, inputPinMode);
 */
-    inputVal = analogRead(pin);
+    inputVal = inCache.analogReadCached(pin);
     // Mapping
     if (inputMap && inputMap->type == aJson_Array)
      {
@@ -1044,4 +1086,43 @@ char* Input::getIdxField() {
     if(idx&& idx->type == aJson_String && idx->valuestring)
         return idx->valuestring;
     return nullptr;
+}
+
+
+
+readCache::readCache()
+{
+   addr=0;
+   type=0;
+}
+
+uint16_t readCache::analogReadCached (uint8_t _pin)
+{
+  if ((_pin==addr) && (IN_ANALOG==type)) return cached_data;
+  addr = _pin;
+  type = IN_ANALOG;
+  cached_data =analogRead(_pin);
+  return cached_data;
+}
+
+uint8_t  readCache::digitalReadCached(uint8_t _pin)
+{
+  ///TBD
+}
+
+uint8_t  readCache::I2CReadBit(uint8_t _type, uint8_t _addr, uint8_t _pin)
+{
+if (addr!=_addr || type != _type)
+{
+  type=_type;
+  addr=_addr;
+  cached_data = mcp.readGPIOAB();
+}
+return (cached_data >> _pin ) & 0x1;
+}
+
+void readCache::invalidateInputCache()
+{
+  addr=0;
+  type=0;
 }

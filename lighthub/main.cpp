@@ -1879,14 +1879,34 @@ configLocked++;
         aJsonObject *input = inputs->child;
 
         while (input) {
-            if ((input->type == aJson_Object)) {
-                Input in(input);
-                in.Poll(CHECK_INPUT);
+            if (input->type == aJson_Object)  {
+                // Check for nested inputs
+                aJsonObject * inputArray = aJson.getObjectItem(input, "act");
+                if  (inputArray && (inputArray->type == aJson_Array))
+                    {
+                      aJsonObject *inputObj = inputArray->child;
+
+                      while(inputObj)
+                        {
+                          Input in(inputObj,input);
+                          in.Poll(CHECK_INPUT);
+
+                          yield();
+                          inputObj = inputObj->next;
+
+                        }
+                    }
+                else
+                {
+                 Input in(input);
+                 in.Poll(CHECK_INPUT);
+                }
             }
             yield();
             input = input->next;
         }
         nextInputCheck = millis() + INTERVAL_CHECK_INPUT;
+        inCache.invalidateInputCache();
     }
 
     if (millis() > nextSensorCheck) {
