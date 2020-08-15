@@ -189,7 +189,9 @@ public:
   readCache();
   uint16_t analogReadCached (uint8_t pin);
   uint8_t  digitalReadCached(uint8_t pin);
+  #ifdef MCP23017
   uint8_t  I2CReadBit(uint8_t type, uint8_t addr, uint8_t pin);
+  #endif
   void invalidateInputCache();
 protected:
   uint8_t   addr;

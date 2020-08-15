@@ -1110,6 +1110,7 @@ uint8_t  readCache::digitalReadCached(uint8_t _pin)
   ///TBD
 }
 
+#ifdef MCP23017
 uint8_t  readCache::I2CReadBit(uint8_t _type, uint8_t _addr, uint8_t _pin)
 {
 if (addr!=_addr || type != _type)
@@ -1120,6 +1121,7 @@ if (addr!=_addr || type != _type)
 }
 return (cached_data >> _pin ) & 0x1;
 }
+#endif
 
 void readCache::invalidateInputCache()
 {
