@@ -81,6 +81,7 @@ EthernetClient ethClient;
 
 #if defined(OTA)
 #include <ArduinoOTA.h>
+bool OTA_initialized=false;
 #endif
 
 #if defined(__SAM3X8E__)
@@ -716,8 +717,11 @@ void ip_ready_config_loaded_connecting_to_broker() {
 void setupOTA(void)
 {
 #ifdef OTA
+if (OTA_initialized) return;
+//        ArduinoOTA.end();
         // start the OTEthernet library with internal (flash) based storage
         ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+OTA_initialized=true;
 #endif
 }
 
@@ -1668,6 +1672,11 @@ infoSerial<<F("\n(+)MCP23017");
 infoSerial<<F("\n(-)MCP23017");
 #endif
 
+#ifdef SYSLOG_ENABLE
+infoSerial<<F("\n(+)SYSLOG");
+#else
+infoSerial<<F("\n(-)SYSLOG");
+#endif
 infoSerial<<endl;
 
 //    WDT_Disable( WDT ) ;
