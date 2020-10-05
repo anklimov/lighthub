@@ -240,6 +240,8 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
   modbusObj = NULL;
   #endif
      debugSerial<<F(" is ")<<freeRam()<<endl;
+     configLoaded=false;
+     configOk=false;
 }
 
 bool isNotRetainingStatus() {
@@ -389,9 +391,9 @@ void setupSyslog()
    short n = 0;
    aJsonObject *udpSyslogArr = NULL;
 
-   if (syslogInitialized) return;
-   if (lanStatus<HAVE_IP_ADDRESS) return;
-   if (!root) return;
+   if (syslogInitialized) {debugSerial<<F("Syslog: initialized")<<endl;return;};
+   if (lanStatus<HAVE_IP_ADDRESS) {debugSerial<<F("Syslog: lanStatus=")<<lanStatus<<endl;return;};
+   if (!root) {debugSerial<<F("Syslog: no root")<<endl;return;};
 
     udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
 
@@ -1013,9 +1015,9 @@ topics = aJson.getObjectItem(root, "topics");
 inputs = aJson.getObjectItem(root, "in");
 mqttArr = aJson.getObjectItem(root, "mqtt");
 
-#ifdef SYSLOG_ENABLE
-        setupSyslog();
-#endif
+
+setupSyslog();
+
 
 #ifdef _dmxin
     int itemsCount;
@@ -1292,7 +1294,7 @@ void cmdFunctionIp(int arg_cnt, char **args)
 }
 
 void cmdFunctionClearEEPROM(int arg_cnt, char **args){
-    for (int i = OFFSET_MAC; i < OFFSET_MAC+EEPROM_FIX_PART_LEN; i++)
+    for (int i = OFFSET_MAC; i < OFFSET_MAC+EEPROM_FIX_PART_LEN+1; i++) //Fi[ part +{]
         EEPROM.write(i, 0);
 
     for (int i = 0; i < EEPROM_SIGNATURE_LENGTH; i++)
@@ -1396,12 +1398,14 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
 #if defined(ARDUINO_ARCH_AVR)
     FILE *configStream;
-    wdt_dis();
+    //wdt_dis();
+    //if (freeRam()<512) cleanConf();
+
     HTTPClient hclient(configServer, 80);
     // FILE is the return STREAM type of the HTTPClient
     configStream = hclient.getURI(URI);
     responseStatusCode = hclient.getLastReturnCode();
-    wdt_en();
+    //wdt_en();
 
     if (configStream != NULL) {
         if (responseStatusCode == 200) {

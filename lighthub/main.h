@@ -207,7 +207,7 @@ enum lan_status {
     REINIT = - 11,
     DO_RECONNECT =  12,
     RECONNECT = 13,
-    READ_RE_CONFIG = -14,
+    READ_RE_CONFIG = 14,
     DO_NOTHING = -15
 };
 
