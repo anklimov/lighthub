@@ -149,8 +149,8 @@ aJsonObject *owArr = NULL;
 #ifdef _dmxout
 aJsonObject *dmxArr = NULL;
 #endif
+
 #ifdef SYSLOG_ENABLE
-aJsonObject *udpSyslogArr = NULL;
 bool syslogInitialized = false;
 #endif
 
@@ -189,7 +189,7 @@ void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init f
 void cleanConf()
 {
   if (!root) return;
-debugSerial<<F("Unlocking config ...");
+debugSerial<<F("Unlocking config ...")<<endl;
 while (configLocked)
 {
           //wdt_res();
@@ -205,7 +205,7 @@ while (configLocked)
           inputLoop();
           yield();
 }
-
+debugSerial<<F("Stopping channels ...")<<endl;
 //Stoping the channels
 aJsonObject * item = items->child;
 while (items && item)
@@ -220,7 +220,9 @@ while (items && item)
    item = item->next;
   }
 pollingItem = NULL;
-
+debugSerial<<F("Stopped")<<endl;
+//stopSyslog();
+syslogInitialized=false; //Garbage in memory
 debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
     aJson.deleteItem(root);
     root   = NULL;
@@ -374,14 +376,26 @@ void setupOTA(void)
 //OTA_initialized=true;
 #endif
 }
+void stopSyslog()
+{
+  syslogInitialized = false;
+
+}
 
 void setupSyslog()
 {
   #ifdef SYSLOG_ENABLE
    int syslogPort = 514;
    short n = 0;
+   aJsonObject *udpSyslogArr = NULL;
+
+   if (syslogInitialized) return;
+   if (lanStatus<HAVE_IP_ADDRESS) return;
+   if (!root) return;
+
     udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
 
+        udpSyslogArr = aJson.getObjectItem(root, "syslog");
       if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
         char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
         if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
@@ -395,6 +409,7 @@ void setupSyslog()
         if (deviceName) udpSyslog.appName(deviceName);
         udpSyslog.defaultPriority(LOG_KERN);
         syslogInitialized=true;
+
         infoSerial<<F("UDP Syslog initialized!\n");
       }
   #endif
@@ -406,11 +421,12 @@ lan_status lanLoop() {
     #ifdef NOETHER
     lanStatus=DO_NOTHING;//-14;
     #endif
-
+//Serial.println(lanStatus);
     switch (lanStatus) {
 
         case INITIAL_STATE:
-            LED.set(ledRED|((configLoaded)?ledBLINK:0));
+          //  LED.set(ledRED|((configLoaded)?ledBLINK:0));
+              LED.set(ledRED|((configLoaded)?ledBLINK:0));
 
             #if  defined(WIFI_ENABLE)
                 onInitialStateInitLAN(); // Moves state to AWAITING_ADDRESS or HAVE_IP_ADDRESS
@@ -443,6 +459,7 @@ lan_status lanLoop() {
         case HAVE_IP_ADDRESS:
         if (!initializedListeners)
         {
+                setupSyslog();
                 setupOTA();
                 #ifdef _artnet
                             if (artnet) artnet->begin();
@@ -831,15 +848,7 @@ if (WiFi.status() == WL_CONNECTED) {
 */
 #else // Ethernet connection
 
-#ifdef W5500_CS_PIN
-     #ifndef Wiz5500
-        Ethernet.init(W5500_CS_PIN);
-     #else
-        Ethernet.w5500_cspin = W5500_CS_PIN;
-     #endif
-    infoSerial<<F("Use W5500 pin: ");
-    infoSerial<<QUOTE(W5500_CS_PIN)<<endl;
-#endif
+
     IPAddress ip, dns, gw, mask;
     int res = 1;
     infoSerial<<F("Starting lan")<<endl;
@@ -1005,7 +1014,6 @@ inputs = aJson.getObjectItem(root, "in");
 mqttArr = aJson.getObjectItem(root, "mqtt");
 
 #ifdef SYSLOG_ENABLE
-        udpSyslogArr = aJson.getObjectItem(root, "syslog");
         setupSyslog();
 #endif
 
@@ -1118,10 +1126,12 @@ void printConfigSummary() {
     infoSerial<<F("\n1-wire ");
     printBool(owArr);
 #endif
+/*
 #ifdef SYSLOG_ENABLE
     infoSerial<<F("\nudp syslog ");
     printBool(udpSyslogArr);
 #endif
+*/
     infoSerial << endl;
     infoSerial<<F("RAM=")<<freeRam()<<endl;
 }
@@ -1453,19 +1463,19 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     response = htclient.responseBody();
     htclient.stop();
     wdt_res();
-    infoSerial<<F("HTTP Status code: ");
-    infoSerial<<responseStatusCode<<" ";
+    infoSerial<<F("HTTP Status code: ")<<responseStatusCode<<endl;
     //debugSerial<<"GET Response: ");
-
+//delay(1000);
     if (responseStatusCode == 200) {
         cleanConf();
+        debugSerial<<F("Configuration cleaned")<<endl;
         root = aJson.parse((char *) response.c_str());
 
         if (!root) {
             errorSerial<<F("Config parsing failed\n");
             return READ_RE_CONFIG;//-11; //Load from NVRAM
         } else {
-            debugSerial<<response;
+            //debugSerial<<response;
             applyConfig();
             infoSerial<<F("Done.\n");
         }
@@ -1564,7 +1574,7 @@ void setup_main() {
 #if defined(ARDUINO_ARCH_ESP8266)
       EEPROM.begin(ESP_EEPROM_SIZE);
 #endif
-    loadConfigFromEEPROM();
+
 
 #ifdef _modbus
     #ifdef CONTROLLINO
@@ -1608,6 +1618,18 @@ void setup_main() {
 
     delay(LAN_INIT_DELAY);//for LAN-shield initializing
     //TODO: checkForRemoteSketchUpdate();
+
+    #ifdef W5500_CS_PIN
+         //#ifndef Wiz5500
+            Ethernet.init(W5500_CS_PIN);
+         //#else
+        //    Ethernet.w5500_cspin = W5500_CS_PIN;
+         //#endif
+        infoSerial<<F("Use W5500 pin: ");
+        infoSerial<<QUOTE(W5500_CS_PIN)<<endl;
+    #endif
+
+        loadConfigFromEEPROM();
 }
 
 void printFirmwareVersionAndBuildOptions() {
@@ -1731,6 +1753,7 @@ infoSerial<<F("\n(-)MCP23017");
 #endif
 
 #ifdef SYSLOG_ENABLE
+//udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
 infoSerial<<F("\n(+)SYSLOG");
 #else
 infoSerial<<F("\n(-)SYSLOG");
@@ -1745,8 +1768,8 @@ infoSerial<<endl;
 
     infoSerial<< F ("ID: ");
     for (byte b = 0 ; b < 4 ; b++)
-    infoSerial<< _HEX((unsigned int) UniqueID.UID_Long [b]) <<endl ;
-    //debugSerial<< endl;
+    infoSerial<< _HEX((unsigned int) UniqueID.UID_Long [b]);
+    infoSerial<< endl;
 #endif
 
 }

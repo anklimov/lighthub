@@ -637,7 +637,7 @@ statusLED::statusLED(uint8_t pattern)
   pinMode(pinGREEN, OUTPUT);
   pinMode(pinBLUE, OUTPUT);
   set(pattern);
-  timestamp=0;
+  timestamp=millis()+ledDelayms;
 #endif
 }
 
