@@ -81,7 +81,7 @@ EthernetClient ethClient;
 
 #if defined(OTA)
 #include <ArduinoOTA.h>
-bool OTA_initialized=false;
+//bool OTA_initialized=false;
 #endif
 
 #if defined(__SAM3X8E__)
@@ -151,6 +151,7 @@ aJsonObject *dmxArr = NULL;
 #endif
 #ifdef SYSLOG_ENABLE
 aJsonObject *udpSyslogArr = NULL;
+bool syslogInitialized = false;
 #endif
 
 uint32_t nextPollingCheck = 0;
@@ -158,12 +159,14 @@ uint32_t nextInputCheck = 0;
 uint32_t nextLanCheckTime = 0;
 uint32_t nextThermostatCheck = 0;
 uint32_t nextSensorCheck =0;
+uint32_t WiFiAwaitingTime =0;
 
 aJsonObject *pollingItem = NULL;
 
 bool owReady = false;
-bool configOk = false;
+bool configOk = false; // At least once connected to MQTT
 bool configLoaded = false;
+bool initializedListeners = false;
 int8_t ethernetIdleCount =0;
 int8_t configLocked = 0;
 
@@ -252,7 +255,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         return;
     }
     LED.flash(ledBLUE);
-    for (int i = 0; i < length; i++)
+    for (unsigned int i = 0; i < length; i++)
         debugSerial<<((char) payload[i]);
     debugSerial<<endl;
 
@@ -336,6 +339,67 @@ void printMACAddress() {
 }
 }
 
+char* getStringFromConfig(aJsonObject * a, int i)
+{
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Array)
+  element = aJson.getArrayItem(a, i);
+// TODO - human readable JSON objects as alias
+
+  if (element && element->type == aJson_String) return element->valuestring;
+  return NULL;
+}
+
+char* getStringFromConfig(aJsonObject * a, char * name)
+{
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Object)
+  element = aJson.getObjectItem(a, name);
+if (element && element->type == aJson_String) return element->valuestring;
+  return NULL;
+}
+
+
+
+void setupOTA(void)
+{
+#ifdef OTA
+//if (OTA_initialized) return;
+//        ArduinoOTA.end();
+        // start the OTEthernet library with internal (flash) based storage
+        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+        infoSerial<<F("OTA initialized\n");
+//OTA_initialized=true;
+#endif
+}
+
+void setupSyslog()
+{
+  #ifdef SYSLOG_ENABLE
+   int syslogPort = 514;
+   short n = 0;
+    udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
+
+      if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
+        char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
+        if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
+
+        inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
+        infoSerial<<F("Syslog params:")<<syslogServer<<":"<<syslogPort<<":"<<syslogDeviceHostname<<endl;
+        udpSyslog.server(syslogServer, syslogPort);
+        udpSyslog.deviceHostname(syslogDeviceHostname);
+
+        if (mqttArr) deviceName = getStringFromConfig(mqttArr, 0);
+        if (deviceName) udpSyslog.appName(deviceName);
+        udpSyslog.defaultPriority(LOG_KERN);
+        syslogInitialized=true;
+        infoSerial<<F("UDP Syslog initialized!\n");
+      }
+  #endif
+}
+
 
 lan_status lanLoop() {
 
@@ -344,18 +408,58 @@ lan_status lanLoop() {
     #endif
 
     switch (lanStatus) {
+
         case INITIAL_STATE:
             LED.set(ledRED|((configLoaded)?ledBLINK:0));
-            if (millis() > nextLanCheckTime)
-                onInitialStateInitLAN();
+
+            #if  defined(WIFI_ENABLE)
+                onInitialStateInitLAN(); // Moves state to AWAITING_ADDRESS or HAVE_IP_ADDRESS
+            #else
+                if (Ethernet.linkStatus() != LinkOFF)   onInitialStateInitLAN(); // Moves state to AWAITING_ADDRESS or HAVE_IP_ADDRESS
+            #endif
+
             break;
 
+        case AWAITING_ADDRESS:
+
+        #if defined(WIFI_ENABLE)
+            if (WiFi.status() == WL_CONNECTED)
+            {
+               infoSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP()<<endl;
+               wifiInitialized = true;
+               lanStatus = HAVE_IP_ADDRESS;
+            }
+            else
+            if (millis()>WiFiAwaitingTime)
+            {
+                errorSerial<<F("\nProblem with WiFi!");
+                return lanStatus = DO_REINIT;
+            }
+        #else
+            lanStatus = HAVE_IP_ADDRESS;
+        #endif
+        break;
+
         case HAVE_IP_ADDRESS:
+        if (!initializedListeners)
+        {
+                setupOTA();
+                #ifdef _artnet
+                            if (artnet) artnet->begin();
+                #endif
+                initializedListeners = true;
+        }
+        lanStatus = LIBS_INITIALIZED;
+        break;
+
+        case LIBS_INITIALIZED:
             LED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
-            if (configLocked) return HAVE_IP_ADDRESS;
+            if (configLocked) return LIBS_INITIALIZED;
+
             if (!configOk)
                 lanStatus = loadConfigFromHttp(0, NULL);
             else lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+
             break;
 
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
@@ -376,18 +480,32 @@ lan_status lanLoop() {
 
                 lanStatus = OPERATION;//3;
                 infoSerial<<F("Accepting commands...\n");
-                break;
             }
-
+            break;
         case OPERATION:
             LED.set(ledGREEN|((configLoaded)?ledBLINK:0));
             if (!mqttClient.connected()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             break;
 
-        case AWAITING_ADDRESS:
-            LED.set(ledRED|((configLoaded)?ledBLINK:0));
+        case DO_REINIT: // Pause and re-init LAN
+             //if (mqttClient.connected()) mqttClient.disconnect();  // Hmm hungs then cable disconnected
+             nextLanCheckTime = millis() + 5000;
+             lanStatus = REINIT;
+             LED.set(ledRED|((configLoaded)?ledBLINK:0));
+             break;
+
+        case REINIT: // Pause and re-init LAN
+
             if (millis() > nextLanCheckTime)
-                lanStatus = INITIAL_STATE;//0;
+                {
+                lanStatus = INITIAL_STATE;
+                }
+            break;
+
+        case DO_RECONNECT: // Pause and re-connect MQTT
+            if (mqttClient.connected()) mqttClient.disconnect();
+            nextLanCheckTime = millis() + 5000;
+            lanStatus = RECONNECT;
             break;
 
         case RECONNECT:
@@ -396,11 +514,11 @@ lan_status lanLoop() {
                 lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             break;
 
-        case READ_RE_CONFIG:
+        case READ_RE_CONFIG: // Restore config from FLASH, re-init LAN
             if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             else {
                 nextLanCheckTime = millis() + 5000;
-                lanStatus = AWAITING_ADDRESS;//-10;
+                lanStatus = DO_REINIT;//-10;
             }
             break;
 
@@ -409,18 +527,10 @@ lan_status lanLoop() {
 
 
     {
-#if defined(WIFI_ENABLE)
-if (WiFi.status() != WL_CONNECTED)
-         {
-          wifiInitialized=false;
-          lanStatus = INITIAL_STATE;
-        }
-#endif
-
 
 #if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined (NRF5)
         wdt_dis();
-        if (lanStatus > 0)
+        if (lanStatus >= HAVE_IP_ADDRESS)
         {
         int etherStatus = Ethernet.maintain();
 
@@ -432,15 +542,11 @@ if (WiFi.status() != WL_CONNECTED)
             switch (etherStatus) {
                    case NO_LINK:
                     errorSerial<<F("No link")<<endl;
-                    if (mqttClient.connected()) mqttClient.disconnect();
-                    nextLanCheckTime = millis() + 30000;
-                    lanStatus = AWAITING_ADDRESS;//-10;
+                    lanStatus = DO_REINIT;
                     break;
                 case DHCP_CHECK_RENEW_FAIL:
                     errorSerial<<F("Error: renewed fail");
-                    if (mqttClient.connected()) mqttClient.disconnect();
-                    nextLanCheckTime = millis() + 1000;
-                    lanStatus = AWAITING_ADDRESS;//-10;
+                    lanStatus = DO_REINIT;
                     break;
 
                 case DHCP_CHECK_RENEW_OK:
@@ -452,7 +558,7 @@ if (WiFi.status() != WL_CONNECTED)
                     errorSerial<<F("Error: rebind fail");
                     if (mqttClient.connected()) mqttClient.disconnect();
                     nextLanCheckTime = millis() + 1000;
-                    lanStatus = AWAITING_ADDRESS;//-10;
+                    lanStatus = DO_REINIT;
                     break;
 
                 case DHCP_CHECK_REBIND_OK:
@@ -572,105 +678,71 @@ configLocked--;
 #endif
 }
 
-char* getStringFromConfig(aJsonObject * a, int i)
-{
-aJsonObject * element = NULL;
-if (!a) return NULL;
-if (a->type == aJson_Array)
-  element = aJson.getArrayItem(a, i);
-// TODO - human readable JSON objects as alias
-
-  if (element && element->type == aJson_String) return element->valuestring;
-  return NULL;
-}
-
-char* getStringFromConfig(aJsonObject * a, char * name)
-{
-aJsonObject * element = NULL;
-if (!a) return NULL;
-if (a->type == aJson_Object)
-  element = aJson.getObjectItem(a, name);
-  if (element && element->type == aJson_String) return element->valuestring;
-  return NULL;
-}
-
 
 void ip_ready_config_loaded_connecting_to_broker() {
-    short n = 0;
+
     int port = 1883;
     char empty = 0;
+    short n = 0;
     char *user = &empty;
     char passwordBuf[16] = "";
     char *password = passwordBuf;
-    int syslogPort = 514;
-    if (mqttArr && (aJson.getArraySize(mqttArr)))
-      {
-                deviceName = getStringFromConfig(mqttArr, 0);
-                infoSerial<<F("Device Name:")<<deviceName<<endl;
-              }
-#ifdef SYSLOG_ENABLE
 
-  udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
+    if (mqttClient.connected())
+        {
+          lanStatus = RETAINING_COLLECTING;
+          return;
+        }
 
-    if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
-      char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
-      if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
+    if (!mqttArr || (n = aJson.getArraySize(mqttArr) < 2)) //At least device name and broker IP must be configured
+        {
+          lanStatus = READ_RE_CONFIG;
+          return;
+        }
 
-       inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
-/*
-      char *syslogDeviceHostname = aJson.getArrayItem(udpSyslogArr, 2)->valuestring;
-      char *syslogAppname = aJson.getArrayItem(udpSyslogArr, 3)->valuestring;
-*/
-      infoSerial<<F("Syslog params:")<<syslogServer<<":"<<syslogPort<<":"<<syslogDeviceHostname<<":"<<deviceName<<endl;
-      udpSyslog.server(syslogServer, syslogPort);
-      udpSyslog.deviceHostname(syslogDeviceHostname);
-      if (deviceName) udpSyslog.appName(deviceName);
-      udpSyslog.defaultPriority(LOG_KERN);
-      //udpSyslog.log(LOG_INFO, F("UDP Syslog initialized!"));
-        infoSerial<<F("UDP Syslog initialized!\n");
-    }
-#endif
 
-    if (!mqttClient.connected() && mqttArr && ((n = aJson.getArraySize(mqttArr)) > 1)) {
-    //    char *client_id = aJson.getArrayItemartnet(mqttArr, 0)->valuestring;
-        char *servername = getStringFromConfig(mqttArr, 1);
-        if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
-        if (n >= 4) user = getStringFromConfig(mqttArr, 3);
-        if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5)) {
+    deviceName = getStringFromConfig(mqttArr, 0);
+    infoSerial<<F("Device Name:")<<deviceName<<endl;
+
+
+    char *servername = getStringFromConfig(mqttArr, 1);
+    if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
+    if (n >= 4) user = getStringFromConfig(mqttArr, 3);
+    if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5))
+        {
             password = getStringFromConfig(mqttArr, 4);
             infoSerial<<F("Using MQTT password from config");
         }
 
-        mqttClient.setServer(servername, port);
-        mqttClient.setCallback(mqttCallback);
+    mqttClient.setServer(servername, port);
+    mqttClient.setCallback(mqttCallback);
 
-        char willMessage[16];
-        char willTopic[32];
+    char willMessage[16];
+    char willTopic[32];
 
-        strncpy_P(willMessage,disconnected_P,sizeof(willMessage));
+    strncpy_P(willMessage,disconnected_P,sizeof(willMessage));
 
       //  strncpy_P(willTopic, outprefix, sizeof(willTopic));
-        setTopic(willTopic,sizeof(willTopic),T_DEV);
+    setTopic(willTopic,sizeof(willTopic),T_DEV);
 
-        strncat_P(willTopic, state_P, sizeof(willTopic));
+    strncat_P(willTopic, state_P, sizeof(willTopic));
 
 
-        infoSerial<<F("\nAttempting MQTT connection to ")<<servername<<F(":")<<port<<F(" user:")<<user<<F(" ...");
+    infoSerial<<F("\nAttempting MQTT connection to ")<<servername<<F(":")<<port<<F(" user:")<<user<<F(" ...");
         if (!strlen(user))
           {
             user = NULL;
             password= NULL;
           }
         //    wdt_dis();  //potential unsafe for ethernetIdle(), but needed to avoid cyclic reboot if mosquitto out of order
-        if (mqttClient.connect(deviceName, user, password,willTopic,MQTTQOS1,true,willMessage)) {
+    if (mqttClient.connect(deviceName, user, password,willTopic,MQTTQOS1,true,willMessage))
+          {
             mqttErrorRate = 0;
             infoSerial<<F("connected as ")<<deviceName <<endl;
-        //    wdt_en();
             configOk = true;
             // ... Temporary subscribe to status topic
             char buf[MQTT_TOPIC_LENGTH+1];
 
-  //          strncpy_P(buf, outprefix, sizeof(buf));
             setTopic(buf,sizeof(buf),T_OUT);
             strncat(buf, "+/+/#", sizeof(buf));      // Only on separated cmd/val topics
             mqttClient.subscribe(buf);
@@ -693,7 +765,8 @@ void ip_ready_config_loaded_connecting_to_broker() {
             lanStatus = RETAINING_COLLECTING;//4;
             nextLanCheckTime = millis() + 5000;
             infoSerial<<F("Awaiting for retained topics");
-        } else {
+        } else
+           {
             errorSerial<<F("failed, rc=")<<mqttClient.state()<<F(" try again in 5 seconds")<<endl;
             nextLanCheckTime = millis() + 5000;
 #ifdef RESTART_LAN_ON_MQTT_ERRORS
@@ -704,25 +777,14 @@ void ip_ready_config_loaded_connecting_to_broker() {
 #ifdef RESET_PIN
                             resetHard();
 #endif
-                            lanStatus=INITIAL_STATE;
+                            lanStatus=DO_REINIT;// GO INITIAL_STATE;
                             return;
                         }
 #endif
 
-            lanStatus = RECONNECT;//12;
+            lanStatus = DO_RECONNECT;//12;
         }
-    }
-}
 
-void setupOTA(void)
-{
-#ifdef OTA
-if (OTA_initialized) return;
-//        ArduinoOTA.end();
-        // start the OTEthernet library with internal (flash) based storage
-        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
-OTA_initialized=true;
-#endif
 }
 
 
@@ -737,31 +799,36 @@ void onInitialStateInitLAN() {
                 wifi_set_macaddr(STATION_IF,mac); //ESP32 to check
 
                 WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
-                int wifi_connection_wait = 10000;
 
-                while (WiFi.status() != WL_CONNECTED && wifi_connection_wait > 0) {
-                    delay(500);
-                    wifi_connection_wait -= 500;
-                    debugSerial<<".";
-                    yield();
-                }
-                wifiInitialized = true; //???
+          //      int wifi_connection_wait = 10000;
+
+
+          //      while (WiFi.status() != WL_CONNECTED && wifi_connection_wait > 0) {
+          //          delay(500);
+          //          wifi_connection_wait -= 500;
+          //          debugSerial<<".";
+          //          yield();
+          //      }
+          //      wifiInitialized = true; //???
             }
 #endif
-
-
+lanStatus = AWAITING_ADDRESS;
+WiFiAwaitingTime = millis() + 60000L;
+return;
+/*
 if (WiFi.status() == WL_CONNECTED) {
         infoSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP()<<endl;
         wifiInitialized = true;
         lanStatus = HAVE_IP_ADDRESS;//1;
-setupOTA();
+//setupOTA();
 
     } else
     {
         errorSerial<<F("\nProblem with WiFi!");
-        nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
+        lanStatus = DO_REINIT;
+        //nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
     }
-
+*/
 #else // Ethernet connection
 
 #ifdef W5500_CS_PIN
@@ -794,10 +861,6 @@ setupOTA();
         } else Ethernet.begin(mac, ip);
     infoSerial<<endl;
     lanStatus = HAVE_IP_ADDRESS;
-    setupOTA();
-    #ifdef _artnet
-                if (artnet) artnet->begin();
-    #endif
     }
     else {
         infoSerial<<"\nNo IP data found in flash\n";
@@ -814,7 +877,7 @@ setupOTA();
 
     if (res == 0) {
         errorSerial<<F("Failed to configure Ethernet using DHCP. You can set ip manually!")<<F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n");
-        lanStatus = AWAITING_ADDRESS;//-10;
+        lanStatus = DO_REINIT;//-10;
         nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
 #ifdef RESET_PIN
         resetHard();
@@ -822,13 +885,7 @@ setupOTA();
     } else {
         infoSerial<<F("Got IP address:");
         printIPAddress(Ethernet.localIP());
-        lanStatus = HAVE_IP_ADDRESS;//1;
-
-        setupOTA();
-
-        #ifdef _artnet
-                    if (artnet) artnet->begin();
-        #endif
+        lanStatus = HAVE_IP_ADDRESS;
     }
   }
     #endif
@@ -905,9 +962,6 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
 void cmdFunctionHelp(int arg_cnt, char **args)
 {
     printFirmwareVersionAndBuildOptions();
-    #ifdef SYSLOG_ENABLE
-//    udpSyslog.logf(LOG_INFO, "free RAM: %d",freeRam());
-    #endif
     printCurentLanConfig();
 //    printFreeRam();
     infoSerial<<F("\nUse these commands: 'help' - this text\n"
@@ -944,6 +998,17 @@ void cmdFunctionReboot(int arg_cnt, char **args) {
 void applyConfig() {
     if (!root) return;
 configLocked++;
+
+items = aJson.getObjectItem(root, "items");
+topics = aJson.getObjectItem(root, "topics");
+inputs = aJson.getObjectItem(root, "in");
+mqttArr = aJson.getObjectItem(root, "mqtt");
+
+#ifdef SYSLOG_ENABLE
+        udpSyslogArr = aJson.getObjectItem(root, "syslog");
+        setupSyslog();
+#endif
+
 #ifdef _dmxin
     int itemsCount;
     dmxArr = aJson.getObjectItem(root, "dmxin");
@@ -985,8 +1050,7 @@ configLocked++;
         }
     }
 #endif
-    items = aJson.getObjectItem(root, "items");
-    topics = aJson.getObjectItem(root, "topics");
+
 
 // Digital output related Items initialization
     pollingItem=NULL;
@@ -1027,13 +1091,9 @@ configLocked++;
         pollingItem = items->child;
     }
     debugSerial<<endl;
-    inputs = aJson.getObjectItem(root, "in");
-    mqttArr = aJson.getObjectItem(root, "mqtt");
 
    inputSetup();
-#ifdef SYSLOG_ENABLE
-    udpSyslogArr = aJson.getObjectItem(root, "syslog");
-#endif
+
     printConfigSummary();
 configLoaded=true;
 configLocked--;
@@ -1225,7 +1285,7 @@ void cmdFunctionClearEEPROM(int arg_cnt, char **args){
     for (int i = OFFSET_MAC; i < OFFSET_MAC+EEPROM_FIX_PART_LEN; i++)
         EEPROM.write(i, 0);
 
-        for (int i = 0; i < EEPROM_SIGNATURE_LENGTH; i++)
+    for (int i = 0; i < EEPROM_SIGNATURE_LENGTH; i++)
             EEPROM.write(i+OFFSET_SIGNATURE,EEPROM_signature[i]);
 
     infoSerial<<F("EEPROM cleared\n");
@@ -1299,7 +1359,6 @@ int ipLoadFromFlash(short n, IPAddress &ip) {
 lan_status loadConfigFromHttp(int arg_cnt, char **args)
 {
     int responseStatusCode = 0;
-    char ch;
     char URI[64];
     char configServer[32]="";
     if (arg_cnt > 1) {
@@ -1476,7 +1535,6 @@ void postTransmission() {
 }
 
 void setup_main() {
-
   #if defined(__SAM3X8E__)
   memset(&UniqueID,0,sizeof(UniqueID));
   #endif
@@ -1859,8 +1917,9 @@ ethernetIdleCount--;
 };
 
 void modbusIdle(void) {
+    LED.poll();
     wdt_res();
-    if (lanLoop() > 1) {
+    if (lanLoop() > HAVE_IP_ADDRESS) {
         yield();
         mqttClient.loop();
 #ifdef _artnet

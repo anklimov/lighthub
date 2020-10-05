@@ -59,7 +59,7 @@
 
 #ifdef ARDUINO_ARCH_STM32
 #include "HttpClient.h"
-#include "UIPEthernet.h"
+//#include "UIPEthernet.h"
 #include <NRFFlashStorage.h>
 //#include <EEPROM.h>
 #endif
@@ -161,7 +161,11 @@ extern Streamlog  errorSerial;
         #ifdef Wiz5500
         #include <Ethernet2.h>
         #else
-        #include <Ethernet.h>
+            #ifdef ARDUINO_ARCH_STM32
+            #include "UIPEthernet.h"
+            #else
+            #include <Ethernet.h>
+            #endif
         #endif
 #endif
 
@@ -192,14 +196,19 @@ extern Artnet *artnet;
 
 enum lan_status {
     INITIAL_STATE = 0,
-    HAVE_IP_ADDRESS = 1,
-    IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER = 2,
-    RETAINING_COLLECTING = 3,
-    OPERATION = 4,
-    AWAITING_ADDRESS = -10,
-    RECONNECT = 12,
-    READ_RE_CONFIG = -11,
-    DO_NOTHING = -14
+    AWAITING_ADDRESS = 1,
+    HAVE_IP_ADDRESS = 2,
+    LIBS_INITIALIZED = 3,
+    IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER = 4,
+    RETAINING_COLLECTING = 5,
+    OPERATION = 6,
+
+    DO_REINIT = -10,
+    REINIT = - 11,
+    DO_RECONNECT =  12,
+    RECONNECT = 13,
+    READ_RE_CONFIG = -14,
+    DO_NOTHING = -15
 };
 
 typedef union {

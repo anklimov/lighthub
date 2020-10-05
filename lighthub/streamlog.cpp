@@ -2,6 +2,7 @@
 #include <Arduino.h>
 
 #ifdef SYSLOG_ENABLE
+extern bool syslogInitialized;
 Streamlog::Streamlog (HardwareSerial * _serialPort, int _severity , Syslog * _syslog )
 {
       serialPort=_serialPort;
@@ -54,6 +55,8 @@ void Streamlog::flush(void)
 size_t Streamlog::write(uint8_t ch)
 {
 #ifdef SYSLOG_ENABLE
+if (syslogInitialized)
+  {
   if (ch=='\n')
               {
                 logBuffer[logBufferPos]=0;
@@ -64,6 +67,7 @@ size_t Streamlog::write(uint8_t ch)
         {
           if (logBufferPos<LOGBUFFER_SIZE-1 && (ch!='\r')) logBuffer[logBufferPos++]=ch;
         }
+   }
 #endif
   if (serialPort) return serialPort->write(ch);
 
