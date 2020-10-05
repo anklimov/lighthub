@@ -1,16 +1,22 @@
 #include "streamlog.h"
 #include <Arduino.h>
+#include "utils.h"
+
+#if defined (STATUSLED)
+extern statusLED LED;
+#endif
 
 #ifdef SYSLOG_ENABLE
 extern bool syslogInitialized;
-Streamlog::Streamlog (HardwareSerial * _serialPort, int _severity , Syslog * _syslog )
+Streamlog::Streamlog (HardwareSerial * _serialPort, int _severity , Syslog * _syslog, uint8_t _ledPattern )
 {
       serialPort=_serialPort;
       severity=_severity;
       syslog=_syslog;
+      ledPattern=_ledPattern;
 }
 #else
-Streamlog::Streamlog (HardwareSerial * _serialPort, int _severity)
+Streamlog::Streamlog (HardwareSerial * _serialPort, int _severity,  uint8_t _ledPattern)
 {
       serialPort=_serialPort;
       severity=_severity;
@@ -69,6 +75,11 @@ if (syslogInitialized)
         }
    }
 #endif
+
+  #if defined (STATUSLED)
+  if ((ch=='\n') && ledPattern) LED.flash(ledPattern);
+  #endif
+
   if (serialPort) return serialPort->write(ch);
 
   return 1;

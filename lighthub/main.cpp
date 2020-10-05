@@ -112,11 +112,11 @@ unsigned long nextSyslogPingTime;
 static char syslogDeviceHostname[16];
 
 Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog);
-Streamlog errorSerial(&debugSerialPort,LOG_ERROR,&udpSyslog);
+Streamlog errorSerial(&debugSerialPort,LOG_ERROR,&udpSyslog,ledRED);
 Streamlog infoSerial (&debugSerialPort,LOG_INFO,&udpSyslog);
 #else
 Streamlog debugSerial(&debugSerialPort,LOG_DEBUG);
-Streamlog errorSerial(&debugSerialPort,LOG_ERROR);
+Streamlog errorSerial(&debugSerialPort,LOG_ERROR, ledRED);
 Streamlog infoSerial (&debugSerialPort,LOG_INFO);
 #endif
 
@@ -221,8 +221,11 @@ while (items && item)
   }
 pollingItem = NULL;
 debugSerial<<F("Stopped")<<endl;
-//stopSyslog();
+
+#ifdef SYSLOG_ENABLE
 syslogInitialized=false; //Garbage in memory
+#endif
+
 debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
     aJson.deleteItem(root);
     root   = NULL;
@@ -378,11 +381,6 @@ void setupOTA(void)
 //OTA_initialized=true;
 #endif
 }
-void stopSyslog()
-{
-  syslogInitialized = false;
-
-}
 
 void setupSyslog()
 {
@@ -391,9 +389,9 @@ void setupSyslog()
    short n = 0;
    aJsonObject *udpSyslogArr = NULL;
 
-   if (syslogInitialized) {debugSerial<<F("Syslog: initialized")<<endl;return;};
-   if (lanStatus<HAVE_IP_ADDRESS) {debugSerial<<F("Syslog: lanStatus=")<<lanStatus<<endl;return;};
-   if (!root) {debugSerial<<F("Syslog: no root")<<endl;return;};
+   if (syslogInitialized) return;
+   if (lanStatus<HAVE_IP_ADDRESS) return;
+   if (!root) return;
 
     udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
 
@@ -412,7 +410,7 @@ void setupSyslog()
         udpSyslog.defaultPriority(LOG_KERN);
         syslogInitialized=true;
 
-        infoSerial<<F("UDP Syslog initialized!\n");
+        infoSerial<<F("UDP Syslog initialized.\n");
       }
   #endif
 }
@@ -1581,18 +1579,18 @@ void setup_main() {
 
 
 #ifdef _modbus
-    #ifdef CONTROLLINO
-    //set PORTJ pin 5,6 direction (RE,DE)
-    DDRJ |= B01100000;
-    //set RE,DE on LOW
-    PORTJ &= B10011111;
-#else
-    pinMode(TXEnablePin, OUTPUT);
-#endif
-        modbusSerial.begin(MODBUS_SERIAL_BAUD);
-        node.idle(&modbusIdle);
-        node.preTransmission(preTransmission);
-        node.postTransmission(postTransmission);
+        #ifdef CONTROLLINO
+        //set PORTJ pin 5,6 direction (RE,DE)
+        DDRJ |= B01100000;
+        //set RE,DE on LOW
+        PORTJ &= B10011111;
+        #else
+        pinMode(TXEnablePin, OUTPUT);
+        #endif
+    modbusSerial.begin(MODBUS_SERIAL_BAUD);
+    node.idle(&modbusIdle);
+    node.preTransmission(preTransmission);
+    node.postTransmission(postTransmission);
 #endif
 
     delay(20);
@@ -1623,12 +1621,8 @@ void setup_main() {
     delay(LAN_INIT_DELAY);//for LAN-shield initializing
     //TODO: checkForRemoteSketchUpdate();
 
-    #ifdef W5500_CS_PIN
-         //#ifndef Wiz5500
-            Ethernet.init(W5500_CS_PIN);
-         //#else
-        //    Ethernet.w5500_cspin = W5500_CS_PIN;
-         //#endif
+    #if defined(W5500_CS_PIN) && ! defined(WIFI_ENABLE)
+        Ethernet.init(W5500_CS_PIN);
         infoSerial<<F("Use W5500 pin: ");
         infoSerial<<QUOTE(W5500_CS_PIN)<<endl;
     #endif
@@ -1663,12 +1657,19 @@ void printFirmwareVersionAndBuildOptions() {
     infoSerial<<F("\n(+)WiFi");
 #elif Wiz5500
     infoSerial<<F("\n(+)WizNet5500");
+#elif Wiz5100
+    infoSerial<<F("\n(+)Wiznet5100");
 #else
     infoSerial<<F("\n(+)Wiznet5x00");
 #endif
 
 #ifndef DMX_DISABLE
     infoSerial<<F("\n(+)DMX");
+    #ifdef FASTLED
+        infoSerial<<F("\n(+)FASTLED");
+    #else
+        infoSerial<<F("\n(+)ADAFRUIT LED");
+    #endif
 #else
     infoSerial<<F("\n(-)DMX");
 #endif
@@ -1733,11 +1734,7 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     infoSerial<<F("\n(-)SPI LED");
 #endif
-#ifdef FASTLED
-    infoSerial<<F("\n(+)FASTLED");
-#else
-    infoSerial<<F("\n(+)ADAFRUIT LED");
-#endif
+
 #ifdef OTA
     infoSerial<<F("\n(+)OTA");
 #else
@@ -1786,8 +1783,6 @@ void publishStat(){
   char intbuf[16];
   uint32_t ut = millis()/1000UL;
   if (!mqttClient.connected()  || ethernetIdleCount) return;
-
-//    debugSerial<<F("\nfree RAM: ")<<fr;
     setTopic(topic,sizeof(topic),T_DEV);
     strncat_P(topic, stats_P, sizeof(topic));
     strncat(topic, "/", sizeof(topic));
@@ -1898,13 +1893,9 @@ void loop_main() {
 #endif
 
     if (items) {
-//        #ifndef MODBUS_DISABLE
         if (isNotRetainingStatus()) pollingLoop();
-//        #endif
-//#ifdef _owire
         yield();
         thermoLoop();
-//#endif
     }
 
     yield();
@@ -1945,6 +1936,8 @@ ethernetIdleCount--;
 
 void modbusIdle(void) {
     LED.poll();
+    yield();
+    cmdPoll();
     wdt_res();
     if (lanLoop() > HAVE_IP_ADDRESS) {
         yield();

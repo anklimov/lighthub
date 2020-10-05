@@ -22,10 +22,10 @@ static uint8_t udpDebugLevel =7;
 class Streamlog : public Print
 {
   public:
-    #ifdef SYSLOG_ENABLE    
-    Streamlog (HardwareSerial * _serialPort, int _severity = LOG_DEBUG, Syslog * _syslog = NULL);
+    #ifdef SYSLOG_ENABLE
+    Streamlog (HardwareSerial * _serialPort, int _severity = LOG_DEBUG, Syslog * _syslog = NULL, uint8_t _ledPattern = 0);
     #else
-    Streamlog (HardwareSerial * _serialPort, int _severity = LOG_DEBUG);
+    Streamlog (HardwareSerial * _serialPort, int _severity = LOG_DEBUG, uint8_t _ledPattern = 0);
     #endif
       //    {serialPort=_serialPort;severity=_severity; syslog=_syslog; }
     void begin(unsigned long speed);
@@ -43,5 +43,6 @@ class Streamlog : public Print
     HardwareSerial *serialPort;
     #ifdef SYSLOG_ENABLE
     Syslog * syslog;
+    uint8_t ledPattern;
     #endif
 };
