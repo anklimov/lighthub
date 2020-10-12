@@ -1,4 +1,5 @@
 // Configuration of drivers enabled
+#define SYSLOG_LOCAL_SOCKET 514
 
 #ifndef FASTLED
 #define ADAFRUIT_LED
@@ -19,7 +20,12 @@
 #define ORDER BRG
 #endif
 
+#ifndef MODBUS_TX_PIN
 #define TXEnablePin 13
+#else
+#define TXEnablePin MODBUS_TX_PIN
+#endif
+
 #define ESP_EEPROM_SIZE 2048
 
 #ifndef AVR_DMXOUT_PIN
@@ -39,6 +45,8 @@
 
 #define MAXFLASHSTR 32
 #define PWDFLASHSTR 16
+#define EEPROM_SIGNATURE "LHCF"
+#define EEPROM_SIGNATURE_LENGTH 4
 
 #define OFFSET_MAC 0
 #define OFFSET_IP OFFSET_MAC+6
@@ -47,8 +55,11 @@
 #define OFFSET_MASK OFFSET_GW+4
 #define OFFSET_CONFIGSERVER OFFSET_MASK+4
 #define OFFSET_MQTT_PWD OFFSET_CONFIGSERVER+MAXFLASHSTR
-#define EEPROM_offset_NotAlligned OFFSET_MQTT_PWD+PWDFLASHSTR
-#define EEPROM_offset EEPROM_offset_NotAlligned + (4 -(EEPROM_offset_NotAlligned & 3))
+#define OFFSET_SIGNATURE OFFSET_MQTT_PWD+PWDFLASHSTR
+#define EEPROM_offset_NotAlligned OFFSET_SIGNATURE+EEPROM_SIGNATURE_LENGTH
+#define EEPROM_offsetJSON EEPROM_offset_NotAlligned + (4 -(EEPROM_offset_NotAlligned & 3))
+#define EEPROM_FIX_PART_LEN EEPROM_offsetJSON-OFFSET_MAC
+
 
 #ifndef INTERVAL_CHECK_INPUT
 #define INTERVAL_CHECK_INPUT  15
@@ -122,7 +133,7 @@
 #define _owire
 #endif
 
-#ifndef MODBUS_DISABLE
+#if !(defined  (MODBUS_DISABLE) && defined (MBUS_DISABLE))
 #define _modbus
 #endif
 
@@ -165,7 +176,7 @@
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #undef _dmxin
-#undef _modbus
+//#undef _modbus
 
 #ifndef DMX_DISABLE
 #define _espdmx
@@ -177,13 +188,15 @@
 
 #if defined(ARDUINO_ARCH_ESP32)
 #undef _dmxin
-#undef _modbus
+//#undef _modbus
 
 #ifndef DMX_DISABLE
 #define _espdmx
 #endif
 //#undef _dmxout
-#undef modbusSerial
+//#undef modbusSerial
+#define modbusSerial Serial2
+#define AC_Serial Serial2
 #endif
 
 #ifndef _dmxout
@@ -215,9 +228,10 @@
 //#define debugSerial M5.Lcd
 //#endif
 
-#ifndef debugSerial
-#define debugSerial Serial
+#ifndef debugSerialPort
+#define debugSerialPort Serial
 #endif
+
 
 #ifndef Wiz5500
 #define W5100_ETHERNET_SHIELD

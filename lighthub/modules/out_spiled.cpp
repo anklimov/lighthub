@@ -6,6 +6,7 @@
 #include "Streaming.h"
 
 #include "item.h"
+#include "main.h"
 
 #ifdef ADAFRUIT_LED
 
@@ -88,7 +89,7 @@ return driverStatus;
 
 int out_SPILed::isActive()
 {
-CHstore st;
+itemStore st;
 st.aslong = item->getVal(); //Restore old params
 debugSerial<< F(" val:")<<st.v<<endl;
 return st.v;
@@ -107,7 +108,7 @@ int out_SPILed::getChanType()
    return CH_RGBW;
 }
 
-int out_SPILed::PixelCtrl(CHstore *st, short cmd, int from, int to, bool show, bool rgb)
+int out_SPILed::PixelCtrl(itemStore *st, short cmd, int from, int to, bool show, bool rgb)
 {
   //debugSerial<<F("cmd: ")<<cmd<<endl;
 #ifdef ADAFRUIT_LED
@@ -188,11 +189,11 @@ CRGB pixel;
 return 1;
 }
 
-int out_SPILed::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixCode, char* subItem)
+int out_SPILed::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
 {
 int chActive = item->isActive();
 bool toExecute = (chActive>0);
-CHstore st;
+itemStore st;
 if (cmd>0 && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 int from=0, to=numLeds-1; //All LEDs on the strip by default
@@ -287,12 +288,12 @@ case S_CMD:
                       PixelCtrl(&st,CMD_ON,from,to);
            else  //whole strip
             {
-            if (st.aslong && (st.v<MIN_VOLUME) && send) st.v=INIT_VOLUME;
+            if (st.aslong && (st.v<MIN_VOLUME) /* && send */) st.v=INIT_VOLUME;
             item->setVal(st.aslong);
 
             if (st.aslong )  //Stored smthng
             {
-              if (send) item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
+              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
               debugSerial<<F("Restored: ")<<st.h<<F(",")<<st.s<<F(",")<<st.v<<endl;
             }
             else
@@ -304,7 +305,7 @@ case S_CMD:
               st.hsv_flag=1;
               // Store
               item->setVal(st.aslong);
-              if (send) item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
+              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             }
 
             PixelCtrl(&st,0,from,to);
@@ -319,7 +320,7 @@ case S_CMD:
             {
               st.v=0;
               PixelCtrl(&st,0,from,to);
-              if (send) item->SendStatus(SEND_COMMAND);
+              item->SendStatus(SEND_COMMAND);
               //  if (send) item->publishTopic(item->itemArr->name,"OFF","/cmd");
             }
             return 1;

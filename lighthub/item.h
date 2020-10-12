@@ -50,6 +50,7 @@ e-mail    anklimov@gmail.com
 #define CH_AC 10  //AC Haier
 #define CH_SPILED 11
 #define CH_MOTOR  12
+#define CH_MBUS  14
 //#define CHANNEL_TYPES 13
 
 //static uint32_t pollInterval[CHANNEL_TYPES] = {0,0,0,0,MODB};
@@ -60,8 +61,18 @@ e-mail    anklimov@gmail.com
 #define CMD_NUM 0
 #define CMD_UNKNOWN  -1
 #define CMD_JSON -2
-#define CMD_RGB  -3
-#define CMD_HSV  -4
+//#define CMD_RGB  -3
+//#define CMD_HSV  -4
+
+typedef  char cmdstr[9];
+
+const cmdstr commands_P[] PROGMEM =
+{
+"","ON","OFF","REST","TOGGLE","HALT","XON","XOFF","INCREASE","DECREASE",
+"HEAT","COOL","AUTO","FAN_ONLY","DRY","STOP","HIGH","MEDIUM","LOW",
+"TRUE","FALSE","ENABLED","DISABLED","RGB","HSV"
+};
+#define commandsNum sizeof(commands_P)/sizeof(cmdstr)
 
 #define CMD_ON  1
 #define CMD_OFF 2
@@ -77,10 +88,16 @@ e-mail    anklimov@gmail.com
 #define CMD_AUTO 0xc
 #define CMD_FAN 0xd
 #define CMD_DRY 0xe
-//#define CMD_SET 0xf
+#define CMD_STOP 0xf
 #define CMD_HIGH 0x10  //AC fan leve
 #define CMD_MED 0x11
 #define CMD_LOW 0x12
+#define CMD_ENABLED 0x13
+#define CMD_DISABLED 0x14
+#define CMD_TRUE 0x15
+#define CMD_FALSE 0x16
+#define CMD_RGB  0x17
+#define CMD_HSV  0x18
 //#define CMD_CURTEMP 0xf
 #define CMD_MASK 0xff
 #define FLAG_MASK 0xff00
@@ -92,6 +109,10 @@ e-mail    anklimov@gmail.com
 #define SEND_DEFFERED 0x800
 #define ACTION_NEEDED 0x1000
 #define ACTION_IN_PROCESS 0x2000
+
+
+
+
 
 //#define CMD_REPORT 32
 
@@ -119,11 +140,40 @@ extern short thermoSetCurTemp(char *name, float t);
 
 int txt2cmd (char * payload);
 
+enum itemStoreType {
+ST_VOID         = 0,
+ST_PERCENTS     = 1,
+ST_HS           = 2,
+ST_HSV          = 3,
+ST_FLOAT_CELSIUS= 4,
+ST_FLOAT_FARENHEIT= 5,
+ST_RGB          = 6,
+ST_RGBW         = 7,
+ST_PERCENTS255  = 8,
+ST_HSV255       = 9,
+ST_INT32        = 10,
+ST_UINT32       = 11,
+ST_STRING       = 12,
+ST_FLOAT        = 13,
+ST_COMMAND      = 15
+
+};
+
 #pragma pack(push, 1)
 typedef union
 {
   long int aslong;
-  float asfloat;
+  int32_t  asInt32;
+  uint32_t asUint32;
+  char*    asString;
+  float    asfloat;
+  struct
+      {
+        uint8_t cmd_code;
+        uint8_t cmd_flag;
+        uint8_t cmd_effect;
+        uint8_t cmd_effect_param;
+      };
   struct
       { uint8_t  v;
         uint8_t  s;
@@ -135,19 +185,24 @@ typedef union
         uint8_t  r;
         uint8_t  g;
         uint8_t  b;
-        uint8_t  w:7;
-        uint8_t  rgb_flag:1;
+        uint8_t  w;//:7;
+//        uint8_t  rgb_flag:1;
       };
-} CHstore;
+} itemStore;
 
-/*
-typedef union
+class itemCmd
 {
-  long int aslong;
-  struct
+public:
+  itemStoreType type;
+  itemStore     param;
+  itemCmd Percents(int i);
+  itemCmd Int(int32_t i);
+  itemCmd Int(uint32_t i);
+  itemCmd Cmd(uint8_t i);
+  char * toString(char * Buffer, int bufLen);
+  short  toCmd();
+  } ;
 
-} RGBWstore;
-*/
 #pragma pack(pop)
 
 class Item
@@ -163,8 +218,10 @@ class Item
 
   boolean isValid ();
   boolean Setup();
-  virtual int Ctrl(short cmd, short n=0, int * Parameters=NULL, boolean send=true, int suffixCode=0, char* subItem=NULL);
-  virtual int Ctrl(char * payload, boolean send=true, char * subItem=NULL);
+  void Stop();
+  int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL);
+  int Ctrl(itemCmd cmd, int suffixCode=0, char* subItem=NULL);
+  int Ctrl(char * payload,  char * subItem=NULL);
 
   int getArg(short n=0);
   //int getVal(short n); //From VAL array. Negative if no array
@@ -172,6 +229,8 @@ class Item
   uint8_t getCmd();
   long int getExt(); //From int val OR array
   void setExt(long int par);
+  chPersistent * getPersistent();
+  chPersistent * setPersistent(chPersistent * par);
   void setCmd(uint8_t cmdValue);
   short getFlag   (short flag=FLAG_MASK);
   void setFlag   (short flag);

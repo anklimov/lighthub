@@ -24,6 +24,7 @@ e-mail    anklimov@gmail.com
 #include <Arduino.h>
 #include "utils.h"
 #include "options.h"
+#include "main.h"
 
 
 OneWire *oneWire = NULL;

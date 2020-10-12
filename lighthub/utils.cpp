@@ -22,6 +22,15 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 #include "stdarg.h"
 #include <Wire.h>
+#include "main.h"
+
+#include "item.h"
+#include <PubSubClient.h>
+extern int8_t configLocked;
+extern int8_t ethernetIdleCount;
+extern PubSubClient mqttClient;
+
+
 
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 #include <malloc.h>
@@ -509,6 +518,183 @@ bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t m
   uint32_t endTime=(timestamp + time) % modulo;
   return   ((currTime>endTime) && (currTime <timestamp)) ||
               ((timestamp<endTime) && ((currTime>endTime) || (currTime <timestamp)));
+}
+
+
+
+
+bool executeCommand(aJsonObject* cmd, int8_t toggle)
+{
+  itemCmd _itemCmd;
+  _itemCmd.type = ST_VOID;
+  return executeCommand(cmd,toggle,_itemCmd);
+}
+
+bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd)
+//bool executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
+{
+switch (cmd->type)
+{
+  case aJson_String: //legacy - no action
+  break;
+  case aJson_Array:  //array - recursive iterate
+  {
+  configLocked++;
+  aJsonObject * command = cmd->child;
+  while (command)
+          {
+          executeCommand(command,toggle,_itemCmd);
+          command = command->next;
+          }
+  configLocked--;
+  }
+  break;
+  case aJson_Object:
+{
+aJsonObject *item = aJson.getObjectItem(cmd, "item");
+aJsonObject *emit = aJson.getObjectItem(cmd, "emit");
+aJsonObject *icmd = NULL;
+aJsonObject *ecmd = NULL;
+
+switch (toggle)
+    {
+    case 0:
+    icmd = aJson.getObjectItem(cmd, "icmd");
+    ecmd = aJson.getObjectItem(cmd, "ecmd");
+    break;
+    case 1:
+    icmd = aJson.getObjectItem(cmd, "irev");
+    ecmd = aJson.getObjectItem(cmd, "erev");
+    //no *rev parameters - fallback
+    if (!icmd) icmd = aJson.getObjectItem(cmd, "icmd");
+    if (!ecmd) ecmd = aJson.getObjectItem(cmd, "ecmd");
+  }
+
+char * itemCommand;
+char Buffer[16];
+if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
+  else    itemCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
+
+char * emitCommand;
+if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
+  else    emitCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
+
+//debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
+if (item) debugSerial << item->valuestring<< F(" -> ")<<itemCommand<<endl;
+if (emit) debugSerial << emit->valuestring<< F(" -> ")<<emitCommand<<endl;
+
+
+
+
+if (emit && emitCommand && emit->type == aJson_String) {
+/*
+TODO implement
+#ifdef WITH_DOMOTICZ
+    if (getIdxField())
+    {  (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
+        : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());	                                               getIdxField())
+                   : publishDataToDomoticz(0, emit,
+                                           "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",
+                                           getIdxField());
+                      } else
+#endif
+*/
+
+{
+char addrstr[MQTT_TOPIC_LENGTH];
+strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+if (mqttClient.connected() && !ethernetIdleCount)
+{
+if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
+mqttClient.publish(addrstr, emitCommand , true);
+}
+}
+} // emit
+if (item && itemCommand && item->type == aJson_String) {
+  //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
+    Item it(item->valuestring);
+    if (it.isValid()) it.Ctrl(itemCommand);
+    }
+return true;
+}
+default:
+return false;
+} //switch type
+return false;
+}
+
+
+itemCmd mapInt(int32_t arg, aJsonObject* map)
+{
+  itemCmd _itemCmd;
+  return _itemCmd.Int(arg);
+}
+
+statusLED::statusLED(uint8_t pattern)
+{
+#if defined (STATUSLED)
+  pinMode(pinRED, OUTPUT);
+  pinMode(pinGREEN, OUTPUT);
+  pinMode(pinBLUE, OUTPUT);
+  set(pattern);
+  timestamp=millis()+ledDelayms;
+#endif
+}
+
+void statusLED::show (uint8_t pattern)
+{
+#if defined (STATUSLED)
+    digitalWrite(pinRED,(pattern & ledRED)?HIGH:LOW );
+    digitalWrite(pinGREEN,(pattern & ledGREEN)?HIGH:LOW);
+    digitalWrite(pinBLUE,(pattern & ledBLUE)?HIGH:LOW);
+#endif
+}
+
+void statusLED::set (uint8_t pattern)
+{
+#if defined (STATUSLED)
+    short newStat = pattern & ledParams;
+
+    if (newStat!=(curStat & ledParams))
+    {
+    //if (!(curStat & ledHidden))
+    show(pattern);
+    curStat=newStat | (curStat & ~ledParams);
+    }
+#endif
+}
+
+void statusLED::flash(uint8_t pattern)
+{
+#if defined (STATUSLED)
+  show(pattern);
+  curStat|=ledFlash;
+#endif
+}
+
+void statusLED::poll()
+{
+#if defined (STATUSLED)
+  if (curStat & ledFlash)
+    {
+      curStat&=~ledFlash;
+      show(curStat);
+    }
+if (millis()>timestamp)
+  {
+
+        if (curStat & ledFASTBLINK) timestamp=millis()+ledFastDelayms;
+                            else    timestamp=millis()+ledDelayms;
+
+    if (( curStat & ledBLINK) || (curStat & ledFASTBLINK))
+    {
+    curStat^=ledHidden;
+    if (curStat & ledHidden)
+        show(0);
+    else show(curStat);
+   }
+  }
+#endif
 }
 
 

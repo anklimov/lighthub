@@ -6,6 +6,7 @@
 #include "Streaming.h"
 
 #include "item.h"
+#include "main.h"
 
 static int driverStatus = CST_UNKNOWN;
 
@@ -210,7 +211,7 @@ int out_Motor::getChanType()
 
 
 
-int out_Motor::Ctrl(short cmd, short n, int * Parameters, boolean send, int suffixCode, char* subItem)
+int out_Motor::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
 {
 int chActive = item->isActive();
 bool toExecute = (chActive>0);
@@ -249,12 +250,12 @@ case S_CMD:
            st = item->getVal();
 
 
-            if (st && (st<MIN_VOLUME) && send) st=INIT_VOLUME;
+            if (st && (st<MIN_VOLUME) /* && send */) st=INIT_VOLUME;
             item->setVal(st);
 
             if (st)  //Stored smthng
             {
-              if (send) item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
+              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
               debugSerial<<F("Restored: ")<<st<<endl;
             }
             else
@@ -263,13 +264,13 @@ case S_CMD:
               // Store
               st=100;
               item->setVal(st);
-              if (send) item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
+              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             }
             if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
             return 1;
 
             case CMD_OFF:
-              if (send) item->SendStatus(SEND_COMMAND);
+              item->SendStatus(SEND_COMMAND);
               if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
             return 1;
 

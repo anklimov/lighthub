@@ -23,15 +23,15 @@
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 //#include "SPIFFS.h"
 #include <ESP_EEPROM.h>
-#include <ESP8266HTTPClient.h>
+//#include <ESP8266HTTPClient.h>
 //#include <ArduinoHttpClient.h>
 //#include "HttpClient.h"
-#include <WiFiManager.h>
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
+//#include <WiFiManager.h>
+//#include <DNSServer.h>
+//#include <ESP8266WebServer.h>
+//#include <ESP8266WiFi.h>
 #include <user_interface.h>
-#define Ethernet WiFi
+//#define Ethernet WiFi
 #endif
 
 #if defined ARDUINO_ARCH_ESP32
@@ -41,15 +41,15 @@
 #include <NRFFlashStorage.h>
 //#include "HttpClient.h"
 //#include <ArduinoHttpClient.h>
-#include <HTTPClient.h>
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WiFiClientSecure.h>
-#include <WebServer.h>
-#include <WiFiManager.h>
-#include <DNSServer.h>
+//#include <HTTPClient.h>
+//#include <WiFi.h>
+//#include <WiFiClient.h>
+//#include <WiFiClientSecure.h>
+//#include <WebServer.h>
+//#include <WiFiManager.h>
+//include <DNSServer.h>
 
-#define Ethernet WiFi
+//#define Ethernet WiFi
 #endif
 
 #ifdef NRF5
@@ -59,10 +59,15 @@
 
 #ifdef ARDUINO_ARCH_STM32
 #include "HttpClient.h"
-#include "UIPEthernet.h"
+//#include "UIPEthernet.h"
 #include <NRFFlashStorage.h>
 //#include <EEPROM.h>
 #endif
+
+#include "streamlog.h"
+extern Streamlog  debugSerial;
+extern Streamlog  infoSerial;
+extern Streamlog  errorSerial;
 
 #if defined(__SAM3X8E__)
 #define wdt_res() watchdogReset()
@@ -119,7 +124,7 @@
 #include "DallasTemperature.h"
 #endif
 
-#ifndef MODBUS_DISABLE
+#ifdef _modbus
 #include <ModbusMaster.h>
 #endif
 
@@ -135,13 +140,33 @@
 #include "dmx.h"
 #endif
 
+#ifdef WIFI_ENABLE
 
-#ifdef Wiz5500
-#include <Ethernet2.h>
-#else
-#if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined(NRF5)
-#include <Ethernet.h>
-#endif
+  #if defined(ARDUINO_ARCH_ESP32)
+        #include <WiFi.h>
+        #include <HTTPClient.h>
+        #include <WiFiClient.h>
+        #include <WiFiClientSecure.h>
+        #include <WiFiManager.h>
+        #include <WebServer.h>
+  #else
+        #include <ESP8266WiFi.h>
+        #include <ESP8266HTTPClient.h>
+        #include <WiFiManager.h>
+        #include <DNSServer.h>
+        #include <ESP8266WebServer.h>
+  #endif
+#define Ethernet WiFi
+#else  //Wired connection
+        #ifdef Wiz5500
+        #include <Ethernet2.h>
+        #else
+            #ifdef ARDUINO_ARCH_STM32
+            #include "UIPEthernet.h"
+            #else
+            #include <Ethernet.h>
+            #endif
+        #endif
 #endif
 
 
@@ -171,14 +196,19 @@ extern Artnet *artnet;
 
 enum lan_status {
     INITIAL_STATE = 0,
-    HAVE_IP_ADDRESS = 1,
-    IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER = 2,
-    RETAINING_COLLECTING = 3,
-    OPERATION = 4,
-    AWAITING_ADDRESS = -10,
-    RECONNECT = 12,
-    READ_RE_CONFIG = -11,
-    DO_NOTHING = -14
+    AWAITING_ADDRESS = 1,
+    HAVE_IP_ADDRESS = 2,
+    LIBS_INITIALIZED = 3,
+    IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER = 4,
+    RETAINING_COLLECTING = 5,
+    OPERATION = 6,
+
+    DO_REINIT = -10,
+    REINIT = - 11,
+    DO_RECONNECT =  12,
+    RECONNECT = 13,
+    READ_RE_CONFIG = 14,
+    DO_NOTHING = -15
 };
 
 typedef union {
@@ -186,6 +216,7 @@ typedef union {
     uint8_t   UID_Byte[20];
 } UID;
 
+bool isNotRetainingStatus();
 //void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);

@@ -24,6 +24,7 @@ e-mail    anklimov@gmail.com
 #define IN_ACTIVE_HIGH   2      // High level = PUSHED/ CLOSED/ ON othervise :Low Level. Use INPUT mode instead of INPUT_PULLUP for digital pin
 #define IN_ANALOG        64     // Analog input
 #define IN_RE            32     // Rotary Encoder (for further use)
+#define IN_I2C           128    // MCP23017
 
 #define IN_PUSH_ON       0      // PUSH - ON, Release - OFF (ovverrided by pcmd/rcmd) - DEFAULT
 #define IN_PUSH_TOGGLE   1      // Used for push buttons. Every physicall push toggle logical switch  on/off. Toggle on leading edge
@@ -134,10 +135,7 @@ public:
     uint8_t pin;
     inStore *store;
 
-    Input(int pin);
-
-    Input(aJsonObject *obj);
-
+    Input(aJsonObject *obj, aJsonObject * configObj = NULL);
     Input(char *name);
 
     boolean isValid();
@@ -159,7 +157,7 @@ public:
 
 
 protected:
-    void Parse();
+    void Parse(aJsonObject * configObj = NULL);
 
     void contactPoll(short cause);
     void analogPoll(short cause);
@@ -181,5 +179,24 @@ protected:
 
     char* getIdxField();
     bool changeState(uint8_t newState, short cause);
-    bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
+    //bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
 };
+
+
+
+class readCache {
+public:
+  readCache();
+  uint16_t analogReadCached (uint8_t pin);
+  uint8_t  digitalReadCached(uint8_t pin);
+  #ifdef MCP23017
+  uint8_t  I2CReadBit(uint8_t type, uint8_t addr, uint8_t pin);
+  #endif
+  void invalidateInputCache();
+protected:
+  uint8_t   addr;
+  uint8_t   type;
+  uint16_t  cached_data;
+};
+
+extern readCache inCache;
