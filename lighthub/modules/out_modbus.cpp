@@ -201,7 +201,7 @@ switch (regType) {
     default:
         debugSerial<<F("Not supported reg type\n");
  }
-if (result != node.ku8MBSuccess) errorSerial<<F("MBUS: Polling error")<<endl;
+if (result != node.ku8MBSuccess) errorSerial<<F("MBUS: Polling error ")<<result<<endl;
 return (result == node.ku8MBSuccess);
 }
 

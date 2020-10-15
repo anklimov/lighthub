@@ -558,7 +558,7 @@ lan_status lanLoop() {
 
             switch (etherStatus) {
                    case NO_LINK:
-                    errorSerial<<F("No link")<<endl;
+                    errorSerial<<F("\nNo link")<<endl;
                     lanStatus = DO_REINIT;
                     break;
                 case DHCP_CHECK_RENEW_FAIL:
@@ -872,7 +872,7 @@ if (WiFi.status() == WL_CONNECTED) {
     lanStatus = HAVE_IP_ADDRESS;
     }
     else {
-        infoSerial<<"\nNo IP data found in flash\n";
+        infoSerial<<"\nuses DHCP\n";
         wdt_dis();
 
         #if defined(ARDUINO_ARCH_STM32)
