@@ -338,14 +338,12 @@ int out_Modbus::getChanType()
 
 
 
-int out_Modbus::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
+int out_Modbus::Ctrl(itemCmd cmd,  int suffixCode, char* subItem)
 {
 int chActive = item->isActive();
 bool toExecute = (chActive>0);
-long st;
-if (cmd>0 && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
-
-//item->setFlag(ACTION_NEEDED);
+itemCmd st(ST_UINT32);
+if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 switch(suffixCode)
 {
@@ -354,12 +352,12 @@ case S_NOTFOUND:
 toExecute = true;
 debugSerial<<F("Forced execution");
 case S_SET:
-          if (!Parameters || n==0) return 0;
-          item->setVal(st=Parameters[0]); //Store
+          if (!cmd.isValue()) return 0;
+          //////item->setVal(st=Parameters[0]); //Store
           if (!suffixCode)
           {
-            if (chActive>0 && !st) item->setCmd(CMD_OFF);
-            if (chActive==0 && st) item->setCmd(CMD_ON);
+            if (chActive>0 && !st.getInt()) item->setCmd(CMD_OFF);
+            if (chActive==0 && st.getInt()) item->setCmd(CMD_ON);
             item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
 //            if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
           }
@@ -369,28 +367,29 @@ case S_SET:
           //break;
 
 case S_CMD:
-      item->setCmd(cmd);
-      switch (cmd)
+      //item->setCmd(cmd.getCmd());
+      st.loadItem(item);
+      switch (cmd.getCmd())
           {
           case CMD_ON:
            //retrive stored values
-           st = item->getVal();
+           st.loadItem(item);
 
 
-            if (st && (st<MIN_VOLUME) /* && send */) st=INIT_VOLUME;
-            item->setVal(st);
+            if (st.getPercents() && (st.getPercents()<MIN_VOLUME) /* && send */) st.Percents(INIT_VOLUME);
+            st.saveItem(item);
 
-            if (st)  //Stored smthng
+            if (st.getPercents())  //Stored smthng
             {
               item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
-              debugSerial<<F("Restored: ")<<st<<endl;
+              debugSerial<<F("Restored: ")<<st.getPercents()<<endl;
             }
             else
             {
-              debugSerial<<st<<F(": No stored values - default\n");
+              debugSerial<<F(": No stored values - default\n");
               // Store
-              st=100;
-              item->setVal(st);
+              st.setDefault();
+              st.saveItem(item);
               item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             }
   //          if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time

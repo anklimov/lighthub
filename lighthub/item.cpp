@@ -55,134 +55,6 @@ extern lan_status lanStatus;
 int retrieveCode(char **psubItem);
 
 
-
-  itemCmd itemCmd::Percents(int i)
-      {
-        type=ST_PERCENTS;
-        param.aslong=i;
-        return *this;
-      }
-
-  itemCmd itemCmd::Int(int32_t i)
-          {
-            type=ST_INT32;
-            param.asInt32=i;
-            return *this;
-          }
-
-  itemCmd itemCmd::Int(uint32_t i)
-                  {
-                    type=ST_UINT32;
-                    param.asUint32=i;
-                    return *this;
-                  }
-
-
-  itemCmd itemCmd::Cmd(uint8_t i)
-      {
-            type=ST_COMMAND;
-            param.cmd_code=i;
-            return *this;
-      }
-
-  char * itemCmd::toString(char * Buffer, int bufLen)
-       {
-         if (!Buffer) return NULL;
-         switch (type)
-         {
-           case ST_VOID:
-                return NULL;
-
-           case ST_PERCENTS:
-           case ST_PERCENTS255:
-           case ST_UINT32:
-              snprintf(Buffer, bufLen, "%u", param.asUint32);
-           break;
-           case ST_INT32:
-              snprintf(Buffer, bufLen, "%d", param.asInt32);
-
-           break;
-           case ST_HS:
-           case ST_HSV:
-           case ST_HSV255:
-           snprintf(Buffer, bufLen, "%d,%d,%d", param.h, param.s, param.v);
-
-           break;
-           case ST_FLOAT_CELSIUS:
-           case ST_FLOAT_FARENHEIT:
-           case ST_FLOAT:
-           snprintf(Buffer, bufLen, "%d", param.asfloat);
-           break;
-           case ST_RGB:
-           snprintf(Buffer, bufLen, "%d,%d,%d", param.r, param.g, param.b);
-           break;
-
-           case ST_RGBW:
-           snprintf(Buffer, bufLen, "%d,%d,%d", param.r, param.g, param.b,param.w);
-           break;
-
-           case ST_STRING:
-           strncpy(Buffer, param.asString,bufLen);
-
-           break;
-           case ST_COMMAND:
-           strncpy_P(Buffer, commands_P[param.cmd_code], bufLen);
-         }
-        return Buffer;
-       }
-
-int txt2cmd(char *payload) {
-    int cmd = CMD_UNKNOWN;
-    if (!payload || !payload[0]) return cmd;
-
-    // Check for command
-    if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = CMD_NUM;
-    else if (*payload == '%') cmd = CMD_UP;
-/*
-    else if (strcmp_P(payload, ON_P) == 0) cmd = CMD_ON;
-    else if (strcmp_P(payload, OFF_P) == 0) cmd = CMD_OFF;
-    else if (strcmp_P(payload, REST_P) == 0) cmd = CMD_RESTORE;
-    else if (strcmp_P(payload, TOGGLE_P) == 0) cmd = CMD_TOGGLE;
-    else if (strcmp_P(payload, HALT_P) == 0) cmd = CMD_HALT;
-    else if (strcmp_P(payload, XON_P) == 0) cmd = CMD_XON;
-    else if (strcmp_P(payload, XOFF_P) == 0) cmd = CMD_XOFF;
-    else if (strcmp_P(payload, HEAT_P) == 0) cmd = CMD_HEAT;
-    else if (strcmp_P(payload, COOL_P) == 0) cmd = CMD_COOL;
-    else if (strcmp_P(payload, AUTO_P) == 0) cmd = CMD_AUTO;
-    else if (strcmp_P(payload, FAN_ONLY_P) == 0) cmd = CMD_FAN;
-    else if (strcmp_P(payload, DRY_P) == 0) cmd = CMD_DRY;
-    else if (strcmp_P(payload, TRUE_P) == 0) cmd = CMD_ON;
-    else if (strcmp_P(payload, FALSE_P) == 0) cmd = CMD_OFF;
-    else if (strcmp_P(payload, ENABLED_P) == 0) cmd = CMD_ON;
-    else if (strcmp_P(payload, DISABLED_P) == 0) cmd = CMD_OFF;
-    else if (strcmp_P(payload, INCREASE_P) == 0) cmd = CMD_UP;
-    else if (strcmp_P(payload, DECREASE_P) == 0) cmd = CMD_DN;
-    else if (strcmp_P(payload, HIGH_P) == 0) cmd = CMD_HIGH;
-    else if (strcmp_P(payload, MED_P) == 0) cmd = CMD_MED;
-    else if (strcmp_P(payload, LOW_P) == 0) cmd = CMD_LOW;
-*/
-    else if (*payload == '{') cmd = CMD_JSON;
-    else if (*payload == '#') cmd = CMD_RGB;
-    else
-    {
-      for(uint8_t i=1; i<commandsNum ;i++)
-          if (strcmp_P(payload, commands_P[i]) == 0)
-               {
-  //             debugSerial<< i << F(" ") << pgm_read_word_near(&serialModes_P[i].mode)<< endl;
-               return i;
-             }
-  //    debugSerial<< F("Default serial mode N81 used");
-  //    return static_cast<uint16_t> (SERIAL_8N1);
-    }
-
-    /*
-    else if (strncmp_P(payload, HSV_P, strlen (HSV_P)) == 0) cmd = CMD_HSV;
-    else if (strncmp_P(payload, RGB_P, strlen (RGB_P)) == 0) cmd = CMD_RGB;
-    */
-
-    return cmd;
-}
-
 int subitem2cmd(char *payload) {
     int cmd = 0;
 
@@ -220,6 +92,7 @@ int txt2subItem(char *payload) {
     else if (strcmp_P(payload, FAN_P) == 0) cmd = S_FAN;
     else if (strcmp_P(payload, HUE_P) == 0) cmd = S_HUE;
     else if (strcmp_P(payload, SAT_P) == 0) cmd = S_SAT;
+    else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
   /*  UnUsed now
     else if (strcmp_P(payload, SETPOINT_P) == 0) cmd = S_SETPOINT;
     else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
@@ -426,6 +299,16 @@ long int Item::getVal() //Return Val if val is int or first elem of Value array
     } else return 0;//-2;
 }
 
+uint8_t Item::getSubtype()
+{
+  if (!itemVal) return 0;//-1;
+  if (itemVal->type == aJson_Int) return itemVal->subtype;
+  else if (itemVal->type == aJson_Array) {
+      aJsonObject *t = aJson.getArrayItem(itemVal, 0);
+      if (t) return t->subtype;
+      else return 0;//-3;
+  } else return 0;//-2;
+}
 /*
 void Item::setVal(short n, int par)  // Only store  if VAL is array defined in config to avoid waste of RAM
 {
@@ -445,6 +328,12 @@ void Item::setVal(long int par)  // Only store if VAL is int (autogenerated or c
     itemVal->valueint = par;
 }
 
+void Item::setSubtype(uint8_t par)  // Only store if VAL is int (autogenerated or config-defined)
+{
+    if (!itemVal || itemVal->type != aJson_Int) return;
+    //debugSerial<<F(" Store ")<<F(" Val=")<<par<<endl;
+    itemVal->subtype = par;
+}
 
 long int Item::getExt() //Return Val if val is int or first elem of Value array
 {
@@ -643,9 +532,8 @@ short Item::cmd2changeActivity(int lastActivity, short defaultCmd)
 }
 */
 
-int Ctrl(itemCmd cmd, int suffixCode, char* subItem)
+int Item::Ctrl(itemCmd cmd, int suffixCode, char* subItem)
 {
-  /*
   char stringBuffer[16];
   bool operation = isNotRetainingStatus() ;
 
@@ -659,8 +547,8 @@ int Ctrl(itemCmd cmd, int suffixCode, char* subItem)
         suffixCode = defaultSuffixCode;
 
 
-      debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Suff=")<<suffixCode<<F(" Cmd=")<<cmd.toCmd()<<F(" Par=")<<cmd.toString(stringBuffer, sizeof(stringBuffer));
-      if (!itemArr) return -1;
+    debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Suff=")<<suffixCode<<F(" Cmd=")<<cmd.getCmd()<<F(" Par=")<<cmd.toString(stringBuffer, sizeof(stringBuffer));
+    if (!itemArr) return -1;
 
 
           if (itemType != CH_GROUP )
@@ -677,16 +565,19 @@ int Ctrl(itemCmd cmd, int suffixCode, char* subItem)
           // Group channel
           if (! operation) return -1;
 
+          int     iaddr = getArg();
+          bool    chActive =(isActive()>0);
 
+          itemCmd st;
+          st.loadItem(this); //Restore previous channel state to "st"
 
-          int   iaddr = getArg();
-          bool  chActive =(isActive()>0);
+          //threating Toggle, Restore, XOFF special conditional commands/ convert to ON, OFF
 
-          switch (cmd.toCmd()) {
+          switch (cmd.getCmd()) {
               int t;
               case CMD_TOGGLE:
                   if (chActive) cmd.Cmd(CMD_OFF);
-                  else cmd.Cmd(CMD_ON);
+                      else cmd.Cmd(CMD_ON);
                   break;
 
               case CMD_RESTORE:
@@ -718,117 +609,128 @@ int Ctrl(itemCmd cmd, int suffixCode, char* subItem)
             case CMD_UP:
             {
             if (itemType == CH_GROUP) break; ////bug here
-            if (!n || !Par[0]) Par[0] = DEFAULT_INC_STEP;
-            if (cmd == CMD_DN) Par[0]=-Par[0];
-            st.aslong = getVal();
-            int cType=getChanType();
+            short step=cmd.getCmdParam();
+            if (!step) step=DEFAULT_INC_STEP;
+            if (cmd.getCmd() == CMD_DN) step=-step;
 
-            debugSerial<<"from: h="<<st.h<<" s="<<st.s <<" v="<<st.v<<endl;
+            int cType=getChanType();
+            //debugSerial<<"from: h="<<st.h<<" s="<<st.s <<" v="<<st.v<<endl;
                       switch (suffixCode)
                       {
                         case S_NOTFOUND:
                         case S_SET:
-                        Par[0] += st.v;
-                        if (Par[0]>100) Par[0]=100;
-                        if (Par[0]<0) Par[0]=0;
-                        n=1;
-                        cmd=CMD_NUM;
-                        debugSerial<<" to v="<<Par[0]<<endl;
+                             st.incrementPercents(step);
                         break;
                         case S_HUE:
+                             st.incrementH(step);
+                             break;
                         case S_SAT:
-                          if ( cType != CH_RGB && cType != CH_RGBW && cType != CH_GROUP) return 0; //HUE and SAT only applicable for RGBx channels
-                       }
+                             st.incrementS(step);
+                      } //switch suffix
 
-                      if ( cType == CH_RGB || cType == CH_RGBW)
-                        {
-                        bool modified = false;
-                        switch (suffixCode)
-                          {
-                            case S_HSV:
-                            Par[0] += st.h;
-                            Par[1] += st.s;
-                            Par[2] += st.v;
-                            modified = true;
-                            break;
-
-                            case S_HUE:
-                            Par[0] += st.h;
-                            Par[1] = st.s;
-                            Par[2] = st.v;
-
-                            modified = true;
-                            break;
-
-                            case S_SAT:
-                            Par[1] = st.s + Par[0];
-                            Par[0] = st.h;
-                            Par[2] = st.v;
-
-                            modified = true;
-                            break;
-                         } //switch suffix
-
-                       if (modified)
-                       {
-                       if (Par[0]>365 ) Par[0]=0;
-                       if (Par[0]<0) Par[0]=365;
-                       if (Par[1]>100) Par[1]=100;
-                       if (Par[1]<0) Par[1]=0;
-                       if (Par[2]>100) Par[2]=100;
-                       if (Par[2]<0) Par[2]=0;
-
-                       n=3;
-                       cmd=CMD_NUM;
-                       suffixCode=S_SET;
-                       debugSerial<<"to: h="<<Par[0]<<" s="<<Par[1] <<" v="<<Par[2]<<endl;
-                     } // if modified
-                     } //RGBx channel
-                    }
-                    break;
+             } //Case UP/DOWN
+             break;
              case CMD_NUM:
                          //if (itemType == CH_GROUP || n!=1) break;
-                         if (n!=1) break;
-                         int cType=getChanType();
-                         if ( cType == CH_RGB || cType == CH_RGBW || cType == CH_GROUP )
-                         {
-                               st.aslong = getVal();
-                               st.hsv_flag=1;
+                         if (!cmd.isValue()) break;
+////                         if ( cType == CH_RGB || cType == CH_RGBW || cType == CH_GROUP )
                                switch (suffixCode)
-                               {
+                               {     case S_SET:
+                                     case S_NOTFOUND:
+                                     st.assignFrom(cmd);
+                                     break;
                                      case S_SAT:
-                                     st.s = Par[0];
-
-                                     Par[0] = st.h;
-                                     Par[1] = st.s;
-                                     Par[2] = st.v;
-
-                                     n=3;
-                                     setVal(st.aslong);
+                                     st.setS(cmd.getInt());
+                                     st.saveItem(this);
                                      break;
 
                                      case S_HUE:
-                                     st.h = Par[0];
-                                     Par[1] = st.s;
-                                     Par[2] = st.v;
-
-                                     n=3;
-                                     setVal(st.aslong);
+                                     st.setH(cmd.getInt());
+                                     st.saveItem(this);
                                    }
-                                 //if (itemType == CH_GROUP) break;
-                               }
-                          else // Non-color channel
-                          if (suffixCode == S_SAT || suffixCode == S_HUE) return -3;
 
+          } //Switch commands
+
+//==================
+
+if (driver) //New style modular code
+        {
+          int res = -1;
+          switch (cmd.getCmd())
+          {
+            case CMD_XON:
+            if (!chActive>0)  //if channel was'nt active before CMD_XON
+                  {
+                    debugSerial<<F("Turning XON\n");
+                    res = driver->Ctrl(cmd.Cmd(CMD_ON), suffixCode, subItem);
+                    setCmd(CMD_XON);
+                  }
+              else
+              {  //cmd = CMD_ON;
+                debugSerial<<F("Already Active\n");
+                return -3;
+              }
+            break;
+            case CMD_HALT:
+            if (chActive>0)  //if channel was active before CMD_HALT
+                  {
+                    res = driver->Ctrl(cmd.Cmd(CMD_OFF), suffixCode, subItem);
+                    setCmd(CMD_HALT);
+                    return res;
+                  }
+            else
+                  {
+                    debugSerial<<F("Already Inactive\n");
+                    return -3;
+                  }
+            break;
+            case CMD_OFF:
+            if (getCmd() != CMD_HALT) //Halted, ignore OFF
+                 {
+                   res = driver->Ctrl(cmd.Cmd(CMD_OFF), suffixCode, subItem);
+                   setCmd(CMD_OFF);
+                 }
+            else
+                  {
+                    debugSerial<<F("Already Halted\n");
+                    return -3;
+                  }
+            break;
+
+            case CMD_NUM:
+            res = driver->Ctrl(st, suffixCode, subItem);
+            break;
+
+            default: //another command
+            res = driver->Ctrl(cmd,  suffixCode, subItem);
+            if (cmd.isCommand()) setCmd(cmd.getCmd());
           }
-
-
-
-
-=========
-  int chActive = item->isActive();
+          return res;
+        }
+// Legacy monolite core code
+//==================
+switch (itemType) {
+          case CH_GROUP://Group
+          {
+              if (itemArg->type == aJson_Array) {
+                  aJsonObject *i = itemArg->child;
+                  configLocked++;
+                  while (i) {
+                      if (i->type == aJson_String)
+                        {
+                        Item it(i->valuestring);
+                        it.Ctrl(cmd, suffixCode,subItem);
+                        }
+                      i = i->next;
+                  } //while
+                  configLocked--;
+              } //if
+          } //case
+      } //switch
+//=========
+/*
   bool toExecute = (chActive>0);
-  long st;
+
   if (cmd>0 && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 
@@ -918,6 +820,27 @@ bool send = isNotRetainingStatus() ;
               debugSerial<<F("<")<<Par[i]<<F(">");
             }
     debugSerial<<F(")")<<endl;
+
+    //======================//
+    itemCmd _itemCmd;
+    switch (n) {
+    case 0:
+              _itemCmd.Cmd(cmd);
+              break;
+
+    case 1:   _itemCmd.Percents((uint32_t)Parameters[0]);
+              break;
+
+    case 2:   _itemCmd.setH(Parameters[0]);
+              _itemCmd.setS(Parameters[1]);
+              _itemCmd.type=ST_HSV;
+              break;
+
+    case 3:   _itemCmd.HSV(Parameters[0],Parameters[1],Parameters[2]);
+              break;
+
+    }
+    //=============//
 
     if (itemType != CH_GROUP )
     {
@@ -1077,7 +1000,8 @@ bool send = isNotRetainingStatus() ;
                    if ( cType == CH_RGB || cType == CH_RGBW || cType == CH_GROUP )
                    {
                          st.aslong = getVal();
-                         st.hsv_flag=1;
+                         //st.hsv_flag=1;
+                         setSubtype(ST_HSV);
                          switch (suffixCode)
                          {
                                case S_SAT:
@@ -1115,7 +1039,8 @@ bool send = isNotRetainingStatus() ;
                 if (!chActive>0)  //if channel was'nt active before CMD_XON
                       {
                         debugSerial<<F("Turning XON\n");
-                        res = driver->Ctrl(CMD_ON, n, Par, suffixCode, subItem);
+                        //res = driver->Ctrl(CMD_ON, n, Par, suffixCode, subItem);
+                        res = driver->Ctrl(_itemCmd.Cmd(CMD_ON), suffixCode, subItem);
                         setCmd(CMD_XON);
                       }
                   else
@@ -1127,7 +1052,7 @@ bool send = isNotRetainingStatus() ;
                 case CMD_HALT:
                 if (chActive>0)  //if channel was active before CMD_HALT
                       {
-                        res = driver->Ctrl(CMD_OFF, n, Par, suffixCode, subItem);
+                        res = driver->Ctrl(_itemCmd.Cmd(CMD_OFF), suffixCode, subItem);
                         setCmd(CMD_HALT);
                         return res;
                       }
@@ -1140,7 +1065,7 @@ bool send = isNotRetainingStatus() ;
                 case CMD_OFF:
                 if (getCmd() != CMD_HALT) //Halted, ignore OFF
                      {
-                       res = driver->Ctrl(cmd, n, Par,  suffixCode, subItem);
+                       res = driver->Ctrl(_itemCmd, suffixCode, subItem);
                        setCmd(CMD_OFF);
                      }
                 else
@@ -1155,7 +1080,7 @@ bool send = isNotRetainingStatus() ;
                 break;
 */
                 default:
-                res = driver->Ctrl(cmd, n, Par,  suffixCode, subItem);
+                res = driver->Ctrl(_itemCmd,  suffixCode, subItem);
                 if (cmd) setCmd(cmd);
               }
               return res;
@@ -1180,7 +1105,7 @@ bool send = isNotRetainingStatus() ;
                    case 1:
 
                       st.v = Par[0]; //Volume only
-                      if (st.hsv_flag)
+                      if (getSubtype()==ST_HSV || getSubtype()==ST_RGB)
                       {
                       Par[0] = st.h;
                       Par[1] = st.s;
@@ -1191,14 +1116,16 @@ bool send = isNotRetainingStatus() ;
                       st.h = Par[0];
                       st.s = Par[1];
                       Par[2] = st.v;
-                      st.hsv_flag = 1;
+                      //st.hsv_flag = 1;
+                      setSubtype(ST_HSV);
                       n = 3;
                       break;
                    case 3: //complete triplet
                       st.h = Par[0];
                       st.s = Par[1];
                       st.v = Par[2];
-                      st.hsv_flag = 1;
+                      //st.hsv_flag = 1;
+                      setSubtype(ST_HSV);
                    }
                 setVal(st.aslong);
                 if (!suffixCode)
@@ -2191,7 +2118,8 @@ int Item::SendStatus(int sendFlags) {
                snprintf(valstr, sizeof(valstr), "%d,%d,%d", st.h,st.s,st.v);
             break;
                case CH_GROUP:
-               if (st.hsv_flag)
+               //if (st.hsv_flag)
+               if (getSubtype()==ST_HSV)
                 snprintf(valstr, sizeof(valstr), "%d,%d,%d", st.h,st.s,st.v);
                else
                 snprintf(valstr, sizeof(valstr), "%d", st.v);
@@ -2200,7 +2128,7 @@ int Item::SendStatus(int sendFlags) {
                 sendFlags &= ~SEND_PARAMETERS;  //No need to send value for relay
             break;
                default:
-               snprintf(valstr, sizeof(valstr), "%d", st.aslong);
+               snprintf(valstr, sizeof(valstr), "%ld", st.aslong);
            }//itemtype
         }
     if (sendFlags & SEND_COMMAND)

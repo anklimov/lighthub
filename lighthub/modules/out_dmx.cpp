@@ -1,6 +1,6 @@
-#ifndef SPILED_DISABLE
-
-#include "modules/out_spiled.h"
+//#ifndef DMX_DISABLE
+#ifdef XXXX
+#include "modules/out_dmx.h"
 #include "Arduino.h"
 #include "options.h"
 #include "Streaming.h"
@@ -8,77 +8,23 @@
 #include "item.h"
 #include "main.h"
 
-#ifdef ADAFRUIT_LED
-
-#include <Adafruit_NeoPixel.h>
-#ifdef __AVR__
- #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
-#endif
-Adafruit_NeoPixel *leds = NULL;
-
-#else
-#include "FastLED.h"
-static CRGB *leds = NULL;
-
-#endif
-
-#define NUM_LEDS 43
-
 static int driverStatus = CST_UNKNOWN;
 
-void out_SPILed::getConfig()
+
+
+
+int  out_dmx::Setup()
 {
-  pin=item->getArg(0);
-  if(pin<=0) pin=3;
 
-  numLeds=item->getArg(1);
-  if (numLeds<=0) numLeds=NUM_LEDS;
-
-  ledsType=item->getArg(2);
-  #ifdef ADAFRUIT_LED
-  if (ledsType<=0) ledsType= NEO_BRG + NEO_KHZ800;
-  #endif
-}
-
-
-int  out_SPILed::Setup()
-{
-getConfig();
-Serial.println("SPI-LED Init");
-
-if (!leds)
-{
-#ifdef ADAFRUIT_LED
-#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
-  clock_prescale_set(clock_div_1);
-#endif
-leds = new Adafruit_NeoPixel(numLeds, pin, ledsType);
-leds->begin();
-#else
-leds = new CRGB [numLeds]; //Allocate dynamic memory for LED objects
-//template< CONTROLLER = TM1809, uint8_t DATA_PIN = pin, EOrder ORDER = BRG >
-//FastLED.addLeds<TM1809, pin, BRG>(leds, numLeds);
-FastLED.addLeds<CONTROLLER, DATA_PIN, ORDER>(leds, numLeds);
-#endif
-}
-
+debugSerial<<F("DMX-Out Init")<<endl;
 driverStatus = CST_INITIALIZED;
 return 1;
 }
 
 int  out_SPILed::Stop()
 {
-Serial.println("SPI-LED De-Init");
-//FastLED.addLeds<TM1809, DATA_PIN, BRG>(leds, NUM_LEDS);
-#ifdef ADAFRUIT_LED
-leds->clear();
-delete leds;
-#else
-FastLED.clear(true);
-delete [] leds;
-#endif
+debugSerial<<F("DMX-Out stop")<<endl;
 driverStatus = CST_UNKNOWN;
-
 return 1;
 }
 
@@ -194,30 +140,7 @@ case S_HSV:
           //st.Int(item->getVal()); //Restore old params
           st.loadItem(item);
           st.assignFrom(cmd);
-/*
-          switch (n) //How many parameters are passed?
-          {
-            case 1:
-            st.v = Parameters[0]; //Volume only
-            if (!st.hsv_flag)
-              {
-                st.h = 0; //Filling by default
-                st.s = 0;
-                st.hsv_flag = 1; // Mark stored vals as HSV
-              }
-            break;
-            case 2: // Just hue and saturation
-              st.h = Parameters[0];
-              st.s = Parameters[1];
-              st.hsv_flag = 1;
-            break;
-            case 3: //complete triplet
-            st.h = Parameters[0];
-            st.s = Parameters[1];
-            st.v = Parameters[2];
-            st.hsv_flag = 1;
-          }
-*/
+
 
           PixelCtrl(st,from,to,toExecute);
 
@@ -235,25 +158,14 @@ case S_HSV:
           }
           return 1;
           //break;
+case S_HUE:
+     st.setH(uint16_t);
+     break;
 
-/*
-case S_RGB:
-  st.r = Parameters[0];
-  st.g = Parameters[1];
-  st.b = Parameters[2];
-  st.w = 0;
-  st.hsv_flag = 0;
-PixelCtrl(&st,0,from,to,toExecute,true);
-//item->setVal(st.aslong); //Store
-if (!suffixCode)
-{
-  if (chActive>0 && !st.aslong) item->setCmd(CMD_OFF);
-  if (chActive==0 && st.aslong) item->setCmd(CMD_ON);
-  item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
-}
-else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
-return 1;
-//break; */
+case S_SAT:
+     st.setS(uint8_t);
+     break;
+
 case S_CMD:
       item->setCmd(cmd.getCmd());
       switch (cmd.getCmd())
@@ -293,7 +205,7 @@ case S_CMD:
 
             case CMD_OFF:
             if (subItem) // LED range, not whole strip
-            PixelCtrl(st.Cmd(CMD_OFF),from,to);
+            PixelCtrl(st.Cmd(CMD_OFF));
             else
             {
               st.Percents(0);

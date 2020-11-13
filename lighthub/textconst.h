@@ -100,7 +100,7 @@ const char DRY_P[]  PROGMEM = "DRY";
 const char HIGH_P[] PROGMEM = "HIGH";
 const char MED_P[]  PROGMEM = "MEDIUM";
 const char LOW_P[]  PROGMEM = "LOW";
-
+const char ERROR_P[]  PROGMEM = "ERR";
 
 
 // SubTopics
@@ -110,7 +110,7 @@ const char MODE_P[] PROGMEM = "mode";
 const char FAN_P[]  PROGMEM = "fan";
 const char HUE_P[]   PROGMEM = "hue";
 const char SAT_P[]   PROGMEM = "sat";
-
+const char TEMP_P[]   PROGMEM = "temp";
 const char HSV_P[]   PROGMEM = "HSV";
 const char RGB_P[]   PROGMEM = "RGB";
 

@@ -66,6 +66,7 @@ PWM Out
 */
 
 #include "main.h"
+#include "statusled.h"
 
 #ifdef WIFI_ENABLE
 WiFiClient ethClient;

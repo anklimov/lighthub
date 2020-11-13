@@ -25,7 +25,8 @@ public:
     int Status() override;
     int isActive() override;
     int getChanType() override;
-    int Ctrl(short cmd, short n=0, int * Parameters=NULL,  int suffixCode=0, char* subItem=NULL) override;
+    //int Ctrl(short cmd, short n=0, int * Parameters=NULL,  int suffixCode=0, char* subItem=NULL) override;
+    int Ctrl(itemCmd cmd, int suffixCode=0, char* subItem=NULL) override;
 
     int8_t pinUp;
     int8_t pinDown;

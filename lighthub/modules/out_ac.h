@@ -29,7 +29,8 @@ public:
     int Stop() override;
     int Status() override;
     int isActive() override;
-    int Ctrl(short cmd, short n=0, int * Parameters=NULL,  int suffixCode=0, char* subItem=NULL) override;
+    //int Ctrl(short cmd, short n=0, int * Parameters=NULL,  int suffixCode=0, char* subItem=NULL) override;
+    int Ctrl(itemCmd cmd, int suffixCode=0, char* subItem=NULL) override;
 
 protected:
     void InsertData(byte data[], size_t size);

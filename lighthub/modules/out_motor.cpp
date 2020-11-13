@@ -211,12 +211,12 @@ int out_Motor::getChanType()
 
 
 
-int out_Motor::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
+int out_Motor::Ctrl(itemCmd cmd,  int suffixCode, char* subItem)
 {
 int chActive = item->isActive();
 bool toExecute = (chActive>0);
-long st;
-if (cmd>0 && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
+itemCmd st(ST_PERCENTS);
+if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 item->setFlag(ACTION_NEEDED);
 
@@ -227,12 +227,14 @@ case S_NOTFOUND:
 toExecute = true;
 debugSerial<<F("Forced execution");
 case S_SET:
-          if (!Parameters || n==0) return 0;
-          item->setVal(st=Parameters[0]); //Store
+          if (!cmd.isValue()) return 0;
+          st.assignFrom(cmd);
+          //Store
+          st.saveItem(item);
           if (!suffixCode)
           {
-            if (chActive>0 && !st) item->setCmd(CMD_OFF);
-            if (chActive==0 && st) item->setCmd(CMD_ON);
+            if (chActive>0 && !st.getPercents()) item->setCmd(CMD_OFF);
+            if (chActive==0 && st.getPercents()) item->setCmd(CMD_ON);
             item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
             if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
           }
@@ -242,30 +244,32 @@ case S_SET:
           //break;
 
 case S_CMD:
-      item->setCmd(cmd);
-      switch (cmd)
+      item->setCmd(cmd.getCmd());
+      switch (cmd.getCmd())
           {
           case CMD_ON:
            //retrive stored values
-           st = item->getVal();
-
-
-            if (st && (st<MIN_VOLUME) /* && send */) st=INIT_VOLUME;
-            item->setVal(st);
-
-            if (st)  //Stored smthng
+            if (st.loadItem(item))
             {
-              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
-              debugSerial<<F("Restored: ")<<st<<endl;
+                if (st.getPercents() && (st.getPercents()<MIN_VOLUME) /* && send */)
+                 { //Volume too low
+                        st.Percents(INIT_VOLUME);
+                        st.saveItem(item);
+                        item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
+                 }
+            debugSerial<<F("Restored: ")<<st.getPercents()<<endl;
             }
             else
             {
-              debugSerial<<st<<F(": No stored values - default\n");
+              debugSerial<<F(": No stored values - default\n");
               // Store
-              st=100;
-              item->setVal(st);
+              st.setDefault();
+              st.saveItem(item);
+              //st=100;
+              //item->setVal(st);
               item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             }
+
             if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
             return 1;
 
