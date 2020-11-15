@@ -211,10 +211,11 @@ int out_Motor::getChanType()
 
 
 
-int out_Motor::Ctrl(itemCmd cmd,  int suffixCode, char* subItem)
+int out_Motor::Ctrl(itemCmd cmd,   char* subItem)
 {
 int chActive = item->isActive();
 bool toExecute = (chActive>0);
+int suffixCode = cmd.getSuffix();
 itemCmd st(ST_PERCENTS);
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 

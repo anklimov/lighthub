@@ -8,7 +8,7 @@ class chPersistent {};
 class abstractOut  : public abstractCh{
 public:
     abstractOut(Item * _item):abstractCh(){item=_item;};
-    virtual int Ctrl(itemCmd cmd, int suffixCode=0, char* subItem=NULL) =0;
+    virtual int Ctrl(itemCmd cmd,  char* subItem=NULL) =0;
     virtual int isActive(){return 0;};
     virtual int getDefaultOnVal(){return 100;};
     virtual int getChanType(){return 0;}

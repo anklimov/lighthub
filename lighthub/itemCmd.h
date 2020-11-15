@@ -58,7 +58,7 @@ const cmdstr commands_P[] PROGMEM =
 #define CMD_MASK 0xff
 #define FLAG_MASK 0xff00
 
-#define CMD_NUM 0
+#define CMD_VOID 0
 #define CMD_UNKNOWN  -1
 #define CMD_JSON -2
 //#define CMD_RGB  -3
@@ -74,6 +74,7 @@ const cmdstr commands_P[] PROGMEM =
 
 int txt2cmd (char * payload);
 
+/*
 enum itemStoreType {
 ST_VOID         = 0,
 ST_PERCENTS     = 1,
@@ -88,12 +89,49 @@ ST_HSV255       = 9,
 ST_INT32        = 10,
 ST_UINT32       = 11,
 ST_STRING       = 12,
-ST_FLOAT        = 13,
-ST_COMMAND      = 15
-
+ST_FLOAT        = 13//,
+//ST_COMMAND      = 15
 };
+*/
+
+#define ST_VOID         0
+#define ST_PERCENTS     1
+#define ST_TENS         2
+#define ST_HSV          3
+#define ST_FLOAT_CELSIUS   4
+#define ST_FLOAT_FARENHEIT 5
+#define ST_RGB          6
+#define ST_RGBW         7
+#define ST_PERCENTS255  8
+#define ST_HSV255       9
+#define ST_INT32        10
+#define ST_UINT32       11
+#define ST_STRING       12
+#define ST_FLOAT        13
+
 
 #pragma pack(push, 1)
+
+typedef union
+{
+  long int aslong;
+  int32_t  asInt32;
+  uint32_t asUint32;
+  struct
+      {
+        uint8_t cmdCode;
+            union {
+                  uint8_t cmdFlag;
+                  struct
+                      { uint8_t  suffixCode:4;
+                        uint8_t  itemArgType:4;
+                      };
+                  };
+        uint8_t cmdEffect;
+        uint8_t cmdParam;
+      };
+} itemCmdStore;
+
 typedef union
 {
   long int aslong;
@@ -101,13 +139,7 @@ typedef union
   uint32_t asUint32;
   char*    asString;
   float    asfloat;
-  struct
-      {
-        uint8_t cmd_code;
-        uint8_t cmd_flag;
-        uint8_t cmd_effect;
-        uint8_t cmd_param;
-      };
+
   struct
       { uint8_t  v;
         uint8_t  s;
@@ -127,19 +159,20 @@ typedef union
         uint8_t  b;
         uint8_t  w;
       };
-} itemStore;
+} itemArgStore;
+
 class Item;
 class itemCmd
 {
 public:
-  itemStoreType type;
-  itemStore     param;
+  itemCmdStore      cmd;
+  itemArgStore      param;
 
-  itemCmd(itemStoreType _type=ST_VOID);
+  itemCmd(uint8_t _type=ST_VOID, uint8_t _code=CMD_VOID);
   itemCmd assignFrom(itemCmd from);
 
-  bool loadItem(Item * item);
-  bool saveItem(Item * item);
+  bool loadItem(Item * item, bool includeCommand=false );
+  bool saveItem(Item * item, bool includeCommand=false);
 
   itemCmd Int(int32_t i);
   itemCmd Int(uint32_t i);
@@ -147,7 +180,12 @@ public:
   itemCmd HSV(uint16_t h, uint8_t s, uint8_t v);
   itemCmd setH(uint16_t);
   itemCmd setS(uint8_t);
+  itemCmd setArgType(uint8_t);
   itemCmd Percents(int i);
+  itemCmd Percents255(int i);
+
+  uint8_t getSuffix();
+  itemCmd setSuffix(uint8_t suffix);
 
   itemCmd incrementPercents(int16_t);
   itemCmd incrementH(int16_t);
@@ -156,8 +194,9 @@ public:
   long int getInt();
   short    getPercents();
   short    getPercents255();
-  short    getCmd();
-  short    getCmdParam();
+  uint8_t    getCmd();
+  uint8_t    getArgType();
+  uint8_t    getCmdParam();
   char   * toString(char * Buffer, int bufLen);
 
   bool isCommand();

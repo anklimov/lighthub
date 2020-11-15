@@ -15,7 +15,7 @@ int txt2cmd(char *payload) {
   if (!payload || !payload[0]) return cmd;
 
   // Check for command
-  if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = CMD_NUM;
+  if (*payload == '-' || (*payload >= '0' && *payload <= '9')) cmd = CMD_VOID;
   else if (*payload == '%') cmd = CMD_UP;
   else if (*payload == '{') cmd = CMD_JSON;
   else if (*payload == '#') cmd = CMD_RGB;
@@ -37,14 +37,15 @@ int txt2cmd(char *payload) {
   return cmd;
 }
 
-itemCmd::itemCmd(itemStoreType _type)
+itemCmd::itemCmd(uint8_t _type, uint8_t _code)
 {
-  type=_type;
+  cmd.itemArgType=_type;
+  cmd.cmdCode=_code;
 }
 
 itemCmd itemCmd::setDefault()
 {
-  switch (type){
+  switch (cmd.itemArgType){
     case ST_FLOAT_CELSIUS: param.asfloat=20.;
     break;
     case ST_FLOAT_FARENHEIT: param.asfloat=75.;
@@ -66,10 +67,10 @@ itemCmd itemCmd::setDefault()
 itemCmd itemCmd::setH(uint16_t h)
 {
   int par=h;
-  switch (type)
+  switch (cmd.itemArgType)
   {
     case ST_VOID:
-      type=ST_HSV;
+      cmd.itemArgType=ST_HSV;
     case ST_HSV:
       if (par>100) par=100;
     case ST_HSV255:
@@ -83,10 +84,10 @@ itemCmd itemCmd::setH(uint16_t h)
 itemCmd itemCmd::setS(uint8_t s)
 {
   int par=s;
-  switch (type)
+  switch (cmd.itemArgType)
   {
     case ST_VOID:
-      type=ST_HSV;
+      cmd.itemArgType=ST_HSV;
     case ST_HSV:
       if (par>100) par=100;
     case ST_HSV255:
@@ -99,7 +100,7 @@ itemCmd itemCmd::setS(uint8_t s)
 
 itemCmd itemCmd::incrementPercents(int16_t dif)
 { int par=param.v;
-  switch (type)
+  switch (cmd.itemArgType)
   {
     case ST_PERCENTS:
     case ST_HSV:
@@ -120,7 +121,7 @@ itemCmd itemCmd::incrementPercents(int16_t dif)
 
 itemCmd itemCmd::incrementH(int16_t dif)
 { int par=param.h;
-  switch (type)
+  switch (cmd.itemArgType)
   {
   case ST_HSV:
   case ST_HSV255:
@@ -135,7 +136,7 @@ return *this;
 
 itemCmd itemCmd::incrementS(int16_t dif)
 {int par=param.s;
-  switch (type)
+  switch (cmd.itemArgType)
   {
     case ST_PERCENTS:
     case ST_HSV:
@@ -161,10 +162,10 @@ itemCmd itemCmd::assignFrom(itemCmd from)
   bool RGBW_flag   = false;
   bool HSV255_flag = false;
 
-  switch (type){ //Destination
+  switch (cmd.itemArgType){ //Destination
      case ST_HSV:
      case ST_PERCENTS:
-        switch (from.type)
+        switch (from.cmd.itemArgType)
              {
               case ST_RGBW:
                    param.w=from.param.w;
@@ -172,7 +173,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                    param.r=from.param.r;
                    param.g=from.param.g;
                    param.b=from.param.b;
-                   type=from.type; //Changing if type
+                   cmd.itemArgType=from.cmd.itemArgType; //Changing if type
                    break;
               case ST_HSV:
                    param.h=from.param.h;
@@ -191,11 +192,11 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                    param.v=map(from.param.v,0,255,0,100);
                    break;
               default:
-                  debugSerial<<F("Wrong Assignment ")<<from.type<<F("->")<<type<<endl;
+                  debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
               }
         case ST_HSV255:
         case ST_PERCENTS255:
-           switch (from.type)
+           switch (from.cmd.itemArgType)
              {
                case ST_RGBW:
                     param.w=from.param.w;
@@ -203,7 +204,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                     param.r=from.param.r;
                     param.g=from.param.g;
                     param.b=from.param.b;
-                    type=from.type;
+                    cmd.itemArgType=from.cmd.itemArgType;
                     break;
               case ST_HSV:
                    param.h=from.param.h;
@@ -222,11 +223,11 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                    param.v=from.param.v;
                    break;
               default:
-                       debugSerial<<F("Wrong Assignment ")<<from.type<<F("->")<<type<<endl;
+                       debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
               }
 
         case ST_VOID:
-             type=from.type;
+             cmd.itemArgType=from.cmd.itemArgType;
 
         case ST_INT32:
         case ST_UINT32:
@@ -239,7 +240,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
         case ST_RGBW:
              RGBW_flag=true;
         case ST_RGB:
-        switch (from.type)
+        switch (from.cmd.itemArgType)
           {
             case ST_RGBW:
             case ST_RGB:
@@ -292,7 +293,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                   #endif
                 }
             default:
-                    debugSerial<<F("Wrong Assignment ")<<from.type<<F("->")<<type<<endl;
+                    debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
          } //Translation to RGB_XX
         break;
      } //Destination
@@ -301,35 +302,25 @@ itemCmd itemCmd::assignFrom(itemCmd from)
 
 bool itemCmd::isCommand()
 {
-  switch (type) {
-    case ST_COMMAND:
-    return true;
-    default:
-    return false;
-  }
+  return (cmd.cmdCode);
 }
 
 bool itemCmd::isValue()
 {
-  switch (type) {
-
-    case ST_COMMAND:
-    case ST_VOID:
-       return false;
-    default:
-    return true;
-  }
+return (cmd.itemArgType);
 }
 
 
 long int itemCmd::getInt()
 {
-  switch (type) {
+  switch (cmd.itemArgType) {
 
     case ST_INT32:
     case ST_PERCENTS:
     case ST_UINT32:
     case ST_PERCENTS255:
+    case ST_HSV:
+    case ST_HSV255:
       return param.aslong;
 
     case ST_FLOAT:
@@ -344,7 +335,7 @@ long int itemCmd::getInt()
 
 short itemCmd::getPercents()
 {
-  switch (type) {
+  switch (cmd.itemArgType) {
 
     case ST_PERCENTS:
     case ST_HSV:
@@ -361,7 +352,7 @@ short itemCmd::getPercents()
 
 short itemCmd::getPercents255()
 {
-  switch (type) {
+  switch (cmd.itemArgType) {
 
     case ST_PERCENTS:
     case ST_HSV:
@@ -376,28 +367,77 @@ short itemCmd::getPercents255()
   }
 }
 
-short itemCmd::getCmd()
+uint8_t itemCmd::getCmd()
 {
-  if (type==ST_COMMAND) return param.cmd_code;
-  return 0;
+  return cmd.cmdCode;
 }
 
-short    itemCmd::getCmdParam()
+uint8_t itemCmd::getArgType()
 {
-  if (type==ST_COMMAND) return param.cmd_param;
+  return cmd.itemArgType;
+}
+
+itemCmd itemCmd::setArgType(uint8_t type)
+{
+   cmd.itemArgType=type;
+  return *this;
+}
+
+uint8_t itemCmd::getCmdParam()
+{
+  if (isCommand()) return cmd.cmdParam;
   return 0;
 }
 
 itemCmd itemCmd::Percents(int i)
     {
-      type=ST_PERCENTS;
-      param.aslong=i;
+      if (i<0) i=0;
+      if (i>100) i=100;
+
+      switch (cmd.itemArgType)
+      {
+       case ST_HSV:
+       case ST_PERCENTS:
+         param.v=i;
+       break;
+
+       case ST_HSV255:
+       case ST_PERCENTS255:
+          param.v=map(i,0,100,0,255);
+       default:
+       cmd.itemArgType=ST_PERCENTS;
+       param.v=i;
+      }
+
       return *this;
     }
 
+    itemCmd itemCmd::Percents255(int i)
+        {
+          if (i<0) i=0;
+          if (i>255) i=255;
+
+          switch (cmd.itemArgType)
+          {
+           case ST_HSV:
+           case ST_PERCENTS:
+             param.v=map(i,0,255,0,100);
+           break;
+
+           case ST_HSV255:
+           case ST_PERCENTS255:
+              param.v=i;;
+           default:
+           cmd.itemArgType=ST_PERCENTS255;
+           param.v=i;
+          }
+
+          return *this;
+        }
+
 itemCmd itemCmd::Int(int32_t i)
         {
-          type=ST_INT32;
+          cmd.itemArgType=ST_INT32;
           param.asInt32=i;
           return *this;
         }
@@ -406,7 +446,7 @@ itemCmd itemCmd::Int(int32_t i)
 
 itemCmd itemCmd::HSV(uint16_t h, uint8_t s, uint8_t v)
 {
-  type=ST_HSV;
+  cmd.itemArgType=ST_HSV;
   param.h=h;
   param.s=s;
   param.v=v;
@@ -416,7 +456,7 @@ itemCmd itemCmd::HSV(uint16_t h, uint8_t s, uint8_t v)
 
 itemCmd itemCmd::Int(uint32_t i)
                 {
-                  type=ST_UINT32;
+                  cmd.itemArgType=ST_UINT32;
                   param.asUint32=i;
                   return *this;
                 }
@@ -424,29 +464,42 @@ itemCmd itemCmd::Int(uint32_t i)
 
 itemCmd itemCmd::Cmd(uint8_t i)
     {
-          type=ST_COMMAND;
-          param.cmd_code=i;
+    //      cmd.itemArgType=ST_COMMAND;
+          cmd.cmdCode=i;
           return *this;
     }
 
 
-bool itemCmd::loadItem(Item * item)
+uint8_t itemCmd::getSuffix()
+{
+  return cmd.suffixCode;
+}
+
+itemCmd itemCmd::setSuffix(uint8_t suffix)
+{
+  cmd.suffixCode=suffix;
+  return *this;
+}
+
+bool itemCmd::loadItem(Item * item, bool includeCommand)
 {
   if (item && item->isValid())
   {
   param.asInt32=item->getVal();
-  type=(itemStoreType) item->getSubtype();
-  return (type!=ST_VOID);
+  cmd.itemArgType=item->getSubtype();
+  if (includeCommand) cmd.cmdCode=item->getCmd();
+  return (cmd.itemArgType!=ST_VOID);
   }
 return false;
 }
 
-bool itemCmd::saveItem(Item * item)
+bool itemCmd::saveItem(Item * item, bool includeCommand)
 {
   if (item && item->isValid())
   {
   item->setVal(param.asInt32);
-  item->setSubtype(type);
+  item->setSubtype(cmd.itemArgType);
+  if (includeCommand) item->setCmd(cmd.cmdCode);
   return true;
   }
 return false;
@@ -456,45 +509,56 @@ return false;
 
 char * itemCmd::toString(char * Buffer, int bufLen)
      {
-       if (!Buffer) return NULL;
-       switch (type)
+
+       if (!Buffer || !bufLen) return NULL;
+       *Buffer=0;
+       char * argPtr=Buffer;
+       if (isCommand())
+                        {
+                          int len;
+                          strncpy_P(Buffer, commands_P[cmd.cmdCode], bufLen);
+                          strncat(Buffer, " ", bufLen);
+                          len=strlen(Buffer);
+                          argPtr+=len;
+                          bufLen-=len;
+                        }
+
+       switch (cmd.itemArgType)
        {
-         case ST_VOID:
-              return NULL;
 
          case ST_PERCENTS:
          case ST_PERCENTS255:
          case ST_UINT32:
-            snprintf(Buffer, bufLen, "%lu", param.asUint32);
+            snprintf(argPtr, bufLen, "%lu", param.asUint32);
          break;
          case ST_INT32:
-            snprintf(Buffer, bufLen, "%ld", param.asInt32);
+            snprintf(argPtr, bufLen, "%ld", param.asInt32);
 
          break;
          case ST_HSV:
          case ST_HSV255:
-         snprintf(Buffer, bufLen, "%d,%d,%d", param.h, param.s, param.v);
+         snprintf(argPtr, bufLen, "%d,%d,%d", param.h, param.s, param.v);
 
          break;
          case ST_FLOAT_CELSIUS:
          case ST_FLOAT_FARENHEIT:
          case ST_FLOAT:
-         snprintf(Buffer, bufLen, "%.1f", param.asfloat);
+         snprintf(argPtr, bufLen, "%.1f", param.asfloat);
          break;
          case ST_RGB:
-         snprintf(Buffer, bufLen, "%d,%d,%d", param.r, param.g, param.b);
+         snprintf(argPtr, bufLen, "%d,%d,%d", param.r, param.g, param.b);
          break;
 
          case ST_RGBW:
-         snprintf(Buffer, bufLen, "%d,%d,%d,%d", param.r, param.g, param.b,param.w);
+         snprintf(argPtr, bufLen, "%d,%d,%d,%d", param.r, param.g, param.b,param.w);
          break;
 
          case ST_STRING:
-         strncpy(Buffer, param.asString,bufLen);
+         strncpy(argPtr, param.asString,bufLen);
 
          break;
-         case ST_COMMAND:
-         strncpy_P(Buffer, commands_P[param.cmd_code], bufLen);
+         default:
+         ;
        }
       return Buffer;
      }

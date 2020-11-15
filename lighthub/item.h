@@ -23,7 +23,7 @@ e-mail    anklimov@gmail.com
 #include "itemCmd.h"
 
 #define S_NOTFOUND  0
-#define S_SETnCMD 0
+//#define S_SETnCMD 0
 #define S_CMD 1
 #define S_SET 2
 #define S_HSV 3
@@ -33,7 +33,7 @@ e-mail    anklimov@gmail.com
 #define S_HUE 7
 #define S_SAT 8
 #define S_TEMP 9
-#define S_ADDITIONAL 64
+#define S_ADDITIONAL 9
 
 #define CH_DIMMER 0   //DMX 1 ch
 #define CH_RGBW   1   //DMX 4 ch
@@ -103,7 +103,7 @@ class Item
   boolean Setup();
   void Stop();
   int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL);
-  int Ctrl(itemCmd cmd, int suffixCode=0, char* subItem=NULL);
+  int Ctrl(itemCmd cmd, char* subItem=NULL);
   int Ctrl(char * payload,  char * subItem=NULL);
 
   int getArg(short n=0);

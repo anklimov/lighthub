@@ -44,6 +44,7 @@ e-mail    anklimov@gmail.com
 #include "modules/out_ac.h"
 #include "modules/out_motor.h"
 #include "modules/out_modbus.h"
+#include "modules/out_dmx.h"
 
 short modbusBusy = 0;
 extern aJsonObject *pollingItem;
@@ -123,6 +124,13 @@ void Item::Parse() {
         itemExt = aJson.getArrayItem(itemArr, I_EXT);
         switch (itemType)
         {
+#ifndef   DMX_DISABLE
+            case CH_RGBW:
+            case CH_RGB:
+            driver = new out_dmx (this);
+  //          debugSerial<<F("SPILED driver created")<<endl;
+            break;
+#endif
 #ifndef   SPILED_DISABLE
           case CH_SPILED:
           driver = new out_SPILed (this);
@@ -479,7 +487,7 @@ debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
       setCommand=cmd;
       case CMD_HSV:
       // suffixCode=S_HSV; //override code for known payload
-      case CMD_NUM:
+      case CMD_VOID:
 
        {
           short i = 0;
@@ -532,9 +540,10 @@ short Item::cmd2changeActivity(int lastActivity, short defaultCmd)
 }
 */
 
-int Item::Ctrl(itemCmd cmd, int suffixCode, char* subItem)
+int Item::Ctrl(itemCmd cmd,  char* subItem)
 {
   char stringBuffer[16];
+  int suffixCode = cmd.getSuffix();
   bool operation = isNotRetainingStatus() ;
 
     if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
@@ -565,7 +574,7 @@ int Item::Ctrl(itemCmd cmd, int suffixCode, char* subItem)
           // Group channel
           if (! operation) return -1;
 
-          int     iaddr = getArg();
+          //int     iaddr = getArg();
           bool    chActive =(isActive()>0);
 
           itemCmd st;
@@ -609,11 +618,13 @@ int Item::Ctrl(itemCmd cmd, int suffixCode, char* subItem)
             case CMD_UP:
             {
             if (itemType == CH_GROUP) break; ////bug here
-            short step=cmd.getCmdParam();
+
+            short step=0;
+            if (cmd.isValue()) step=cmd.getInt();
             if (!step) step=DEFAULT_INC_STEP;
             if (cmd.getCmd() == CMD_DN) step=-step;
 
-            int cType=getChanType();
+            //int cType=getChanType();
             //debugSerial<<"from: h="<<st.h<<" s="<<st.s <<" v="<<st.v<<endl;
                       switch (suffixCode)
                       {
@@ -630,7 +641,7 @@ int Item::Ctrl(itemCmd cmd, int suffixCode, char* subItem)
 
              } //Case UP/DOWN
              break;
-             case CMD_NUM:
+             case CMD_VOID:
                          //if (itemType == CH_GROUP || n!=1) break;
                          if (!cmd.isValue()) break;
 ////                         if ( cType == CH_RGB || cType == CH_RGBW || cType == CH_GROUP )
@@ -662,7 +673,7 @@ if (driver) //New style modular code
             if (!chActive>0)  //if channel was'nt active before CMD_XON
                   {
                     debugSerial<<F("Turning XON\n");
-                    res = driver->Ctrl(cmd.Cmd(CMD_ON), suffixCode, subItem);
+                    res = driver->Ctrl(cmd.Cmd(CMD_ON), subItem);
                     setCmd(CMD_XON);
                   }
               else
@@ -674,7 +685,7 @@ if (driver) //New style modular code
             case CMD_HALT:
             if (chActive>0)  //if channel was active before CMD_HALT
                   {
-                    res = driver->Ctrl(cmd.Cmd(CMD_OFF), suffixCode, subItem);
+                    res = driver->Ctrl(cmd.Cmd(CMD_OFF), subItem);
                     setCmd(CMD_HALT);
                     return res;
                   }
@@ -687,7 +698,7 @@ if (driver) //New style modular code
             case CMD_OFF:
             if (getCmd() != CMD_HALT) //Halted, ignore OFF
                  {
-                   res = driver->Ctrl(cmd.Cmd(CMD_OFF), suffixCode, subItem);
+                   res = driver->Ctrl(cmd.Cmd(CMD_OFF), subItem);
                    setCmd(CMD_OFF);
                  }
             else
@@ -697,12 +708,12 @@ if (driver) //New style modular code
                   }
             break;
 
-            case CMD_NUM:
-            res = driver->Ctrl(st, suffixCode, subItem);
+            case CMD_VOID:
+            res = driver->Ctrl(st, subItem);
             break;
 
             default: //another command
-            res = driver->Ctrl(cmd,  suffixCode, subItem);
+            res = driver->Ctrl(cmd, subItem);
             if (cmd.isCommand()) setCmd(cmd.getCmd());
           }
           return res;
@@ -719,7 +730,7 @@ switch (itemType) {
                       if (i->type == aJson_String)
                         {
                         Item it(i->valuestring);
-                        it.Ctrl(cmd, suffixCode,subItem);
+                        it.Ctrl(cmd,subItem);
                         }
                       i = i->next;
                   } //while
@@ -833,7 +844,7 @@ bool send = isNotRetainingStatus() ;
 
     case 2:   _itemCmd.setH(Parameters[0]);
               _itemCmd.setS(Parameters[1]);
-              _itemCmd.type=ST_HSV;
+              _itemCmd.setArgType(ST_HSV);
               break;
 
     case 3:   _itemCmd.HSV(Parameters[0],Parameters[1],Parameters[2]);
@@ -864,7 +875,7 @@ bool send = isNotRetainingStatus() ;
 
     int iaddr = getArg();
     int chActive =isActive();
-    itemStore st;
+    itemArgStore st;
     switch (cmd) {
         int t;
 /*
@@ -939,7 +950,7 @@ bool send = isNotRetainingStatus() ;
                   if (Par[0]>100) Par[0]=100;
                   if (Par[0]<0) Par[0]=0;
                   n=1;
-                  cmd=CMD_NUM;
+                  cmd=CMD_VOID;
                   debugSerial<<" to v="<<Par[0]<<endl;
                   break;
                   case S_HUE:
@@ -986,14 +997,14 @@ bool send = isNotRetainingStatus() ;
                  if (Par[2]<0) Par[2]=0;
 
                  n=3;
-                 cmd=CMD_NUM;
+                 cmd=CMD_VOID;
                  suffixCode=S_SET;
                  debugSerial<<"to: h="<<Par[0]<<" s="<<Par[1] <<" v="<<Par[2]<<endl;
                } // if modified
                } //RGBx channel
               }
               break;
-       case CMD_NUM:
+       case CMD_VOID:
                    //if (itemType == CH_GROUP || n!=1) break;
                    if (n!=1) break;
                    int cType=getChanType();
@@ -1040,7 +1051,7 @@ bool send = isNotRetainingStatus() ;
                       {
                         debugSerial<<F("Turning XON\n");
                         //res = driver->Ctrl(CMD_ON, n, Par, suffixCode, subItem);
-                        res = driver->Ctrl(_itemCmd.Cmd(CMD_ON), suffixCode, subItem);
+                        res = driver->Ctrl(_itemCmd.Cmd(CMD_ON),  subItem);
                         setCmd(CMD_XON);
                       }
                   else
@@ -1052,7 +1063,7 @@ bool send = isNotRetainingStatus() ;
                 case CMD_HALT:
                 if (chActive>0)  //if channel was active before CMD_HALT
                       {
-                        res = driver->Ctrl(_itemCmd.Cmd(CMD_OFF), suffixCode, subItem);
+                        res = driver->Ctrl(_itemCmd.Cmd(CMD_OFF), subItem);
                         setCmd(CMD_HALT);
                         return res;
                       }
@@ -1065,7 +1076,7 @@ bool send = isNotRetainingStatus() ;
                 case CMD_OFF:
                 if (getCmd() != CMD_HALT) //Halted, ignore OFF
                      {
-                       res = driver->Ctrl(_itemCmd, suffixCode, subItem);
+                       res = driver->Ctrl(_itemCmd, subItem);
                        setCmd(CMD_OFF);
                      }
                 else
@@ -1080,7 +1091,7 @@ bool send = isNotRetainingStatus() ;
                 break;
 */
                 default:
-                res = driver->Ctrl(_itemCmd,  suffixCode, subItem);
+                res = driver->Ctrl(_itemCmd,   subItem);
                 if (cmd) setCmd(cmd);
               }
               return res;
@@ -1482,8 +1493,14 @@ bool send = isNotRetainingStatus() ;
 return 1;
 }
 
+
+
+
+
+
+
 int Item::isActive() {
-    itemStore st;
+    itemArgStore st;
     int val = 0;
 
 
@@ -2106,7 +2123,7 @@ int Item::SendStatus(int sendFlags) {
       if (sendFlags & SEND_PARAMETERS)
       {
       // Preparing parameters payload //////////
-       itemStore st;
+       itemArgStore st;
        int chanType = itemType;
         if (driver) chanType = driver->getChanType();
        //retrive stored values

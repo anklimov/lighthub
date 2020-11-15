@@ -338,11 +338,13 @@ int out_Modbus::getChanType()
 
 
 
-int out_Modbus::Ctrl(itemCmd cmd,  int suffixCode, char* subItem)
+int out_Modbus::Ctrl(itemCmd cmd,   char* subItem)
 {
 int chActive = item->isActive();
 bool toExecute = (chActive>0);
 itemCmd st(ST_UINT32);
+int suffixCode = cmd.getSuffix();
+
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 switch(suffixCode)

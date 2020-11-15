@@ -22,7 +22,7 @@ public:
     int isActive() override;
     int getChanType() override;
     //int Ctrl(short cmd, short n=0, int * Parameters=NULL,  int suffixCode=0, char* subItem=NULL) override;
-    int Ctrl(itemCmd cmd, int suffixCode=0, char* subItem=NULL) override;
+    int Ctrl(itemCmd cmd, char* subItem=NULL) override;
     int PixelCtrl(itemCmd cmd, int from =0 , int to = 1024, bool show = 1);
     int numLeds;
     int8_t pin;

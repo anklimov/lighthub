@@ -89,7 +89,7 @@ return driverStatus;
 
 int out_SPILed::isActive()
 {
-itemStore st;
+itemArgStore st;
 st.aslong = item->getVal(); //Restore old params
 debugSerial<< F(" val:")<<st.v<<endl;
 return st.v;
@@ -102,6 +102,7 @@ return 0;
 
 int out_SPILed::getChanType()
 {
+
   if  ((ledsType>>4) == (ledsType>>6))
    return CH_RGB;
   else
@@ -167,10 +168,11 @@ CRGB pixel;
 return 1;
 }
 
-int out_SPILed::Ctrl(itemCmd cmd,  int suffixCode, char* subItem)
+int out_SPILed::Ctrl(itemCmd cmd,   char* subItem)
 {
 int chActive = item->isActive();
 bool toExecute = (chActive>0);
+int suffixCode = cmd.getSuffix();
 itemCmd st(ST_HSV);
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 

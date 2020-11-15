@@ -525,9 +525,8 @@ bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t m
 
 bool executeCommand(aJsonObject* cmd, int8_t toggle)
 {
-  itemCmd _itemCmd;
-  _itemCmd.type = ST_VOID;
-  return executeCommand(cmd,toggle,_itemCmd);
+  //itemCmd _itemCmd;
+  return executeCommand(cmd,toggle,itemCmd());
 }
 
 bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd)
