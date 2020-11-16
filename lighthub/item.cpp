@@ -45,6 +45,7 @@ e-mail    anklimov@gmail.com
 #include "modules/out_motor.h"
 #include "modules/out_modbus.h"
 #include "modules/out_dmx.h"
+#include "modules/out_pwm.h"
 
 short modbusBusy = 0;
 extern aJsonObject *pollingItem;
@@ -124,9 +125,14 @@ void Item::Parse() {
         itemExt = aJson.getArrayItem(itemArr, I_EXT);
         switch (itemType)
         {
+          case CH_PWM:
+          driver = new out_pwm (this);
+          break;
+
 #ifndef   DMX_DISABLE
             case CH_RGBW:
             case CH_RGB:
+            case CH_DIMMER:
             driver = new out_dmx (this);
   //          debugSerial<<F("SPILED driver created")<<endl;
             break;

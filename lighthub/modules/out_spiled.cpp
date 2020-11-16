@@ -109,8 +109,20 @@ int out_SPILed::getChanType()
    return CH_RGBW;
 }
 
-int out_SPILed::PixelCtrl(itemCmd cmd, int from, int to, bool show)
+int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show );
+//int out_SPILed::PixelCtrl(itemCmd cmd, int from, int to, bool show)
 {
+
+int from=0, to=numLeds-1; //All LEDs on the strip by default
+  // retrive LEDs range from suffix
+ if (subItem)
+  { //Just single LED to control todo - range
+  //  debugSerial<<F("Range:")<<subItem<<endl;
+    if (sscanf(subItem,"%d-%d",&from,&to) == 1) to=from;
+  }
+  debugSerial<<from<<F("-")<<to<<F(" cmd=")<<cmd.getCmd()<<endl;
+
+
 itemCmd st(ST_RGB);
 
 #ifdef ADAFRUIT_LED
@@ -162,12 +174,13 @@ CRGB pixel;
           #else
           FastLED.show();
           #endif
-
           debugSerial<<F("Show")<<endl;
           }
 return 1;
+
 }
 
+/*
 int out_SPILed::Ctrl(itemCmd cmd,   char* subItem)
 {
 int chActive = item->isActive();
@@ -196,30 +209,6 @@ case S_HSV:
           //st.Int(item->getVal()); //Restore old params
           st.loadItem(item);
           st.assignFrom(cmd);
-/*
-          switch (n) //How many parameters are passed?
-          {
-            case 1:
-            st.v = Parameters[0]; //Volume only
-            if (!st.hsv_flag)
-              {
-                st.h = 0; //Filling by default
-                st.s = 0;
-                st.hsv_flag = 1; // Mark stored vals as HSV
-              }
-            break;
-            case 2: // Just hue and saturation
-              st.h = Parameters[0];
-              st.s = Parameters[1];
-              st.hsv_flag = 1;
-            break;
-            case 3: //complete triplet
-            st.h = Parameters[0];
-            st.s = Parameters[1];
-            st.v = Parameters[2];
-            st.hsv_flag = 1;
-          }
-*/
 
           PixelCtrl(st,from,to,toExecute);
 
@@ -238,24 +227,6 @@ case S_HSV:
           return 1;
           //break;
 
-/*
-case S_RGB:
-  st.r = Parameters[0];
-  st.g = Parameters[1];
-  st.b = Parameters[2];
-  st.w = 0;
-  st.hsv_flag = 0;
-PixelCtrl(&st,0,from,to,toExecute,true);
-//item->setVal(st.aslong); //Store
-if (!suffixCode)
-{
-  if (chActive>0 && !st.aslong) item->setCmd(CMD_OFF);
-  if (chActive==0 && st.aslong) item->setCmd(CMD_ON);
-  item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
-}
-else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
-return 1;
-//break; */
 case S_CMD:
       item->setCmd(cmd.getCmd());
       switch (cmd.getCmd())
@@ -268,7 +239,7 @@ case S_CMD:
                       PixelCtrl(st.Cmd(CMD_ON),from,to);
            else  //whole strip
             {
-            if (st.param.aslong && (st.param.v<MIN_VOLUME) /* && send */) st.Percents(INIT_VOLUME);
+            if (st.param.aslong && (st.param.v<MIN_VOLUME) ) st.Percents(INIT_VOLUME);
             //item->setVal(st.getInt());
             st.saveItem(item);
 
@@ -312,5 +283,7 @@ break;
 debugSerial<<F("Unknown cmd")<<endl;
 return 0;
 }
+
+*/
 
 #endif
