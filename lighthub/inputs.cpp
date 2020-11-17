@@ -23,6 +23,7 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 #include <PubSubClient.h>
 #include "main.h"
+#include "itemCmd.h""
 
 #ifndef DHT_DISABLE
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
@@ -1012,11 +1013,11 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
         Item it(item->valuestring);
         if (it.isValid()) {
             if (newValue) {  //send set command
-                if (!scmd || scmd->type != aJson_String) it.Ctrl(CMD_ON, 0, NULL);
+                if (!scmd || scmd->type != aJson_String) it.Ctrl(itemCmd(ST_VOID,CMD_ON));
                 else if (strlen(scmd->valuestring))
                     it.Ctrl(scmd->valuestring);
             } else {  //send reset command
-                if (!rcmd || rcmd->type != aJson_String) it.Ctrl(CMD_OFF, 0, NULL);
+                if (!rcmd || rcmd->type != aJson_String) it.Ctrl(itemCmd(ST_VOID,CMD_OFF));
                 else if (strlen(rcmd->valuestring))
                     it.Ctrl(rcmd->valuestring);
             }
@@ -1049,10 +1050,11 @@ void Input::onAnalogChanged(float newValue) {
 }
 
     if (item && item->type == aJson_String) {
-        int intNewValue = round(newValue);
+        //int intNewValue = round(newValue);
         Item it(item->valuestring);
         if (it.isValid()) {
-           it.Ctrl(0, 1, &intNewValue, true);
+           //it.Ctrl(0, 1, &intNewValue, true);
+           it.Ctrl(itemCmd(newValue));
         }
     }
 }

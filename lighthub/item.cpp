@@ -25,6 +25,7 @@ e-mail    anklimov@gmail.com
 #include "textconst.h"
 #include "main.h"
 #include "bright.h"
+#include "itemCmd.h"
 
 #ifdef _dmxout
 #include "dmx.h"
@@ -134,7 +135,7 @@ void Item::Parse() {
             case CH_RGB:
             case CH_DIMMER:
             driver = new out_dmx (this);
-  //          debugSerial<<F("SPILED driver created")<<endl;
+  //          debugSerial<<F("DMX driver created")<<endl;
             break;
 #endif
 #ifndef   SPILED_DISABLE
@@ -289,6 +290,13 @@ int Item::getArg(short n) //Return arg int or first array element if Arg is arra
     else return 0;//-2;
 }
 
+short Item::getArgCount()
+{
+  if (!itemArg) return 0;
+  if (itemArg->type == aJson_Int) return 1;
+  if (itemArg->type == aJson_Array) return aJson.getArraySize(itemArg);
+      else return 0;
+}
 /*
 int Item::getVal(short n) //Return Val from Value array
 { if (!itemVal) return -1;
@@ -403,31 +411,6 @@ boolean Item::isValid() {
     return (itemArr && (itemArr->type == aJson_Array));
 }
 
-
-
-/*
-void Item::copyPar (aJsonObject *itemV)
-{ int n=aJson.getArraySize(itemV);
-  //for (int i=aJson.getArraySize(itemVal);i<n;i++) aJson.addItemToArray(itemVal,aJson.createItem(int(0))); //Enlarge array of Values
-   for (int i=0;i<n;i++) setPar(i,aJson.getArrayItem(itemV,i)->valueint);
-}
-*/
-
-
-#if defined(ARDUINO_ARCH_ESP32)
-void analogWrite(int pin, int val)
-{
-  //TBD
-}
-#endif
-
-
-/*
-boolean Item::getEnableCMD(int delta) {
-    return ((millis() - lastctrl > (unsigned long) delta));// || ((void *)itemArr != (void *) lastobj));
-}
-*/
-
 // If retrieving subitem code ok - return it
 // parameter will point on the rest truncated part of subitem
 // or pointer to NULL of whole string converted to subitem code
@@ -460,16 +443,16 @@ else
 return suffixCode;
 }
 
-#define MAXCTRLPAR 3
+//#define MAXCTRLPAR 3
 
 // myhome/dev/item/subItem
-int Item::Ctrl(char * payload, char * subItem){
-  if (!payload) return 0;
+int Item::Ctrl(char * payload, char * subItem)
+{
+if (!payload) return 0;
 
-
+itemCmd st(ST_VOID,CMD_VOID);
 int   suffixCode = 0;
-//int   setCommand = CMD_SET;  //default SET behavior now - not turn on channels
-int setCommand = 0;
+
 if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
     subItem = defaultSubItem;  /// possible problem here with truncated default
 
@@ -479,57 +462,66 @@ if (subItem && strlen(subItem))
 if (!suffixCode && defaultSuffixCode)
         suffixCode = defaultSuffixCode;
 
+st.setSuffix(suffixCode);
+
 int i=0;
 while (payload[i]) {payload[i]=toupper(payload[i]);i++;};
 
 int cmd = txt2cmd(payload);
 debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
+st.Cmd(cmd);
 
-//if (isSet)
-//{
   switch (cmd) {
+      case CMD_HSV: st.Cmd(0);
       case CMD_UP:
       case CMD_DN:
-      setCommand=cmd;
-      case CMD_HSV:
-      // suffixCode=S_HSV; //override code for known payload
       case CMD_VOID:
-
        {
+         //Parsing integers from payload
           short i = 0;
           int Par[3];
-
           while (payload && i < 3)
               Par[i++] = getInt((char **) &payload);
 
-          return   Ctrl(setCommand, i, Par,  suffixCode, subItem);
+          switch (i) //Number of params
+          {
+            case 1: st.Percents(Par[0]);
+            break;
+            case 2: st.setH(Par[0]);
+                    st.setS(Par[0]);
+            break;
+            case 3: st.HSV(Par[0],Par[1],Par[2]);
+            default:;
+          }
+          //return   Ctrl(setCommand, i, Par,  suffixCode, subItem);
+          return   Ctrl(st,subItem);
       }
           break;
 
       case CMD_UNKNOWN: //Not known command
       case CMD_JSON: //JSON input (not implemented yet
           break;
-#if not defined(ARDUINO_ARCH_ESP32) and not defined(ESP8266) and not defined(ARDUINO_ARCH_STM32) and not defined(DMX_DISABLE)
-    #ifndef ADAFRUIT_LED
       case CMD_RGB: //RGB color in #RRGGBB notation
-      {
 
-          suffixCode=S_HSV; //override code for known payload
-          CRGB rgb;
-          if (sscanf((const char*)payload, "#%2X%2X%2X", &rgb.r, &rgb.g, &rgb.b) == 3) {
-              int Par[3];
-              CHSV hsv = rgb2hsv_approximate(rgb);
-              Par[0] = map(hsv.h, 0, 255, 0, 365);
-              Par[1] = map(hsv.s, 0, 255, 0, 100);
-              Par[2] = map(hsv.v, 0, 255, 0, 100);
-          return    Ctrl(setCommand, 3, Par,  suffixCode, subItem);
-          }
-          break;
+      {
+        //Parsing integers from payload
+         short i = 0;
+         int Par[4];
+         while (payload && i < 4)
+             Par[i++] = getInt((char **) &payload);
+
+         switch (i) //Number of params
+         {
+           case 3: st.RGB(Par[0],Par[1],Par[2]);
+           break;
+           case 4: st.RGBW(Par[0],Par[1],Par[2],Par[3]);
+           default:;
+         }
+         //return   Ctrl(setCommand, i, Par,  suffixCode, subItem);
+         return   Ctrl(st,subItem);
       }
-  #endif
-#endif
       default: //some known command
-          return Ctrl(cmd, 0, NULL,  suffixCode, subItem);
+      return Ctrl(st, subItem);
 
   } //ctrl
 return 0;
@@ -583,7 +575,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
           //int     iaddr = getArg();
           bool    chActive =(isActive()>0);
 
-          itemCmd st;
+          itemCmd st(ST_VOID,CMD_VOID);
           st.loadItem(this); //Restore previous channel state to "st"
 
           //threating Toggle, Restore, XOFF special conditional commands/ convert to ON, OFF
@@ -724,7 +716,7 @@ if (driver) //New style modular code
           }
           return res;
         }
-// Legacy monolite core code
+
 //==================
 switch (itemType) {
           case CH_GROUP://Group
@@ -743,78 +735,57 @@ switch (itemType) {
                   configLocked--;
               } //if
           } //case
-      } //switch
-//=========
-/*
-  bool toExecute = (chActive>0);
 
-  if (cmd>0 && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
+// rest of Legacy monolite core code (to be refactored )
 
+              case CH_RELAY:
+        {
+                 short iaddr=getArg();
+                 short icmd =cmd.getCmd();
 
+                 if (iaddr)
+                 {
+                  int k;
+                  short inverse = 0;
 
-  switch(suffixCode)
-  {
-  case S_NOTFOUND:
-    // turn on  and set
-  toExecute = true;
-  debugSerial<<F("Forced execution");
-  case S_SET:
-            if (!Parameters || n==0) return 0;
-            item->setVal(st=Parameters[0]); //Store
-            if (!suffixCode)
-            {
-              if (chActive>0 && !st) item->setCmd(CMD_OFF);
-              if (chActive==0 && st) item->setCmd(CMD_ON);
-              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
-              if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
-            }
-            else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                  if (iaddr < 0) {
+                      iaddr = -iaddr;
+                      inverse = 1;
+                  }
+                  pinMode(iaddr, OUTPUT);
 
-            return 1;
-            //break;
+                  if (inverse)
+                      digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_XON) ? LOW : HIGH));
+                  else
+                      digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_XON) ? HIGH : LOW));
+                  debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
+                  break;
+                }
+      }
 
-  case S_CMD:
-        item->setCmd(cmd);
-        switch (cmd)
-            {
-            case CMD_ON:
-             //retrive stored values
-             st = item->getVal();
+      case CH_THERMO:
+                      ///thermoSet(name,cmd,Par1); all activities done - update temp & cmd
+                  break;
 
 
-              if (st && (st<MIN_VOLUME) ) st=INIT_VOLUME; // & send
-              item->setVal(st);
-
-              if (st)  //Stored smthng
-              {
-                item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
-                debugSerial<<F("Restored: ")<<st<<endl;
+      #ifndef MODBUS_DISABLE
+              case CH_MODBUS:
+                  modbusDimmerSet(cmd.getPercents());
+                  break;
+              case CH_VC:
+                  VacomSetFan(cmd.getPercents(), cmd.getCmd());
+                  break;
+              case CH_VCTEMP: {
+                  VacomSetHeat(cmd.getPercents(), cmd.getCmd());
+                  break;
               }
-              else
-              {
-                debugSerial<<st<<F(": No stored values - default\n");
-                // Store
-                st=100;
-                item->setVal(st);
-                item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
-              }
-              if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
-              return 1;
+      #endif
+  } //switch
 
-              case CMD_OFF:
-                item->SendStatus(SEND_COMMAND);
-                if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
-              return 1;
-
-  } //switch cmd
-
-  break;
-  } //switch suffix
-  debugSerial<<F("Unknown cmd")<<endl;
-  return 0;
-*/
 }
 
+
+/* RIP
 int Item::Ctrl(short cmd, short n, int *Parameters,  int suffixCode, char *subItem) {
 bool send = isNotRetainingStatus() ;
   if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
@@ -839,7 +810,7 @@ bool send = isNotRetainingStatus() ;
     debugSerial<<F(")")<<endl;
 
     //======================//
-    itemCmd _itemCmd;
+    itemCmd _itemCmd(ST_VOID,CMD_VOID);
     switch (n) {
     case 0:
               _itemCmd.Cmd(cmd);
@@ -884,28 +855,6 @@ bool send = isNotRetainingStatus() ;
     itemArgStore st;
     switch (cmd) {
         int t;
-/*
-       case CMD_ON:
-              if (getChanType()==CH_RGBW && getCmd() == CMD_ON && send  && (chActive>0)) {
-                          debugSerial<<F("Force White\n");
-                          st.aslong = getVal();
-                          //itemType = CH_WHITE;
-                          Par[0] = st.h;
-                          Par[1] = 0;   //Zero saturation
-                          Par[2] = 100; //Full power
-                          n=3;
-                          cmd=CMD_NUM; */
-                          // Store
-/*
-                          st.h = Par[0];
-                          st.s = Par[1];
-                          st.v = Par[2];
-                          setVal(st.aslong);
-                          setCmd(cmd);
-                          //Send to OH
-                          if (send) SendStatus(SEND_COMMAND | SEND_PARAMETERS ); */
-//                } // if forcewhite
-//        break;
 
 
         case CMD_TOGGLE:
@@ -1091,11 +1040,11 @@ bool send = isNotRetainingStatus() ;
                         return -3;
                       }
                 break;
-                /*
-                case CMD_SET:
-                res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
-                break;
-*/
+                ////
+                //case CMD_SET:
+                //res = driver->Ctrl(cmd, n, Parameters, send, suffixCode, subItem);
+                //break;
+                //
                 default:
                 res = driver->Ctrl(_itemCmd,   subItem);
                 if (cmd) setCmd(cmd);
@@ -1500,7 +1449,7 @@ return 1;
 }
 
 
-
+*/
 
 
 
@@ -1860,7 +1809,8 @@ int Item::checkFM() {
                 int val = 100;
                 Item item(airGateObj->valuestring);
                 if (item.isValid())
-                    item.Ctrl(0, 1, &val);
+                //    item.Ctrl(0, 1, &val);
+                item.Ctrl(itemCmd(ST_PERCENTS,CMD_VOID).Percents(val));
             }
         }
     } else
@@ -1871,7 +1821,7 @@ int Item::checkFM() {
         result = node.readHoldingRegisters(2111 - 1, 1);
         if (result == node.ku8MBSuccess) aJson.addNumberToObject(out, "flt", (int) node.getResponseBuffer(0));
         modbusBusy=0;
-        if (isActive()>0) Ctrl(CMD_OFF); //Shut down ///
+        if (isActive()>0) Off(); //Shut down ///
         modbusBusy=1;
     } else aJson.addNumberToObject(out, "flt", 0);
 
@@ -1900,7 +1850,7 @@ int Item::checkFM() {
         if (ftemp > FM_OVERHEAT_CELSIUS && set) {
           if (mqttClient.connected()  && !ethernetIdleCount)
               mqttClient.publish("/alarm/ovrht", itemArr->name);
-            Ctrl(CMD_OFF); //Shut down
+            Off(); //Shut down
         }
     } else
         debugSerial << F("Modbus polling error=") << _HEX(result);

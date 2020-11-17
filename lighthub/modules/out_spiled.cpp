@@ -109,7 +109,7 @@ int out_SPILed::getChanType()
    return CH_RGBW;
 }
 
-int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show );
+int out_SPILed::PixelCtrl(itemCmd cmd, char* subItem, bool show )
 //int out_SPILed::PixelCtrl(itemCmd cmd, int from, int to, bool show)
 {
 
@@ -123,7 +123,7 @@ int from=0, to=numLeds-1; //All LEDs on the strip by default
   debugSerial<<from<<F("-")<<to<<F(" cmd=")<<cmd.getCmd()<<endl;
 
 
-itemCmd st(ST_RGB);
+itemCmd st(ST_RGB,CMD_VOID);
 
 #ifdef ADAFRUIT_LED
 uint32_t pixel;

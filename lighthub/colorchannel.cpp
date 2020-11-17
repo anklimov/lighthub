@@ -6,14 +6,23 @@
 #include "item.h"
 #include "main.h"
 
+//colorChannel::colorChannel(Item * _item)
 
-int out_dmx::Ctrl(itemCmd cmd, char* subItem)
+
+short colorChannel::getChannelAddr(short n)
+{
+  if (!n) return iaddr;
+  if (n+1>numArgs) return iaddr+n;
+  return item->getArg(n);
+}
+
+int colorChannel::Ctrl(itemCmd cmd, char* subItem)
 {
 
 int chActive = item->isActive();
 bool toExecute = (chActive>0); // execute if channel is active now
 int suffixCode = cmd.getSuffix();
-itemCmd st(ST_HSV);
+itemCmd st(ST_HSV,CMD_VOID);
 
 if (!suffixCode) toExecute=true; //forced execute if no suffix
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command recognized , but w/o correct cmd suffix - threat it as command
@@ -67,7 +76,7 @@ case S_CMD:
               debugSerial<<st.param.aslong<<F(": No stored values - default\n");
             }
 
-            st.saveItem(item, subItem, true);
+            st.saveItem(item, true);
             PixelCtrl(st);
             item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             return 1;

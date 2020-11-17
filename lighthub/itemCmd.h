@@ -169,6 +169,7 @@ public:
   itemArgStore      param;
 
   itemCmd(uint8_t _type=ST_VOID, uint8_t _code=CMD_VOID);
+  itemCmd(float val);
   itemCmd assignFrom(itemCmd from);
 
   bool loadItem(Item * item, bool includeCommand=false );
@@ -178,6 +179,8 @@ public:
   itemCmd Int(uint32_t i);
   itemCmd Cmd(uint8_t i);
   itemCmd HSV(uint16_t h, uint8_t s, uint8_t v);
+  itemCmd RGB(uint8_t r, uint8_t g, uint8_t b);
+  itemCmd RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w);
   itemCmd setH(uint16_t);
   itemCmd setS(uint8_t);
   itemCmd setArgType(uint8_t);
@@ -192,8 +195,8 @@ public:
   itemCmd incrementS(int16_t);
 
   long int getInt();
-  short    getPercents();
-  short    getPercents255();
+  short    getPercents(bool inverse=false);
+  short    getPercents255(bool inverse=false);
   uint8_t    getCmd();
   uint8_t    getArgType();
   uint8_t    getCmdParam();

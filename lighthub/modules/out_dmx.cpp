@@ -45,27 +45,44 @@ return 0;
 
 int out_dmx::getChanType()
 {
-  if (item) return item->itemType;
+  if (item)
+  {
+  switch (numArgs)
+  {
+    case 3:
+      return CH_RGB;
+    case 4:
+      return CH_RGBW;
+    default:
+      return item->itemType;
+  }
   return 0;
+ }
 }
 
-int out_dmx::PixelCtrl(itemCmd cmd)
+int out_dmx::PixelCtrl(itemCmd cmd, char* subItem, bool show)
+//int out_dmx::PixelCtrl(itemCmd cmd)
 {
-if (!item) return 0;
-int iaddr = item->getArg(0);
-itemCmd st(ST_RGB);
+if (!item || !show) return 0;
+short cType=getChanType();
+
+if (cType==CH_DIMMER) //Single channel
+  {
+    DmxWrite(iaddr, cmd.getPercents255());
+    return 1;
+  }
+
+itemCmd st(ST_RGB,CMD_VOID);
 st.assignFrom(cmd);
 
-    switch (getChanType())
-    { case CH_DIMMER:
-      DmxWrite(iaddr + 3, cmd.getPercents255());
-      break;
+    switch (cType)
+    {
       case CH_RGBW:
-      DmxWrite(iaddr + 3, st.param.w);
+      DmxWrite(getChannelAddr(3), st.param.w);
       case CH_RGB:
       DmxWrite(iaddr, st.param.r);
-      DmxWrite(iaddr + 1, st.param.g);
-      DmxWrite(iaddr + 2, st.param.b);
+      DmxWrite(getChannelAddr(1), st.param.g);
+      DmxWrite(getChannelAddr(2), st.param.b);
       break;
       default: ;
     }

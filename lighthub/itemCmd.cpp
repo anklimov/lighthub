@@ -43,6 +43,13 @@ itemCmd::itemCmd(uint8_t _type, uint8_t _code)
   cmd.cmdCode=_code;
 }
 
+itemCmd::itemCmd(float val)
+{
+  cmd.cmdCode=0;
+  cmd.itemArgType=ST_FLOAT;
+  param.asfloat=val;
+}
+
 itemCmd itemCmd::setDefault()
 {
   switch (cmd.itemArgType){
@@ -333,34 +340,36 @@ long int itemCmd::getInt()
 }
 
 
-short itemCmd::getPercents()
+short itemCmd::getPercents(bool inverse)
 {
   switch (cmd.itemArgType) {
 
     case ST_PERCENTS:
     case ST_HSV:
-      return param.v;
+      if (inverse) return 100-param.v; else return param.v;
 
     case ST_PERCENTS255:
     case ST_HSV255:
-      return map(param.v,0,255,0,100);
+      if (inverse) return map(param.v,0,255,100,0);
+          else return map(param.v,0,255,0,100);
 
     default:
     return 0;
   }
 }
 
-short itemCmd::getPercents255()
+short itemCmd::getPercents255(bool inverse)
 {
   switch (cmd.itemArgType) {
 
     case ST_PERCENTS:
     case ST_HSV:
-    return map(param.v,0,100,0,255);
+    if (inverse) return map(param.v,0,100,255,0);
+            else return map(param.v,0,100,0,255);
 
     case ST_PERCENTS255:
     case ST_HSV255:
-    return param.v;
+    if (inverse) return 255-param.v; else return param.v;
 
     default:
     return 0;
@@ -450,6 +459,27 @@ itemCmd itemCmd::HSV(uint16_t h, uint8_t s, uint8_t v)
   param.h=h;
   param.s=s;
   param.v=v;
+
+  return *this;
+}
+
+itemCmd itemCmd::RGB(uint8_t r, uint8_t g, uint8_t b)
+{
+  cmd.itemArgType=ST_RGB;
+  param.r=r;
+  param.g=g;
+  param.b=b;
+
+  return *this;
+}
+
+itemCmd itemCmd::RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
+{
+  cmd.itemArgType=ST_RGBW;
+  param.r=r;
+  param.g=g;
+  param.b=b;
+  param.w=w;
 
   return *this;
 }

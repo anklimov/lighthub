@@ -12,7 +12,7 @@
 #include "FastLED.h"
 #endif
 
-class out_SPILed : public abstractOut {
+class out_SPILed : public colorChannel {
 public:
 
     out_SPILed(Item * _item):colorChannel(_item){getConfig();};

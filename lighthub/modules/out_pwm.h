@@ -7,7 +7,7 @@
 #include <item.h>
 #include "colorchannel.h"
 
-class out_dmx : public colorChannel {
+class out_pwm : public colorChannel {
 public:
 
     out_pwm(Item * _item):colorChannel(_item){};
@@ -18,9 +18,9 @@ public:
     int isActive() override;
     int getChanType() override;
     //int Ctrl(itemCmd cmd, char* subItem=NULL) override;
-    //int PixelCtrl(itemCmd cmd) override;
     int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true ) override;
 
 protected:
+    short numChannels;
 };
 #endif

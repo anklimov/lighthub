@@ -102,11 +102,12 @@ class Item
   boolean isValid ();
   boolean Setup();
   void Stop();
-  int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL);
+  //int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL);
   int Ctrl(itemCmd cmd, char* subItem=NULL);
   int Ctrl(char * payload,  char * subItem=NULL);
 
   int getArg(short n=0);
+  short getArgCount();
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array
   uint8_t getSubtype();
@@ -125,9 +126,9 @@ class Item
   int SendStatus(int sendFlags);
   int isActive();
   int getChanType();
-  inline int On (){return Ctrl(CMD_ON);};
-  inline int Off(){return Ctrl(CMD_OFF);};
-  inline int Toggle(){return Ctrl(CMD_TOGGLE);};
+  inline int On (){return Ctrl(itemCmd(ST_VOID,CMD_ON));};
+  inline int Off(){return Ctrl(itemCmd(ST_VOID,CMD_OFF));};
+  inline int Toggle(){return Ctrl(itemCmd(ST_VOID,CMD_TOGGLE));};
 
   protected:
   //short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);

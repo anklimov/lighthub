@@ -216,7 +216,7 @@ int out_Motor::Ctrl(itemCmd cmd,   char* subItem)
 int chActive = item->isActive();
 bool toExecute = (chActive>0);
 int suffixCode = cmd.getSuffix();
-itemCmd st(ST_PERCENTS);
+itemCmd st(ST_PERCENTS,CMD_VOID);
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 item->setFlag(ACTION_NEEDED);
