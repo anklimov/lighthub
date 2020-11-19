@@ -263,7 +263,7 @@ return INTERVAL_POLLING;
 };
 
 //int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
-int out_AC::Ctrl(itemCmd cmd,  char* subItem)
+int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
 {char s_mode[10];
   int suffixCode = cmd.getSuffix();
  // Some additional Subitems

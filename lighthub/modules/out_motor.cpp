@@ -211,12 +211,12 @@ int out_Motor::getChanType()
 
 
 
-int out_Motor::Ctrl(itemCmd cmd,   char* subItem)
+int out_Motor::Ctrl(itemCmd cmd,   char* subItem , bool toExecute)
 {
-int chActive = item->isActive();
-bool toExecute = (chActive>0);
+//int chActive = item->isActive();
+//bool toExecute = (chActive>0);
 int suffixCode = cmd.getSuffix();
-itemCmd st(ST_PERCENTS,CMD_VOID);
+//itemCmd st(ST_PERCENTS,CMD_VOID);
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 item->setFlag(ACTION_NEEDED);
@@ -229,6 +229,8 @@ toExecute = true;
 debugSerial<<F("Forced execution");
 case S_SET:
           if (!cmd.isValue()) return 0;
+          if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+          /*
           st.assignFrom(cmd);
           //Store
           st.saveItem(item);
@@ -240,7 +242,7 @@ case S_SET:
             if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
           }
           else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
-
+          */
           return 1;
           //break;
 
@@ -249,10 +251,12 @@ case S_CMD:
       switch (cmd.getCmd())
           {
           case CMD_ON:
+
+           /*
            //retrive stored values
             if (st.loadItem(item))
             {
-                if (st.getPercents() && (st.getPercents()<MIN_VOLUME) /* && send */)
+                if (st.getPercents() && (st.getPercents()<MIN_VOLUME))
                  { //Volume too low
                         st.Percents(INIT_VOLUME);
                         st.saveItem(item);
@@ -270,12 +274,12 @@ case S_CMD:
               //item->setVal(st);
               item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             }
-
+            */
             if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
             return 1;
 
             case CMD_OFF:
-              item->SendStatus(SEND_COMMAND);
+              ////item->SendStatus(SEND_COMMAND);
               if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
             return 1;
 

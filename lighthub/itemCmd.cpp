@@ -39,15 +39,46 @@ int txt2cmd(char *payload) {
 
 itemCmd::itemCmd(uint8_t _type, uint8_t _code)
 {
+  cmd.aslong=0;
+  param.aslong=0;
+
   cmd.itemArgType=_type;
   cmd.cmdCode=_code;
 }
 
 itemCmd::itemCmd(float val)
 {
-  cmd.cmdCode=0;
+  cmd.aslong=0;
+  param.aslong=0;
+
   cmd.itemArgType=ST_FLOAT;
   param.asfloat=val;
+}
+
+itemCmd itemCmd::setChanType(short chanType)
+{
+  switch (chanType)
+  {
+    case CH_RGB:
+    case CH_RGBW:
+    case CH_SPILED:
+    cmd.itemArgType=ST_HSV;
+    break;
+    case CH_AC:
+    case CH_THERMO:
+    case CH_VCTEMP:
+    cmd.itemArgType=ST_FLOAT_CELSIUS;
+    break;
+    case CH_DIMMER:
+    case CH_MOTOR:
+    case CH_PWM:
+    case CH_RELAY:
+    cmd.itemArgType=ST_PERCENTS;
+    break;
+    default:
+    cmd.itemArgType=ST_PERCENTS;
+  }
+  return *this;
 }
 
 itemCmd itemCmd::setDefault()
@@ -71,7 +102,7 @@ itemCmd itemCmd::setDefault()
   return *this;
 }
 
-itemCmd itemCmd::setH(uint16_t h)
+bool itemCmd::setH(uint16_t h)
 {
   int par=h;
   switch (cmd.itemArgType)
@@ -79,16 +110,20 @@ itemCmd itemCmd::setH(uint16_t h)
     case ST_VOID:
       cmd.itemArgType=ST_HSV;
     case ST_HSV:
-      if (par>100) par=100;
     case ST_HSV255:
-      if (par>255) par=255;
+      if (par>365) par=365;
       if (par<0) par=0;
       param.h=par;
+      break;
+
+    default:
+  //  debugSerial<<F("Can't assign HUE to type ")<<cmd.itemArgType<<endl;
+    return false;
   }
-  return *this;
+  return true;
 }
 
-itemCmd itemCmd::setS(uint8_t s)
+bool itemCmd::setS(uint8_t s)
 {
   int par=s;
   switch (cmd.itemArgType)
@@ -97,15 +132,31 @@ itemCmd itemCmd::setS(uint8_t s)
       cmd.itemArgType=ST_HSV;
     case ST_HSV:
       if (par>100) par=100;
+      param.s=par;
+      break;
     case ST_HSV255:
       if (par>255) par=255;
       if (par<0) par=0;
       param.s=par;
+      break;
+    default:
+//    debugSerial<<F("Can't assign saturation to type ")<<cmd.itemArgType<<endl;
+    return false;
   }
-  return *this;
+  return true;
 }
 
-itemCmd itemCmd::incrementPercents(int16_t dif)
+uint16_t itemCmd::getH()
+{
+  return param.h;
+}
+
+uint16_t itemCmd::getS()
+{
+  return param.s;
+}
+
+bool itemCmd::incrementPercents(int16_t dif)
 { int par=param.v;
   switch (cmd.itemArgType)
   {
@@ -121,12 +172,13 @@ itemCmd itemCmd::incrementPercents(int16_t dif)
      if (par>255) par=255;
      if (par<0) par=0;
     break;
+   default: return false;
   }
   param.v=par;
-  return *this;
+  return true;
 }
 
-itemCmd itemCmd::incrementH(int16_t dif)
+bool itemCmd::incrementH(int16_t dif)
 { int par=param.h;
   switch (cmd.itemArgType)
   {
@@ -135,31 +187,34 @@ itemCmd itemCmd::incrementH(int16_t dif)
    par+=dif;
    if (par>365) par=0;
    if (par<0) par=365;
+   break;
+  default: return false;
   break;
 }
 param.h=par;
-return *this;
+return true;
 }
 
-itemCmd itemCmd::incrementS(int16_t dif)
+bool itemCmd::incrementS(int16_t dif)
 {int par=param.s;
   switch (cmd.itemArgType)
   {
-    case ST_PERCENTS:
+    //case ST_PERCENTS:
     case ST_HSV:
      par+=dif;
      if (par>100) par=100;
      if (par<0) par=0;
     break;
-    case ST_PERCENTS255:
+    //case ST_PERCENTS255:
     case ST_HSV255:
      par+=dif;
      if (par>255) par=255;
      if (par<0) par=0;
     break;
+   default: return false;
   }
   param.s=par;
-  return *this;
+  return true;
 
 }
 
@@ -168,6 +223,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
 {
   bool RGBW_flag   = false;
   bool HSV255_flag = false;
+  cmd.suffixCode=from.cmd.suffixCode;
 
   switch (cmd.itemArgType){ //Destination
      case ST_HSV:
@@ -201,6 +257,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
               default:
                   debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
               }
+              break;
         case ST_HSV255:
         case ST_PERCENTS255:
            switch (from.cmd.itemArgType)
@@ -232,7 +289,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
               default:
                        debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
               }
-
+             break;
         case ST_VOID:
              cmd.itemArgType=from.cmd.itemArgType;
 
@@ -298,6 +355,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                     param.g=rgb.g;
                     param.b=rgb.b;
                   #endif
+                  break;
                 }
             default:
                     debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
@@ -388,7 +446,7 @@ uint8_t itemCmd::getArgType()
 
 itemCmd itemCmd::setArgType(uint8_t type)
 {
-   cmd.itemArgType=type;
+   cmd.itemArgType=type & 0xF;
   return *this;
 }
 
@@ -515,10 +573,16 @@ bool itemCmd::loadItem(Item * item, bool includeCommand)
 {
   if (item && item->isValid())
   {
-  param.asInt32=item->getVal();
-  cmd.itemArgType=item->getSubtype();
-  if (includeCommand) cmd.cmdCode=item->getCmd();
-  return (cmd.itemArgType!=ST_VOID);
+  short subtype =item->getSubtype();
+  if (subtype)
+        {
+          param.asInt32=item->getVal();
+          cmd.itemArgType= subtype;
+          if (includeCommand) cmd.cmdCode=item->getCmd();
+          debugSerial<<F("Loaded :");
+          debugOut();
+          return 1;
+        }
   }
 return false;
 }
@@ -530,6 +594,8 @@ bool itemCmd::saveItem(Item * item, bool includeCommand)
   item->setVal(param.asInt32);
   item->setSubtype(cmd.itemArgType);
   if (includeCommand) item->setCmd(cmd.cmdCode);
+  debugSerial<<F("Saved :");
+  debugOut();
   return true;
   }
 return false;
@@ -537,13 +603,13 @@ return false;
 
 
 
-char * itemCmd::toString(char * Buffer, int bufLen)
+char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags )
      {
 
        if (!Buffer || !bufLen) return NULL;
        *Buffer=0;
        char * argPtr=Buffer;
-       if (isCommand())
+       if (isCommand() && (sendFlags & SEND_COMMAND))
                         {
                           int len;
                           strncpy_P(Buffer, commands_P[cmd.cmdCode], bufLen);
@@ -552,12 +618,14 @@ char * itemCmd::toString(char * Buffer, int bufLen)
                           argPtr+=len;
                           bufLen-=len;
                         }
-
+       if (sendFlags & SEND_PARAMETERS)
        switch (cmd.itemArgType)
        {
 
          case ST_PERCENTS:
          case ST_PERCENTS255:
+            snprintf(argPtr, bufLen, "%u", param.v);
+        break;
          case ST_UINT32:
             snprintf(argPtr, bufLen, "%lu", param.asUint32);
          break;
@@ -591,4 +659,11 @@ char * itemCmd::toString(char * Buffer, int bufLen)
          ;
        }
       return Buffer;
+     }
+
+     void itemCmd::debugOut()
+     {
+       char buf[32];
+       toString(buf,sizeof(buf));
+       debugSerial<<buf<<F(" AT:")<<getArgType()<<F(" Suff:")<<getSuffix()<<endl;
      }

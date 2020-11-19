@@ -23,7 +23,7 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 #include <PubSubClient.h>
 #include "main.h"
-#include "itemCmd.h""
+#include "itemCmd.h"
 
 #ifndef DHT_DISABLE
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)

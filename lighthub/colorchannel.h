@@ -14,7 +14,7 @@ public:
                           if (iaddr<0) iaddr=-iaddr;
                           numArgs = item->getArgCount(); // and how many addresses is configured
                         };
-    int Ctrl(itemCmd cmd, char* subItem=NULL) override;
+    int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true) override;
     virtual int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true ) =0;
     short getChannelAddr(short n =0);
 protected:

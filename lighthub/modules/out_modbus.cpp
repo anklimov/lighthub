@@ -338,11 +338,11 @@ int out_Modbus::getChanType()
 
 
 
-int out_Modbus::Ctrl(itemCmd cmd,   char* subItem)
+int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
 {
-int chActive = item->isActive();
-bool toExecute = (chActive>0);
-itemCmd st(ST_UINT32,CMD_VOID);
+//int chActive = item->isActive();
+//bool toExecute = (chActive>0);
+//itemCmd st(ST_UINT32,CMD_VOID);
 int suffixCode = cmd.getSuffix();
 
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
@@ -355,58 +355,30 @@ toExecute = true;
 debugSerial<<F("Forced execution");
 case S_SET:
           if (!cmd.isValue()) return 0;
-          //////item->setVal(st=Parameters[0]); //Store
-          if (!suffixCode)
-          {
-            if (chActive>0 && !st.getInt()) item->setCmd(CMD_OFF);
-            if (chActive==0 && st.getInt()) item->setCmd(CMD_ON);
-            item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
-//            if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
-          }
-          else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
 
+//TODO
           return 1;
           //break;
 
 case S_CMD:
-      //item->setCmd(cmd.getCmd());
-      st.loadItem(item);
       switch (cmd.getCmd())
           {
           case CMD_ON:
-           //retrive stored values
-           st.loadItem(item);
 
-
-            if (st.getPercents() && (st.getPercents()<MIN_VOLUME) /* && send */) st.Percents(INIT_VOLUME);
-            st.saveItem(item);
-
-            if (st.getPercents())  //Stored smthng
-            {
-              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
-              debugSerial<<F("Restored: ")<<st.getPercents()<<endl;
-            }
-            else
-            {
-              debugSerial<<F(": No stored values - default\n");
-              // Store
-              st.setDefault();
-              st.saveItem(item);
-              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
-            }
-  //          if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
             return 1;
 
             case CMD_OFF:
-              item->SendStatus(SEND_COMMAND);
-  //            if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+
             return 1;
 
-} //switch cmd
+            default:
+            debugSerial<<F("Unknown cmd ")<<cmd.getCmd()<<endl;
+          } //switch cmd
 
-break;
+    default:
+  debugSerial<<F("Unknown suffix ")<<suffixCode<<endl;
 } //switch suffix
-debugSerial<<F("Unknown cmd")<<endl;
+
 return 0;
 }
 

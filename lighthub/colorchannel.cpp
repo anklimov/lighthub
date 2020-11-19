@@ -16,16 +16,30 @@ short colorChannel::getChannelAddr(short n)
   return item->getArg(n);
 }
 
-int colorChannel::Ctrl(itemCmd cmd, char* subItem)
+int colorChannel::Ctrl(itemCmd cmd, char* subItem, bool toExecute)
 {
-
-int chActive = item->isActive();
-bool toExecute = (chActive>0); // execute if channel is active now
+debugSerial<<F("clrCtr: ");
+cmd.debugOut();
+//int chActive = item->isActive();
+//bool toExecute = (chActive>0); // execute if channel is active now
 int suffixCode = cmd.getSuffix();
-itemCmd st(ST_HSV,CMD_VOID);
+/*
+// Since this driver working both, for single-dimmed or PWM channel and color - define storage type
+uint8_t storageType;
+switch (getChanType())
+{
+  case CH_RGB:
+  case CH_RGBW:
+  storageType=ST_HSV;
+  break;
+  default:
+  storageType=ST_PERCENTS;
+}
+itemCmd st(storageType,CMD_VOID);
 
 if (!suffixCode) toExecute=true; //forced execute if no suffix
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command recognized , but w/o correct cmd suffix - threat it as command
+*/
 
 switch(suffixCode)
 {
@@ -34,62 +48,32 @@ case S_NOTFOUND:
 toExecute = true;
 case S_SET:
 case S_HSV:
-          st.loadItem(item);
-          st.assignFrom(cmd);
-          PixelCtrl(st, subItem, toExecute);
-          st.saveItem(item);
-
-          if (!suffixCode)
-          {
-            if (chActive>0 && !st.getPercents()) item->setCmd(CMD_OFF);
-            if (chActive==0 && st.getPercents()) item->setCmd(CMD_ON);
-            item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
-          }
-          else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+          PixelCtrl(cmd, subItem, toExecute);
           return 1;
-/*
-case S_HUE:
-     st.setH(uint16_t);
-     break;
-
-case S_SAT:
-     st.setS(uint8_t);
-     break;
-*/
 case S_CMD:
       item->setCmd(cmd.getCmd());
       switch (cmd.getCmd())
           {
           case CMD_ON:
-           //retrive stored values
-           if (st.loadItem(item))
-            {
-            if (st.param.aslong && (st.param.v<MIN_VOLUME)) {
-                                                            st.Percents(INIT_VOLUME);
-                                                            }
-
-              debugSerial<<F("Restored: ")<<st.param.h<<F(",")<<st.param.s<<F(",")<<st.param.v<<endl;
-           }
-            else // Not restored
-            {
-              st.setDefault();
-              debugSerial<<st.param.aslong<<F(": No stored values - default\n");
-            }
-
-            st.saveItem(item, true);
-            PixelCtrl(st);
+            PixelCtrl(cmd,subItem, true);
             item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             return 1;
 
             case CMD_OFF:
-              st.Percents(0);
-              PixelCtrl(st, subItem, true);
+              cmd.Percents(0);
+              PixelCtrl(cmd, subItem, true);
               item->SendStatus(SEND_COMMAND);
             return 1;
+
+            default:
+            debugSerial<<F("Unknown cmd ")<<cmd.getCmd()<<endl;
           } //switch cmd
+
+    default:
+  debugSerial<<F("Unknown suffix ")<<suffixCode<<endl;
 } //switch suffix
 
-debugSerial<<F("Unknown cmd")<<endl;
+cmd.debugOut();
 return 0;
 
 }

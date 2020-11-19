@@ -19,6 +19,7 @@ e-mail    anklimov@gmail.com
 */
 #pragma once
 #include "Arduino.h"
+///#include "item.h"
 
 typedef  char cmdstr[9];
 
@@ -98,16 +99,17 @@ ST_FLOAT        = 13//,
 #define ST_PERCENTS     1
 #define ST_TENS         2
 #define ST_HSV          3
-#define ST_FLOAT_CELSIUS   4
-#define ST_FLOAT_FARENHEIT 5
-#define ST_RGB          6
-#define ST_RGBW         7
-#define ST_PERCENTS255  8
-#define ST_HSV255       9
-#define ST_INT32        10
-#define ST_UINT32       11
-#define ST_STRING       12
-#define ST_FLOAT        13
+#define ST_HSVW         4
+#define ST_FLOAT_CELSIUS   5
+#define ST_FLOAT_FARENHEIT 6
+#define ST_RGB          7
+#define ST_RGBW         8
+#define ST_PERCENTS255  9
+#define ST_HSV255       10
+#define ST_INT32        11
+#define ST_UINT32       12
+#define ST_STRING       13
+#define ST_FLOAT        14
 
 
 #pragma pack(push, 1)
@@ -122,12 +124,18 @@ typedef union
         uint8_t cmdCode;
             union {
                   uint8_t cmdFlag;
+/*
                   struct
                       { uint8_t  suffixCode:4;
                         uint8_t  itemArgType:4;
                       };
+                      */
                   };
-        uint8_t cmdEffect;
+                  struct
+                      { uint8_t  suffixCode:4;
+                        uint8_t  itemArgType:4;
+                      };
+    //    uint8_t cmdEffect;
         uint8_t cmdParam;
       };
 } itemCmdStore;
@@ -181,8 +189,10 @@ public:
   itemCmd HSV(uint16_t h, uint8_t s, uint8_t v);
   itemCmd RGB(uint8_t r, uint8_t g, uint8_t b);
   itemCmd RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w);
-  itemCmd setH(uint16_t);
-  itemCmd setS(uint8_t);
+  bool setH(uint16_t);
+  bool setS(uint8_t);
+  uint16_t getH();
+  uint16_t getS();
   itemCmd setArgType(uint8_t);
   itemCmd Percents(int i);
   itemCmd Percents255(int i);
@@ -190,9 +200,9 @@ public:
   uint8_t getSuffix();
   itemCmd setSuffix(uint8_t suffix);
 
-  itemCmd incrementPercents(int16_t);
-  itemCmd incrementH(int16_t);
-  itemCmd incrementS(int16_t);
+  bool incrementPercents(int16_t);
+  bool incrementH(int16_t);
+  bool incrementS(int16_t);
 
   long int getInt();
   short    getPercents(bool inverse=false);
@@ -200,13 +210,15 @@ public:
   uint8_t    getCmd();
   uint8_t    getArgType();
   uint8_t    getCmdParam();
-  char   * toString(char * Buffer, int bufLen);
+  char   * toString(char * Buffer, int bufLen, int sendFlags = SEND_COMMAND | SEND_PARAMETERS );
 
   bool isCommand();
   bool isValue();
   bool isHSV();
 
   itemCmd setDefault();
+  itemCmd setChanType(short chanType);
+  void debugOut();
   };
 
 #pragma pack(pop)
