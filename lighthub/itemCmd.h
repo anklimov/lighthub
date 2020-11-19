@@ -99,7 +99,7 @@ ST_FLOAT        = 13//,
 #define ST_PERCENTS     1
 #define ST_TENS         2
 #define ST_HSV          3
-#define ST_HSVW         4
+#define ST_HS           4
 #define ST_FLOAT_CELSIUS   5
 #define ST_FLOAT_FARENHEIT 6
 #define ST_RGB          7
@@ -187,6 +187,7 @@ public:
   itemCmd Int(uint32_t i);
   itemCmd Cmd(uint8_t i);
   itemCmd HSV(uint16_t h, uint8_t s, uint8_t v);
+  itemCmd HS(uint16_t h, uint8_t s);
   itemCmd RGB(uint8_t r, uint8_t g, uint8_t b);
   itemCmd RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w);
   bool setH(uint16_t);
@@ -214,7 +215,7 @@ public:
 
   bool isCommand();
   bool isValue();
-  bool isHSV();
+  bool isColor();
 
   itemCmd setDefault();
   itemCmd setChanType(short chanType);

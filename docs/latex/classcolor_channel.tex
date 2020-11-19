@@ -1,0 +1,90 @@
+\hypertarget{classcolor_channel}{}\doxysection{color\+Channel Class Reference}
+\label{classcolor_channel}\index{colorChannel@{colorChannel}}
+
+
+{\ttfamily \#include $<$colorchannel.\+h$>$}
+
+Inheritance diagram for color\+Channel\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classcolor_channel}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classcolor_channel_af5d8c0be99104c65484560a5a1c2cfd2}{color\+Channel}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
+\item 
+int \mbox{\hyperlink{classcolor_channel_a9d7354cc266c98067b7b43cbf8707feb}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true) override
+\item 
+virtual int \mbox{\hyperlink{classcolor_channel_a6c835d00ee8af04679f03465617c2873}{Pixel\+Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool show=true)=0
+\item 
+short \mbox{\hyperlink{classcolor_channel_a09276ae99835316b9a222df20fb45097}{get\+Channel\+Addr}} (short n=0)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+short \mbox{\hyperlink{classcolor_channel_a4dd2fa654273b3bf9a3413ee2966fdce}{iaddr}}
+\item 
+short \mbox{\hyperlink{classcolor_channel_ace14fae07b9d51500db5d0191f5a7081}{num\+Args}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classcolor_channel_af5d8c0be99104c65484560a5a1c2cfd2}\label{classcolor_channel_af5d8c0be99104c65484560a5a1c2cfd2}} 
+\index{colorChannel@{colorChannel}!colorChannel@{colorChannel}}
+\index{colorChannel@{colorChannel}!colorChannel@{colorChannel}}
+\doxysubsubsection{\texorpdfstring{colorChannel()}{colorChannel()}}
+{\footnotesize\ttfamily color\+Channel\+::color\+Channel (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_item}{Item}} $\ast$}]{\+\_\+item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classcolor_channel_a9d7354cc266c98067b7b43cbf8707feb}\label{classcolor_channel_a9d7354cc266c98067b7b43cbf8707feb}} 
+\index{colorChannel@{colorChannel}!Ctrl@{Ctrl}}
+\index{Ctrl@{Ctrl}!colorChannel@{colorChannel}}
+\doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}}
+{\footnotesize\ttfamily int color\+Channel\+::\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{to\+Execute = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classcolor_channel_a09276ae99835316b9a222df20fb45097}\label{classcolor_channel_a09276ae99835316b9a222df20fb45097}} 
+\index{colorChannel@{colorChannel}!getChannelAddr@{getChannelAddr}}
+\index{getChannelAddr@{getChannelAddr}!colorChannel@{colorChannel}}
+\doxysubsubsection{\texorpdfstring{getChannelAddr()}{getChannelAddr()}}
+{\footnotesize\ttfamily short color\+Channel\+::get\+Channel\+Addr (\begin{DoxyParamCaption}\item[{short}]{n = {\ttfamily 0} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classcolor_channel_a6c835d00ee8af04679f03465617c2873}\label{classcolor_channel_a6c835d00ee8af04679f03465617c2873}} 
+\index{colorChannel@{colorChannel}!PixelCtrl@{PixelCtrl}}
+\index{PixelCtrl@{PixelCtrl}!colorChannel@{colorChannel}}
+\doxysubsubsection{\texorpdfstring{PixelCtrl()}{PixelCtrl()}}
+{\footnotesize\ttfamily virtual int color\+Channel\+::\+Pixel\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{show = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classout___s_p_i_led_a75d1e9b7333a0bb9777df807634607b3}{out\+\_\+\+S\+P\+I\+Led}}, \mbox{\hyperlink{classout__pwm_adcb4bb3d03aa8c4b7e12796136b5cd1e}{out\+\_\+pwm}}, and \mbox{\hyperlink{classout__dmx_ad33a8e316c5c8d409cddf4dcd8b15fcc}{out\+\_\+dmx}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classcolor_channel_a4dd2fa654273b3bf9a3413ee2966fdce}\label{classcolor_channel_a4dd2fa654273b3bf9a3413ee2966fdce}} 
+\index{colorChannel@{colorChannel}!iaddr@{iaddr}}
+\index{iaddr@{iaddr}!colorChannel@{colorChannel}}
+\doxysubsubsection{\texorpdfstring{iaddr}{iaddr}}
+{\footnotesize\ttfamily short color\+Channel\+::iaddr\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classcolor_channel_ace14fae07b9d51500db5d0191f5a7081}\label{classcolor_channel_ace14fae07b9d51500db5d0191f5a7081}} 
+\index{colorChannel@{colorChannel}!numArgs@{numArgs}}
+\index{numArgs@{numArgs}!colorChannel@{colorChannel}}
+\doxysubsubsection{\texorpdfstring{numArgs}{numArgs}}
+{\footnotesize\ttfamily short color\+Channel\+::num\+Args\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/\mbox{\hyperlink{colorchannel_8h}{colorchannel.\+h}}\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/\mbox{\hyperlink{colorchannel_8cpp}{colorchannel.\+cpp}}\end{DoxyCompactItemize}

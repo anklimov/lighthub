@@ -1,0 +1,120 @@
+\hypertarget{classout__dmx}{}\doxysection{out\+\_\+dmx Class Reference}
+\label{classout__dmx}\index{out\_dmx@{out\_dmx}}
+
+
+{\ttfamily \#include $<$out\+\_\+dmx.\+h$>$}
+
+Inheritance diagram for out\+\_\+dmx\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classout__dmx}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classout__dmx_a6fc6530587d5b7edfb31540ea2d0faba}{out\+\_\+dmx}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
+\item 
+int \mbox{\hyperlink{classout__dmx_a7bf52f6c7ce630f879de60596b82dd87}{Setup}} () override
+\item 
+int \mbox{\hyperlink{classout__dmx_a0b1d943e9772bf10487010040b948e8a}{Poll}} (short cause) override
+\item 
+int \mbox{\hyperlink{classout__dmx_a0b9383e7fe30707142915cbc3d0ec772}{Stop}} () override
+\item 
+int \mbox{\hyperlink{classout__dmx_aa5f2590101b1951f4cf5eb57449d8365}{Status}} () override
+\item 
+int \mbox{\hyperlink{classout__dmx_a691d16146df96df12df763a90cdc6d92}{is\+Active}} () override
+\item 
+int \mbox{\hyperlink{classout__dmx_a575351786cdc191555757cd39b4382f5}{get\+Chan\+Type}} () override
+\item 
+virtual int \mbox{\hyperlink{classout__dmx_ad33a8e316c5c8d409cddf4dcd8b15fcc}{Pixel\+Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool show=true) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classout__dmx_a6fc6530587d5b7edfb31540ea2d0faba}\label{classout__dmx_a6fc6530587d5b7edfb31540ea2d0faba}} 
+\index{out\_dmx@{out\_dmx}!out\_dmx@{out\_dmx}}
+\index{out\_dmx@{out\_dmx}!out\_dmx@{out\_dmx}}
+\doxysubsubsection{\texorpdfstring{out\_dmx()}{out\_dmx()}}
+{\footnotesize\ttfamily out\+\_\+dmx\+::out\+\_\+dmx (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_item}{Item}} $\ast$}]{\+\_\+item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classout__dmx_a575351786cdc191555757cd39b4382f5}\label{classout__dmx_a575351786cdc191555757cd39b4382f5}} 
+\index{out\_dmx@{out\_dmx}!getChanType@{getChanType}}
+\index{getChanType@{getChanType}!out\_dmx@{out\_dmx}}
+\doxysubsubsection{\texorpdfstring{getChanType()}{getChanType()}}
+{\footnotesize\ttfamily int out\+\_\+dmx\+::get\+Chan\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout__dmx_a691d16146df96df12df763a90cdc6d92}\label{classout__dmx_a691d16146df96df12df763a90cdc6d92}} 
+\index{out\_dmx@{out\_dmx}!isActive@{isActive}}
+\index{isActive@{isActive}!out\_dmx@{out\_dmx}}
+\doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
+{\footnotesize\ttfamily int out\+\_\+dmx\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout__dmx_ad33a8e316c5c8d409cddf4dcd8b15fcc}\label{classout__dmx_ad33a8e316c5c8d409cddf4dcd8b15fcc}} 
+\index{out\_dmx@{out\_dmx}!PixelCtrl@{PixelCtrl}}
+\index{PixelCtrl@{PixelCtrl}!out\_dmx@{out\_dmx}}
+\doxysubsubsection{\texorpdfstring{PixelCtrl()}{PixelCtrl()}}
+{\footnotesize\ttfamily int out\+\_\+dmx\+::\+Pixel\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{show = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classcolor_channel_a6c835d00ee8af04679f03465617c2873}{color\+Channel}}.
+
+\mbox{\Hypertarget{classout__dmx_a0b1d943e9772bf10487010040b948e8a}\label{classout__dmx_a0b1d943e9772bf10487010040b948e8a}} 
+\index{out\_dmx@{out\_dmx}!Poll@{Poll}}
+\index{Poll@{Poll}!out\_dmx@{out\_dmx}}
+\doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
+{\footnotesize\ttfamily int out\+\_\+dmx\+::\+Poll (\begin{DoxyParamCaption}\item[{short}]{cause }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout__dmx_a7bf52f6c7ce630f879de60596b82dd87}\label{classout__dmx_a7bf52f6c7ce630f879de60596b82dd87}} 
+\index{out\_dmx@{out\_dmx}!Setup@{Setup}}
+\index{Setup@{Setup}!out\_dmx@{out\_dmx}}
+\doxysubsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily int out\+\_\+dmx\+::\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_aeaf6346625245be1774a6d27d9cece4e}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout__dmx_aa5f2590101b1951f4cf5eb57449d8365}\label{classout__dmx_aa5f2590101b1951f4cf5eb57449d8365}} 
+\index{out\_dmx@{out\_dmx}!Status@{Status}}
+\index{Status@{Status}!out\_dmx@{out\_dmx}}
+\doxysubsubsection{\texorpdfstring{Status()}{Status()}}
+{\footnotesize\ttfamily int out\+\_\+dmx\+::\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_aefb8821172a2e66f49ea0da9b7c205a5}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout__dmx_a0b9383e7fe30707142915cbc3d0ec772}\label{classout__dmx_a0b9383e7fe30707142915cbc3d0ec772}} 
+\index{out\_dmx@{out\_dmx}!Stop@{Stop}}
+\index{Stop@{Stop}!out\_dmx@{out\_dmx}}
+\doxysubsubsection{\texorpdfstring{Stop()}{Stop()}}
+{\footnotesize\ttfamily int out\+\_\+dmx\+::\+Stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac08061e5ae0}{abstract\+Ch}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/modules/\mbox{\hyperlink{out__dmx_8h}{out\+\_\+dmx.\+h}}\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/modules/\mbox{\hyperlink{out__dmx_8cpp}{out\+\_\+dmx.\+cpp}}\end{DoxyCompactItemize}

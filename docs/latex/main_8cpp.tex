@@ -1,0 +1,715 @@
+\hypertarget{main_8cpp}{}\doxysection{/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/main.cpp File Reference}
+\label{main_8cpp}\index{/Users/andrey/Documents/Arduino/lighthub/lighthub/main.cpp@{/Users/andrey/Documents/Arduino/lighthub/lighthub/main.cpp}}
+{\ttfamily \#include \char`\"{}main.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}statusled.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$Dhcp.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+Pub\+Sub\+Client \mbox{\hyperlink{main_8cpp_a18e15522dd78764c518fd5526cc2d446}{mqtt\+Client}} (\mbox{\hyperlink{main_8cpp_a2a65545cb474469b22d80319e302a2f8}{eth\+Client}})
+\item 
+void \mbox{\hyperlink{main_8cpp_a19861585da4d4540b8f7c2601895607d}{clean\+Conf}} ()
+\item 
+bool \mbox{\hyperlink{main_8cpp_a9b73380a4525361ce5634b890e83c8d2}{is\+Not\+Retaining\+Status}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a6f06b273defaebb581fdf1adc8969f40}{mqtt\+Callback}} (char $\ast$topic, byte $\ast$payload, unsigned int length)
+\item 
+void \mbox{\hyperlink{main_8cpp_ad04c200b33c848aace1315bdf676201e}{print\+M\+A\+C\+Address}} ()
+\item 
+char $\ast$ \mbox{\hyperlink{main_8cpp_a900f9d7a9963ef64b642248a76175af7}{get\+String\+From\+Config}} (a\+Json\+Object $\ast$\mbox{\hyperlink{item_8cpp_a8d3c3518d793541417a4845125da1ae1}{a}}, int i)
+\item 
+char $\ast$ \mbox{\hyperlink{main_8cpp_a7d5e0e0612ab235c45bea4406faa5f76}{get\+String\+From\+Config}} (a\+Json\+Object $\ast$\mbox{\hyperlink{item_8cpp_a8d3c3518d793541417a4845125da1ae1}{a}}, char $\ast$name)
+\item 
+void \mbox{\hyperlink{main_8cpp_acfca2f2b3c22e56799e7fd1f66952729}{setup\+O\+TA}} (void)
+\item 
+void \mbox{\hyperlink{main_8cpp_afa048a9d2e392a67cb5af8ab00b3ec0f}{setup\+Syslog}} ()
+\item 
+\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} \mbox{\hyperlink{main_8cpp_ac90757e5d1212e1b230bb4db8924d310}{lan\+Loop}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_af1a9158faed86994ef3c4f248bdd86c8}{on\+M\+Q\+T\+T\+Connect}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_aed1aedfd8ec1c64e58ca24e5de9470b2}{ip\+\_\+ready\+\_\+config\+\_\+loaded\+\_\+connecting\+\_\+to\+\_\+broker}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_ae886a24c554e48191a1ea668c43d2287}{on\+Initial\+State\+Init\+L\+AN}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a8a8de594b1a60fc6867b639d1c50a34b}{reset\+Hard}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_abbcbfa3bc0f5d93f1f1d84c3fdc23608}{Changed}} (int i, Device\+Address addr, float current\+Temp)
+\item 
+void \mbox{\hyperlink{main_8cpp_a21fea6de1fe7b59684f3d18e3f4764d7}{cmd\+Function\+Help}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+void \mbox{\hyperlink{main_8cpp_ab6cb5750ee8902ca29b51dd013bb74b9}{print\+Curent\+Lan\+Config}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_ab854d947e87c345f801a07f196e50a67}{cmd\+Function\+Kill}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+void \mbox{\hyperlink{main_8cpp_a1f823c0616ac50cfe9d6d262c313b416}{cmd\+Function\+Reboot}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+void \mbox{\hyperlink{main_8cpp_a82529a2f0678bfb6b0808935865ba42d}{apply\+Config}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_ae22f686238cf5f09109b12f4b628ccea}{print\+Config\+Summary}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a3e35733dfdfb0fc4a3c55ab4bfc34fc1}{cmd\+Function\+Load}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+int \mbox{\hyperlink{main_8cpp_a92e24c034fb886c8155d50831bae5823}{load\+Config\+From\+E\+E\+P\+R\+OM}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a1ebb3f04dc34df941a4bf974f7ad9443}{cmd\+Function\+Req}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+int \mbox{\hyperlink{main_8cpp_aec955c97b23e5875d0fdb3c00e789903}{mqtt\+Config\+Request}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+int \mbox{\hyperlink{main_8cpp_ad60a48a0c509facdc6dc61df64d49fae}{mqtt\+Config\+Resp}} (char $\ast$as)
+\item 
+void \mbox{\hyperlink{main_8cpp_a66af021e24df0f8f82d9550cdb6bf865}{cmd\+Function\+Save}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+void \mbox{\hyperlink{main_8cpp_a5c6faf75e381fd57cf83b6efb002ceb4}{cmd\+Function\+Ip}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+void \mbox{\hyperlink{main_8cpp_ab2e128aecd2d6a7c32257adb25b6bc0d}{cmd\+Function\+Clear\+E\+E\+P\+R\+OM}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+void \mbox{\hyperlink{main_8cpp_a46b3fce70062889d311e18a31d1dac28}{cmd\+Function\+Pwd}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+void \mbox{\hyperlink{main_8cpp_aea9177f835f6f4ad83d8f71dc0a4db77}{cmd\+Function\+Set\+Mac}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+void \mbox{\hyperlink{main_8cpp_a84a345181b5379a4dc0eec58f348deb7}{cmd\+Function\+Get}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+void \mbox{\hyperlink{main_8cpp_a2d4b5aa8fbc197c31397235607aeba13}{print\+Bool}} (bool arg)
+\item 
+void \mbox{\hyperlink{main_8cpp_a3d9b2a443a58bf0d3e28c174d2c43b8f}{save\+Flash}} (short n, char $\ast$str)
+\item 
+int \mbox{\hyperlink{main_8cpp_aff5e7d5d674ed8a8fedcde644c725f68}{load\+Flash}} (short n, char $\ast$str, short l)
+\item 
+void \mbox{\hyperlink{main_8cpp_a881f36fdc5bf71038ea93823437e7751}{save\+Flash}} (short n, I\+P\+Address \&ip)
+\item 
+int \mbox{\hyperlink{main_8cpp_a4ae13d2288d58c3ea8b731270fa798d3}{ip\+Load\+From\+Flash}} (short n, I\+P\+Address \&ip)
+\item 
+\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} \mbox{\hyperlink{main_8cpp_aa6db506a9d019ba9decab546c15eb819}{load\+Config\+From\+Http}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+\item 
+void \mbox{\hyperlink{main_8cpp_a1c43d8a4afead0d0df29635242290377}{pre\+Transmission}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a33b535e84f654e423bb627b25b7b3759}{post\+Transmission}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_aa34675c2dc6eb3d0744844d8e67e3af8}{setup\+\_\+main}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a1cff64c0263246441c972f03e6893714}{print\+Firmware\+Version\+And\+Build\+Options}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a2cf2114e80da1894dc41209a4b66a08f}{publish\+Stat}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a2186513a50a77b9bd9bb453d4584c5f8}{setup\+Mac\+Address}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_abec54b31996557c73a31054ce068c8fa}{setup\+Cmd\+Arduino}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a840f282fdf876a88d5ff634fd74f10be}{loop\+\_\+main}} ()
+\item 
+void \mbox{\hyperlink{main_8cpp_a58e08cc15112818913fe96d75642265e}{ow\+Idle}} (void)
+\item 
+void \mbox{\hyperlink{main_8cpp_ae161ded98969a4b68b902b79633edc3b}{ethernet\+Idle}} (void)
+\item 
+void \mbox{\hyperlink{main_8cpp_aa557ba1fef085fb9865ffd399c738dbf}{modbus\+Idle}} (void)
+\item 
+void \mbox{\hyperlink{main_8cpp_ad146ac5b8d70c1a9a590ba4029c3548e}{input\+Loop}} (void)
+\item 
+void \mbox{\hyperlink{main_8cpp_a312b53e977f386af72ed576bca617fef}{input\+Setup}} (void)
+\item 
+void \mbox{\hyperlink{main_8cpp_aec2ff7b5df24b3ae0cfe8d556088fd7c}{polling\+Loop}} (void)
+\item 
+bool \mbox{\hyperlink{main_8cpp_a5976046ebb500523e75d64f9c858d73d}{is\+Thermostat\+With\+Min\+Array\+Size}} (a\+Json\+Object $\ast$item, int minimal\+Array\+Size)
+\item 
+bool \mbox{\hyperlink{main_8cpp_a35f5a9d31c8cb726a3c7e77e7ad9c4b2}{thermo\+Disabled\+Or\+Disconnected}} (a\+Json\+Object $\ast$thermo\+Extension\+Array, int thermo\+State\+Command)
+\item 
+void \mbox{\hyperlink{main_8cpp_a2d1cd6009a6e25d3605fee3e54065577}{thermo\+Loop}} (void)
+\item 
+short \mbox{\hyperlink{main_8cpp_a73643474e211698e96d2a6ac69264b46}{thermo\+Set\+Cur\+Temp}} (char $\ast$name, float t)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+Ethernet\+Client \mbox{\hyperlink{main_8cpp_a2a65545cb474469b22d80319e302a2f8}{eth\+Client}}
+\item 
+\mbox{\hyperlink{class_streamlog}{Streamlog}} \mbox{\hyperlink{main_8h_a9f5fbaf4b0a3b028eb31e734a5899428}{debug\+Serial}} \& \mbox{\hyperlink{main_8cpp_a525e5725911fc3939bb449849aa1b5ab}{debug\+Serial\+Port}}
+\item 
+\mbox{\hyperlink{classstatus_l_e_d}{status\+L\+ED}} \mbox{\hyperlink{main_8cpp_a1c77e6f587043bdec86e0cabd956e2e2}{L\+ED}} (\mbox{\hyperlink{statusled_8h_abfe826857256aa93aa762e7d98390743}{led\+R\+ED}})
+\item 
+\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} \mbox{\hyperlink{main_8cpp_a7bbda7cf303a1bc3222e7a270f9040bd}{lan\+Status}} = \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473a11ea6a01636f6011440e189d5ba5f34f}{I\+N\+I\+T\+I\+A\+L\+\_\+\+S\+T\+A\+TE}}
+\item 
+const char configserver\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{main_8cpp_adf233b4843635c473146d0fd1d2a8b46}{P\+R\+O\+G\+M\+EM}} = \mbox{\hyperlink{options_8h_a979988f1e12c581103bd7dcd41be2a4a}{C\+O\+N\+F\+I\+G\+\_\+\+S\+E\+R\+V\+ER}}
+\item 
+char $\ast$ \mbox{\hyperlink{main_8cpp_a5da66826e811349c98b2daf2bafb78c2}{device\+Name}} = N\+U\+LL
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{main_8cpp_addabf1c5a7be47e4e89beb38a435cb51}{topics}} = N\+U\+LL
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{main_8cpp_a2e223992d94c34788bec64fb05f780ba}{root}} = N\+U\+LL
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{main_8cpp_a012787f09a43864616e2b44349b29352}{items}} = N\+U\+LL
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{main_8cpp_a9e63aa63a6b8b667a41f94bec231d7aa}{inputs}} = N\+U\+LL
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{main_8cpp_a5a49c3c9f18e1b12e3706522c19c62c3}{mqtt\+Arr}} = N\+U\+LL
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{main_8cpp_aabc7159a42d55e7c474862449404d65c}{modbus\+Obj}} = N\+U\+LL
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{main_8cpp_a564a174b067eee3b33b1162935884d55}{ow\+Arr}} = N\+U\+LL
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{main_8cpp_a077dba54087a1a3694f810ba9fd06933}{dmx\+Arr}} = N\+U\+LL
+\item 
+uint32\+\_\+t \mbox{\hyperlink{main_8cpp_a44ea85dd3be07c7cf3ad07d3565c8663}{next\+Polling\+Check}} = 0
+\item 
+uint32\+\_\+t \mbox{\hyperlink{main_8cpp_ab97b60e63c8bfbdd8baaf7d1ad94501f}{next\+Input\+Check}} = 0
+\item 
+uint32\+\_\+t \mbox{\hyperlink{main_8cpp_a718a0d8e0b8df891d3f1e4ac55c786ca}{next\+Lan\+Check\+Time}} = 0
+\item 
+uint32\+\_\+t \mbox{\hyperlink{main_8cpp_a8389528c25c33724774418d61bb3ac35}{next\+Thermostat\+Check}} = 0
+\item 
+uint32\+\_\+t \mbox{\hyperlink{main_8cpp_a1faa7904cff01b8c7c39eeedcc205325}{next\+Sensor\+Check}} =0
+\item 
+uint32\+\_\+t \mbox{\hyperlink{main_8cpp_ae4b71bfb7d27827d7d6c40fc3b745510}{Wi\+Fi\+Awaiting\+Time}} =0
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{main_8cpp_aa8f2c895949680c2aadc4843bb350347}{polling\+Item}} = N\+U\+LL
+\item 
+bool \mbox{\hyperlink{main_8cpp_a9638cf28423f00ad98377d1d89cba57e}{ow\+Ready}} = false
+\item 
+bool \mbox{\hyperlink{main_8cpp_a459dec3d2fac52eba9bf53c19d14bcc7}{config\+Ok}} = false
+\item 
+bool \mbox{\hyperlink{main_8cpp_a235b23edd19d4c133a8d49bc1b09cedb}{config\+Loaded}} = false
+\item 
+bool \mbox{\hyperlink{main_8cpp_ad40189c6dffdd91758f3686c80484ac7}{initialized\+Listeners}} = false
+\item 
+int8\+\_\+t \mbox{\hyperlink{main_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}{ethernet\+Idle\+Count}} =0
+\item 
+int8\+\_\+t \mbox{\hyperlink{main_8cpp_a58655351bd1d5333e5eb92d4c29f4263}{config\+Locked}} = 0
+\item 
+Modbus\+Master \mbox{\hyperlink{main_8cpp_aed3ca48125de3e138d26fa4884c35c93}{node}}
+\item 
+byte \mbox{\hyperlink{main_8cpp_a775118f5b90a904c7e65066faabab1a2}{mac}} \mbox{[}6\mbox{]}
+\item 
+bool \mbox{\hyperlink{main_8cpp_a6a547b8f65552a00acceaae5fb86fb0d}{wifi\+Initialized}}
+\item 
+int \mbox{\hyperlink{main_8cpp_ac2567a764f7c3bef5306a430ba615de9}{mqtt\+Error\+Rate}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{main_8cpp_a82529a2f0678bfb6b0808935865ba42d}\label{main_8cpp_a82529a2f0678bfb6b0808935865ba42d}} 
+\index{main.cpp@{main.cpp}!applyConfig@{applyConfig}}
+\index{applyConfig@{applyConfig}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{applyConfig()}{applyConfig()}}
+{\footnotesize\ttfamily void apply\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_abbcbfa3bc0f5d93f1f1d84c3fdc23608}\label{main_8cpp_abbcbfa3bc0f5d93f1f1d84c3fdc23608}} 
+\index{main.cpp@{main.cpp}!Changed@{Changed}}
+\index{Changed@{Changed}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{Changed()}{Changed()}}
+{\footnotesize\ttfamily void Changed (\begin{DoxyParamCaption}\item[{int}]{i,  }\item[{Device\+Address}]{addr,  }\item[{float}]{current\+Temp }\end{DoxyParamCaption})}
+
+T\+O\+DO\+: Refactore using Items interface\mbox{\Hypertarget{main_8cpp_a19861585da4d4540b8f7c2601895607d}\label{main_8cpp_a19861585da4d4540b8f7c2601895607d}} 
+\index{main.cpp@{main.cpp}!cleanConf@{cleanConf}}
+\index{cleanConf@{cleanConf}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cleanConf()}{cleanConf()}}
+{\footnotesize\ttfamily void clean\+Conf (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_ab2e128aecd2d6a7c32257adb25b6bc0d}\label{main_8cpp_ab2e128aecd2d6a7c32257adb25b6bc0d}} 
+\index{main.cpp@{main.cpp}!cmdFunctionClearEEPROM@{cmdFunctionClearEEPROM}}
+\index{cmdFunctionClearEEPROM@{cmdFunctionClearEEPROM}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionClearEEPROM()}{cmdFunctionClearEEPROM()}}
+{\footnotesize\ttfamily void cmd\+Function\+Clear\+E\+E\+P\+R\+OM (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a84a345181b5379a4dc0eec58f348deb7}\label{main_8cpp_a84a345181b5379a4dc0eec58f348deb7}} 
+\index{main.cpp@{main.cpp}!cmdFunctionGet@{cmdFunctionGet}}
+\index{cmdFunctionGet@{cmdFunctionGet}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionGet()}{cmdFunctionGet()}}
+{\footnotesize\ttfamily void cmd\+Function\+Get (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a21fea6de1fe7b59684f3d18e3f4764d7}\label{main_8cpp_a21fea6de1fe7b59684f3d18e3f4764d7}} 
+\index{main.cpp@{main.cpp}!cmdFunctionHelp@{cmdFunctionHelp}}
+\index{cmdFunctionHelp@{cmdFunctionHelp}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionHelp()}{cmdFunctionHelp()}}
+{\footnotesize\ttfamily void cmd\+Function\+Help (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a5c6faf75e381fd57cf83b6efb002ceb4}\label{main_8cpp_a5c6faf75e381fd57cf83b6efb002ceb4}} 
+\index{main.cpp@{main.cpp}!cmdFunctionIp@{cmdFunctionIp}}
+\index{cmdFunctionIp@{cmdFunctionIp}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionIp()}{cmdFunctionIp()}}
+{\footnotesize\ttfamily void cmd\+Function\+Ip (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_ab854d947e87c345f801a07f196e50a67}\label{main_8cpp_ab854d947e87c345f801a07f196e50a67}} 
+\index{main.cpp@{main.cpp}!cmdFunctionKill@{cmdFunctionKill}}
+\index{cmdFunctionKill@{cmdFunctionKill}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionKill()}{cmdFunctionKill()}}
+{\footnotesize\ttfamily void cmd\+Function\+Kill (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a3e35733dfdfb0fc4a3c55ab4bfc34fc1}\label{main_8cpp_a3e35733dfdfb0fc4a3c55ab4bfc34fc1}} 
+\index{main.cpp@{main.cpp}!cmdFunctionLoad@{cmdFunctionLoad}}
+\index{cmdFunctionLoad@{cmdFunctionLoad}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionLoad()}{cmdFunctionLoad()}}
+{\footnotesize\ttfamily void cmd\+Function\+Load (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a46b3fce70062889d311e18a31d1dac28}\label{main_8cpp_a46b3fce70062889d311e18a31d1dac28}} 
+\index{main.cpp@{main.cpp}!cmdFunctionPwd@{cmdFunctionPwd}}
+\index{cmdFunctionPwd@{cmdFunctionPwd}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionPwd()}{cmdFunctionPwd()}}
+{\footnotesize\ttfamily void cmd\+Function\+Pwd (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a1f823c0616ac50cfe9d6d262c313b416}\label{main_8cpp_a1f823c0616ac50cfe9d6d262c313b416}} 
+\index{main.cpp@{main.cpp}!cmdFunctionReboot@{cmdFunctionReboot}}
+\index{cmdFunctionReboot@{cmdFunctionReboot}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionReboot()}{cmdFunctionReboot()}}
+{\footnotesize\ttfamily void cmd\+Function\+Reboot (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a1ebb3f04dc34df941a4bf974f7ad9443}\label{main_8cpp_a1ebb3f04dc34df941a4bf974f7ad9443}} 
+\index{main.cpp@{main.cpp}!cmdFunctionReq@{cmdFunctionReq}}
+\index{cmdFunctionReq@{cmdFunctionReq}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionReq()}{cmdFunctionReq()}}
+{\footnotesize\ttfamily void cmd\+Function\+Req (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a66af021e24df0f8f82d9550cdb6bf865}\label{main_8cpp_a66af021e24df0f8f82d9550cdb6bf865}} 
+\index{main.cpp@{main.cpp}!cmdFunctionSave@{cmdFunctionSave}}
+\index{cmdFunctionSave@{cmdFunctionSave}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionSave()}{cmdFunctionSave()}}
+{\footnotesize\ttfamily void cmd\+Function\+Save (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_aea9177f835f6f4ad83d8f71dc0a4db77}\label{main_8cpp_aea9177f835f6f4ad83d8f71dc0a4db77}} 
+\index{main.cpp@{main.cpp}!cmdFunctionSetMac@{cmdFunctionSetMac}}
+\index{cmdFunctionSetMac@{cmdFunctionSetMac}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionSetMac()}{cmdFunctionSetMac()}}
+{\footnotesize\ttfamily void cmd\+Function\+Set\+Mac (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_ae161ded98969a4b68b902b79633edc3b}\label{main_8cpp_ae161ded98969a4b68b902b79633edc3b}} 
+\index{main.cpp@{main.cpp}!ethernetIdle@{ethernetIdle}}
+\index{ethernetIdle@{ethernetIdle}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{ethernetIdle()}{ethernetIdle()}}
+{\footnotesize\ttfamily void ethernet\+Idle (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a7d5e0e0612ab235c45bea4406faa5f76}\label{main_8cpp_a7d5e0e0612ab235c45bea4406faa5f76}} 
+\index{main.cpp@{main.cpp}!getStringFromConfig@{getStringFromConfig}}
+\index{getStringFromConfig@{getStringFromConfig}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{getStringFromConfig()}{getStringFromConfig()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily char$\ast$ get\+String\+From\+Config (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{a,  }\item[{char $\ast$}]{name }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a900f9d7a9963ef64b642248a76175af7}\label{main_8cpp_a900f9d7a9963ef64b642248a76175af7}} 
+\index{main.cpp@{main.cpp}!getStringFromConfig@{getStringFromConfig}}
+\index{getStringFromConfig@{getStringFromConfig}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{getStringFromConfig()}{getStringFromConfig()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily char$\ast$ get\+String\+From\+Config (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{a,  }\item[{int}]{i }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_ad146ac5b8d70c1a9a590ba4029c3548e}\label{main_8cpp_ad146ac5b8d70c1a9a590ba4029c3548e}} 
+\index{main.cpp@{main.cpp}!inputLoop@{inputLoop}}
+\index{inputLoop@{inputLoop}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{inputLoop()}{inputLoop()}}
+{\footnotesize\ttfamily void input\+Loop (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a312b53e977f386af72ed576bca617fef}\label{main_8cpp_a312b53e977f386af72ed576bca617fef}} 
+\index{main.cpp@{main.cpp}!inputSetup@{inputSetup}}
+\index{inputSetup@{inputSetup}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{inputSetup()}{inputSetup()}}
+{\footnotesize\ttfamily void input\+Setup (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_aed1aedfd8ec1c64e58ca24e5de9470b2}\label{main_8cpp_aed1aedfd8ec1c64e58ca24e5de9470b2}} 
+\index{main.cpp@{main.cpp}!ip\_ready\_config\_loaded\_connecting\_to\_broker@{ip\_ready\_config\_loaded\_connecting\_to\_broker}}
+\index{ip\_ready\_config\_loaded\_connecting\_to\_broker@{ip\_ready\_config\_loaded\_connecting\_to\_broker}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{ip\_ready\_config\_loaded\_connecting\_to\_broker()}{ip\_ready\_config\_loaded\_connecting\_to\_broker()}}
+{\footnotesize\ttfamily void ip\+\_\+ready\+\_\+config\+\_\+loaded\+\_\+connecting\+\_\+to\+\_\+broker (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a4ae13d2288d58c3ea8b731270fa798d3}\label{main_8cpp_a4ae13d2288d58c3ea8b731270fa798d3}} 
+\index{main.cpp@{main.cpp}!ipLoadFromFlash@{ipLoadFromFlash}}
+\index{ipLoadFromFlash@{ipLoadFromFlash}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{ipLoadFromFlash()}{ipLoadFromFlash()}}
+{\footnotesize\ttfamily int ip\+Load\+From\+Flash (\begin{DoxyParamCaption}\item[{short}]{n,  }\item[{I\+P\+Address \&}]{ip }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a9b73380a4525361ce5634b890e83c8d2}\label{main_8cpp_a9b73380a4525361ce5634b890e83c8d2}} 
+\index{main.cpp@{main.cpp}!isNotRetainingStatus@{isNotRetainingStatus}}
+\index{isNotRetainingStatus@{isNotRetainingStatus}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{isNotRetainingStatus()}{isNotRetainingStatus()}}
+{\footnotesize\ttfamily bool is\+Not\+Retaining\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a5976046ebb500523e75d64f9c858d73d}\label{main_8cpp_a5976046ebb500523e75d64f9c858d73d}} 
+\index{main.cpp@{main.cpp}!isThermostatWithMinArraySize@{isThermostatWithMinArraySize}}
+\index{isThermostatWithMinArraySize@{isThermostatWithMinArraySize}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{isThermostatWithMinArraySize()}{isThermostatWithMinArraySize()}}
+{\footnotesize\ttfamily bool is\+Thermostat\+With\+Min\+Array\+Size (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{item,  }\item[{int}]{minimal\+Array\+Size }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_ac90757e5d1212e1b230bb4db8924d310}\label{main_8cpp_ac90757e5d1212e1b230bb4db8924d310}} 
+\index{main.cpp@{main.cpp}!lanLoop@{lanLoop}}
+\index{lanLoop@{lanLoop}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{lanLoop()}{lanLoop()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} lan\+Loop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a92e24c034fb886c8155d50831bae5823}\label{main_8cpp_a92e24c034fb886c8155d50831bae5823}} 
+\index{main.cpp@{main.cpp}!loadConfigFromEEPROM@{loadConfigFromEEPROM}}
+\index{loadConfigFromEEPROM@{loadConfigFromEEPROM}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{loadConfigFromEEPROM()}{loadConfigFromEEPROM()}}
+{\footnotesize\ttfamily int load\+Config\+From\+E\+E\+P\+R\+OM (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_aa6db506a9d019ba9decab546c15eb819}\label{main_8cpp_aa6db506a9d019ba9decab546c15eb819}} 
+\index{main.cpp@{main.cpp}!loadConfigFromHttp@{loadConfigFromHttp}}
+\index{loadConfigFromHttp@{loadConfigFromHttp}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{loadConfigFromHttp()}{loadConfigFromHttp()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} load\+Config\+From\+Http (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_aff5e7d5d674ed8a8fedcde644c725f68}\label{main_8cpp_aff5e7d5d674ed8a8fedcde644c725f68}} 
+\index{main.cpp@{main.cpp}!loadFlash@{loadFlash}}
+\index{loadFlash@{loadFlash}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{loadFlash()}{loadFlash()}}
+{\footnotesize\ttfamily int load\+Flash (\begin{DoxyParamCaption}\item[{short}]{n,  }\item[{char $\ast$}]{str,  }\item[{short}]{l }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a840f282fdf876a88d5ff634fd74f10be}\label{main_8cpp_a840f282fdf876a88d5ff634fd74f10be}} 
+\index{main.cpp@{main.cpp}!loop\_main@{loop\_main}}
+\index{loop\_main@{loop\_main}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{loop\_main()}{loop\_main()}}
+{\footnotesize\ttfamily void loop\+\_\+main (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_aa557ba1fef085fb9865ffd399c738dbf}\label{main_8cpp_aa557ba1fef085fb9865ffd399c738dbf}} 
+\index{main.cpp@{main.cpp}!modbusIdle@{modbusIdle}}
+\index{modbusIdle@{modbusIdle}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{modbusIdle()}{modbusIdle()}}
+{\footnotesize\ttfamily void modbus\+Idle (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a6f06b273defaebb581fdf1adc8969f40}\label{main_8cpp_a6f06b273defaebb581fdf1adc8969f40}} 
+\index{main.cpp@{main.cpp}!mqttCallback@{mqttCallback}}
+\index{mqttCallback@{mqttCallback}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{mqttCallback()}{mqttCallback()}}
+{\footnotesize\ttfamily void mqtt\+Callback (\begin{DoxyParamCaption}\item[{char $\ast$}]{topic,  }\item[{byte $\ast$}]{payload,  }\item[{unsigned int}]{length }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a18e15522dd78764c518fd5526cc2d446}\label{main_8cpp_a18e15522dd78764c518fd5526cc2d446}} 
+\index{main.cpp@{main.cpp}!mqttClient@{mqttClient}}
+\index{mqttClient@{mqttClient}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{mqttClient()}{mqttClient()}}
+{\footnotesize\ttfamily Pub\+Sub\+Client mqtt\+Client (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{main_8cpp_a2a65545cb474469b22d80319e302a2f8}{eth\+Client}}}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_aec955c97b23e5875d0fdb3c00e789903}\label{main_8cpp_aec955c97b23e5875d0fdb3c00e789903}} 
+\index{main.cpp@{main.cpp}!mqttConfigRequest@{mqttConfigRequest}}
+\index{mqttConfigRequest@{mqttConfigRequest}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{mqttConfigRequest()}{mqttConfigRequest()}}
+{\footnotesize\ttfamily int mqtt\+Config\+Request (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_ad60a48a0c509facdc6dc61df64d49fae}\label{main_8cpp_ad60a48a0c509facdc6dc61df64d49fae}} 
+\index{main.cpp@{main.cpp}!mqttConfigResp@{mqttConfigResp}}
+\index{mqttConfigResp@{mqttConfigResp}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{mqttConfigResp()}{mqttConfigResp()}}
+{\footnotesize\ttfamily int mqtt\+Config\+Resp (\begin{DoxyParamCaption}\item[{char $\ast$}]{as }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_ae886a24c554e48191a1ea668c43d2287}\label{main_8cpp_ae886a24c554e48191a1ea668c43d2287}} 
+\index{main.cpp@{main.cpp}!onInitialStateInitLAN@{onInitialStateInitLAN}}
+\index{onInitialStateInitLAN@{onInitialStateInitLAN}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{onInitialStateInitLAN()}{onInitialStateInitLAN()}}
+{\footnotesize\ttfamily void on\+Initial\+State\+Init\+L\+AN (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_af1a9158faed86994ef3c4f248bdd86c8}\label{main_8cpp_af1a9158faed86994ef3c4f248bdd86c8}} 
+\index{main.cpp@{main.cpp}!onMQTTConnect@{onMQTTConnect}}
+\index{onMQTTConnect@{onMQTTConnect}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{onMQTTConnect()}{onMQTTConnect()}}
+{\footnotesize\ttfamily void on\+M\+Q\+T\+T\+Connect (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+strncat(buf,item-\/$>$name,sizeof(buf)); strncat(buf,\char`\"{},\char`\"{},sizeof(buf));
+
+mqtt\+Client.\+publish(topic,buf,true);\mbox{\Hypertarget{main_8cpp_a58e08cc15112818913fe96d75642265e}\label{main_8cpp_a58e08cc15112818913fe96d75642265e}} 
+\index{main.cpp@{main.cpp}!owIdle@{owIdle}}
+\index{owIdle@{owIdle}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{owIdle()}{owIdle()}}
+{\footnotesize\ttfamily void ow\+Idle (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_aec2ff7b5df24b3ae0cfe8d556088fd7c}\label{main_8cpp_aec2ff7b5df24b3ae0cfe8d556088fd7c}} 
+\index{main.cpp@{main.cpp}!pollingLoop@{pollingLoop}}
+\index{pollingLoop@{pollingLoop}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{pollingLoop()}{pollingLoop()}}
+{\footnotesize\ttfamily void polling\+Loop (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a33b535e84f654e423bb627b25b7b3759}\label{main_8cpp_a33b535e84f654e423bb627b25b7b3759}} 
+\index{main.cpp@{main.cpp}!postTransmission@{postTransmission}}
+\index{postTransmission@{postTransmission}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{postTransmission()}{postTransmission()}}
+{\footnotesize\ttfamily void post\+Transmission (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a1c43d8a4afead0d0df29635242290377}\label{main_8cpp_a1c43d8a4afead0d0df29635242290377}} 
+\index{main.cpp@{main.cpp}!preTransmission@{preTransmission}}
+\index{preTransmission@{preTransmission}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{preTransmission()}{preTransmission()}}
+{\footnotesize\ttfamily void pre\+Transmission (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a2d4b5aa8fbc197c31397235607aeba13}\label{main_8cpp_a2d4b5aa8fbc197c31397235607aeba13}} 
+\index{main.cpp@{main.cpp}!printBool@{printBool}}
+\index{printBool@{printBool}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{printBool()}{printBool()}}
+{\footnotesize\ttfamily void print\+Bool (\begin{DoxyParamCaption}\item[{bool}]{arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_ae22f686238cf5f09109b12f4b628ccea}\label{main_8cpp_ae22f686238cf5f09109b12f4b628ccea}} 
+\index{main.cpp@{main.cpp}!printConfigSummary@{printConfigSummary}}
+\index{printConfigSummary@{printConfigSummary}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{printConfigSummary()}{printConfigSummary()}}
+{\footnotesize\ttfamily void print\+Config\+Summary (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_ab6cb5750ee8902ca29b51dd013bb74b9}\label{main_8cpp_ab6cb5750ee8902ca29b51dd013bb74b9}} 
+\index{main.cpp@{main.cpp}!printCurentLanConfig@{printCurentLanConfig}}
+\index{printCurentLanConfig@{printCurentLanConfig}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{printCurentLanConfig()}{printCurentLanConfig()}}
+{\footnotesize\ttfamily void print\+Curent\+Lan\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a1cff64c0263246441c972f03e6893714}\label{main_8cpp_a1cff64c0263246441c972f03e6893714}} 
+\index{main.cpp@{main.cpp}!printFirmwareVersionAndBuildOptions@{printFirmwareVersionAndBuildOptions}}
+\index{printFirmwareVersionAndBuildOptions@{printFirmwareVersionAndBuildOptions}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{printFirmwareVersionAndBuildOptions()}{printFirmwareVersionAndBuildOptions()}}
+{\footnotesize\ttfamily void print\+Firmware\+Version\+And\+Build\+Options (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_ad04c200b33c848aace1315bdf676201e}\label{main_8cpp_ad04c200b33c848aace1315bdf676201e}} 
+\index{main.cpp@{main.cpp}!printMACAddress@{printMACAddress}}
+\index{printMACAddress@{printMACAddress}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{printMACAddress()}{printMACAddress()}}
+{\footnotesize\ttfamily void print\+M\+A\+C\+Address (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a2cf2114e80da1894dc41209a4b66a08f}\label{main_8cpp_a2cf2114e80da1894dc41209a4b66a08f}} 
+\index{main.cpp@{main.cpp}!publishStat@{publishStat}}
+\index{publishStat@{publishStat}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{publishStat()}{publishStat()}}
+{\footnotesize\ttfamily void publish\+Stat (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a8a8de594b1a60fc6867b639d1c50a34b}\label{main_8cpp_a8a8de594b1a60fc6867b639d1c50a34b}} 
+\index{main.cpp@{main.cpp}!resetHard@{resetHard}}
+\index{resetHard@{resetHard}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{resetHard()}{resetHard()}}
+{\footnotesize\ttfamily void reset\+Hard (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a3d9b2a443a58bf0d3e28c174d2c43b8f}\label{main_8cpp_a3d9b2a443a58bf0d3e28c174d2c43b8f}} 
+\index{main.cpp@{main.cpp}!saveFlash@{saveFlash}}
+\index{saveFlash@{saveFlash}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{saveFlash()}{saveFlash()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void save\+Flash (\begin{DoxyParamCaption}\item[{short}]{n,  }\item[{char $\ast$}]{str }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a881f36fdc5bf71038ea93823437e7751}\label{main_8cpp_a881f36fdc5bf71038ea93823437e7751}} 
+\index{main.cpp@{main.cpp}!saveFlash@{saveFlash}}
+\index{saveFlash@{saveFlash}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{saveFlash()}{saveFlash()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void save\+Flash (\begin{DoxyParamCaption}\item[{short}]{n,  }\item[{I\+P\+Address \&}]{ip }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_aa34675c2dc6eb3d0744844d8e67e3af8}\label{main_8cpp_aa34675c2dc6eb3d0744844d8e67e3af8}} 
+\index{main.cpp@{main.cpp}!setup\_main@{setup\_main}}
+\index{setup\_main@{setup\_main}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{setup\_main()}{setup\_main()}}
+{\footnotesize\ttfamily void setup\+\_\+main (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_abec54b31996557c73a31054ce068c8fa}\label{main_8cpp_abec54b31996557c73a31054ce068c8fa}} 
+\index{main.cpp@{main.cpp}!setupCmdArduino@{setupCmdArduino}}
+\index{setupCmdArduino@{setupCmdArduino}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{setupCmdArduino()}{setupCmdArduino()}}
+{\footnotesize\ttfamily void setup\+Cmd\+Arduino (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a2186513a50a77b9bd9bb453d4584c5f8}\label{main_8cpp_a2186513a50a77b9bd9bb453d4584c5f8}} 
+\index{main.cpp@{main.cpp}!setupMacAddress@{setupMacAddress}}
+\index{setupMacAddress@{setupMacAddress}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{setupMacAddress()}{setupMacAddress()}}
+{\footnotesize\ttfamily void setup\+Mac\+Address (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_acfca2f2b3c22e56799e7fd1f66952729}\label{main_8cpp_acfca2f2b3c22e56799e7fd1f66952729}} 
+\index{main.cpp@{main.cpp}!setupOTA@{setupOTA}}
+\index{setupOTA@{setupOTA}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{setupOTA()}{setupOTA()}}
+{\footnotesize\ttfamily void setup\+O\+TA (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_afa048a9d2e392a67cb5af8ab00b3ec0f}\label{main_8cpp_afa048a9d2e392a67cb5af8ab00b3ec0f}} 
+\index{main.cpp@{main.cpp}!setupSyslog@{setupSyslog}}
+\index{setupSyslog@{setupSyslog}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{setupSyslog()}{setupSyslog()}}
+{\footnotesize\ttfamily void setup\+Syslog (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a35f5a9d31c8cb726a3c7e77e7ad9c4b2}\label{main_8cpp_a35f5a9d31c8cb726a3c7e77e7ad9c4b2}} 
+\index{main.cpp@{main.cpp}!thermoDisabledOrDisconnected@{thermoDisabledOrDisconnected}}
+\index{thermoDisabledOrDisconnected@{thermoDisabledOrDisconnected}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{thermoDisabledOrDisconnected()}{thermoDisabledOrDisconnected()}}
+{\footnotesize\ttfamily bool thermo\+Disabled\+Or\+Disconnected (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{thermo\+Extension\+Array,  }\item[{int}]{thermo\+State\+Command }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a2d1cd6009a6e25d3605fee3e54065577}\label{main_8cpp_a2d1cd6009a6e25d3605fee3e54065577}} 
+\index{main.cpp@{main.cpp}!thermoLoop@{thermoLoop}}
+\index{thermoLoop@{thermoLoop}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{thermoLoop()}{thermoLoop()}}
+{\footnotesize\ttfamily void thermo\+Loop (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{main_8cpp_a73643474e211698e96d2a6ac69264b46}\label{main_8cpp_a73643474e211698e96d2a6ac69264b46}} 
+\index{main.cpp@{main.cpp}!thermoSetCurTemp@{thermoSetCurTemp}}
+\index{thermoSetCurTemp@{thermoSetCurTemp}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{thermoSetCurTemp()}{thermoSetCurTemp()}}
+{\footnotesize\ttfamily short thermo\+Set\+Cur\+Temp (\begin{DoxyParamCaption}\item[{char $\ast$}]{name,  }\item[{float}]{t }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{main_8cpp_a235b23edd19d4c133a8d49bc1b09cedb}\label{main_8cpp_a235b23edd19d4c133a8d49bc1b09cedb}} 
+\index{main.cpp@{main.cpp}!configLoaded@{configLoaded}}
+\index{configLoaded@{configLoaded}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{configLoaded}{configLoaded}}
+{\footnotesize\ttfamily bool config\+Loaded = false}
+
+\mbox{\Hypertarget{main_8cpp_a58655351bd1d5333e5eb92d4c29f4263}\label{main_8cpp_a58655351bd1d5333e5eb92d4c29f4263}} 
+\index{main.cpp@{main.cpp}!configLocked@{configLocked}}
+\index{configLocked@{configLocked}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{configLocked}{configLocked}}
+{\footnotesize\ttfamily int8\+\_\+t config\+Locked = 0}
+
+\mbox{\Hypertarget{main_8cpp_a459dec3d2fac52eba9bf53c19d14bcc7}\label{main_8cpp_a459dec3d2fac52eba9bf53c19d14bcc7}} 
+\index{main.cpp@{main.cpp}!configOk@{configOk}}
+\index{configOk@{configOk}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{configOk}{configOk}}
+{\footnotesize\ttfamily bool config\+Ok = false}
+
+\mbox{\Hypertarget{main_8cpp_a525e5725911fc3939bb449849aa1b5ab}\label{main_8cpp_a525e5725911fc3939bb449849aa1b5ab}} 
+\index{main.cpp@{main.cpp}!debugSerialPort@{debugSerialPort}}
+\index{debugSerialPort@{debugSerialPort}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{debugSerialPort}{debugSerialPort}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_streamlog}{Streamlog}} \mbox{\hyperlink{main_8h_a962d0234b6d650699159b02bbb1ba659}{info\+Serial}}\& debug\+Serial\+Port}
+
+\mbox{\Hypertarget{main_8cpp_a5da66826e811349c98b2daf2bafb78c2}\label{main_8cpp_a5da66826e811349c98b2daf2bafb78c2}} 
+\index{main.cpp@{main.cpp}!deviceName@{deviceName}}
+\index{deviceName@{deviceName}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{deviceName}{deviceName}}
+{\footnotesize\ttfamily char$\ast$ device\+Name = N\+U\+LL}
+
+\mbox{\Hypertarget{main_8cpp_a077dba54087a1a3694f810ba9fd06933}\label{main_8cpp_a077dba54087a1a3694f810ba9fd06933}} 
+\index{main.cpp@{main.cpp}!dmxArr@{dmxArr}}
+\index{dmxArr@{dmxArr}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{dmxArr}{dmxArr}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ dmx\+Arr = N\+U\+LL}
+
+\mbox{\Hypertarget{main_8cpp_a2a65545cb474469b22d80319e302a2f8}\label{main_8cpp_a2a65545cb474469b22d80319e302a2f8}} 
+\index{main.cpp@{main.cpp}!ethClient@{ethClient}}
+\index{ethClient@{ethClient}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{ethClient}{ethClient}}
+{\footnotesize\ttfamily Ethernet\+Client eth\+Client}
+
+\mbox{\Hypertarget{main_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}\label{main_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}} 
+\index{main.cpp@{main.cpp}!ethernetIdleCount@{ethernetIdleCount}}
+\index{ethernetIdleCount@{ethernetIdleCount}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{ethernetIdleCount}{ethernetIdleCount}}
+{\footnotesize\ttfamily int8\+\_\+t ethernet\+Idle\+Count =0}
+
+\mbox{\Hypertarget{main_8cpp_ad40189c6dffdd91758f3686c80484ac7}\label{main_8cpp_ad40189c6dffdd91758f3686c80484ac7}} 
+\index{main.cpp@{main.cpp}!initializedListeners@{initializedListeners}}
+\index{initializedListeners@{initializedListeners}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{initializedListeners}{initializedListeners}}
+{\footnotesize\ttfamily bool initialized\+Listeners = false}
+
+\mbox{\Hypertarget{main_8cpp_a9e63aa63a6b8b667a41f94bec231d7aa}\label{main_8cpp_a9e63aa63a6b8b667a41f94bec231d7aa}} 
+\index{main.cpp@{main.cpp}!inputs@{inputs}}
+\index{inputs@{inputs}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{inputs}{inputs}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ inputs = N\+U\+LL}
+
+\mbox{\Hypertarget{main_8cpp_a012787f09a43864616e2b44349b29352}\label{main_8cpp_a012787f09a43864616e2b44349b29352}} 
+\index{main.cpp@{main.cpp}!items@{items}}
+\index{items@{items}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{items}{items}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ items = N\+U\+LL}
+
+\mbox{\Hypertarget{main_8cpp_a7bbda7cf303a1bc3222e7a270f9040bd}\label{main_8cpp_a7bbda7cf303a1bc3222e7a270f9040bd}} 
+\index{main.cpp@{main.cpp}!lanStatus@{lanStatus}}
+\index{lanStatus@{lanStatus}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{lanStatus}{lanStatus}}
+{\footnotesize\ttfamily \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} lan\+Status = \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473a11ea6a01636f6011440e189d5ba5f34f}{I\+N\+I\+T\+I\+A\+L\+\_\+\+S\+T\+A\+TE}}}
+
+\mbox{\Hypertarget{main_8cpp_a1c77e6f587043bdec86e0cabd956e2e2}\label{main_8cpp_a1c77e6f587043bdec86e0cabd956e2e2}} 
+\index{main.cpp@{main.cpp}!LED@{LED}}
+\index{LED@{LED}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{LED}{LED}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classstatus_l_e_d}{status\+L\+ED}} L\+ED(\mbox{\hyperlink{statusled_8h_abfe826857256aa93aa762e7d98390743}{led\+R\+ED}})}
+
+\mbox{\Hypertarget{main_8cpp_a775118f5b90a904c7e65066faabab1a2}\label{main_8cpp_a775118f5b90a904c7e65066faabab1a2}} 
+\index{main.cpp@{main.cpp}!mac@{mac}}
+\index{mac@{mac}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{mac}{mac}}
+{\footnotesize\ttfamily byte mac\mbox{[}6\mbox{]}}
+
+\mbox{\Hypertarget{main_8cpp_aabc7159a42d55e7c474862449404d65c}\label{main_8cpp_aabc7159a42d55e7c474862449404d65c}} 
+\index{main.cpp@{main.cpp}!modbusObj@{modbusObj}}
+\index{modbusObj@{modbusObj}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{modbusObj}{modbusObj}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ modbus\+Obj = N\+U\+LL}
+
+\mbox{\Hypertarget{main_8cpp_a5a49c3c9f18e1b12e3706522c19c62c3}\label{main_8cpp_a5a49c3c9f18e1b12e3706522c19c62c3}} 
+\index{main.cpp@{main.cpp}!mqttArr@{mqttArr}}
+\index{mqttArr@{mqttArr}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{mqttArr}{mqttArr}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ mqtt\+Arr = N\+U\+LL}
+
+\mbox{\Hypertarget{main_8cpp_ac2567a764f7c3bef5306a430ba615de9}\label{main_8cpp_ac2567a764f7c3bef5306a430ba615de9}} 
+\index{main.cpp@{main.cpp}!mqttErrorRate@{mqttErrorRate}}
+\index{mqttErrorRate@{mqttErrorRate}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{mqttErrorRate}{mqttErrorRate}}
+{\footnotesize\ttfamily int mqtt\+Error\+Rate}
+
+\mbox{\Hypertarget{main_8cpp_ab97b60e63c8bfbdd8baaf7d1ad94501f}\label{main_8cpp_ab97b60e63c8bfbdd8baaf7d1ad94501f}} 
+\index{main.cpp@{main.cpp}!nextInputCheck@{nextInputCheck}}
+\index{nextInputCheck@{nextInputCheck}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{nextInputCheck}{nextInputCheck}}
+{\footnotesize\ttfamily uint32\+\_\+t next\+Input\+Check = 0}
+
+\mbox{\Hypertarget{main_8cpp_a718a0d8e0b8df891d3f1e4ac55c786ca}\label{main_8cpp_a718a0d8e0b8df891d3f1e4ac55c786ca}} 
+\index{main.cpp@{main.cpp}!nextLanCheckTime@{nextLanCheckTime}}
+\index{nextLanCheckTime@{nextLanCheckTime}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{nextLanCheckTime}{nextLanCheckTime}}
+{\footnotesize\ttfamily uint32\+\_\+t next\+Lan\+Check\+Time = 0}
+
+\mbox{\Hypertarget{main_8cpp_a44ea85dd3be07c7cf3ad07d3565c8663}\label{main_8cpp_a44ea85dd3be07c7cf3ad07d3565c8663}} 
+\index{main.cpp@{main.cpp}!nextPollingCheck@{nextPollingCheck}}
+\index{nextPollingCheck@{nextPollingCheck}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{nextPollingCheck}{nextPollingCheck}}
+{\footnotesize\ttfamily uint32\+\_\+t next\+Polling\+Check = 0}
+
+\mbox{\Hypertarget{main_8cpp_a1faa7904cff01b8c7c39eeedcc205325}\label{main_8cpp_a1faa7904cff01b8c7c39eeedcc205325}} 
+\index{main.cpp@{main.cpp}!nextSensorCheck@{nextSensorCheck}}
+\index{nextSensorCheck@{nextSensorCheck}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{nextSensorCheck}{nextSensorCheck}}
+{\footnotesize\ttfamily uint32\+\_\+t next\+Sensor\+Check =0}
+
+\mbox{\Hypertarget{main_8cpp_a8389528c25c33724774418d61bb3ac35}\label{main_8cpp_a8389528c25c33724774418d61bb3ac35}} 
+\index{main.cpp@{main.cpp}!nextThermostatCheck@{nextThermostatCheck}}
+\index{nextThermostatCheck@{nextThermostatCheck}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{nextThermostatCheck}{nextThermostatCheck}}
+{\footnotesize\ttfamily uint32\+\_\+t next\+Thermostat\+Check = 0}
+
+\mbox{\Hypertarget{main_8cpp_aed3ca48125de3e138d26fa4884c35c93}\label{main_8cpp_aed3ca48125de3e138d26fa4884c35c93}} 
+\index{main.cpp@{main.cpp}!node@{node}}
+\index{node@{node}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{node}{node}}
+{\footnotesize\ttfamily Modbus\+Master node}
+
+\mbox{\Hypertarget{main_8cpp_a564a174b067eee3b33b1162935884d55}\label{main_8cpp_a564a174b067eee3b33b1162935884d55}} 
+\index{main.cpp@{main.cpp}!owArr@{owArr}}
+\index{owArr@{owArr}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{owArr}{owArr}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ ow\+Arr = N\+U\+LL}
+
+\mbox{\Hypertarget{main_8cpp_a9638cf28423f00ad98377d1d89cba57e}\label{main_8cpp_a9638cf28423f00ad98377d1d89cba57e}} 
+\index{main.cpp@{main.cpp}!owReady@{owReady}}
+\index{owReady@{owReady}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{owReady}{owReady}}
+{\footnotesize\ttfamily bool ow\+Ready = false}
+
+\mbox{\Hypertarget{main_8cpp_aa8f2c895949680c2aadc4843bb350347}\label{main_8cpp_aa8f2c895949680c2aadc4843bb350347}} 
+\index{main.cpp@{main.cpp}!pollingItem@{pollingItem}}
+\index{pollingItem@{pollingItem}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{pollingItem}{pollingItem}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ polling\+Item = N\+U\+LL}
+
+\mbox{\Hypertarget{main_8cpp_adf233b4843635c473146d0fd1d2a8b46}\label{main_8cpp_adf233b4843635c473146d0fd1d2a8b46}} 
+\index{main.cpp@{main.cpp}!PROGMEM@{PROGMEM}}
+\index{PROGMEM@{PROGMEM}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{PROGMEM}{PROGMEM}}
+{\footnotesize\ttfamily const char verval\+\_\+P \mbox{[}$\,$\mbox{]} P\+R\+O\+G\+M\+EM = \mbox{\hyperlink{options_8h_a979988f1e12c581103bd7dcd41be2a4a}{C\+O\+N\+F\+I\+G\+\_\+\+S\+E\+R\+V\+ER}}}
+
+\mbox{\Hypertarget{main_8cpp_a2e223992d94c34788bec64fb05f780ba}\label{main_8cpp_a2e223992d94c34788bec64fb05f780ba}} 
+\index{main.cpp@{main.cpp}!root@{root}}
+\index{root@{root}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{root}{root}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ root = N\+U\+LL}
+
+\mbox{\Hypertarget{main_8cpp_addabf1c5a7be47e4e89beb38a435cb51}\label{main_8cpp_addabf1c5a7be47e4e89beb38a435cb51}} 
+\index{main.cpp@{main.cpp}!topics@{topics}}
+\index{topics@{topics}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{topics}{topics}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ topics = N\+U\+LL}
+
+\mbox{\Hypertarget{main_8cpp_ae4b71bfb7d27827d7d6c40fc3b745510}\label{main_8cpp_ae4b71bfb7d27827d7d6c40fc3b745510}} 
+\index{main.cpp@{main.cpp}!WiFiAwaitingTime@{WiFiAwaitingTime}}
+\index{WiFiAwaitingTime@{WiFiAwaitingTime}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{WiFiAwaitingTime}{WiFiAwaitingTime}}
+{\footnotesize\ttfamily uint32\+\_\+t Wi\+Fi\+Awaiting\+Time =0}
+
+\mbox{\Hypertarget{main_8cpp_a6a547b8f65552a00acceaae5fb86fb0d}\label{main_8cpp_a6a547b8f65552a00acceaae5fb86fb0d}} 
+\index{main.cpp@{main.cpp}!wifiInitialized@{wifiInitialized}}
+\index{wifiInitialized@{wifiInitialized}!main.cpp@{main.cpp}}
+\doxysubsubsection{\texorpdfstring{wifiInitialized}{wifiInitialized}}
+{\footnotesize\ttfamily bool wifi\+Initialized}
+

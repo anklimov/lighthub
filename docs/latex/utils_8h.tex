@@ -1,0 +1,273 @@
+\hypertarget{utils_8h}{}\doxysection{/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/utils.h File Reference}
+\label{utils_8h}\index{/Users/andrey/Documents/Arduino/lighthub/lighthub/utils.h@{/Users/andrey/Documents/Arduino/lighthub/lighthub/utils.h}}
+{\ttfamily \#include $<$Arduino.\+h$>$}\newline
+{\ttfamily \#include $<$I\+P\+Address.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}a\+J\+S\+O\+N.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}options.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}item.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Streaming.\+h\char`\"{}}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{utils_8h_a2a280bfe12bc6e732a7c4d3d62443a14}{Q}}(x)~\#x
+\item 
+\#define \mbox{\hyperlink{utils_8h_a2117b58e19182dff91ad3558e650541d}{Q\+U\+O\+TE}}(x)~\mbox{\hyperlink{utils_8h_a2a280bfe12bc6e732a7c4d3d62443a14}{Q}}(x)
+\item 
+\#define \mbox{\hyperlink{utils_8h_ad15c9a08925b1c0365fb1bd9ac826670}{V\+A\+L\+U\+E\+\_\+\+T\+O\+\_\+\+S\+T\+R\+I\+NG}}(x)~\#x
+\item 
+\#define \mbox{\hyperlink{utils_8h_ad705dc78222473228fa826e42eca95f1}{V\+A\+L\+UE}}(x)~\mbox{\hyperlink{utils_8h_ad15c9a08925b1c0365fb1bd9ac826670}{V\+A\+L\+U\+E\+\_\+\+T\+O\+\_\+\+S\+T\+R\+I\+NG}}(x)
+\item 
+\#define \mbox{\hyperlink{utils_8h_a9a89328d94ddd2cdd4b39db22da01f79}{V\+A\+R\+\_\+\+N\+A\+M\+E\+\_\+\+V\+A\+L\+UE}}(var)~\#var \char`\"{}=\char`\"{}  \mbox{\hyperlink{utils_8h_ad705dc78222473228fa826e42eca95f1}{V\+A\+L\+UE}}(var)
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{utils_8h_a2598bacb04e8f77e8b41cee61ef359fc}{topic\+Type}} \{ \mbox{\hyperlink{utils_8h_a2598bacb04e8f77e8b41cee61ef359fca3fa22e2ae357981afc104dc67d764c85}{T\+\_\+\+D\+EV}} = 1, 
+\mbox{\hyperlink{utils_8h_a2598bacb04e8f77e8b41cee61ef359fca26fa2da957fe6c55420ed0e1a7dd7a15}{T\+\_\+\+B\+C\+ST}} = 2, 
+\mbox{\hyperlink{utils_8h_a2598bacb04e8f77e8b41cee61ef359fca27b2310c69298d62ed18dd416476a44d}{T\+\_\+\+O\+UT}} = 3
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{utils_8h_ab5fb614b925280fc7c8d0e5314dd3b7a}{Print\+Bytes}} (uint8\+\_\+t $\ast$addr, uint8\+\_\+t count, bool newline)
+\item 
+void \mbox{\hyperlink{utils_8h_a85a33f14fc0eefef02be4c6bacf5c8f0}{Set\+Bytes}} (uint8\+\_\+t $\ast$addr, uint8\+\_\+t count, char $\ast$out)
+\item 
+void \mbox{\hyperlink{utils_8h_a4dd6705cb24a3eab32d9abc8393844b3}{Set\+Addr}} (char $\ast$out, uint8\+\_\+t $\ast$addr)
+\item 
+uint8\+\_\+t \mbox{\hyperlink{utils_8h_a215fd13be95cb1c21fe50b3693b85557}{H\+E\+X2\+D\+EC}} (char i)
+\item 
+int \mbox{\hyperlink{utils_8h_a6037cfc7913c0856e93dbf8fc2133aac}{get\+Int}} (char $\ast$$\ast$chan)
+\item 
+unsigned long \mbox{\hyperlink{utils_8h_a3c97971726a07a7d14fb701f4a4638f0}{free\+Ram}} ()
+\item 
+void \mbox{\hyperlink{utils_8h_a1938abf1ef99f35bd2578e3db1bcf7b8}{parse\+Bytes}} (const char $\ast$str, char separator, byte $\ast$bytes, int max\+Bytes, int base)
+\item 
+int \mbox{\hyperlink{utils_8h_aadf1050416e46077ad59157173438dad}{log}} (const char $\ast$str,...)
+\item 
+void \mbox{\hyperlink{utils_8h_a6c16341dd45c4e557f951818d8d09810}{print\+Float\+Value\+To\+Str}} (float value, char $\ast$valstr)
+\item 
+void \mbox{\hyperlink{utils_8h_a1380fbc9c2170180770dd1bdcc5ac647}{Read\+Unique\+ID}} (uint32\+\_\+t $\ast$pdw\+Unique\+ID)
+\item 
+int \mbox{\hyperlink{utils_8h_a2abeec32a0c7fe0b4aa02a8807ed9cee}{inet\+\_\+aton}} (const char $\ast$a\+I\+P\+Addr\+String, I\+P\+Address \&a\+Result)
+\item 
+char $\ast$ \mbox{\hyperlink{utils_8h_a5f3cdb518da692b8859ae48ed58196fc}{inet\+\_\+ntoa\+\_\+r}} (I\+P\+Address addr, char $\ast$buf, int buflen)
+\item 
+void \mbox{\hyperlink{utils_8h_af0df006a5ae8d0d730134afdaf1c64dd}{print\+I\+P\+Address}} (I\+P\+Address ip\+Address)
+\item 
+char $\ast$ \mbox{\hyperlink{utils_8h_aa0045f41bb76629662ed1ee7952f856e}{set\+Topic}} (char $\ast$buf, int8\+\_\+t buflen, \mbox{\hyperlink{utils_8h_a2598bacb04e8f77e8b41cee61ef359fc}{topic\+Type}} tt, const char $\ast$suffix=N\+U\+LL)
+\item 
+void \mbox{\hyperlink{utils_8h_afb183532261be04b86e9e535010db6a9}{print\+Ulong\+Value\+To\+Str}} (char $\ast$valstr, unsigned long value)
+\item 
+void \mbox{\hyperlink{utils_8h_af585ed9b15b9980b72fbec6d9c9dba67}{scan\+\_\+i2c\+\_\+bus}} ()
+\item 
+void \mbox{\hyperlink{utils_8h_a7facb8f2c84692ab65024785eb64b541}{soft\+Reboot\+Func}} ()
+\item 
+bool \mbox{\hyperlink{utils_8h_acd6072104e482c3f61e5bfad35a58ac0}{is\+Time\+Over}} (uint32\+\_\+t timestamp, uint32\+\_\+t curr\+Time, uint32\+\_\+t time, uint32\+\_\+t modulo=0x\+F\+F\+F\+F\+F\+F\+FF)
+\item 
+bool \mbox{\hyperlink{utils_8h_a9843f57c765644bc93e675922da82beb}{execute\+Command}} (a\+Json\+Object $\ast$cmd, int8\+\_\+t toggle=-\/1)
+\item 
+bool \mbox{\hyperlink{utils_8h_a2cd15a22b2799d0378a27850c96c6300}{execute\+Command}} (a\+Json\+Object $\ast$cmd, int8\+\_\+t toggle, \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \+\_\+item\+Cmd)
+\item 
+\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{utils_8h_ace8fa23ff29c3feb89c5d500ef87b914}{map\+Int}} (int32\+\_\+t arg, a\+Json\+Object $\ast$map)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{utils_8h_a2a280bfe12bc6e732a7c4d3d62443a14}\label{utils_8h_a2a280bfe12bc6e732a7c4d3d62443a14}} 
+\index{utils.h@{utils.h}!Q@{Q}}
+\index{Q@{Q}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{Q}{Q}}
+{\footnotesize\ttfamily \#define Q(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~\#x}
+
+\mbox{\Hypertarget{utils_8h_a2117b58e19182dff91ad3558e650541d}\label{utils_8h_a2117b58e19182dff91ad3558e650541d}} 
+\index{utils.h@{utils.h}!QUOTE@{QUOTE}}
+\index{QUOTE@{QUOTE}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{QUOTE}{QUOTE}}
+{\footnotesize\ttfamily \#define Q\+U\+O\+TE(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~\mbox{\hyperlink{utils_8h_a2a280bfe12bc6e732a7c4d3d62443a14}{Q}}(x)}
+
+\mbox{\Hypertarget{utils_8h_ad705dc78222473228fa826e42eca95f1}\label{utils_8h_ad705dc78222473228fa826e42eca95f1}} 
+\index{utils.h@{utils.h}!VALUE@{VALUE}}
+\index{VALUE@{VALUE}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{VALUE}{VALUE}}
+{\footnotesize\ttfamily \#define V\+A\+L\+UE(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~\mbox{\hyperlink{utils_8h_ad15c9a08925b1c0365fb1bd9ac826670}{V\+A\+L\+U\+E\+\_\+\+T\+O\+\_\+\+S\+T\+R\+I\+NG}}(x)}
+
+\mbox{\Hypertarget{utils_8h_ad15c9a08925b1c0365fb1bd9ac826670}\label{utils_8h_ad15c9a08925b1c0365fb1bd9ac826670}} 
+\index{utils.h@{utils.h}!VALUE\_TO\_STRING@{VALUE\_TO\_STRING}}
+\index{VALUE\_TO\_STRING@{VALUE\_TO\_STRING}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{VALUE\_TO\_STRING}{VALUE\_TO\_STRING}}
+{\footnotesize\ttfamily \#define V\+A\+L\+U\+E\+\_\+\+T\+O\+\_\+\+S\+T\+R\+I\+NG(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~\#x}
+
+\mbox{\Hypertarget{utils_8h_a9a89328d94ddd2cdd4b39db22da01f79}\label{utils_8h_a9a89328d94ddd2cdd4b39db22da01f79}} 
+\index{utils.h@{utils.h}!VAR\_NAME\_VALUE@{VAR\_NAME\_VALUE}}
+\index{VAR\_NAME\_VALUE@{VAR\_NAME\_VALUE}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{VAR\_NAME\_VALUE}{VAR\_NAME\_VALUE}}
+{\footnotesize\ttfamily \#define V\+A\+R\+\_\+\+N\+A\+M\+E\+\_\+\+V\+A\+L\+UE(\begin{DoxyParamCaption}\item[{}]{var }\end{DoxyParamCaption})~\#var \char`\"{}=\char`\"{}  \mbox{\hyperlink{utils_8h_ad705dc78222473228fa826e42eca95f1}{V\+A\+L\+UE}}(var)}
+
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{utils_8h_a2598bacb04e8f77e8b41cee61ef359fc}\label{utils_8h_a2598bacb04e8f77e8b41cee61ef359fc}} 
+\index{utils.h@{utils.h}!topicType@{topicType}}
+\index{topicType@{topicType}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{topicType}{topicType}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{utils_8h_a2598bacb04e8f77e8b41cee61ef359fc}{topic\+Type}}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{T\_DEV@{T\_DEV}!utils.h@{utils.h}}\index{utils.h@{utils.h}!T\_DEV@{T\_DEV}}}\mbox{\Hypertarget{utils_8h_a2598bacb04e8f77e8b41cee61ef359fca3fa22e2ae357981afc104dc67d764c85}\label{utils_8h_a2598bacb04e8f77e8b41cee61ef359fca3fa22e2ae357981afc104dc67d764c85}} 
+T\+\_\+\+D\+EV&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{T\_BCST@{T\_BCST}!utils.h@{utils.h}}\index{utils.h@{utils.h}!T\_BCST@{T\_BCST}}}\mbox{\Hypertarget{utils_8h_a2598bacb04e8f77e8b41cee61ef359fca26fa2da957fe6c55420ed0e1a7dd7a15}\label{utils_8h_a2598bacb04e8f77e8b41cee61ef359fca26fa2da957fe6c55420ed0e1a7dd7a15}} 
+T\+\_\+\+B\+C\+ST&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{T\_OUT@{T\_OUT}!utils.h@{utils.h}}\index{utils.h@{utils.h}!T\_OUT@{T\_OUT}}}\mbox{\Hypertarget{utils_8h_a2598bacb04e8f77e8b41cee61ef359fca27b2310c69298d62ed18dd416476a44d}\label{utils_8h_a2598bacb04e8f77e8b41cee61ef359fca27b2310c69298d62ed18dd416476a44d}} 
+T\+\_\+\+O\+UT&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{utils_8h_a2cd15a22b2799d0378a27850c96c6300}\label{utils_8h_a2cd15a22b2799d0378a27850c96c6300}} 
+\index{utils.h@{utils.h}!executeCommand@{executeCommand}}
+\index{executeCommand@{executeCommand}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{executeCommand()}{executeCommand()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily bool execute\+Command (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{cmd,  }\item[{int8\+\_\+t}]{toggle,  }\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{\+\_\+item\+Cmd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a9843f57c765644bc93e675922da82beb}\label{utils_8h_a9843f57c765644bc93e675922da82beb}} 
+\index{utils.h@{utils.h}!executeCommand@{executeCommand}}
+\index{executeCommand@{executeCommand}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{executeCommand()}{executeCommand()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily bool execute\+Command (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{cmd,  }\item[{int8\+\_\+t}]{toggle = {\ttfamily -\/1} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a3c97971726a07a7d14fb701f4a4638f0}\label{utils_8h_a3c97971726a07a7d14fb701f4a4638f0}} 
+\index{utils.h@{utils.h}!freeRam@{freeRam}}
+\index{freeRam@{freeRam}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{freeRam()}{freeRam()}}
+{\footnotesize\ttfamily unsigned long free\+Ram (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a6037cfc7913c0856e93dbf8fc2133aac}\label{utils_8h_a6037cfc7913c0856e93dbf8fc2133aac}} 
+\index{utils.h@{utils.h}!getInt@{getInt}}
+\index{getInt@{getInt}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{getInt()}{getInt()}}
+{\footnotesize\ttfamily int get\+Int (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{chan }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a215fd13be95cb1c21fe50b3693b85557}\label{utils_8h_a215fd13be95cb1c21fe50b3693b85557}} 
+\index{utils.h@{utils.h}!HEX2DEC@{HEX2DEC}}
+\index{HEX2DEC@{HEX2DEC}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{HEX2DEC()}{HEX2DEC()}}
+{\footnotesize\ttfamily uint8\+\_\+t H\+E\+X2\+D\+EC (\begin{DoxyParamCaption}\item[{char}]{i }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a2abeec32a0c7fe0b4aa02a8807ed9cee}\label{utils_8h_a2abeec32a0c7fe0b4aa02a8807ed9cee}} 
+\index{utils.h@{utils.h}!inet\_aton@{inet\_aton}}
+\index{inet\_aton@{inet\_aton}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{inet\_aton()}{inet\_aton()}}
+{\footnotesize\ttfamily int inet\+\_\+aton (\begin{DoxyParamCaption}\item[{const char $\ast$}]{a\+I\+P\+Addr\+String,  }\item[{I\+P\+Address \&}]{a\+Result }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a5f3cdb518da692b8859ae48ed58196fc}\label{utils_8h_a5f3cdb518da692b8859ae48ed58196fc}} 
+\index{utils.h@{utils.h}!inet\_ntoa\_r@{inet\_ntoa\_r}}
+\index{inet\_ntoa\_r@{inet\_ntoa\_r}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{inet\_ntoa\_r()}{inet\_ntoa\_r()}}
+{\footnotesize\ttfamily char$\ast$ inet\+\_\+ntoa\+\_\+r (\begin{DoxyParamCaption}\item[{I\+P\+Address}]{addr,  }\item[{char $\ast$}]{buf,  }\item[{int}]{buflen }\end{DoxyParamCaption})}
+
+Same as ipaddr\+\_\+ntoa, but reentrant since a user-\/supplied buffer is used.
+
+
+\begin{DoxyParams}{Parameters}
+{\em addr} & ip address in network order to convert \\
+\hline
+{\em buf} & target buffer where the string is stored \\
+\hline
+{\em buflen} & length of buf \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+either pointer to buf which now holds the A\+S\+C\+II representation of addr or N\+U\+LL if buf was too small 
+\end{DoxyReturn}
+\mbox{\Hypertarget{utils_8h_acd6072104e482c3f61e5bfad35a58ac0}\label{utils_8h_acd6072104e482c3f61e5bfad35a58ac0}} 
+\index{utils.h@{utils.h}!isTimeOver@{isTimeOver}}
+\index{isTimeOver@{isTimeOver}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{isTimeOver()}{isTimeOver()}}
+{\footnotesize\ttfamily bool is\+Time\+Over (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{timestamp,  }\item[{uint32\+\_\+t}]{curr\+Time,  }\item[{uint32\+\_\+t}]{time,  }\item[{uint32\+\_\+t}]{modulo = {\ttfamily 0xFFFFFFFF} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_aadf1050416e46077ad59157173438dad}\label{utils_8h_aadf1050416e46077ad59157173438dad}} 
+\index{utils.h@{utils.h}!log@{log}}
+\index{log@{log}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{log()}{log()}}
+{\footnotesize\ttfamily int log (\begin{DoxyParamCaption}\item[{const char $\ast$}]{str,  }\item[{}]{... }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_ace8fa23ff29c3feb89c5d500ef87b914}\label{utils_8h_ace8fa23ff29c3feb89c5d500ef87b914}} 
+\index{utils.h@{utils.h}!mapInt@{mapInt}}
+\index{mapInt@{mapInt}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{mapInt()}{mapInt()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} map\+Int (\begin{DoxyParamCaption}\item[{int32\+\_\+t}]{arg,  }\item[{a\+Json\+Object $\ast$}]{map }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a1938abf1ef99f35bd2578e3db1bcf7b8}\label{utils_8h_a1938abf1ef99f35bd2578e3db1bcf7b8}} 
+\index{utils.h@{utils.h}!parseBytes@{parseBytes}}
+\index{parseBytes@{parseBytes}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{parseBytes()}{parseBytes()}}
+{\footnotesize\ttfamily void parse\+Bytes (\begin{DoxyParamCaption}\item[{const char $\ast$}]{str,  }\item[{char}]{separator,  }\item[{byte $\ast$}]{bytes,  }\item[{int}]{max\+Bytes,  }\item[{int}]{base }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_ab5fb614b925280fc7c8d0e5314dd3b7a}\label{utils_8h_ab5fb614b925280fc7c8d0e5314dd3b7a}} 
+\index{utils.h@{utils.h}!PrintBytes@{PrintBytes}}
+\index{PrintBytes@{PrintBytes}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{PrintBytes()}{PrintBytes()}}
+{\footnotesize\ttfamily void Print\+Bytes (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{addr,  }\item[{uint8\+\_\+t}]{count,  }\item[{bool}]{newline }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a6c16341dd45c4e557f951818d8d09810}\label{utils_8h_a6c16341dd45c4e557f951818d8d09810}} 
+\index{utils.h@{utils.h}!printFloatValueToStr@{printFloatValueToStr}}
+\index{printFloatValueToStr@{printFloatValueToStr}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{printFloatValueToStr()}{printFloatValueToStr()}}
+{\footnotesize\ttfamily void print\+Float\+Value\+To\+Str (\begin{DoxyParamCaption}\item[{float}]{value,  }\item[{char $\ast$}]{valstr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_af0df006a5ae8d0d730134afdaf1c64dd}\label{utils_8h_af0df006a5ae8d0d730134afdaf1c64dd}} 
+\index{utils.h@{utils.h}!printIPAddress@{printIPAddress}}
+\index{printIPAddress@{printIPAddress}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{printIPAddress()}{printIPAddress()}}
+{\footnotesize\ttfamily void print\+I\+P\+Address (\begin{DoxyParamCaption}\item[{I\+P\+Address}]{ip\+Address }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_afb183532261be04b86e9e535010db6a9}\label{utils_8h_afb183532261be04b86e9e535010db6a9}} 
+\index{utils.h@{utils.h}!printUlongValueToStr@{printUlongValueToStr}}
+\index{printUlongValueToStr@{printUlongValueToStr}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{printUlongValueToStr()}{printUlongValueToStr()}}
+{\footnotesize\ttfamily void print\+Ulong\+Value\+To\+Str (\begin{DoxyParamCaption}\item[{char $\ast$}]{valstr,  }\item[{unsigned long}]{value }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a1380fbc9c2170180770dd1bdcc5ac647}\label{utils_8h_a1380fbc9c2170180770dd1bdcc5ac647}} 
+\index{utils.h@{utils.h}!ReadUniqueID@{ReadUniqueID}}
+\index{ReadUniqueID@{ReadUniqueID}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{ReadUniqueID()}{ReadUniqueID()}}
+{\footnotesize\ttfamily void Read\+Unique\+ID (\begin{DoxyParamCaption}\item[{uint32\+\_\+t $\ast$}]{pdw\+Unique\+ID }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_af585ed9b15b9980b72fbec6d9c9dba67}\label{utils_8h_af585ed9b15b9980b72fbec6d9c9dba67}} 
+\index{utils.h@{utils.h}!scan\_i2c\_bus@{scan\_i2c\_bus}}
+\index{scan\_i2c\_bus@{scan\_i2c\_bus}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{scan\_i2c\_bus()}{scan\_i2c\_bus()}}
+{\footnotesize\ttfamily void scan\+\_\+i2c\+\_\+bus (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a4dd6705cb24a3eab32d9abc8393844b3}\label{utils_8h_a4dd6705cb24a3eab32d9abc8393844b3}} 
+\index{utils.h@{utils.h}!SetAddr@{SetAddr}}
+\index{SetAddr@{SetAddr}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{SetAddr()}{SetAddr()}}
+{\footnotesize\ttfamily void Set\+Addr (\begin{DoxyParamCaption}\item[{char $\ast$}]{out,  }\item[{uint8\+\_\+t $\ast$}]{addr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a85a33f14fc0eefef02be4c6bacf5c8f0}\label{utils_8h_a85a33f14fc0eefef02be4c6bacf5c8f0}} 
+\index{utils.h@{utils.h}!SetBytes@{SetBytes}}
+\index{SetBytes@{SetBytes}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{SetBytes()}{SetBytes()}}
+{\footnotesize\ttfamily void Set\+Bytes (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{addr,  }\item[{uint8\+\_\+t}]{count,  }\item[{char $\ast$}]{out }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_aa0045f41bb76629662ed1ee7952f856e}\label{utils_8h_aa0045f41bb76629662ed1ee7952f856e}} 
+\index{utils.h@{utils.h}!setTopic@{setTopic}}
+\index{setTopic@{setTopic}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{setTopic()}{setTopic()}}
+{\footnotesize\ttfamily char$\ast$ set\+Topic (\begin{DoxyParamCaption}\item[{char $\ast$}]{buf,  }\item[{int8\+\_\+t}]{buflen,  }\item[{\mbox{\hyperlink{utils_8h_a2598bacb04e8f77e8b41cee61ef359fc}{topic\+Type}}}]{tt,  }\item[{const char $\ast$}]{suffix = {\ttfamily NULL} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a7facb8f2c84692ab65024785eb64b541}\label{utils_8h_a7facb8f2c84692ab65024785eb64b541}} 
+\index{utils.h@{utils.h}!softRebootFunc@{softRebootFunc}}
+\index{softRebootFunc@{softRebootFunc}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{softRebootFunc()}{softRebootFunc()}}
+{\footnotesize\ttfamily void soft\+Reboot\+Func (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+

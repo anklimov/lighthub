@@ -1,0 +1,137 @@
+\hypertarget{unionin_store}{}\doxysection{in\+Store Union Reference}
+\label{unionin_store}\index{inStore@{inStore}}
+
+
+{\ttfamily \#include $<$inputs.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+long int \mbox{\hyperlink{unionin_store_a16a83a9f8fd433154711d7dbd5cdc98a}{aslong}}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{unionin_store_a4bddf64e5bea1ba4101346caf0df2852}{timestamp}}
+\item 
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+struct \{\\
+\>uint8\_t \mbox{\hyperlink{unionin_store_a80c2c10e46083179d86fa7c4511d671d}{reserved}}\\
+\>uint8\_t \mbox{\hyperlink{unionin_store_a44af41c00bfa555c4a9f7c7d5e2cfbc7}{logicState}}\\
+\>int16\_t \mbox{\hyperlink{unionin_store_ab588498a30cd9248c4b98b939d6a3bd1}{currentValue}}\\
+\}; \\
+
+\end{tabbing}\item 
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+struct \{\\
+\>uint8\_t \mbox{\hyperlink{unionin_store_a5e5cdaeda80c6eed6a55554a0780a128}{toggle1}}:1\\
+\>uint8\_t \mbox{\hyperlink{unionin_store_a8f5f08b35e330945b3b0df11eacdae72}{toggle2}}:1\\
+\>uint8\_t \mbox{\hyperlink{unionin_store_a4e4a1f17bcdd01c934df232175195a46}{toggle3}}:1\\
+\>uint8\_t \mbox{\hyperlink{unionin_store_accec7f5bdcfc35e9cc86a66c301348e2}{lastValue}}:1\\
+\>uint8\_t \mbox{\hyperlink{unionin_store_a719ff985b81bbfbd4905735ea5cee1a9}{delayedState}}:1\\
+\>uint8\_t \mbox{\hyperlink{unionin_store_a0458b3c28da62ec08dfbe9c28546c939}{bounce}}:3\\
+\>uint8\_t \mbox{\hyperlink{unionin_store_a5db18504795773dee8dd1cca020994f7}{state}}:4\\
+\>uint8\_t \mbox{\hyperlink{unionin_store_a1c67a8ed876e1320206c1b1b9651fd10}{reqState}}:4\\
+\>uint16\_t \mbox{\hyperlink{unionin_store_a53f6cadfd77d4bd024d6e6c395ae5364}{timestamp16}}\\
+\}; \\
+
+\end{tabbing}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{unionin_store_a9094e569beac17295c1eab286e22b344}\label{unionin_store_a9094e569beac17295c1eab286e22b344}} 
+\doxysubsubsection{\texorpdfstring{"@1}{@1}}
+{\footnotesize\ttfamily struct \{ ... \} }
+
+\mbox{\Hypertarget{unionin_store_a7d8bb1867b9b0479c96fda7b86a20ab3}\label{unionin_store_a7d8bb1867b9b0479c96fda7b86a20ab3}} 
+\doxysubsubsection{\texorpdfstring{"@3}{@3}}
+{\footnotesize\ttfamily struct \{ ... \} }
+
+\mbox{\Hypertarget{unionin_store_a16a83a9f8fd433154711d7dbd5cdc98a}\label{unionin_store_a16a83a9f8fd433154711d7dbd5cdc98a}} 
+\index{inStore@{inStore}!aslong@{aslong}}
+\index{aslong@{aslong}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{aslong}{aslong}}
+{\footnotesize\ttfamily long int in\+Store\+::aslong}
+
+\mbox{\Hypertarget{unionin_store_a0458b3c28da62ec08dfbe9c28546c939}\label{unionin_store_a0458b3c28da62ec08dfbe9c28546c939}} 
+\index{inStore@{inStore}!bounce@{bounce}}
+\index{bounce@{bounce}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{bounce}{bounce}}
+{\footnotesize\ttfamily uint8\+\_\+t in\+Store\+::bounce}
+
+\mbox{\Hypertarget{unionin_store_ab588498a30cd9248c4b98b939d6a3bd1}\label{unionin_store_ab588498a30cd9248c4b98b939d6a3bd1}} 
+\index{inStore@{inStore}!currentValue@{currentValue}}
+\index{currentValue@{currentValue}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{currentValue}{currentValue}}
+{\footnotesize\ttfamily int16\+\_\+t in\+Store\+::current\+Value}
+
+\mbox{\Hypertarget{unionin_store_a719ff985b81bbfbd4905735ea5cee1a9}\label{unionin_store_a719ff985b81bbfbd4905735ea5cee1a9}} 
+\index{inStore@{inStore}!delayedState@{delayedState}}
+\index{delayedState@{delayedState}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{delayedState}{delayedState}}
+{\footnotesize\ttfamily uint8\+\_\+t in\+Store\+::delayed\+State}
+
+\mbox{\Hypertarget{unionin_store_accec7f5bdcfc35e9cc86a66c301348e2}\label{unionin_store_accec7f5bdcfc35e9cc86a66c301348e2}} 
+\index{inStore@{inStore}!lastValue@{lastValue}}
+\index{lastValue@{lastValue}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{lastValue}{lastValue}}
+{\footnotesize\ttfamily uint8\+\_\+t in\+Store\+::last\+Value}
+
+\mbox{\Hypertarget{unionin_store_a44af41c00bfa555c4a9f7c7d5e2cfbc7}\label{unionin_store_a44af41c00bfa555c4a9f7c7d5e2cfbc7}} 
+\index{inStore@{inStore}!logicState@{logicState}}
+\index{logicState@{logicState}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{logicState}{logicState}}
+{\footnotesize\ttfamily uint8\+\_\+t in\+Store\+::logic\+State}
+
+\mbox{\Hypertarget{unionin_store_a1c67a8ed876e1320206c1b1b9651fd10}\label{unionin_store_a1c67a8ed876e1320206c1b1b9651fd10}} 
+\index{inStore@{inStore}!reqState@{reqState}}
+\index{reqState@{reqState}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{reqState}{reqState}}
+{\footnotesize\ttfamily uint8\+\_\+t in\+Store\+::req\+State}
+
+\mbox{\Hypertarget{unionin_store_a80c2c10e46083179d86fa7c4511d671d}\label{unionin_store_a80c2c10e46083179d86fa7c4511d671d}} 
+\index{inStore@{inStore}!reserved@{reserved}}
+\index{reserved@{reserved}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{reserved}{reserved}}
+{\footnotesize\ttfamily uint8\+\_\+t in\+Store\+::reserved}
+
+\mbox{\Hypertarget{unionin_store_a5db18504795773dee8dd1cca020994f7}\label{unionin_store_a5db18504795773dee8dd1cca020994f7}} 
+\index{inStore@{inStore}!state@{state}}
+\index{state@{state}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{state}{state}}
+{\footnotesize\ttfamily uint8\+\_\+t in\+Store\+::state}
+
+\mbox{\Hypertarget{unionin_store_a4bddf64e5bea1ba4101346caf0df2852}\label{unionin_store_a4bddf64e5bea1ba4101346caf0df2852}} 
+\index{inStore@{inStore}!timestamp@{timestamp}}
+\index{timestamp@{timestamp}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{timestamp}{timestamp}}
+{\footnotesize\ttfamily uint32\+\_\+t in\+Store\+::timestamp}
+
+\mbox{\Hypertarget{unionin_store_a53f6cadfd77d4bd024d6e6c395ae5364}\label{unionin_store_a53f6cadfd77d4bd024d6e6c395ae5364}} 
+\index{inStore@{inStore}!timestamp16@{timestamp16}}
+\index{timestamp16@{timestamp16}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{timestamp16}{timestamp16}}
+{\footnotesize\ttfamily uint16\+\_\+t in\+Store\+::timestamp16}
+
+\mbox{\Hypertarget{unionin_store_a5e5cdaeda80c6eed6a55554a0780a128}\label{unionin_store_a5e5cdaeda80c6eed6a55554a0780a128}} 
+\index{inStore@{inStore}!toggle1@{toggle1}}
+\index{toggle1@{toggle1}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{toggle1}{toggle1}}
+{\footnotesize\ttfamily uint8\+\_\+t in\+Store\+::toggle1}
+
+\mbox{\Hypertarget{unionin_store_a8f5f08b35e330945b3b0df11eacdae72}\label{unionin_store_a8f5f08b35e330945b3b0df11eacdae72}} 
+\index{inStore@{inStore}!toggle2@{toggle2}}
+\index{toggle2@{toggle2}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{toggle2}{toggle2}}
+{\footnotesize\ttfamily uint8\+\_\+t in\+Store\+::toggle2}
+
+\mbox{\Hypertarget{unionin_store_a4e4a1f17bcdd01c934df232175195a46}\label{unionin_store_a4e4a1f17bcdd01c934df232175195a46}} 
+\index{inStore@{inStore}!toggle3@{toggle3}}
+\index{toggle3@{toggle3}!inStore@{inStore}}
+\doxysubsubsection{\texorpdfstring{toggle3}{toggle3}}
+{\footnotesize\ttfamily uint8\+\_\+t in\+Store\+::toggle3}
+
+
+
+The documentation for this union was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/\mbox{\hyperlink{inputs_8h}{inputs.\+h}}\end{DoxyCompactItemize}

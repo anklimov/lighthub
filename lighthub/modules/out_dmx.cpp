@@ -64,7 +64,17 @@ int out_dmx::PixelCtrl(itemCmd cmd, char* subItem, bool show)
 //int out_dmx::PixelCtrl(itemCmd cmd)
 {
 if (!item || !show) return 0;
-short cType=getChanType();
+
+short   cType=getChanType();
+uint8_t storageType;
+
+switch (cmd.getCmd()){
+  case CMD_OFF:
+    cmd.Percents(0);
+  break;
+}
+
+debugSerial<<F("DMX ctrl: "); cmd.debugOut();
 
 if (cType==CH_DIMMER) //Single channel
   {
@@ -72,9 +82,22 @@ if (cType==CH_DIMMER) //Single channel
     return 1;
   }
 
-itemCmd st(ST_RGB,CMD_VOID);
-st.assignFrom(cmd);
+  switch (cType)
+  {
+    case CH_RGB:
+     storageType=ST_RGB;
+     break;
+    case CH_RGBW:
+     storageType=ST_RGBW;
+     break;
+    default:
+     storageType=ST_PERCENTS;
+   }
 
+itemCmd st(storageType,CMD_VOID);
+
+st.assignFrom(cmd);
+debugSerial<<F("Assigned:");st.debugOut();
     switch (cType)
     {
       case CH_RGBW:

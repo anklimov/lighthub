@@ -1,0 +1,152 @@
+\hypertarget{classout___modbus}{}\doxysection{out\+\_\+\+Modbus Class Reference}
+\label{classout___modbus}\index{out\_Modbus@{out\_Modbus}}
+
+
+{\ttfamily \#include $<$out\+\_\+modbus.\+h$>$}
+
+Inheritance diagram for out\+\_\+\+Modbus\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classout___modbus}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classout___modbus_ad5aff68ec31c500be860a4f56b095373}{out\+\_\+\+Modbus}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
+\item 
+int \mbox{\hyperlink{classout___modbus_acf5452aac576901614eca795ab4ca440}{Setup}} () override
+\item 
+int \mbox{\hyperlink{classout___modbus_aec6803a6033403f8ac4038236cac5cd9}{Poll}} (short cause) override
+\item 
+int \mbox{\hyperlink{classout___modbus_a9cb4b395f5f8a6d15dcc429664a4174b}{Stop}} () override
+\item 
+int \mbox{\hyperlink{classout___modbus_acc0fc0ecdb6928cfc7906986b8139780}{Status}} () override
+\item 
+int \mbox{\hyperlink{classout___modbus_a6b94efbbbbea5a4ad3b489dba8f9b268}{is\+Active}} () override
+\item 
+int \mbox{\hyperlink{classout___modbus_a2752cf2376840f3763572963be8785db}{get\+Chan\+Type}} () override
+\item 
+int \mbox{\hyperlink{classout___modbus_a784be57c40d67b41488b9585fe792019}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{classout___modbus_aea16d64ad349120558951f92205d5249}{get\+Config}} ()
+\item 
+int \mbox{\hyperlink{classout___modbus_a026f3ad193b151565f70a72d1c8ca48b}{find\+Register}} (int register\+Num, int pos\+In\+Buffer)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classmb_persistent}{mb\+Persistent}} $\ast$ \mbox{\hyperlink{classout___modbus_a78e591ac7d7de9e7a3ab0a6d96263c2b}{store}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classout___modbus_ad5aff68ec31c500be860a4f56b095373}\label{classout___modbus_ad5aff68ec31c500be860a4f56b095373}} 
+\index{out\_Modbus@{out\_Modbus}!out\_Modbus@{out\_Modbus}}
+\index{out\_Modbus@{out\_Modbus}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{out\_Modbus()}{out\_Modbus()}}
+{\footnotesize\ttfamily out\+\_\+\+Modbus\+::out\+\_\+\+Modbus (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_item}{Item}} $\ast$}]{\+\_\+item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classout___modbus_a784be57c40d67b41488b9585fe792019}\label{classout___modbus_a784be57c40d67b41488b9585fe792019}} 
+\index{out\_Modbus@{out\_Modbus}!Ctrl@{Ctrl}}
+\index{Ctrl@{Ctrl}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}}
+{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{to\+Execute = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___modbus_a026f3ad193b151565f70a72d1c8ca48b}\label{classout___modbus_a026f3ad193b151565f70a72d1c8ca48b}} 
+\index{out\_Modbus@{out\_Modbus}!findRegister@{findRegister}}
+\index{findRegister@{findRegister}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{findRegister()}{findRegister()}}
+{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::find\+Register (\begin{DoxyParamCaption}\item[{int}]{register\+Num,  }\item[{int}]{pos\+In\+Buffer }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classout___modbus_a2752cf2376840f3763572963be8785db}\label{classout___modbus_a2752cf2376840f3763572963be8785db}} 
+\index{out\_Modbus@{out\_Modbus}!getChanType@{getChanType}}
+\index{getChanType@{getChanType}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{getChanType()}{getChanType()}}
+{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::get\+Chan\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___modbus_aea16d64ad349120558951f92205d5249}\label{classout___modbus_aea16d64ad349120558951f92205d5249}} 
+\index{out\_Modbus@{out\_Modbus}!getConfig@{getConfig}}
+\index{getConfig@{getConfig}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{getConfig()}{getConfig()}}
+{\footnotesize\ttfamily bool out\+\_\+\+Modbus\+::get\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classout___modbus_a6b94efbbbbea5a4ad3b489dba8f9b268}\label{classout___modbus_a6b94efbbbbea5a4ad3b489dba8f9b268}} 
+\index{out\_Modbus@{out\_Modbus}!isActive@{isActive}}
+\index{isActive@{isActive}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
+{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___modbus_aec6803a6033403f8ac4038236cac5cd9}\label{classout___modbus_aec6803a6033403f8ac4038236cac5cd9}} 
+\index{out\_Modbus@{out\_Modbus}!Poll@{Poll}}
+\index{Poll@{Poll}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
+{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::\+Poll (\begin{DoxyParamCaption}\item[{short}]{cause }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___modbus_acf5452aac576901614eca795ab4ca440}\label{classout___modbus_acf5452aac576901614eca795ab4ca440}} 
+\index{out\_Modbus@{out\_Modbus}!Setup@{Setup}}
+\index{Setup@{Setup}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_aeaf6346625245be1774a6d27d9cece4e}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___modbus_acc0fc0ecdb6928cfc7906986b8139780}\label{classout___modbus_acc0fc0ecdb6928cfc7906986b8139780}} 
+\index{out\_Modbus@{out\_Modbus}!Status@{Status}}
+\index{Status@{Status}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{Status()}{Status()}}
+{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_aefb8821172a2e66f49ea0da9b7c205a5}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___modbus_a9cb4b395f5f8a6d15dcc429664a4174b}\label{classout___modbus_a9cb4b395f5f8a6d15dcc429664a4174b}} 
+\index{out\_Modbus@{out\_Modbus}!Stop@{Stop}}
+\index{Stop@{Stop}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{Stop()}{Stop()}}
+{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::\+Stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac08061e5ae0}{abstract\+Ch}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classout___modbus_a78e591ac7d7de9e7a3ab0a6d96263c2b}\label{classout___modbus_a78e591ac7d7de9e7a3ab0a6d96263c2b}} 
+\index{out\_Modbus@{out\_Modbus}!store@{store}}
+\index{store@{store}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{store}{store}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classmb_persistent}{mb\+Persistent}}$\ast$ out\+\_\+\+Modbus\+::store\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/modules/\mbox{\hyperlink{out__modbus_8h}{out\+\_\+modbus.\+h}}\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/modules/\mbox{\hyperlink{out__modbus_8cpp}{out\+\_\+modbus.\+cpp}}\end{DoxyCompactItemize}

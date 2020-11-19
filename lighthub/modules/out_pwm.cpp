@@ -119,6 +119,12 @@ if (!item || !iaddr || !show) return 0;
 bool   inverse  = (item->getArg()<0);
 short  cType    = getChanType();
 
+switch (cmd.getCmd()){
+  case CMD_OFF:
+    cmd.Percents(0);
+  break;
+}
+
 if (cType=CH_PWM)
           { short k;
             analogWrite(iaddr, k=cmd.getPercents255(inverse));

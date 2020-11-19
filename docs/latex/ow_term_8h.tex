@@ -1,0 +1,358 @@
+\hypertarget{ow_term_8h}{}\doxysection{/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/ow\+Term.h File Reference}
+\label{ow_term_8h}\index{/Users/andrey/Documents/Arduino/lighthub/lighthub/owTerm.h@{/Users/andrey/Documents/Arduino/lighthub/lighthub/owTerm.h}}
+{\ttfamily \#include $<$Dallas\+Temperature.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}a\+J\+S\+O\+N.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$Wire.\+h$>$}\newline
+{\ttfamily \#include $<$D\+S2482\+\_\+\+One\+Wire.\+h$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a9842f177c8e00b6c38daf3aca290e300}{S\+W\+\_\+\+A\+U\+X0}}~0x40
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_ac0309c49990b7232afdf7d27f30f42b4}{S\+W\+\_\+\+A\+U\+X1}}~0x80
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a2a8205edd6a8a56bd3dcc301b5e89522}{S\+W\+\_\+\+S\+T\+A\+T0}}~0x4
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a00243602c461da89cd31481290e64459}{S\+W\+\_\+\+S\+T\+A\+T1}}~0x8
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a1db8ee4f7494dbd6852b582086bf8618}{S\+W\+\_\+\+O\+U\+T0}}~0x20
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a2b4445eee4ea221bc240c0db281e14d8}{S\+W\+\_\+\+O\+U\+T1}}~0x10
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a240dee0900895c9dc452fc3e94319116}{S\+W\+\_\+\+M\+A\+SK}}~0xF
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a2566855e014080775e472bf2b959b510}{S\+W\+\_\+\+I\+N\+M\+A\+SK}}~0x\+FC
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_ab8f08116296551612d3ccdad9e14e23a}{recheck\+\_\+interval}}~5
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a9db1df6249649d3fca671805ace0ed82}{check\+\_\+circle}}~2000/\mbox{\hyperlink{ow_term_8h_a4e9707ca4dbcd2ddd6d14657f2e12700}{t\+\_\+count}}
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a2e409a3583ffd8bf522847aa2babcc65}{S\+W\+\_\+\+F\+I\+ND}}~1
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a04b690d8ae7ea22fc1cd850cb28d1a89}{S\+W\+\_\+\+D\+O\+U\+B\+L\+E\+C\+H\+E\+CK}}~2
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a3312fd9b274e02275c7e6e14812d8b77}{S\+W\+\_\+\+P\+U\+L\+S\+E0}}~4
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_ac48f14c4bbb976160877b913707b0555}{S\+W\+\_\+\+P\+U\+L\+S\+E1}}~8
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a0ae32f8bd855e4f0d54f2efa7f749432}{S\+W\+\_\+\+P\+U\+L\+S\+E\+\_\+\+P0}}~0x10
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_aea6e1f060eb378a3f5ac7b0fb75e3321}{S\+W\+\_\+\+P\+U\+L\+S\+E\+\_\+\+P1}}~0x20
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a89104025a8859791e89115fef5bc1d74}{S\+W\+\_\+\+C\+H\+A\+N\+G\+E\+D\+\_\+\+P0}}~0x40
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a78449cd6b324f70f052efa1c7684f939}{S\+W\+\_\+\+C\+H\+A\+N\+G\+E\+D\+\_\+\+P1}}~0x80
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a394220e3a4d07cd1c110c655332bbed1}{S\+W\+\_\+\+P\+U\+L\+S\+E0\+\_\+R}}~0x100
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_aa5279ea909ec370f1ca60c619cea7b2f}{S\+W\+\_\+\+P\+U\+L\+S\+E1\+\_\+R}}~0x200
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_ab8f08116296551612d3ccdad9e14e23a}{recheck\+\_\+interval}}~5
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a9db1df6249649d3fca671805ace0ed82}{check\+\_\+circle}}~2000/\mbox{\hyperlink{ow_term_8h_a4e9707ca4dbcd2ddd6d14657f2e12700}{t\+\_\+count}}
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a9382f08ab82ba07c710f5b2e9e6ec0f3}{t\+\_\+max}}~20
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a41a331314b46059bd942e76ffc60cf4a}{T\+E\+M\+P\+E\+R\+A\+T\+U\+R\+E\+\_\+\+P\+R\+E\+C\+I\+S\+I\+ON}}~12
+\item 
+\#define \mbox{\hyperlink{ow_term_8h_a92c17810a48118ba0c75809050dd6bbe}{D\+S2482\+\_\+100\+\_\+\+I2\+C\+\_\+\+T\+O\+\_\+1\+W\+\_\+\+B\+R\+I\+D\+GE}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef void($\ast$ \mbox{\hyperlink{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}{ow\+Changed\+Type}}) (int, Device\+Address, float)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{ow_term_8h_aff3811570b1dd6182d7f45bd573afcfd}{ow\+Update}} ()
+\item 
+int \mbox{\hyperlink{ow_term_8h_ac78e14aeb04a12acf45919b64fe0d280}{ow\+Setup}} (\mbox{\hyperlink{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}{ow\+Changed\+Type}} ow\+Ch)
+\item 
+void \mbox{\hyperlink{ow_term_8h_a3d8b76952ce1af677267e10c981e6dd5}{ow\+Loop}} ()
+\item 
+void \mbox{\hyperlink{ow_term_8h_acbf132b42d0828077bbd21e2b205c5fc}{setup\+Ow\+Idle}} (void($\ast$)())
+\item 
+int \mbox{\hyperlink{ow_term_8h_a38798dcd7c98c38975db6e3f19de63a3}{ow\+Find}} (Device\+Address addr)
+\item 
+void \mbox{\hyperlink{ow_term_8h_ac9fd793efbaca8922408effe06e71650}{ow\+Add}} (Device\+Address addr)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{ow_term_8h_a564a174b067eee3b33b1162935884d55}{ow\+Arr}}
+\item 
+One\+Wire $\ast$ \mbox{\hyperlink{ow_term_8h_a385b7fa9c4553fcb57ee60a03932b60c}{one\+Wire}}
+\item 
+Dallas\+Temperature $\ast$ \mbox{\hyperlink{ow_term_8h_ab5e031d55a57a0dd79468e5a7cbb5e64}{sensors}}
+\item 
+Device\+Address $\ast$ \mbox{\hyperlink{ow_term_8h_ac8f950395764bcd345b63d2887dae1a0}{term}}
+\item 
+int $\ast$ \mbox{\hyperlink{ow_term_8h_a51d8312908b2e5f09ac8e40879c2f1a9}{regs}}
+\item 
+uint16\+\_\+t $\ast$ \mbox{\hyperlink{ow_term_8h_a31e8c0d5ba0869a2bfbf32fd8caaac57}{wstat}}
+\item 
+int \mbox{\hyperlink{ow_term_8h_a4e9707ca4dbcd2ddd6d14657f2e12700}{t\+\_\+count}}
+\item 
+short \mbox{\hyperlink{ow_term_8h_ac37ce0c409c53b6a18aefbfc3ad46b4a}{si}}
+\item 
+\mbox{\hyperlink{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}{ow\+Changed\+Type}} \mbox{\hyperlink{ow_term_8h_ac7999c9efd1309081d54939dc27687ba}{ow\+Changed}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{ow_term_8h_a9db1df6249649d3fca671805ace0ed82}\label{ow_term_8h_a9db1df6249649d3fca671805ace0ed82}} 
+\index{owTerm.h@{owTerm.h}!check\_circle@{check\_circle}}
+\index{check\_circle@{check\_circle}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{check\_circle}{check\_circle}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \#define check\+\_\+circle~2000/\mbox{\hyperlink{ow_term_8h_a4e9707ca4dbcd2ddd6d14657f2e12700}{t\+\_\+count}}}
+
+\mbox{\Hypertarget{ow_term_8h_a9db1df6249649d3fca671805ace0ed82}\label{ow_term_8h_a9db1df6249649d3fca671805ace0ed82}} 
+\index{owTerm.h@{owTerm.h}!check\_circle@{check\_circle}}
+\index{check\_circle@{check\_circle}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{check\_circle}{check\_circle}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \#define check\+\_\+circle~2000/\mbox{\hyperlink{ow_term_8h_a4e9707ca4dbcd2ddd6d14657f2e12700}{t\+\_\+count}}}
+
+\mbox{\Hypertarget{ow_term_8h_a92c17810a48118ba0c75809050dd6bbe}\label{ow_term_8h_a92c17810a48118ba0c75809050dd6bbe}} 
+\index{owTerm.h@{owTerm.h}!DS2482\_100\_I2C\_TO\_1W\_BRIDGE@{DS2482\_100\_I2C\_TO\_1W\_BRIDGE}}
+\index{DS2482\_100\_I2C\_TO\_1W\_BRIDGE@{DS2482\_100\_I2C\_TO\_1W\_BRIDGE}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{DS2482\_100\_I2C\_TO\_1W\_BRIDGE}{DS2482\_100\_I2C\_TO\_1W\_BRIDGE}}
+{\footnotesize\ttfamily \#define D\+S2482\+\_\+100\+\_\+\+I2\+C\+\_\+\+T\+O\+\_\+1\+W\+\_\+\+B\+R\+I\+D\+GE}
+
+\mbox{\Hypertarget{ow_term_8h_ab8f08116296551612d3ccdad9e14e23a}\label{ow_term_8h_ab8f08116296551612d3ccdad9e14e23a}} 
+\index{owTerm.h@{owTerm.h}!recheck\_interval@{recheck\_interval}}
+\index{recheck\_interval@{recheck\_interval}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{recheck\_interval}{recheck\_interval}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \#define recheck\+\_\+interval~5}
+
+\mbox{\Hypertarget{ow_term_8h_ab8f08116296551612d3ccdad9e14e23a}\label{ow_term_8h_ab8f08116296551612d3ccdad9e14e23a}} 
+\index{owTerm.h@{owTerm.h}!recheck\_interval@{recheck\_interval}}
+\index{recheck\_interval@{recheck\_interval}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{recheck\_interval}{recheck\_interval}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \#define recheck\+\_\+interval~5}
+
+\mbox{\Hypertarget{ow_term_8h_a9842f177c8e00b6c38daf3aca290e300}\label{ow_term_8h_a9842f177c8e00b6c38daf3aca290e300}} 
+\index{owTerm.h@{owTerm.h}!SW\_AUX0@{SW\_AUX0}}
+\index{SW\_AUX0@{SW\_AUX0}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_AUX0}{SW\_AUX0}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+A\+U\+X0~0x40}
+
+\mbox{\Hypertarget{ow_term_8h_ac0309c49990b7232afdf7d27f30f42b4}\label{ow_term_8h_ac0309c49990b7232afdf7d27f30f42b4}} 
+\index{owTerm.h@{owTerm.h}!SW\_AUX1@{SW\_AUX1}}
+\index{SW\_AUX1@{SW\_AUX1}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_AUX1}{SW\_AUX1}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+A\+U\+X1~0x80}
+
+\mbox{\Hypertarget{ow_term_8h_a89104025a8859791e89115fef5bc1d74}\label{ow_term_8h_a89104025a8859791e89115fef5bc1d74}} 
+\index{owTerm.h@{owTerm.h}!SW\_CHANGED\_P0@{SW\_CHANGED\_P0}}
+\index{SW\_CHANGED\_P0@{SW\_CHANGED\_P0}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_CHANGED\_P0}{SW\_CHANGED\_P0}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+C\+H\+A\+N\+G\+E\+D\+\_\+\+P0~0x40}
+
+\mbox{\Hypertarget{ow_term_8h_a78449cd6b324f70f052efa1c7684f939}\label{ow_term_8h_a78449cd6b324f70f052efa1c7684f939}} 
+\index{owTerm.h@{owTerm.h}!SW\_CHANGED\_P1@{SW\_CHANGED\_P1}}
+\index{SW\_CHANGED\_P1@{SW\_CHANGED\_P1}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_CHANGED\_P1}{SW\_CHANGED\_P1}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+C\+H\+A\+N\+G\+E\+D\+\_\+\+P1~0x80}
+
+\mbox{\Hypertarget{ow_term_8h_a04b690d8ae7ea22fc1cd850cb28d1a89}\label{ow_term_8h_a04b690d8ae7ea22fc1cd850cb28d1a89}} 
+\index{owTerm.h@{owTerm.h}!SW\_DOUBLECHECK@{SW\_DOUBLECHECK}}
+\index{SW\_DOUBLECHECK@{SW\_DOUBLECHECK}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_DOUBLECHECK}{SW\_DOUBLECHECK}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+D\+O\+U\+B\+L\+E\+C\+H\+E\+CK~2}
+
+\mbox{\Hypertarget{ow_term_8h_a2e409a3583ffd8bf522847aa2babcc65}\label{ow_term_8h_a2e409a3583ffd8bf522847aa2babcc65}} 
+\index{owTerm.h@{owTerm.h}!SW\_FIND@{SW\_FIND}}
+\index{SW\_FIND@{SW\_FIND}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_FIND}{SW\_FIND}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+F\+I\+ND~1}
+
+\mbox{\Hypertarget{ow_term_8h_a2566855e014080775e472bf2b959b510}\label{ow_term_8h_a2566855e014080775e472bf2b959b510}} 
+\index{owTerm.h@{owTerm.h}!SW\_INMASK@{SW\_INMASK}}
+\index{SW\_INMASK@{SW\_INMASK}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_INMASK}{SW\_INMASK}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+I\+N\+M\+A\+SK~0x\+FC}
+
+\mbox{\Hypertarget{ow_term_8h_a240dee0900895c9dc452fc3e94319116}\label{ow_term_8h_a240dee0900895c9dc452fc3e94319116}} 
+\index{owTerm.h@{owTerm.h}!SW\_MASK@{SW\_MASK}}
+\index{SW\_MASK@{SW\_MASK}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_MASK}{SW\_MASK}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+M\+A\+SK~0xF}
+
+\mbox{\Hypertarget{ow_term_8h_a1db8ee4f7494dbd6852b582086bf8618}\label{ow_term_8h_a1db8ee4f7494dbd6852b582086bf8618}} 
+\index{owTerm.h@{owTerm.h}!SW\_OUT0@{SW\_OUT0}}
+\index{SW\_OUT0@{SW\_OUT0}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_OUT0}{SW\_OUT0}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+O\+U\+T0~0x20}
+
+\mbox{\Hypertarget{ow_term_8h_a2b4445eee4ea221bc240c0db281e14d8}\label{ow_term_8h_a2b4445eee4ea221bc240c0db281e14d8}} 
+\index{owTerm.h@{owTerm.h}!SW\_OUT1@{SW\_OUT1}}
+\index{SW\_OUT1@{SW\_OUT1}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_OUT1}{SW\_OUT1}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+O\+U\+T1~0x10}
+
+\mbox{\Hypertarget{ow_term_8h_a3312fd9b274e02275c7e6e14812d8b77}\label{ow_term_8h_a3312fd9b274e02275c7e6e14812d8b77}} 
+\index{owTerm.h@{owTerm.h}!SW\_PULSE0@{SW\_PULSE0}}
+\index{SW\_PULSE0@{SW\_PULSE0}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_PULSE0}{SW\_PULSE0}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+P\+U\+L\+S\+E0~4}
+
+\mbox{\Hypertarget{ow_term_8h_a394220e3a4d07cd1c110c655332bbed1}\label{ow_term_8h_a394220e3a4d07cd1c110c655332bbed1}} 
+\index{owTerm.h@{owTerm.h}!SW\_PULSE0\_R@{SW\_PULSE0\_R}}
+\index{SW\_PULSE0\_R@{SW\_PULSE0\_R}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_PULSE0\_R}{SW\_PULSE0\_R}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+P\+U\+L\+S\+E0\+\_\+R~0x100}
+
+\mbox{\Hypertarget{ow_term_8h_ac48f14c4bbb976160877b913707b0555}\label{ow_term_8h_ac48f14c4bbb976160877b913707b0555}} 
+\index{owTerm.h@{owTerm.h}!SW\_PULSE1@{SW\_PULSE1}}
+\index{SW\_PULSE1@{SW\_PULSE1}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_PULSE1}{SW\_PULSE1}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+P\+U\+L\+S\+E1~8}
+
+\mbox{\Hypertarget{ow_term_8h_aa5279ea909ec370f1ca60c619cea7b2f}\label{ow_term_8h_aa5279ea909ec370f1ca60c619cea7b2f}} 
+\index{owTerm.h@{owTerm.h}!SW\_PULSE1\_R@{SW\_PULSE1\_R}}
+\index{SW\_PULSE1\_R@{SW\_PULSE1\_R}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_PULSE1\_R}{SW\_PULSE1\_R}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+P\+U\+L\+S\+E1\+\_\+R~0x200}
+
+\mbox{\Hypertarget{ow_term_8h_a0ae32f8bd855e4f0d54f2efa7f749432}\label{ow_term_8h_a0ae32f8bd855e4f0d54f2efa7f749432}} 
+\index{owTerm.h@{owTerm.h}!SW\_PULSE\_P0@{SW\_PULSE\_P0}}
+\index{SW\_PULSE\_P0@{SW\_PULSE\_P0}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_PULSE\_P0}{SW\_PULSE\_P0}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+P\+U\+L\+S\+E\+\_\+\+P0~0x10}
+
+\mbox{\Hypertarget{ow_term_8h_aea6e1f060eb378a3f5ac7b0fb75e3321}\label{ow_term_8h_aea6e1f060eb378a3f5ac7b0fb75e3321}} 
+\index{owTerm.h@{owTerm.h}!SW\_PULSE\_P1@{SW\_PULSE\_P1}}
+\index{SW\_PULSE\_P1@{SW\_PULSE\_P1}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_PULSE\_P1}{SW\_PULSE\_P1}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+P\+U\+L\+S\+E\+\_\+\+P1~0x20}
+
+\mbox{\Hypertarget{ow_term_8h_a2a8205edd6a8a56bd3dcc301b5e89522}\label{ow_term_8h_a2a8205edd6a8a56bd3dcc301b5e89522}} 
+\index{owTerm.h@{owTerm.h}!SW\_STAT0@{SW\_STAT0}}
+\index{SW\_STAT0@{SW\_STAT0}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_STAT0}{SW\_STAT0}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+S\+T\+A\+T0~0x4}
+
+\mbox{\Hypertarget{ow_term_8h_a00243602c461da89cd31481290e64459}\label{ow_term_8h_a00243602c461da89cd31481290e64459}} 
+\index{owTerm.h@{owTerm.h}!SW\_STAT1@{SW\_STAT1}}
+\index{SW\_STAT1@{SW\_STAT1}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{SW\_STAT1}{SW\_STAT1}}
+{\footnotesize\ttfamily \#define S\+W\+\_\+\+S\+T\+A\+T1~0x8}
+
+\mbox{\Hypertarget{ow_term_8h_a9382f08ab82ba07c710f5b2e9e6ec0f3}\label{ow_term_8h_a9382f08ab82ba07c710f5b2e9e6ec0f3}} 
+\index{owTerm.h@{owTerm.h}!t\_max@{t\_max}}
+\index{t\_max@{t\_max}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{t\_max}{t\_max}}
+{\footnotesize\ttfamily \#define t\+\_\+max~20}
+
+\mbox{\Hypertarget{ow_term_8h_a41a331314b46059bd942e76ffc60cf4a}\label{ow_term_8h_a41a331314b46059bd942e76ffc60cf4a}} 
+\index{owTerm.h@{owTerm.h}!TEMPERATURE\_PRECISION@{TEMPERATURE\_PRECISION}}
+\index{TEMPERATURE\_PRECISION@{TEMPERATURE\_PRECISION}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{TEMPERATURE\_PRECISION}{TEMPERATURE\_PRECISION}}
+{\footnotesize\ttfamily \#define T\+E\+M\+P\+E\+R\+A\+T\+U\+R\+E\+\_\+\+P\+R\+E\+C\+I\+S\+I\+ON~12}
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}\label{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}} 
+\index{owTerm.h@{owTerm.h}!owChangedType@{owChangedType}}
+\index{owChangedType@{owChangedType}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{owChangedType}{owChangedType}}
+{\footnotesize\ttfamily typedef void($\ast$ ow\+Changed\+Type) (int, Device\+Address, float)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{ow_term_8h_ac9fd793efbaca8922408effe06e71650}\label{ow_term_8h_ac9fd793efbaca8922408effe06e71650}} 
+\index{owTerm.h@{owTerm.h}!owAdd@{owAdd}}
+\index{owAdd@{owAdd}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{owAdd()}{owAdd()}}
+{\footnotesize\ttfamily void ow\+Add (\begin{DoxyParamCaption}\item[{Device\+Address}]{addr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8h_a38798dcd7c98c38975db6e3f19de63a3}\label{ow_term_8h_a38798dcd7c98c38975db6e3f19de63a3}} 
+\index{owTerm.h@{owTerm.h}!owFind@{owFind}}
+\index{owFind@{owFind}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{owFind()}{owFind()}}
+{\footnotesize\ttfamily int ow\+Find (\begin{DoxyParamCaption}\item[{Device\+Address}]{addr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8h_a3d8b76952ce1af677267e10c981e6dd5}\label{ow_term_8h_a3d8b76952ce1af677267e10c981e6dd5}} 
+\index{owTerm.h@{owTerm.h}!owLoop@{owLoop}}
+\index{owLoop@{owLoop}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{owLoop()}{owLoop()}}
+{\footnotesize\ttfamily void ow\+Loop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8h_ac78e14aeb04a12acf45919b64fe0d280}\label{ow_term_8h_ac78e14aeb04a12acf45919b64fe0d280}} 
+\index{owTerm.h@{owTerm.h}!owSetup@{owSetup}}
+\index{owSetup@{owSetup}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{owSetup()}{owSetup()}}
+{\footnotesize\ttfamily int ow\+Setup (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}{ow\+Changed\+Type}}}]{ow\+Ch }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8h_aff3811570b1dd6182d7f45bd573afcfd}\label{ow_term_8h_aff3811570b1dd6182d7f45bd573afcfd}} 
+\index{owTerm.h@{owTerm.h}!owUpdate@{owUpdate}}
+\index{owUpdate@{owUpdate}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{owUpdate()}{owUpdate()}}
+{\footnotesize\ttfamily int ow\+Update (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8h_acbf132b42d0828077bbd21e2b205c5fc}\label{ow_term_8h_acbf132b42d0828077bbd21e2b205c5fc}} 
+\index{owTerm.h@{owTerm.h}!setupOwIdle@{setupOwIdle}}
+\index{setupOwIdle@{setupOwIdle}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{setupOwIdle()}{setupOwIdle()}}
+{\footnotesize\ttfamily void setup\+Ow\+Idle (\begin{DoxyParamCaption}\item[{void($\ast$)()}]{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{ow_term_8h_a385b7fa9c4553fcb57ee60a03932b60c}\label{ow_term_8h_a385b7fa9c4553fcb57ee60a03932b60c}} 
+\index{owTerm.h@{owTerm.h}!oneWire@{oneWire}}
+\index{oneWire@{oneWire}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{oneWire}{oneWire}}
+{\footnotesize\ttfamily One\+Wire$\ast$ one\+Wire\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{ow_term_8h_a564a174b067eee3b33b1162935884d55}\label{ow_term_8h_a564a174b067eee3b33b1162935884d55}} 
+\index{owTerm.h@{owTerm.h}!owArr@{owArr}}
+\index{owArr@{owArr}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{owArr}{owArr}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ ow\+Arr\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{ow_term_8h_ac7999c9efd1309081d54939dc27687ba}\label{ow_term_8h_ac7999c9efd1309081d54939dc27687ba}} 
+\index{owTerm.h@{owTerm.h}!owChanged@{owChanged}}
+\index{owChanged@{owChanged}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{owChanged}{owChanged}}
+{\footnotesize\ttfamily \mbox{\hyperlink{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}{ow\+Changed\+Type}} ow\+Changed\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{ow_term_8h_a51d8312908b2e5f09ac8e40879c2f1a9}\label{ow_term_8h_a51d8312908b2e5f09ac8e40879c2f1a9}} 
+\index{owTerm.h@{owTerm.h}!regs@{regs}}
+\index{regs@{regs}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{regs}{regs}}
+{\footnotesize\ttfamily int$\ast$ regs\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{ow_term_8h_ab5e031d55a57a0dd79468e5a7cbb5e64}\label{ow_term_8h_ab5e031d55a57a0dd79468e5a7cbb5e64}} 
+\index{owTerm.h@{owTerm.h}!sensors@{sensors}}
+\index{sensors@{sensors}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{sensors}{sensors}}
+{\footnotesize\ttfamily Dallas\+Temperature$\ast$ sensors\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{ow_term_8h_ac37ce0c409c53b6a18aefbfc3ad46b4a}\label{ow_term_8h_ac37ce0c409c53b6a18aefbfc3ad46b4a}} 
+\index{owTerm.h@{owTerm.h}!si@{si}}
+\index{si@{si}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{si}{si}}
+{\footnotesize\ttfamily short si\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{ow_term_8h_a4e9707ca4dbcd2ddd6d14657f2e12700}\label{ow_term_8h_a4e9707ca4dbcd2ddd6d14657f2e12700}} 
+\index{owTerm.h@{owTerm.h}!t\_count@{t\_count}}
+\index{t\_count@{t\_count}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{t\_count}{t\_count}}
+{\footnotesize\ttfamily int t\+\_\+count\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{ow_term_8h_ac8f950395764bcd345b63d2887dae1a0}\label{ow_term_8h_ac8f950395764bcd345b63d2887dae1a0}} 
+\index{owTerm.h@{owTerm.h}!term@{term}}
+\index{term@{term}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{term}{term}}
+{\footnotesize\ttfamily Device\+Address$\ast$ term\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{ow_term_8h_a31e8c0d5ba0869a2bfbf32fd8caaac57}\label{ow_term_8h_a31e8c0d5ba0869a2bfbf32fd8caaac57}} 
+\index{owTerm.h@{owTerm.h}!wstat@{wstat}}
+\index{wstat@{wstat}!owTerm.h@{owTerm.h}}
+\doxysubsubsection{\texorpdfstring{wstat}{wstat}}
+{\footnotesize\ttfamily uint16\+\_\+t$\ast$ wstat\hspace{0.3cm}{\ttfamily [extern]}}
+

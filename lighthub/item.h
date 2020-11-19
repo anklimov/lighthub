@@ -132,10 +132,11 @@ class Item
 
   protected:
   //short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
-  int VacomSetFan (int8_t  val, int8_t  cmd=0);
-  int VacomSetHeat(int8_t  val, int8_t  cmd=0);
+  int VacomSetFan (itemCmd st);
+  int VacomSetHeat(itemCmd st);
+  int modbusDimmerSet(itemCmd st);
+
   int modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value);
-  int modbusDimmerSet(uint16_t value);
   void mb_fail();
   void Parse();
   int checkModbusDimmer();

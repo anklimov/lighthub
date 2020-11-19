@@ -1,0 +1,142 @@
+\hypertarget{dmx_8h}{}\doxysection{/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/dmx.h File Reference}
+\label{dmx_8h}\index{/Users/andrey/Documents/Arduino/lighthub/lighthub/dmx.h@{/Users/andrey/Documents/Arduino/lighthub/lighthub/dmx.h}}
+{\ttfamily \#include \char`\"{}options.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}a\+J\+S\+O\+N.\+h\char`\"{}}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{dmx_8h_aa2d5ab73cfb3c82efe053ca1c3ba2b9a}{D\+\_\+\+U\+P\+D\+A\+T\+E\+D1}}~1
+\item 
+\#define \mbox{\hyperlink{dmx_8h_aaf60f29640da1e595ec01b5827cddc48}{D\+\_\+\+U\+P\+D\+A\+T\+E\+D2}}~2
+\item 
+\#define \mbox{\hyperlink{dmx_8h_a7dfd71e0bf48e87b1310b8bf75297aed}{D\+\_\+\+U\+P\+D\+A\+T\+E\+D3}}~4
+\item 
+\#define \mbox{\hyperlink{dmx_8h_a449cd019aa3e4cd80cb821450bd4f4bb}{D\+\_\+\+U\+P\+D\+A\+T\+E\+D4}}~8
+\item 
+\#define \mbox{\hyperlink{dmx_8h_a14052474033fc0b01cc36a5f52cfb575}{D\+\_\+\+C\+H\+E\+C\+KT}}~300
+\item 
+\#define \mbox{\hyperlink{dmx_8h_ac69ee46f4a51ed14f0d68628c2dec71d}{M\+A\+X\+\_\+\+C\+H\+A\+N\+N\+E\+LS}}~60
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{dmx_8h_a9f36c84bdc0b4926f7d7b28bbe47cdc0}{D\+M\+Xput}} (void)
+\item 
+void \mbox{\hyperlink{dmx_8h_a45b57fab4ca3a3f7d3491506945c6326}{D\+M\+Xin\+Setup}} (int channels)
+\item 
+void \mbox{\hyperlink{dmx_8h_af5aeb81882ff7b4fe7cccb66a12539df}{D\+M\+Xout\+Setup}} (int channels)
+\item 
+void \mbox{\hyperlink{dmx_8h_af7ba5611c2c7485938cbf745ed65741f}{Artnet\+Setup}} ()
+\item 
+void \mbox{\hyperlink{dmx_8h_a0d740c517b312806bd34e2ac3155c3a5}{D\+M\+X\+Check}} (void)
+\item 
+int \mbox{\hyperlink{dmx_8h_abbcd6bfbf8b1c05b00ba38459d41ff4d}{item\+Ctrl2}} (char $\ast$name, int r, int g, int \mbox{\hyperlink{item_8cpp_ab2d05693952610f937e5acb3c4a8fa1b}{b}}, int w)
+\item 
+void \mbox{\hyperlink{dmx_8h_a3faac041a7441faf18a1ad72021be077}{Dmx\+Write\+Buf}} (uint16\+\_\+t chan, uint8\+\_\+t val)
+\item 
+void \mbox{\hyperlink{dmx_8h_a7c166d810404d3d15f663706271de37f}{D\+M\+X\+O\+U\+T\+\_\+propagate}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{dmx_8h_a077dba54087a1a3694f810ba9fd06933}{dmx\+Arr}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{dmx_8h_a14052474033fc0b01cc36a5f52cfb575}\label{dmx_8h_a14052474033fc0b01cc36a5f52cfb575}} 
+\index{dmx.h@{dmx.h}!D\_CHECKT@{D\_CHECKT}}
+\index{D\_CHECKT@{D\_CHECKT}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{D\_CHECKT}{D\_CHECKT}}
+{\footnotesize\ttfamily \#define D\+\_\+\+C\+H\+E\+C\+KT~300}
+
+\mbox{\Hypertarget{dmx_8h_aa2d5ab73cfb3c82efe053ca1c3ba2b9a}\label{dmx_8h_aa2d5ab73cfb3c82efe053ca1c3ba2b9a}} 
+\index{dmx.h@{dmx.h}!D\_UPDATED1@{D\_UPDATED1}}
+\index{D\_UPDATED1@{D\_UPDATED1}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{D\_UPDATED1}{D\_UPDATED1}}
+{\footnotesize\ttfamily \#define D\+\_\+\+U\+P\+D\+A\+T\+E\+D1~1}
+
+\mbox{\Hypertarget{dmx_8h_aaf60f29640da1e595ec01b5827cddc48}\label{dmx_8h_aaf60f29640da1e595ec01b5827cddc48}} 
+\index{dmx.h@{dmx.h}!D\_UPDATED2@{D\_UPDATED2}}
+\index{D\_UPDATED2@{D\_UPDATED2}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{D\_UPDATED2}{D\_UPDATED2}}
+{\footnotesize\ttfamily \#define D\+\_\+\+U\+P\+D\+A\+T\+E\+D2~2}
+
+\mbox{\Hypertarget{dmx_8h_a7dfd71e0bf48e87b1310b8bf75297aed}\label{dmx_8h_a7dfd71e0bf48e87b1310b8bf75297aed}} 
+\index{dmx.h@{dmx.h}!D\_UPDATED3@{D\_UPDATED3}}
+\index{D\_UPDATED3@{D\_UPDATED3}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{D\_UPDATED3}{D\_UPDATED3}}
+{\footnotesize\ttfamily \#define D\+\_\+\+U\+P\+D\+A\+T\+E\+D3~4}
+
+\mbox{\Hypertarget{dmx_8h_a449cd019aa3e4cd80cb821450bd4f4bb}\label{dmx_8h_a449cd019aa3e4cd80cb821450bd4f4bb}} 
+\index{dmx.h@{dmx.h}!D\_UPDATED4@{D\_UPDATED4}}
+\index{D\_UPDATED4@{D\_UPDATED4}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{D\_UPDATED4}{D\_UPDATED4}}
+{\footnotesize\ttfamily \#define D\+\_\+\+U\+P\+D\+A\+T\+E\+D4~8}
+
+\mbox{\Hypertarget{dmx_8h_ac69ee46f4a51ed14f0d68628c2dec71d}\label{dmx_8h_ac69ee46f4a51ed14f0d68628c2dec71d}} 
+\index{dmx.h@{dmx.h}!MAX\_CHANNELS@{MAX\_CHANNELS}}
+\index{MAX\_CHANNELS@{MAX\_CHANNELS}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{MAX\_CHANNELS}{MAX\_CHANNELS}}
+{\footnotesize\ttfamily \#define M\+A\+X\+\_\+\+C\+H\+A\+N\+N\+E\+LS~60}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{dmx_8h_af7ba5611c2c7485938cbf745ed65741f}\label{dmx_8h_af7ba5611c2c7485938cbf745ed65741f}} 
+\index{dmx.h@{dmx.h}!ArtnetSetup@{ArtnetSetup}}
+\index{ArtnetSetup@{ArtnetSetup}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{ArtnetSetup()}{ArtnetSetup()}}
+{\footnotesize\ttfamily void Artnet\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{dmx_8h_a0d740c517b312806bd34e2ac3155c3a5}\label{dmx_8h_a0d740c517b312806bd34e2ac3155c3a5}} 
+\index{dmx.h@{dmx.h}!DMXCheck@{DMXCheck}}
+\index{DMXCheck@{DMXCheck}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{DMXCheck()}{DMXCheck()}}
+{\footnotesize\ttfamily void D\+M\+X\+Check (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{dmx_8h_a45b57fab4ca3a3f7d3491506945c6326}\label{dmx_8h_a45b57fab4ca3a3f7d3491506945c6326}} 
+\index{dmx.h@{dmx.h}!DMXinSetup@{DMXinSetup}}
+\index{DMXinSetup@{DMXinSetup}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{DMXinSetup()}{DMXinSetup()}}
+{\footnotesize\ttfamily void D\+M\+Xin\+Setup (\begin{DoxyParamCaption}\item[{int}]{channels }\end{DoxyParamCaption})}
+
+To\+Do\+: re-\/init\mbox{\Hypertarget{dmx_8h_a7c166d810404d3d15f663706271de37f}\label{dmx_8h_a7c166d810404d3d15f663706271de37f}} 
+\index{dmx.h@{dmx.h}!DMXOUT\_propagate@{DMXOUT\_propagate}}
+\index{DMXOUT\_propagate@{DMXOUT\_propagate}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{DMXOUT\_propagate()}{DMXOUT\_propagate()}}
+{\footnotesize\ttfamily void D\+M\+X\+O\+U\+T\+\_\+propagate (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{dmx_8h_af5aeb81882ff7b4fe7cccb66a12539df}\label{dmx_8h_af5aeb81882ff7b4fe7cccb66a12539df}} 
+\index{dmx.h@{dmx.h}!DMXoutSetup@{DMXoutSetup}}
+\index{DMXoutSetup@{DMXoutSetup}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{DMXoutSetup()}{DMXoutSetup()}}
+{\footnotesize\ttfamily void D\+M\+Xout\+Setup (\begin{DoxyParamCaption}\item[{int}]{channels }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{dmx_8h_a9f36c84bdc0b4926f7d7b28bbe47cdc0}\label{dmx_8h_a9f36c84bdc0b4926f7d7b28bbe47cdc0}} 
+\index{dmx.h@{dmx.h}!DMXput@{DMXput}}
+\index{DMXput@{DMXput}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{DMXput()}{DMXput()}}
+{\footnotesize\ttfamily void D\+M\+Xput (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{dmx_8h_a3faac041a7441faf18a1ad72021be077}\label{dmx_8h_a3faac041a7441faf18a1ad72021be077}} 
+\index{dmx.h@{dmx.h}!DmxWriteBuf@{DmxWriteBuf}}
+\index{DmxWriteBuf@{DmxWriteBuf}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{DmxWriteBuf()}{DmxWriteBuf()}}
+{\footnotesize\ttfamily void Dmx\+Write\+Buf (\begin{DoxyParamCaption}\item[{uint16\+\_\+t}]{chan,  }\item[{uint8\+\_\+t}]{val }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{dmx_8h_abbcd6bfbf8b1c05b00ba38459d41ff4d}\label{dmx_8h_abbcd6bfbf8b1c05b00ba38459d41ff4d}} 
+\index{dmx.h@{dmx.h}!itemCtrl2@{itemCtrl2}}
+\index{itemCtrl2@{itemCtrl2}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{itemCtrl2()}{itemCtrl2()}}
+{\footnotesize\ttfamily int item\+Ctrl2 (\begin{DoxyParamCaption}\item[{char $\ast$}]{name,  }\item[{int}]{r,  }\item[{int}]{g,  }\item[{int}]{b,  }\item[{int}]{w }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{dmx_8h_a077dba54087a1a3694f810ba9fd06933}\label{dmx_8h_a077dba54087a1a3694f810ba9fd06933}} 
+\index{dmx.h@{dmx.h}!dmxArr@{dmxArr}}
+\index{dmxArr@{dmxArr}!dmx.h@{dmx.h}}
+\doxysubsubsection{\texorpdfstring{dmxArr}{dmxArr}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ dmx\+Arr\hspace{0.3cm}{\ttfamily [extern]}}
+

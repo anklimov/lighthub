@@ -1,0 +1,185 @@
+\hypertarget{classout___motor}{}\doxysection{out\+\_\+\+Motor Class Reference}
+\label{classout___motor}\index{out\_Motor@{out\_Motor}}
+
+
+{\ttfamily \#include $<$out\+\_\+motor.\+h$>$}
+
+Inheritance diagram for out\+\_\+\+Motor\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classout___motor}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classout___motor_a7698763731e54149861a9bdcc18e6344}{out\+\_\+\+Motor}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
+\item 
+int \mbox{\hyperlink{classout___motor_ab9f2b433a4fedd6fec5b9cb504b934f4}{Setup}} () override
+\item 
+int \mbox{\hyperlink{classout___motor_a7a98c58b6c32cc20b7b05ad07a07c231}{Poll}} (short cause) override
+\item 
+int \mbox{\hyperlink{classout___motor_aafdbaaaf47776dd8c0c5d6bfa32bb3c2}{Stop}} () override
+\item 
+int \mbox{\hyperlink{classout___motor_a47de22f0ce071787ac14a19897337cea}{Status}} () override
+\item 
+int \mbox{\hyperlink{classout___motor_ac2a224d74421c1a28d34a83779a45bdc}{is\+Active}} () override
+\item 
+int \mbox{\hyperlink{classout___motor_afd67d9b6e08f14074a236d5222809226}{get\+Chan\+Type}} () override
+\item 
+int \mbox{\hyperlink{classout___motor_aa731e4d1848e07ac7dc4a99a0ddad942}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int8\+\_\+t \mbox{\hyperlink{classout___motor_aaa2493a4399f63fd8d17e37f0c731791}{pin\+Up}}
+\item 
+int8\+\_\+t \mbox{\hyperlink{classout___motor_af21db4b38c3676a038c93d403b227152}{pin\+Down}}
+\item 
+int8\+\_\+t \mbox{\hyperlink{classout___motor_ae4052839e88ca4a59e83c35400d239cf}{pin\+Feedback}}
+\item 
+int16\+\_\+t \mbox{\hyperlink{classout___motor_a58e72bff70d2915b7b508d0605a082e8}{max\+On\+Time}}
+\item 
+uint16\+\_\+t \mbox{\hyperlink{classout___motor_aa002cd716f47ee74a72dcd4e335b80ae}{feedback\+Open}}
+\item 
+uint16\+\_\+t \mbox{\hyperlink{classout___motor_ad8179a6054b692c3f00c5fa350f59e3f}{feedback\+Closed}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classout___motor_a7ba2681d317e29a412e44741ae1ff5e4}{get\+Config}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classout___motor_a7698763731e54149861a9bdcc18e6344}\label{classout___motor_a7698763731e54149861a9bdcc18e6344}} 
+\index{out\_Motor@{out\_Motor}!out\_Motor@{out\_Motor}}
+\index{out\_Motor@{out\_Motor}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{out\_Motor()}{out\_Motor()}}
+{\footnotesize\ttfamily out\+\_\+\+Motor\+::out\+\_\+\+Motor (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_item}{Item}} $\ast$}]{\+\_\+item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classout___motor_aa731e4d1848e07ac7dc4a99a0ddad942}\label{classout___motor_aa731e4d1848e07ac7dc4a99a0ddad942}} 
+\index{out\_Motor@{out\_Motor}!Ctrl@{Ctrl}}
+\index{Ctrl@{Ctrl}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}}
+{\footnotesize\ttfamily int out\+\_\+\+Motor\+::\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{to\+Execute = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___motor_afd67d9b6e08f14074a236d5222809226}\label{classout___motor_afd67d9b6e08f14074a236d5222809226}} 
+\index{out\_Motor@{out\_Motor}!getChanType@{getChanType}}
+\index{getChanType@{getChanType}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{getChanType()}{getChanType()}}
+{\footnotesize\ttfamily int out\+\_\+\+Motor\+::get\+Chan\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___motor_a7ba2681d317e29a412e44741ae1ff5e4}\label{classout___motor_a7ba2681d317e29a412e44741ae1ff5e4}} 
+\index{out\_Motor@{out\_Motor}!getConfig@{getConfig}}
+\index{getConfig@{getConfig}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{getConfig()}{getConfig()}}
+{\footnotesize\ttfamily void out\+\_\+\+Motor\+::get\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classout___motor_ac2a224d74421c1a28d34a83779a45bdc}\label{classout___motor_ac2a224d74421c1a28d34a83779a45bdc}} 
+\index{out\_Motor@{out\_Motor}!isActive@{isActive}}
+\index{isActive@{isActive}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
+{\footnotesize\ttfamily int out\+\_\+\+Motor\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___motor_a7a98c58b6c32cc20b7b05ad07a07c231}\label{classout___motor_a7a98c58b6c32cc20b7b05ad07a07c231}} 
+\index{out\_Motor@{out\_Motor}!Poll@{Poll}}
+\index{Poll@{Poll}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
+{\footnotesize\ttfamily int out\+\_\+\+Motor\+::\+Poll (\begin{DoxyParamCaption}\item[{short}]{cause }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___motor_ab9f2b433a4fedd6fec5b9cb504b934f4}\label{classout___motor_ab9f2b433a4fedd6fec5b9cb504b934f4}} 
+\index{out\_Motor@{out\_Motor}!Setup@{Setup}}
+\index{Setup@{Setup}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily int out\+\_\+\+Motor\+::\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_aeaf6346625245be1774a6d27d9cece4e}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___motor_a47de22f0ce071787ac14a19897337cea}\label{classout___motor_a47de22f0ce071787ac14a19897337cea}} 
+\index{out\_Motor@{out\_Motor}!Status@{Status}}
+\index{Status@{Status}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{Status()}{Status()}}
+{\footnotesize\ttfamily int out\+\_\+\+Motor\+::\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_aefb8821172a2e66f49ea0da9b7c205a5}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___motor_aafdbaaaf47776dd8c0c5d6bfa32bb3c2}\label{classout___motor_aafdbaaaf47776dd8c0c5d6bfa32bb3c2}} 
+\index{out\_Motor@{out\_Motor}!Stop@{Stop}}
+\index{Stop@{Stop}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{Stop()}{Stop()}}
+{\footnotesize\ttfamily int out\+\_\+\+Motor\+::\+Stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac08061e5ae0}{abstract\+Ch}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classout___motor_ad8179a6054b692c3f00c5fa350f59e3f}\label{classout___motor_ad8179a6054b692c3f00c5fa350f59e3f}} 
+\index{out\_Motor@{out\_Motor}!feedbackClosed@{feedbackClosed}}
+\index{feedbackClosed@{feedbackClosed}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{feedbackClosed}{feedbackClosed}}
+{\footnotesize\ttfamily uint16\+\_\+t out\+\_\+\+Motor\+::feedback\+Closed}
+
+\mbox{\Hypertarget{classout___motor_aa002cd716f47ee74a72dcd4e335b80ae}\label{classout___motor_aa002cd716f47ee74a72dcd4e335b80ae}} 
+\index{out\_Motor@{out\_Motor}!feedbackOpen@{feedbackOpen}}
+\index{feedbackOpen@{feedbackOpen}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{feedbackOpen}{feedbackOpen}}
+{\footnotesize\ttfamily uint16\+\_\+t out\+\_\+\+Motor\+::feedback\+Open}
+
+\mbox{\Hypertarget{classout___motor_a58e72bff70d2915b7b508d0605a082e8}\label{classout___motor_a58e72bff70d2915b7b508d0605a082e8}} 
+\index{out\_Motor@{out\_Motor}!maxOnTime@{maxOnTime}}
+\index{maxOnTime@{maxOnTime}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{maxOnTime}{maxOnTime}}
+{\footnotesize\ttfamily int16\+\_\+t out\+\_\+\+Motor\+::max\+On\+Time}
+
+\mbox{\Hypertarget{classout___motor_af21db4b38c3676a038c93d403b227152}\label{classout___motor_af21db4b38c3676a038c93d403b227152}} 
+\index{out\_Motor@{out\_Motor}!pinDown@{pinDown}}
+\index{pinDown@{pinDown}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{pinDown}{pinDown}}
+{\footnotesize\ttfamily int8\+\_\+t out\+\_\+\+Motor\+::pin\+Down}
+
+\mbox{\Hypertarget{classout___motor_ae4052839e88ca4a59e83c35400d239cf}\label{classout___motor_ae4052839e88ca4a59e83c35400d239cf}} 
+\index{out\_Motor@{out\_Motor}!pinFeedback@{pinFeedback}}
+\index{pinFeedback@{pinFeedback}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{pinFeedback}{pinFeedback}}
+{\footnotesize\ttfamily int8\+\_\+t out\+\_\+\+Motor\+::pin\+Feedback}
+
+\mbox{\Hypertarget{classout___motor_aaa2493a4399f63fd8d17e37f0c731791}\label{classout___motor_aaa2493a4399f63fd8d17e37f0c731791}} 
+\index{out\_Motor@{out\_Motor}!pinUp@{pinUp}}
+\index{pinUp@{pinUp}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{pinUp}{pinUp}}
+{\footnotesize\ttfamily int8\+\_\+t out\+\_\+\+Motor\+::pin\+Up}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/modules/\mbox{\hyperlink{out__motor_8h}{out\+\_\+motor.\+h}}\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/modules/\mbox{\hyperlink{out__motor_8cpp}{out\+\_\+motor.\+cpp}}\end{DoxyCompactItemize}

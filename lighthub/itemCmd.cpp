@@ -88,7 +88,9 @@ itemCmd itemCmd::setDefault()
     break;
     case ST_FLOAT_FARENHEIT: param.asfloat=75.;
     break;
-    case ST_HSV: param.h=100; param.s=0; param.v=100;
+    case ST_HSV:
+    case ST_HS:
+                param.h=100; param.s=0; param.v=100;
     break;
     case ST_HSV255: param.h=100; param.s=0; param.v=255;
     break;
@@ -239,9 +241,10 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                    cmd.itemArgType=from.cmd.itemArgType; //Changing if type
                    break;
               case ST_HSV:
+                   param.v=from.param.v;
+              case ST_HS:
                    param.h=from.param.h;
                    param.s=from.param.s;
-                   param.v=from.param.v;
                    break;
               case ST_PERCENTS:
                    param.v=from.param.v;
@@ -254,6 +257,9 @@ itemCmd itemCmd::assignFrom(itemCmd from)
               case ST_PERCENTS255:
                    param.v=map(from.param.v,0,255,0,100);
                    break;
+              case ST_FLOAT:
+                   param.v =  (int) from.param.asfloat;
+                    break;
               default:
                   debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
               }
@@ -270,10 +276,11 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                     param.b=from.param.b;
                     cmd.itemArgType=from.cmd.itemArgType;
                     break;
+              case ST_HS:
+                   param.v=map(from.param.v,0,100,0,255);
               case ST_HSV:
                    param.h=from.param.h;
                    param.s=map(from.param.s,0,100,0,255);
-                   param.v=map(from.param.v,0,100,0,255);
                    break;
               case ST_PERCENTS:
                    param.v=map(from.param.v,0,100,0,255);
@@ -334,7 +341,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                                       param.w=map((127 - rgbSaturation) * rgbValue, 0, 127*255, 0, 255);
                                       int rgbvLevel = map (rgbSaturation,0,127,0,255*2);
                                       rgbValue = map(rgbValue, 0, 255, 0, rgbvLevel);
-                                      rgbSaturation = map(rgbSaturation, 0, 127, 255, 100);
+                                      rgbSaturation = map(rgbSaturation, 0, 127, 100, 255);
                                       if (rgbValue>255) rgbValue = 255;
                                      }
                       else
@@ -342,6 +349,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                         rgbSaturation = map(rgbSaturation, 128, 255, 100, 255);
                         param.w=0;
                       }
+                    debugSerial<<F("Converted S:")<<rgbSaturation<<F(" Converted V:")<<rgbValue<<endl;
                   }
                   #ifdef ADAFRUIT_LED
                     Adafruit_NeoPixel strip(0, 0, 0);
@@ -355,6 +363,8 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                     param.g=rgb.g;
                     param.b=rgb.b;
                   #endif
+                  debugSerial<<F("RGBx: ");
+                  debugOut();
                   break;
                 }
             default:
@@ -375,18 +385,25 @@ bool itemCmd::isValue()
 return (cmd.itemArgType);
 }
 
+bool itemCmd::isColor()
+{
+return (cmd.itemArgType==ST_HS || cmd.itemArgType==ST_HSV || cmd.itemArgType==ST_HSV255 || cmd.itemArgType==ST_RGB || cmd.itemArgType==ST_RGBW);
+}
+
 
 long int itemCmd::getInt()
 {
   switch (cmd.itemArgType) {
 
     case ST_INT32:
-    case ST_PERCENTS:
     case ST_UINT32:
+      return param.aslong;
+
+    case ST_PERCENTS:
     case ST_PERCENTS255:
     case ST_HSV:
     case ST_HSV255:
-      return param.aslong;
+      return param.v;
 
     case ST_FLOAT:
     case ST_FLOAT_CELSIUS:
@@ -471,11 +488,11 @@ itemCmd itemCmd::Percents(int i)
        case ST_HSV255:
        case ST_PERCENTS255:
           param.v=map(i,0,100,0,255);
+       break;
        default:
        cmd.itemArgType=ST_PERCENTS;
        param.v=i;
       }
-
       return *this;
     }
 
@@ -493,12 +510,12 @@ itemCmd itemCmd::Percents(int i)
 
            case ST_HSV255:
            case ST_PERCENTS255:
-              param.v=i;;
+              param.v=i;
+            break;
            default:
            cmd.itemArgType=ST_PERCENTS255;
            param.v=i;
           }
-
           return *this;
         }
 
@@ -520,6 +537,16 @@ itemCmd itemCmd::HSV(uint16_t h, uint8_t s, uint8_t v)
 
   return *this;
 }
+
+itemCmd itemCmd::HS(uint16_t h, uint8_t s)
+{
+  cmd.itemArgType=ST_HS;
+  param.h=h;
+  param.s=s;
+
+  return *this;
+}
+
 
 itemCmd itemCmd::RGB(uint8_t r, uint8_t g, uint8_t b)
 {
@@ -636,6 +663,10 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags )
          case ST_HSV:
          case ST_HSV255:
          snprintf(argPtr, bufLen, "%d,%d,%d", param.h, param.s, param.v);
+
+         break;
+         case ST_HS:
+         snprintf(argPtr, bufLen, "%d,%d", param.h, param.s);
 
          break;
          case ST_FLOAT_CELSIUS:

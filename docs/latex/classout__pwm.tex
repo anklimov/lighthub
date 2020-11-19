@@ -1,0 +1,134 @@
+\hypertarget{classout__pwm}{}\doxysection{out\+\_\+pwm Class Reference}
+\label{classout__pwm}\index{out\_pwm@{out\_pwm}}
+
+
+{\ttfamily \#include $<$out\+\_\+pwm.\+h$>$}
+
+Inheritance diagram for out\+\_\+pwm\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classout__pwm}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classout__pwm_acd3804fb3d24afe569042202bdba2179}{out\+\_\+pwm}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
+\item 
+int \mbox{\hyperlink{classout__pwm_a0ba3173e9df1cb61b74a705c270ef7b6}{Setup}} () override
+\item 
+int \mbox{\hyperlink{classout__pwm_a88c460e7ba29e5b068a2defa395cae2c}{Poll}} (short cause) override
+\item 
+int \mbox{\hyperlink{classout__pwm_a9f3fc73a1fff6ecf991d42564a7b8273}{Stop}} () override
+\item 
+int \mbox{\hyperlink{classout__pwm_a01edf9d010b717601898bf3fddecbc3f}{Status}} () override
+\item 
+int \mbox{\hyperlink{classout__pwm_a18f9c90ab80a5bf00049e25c2c4657a5}{is\+Active}} () override
+\item 
+int \mbox{\hyperlink{classout__pwm_a54bea9682560aa628f85a532a363d57a}{get\+Chan\+Type}} () override
+\item 
+int \mbox{\hyperlink{classout__pwm_adcb4bb3d03aa8c4b7e12796136b5cd1e}{Pixel\+Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool show=true) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+short \mbox{\hyperlink{classout__pwm_a1d705ffb413e0e5b9c3ad007fdafcbbd}{num\+Channels}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classout__pwm_acd3804fb3d24afe569042202bdba2179}\label{classout__pwm_acd3804fb3d24afe569042202bdba2179}} 
+\index{out\_pwm@{out\_pwm}!out\_pwm@{out\_pwm}}
+\index{out\_pwm@{out\_pwm}!out\_pwm@{out\_pwm}}
+\doxysubsubsection{\texorpdfstring{out\_pwm()}{out\_pwm()}}
+{\footnotesize\ttfamily out\+\_\+pwm\+::out\+\_\+pwm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_item}{Item}} $\ast$}]{\+\_\+item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classout__pwm_a54bea9682560aa628f85a532a363d57a}\label{classout__pwm_a54bea9682560aa628f85a532a363d57a}} 
+\index{out\_pwm@{out\_pwm}!getChanType@{getChanType}}
+\index{getChanType@{getChanType}!out\_pwm@{out\_pwm}}
+\doxysubsubsection{\texorpdfstring{getChanType()}{getChanType()}}
+{\footnotesize\ttfamily int out\+\_\+pwm\+::get\+Chan\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout__pwm_a18f9c90ab80a5bf00049e25c2c4657a5}\label{classout__pwm_a18f9c90ab80a5bf00049e25c2c4657a5}} 
+\index{out\_pwm@{out\_pwm}!isActive@{isActive}}
+\index{isActive@{isActive}!out\_pwm@{out\_pwm}}
+\doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
+{\footnotesize\ttfamily int out\+\_\+pwm\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout__pwm_adcb4bb3d03aa8c4b7e12796136b5cd1e}\label{classout__pwm_adcb4bb3d03aa8c4b7e12796136b5cd1e}} 
+\index{out\_pwm@{out\_pwm}!PixelCtrl@{PixelCtrl}}
+\index{PixelCtrl@{PixelCtrl}!out\_pwm@{out\_pwm}}
+\doxysubsubsection{\texorpdfstring{PixelCtrl()}{PixelCtrl()}}
+{\footnotesize\ttfamily int out\+\_\+pwm\+::\+Pixel\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{show = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classcolor_channel_a6c835d00ee8af04679f03465617c2873}{color\+Channel}}.
+
+\mbox{\Hypertarget{classout__pwm_a88c460e7ba29e5b068a2defa395cae2c}\label{classout__pwm_a88c460e7ba29e5b068a2defa395cae2c}} 
+\index{out\_pwm@{out\_pwm}!Poll@{Poll}}
+\index{Poll@{Poll}!out\_pwm@{out\_pwm}}
+\doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
+{\footnotesize\ttfamily int out\+\_\+pwm\+::\+Poll (\begin{DoxyParamCaption}\item[{short}]{cause }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout__pwm_a0ba3173e9df1cb61b74a705c270ef7b6}\label{classout__pwm_a0ba3173e9df1cb61b74a705c270ef7b6}} 
+\index{out\_pwm@{out\_pwm}!Setup@{Setup}}
+\index{Setup@{Setup}!out\_pwm@{out\_pwm}}
+\doxysubsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily int out\+\_\+pwm\+::\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_aeaf6346625245be1774a6d27d9cece4e}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout__pwm_a01edf9d010b717601898bf3fddecbc3f}\label{classout__pwm_a01edf9d010b717601898bf3fddecbc3f}} 
+\index{out\_pwm@{out\_pwm}!Status@{Status}}
+\index{Status@{Status}!out\_pwm@{out\_pwm}}
+\doxysubsubsection{\texorpdfstring{Status()}{Status()}}
+{\footnotesize\ttfamily int out\+\_\+pwm\+::\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_aefb8821172a2e66f49ea0da9b7c205a5}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout__pwm_a9f3fc73a1fff6ecf991d42564a7b8273}\label{classout__pwm_a9f3fc73a1fff6ecf991d42564a7b8273}} 
+\index{out\_pwm@{out\_pwm}!Stop@{Stop}}
+\index{Stop@{Stop}!out\_pwm@{out\_pwm}}
+\doxysubsubsection{\texorpdfstring{Stop()}{Stop()}}
+{\footnotesize\ttfamily int out\+\_\+pwm\+::\+Stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac08061e5ae0}{abstract\+Ch}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classout__pwm_a1d705ffb413e0e5b9c3ad007fdafcbbd}\label{classout__pwm_a1d705ffb413e0e5b9c3ad007fdafcbbd}} 
+\index{out\_pwm@{out\_pwm}!numChannels@{numChannels}}
+\index{numChannels@{numChannels}!out\_pwm@{out\_pwm}}
+\doxysubsubsection{\texorpdfstring{numChannels}{numChannels}}
+{\footnotesize\ttfamily short out\+\_\+pwm\+::num\+Channels\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/modules/\mbox{\hyperlink{out__pwm_8h}{out\+\_\+pwm.\+h}}\item 
+/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/modules/\mbox{\hyperlink{out__pwm_8cpp}{out\+\_\+pwm.\+cpp}}\end{DoxyCompactItemize}
