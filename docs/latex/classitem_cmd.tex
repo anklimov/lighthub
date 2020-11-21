@@ -4,13 +4,23 @@
 
 {\ttfamily \#include $<$item\+Cmd.\+h$>$}
 
+
+
+Collaboration diagram for item\+Cmd\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=252pt]{classitem_cmd__coll__graph}
+\end{center}
+\end{figure}
 \doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\hyperlink{classitem_cmd_a0bb584552fc43e5f081ab839a56e6f47}{item\+Cmd}} (uint8\+\_\+t \+\_\+type=\mbox{\hyperlink{item_cmd_8h_a89b3fb099d3038f85ed3b573ba64d031}{S\+T\+\_\+\+V\+O\+ID}}, uint8\+\_\+t \+\_\+code=\mbox{\hyperlink{item_cmd_8h_a9bbd3f606a1c37e525a172fa9b6b345d}{C\+M\+D\+\_\+\+V\+O\+ID}})
-\item 
+\begin{DoxyCompactList}\small\item\em Constructor with definition of type and command. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classitem_cmd_a1d55aaa33dbc0e9cd5c24682434eceb5}{item\+Cmd}} (float val)
-\item 
+\begin{DoxyCompactList}\small\item\em Constructor with definition of F\+L\+O\+AT value in storage. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{classitem_cmd_ae41a813edbb1cdbc09792cae5dd2f434}{assign\+From}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} from)
 \item 
 bool \mbox{\hyperlink{classitem_cmd_aea24f60f90bfe69d65669c06007421fc}{load\+Item}} (\mbox{\hyperlink{class_item}{Item}} $\ast$item, bool include\+Command=false)
@@ -25,6 +35,8 @@ bool \mbox{\hyperlink{classitem_cmd_ab1b5e501888d0944b6c1215d58b524cf}{save\+Ite
 \item 
 \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{classitem_cmd_a7fcb37674371093f11886bc7d1d39825}{H\+SV}} (uint16\+\_\+t h, uint8\+\_\+t s, uint8\+\_\+t v)
 \item 
+\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{classitem_cmd_a66b21972461bf673ee9a6ece4f44e3a4}{H\+S\+V255}} (uint16\+\_\+t h, uint8\+\_\+t s, uint8\+\_\+t v)
+\item 
 \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{classitem_cmd_adf272eeb6a9d65581ea3b773e94a9f3f}{HS}} (uint16\+\_\+t h, uint8\+\_\+t s)
 \item 
 \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{classitem_cmd_aa820840f665aa22da6a25361ac5a3e37}{R\+GB}} (uint8\+\_\+t r, uint8\+\_\+t g, uint8\+\_\+t \mbox{\hyperlink{item_8cpp_ab2d05693952610f937e5acb3c4a8fa1b}{b}})
@@ -34,6 +46,10 @@ bool \mbox{\hyperlink{classitem_cmd_ab1b5e501888d0944b6c1215d58b524cf}{save\+Ite
 bool \mbox{\hyperlink{classitem_cmd_a80e4577e896d7d015402709153cc66cd}{setH}} (uint16\+\_\+t)
 \item 
 bool \mbox{\hyperlink{classitem_cmd_aed6c891043edd0083ea036494956da93}{setS}} (uint8\+\_\+t)
+\item 
+bool \mbox{\hyperlink{classitem_cmd_ae669d13e77a20f9472424b9b4c73aac0}{set\+Color\+Temp}} (uint8\+\_\+t)
+\item 
+int8\+\_\+t \mbox{\hyperlink{classitem_cmd_a578cd9bf477cad51f2c3904b04656222}{get\+Color\+Temp}} ()
 \item 
 uint16\+\_\+t \mbox{\hyperlink{classitem_cmd_ad694475a5854b6fc65de797814bf6c34}{getH}} ()
 \item 
@@ -97,12 +113,34 @@ void \mbox{\hyperlink{classitem_cmd_a313a3ec3e6507dc0b7bc6238a81ce53a}{debug\+Ou
 \doxysubsubsection{\texorpdfstring{itemCmd()}{itemCmd()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily item\+Cmd\+::item\+Cmd (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{\+\_\+type = {\ttfamily \mbox{\hyperlink{item_cmd_8h_a89b3fb099d3038f85ed3b573ba64d031}{S\+T\+\_\+\+V\+O\+ID}}},  }\item[{uint8\+\_\+t}]{\+\_\+code = {\ttfamily \mbox{\hyperlink{item_cmd_8h_a9bbd3f606a1c37e525a172fa9b6b345d}{C\+M\+D\+\_\+\+V\+O\+ID}}} }\end{DoxyParamCaption})}
 
+
+
+Constructor with definition of type and command. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em type} & -\/ type of value (S\+T\+\_\+???, S\+T\+\_\+\+V\+O\+ID by default) \\
+\hline
+{\em code} & -\/ code of command (C\+M\+D\+\_\+\+V\+O\+ID by default) \\
+\hline
+\end{DoxyParams}
 \mbox{\Hypertarget{classitem_cmd_a1d55aaa33dbc0e9cd5c24682434eceb5}\label{classitem_cmd_a1d55aaa33dbc0e9cd5c24682434eceb5}} 
 \index{itemCmd@{itemCmd}!itemCmd@{itemCmd}}
 \index{itemCmd@{itemCmd}!itemCmd@{itemCmd}}
 \doxysubsubsection{\texorpdfstring{itemCmd()}{itemCmd()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily item\+Cmd\+::item\+Cmd (\begin{DoxyParamCaption}\item[{float}]{val }\end{DoxyParamCaption})}
 
+
+
+Constructor with definition of F\+L\+O\+AT value in storage. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em float} & \\
+\hline
+{\em type} & -\/ type of value (S\+T\+\_\+\+F\+L\+O\+AT or S\+T\+\_\+\+F\+L\+O\+A\+T\+\_\+\+C\+E\+L\+S\+I\+US or S\+T\+\_\+\+F\+L\+O\+A\+T\+\_\+\+F\+A\+R\+E\+N\+H\+E\+IT) -\/ optional \\
+\hline
+\end{DoxyParams}
 
 
 \doxysubsection{Member Function Documentation}
@@ -142,7 +180,13 @@ void \mbox{\hyperlink{classitem_cmd_a313a3ec3e6507dc0b7bc6238a81ce53a}{debug\+Ou
 \doxysubsubsection{\texorpdfstring{getCmdParam()}{getCmdParam()}}
 {\footnotesize\ttfamily uint8\+\_\+t item\+Cmd\+::get\+Cmd\+Param (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{classitem_cmd_ad694475a5854b6fc65de797814bf6c34}\label{classitem_cmd_ad694475a5854b6fc65de797814bf6c34}} 
+\mbox{\Hypertarget{classitem_cmd_a578cd9bf477cad51f2c3904b04656222}\label{classitem_cmd_a578cd9bf477cad51f2c3904b04656222}} 
+\index{itemCmd@{itemCmd}!getColorTemp@{getColorTemp}}
+\index{getColorTemp@{getColorTemp}!itemCmd@{itemCmd}}
+\doxysubsubsection{\texorpdfstring{getColorTemp()}{getColorTemp()}}
+{\footnotesize\ttfamily int8\+\_\+t item\+Cmd\+::get\+Color\+Temp (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Setup color tempetature parameter from H\+SV or H\+S\+V255 types. return 0..100 value in success. -\/1 -\/ if no value stored \mbox{\Hypertarget{classitem_cmd_ad694475a5854b6fc65de797814bf6c34}\label{classitem_cmd_ad694475a5854b6fc65de797814bf6c34}} 
 \index{itemCmd@{itemCmd}!getH@{getH}}
 \index{getH@{getH}!itemCmd@{itemCmd}}
 \doxysubsubsection{\texorpdfstring{getH()}{getH()}}
@@ -189,6 +233,12 @@ void \mbox{\hyperlink{classitem_cmd_a313a3ec3e6507dc0b7bc6238a81ce53a}{debug\+Ou
 \index{HSV@{HSV}!itemCmd@{itemCmd}}
 \doxysubsubsection{\texorpdfstring{HSV()}{HSV()}}
 {\footnotesize\ttfamily \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} item\+Cmd\+::\+H\+SV (\begin{DoxyParamCaption}\item[{uint16\+\_\+t}]{h,  }\item[{uint8\+\_\+t}]{s,  }\item[{uint8\+\_\+t}]{v }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classitem_cmd_a66b21972461bf673ee9a6ece4f44e3a4}\label{classitem_cmd_a66b21972461bf673ee9a6ece4f44e3a4}} 
+\index{itemCmd@{itemCmd}!HSV255@{HSV255}}
+\index{HSV255@{HSV255}!itemCmd@{itemCmd}}
+\doxysubsubsection{\texorpdfstring{HSV255()}{HSV255()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} item\+Cmd\+::\+H\+S\+V255 (\begin{DoxyParamCaption}\item[{uint16\+\_\+t}]{h,  }\item[{uint8\+\_\+t}]{s,  }\item[{uint8\+\_\+t}]{v }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{classitem_cmd_ae0224e0c9b5d1aff2bb75f48c79f9711}\label{classitem_cmd_ae0224e0c9b5d1aff2bb75f48c79f9711}} 
 \index{itemCmd@{itemCmd}!incrementH@{incrementH}}
@@ -286,7 +336,13 @@ void \mbox{\hyperlink{classitem_cmd_a313a3ec3e6507dc0b7bc6238a81ce53a}{debug\+Ou
 \doxysubsubsection{\texorpdfstring{setChanType()}{setChanType()}}
 {\footnotesize\ttfamily \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} item\+Cmd\+::set\+Chan\+Type (\begin{DoxyParamCaption}\item[{short}]{chan\+Type }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{classitem_cmd_acd8e47506003ffd28db64d6a6c443300}\label{classitem_cmd_acd8e47506003ffd28db64d6a6c443300}} 
+\mbox{\Hypertarget{classitem_cmd_ae669d13e77a20f9472424b9b4c73aac0}\label{classitem_cmd_ae669d13e77a20f9472424b9b4c73aac0}} 
+\index{itemCmd@{itemCmd}!setColorTemp@{setColorTemp}}
+\index{setColorTemp@{setColorTemp}!itemCmd@{itemCmd}}
+\doxysubsubsection{\texorpdfstring{setColorTemp()}{setColorTemp()}}
+{\footnotesize\ttfamily bool item\+Cmd\+::set\+Color\+Temp (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{t }\end{DoxyParamCaption})}
+
+Setup color tempetature parameter for H\+SV or H\+S\+V255 types. It must be 0..100 value. 0 -\/ cold, 100 -\/ warm light \mbox{\Hypertarget{classitem_cmd_acd8e47506003ffd28db64d6a6c443300}\label{classitem_cmd_acd8e47506003ffd28db64d6a6c443300}} 
 \index{itemCmd@{itemCmd}!setDefault@{setDefault}}
 \index{setDefault@{setDefault}!itemCmd@{itemCmd}}
 \doxysubsubsection{\texorpdfstring{setDefault()}{setDefault()}}
@@ -335,5 +391,5 @@ void \mbox{\hyperlink{classitem_cmd_a313a3ec3e6507dc0b7bc6238a81ce53a}{debug\+Ou
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
-/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/\mbox{\hyperlink{item_cmd_8h}{item\+Cmd.\+h}}\item 
-/\+Users/andrey/\+Documents/\+Arduino/lighthub/lighthub/\mbox{\hyperlink{item_cmd_8cpp}{item\+Cmd.\+cpp}}\end{DoxyCompactItemize}
+\mbox{\hyperlink{item_cmd_8h}{item\+Cmd.\+h}}\item 
+\mbox{\hyperlink{item_cmd_8cpp}{item\+Cmd.\+cpp}}\end{DoxyCompactItemize}

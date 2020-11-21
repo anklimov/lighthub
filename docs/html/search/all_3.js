@@ -33,7 +33,7 @@ var searchData=
   ['cleanconf_83',['cleanConf',['../main_8cpp.html#a19861585da4d4540b8f7c2601895607d',1,'main.cpp']]],
   ['cleanstore_84',['cleanStore',['../inputs_8cpp.html#a4d0d8ca9d09c3caf99fbaec688ebef2a',1,'inputs.cpp']]],
   ['clearflag_85',['clearFlag',['../class_item.html#a60c43acb3bd16c858ca4c1fa6b12145b',1,'Item']]],
-  ['cmd_86',['cmd',['../classitem_cmd.html#a4c421cb3f527b95459233ea210f6dfce',1,'itemCmd::cmd()'],['../classitem_cmd.html#a8b1cc0b2b9e5f30f4cf9bb4db21988ac',1,'itemCmd::Cmd(uint8_t i)']]],
+  ['cmd_86',['Cmd',['../classitem_cmd.html#a8b1cc0b2b9e5f30f4cf9bb4db21988ac',1,'itemCmd::Cmd(uint8_t i)'],['../classitem_cmd.html#a4c421cb3f527b95459233ea210f6dfce',1,'itemCmd::cmd()']]],
   ['cmd_5fauto_87',['CMD_AUTO',['../item_cmd_8h.html#ac6314f47e3a245eec13c6b5b0fa1c7db',1,'itemCmd.h']]],
   ['cmd_5fcool_88',['CMD_COOL',['../item_cmd_8h.html#a4714e5ac85eca811a7d871e0cef7e720',1,'itemCmd.h']]],
   ['cmd_5fdisabled_89',['CMD_DISABLED',['../item_cmd_8h.html#a9921eb85f3037b82c45510c726a444ee',1,'itemCmd.h']]],

@@ -19,7 +19,6 @@ e-mail    anklimov@gmail.com
 */
 #pragma once
 #include "Arduino.h"
-///#include "item.h"
 
 typedef  char cmdstr[9];
 
@@ -31,39 +30,38 @@ const cmdstr commands_P[] PROGMEM =
 };
 #define commandsNum sizeof(commands_P)/sizeof(cmdstr)
 
-#define CMD_ON  1
-#define CMD_OFF 2
-#define CMD_RESTORE 3 //on only if was turned off by CMD_HALT
-#define CMD_TOGGLE 4
-#define CMD_HALT 5    //just Off
-#define CMD_XON 6     //just on
-#define CMD_XOFF 7    //off only if was previously turned on by CMD_XON
-#define CMD_UP 8      //increase
-#define CMD_DN 9      //decrease
-#define CMD_HEAT 0xa
-#define CMD_COOL 0xb
-#define CMD_AUTO 0xc
-#define CMD_FAN 0xd
-#define CMD_DRY 0xe
-#define CMD_STOP 0xf
-#define CMD_HIGH 0x10  //AC fan leve
-#define CMD_MED 0x11
-#define CMD_LOW 0x12
-#define CMD_ENABLED 0x13
-#define CMD_DISABLED 0x14
-#define CMD_TRUE 0x15
-#define CMD_FALSE 0x16
-#define CMD_RGB  0x17
+/// Definition of Commands
+#define CMD_ON  1       /// Turn channel ON 
+#define CMD_OFF 2       /// Turn channel OFF
+#define CMD_RESTORE 3   /// Turn ON only if was previously turned off by CMD_HALT
+#define CMD_TOGGLE 4    /// Toggle ON/OFF
+#define CMD_HALT 5      /// Just Off
+#define CMD_XON 6       /// Just on
+#define CMD_XOFF 7      /// OFF only if was previously turned on by CMD_XON
+#define CMD_UP 8        /// increase
+#define CMD_DN 9        /// decrease
+#define CMD_HEAT 0xa    /// Thermostat/AC set to HEATing mode 
+#define CMD_COOL 0xb    /// Thermostat/AC set to COOLing mode 
+#define CMD_AUTO 0xc    /// Thermostat/AC set to Auto mode 
+#define CMD_FAN 0xd     /// AC set to Fan-only mode 
+#define CMD_DRY 0xe     /// AC set to Dry mode
+#define CMD_STOP 0xf    /// stop dimming (for further use)
+#define CMD_HIGH 0x10   /// AC/Vent fan level HIGH
+#define CMD_MED 0x11    /// AC/Vent fan level MEDIUM
+#define CMD_LOW 0x12    /// AC/Vent fan level LOW
+#define CMD_ENABLED 0x13 /// Aliase for ON
+#define CMD_DISABLED 0x14 /// Aliase for OFF
+#define CMD_TRUE 0x15   /// Aliase for ON
+#define CMD_FALSE 0x16  /// Aliase for OFF
+#define CMD_RGB  0x17 
 #define CMD_HSV  0x18
-//#define CMD_CURTEMP 0xf
+
 #define CMD_MASK 0xff
 #define FLAG_MASK 0xff00
 
 #define CMD_VOID 0
 #define CMD_UNKNOWN  -1
 #define CMD_JSON -2
-//#define CMD_RGB  -3
-//#define CMD_HSV  -4
 
 #define SEND_COMMAND 0x100
 #define SEND_PARAMETERS 0x200
@@ -95,21 +93,22 @@ ST_FLOAT        = 13//,
 };
 */
 
-#define ST_VOID         0
-#define ST_PERCENTS     1
-#define ST_TENS         2
-#define ST_HSV          3
-#define ST_HS           4
-#define ST_FLOAT_CELSIUS   5
-#define ST_FLOAT_FARENHEIT 6
-#define ST_RGB          7
-#define ST_RGBW         8
-#define ST_PERCENTS255  9
-#define ST_HSV255       10
-#define ST_INT32        11
-#define ST_UINT32       12
-#define ST_STRING       13
-#define ST_FLOAT        14
+///Definition of all possible types of argument, contained in class
+#define ST_VOID         0      /// Not defined
+#define ST_PERCENTS     1      /// Percent value 0..100
+#define ST_TENS         2      /// Int representation of Float point value in tens part (ex 12.3 = 123 in "tens")
+#define ST_HSV          3      /// HUE-SATURATION-VALUE representation of color (0..365, 0..100, 0..100)
+#define ST_HS           4      /// just hue and saturation
+#define ST_FLOAT_CELSIUS   5   /// Float value - temperature in Celsium
+#define ST_FLOAT_FARENHEIT 6   /// Float value - temperature in Farenheit
+#define ST_RGB          7      /// RGB replesentation of color
+#define ST_RGBW         8      /// RGB + White channel
+#define ST_PERCENTS255  9      /// Percent value 0..255
+#define ST_HSV255       10     /// HUE-SATURATION-VALUE representation of color (0..365, 0..255, 0..255)
+#define ST_INT32        11     /// 32 bits signed integer
+#define ST_UINT32       12     /// 32 bits unsigned integer
+#define ST_STRING       13     /// pointer to string (for further use)
+#define ST_FLOAT        14     /// generic Float value
 
 
 #pragma pack(push, 1)
@@ -153,18 +152,18 @@ typedef union
         uint8_t  s;
         uint16_t h:9;
         uint16_t colorTemp:7;
-      };
+      };   
   struct
       { int8_t  signed_v;
         int8_t  signed_s;
         int16_t signed_h:9;
         int16_t signed_colorTemp:7;
-      };
-  struct
+      };    
+  struct  //Should be NeoPixel packed Color compatible 
       {
-        uint8_t  r;
-        uint8_t  g;
         uint8_t  b;
+        uint8_t  g;
+        uint8_t  r;
         uint8_t  w;
       };
 } itemArgStore;
@@ -187,11 +186,14 @@ public:
   itemCmd Int(uint32_t i);
   itemCmd Cmd(uint8_t i);
   itemCmd HSV(uint16_t h, uint8_t s, uint8_t v);
+  itemCmd HSV255(uint16_t h, uint8_t s, uint8_t v);
   itemCmd HS(uint16_t h, uint8_t s);
   itemCmd RGB(uint8_t r, uint8_t g, uint8_t b);
   itemCmd RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w);
   bool setH(uint16_t);
   bool setS(uint8_t);
+  bool setColorTemp(uint8_t);
+  int8_t getColorTemp();
   uint16_t getH();
   uint16_t getS();
   itemCmd setArgType(uint8_t);

@@ -9,6 +9,7 @@
 #else
 #include "FastLED.h"
 #endif
+//#include "hsv2rgb.h"
 
 int txt2cmd(char *payload) {
   int cmd = CMD_UNKNOWN;
@@ -22,21 +23,22 @@ int txt2cmd(char *payload) {
   else
   {
     for(uint8_t i=1; i<commandsNum ;i++)
-        if (strcmp_P(payload, commands_P[i]) == 0)
+        if (strncmp_P(payload, commands_P[i], strlen_P(commands_P[i])) == 0)
              {
 //             debugSerial<< i << F(" ") << pgm_read_word_near(&serialModes_P[i].mode)<< endl;
              return i;
            }
   }
 
-  /*
-  else if (strncmp_P(payload, HSV_P, strlen (HSV_P)) == 0) cmd = CMD_HSV;
-  else if (strncmp_P(payload, RGB_P, strlen (RGB_P)) == 0) cmd = CMD_RGB;
-  */
 
   return cmd;
 }
 
+/*!
+     \brief Constructor with definition of type and command
+     \param type - type of value (ST_???, ST_VOID by default) 
+     \param code - code of command (CMD_VOID by default)
+*/
 itemCmd::itemCmd(uint8_t _type, uint8_t _code)
 {
   cmd.aslong=0;
@@ -46,6 +48,12 @@ itemCmd::itemCmd(uint8_t _type, uint8_t _code)
   cmd.cmdCode=_code;
 }
 
+
+/*!
+     \brief Constructor with definition of FLOAT value in storage
+     \param float
+     \param type - type of value (ST_FLOAT or ST_FLOAT_CELSIUS or ST_FLOAT_FARENHEIT) - optional
+*/
 itemCmd::itemCmd(float val)
 {
   cmd.aslong=0;
@@ -133,19 +141,57 @@ bool itemCmd::setS(uint8_t s)
     case ST_VOID:
       cmd.itemArgType=ST_HSV;
     case ST_HSV:
+     case ST_HSV255:
       if (par>100) par=100;
       param.s=par;
       break;
+      /*
     case ST_HSV255:
       if (par>255) par=255;
       if (par<0) par=0;
       param.s=par;
-      break;
+      break;*/
     default:
 //    debugSerial<<F("Can't assign saturation to type ")<<cmd.itemArgType<<endl;
     return false;
   }
   return true;
+}
+
+
+
+//! Setup color tempetature parameter for HSV or HSV255 types. It must be 0..100 value.
+//! 0 - cold, 100 - warm light
+bool itemCmd::setColorTemp(uint8_t t)
+{
+  int par=t;
+  switch (cmd.itemArgType)
+  {
+    case ST_VOID:
+      cmd.itemArgType=ST_HSV;
+    case ST_HSV:
+    case ST_HS:
+      if (par>100) par=100;
+      // value 0 is reserved for default/uninitialized value. Internally data stored in 1..101 range (7 bits)
+      param.colorTemp=par+1;
+      break;
+    case ST_HSV255:
+      if (par>100) par=100;
+      if (par<0) par=0;
+      param.colorTemp=par+1;
+      break;
+    default:
+    return false;
+  }
+  return true;
+}
+
+//! Setup color tempetature parameter from HSV or HSV255 types. return 0..100 value in success.
+//! -1 - if no value stored
+int8_t itemCmd::getColorTemp()
+{
+  if (cmd.itemArgType!=ST_HSV and cmd.itemArgType!=ST_HSV255 and cmd.itemArgType!=ST_HS) return -1;
+  return param.colorTemp-1;
 }
 
 uint16_t itemCmd::getH()
@@ -203,16 +249,18 @@ bool itemCmd::incrementS(int16_t dif)
   {
     //case ST_PERCENTS:
     case ST_HSV:
+    case ST_HSV255:
      par+=dif;
      if (par>100) par=100;
      if (par<0) par=0;
     break;
+    /*
     //case ST_PERCENTS255:
     case ST_HSV255:
      par+=dif;
      if (par>255) par=255;
      if (par<0) par=0;
-    break;
+    break; */
    default: return false;
   }
   param.s=par;
@@ -251,7 +299,8 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                    break;
               case ST_HSV255:
                    param.h=from.param.h;
-                   param.s=map(from.param.s,0,255,0,100);
+                   //param.s=map(from.param.s,0,255,0,100);
+                   param.s=from.param.s;
                    param.v=map(from.param.v,0,255,0,100);
                    break;
               case ST_PERCENTS255:
@@ -280,7 +329,8 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                    param.v=map(from.param.v,0,100,0,255);
               case ST_HSV:
                    param.h=from.param.h;
-                   param.s=map(from.param.s,0,100,0,255);
+                   param.s=from.param.s;
+                   //param.s=map(from.param.s,0,100,0,255);
                    break;
               case ST_PERCENTS:
                    param.v=map(from.param.v,0,100,0,255);
@@ -316,7 +366,61 @@ itemCmd itemCmd::assignFrom(itemCmd from)
             case ST_RGBW:
             case ST_RGB:
                   param.asInt32=from.param.asInt32;
-                 break;
+            break;
+            // Those types are not possible to apply over RGB without convertion toward HSV
+            case ST_PERCENTS255:
+            case ST_PERCENTS:
+            case ST_HS:
+            {
+
+             #ifndef ADAFRUIT_LED  
+             // Restoring HSV from RGB
+              CRGB rgb;
+              rgb.r = param.r;
+              rgb.g = param.g;
+              rgb.b = param.b;    
+              CHSV hsv = rgb2hsv_approximate(rgb);
+              #endif
+ 
+                 switch (from.cmd.itemArgType){
+                      case ST_PERCENTS255:
+                            #ifndef ADAFRUIT_LED 
+                                from.param.h = map(hsv.h, 0, 255, 0, 365);
+                                from.param.s = map(hsv.s, 0, 255, 0, 100);
+                            #else
+                                from.param.h=100;
+                                from.param.s=0;    
+                            #endif    
+                      from.cmd.itemArgType=ST_HSV255;  
+                      break;
+                      case ST_PERCENTS:
+                            #ifndef ADAFRUIT_LED  
+                                from.param.h = map(hsv.h, 0, 255, 0, 365);
+                                from.param.s = map(hsv.s, 0, 255, 0, 100);
+                            #else
+                                from.param.h=100;
+                                from.param.s=0;   
+                            #endif
+                      from.cmd.itemArgType=ST_HSV255;         
+                      break;
+                      case ST_HS:
+
+                            #ifndef ADAFRUIT_LED     
+                                from.param.v = hsv.v;
+                            #else
+                                from.param.v=255;
+                            #endif     
+                      from.cmd.itemArgType=ST_HSV255;
+                      break;
+                 }
+             }
+           //Converting  current obj to HSV
+           
+           debugSerial<<F("Updated:"); from.debugOut();
+           param=from.param;
+           cmd=from.cmd;
+           return *this;
+
            case ST_HSV255:
                 HSV255_flag=true;
            case ST_HSV:
@@ -326,7 +430,8 @@ itemCmd itemCmd::assignFrom(itemCmd from)
 
                 if (HSV255_flag)
                   {
-                    rgbSaturation = from.param.s;
+                    //rgbSaturation = from.param.s;
+                    rgbSaturation =map(from.param.s, 0, 100, 0, 255);
                     rgbValue      = from.param.v;
                   }
                 else
@@ -397,6 +502,8 @@ long int itemCmd::getInt()
 
     case ST_INT32:
     case ST_UINT32:
+    case ST_RGB:
+    case ST_RGBW:
       return param.aslong;
 
     case ST_PERCENTS:
@@ -409,6 +516,8 @@ long int itemCmd::getInt()
     case ST_FLOAT_CELSIUS:
     case ST_FLOAT_FARENHEIT:
       return int (param.asfloat);
+
+ 
     default:
     return 0;
   }
@@ -538,6 +647,17 @@ itemCmd itemCmd::HSV(uint16_t h, uint8_t s, uint8_t v)
   return *this;
 }
 
+itemCmd itemCmd::HSV255(uint16_t h, uint8_t s, uint8_t v)
+{
+  cmd.itemArgType=ST_HSV255;
+  param.h=h;
+  param.s=s;
+  param.v=v;
+
+  return *this;
+}
+
+
 itemCmd itemCmd::HS(uint16_t h, uint8_t s)
 {
   cmd.itemArgType=ST_HS;
@@ -647,7 +767,7 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags )
                         }
        if (sendFlags & SEND_PARAMETERS)
        switch (cmd.itemArgType)
-       {
+       { short colorTemp;
 
          case ST_PERCENTS:
          case ST_PERCENTS255:
@@ -662,7 +782,12 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags )
          break;
          case ST_HSV:
          case ST_HSV255:
-         snprintf(argPtr, bufLen, "%d,%d,%d", param.h, param.s, param.v);
+         colorTemp=getColorTemp();
+
+         if (colorTemp<0) 
+              snprintf(argPtr, bufLen, "%d,%d,%d", param.h, param.s, param.v);
+            else   
+              snprintf(argPtr, bufLen, "%d,%d,%d,%d", param.h, param.s, param.v, colorTemp);    
 
          break;
          case ST_HS:

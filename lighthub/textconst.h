@@ -105,6 +105,7 @@ const char ERROR_P[]  PROGMEM = "ERR";
 
 // SubTopics
 const char SET_P[]  PROGMEM = "set";
+const char ESET_P[]  PROGMEM = "eset";
 const char CMD_P[]  PROGMEM = "cmd";
 const char MODE_P[] PROGMEM = "mode";
 const char FAN_P[]  PROGMEM = "fan";

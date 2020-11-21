@@ -1,0 +1,8 @@
+<map id="colorChannel" name="colorChannel">
+<area shape="rect" id="node1" title=" " alt="" coords="89,155,188,181"/>
+<area shape="rect" id="node4" href="$classout__dmx.html" title=" " alt="" coords="5,229,77,256"/>
+<area shape="rect" id="node5" href="$classout__pwm.html" title=" " alt="" coords="101,229,176,256"/>
+<area shape="rect" id="node6" href="$classout___s_p_i_led.html" title=" " alt="" coords="200,229,291,256"/>
+<area shape="rect" id="node2" href="$classabstract_out.html" title=" " alt="" coords="93,80,184,107"/>
+<area shape="rect" id="node3" href="$classabstract_ch.html" title=" " alt="" coords="95,5,182,32"/>
+</map>

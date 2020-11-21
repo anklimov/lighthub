@@ -88,6 +88,7 @@ int txt2subItem(char *payload) {
     if (!payload || !strlen(payload)) return S_NOTFOUND;
     // Check for command
     if (strcmp_P(payload, SET_P) == 0) cmd = S_SET;
+    else if (strcmp_P(payload, ESET_P) == 0) cmd = S_ESET;
     else if (strcmp_P(payload, CMD_P) == 0) cmd = S_CMD;
     else if (strcmp_P(payload, MODE_P) == 0) cmd = S_MODE;
     else if (strcmp_P(payload, HSV_P) == 0) cmd = S_HSV;
@@ -470,6 +471,20 @@ int cmd = txt2cmd(payload);
 debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
 
 itemCmd st(ST_VOID,cmd);
+bool set255flag=false;
+
+switch (suffixCode) {
+    case S_ESET:
+        set255flag=true;  
+        suffixCode=S_SET;  
+    break;
+    case S_HSV:
+        cmd=CMD_HSV; 
+    break;
+    case S_RGB:
+        cmd=CMD_RGB;
+    break;
+}
 st.setSuffix(suffixCode);
 
   switch (cmd) {
@@ -478,13 +493,14 @@ st.setSuffix(suffixCode);
           st.Int((int32_t)getInt((char **) &payload));
           return   Ctrl(st,subItem);
       break;
-      case CMD_HSV: st.Cmd(0);
+      case CMD_HSV: 
+          st.Cmd(0);
       case CMD_VOID:
        {
          //Parsing integers from payload
           short i = 0;
-          int Par[3];
-          while (payload && i < 3)
+          int Par[4];
+          while (payload && i < 4)
               Par[i++] = getInt((char **) &payload);
 
           switch(suffixCode)
@@ -497,15 +513,28 @@ st.setSuffix(suffixCode);
                 default:
                     switch (i) //Number of params
                     {
-                      case 1: st.Percents(Par[0]);  //ToDo float
+                      case 1: 
+                            if (set255flag)
+                                  st.Percents255(Par[0]);
+                            else  st.Percents(Par[0]);  //ToDo float
                       break;
                       case 2: st.HS(Par[0],Par[1]);
                       break;
-                      case 3: st.HSV(Par[0],Par[1],Par[2]);
+                      case 3: 
+                              if (set255flag)
+                                    st.HSV255(Par[0],Par[1],Par[2]);   
+                              else  st.HSV(Par[0],Par[1],Par[2]);
+                      break;
+                      case 4:
+                              if (set255flag)
+                                st.HSV255(Par[0],Par[1],Par[2]);
+                              else st.HSV(Par[0],Par[1],Par[2]);
+                              st.setColorTemp(Par[3]);
+                      break;        
                       default:;
                     }
               }
-          //return   Ctrl(setCommand, i, Par,  suffixCode, subItem);
+ 
           return   Ctrl(st,subItem);
       }
           break;
@@ -541,7 +570,7 @@ return 0;
 
 int Item::Ctrl(itemCmd cmd,  char* subItem)
 {
-  char stringBuffer[16];
+  //char stringBuffer[16];
   int suffixCode = cmd.getSuffix();
   bool operation = isNotRetainingStatus() ;
 
@@ -555,7 +584,8 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
         suffixCode = defaultSuffixCode;
 
 
-    debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Suff=")<<suffixCode<<F(" Cmd=")<<cmd.getCmd()<<F(" Par=")<<cmd.toString(stringBuffer, sizeof(stringBuffer))<<endl;
+    debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem;
+    cmd.debugOut();
     if (!itemArr) return -1;
 
     bool    chActive  = (isActive()>0);
@@ -647,6 +677,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
                         case S_NOTFOUND:
                              toExecute=true;
                         case S_SET:
+                        //case S_ESET:
                              if (st.incrementPercents(step))
                              {
                                st.saveItem(this);
@@ -685,6 +716,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
 
                                      // continue processing as SET
                                      case S_SET:
+                                     //case S_ESET:
                                      if (itemType == CH_GROUP && cmd.isColor()) st.setArgType(ST_HSV);//Extend storage for group channel
                                      st.assignFrom(cmd);
                                      st.saveItem(this);
@@ -856,6 +888,7 @@ switch (itemType) {
               SendStatus(SEND_COMMAND);
               }
  }
+return 1; 
 }
 
 
@@ -1039,6 +1072,7 @@ int Item::modbusDimmerSet(itemCmd st)
                 if (_maxval) return modbusDimmerSet(_addr, _reg, _regType, _mask, map(value, 0, 100, 0, _maxval));
                              else return modbusDimmerSet(_addr, _reg, _regType, _mask, value);
             }
+            return 0;
         }
 #endif
 
@@ -1074,7 +1108,7 @@ int Item::VacomSetFan(itemCmd st) {
         return 0;
     }
     modbusBusy = 1;
-    uint8_t j;//, result;
+    //uint8_t j;//, result;
     //uint16_t data[1];
 
     modbusSerial.begin(9600, fmPar);
@@ -1289,6 +1323,7 @@ int Item::checkFM() {
     free(outch);
     aJson.deleteItem(out);
     modbusBusy = 0;
+    return 1;
 }
 
 boolean Item::checkModbusRetry() {
@@ -1402,7 +1437,7 @@ int Item::checkModbusDimmer() {
         debugSerial << F("Modbus polling error=") << _HEX(result) << endl;
     modbusBusy = 0;
 
-
+return 1;
 }
 
 
@@ -1435,6 +1470,7 @@ int Item::checkModbusDimmer(int data) {
             }
         }
     } //if data changed
+  return 1;  
 }
 
 #endif
@@ -1502,7 +1538,9 @@ int Item::SendStatus(int sendFlags) {
         return -1;
     }
     else {
-      int chancmd=getCmd();
+      itemCmd st(ST_VOID,CMD_VOID);  
+      st.loadItem(this, true);
+
       sendFlags |= getFlag(SEND_COMMAND | SEND_PARAMETERS); //if some delayed status is pending
 
       char addrstr[48];
@@ -1511,45 +1549,14 @@ int Item::SendStatus(int sendFlags) {
 
       if (sendFlags & SEND_PARAMETERS)
       {
-      // Preparing parameters payload //////////
-/*
-       itemArgStore st;
-       int chanType = itemType;
-        if (driver) chanType = driver->getChanType();
-       //retrive stored values
-       st.aslong = getVal();
-       switch (chanType) {
-               //case CH_GROUP:
-               case CH_RGBW:
-               case CH_RGB:
-               snprintf(valstr, sizeof(valstr), "%d,%d,%d", st.h,st.s,st.v);
-            break;
-               case CH_GROUP:
-               //if (st.hsv_flag)
-               if (getSubtype()==ST_HSV)
-                snprintf(valstr, sizeof(valstr), "%d,%d,%d", st.h,st.s,st.v);
-               else
-                snprintf(valstr, sizeof(valstr), "%d", st.v);
-            break;
-              case CH_RELAY:
-                sendFlags &= ~SEND_PARAMETERS;  //No need to send value for relay
-            break;
-               default:
-               snprintf(valstr, sizeof(valstr), "%ld", st.aslong);
-           }//itemtype
-           */
+        // Preparing parameters payload //////////
+        st.toString(valstr, sizeof(valstr), SEND_PARAMETERS);
+      }
 
-
-
-
-    itemCmd st(ST_VOID,CMD_VOID);
-    st.loadItem(this, true);
-    st.toString(valstr, sizeof(valstr), SEND_PARAMETERS);
-    }
     if (sendFlags & SEND_COMMAND)
     {
     // Preparing Command payload  //////////////
-    switch (chancmd) {
+    switch (st.getCmd()) {
         case CMD_ON:
         case CMD_XON:
         case CMD_AUTO:
@@ -1561,8 +1568,7 @@ int Item::SendStatus(int sendFlags) {
         case CMD_HALT:
             strcpy_P(cmdstr, OFF_P);
             break;
-        case 0:
-    ///    case CMD_SET:
+        case CMD_VOID:
         sendFlags &= ~SEND_COMMAND; // Not send command for parametrized req
             break;
         default:
@@ -1570,13 +1576,14 @@ int Item::SendStatus(int sendFlags) {
             sendFlags &= ~SEND_COMMAND;
     }
    }
-      //publish to MQTT - OpenHab Legacy style to myhome/s_out/item flat values
+      if (st.getArgType()!=ST_RGB && st.getArgType()!=ST_RGBW) {  
+        //publish to MQTT - OpenHab Legacy style to myhome/s_out/item flat values
         setTopic(addrstr,sizeof(addrstr),T_OUT);
         strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
 
               if (mqttClient.connected()  && !ethernetIdleCount)
                       {
-                      if (sendFlags & SEND_PARAMETERS && chancmd != CMD_OFF && chancmd != CMD_HALT)
+                      if (sendFlags & SEND_PARAMETERS && st.getCmd() != CMD_OFF && st.getCmd() != CMD_HALT)
                       {
                         mqttClient.publish(addrstr, valstr, true);
                         debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
@@ -1594,7 +1601,7 @@ int Item::SendStatus(int sendFlags) {
                       setFlag(sendFlags);
                       return 0;
                       }
-
+            } 
             // publush to MQTT - New style to
             // myhome/s_out/item/cmd
             // myhome/s_out/item/set
@@ -1604,8 +1611,19 @@ int Item::SendStatus(int sendFlags) {
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
               strncat(addrstr, "/", sizeof(addrstr));
-              strncat_P(addrstr, SET_P, sizeof(addrstr));
-
+              
+              switch (st.getArgType()) {
+                  case ST_RGB:
+                  case ST_RGBW:
+                     strncat_P(addrstr, RGB_P, sizeof(addrstr));
+                     break;
+                  case ST_PERCENTS255:
+                  case ST_HSV255:
+                     strncat_P(addrstr, ESET_P, sizeof(addrstr));
+                     break;
+                  default:
+                     strncat_P(addrstr, SET_P, sizeof(addrstr));
+              }
 
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
               if (mqttClient.connected()  && !ethernetIdleCount)
@@ -1624,7 +1642,7 @@ int Item::SendStatus(int sendFlags) {
               if (sendFlags & SEND_COMMAND)
               {
               // Some additional preparing for extended set of commands:
-                switch (chancmd) {
+                switch (st.getCmd()) {
                     case CMD_AUTO:
                           strcpy_P(cmdstr, AUTO_P);
                         break;
