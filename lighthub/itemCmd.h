@@ -192,8 +192,8 @@ public:
   itemCmd RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w);
   bool setH(uint16_t);
   bool setS(uint8_t);
-  bool setColorTemp(uint8_t);
-  int8_t getColorTemp();
+  bool setColorTemp(int);
+  int getColorTemp();
   uint16_t getH();
   uint16_t getS();
   itemCmd setArgType(uint8_t);

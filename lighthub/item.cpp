@@ -510,6 +510,9 @@ st.setSuffix(suffixCode);
                case S_SAT:
                       st.setS(Par[0]);
                       break;
+               case S_TEMP:
+                      st.setColorTemp(Par[0]);
+                      break;        
                 default:
                     switch (i) //Number of params
                     {
@@ -584,7 +587,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
         suffixCode = defaultSuffixCode;
 
 
-    debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem;
+    debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd=");
     cmd.debugOut();
     if (!itemArr) return -1;
 
@@ -739,6 +742,11 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
                                           st.saveItem(this);
                                           SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
                                         }
+                                    break;
+                                    case S_TEMP:
+                                    st.setColorTemp(cmd.getColorTemp());
+                                    st.saveItem(this);
+                                    SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
                                    }
 
                                   break;

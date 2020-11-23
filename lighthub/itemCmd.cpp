@@ -160,24 +160,24 @@ bool itemCmd::setS(uint8_t s)
 
 
 
-//! Setup color tempetature parameter for HSV or HSV255 types. It must be 0..100 value.
-//! 0 - cold, 100 - warm light
-bool itemCmd::setColorTemp(uint8_t t)
+//! Setup color tempetature parameter for HSV or HSV255 types. It must be 153..500 (mireds) value.
+//! Internally  1 - cold, 101 - warm light
+bool itemCmd::setColorTemp(int t)
 {
-  int par=t;
+  int par=map(t,153,500,0,100);
   switch (cmd.itemArgType)
   {
     case ST_VOID:
       cmd.itemArgType=ST_HSV;
     case ST_HSV:
     case ST_HS:
-      if (par>100) par=100;
-      // value 0 is reserved for default/uninitialized value. Internally data stored in 1..101 range (7 bits)
-      param.colorTemp=par+1;
-      break;
+    case ST_PERCENTS:
+    case ST_PERCENTS255:
     case ST_HSV255:
       if (par>100) par=100;
       if (par<0) par=0;
+      //debugSerial<<F("Assign color temp:")<<par<<endl;
+      // value 0 is reserved for default/uninitialized value. Internally data stored in 1..101 range (7 bits)
       param.colorTemp=par+1;
       break;
     default:
@@ -188,10 +188,22 @@ bool itemCmd::setColorTemp(uint8_t t)
 
 //! Setup color tempetature parameter from HSV or HSV255 types. return 0..100 value in success.
 //! -1 - if no value stored
-int8_t itemCmd::getColorTemp()
+int itemCmd::getColorTemp()
 {
-  if (cmd.itemArgType!=ST_HSV and cmd.itemArgType!=ST_HSV255 and cmd.itemArgType!=ST_HS) return -1;
-  return param.colorTemp-1;
+  if (!param.colorTemp) return -1;
+
+  switch (cmd.itemArgType)
+  {
+    case ST_HSV:
+    case ST_HS:
+    case ST_PERCENTS:
+    case ST_PERCENTS255:
+    case ST_HSV255:
+  
+  return map(param.colorTemp-1,0,100,153,500);
+    break;
+  }
+  return -1;  
 }
 
 uint16_t itemCmd::getH()
@@ -273,8 +285,15 @@ itemCmd itemCmd::assignFrom(itemCmd from)
 {
   bool RGBW_flag   = false;
   bool HSV255_flag = false;
-  cmd.suffixCode=from.cmd.suffixCode;
+  int t=from.getColorTemp();
 
+  if (t>=0) 
+              {
+              setColorTemp(t);
+              }
+  cmd.suffixCode=from.cmd.suffixCode;
+  
+  
   switch (cmd.itemArgType){ //Destination
      case ST_HSV:
      case ST_PERCENTS:
@@ -293,6 +312,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
               case ST_HS:
                    param.h=from.param.h;
                    param.s=from.param.s;
+                   
                    break;
               case ST_PERCENTS:
                    param.v=from.param.v;
@@ -325,9 +345,9 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                     param.b=from.param.b;
                     cmd.itemArgType=from.cmd.itemArgType;
                     break;
-              case ST_HS:
-                   param.v=map(from.param.v,0,100,0,255);
               case ST_HSV:
+                   param.v=map(from.param.v,0,100,0,255);
+              case ST_HS:
                    param.h=from.param.h;
                    param.s=from.param.s;
                    //param.s=map(from.param.s,0,100,0,255);
@@ -415,7 +435,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                  }
              }
            //Converting  current obj to HSV
-           
+
            debugSerial<<F("Updated:"); from.debugOut();
            param=from.param;
            cmd=from.cmd;
@@ -439,23 +459,51 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                     rgbSaturation =map(from.param.s, 0, 100, 0, 255);
                     rgbValue =     map(from.param.v, 0, 100, 0, 255);
                   }
+                  short colorT=from.param.colorTemp-1;
+
 
                   if (RGBW_flag)
-                  {
-                      if (rgbSaturation < 128) { // Using white
-                                      param.w=map((127 - rgbSaturation) * rgbValue, 0, 127*255, 0, 255);
-                                      int rgbvLevel = map (rgbSaturation,0,127,0,255*2);
-                                      rgbValue = map(rgbValue, 0, 255, 0, rgbvLevel);
-                                      rgbSaturation = map(rgbSaturation, 0, 127, 100, 255);
-                                      if (rgbValue>255) rgbValue = 255;
-                                     }
-                      else
-                      {
-                        rgbSaturation = map(rgbSaturation, 128, 255, 100, 255);
-                        param.w=0;
-                      }
-                    debugSerial<<F("Converted S:")<<rgbSaturation<<F(" Converted V:")<<rgbValue<<endl;
-                  }
+                  
+                          {
+                              if (colorT<0)
+                              { //ColorTemperature not set
+                              if (rgbSaturation < 128) { // Using white
+                                                param.w=map((127 - rgbSaturation) * rgbValue, 0, 127*255, 0, 255);
+                                                int rgbvLevel = map (rgbSaturation,0,127,0,255*2);
+                                                rgbValue = map(rgbValue, 0, 255, 0, rgbvLevel);
+                                                rgbSaturation = map(rgbSaturation, 0, 127, 100, 255);
+                                                if (rgbValue>255) rgbValue = 255;
+                                              }
+                                  else
+                                              {
+                                                rgbSaturation = map(rgbSaturation, 128, 255, 100, 255);
+                                                param.w=0;
+                                              };
+                              debugSerial<<F("Converted S:")<<rgbSaturation<<F(" Converted V:")<<rgbValue<<endl;                    
+                              }
+                              else
+                              {
+                                long coldPercent = map (colorT,0,100,100,30); 
+                                long hotPercent  = map (colorT,0,100,30,100);
+                                int rgbvLevel;
+
+                                if (rgbSaturation < 128) { // Using white
+                                                param.w=map((127 - rgbSaturation) * rgbValue *hotPercent, 0, 127*255*100, 0, 255);
+                                                rgbvLevel = map (rgbSaturation+coldPercent,0,127+100,0,255*2);
+                                                rgbValue = map(rgbValue, 0, 255, 0, rgbvLevel);
+                                                rgbSaturation = map(rgbSaturation, 0, 127, 0, 255);
+                                                if (rgbValue>255) rgbValue = 255;
+                                              }
+                                  else
+                                      {
+                                        rgbSaturation = map(rgbSaturation, 128, 255, 100, 255);
+                                        param.w=0;
+                                      };
+                              debugSerial<<F("Cold:")<<coldPercent<<F(" Hot:")<<hotPercent<<F(" ConvS:")<<rgbSaturation<<F(" ConvV:")<<rgbValue<<F(" vLevel:")<<rgbvLevel<<endl;             
+                              } 
+                          }                
+
+                  
                   #ifdef ADAFRUIT_LED
                     Adafruit_NeoPixel strip(0, 0, 0);
                     uint32_t rgb = strip.ColorHSV(map(from.param.h, 0, 365, 0, 65535), rgbSaturation, rgbValue);
