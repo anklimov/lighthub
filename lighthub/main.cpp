@@ -2160,7 +2160,7 @@ short thermoSetCurTemp(char *name, float t) {
                 extArray = aJson.createArray(); //Create Ext Array
 
                 aJsonObject *ocurt = aJson.createItem(t);  //Create float
-                aJsonObject *oattempts = aJson.createItem(T_ATTEMPTS); //Create int
+                aJsonObject *oattempts = aJson.createItem((long int) T_ATTEMPTS); //Create int
                 aJson.addItemToArray(extArray, ocurt);
                 aJson.addItemToArray(extArray, oattempts);
                 aJson.addItemToArray(thermoItem, extArray); //Adding to thermoItem
