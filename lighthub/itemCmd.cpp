@@ -552,6 +552,7 @@ long int itemCmd::getInt()
     case ST_UINT32:
     case ST_RGB:
     case ST_RGBW:
+    case ST_TENS:
       return param.aslong;
 
     case ST_PERCENTS:
@@ -571,6 +572,11 @@ long int itemCmd::getInt()
   }
 }
 
+long int itemCmd::getSingleInt()
+{
+  if (cmd.cmdCode) return cmd.cmdCode;
+  return getInt();
+}
 
 short itemCmd::getPercents(bool inverse)
 {
@@ -683,7 +689,20 @@ itemCmd itemCmd::Int(int32_t i)
           return *this;
         }
 
+itemCmd itemCmd::Int(uint32_t i)
+        {
+          cmd.itemArgType=ST_UINT32;
+          param.asUint32=i;
+          return *this;
+        }
 
+
+itemCmd itemCmd::Tens(int32_t i)
+        {
+          cmd.itemArgType=ST_TENS;
+          param.asInt32=i;
+          return *this;
+        }
 
 itemCmd itemCmd::HSV(uint16_t h, uint8_t s, uint8_t v)
 {
@@ -737,12 +756,7 @@ itemCmd itemCmd::RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
   return *this;
 }
 
-itemCmd itemCmd::Int(uint32_t i)
-                {
-                  cmd.itemArgType=ST_UINT32;
-                  param.asUint32=i;
-                  return *this;
-                }
+
 
 
 itemCmd itemCmd::Cmd(uint8_t i)
@@ -797,6 +811,17 @@ return false;
 }
 
 
+  int itemCmd::doMapping(aJsonObject *mappingData)
+  {
+
+
+  }
+  int itemCmd::doReverseMapping (aJsonObject *mappingData)
+
+  {
+
+  }
+
 
 char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags )
      {
@@ -826,7 +851,9 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags )
          break;
          case ST_INT32:
             snprintf(argPtr, bufLen, "%ld", param.asInt32);
-
+         break;
+         case ST_TENS:
+            snprintf(argPtr, bufLen, "%ld.%d", param.asInt32/10, param.asInt32 % 10);
          break;
          case ST_HSV:
          case ST_HSV255:

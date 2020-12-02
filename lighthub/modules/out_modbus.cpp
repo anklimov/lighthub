@@ -36,6 +36,7 @@ struct serial_t
 #define PAR_I8L 6
 #define PAR_U8H 7
 #define PAR_U8L 8
+#define PAR_TENS 9
 
 
 const reg_t regSize_P[] PROGMEM =
@@ -47,7 +48,8 @@ const reg_t regSize_P[] PROGMEM =
   { "i8h", (uint8_t) PAR_I8H },
   { "i8l", (uint8_t) PAR_I8L },
   { "u8h", (uint8_t) PAR_U8H },
-  { "u8l", (uint8_t) PAR_U8L }
+  { "u8l", (uint8_t) PAR_U8L },
+  { "x10", (uint8_t) PAR_TENS }
 } ;
 #define regSizeNum sizeof(regSize_P)/sizeof(reg_t)
 
@@ -223,40 +225,75 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer)
                     int8_t    regType = PAR_I16;
                     uint32_t  param =0;
                     itemCmd   mappedParam;
-                    bool isSigned=false;
+                    char buf[16];
+
+                    //bool isSigned=false;
                     if (typeObj && typeObj->type == aJson_String) regType=str2regSize(typeObj->valuestring);
                     switch(regType) {
 
                       case PAR_I16:
-                      isSigned=true;
+                      //isSigned=true;
+                      mappedParam.Int((int32_t)data);
+                      break;
+
                       case PAR_U16:
-                      param=data;
+                      mappedParam.Int((uint32_t)data);
+                      //param=data;
                       break;
                       case PAR_I32:
-                      isSigned=true;
+                      //isSigned=true;
+                      param = data | (node.getResponseBuffer(posInBuffer+1)<<16);
+                      mappedParam.Int((int32_t)param);
+                      break;
+
                       case PAR_U32:
                       param = data | (node.getResponseBuffer(posInBuffer+1)<<16);
+                      mappedParam.Int((uint32_t)param);
                       break;
+
                       case PAR_U8L:
-                      is8bit=true;
+                      //is8bit=true;
                       param = data & 0xFF;
+                      mappedParam.Int((uint32_t)param);
                       break;
+
                       case PAR_U8H:
-                      is8bit=true;
+                      //is8bit=true;
                       param = data << 8;
+                      mappedParam.Int((uint32_t)param);
+                      break;
+
+                      case PAR_TENS:
+                      mappedParam.Tens((int32_t) data);
                     }
 
                     if (mapObj && (mapObj->type==aJson_Array || mapObj->type==aJson_Object))
-                       mappedParam = mapInt(param,mapObj);
-                    else  mappedParam.Int(param);
+                       mappedParam.doMapping(mapObj);
+                       
+                    debugSerial << F("MB got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from ")<<regType<<F(":")<<paramObj->name<<endl;             
 
                     if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                           {
                           aJsonObject *execObj = aJson.getObjectItem(itemParametersObj,paramObj->name);
-                          if (execObj) executeCommand(execObj, -1, mappedParam);
+                          if (execObj) 
+                                      {
+                                      bool submitParam=true;  
+                                      //Retrive previous data
+                                      aJsonObject *lastMeasured = aJson.getObjectItem(execObj,"@S");
+                                      if (lastMeasured)
+                                          {
+                                          if   (lastMeasured->valueint == mappedParam.getSingleInt())
+                                                submitParam=false; //supress repeating execution for same val
+                                          else  lastMeasured->valueint=mappedParam.getSingleInt();
+                                          }
+                                      else //No container to store value yet 
+                                      {
+                                        debugSerial<<F("Add @S: ")<<paramObj->name<<endl;
+                                        aJson.addNumberToObject(execObj, "@S", mappedParam.getSingleInt());
+                                      }                                      
+                                      if (submitParam) executeCommand(execObj, -1, mappedParam);
+                                      }
                           }
-                    debugSerial << F("MB got ")<<param<< F(" from ")<<regType<<F(":")<<paramObj->name<<endl;
-
                     if (!is8bit) return 1;
                     }
             paramObj=paramObj->next;

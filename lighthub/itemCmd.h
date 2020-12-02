@@ -19,6 +19,7 @@ e-mail    anklimov@gmail.com
 */
 #pragma once
 #include "Arduino.h"
+#include "aJson.h"
 
 typedef  char cmdstr[9];
 
@@ -110,6 +111,8 @@ ST_FLOAT        = 13//,
 #define ST_STRING       13     /// pointer to string (for further use)
 #define ST_FLOAT        14     /// generic Float value
 
+#define MAP_SCALE       1
+#define MAP_VAL_CMD     2
 
 #pragma pack(push, 1)
 
@@ -184,6 +187,7 @@ public:
 
   itemCmd Int(int32_t i);
   itemCmd Int(uint32_t i);
+  itemCmd Tens(int32_t i);
   itemCmd Cmd(uint8_t i);
   itemCmd HSV(uint16_t h, uint8_t s, uint8_t v);
   itemCmd HSV255(uint16_t h, uint8_t s, uint8_t v);
@@ -208,6 +212,7 @@ public:
   bool incrementS(int16_t);
 
   long int getInt();
+  long int getSingleInt();
   short    getPercents(bool inverse=false);
   short    getPercents255(bool inverse=false);
   uint8_t    getCmd();
@@ -222,6 +227,11 @@ public:
   itemCmd setDefault();
   itemCmd setChanType(short chanType);
   void debugOut();
+
+  int doMapping(aJsonObject *mappingData);
+  int doReverseMapping (aJsonObject *mappingData);
+
+
   };
 
 #pragma pack(pop)

@@ -115,11 +115,11 @@ void Input::Parse(aJsonObject * configObj)
         }
 
         // Persistant storage
-        itemBuffer = aJson.getObjectItem(inputObj, "S");
+        itemBuffer = aJson.getObjectItem(inputObj, "@S");
         if (!itemBuffer) {
             debugSerial<<F("In: ")<<pin<<F("/")<<inType<<endl;
-            aJson.addNumberToObject(inputObj, "S", 0);
-            itemBuffer = aJson.getObjectItem(inputObj, "S");
+            aJson.addNumberToObject(inputObj, "@S", (long int) 0);
+            itemBuffer = aJson.getObjectItem(inputObj, "@S");
         }
         if (itemBuffer) store = (inStore *) &itemBuffer->valueint;
 

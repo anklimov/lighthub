@@ -16,7 +16,6 @@ public:
   uint32_t timestamp;
   aJsonObject * pollingRegisters;
   aJsonObject * parameters;
-
 };
 
 
