@@ -711,7 +711,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
           return;
         }
 
-    if (!mqttArr || (n = aJson.getArraySize(mqttArr) < 2)) //At least device name and broker IP must be configured
+    if (!mqttArr || ((n = aJson.getArraySize(mqttArr)) < 2)) //At least device name and broker IP must be configured
         {
           lanStatus = READ_RE_CONFIG;
           return;
