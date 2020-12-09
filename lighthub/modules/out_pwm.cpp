@@ -102,10 +102,14 @@ int out_pwm::getChanType()
   switch (numArgs)
   {
     case 3:
+    debugSerial<<F("RGB PWM")<<endl;
       return CH_RGB;
+
     case 4:
+    debugSerial<<F("RGBW PWM")<<endl;
       return CH_RGBW;
     default:
+    debugSerial<<item->itemType<<F(" PWM")<<endl;
       return item->itemType;
   }
  }
@@ -118,6 +122,7 @@ if (!item || !iaddr || !show) return 0;
 
 bool   inverse  = (item->getArg()<0);
 short  cType    = getChanType();
+uint8_t storageType;
 
 switch (cmd.getCmd()){
   case CMD_OFF:
@@ -125,14 +130,27 @@ switch (cmd.getCmd()){
   break;
 }
 
-if (cType=CH_PWM)
+
+ switch (cType)
+  {
+    case CH_PWM:
           { short k;
             analogWrite(iaddr, k=cmd.getPercents255(inverse));
             debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
             return 1;
           }
+    case CH_RGB:
+     storageType=ST_RGB;
+     break;
+    case CH_RGBW:
+     storageType=ST_RGBW;
+     break;
+    default:
+     storageType=ST_PERCENTS;
+   }
 
-itemCmd st(ST_RGB,CMD_VOID);
+itemCmd st(storageType,CMD_VOID);
+
 st.assignFrom(cmd);
 
 switch (cType)

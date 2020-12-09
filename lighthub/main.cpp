@@ -712,7 +712,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
           return;
         }
 
-    if (!mqttArr || (n = aJson.getArraySize(mqttArr) < 2)) //At least device name and broker IP must be configured
+    if (!mqttArr || ((n = aJson.getArraySize(mqttArr)) < 2)) //At least device name and broker IP must be configured
         {
           lanStatus = READ_RE_CONFIG;
           return;
@@ -721,7 +721,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
     deviceName = getStringFromConfig(mqttArr, 0);
     infoSerial<<F("Device Name:")<<deviceName<<endl;
-
+debugSerial<<F("N:")<<n<<endl;
 
     char *servername = getStringFromConfig(mqttArr, 1);
     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
@@ -729,7 +729,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
     if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5))
         {
             password = getStringFromConfig(mqttArr, 4);
-            infoSerial<<F("Using MQTT password from config");
+            infoSerial<<F("Using MQTT password from config")<<endl;
         }
 
     mqttClient.setServer(servername, port);

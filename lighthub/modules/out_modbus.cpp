@@ -358,8 +358,8 @@ if (store->pollingRegisters && !modbusBusy && (Status() == CST_INITIALIZED) && i
   debugSerial<<F("endPoll ")<< item->itemArr->name << endl;
 
   //Non blocking waiting to release line
-  uint32_t time = millis()+50;
-  while (millis()<time)
+  uint32_t time = millis();
+  while (!isTimeOver(time,millis(),50))
              modbusIdle();
 
   modbusBusy =0;
