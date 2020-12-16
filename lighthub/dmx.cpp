@@ -262,7 +262,7 @@ for (int i=1;i<=channels;i++) DmxWrite(i,0);
 
 #ifdef DMX_SMOOTH
 if (DMXinterimBuf) delete DMXinterimBuf;
-DMXinterimBuf = new uint8_t [channels];
+DMXinterimBuf = new uint8_t [channels+1];
 DMXOUT_Channels=channels;
 for (int i=1;i<=channels;i++) DMXinterimBuf[i]=0;
 #endif
@@ -277,23 +277,22 @@ void DMXOUT_propagate()
   for(int i=1;i<=DMXOUT_Channels;i++)
   {
   uint8_t currLevel=dmxout.getTx(i);
-  uint16_t delta = currLevel-DMXinterimBuf[i-1];
+  int32_t delta = currLevel-DMXinterimBuf[i-1];
   if (delta)
         {
         uint16_t step  = abs(delta) >> 4;
         if (!step) step=1;
 
         if (delta<0)
-                        DmxWrite2(i,currLevel+step);
+                        {DmxWrite2(i,currLevel+step);}
 
         if (delta>0)
-                        DmxWrite2(i,currLevel-step);
+                        {DmxWrite2(i,currLevel-step);}
         }
   }
   checkTimestamp=now+DMX_SMOOTH_DELAY;
   #endif
 }
-
 
 void ArtnetSetup()
 {
