@@ -260,12 +260,13 @@ dmxout.setTxMaxChannels(channels);
 #ifndef DMX_DISABLE
 for (int i=1;i<=channels;i++) DmxWrite(i,0);
 #endif
-
+debugSerial<<F("DMXOut. Free:")<<freeRam()<<endl;
 #ifdef DMX_SMOOTH
 if (DMXinterimBuf) delete DMXinterimBuf;
-DMXinterimBuf = new uint8_t [channels];
+DMXinterimBuf = new uint8_t [channels+1];
 DMXOUT_Channels=channels;
 for (int i=1;i<=channels;i++) DMXinterimBuf[i]=0;
+debugSerial<<F("DMXInterim. Free:")<<freeRam()<<endl;
 #endif
 }
 

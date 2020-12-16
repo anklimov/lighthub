@@ -550,6 +550,9 @@ switch (cmd->type)
   break;
   case aJson_Object:
 {
+aJsonObject *act = aJson.getObjectItem(cmd, "act");            
+if (act) return executeCommand(act,toggle,_itemCmd);
+
 aJsonObject *item = aJson.getObjectItem(cmd, "item");
 aJsonObject *emit = aJson.getObjectItem(cmd, "emit");
 aJsonObject *icmd = NULL;

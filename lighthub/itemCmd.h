@@ -230,6 +230,8 @@ public:
 
   int doMapping(aJsonObject *mappingData);
   int doReverseMapping (aJsonObject *mappingData);
+  int doMappingCmd(aJsonObject *mappingData);
+  int doReverseMappingCmd (aJsonObject *mappingData);
 
 
   };

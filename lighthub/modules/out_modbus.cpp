@@ -374,6 +374,11 @@ int out_Modbus::getChanType()
 }
 
 
+//!Control unified Modbus item  
+// Priority of selection sub-items control to:
+// 1. if defined standard suffix Code inside cmd
+// 2. custom textual subItem
+// 3. non-standard numeric  suffix Code equal param id
 
 int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
 {
@@ -381,6 +386,37 @@ int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
 //bool toExecute = (chActive>0);
 //itemCmd st(ST_UINT32,CMD_VOID);
 int suffixCode = cmd.getSuffix();
+aJsonObject *templateParamObj = NULL;
+short mappedCmdVal = 0;
+
+// trying to find parameter in template with name == subItem (NB!! standard suffixes dint working here)
+if (subItem && strlen (subItem)) templateParamObj = aJson.getObjectItem(store->parameters, subItem);
+
+if (!templateParamObj)
+{
+  // Trying to find template parameter where id == suffixCode
+ templateParamObj = store->parameters->child;
+
+  while (templateParamObj)
+          {
+            //aJsonObject *regObj = aJson.getObjectItem(paramObj, "reg");
+            aJsonObject *idObj = aJson.getObjectItem(templateParamObj, "id");
+            if (idObj->type==aJson_Int && idObj->valueint == suffixCode) break;
+
+            aJsonObject *mapObj = aJson.getObjectItem(templateParamObj, "mapcmd");
+            if (mapObj && (mappedCmdVal = cmd.doReverseMappingCmd(mapObj))) break;
+
+            templateParamObj=templateParamObj->next;                       
+          }
+}
+
+
+//                    aJsonObject *typeObj = aJson.getObjectItem(paramObj, "type");
+//                    aJsonObject *mapObj = aJson.getObjectItem(paramObj, "map");
+//                    aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
+//                    uint16_t data = node.getResponseBuffer(posInBuffer);
+
+
 
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 

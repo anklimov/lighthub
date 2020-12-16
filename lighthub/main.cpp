@@ -1033,6 +1033,7 @@ setupSyslog();
     if (dmxoutArr &&  (numParams=aJson.getArraySize(dmxoutArr)) >=1 ) {
         DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, numParams-1)->valueint);
         infoSerial<<F("DMX out started. Channels: ")<<maxChannels<<endl;
+        debugSerial<<F("Free:")<<freeRam()<<endl;
     }
 #endif
 #ifdef _modbus
@@ -1467,17 +1468,21 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     htclient.stop();
     wdt_res();
     infoSerial<<F("HTTP Status code: ")<<responseStatusCode<<endl;
-    //debugSerial<<"GET Response: ");
+    
 //delay(1000);
     if (responseStatusCode == 200) {
+        debugSerial<<F("GET Response: ")<<response<<endl;
+        debugSerial<<F("Free:")<<freeRam()<<endl;
         cleanConf();
         debugSerial<<F("Configuration cleaned")<<endl;
+        debugSerial<<F("Free:")<<freeRam()<<endl;
         root = aJson.parse((char *) response.c_str());
 
         if (!root) {
             errorSerial<<F("Config parsing failed\n");
             return READ_RE_CONFIG;//-11; //Load from NVRAM
         } else {
+            debugSerial<<F("Parsed. Free:")<<freeRam()<<endl;
             //debugSerial<<response;
             applyConfig();
             infoSerial<<F("Done.\n");

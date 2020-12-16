@@ -822,6 +822,16 @@ return false;
 
   }
 
+int itemCmd::doMappingCmd(aJsonObject *mappingData)
+  {
+
+
+  }
+  int itemCmd::doReverseMappingCmd (aJsonObject *mappingData)
+
+  {
+
+  }
 
 char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags )
      {

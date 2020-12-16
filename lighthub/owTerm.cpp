@@ -95,6 +95,7 @@ int owSetup(owChangedType owCh) {
     if (oneWire) return true;    // Already initialized
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     debugSerial<<F("DS2482_100_I2C_TO_1W_BRIDGE init")<<endl;
+    debugSerial<<F("Free:")<<freeRam()<<endl;
     oneWire = new OneWire;
 #else
     debugSerial.print(F("One wire setup on PIN:"));
@@ -102,12 +103,25 @@ int owSetup(owChangedType owCh) {
     oneWire = new OneWire (USE_1W_PIN);
 #endif
 
+if (!oneWire)
+                {
+                    errorSerial<<F("Error 1-w init #1")<<endl;
+                    return false;
+                }
 // Pass our oneWire reference to Dallas Temperature.
 //    sensors = new DallasTemperature(oneWire);
 
     term = new DeviceAddress[t_max];
+    debugSerial<<F("Term. Free:")<<freeRam()<<endl;
 //regs = new    int [t_max];
     wstat = new uint16_t[t_max];
+    debugSerial<<F("wstat. Free:")<<freeRam()<<endl;
+if (!term || ! wstat)
+                {
+                    errorSerial<<F("Error 1-w init #2 Free:")<<freeRam()<<endl;
+                    return false;
+                }
+
     owChanged = owCh;
 
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
