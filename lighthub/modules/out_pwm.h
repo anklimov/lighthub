@@ -1,7 +1,7 @@
 
 #pragma once
 #include "options.h"
-#ifndef DMX_DISABLE
+#ifndef PWM_DISABLE
 
 #include <abstractout.h>
 #include <item.h>

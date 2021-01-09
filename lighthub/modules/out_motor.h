@@ -10,7 +10,7 @@
 
 // The number of simultaniusly working motors
 #ifndef MOTOR_QUOTE
-#define MOTOR_QUOTE 2
+#define MOTOR_QUOTE 1
 #endif
 
 static int8_t motorQuote = MOTOR_QUOTE;
@@ -34,6 +34,7 @@ public:
     int16_t maxOnTime;
     uint16_t feedbackOpen;
     uint16_t feedbackClosed;
+    bool inverted;
 protected:
     void getConfig();
 };

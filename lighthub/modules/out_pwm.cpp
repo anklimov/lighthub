@@ -1,3 +1,4 @@
+#ifndef PWM_DISABLE
 #include "modules/out_pwm.h"
 #include "Arduino.h"
 #include "options.h"
@@ -167,3 +168,4 @@ switch (cType)
 
 return 1;
 }
+#endif
