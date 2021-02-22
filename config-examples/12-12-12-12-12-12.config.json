@@ -1,0 +1,302 @@
+{
+    "mqtt":["abc3","192.168.88.2"],
+    "syslog":["192.168.88.2"],
+      "dmx":[3,80],
+      "topics":{"root":"abc"},
+      "modbus":[],
+    "items":
+          {
+          "lightall":[7,[
+                          "lampbedr3",
+                          "lampcab31",
+                          "lampcab32",
+                          "lampsauna3",
+                          "lampbath33",
+                          "lampktc3",
+                          "lampwc3",
+                          "lamp4",
+                          "lampext4",
+                          "lamphall3",
+                          "lampstw3",
+                          "fasadeast",
+                          "bra31",
+                          "lampgst3",
+                          "lampkln3",
+                          "lampbalk3",
+                          "fasadsouth",
+                          "bra32"]],
+          "gr_hall3":[7,["lamphall3","lampstw3"]],
+          "gr_gost3":[7,["lampgst3","lampktc3"]],
+          "relays":[7,["pout0","thermostat","pout2","pout3","pout4","pout5","pout6"]],
+              "uouts":[7,["unprot0","unprot1","unprot2","unprot3","unprot4","unprot5","unprot6","unprot7"]],
+      
+              "mb1":[44,[1,0,3,100]],
+          "mb2":[44,[1,1,3,100]],
+          "mb3":[44,[1,2,3,100]],
+          "mb4":[44,[1,3,3,100]],
+          "mba":[44,[96,0,0]],
+          
+          "lampbedr3":[0,1],
+          "lampcab31":[0,2],
+          "lampcab32":[0,3],
+          
+          "lampsauna3":[0,4],
+          "lampbath3":[0,5],
+          "lampwc3":[0,6],
+          
+          "lampktc3":[0,7],
+          "lamp4":[0,8],
+          "lamphall3":[0,9],
+          
+          "lampext4":[0,10],
+          "lampstw3":[0,11],
+          "fasadeast":[0,12],
+          
+          "lampgst3":[0,13],
+          "bra31":[0,14],
+          "bra32":[0,15],
+    
+          "lampbalk3":[0,16],
+          "fasadsouth":[0,17],
+          "lampkln3":[0,18],
+          "lampbar3":[0,21],
+          
+          "ledbedr3":[1,22],
+          "ledcab31":[1,26],
+          "ledcab32":[1,30],
+          "ledkab":[7,["ledcab31","ledcab32"]],
+          "ledsauna31":[1,34],
+          "ledsauna32":[1,38],
+          "ledsauna":[7,["ledsauna31","ledsauna32"]],
+          "led4":[1,42],
+          
+          "ledktc31":[1,48],
+          "ledktc31w":[0,52],
+          "ledktc32":[1,53],
+          "ledktc32w":[0,57],
+          "ledgst31":[1,58],
+          "ledgst31w":[0,62],
+          "ledgst32":[1,63],
+          "ledgst32w":[0,67],
+          "ledktc3w":[7,["ledktc31w","ledktc32w","ledgst31w","ledgst32w"]],
+          "ledktc3":[7,["ledktc31","ledktc32","ledgst31","ledgst32"]],      
+          
+          "fanbath3":[0,68],
+          "fanwc3":[0,69],
+          
+          "pout0":[6,22],
+          "thermostat":[5,23,33],
+          "pout2":[6,24],
+          "water3":[6,25],
+          "pout4":[3,9],
+          "pout5":[3,8],
+          "pout6":[3,11],
+          "pout7":[6,12],
+          
+          
+          "pwm0" :[3,4],
+          "pwm1" :[3,5],
+          "pwm2" :[3,6],
+          "pwm3" :[3,7],
+          "pwm10":[3,10],
+          
+              
+              "unprot0":[6,33],
+              "unprot1":[6,32],
+              "unprot2":[6,31],
+              "unprot3":[6,30],
+              "unprot4":[6,29],
+              "unprot5":[6,28],
+              "unprot6":[6,27],
+              "unprot7":[6,26]
+          },
+          
+    "in":
+          [   {"#":42,"emit":"power3","item":"fanwc3"},
+                {"#":44,"emit":"in1"},
+                {"#":46,"emit":"in2"},
+                  {"#":49,"emit":"in3"},
+                  {"#":43,"emit":"in4"},
+              {"#":45,"emit":"in5"},
+              {"#":47,"emit":"in6"},
+              {"#":48,"emit":"in7"},
+                  {"#":34,"emit":"in8"},
+              {"#":36,"emit":"in9"},
+              
+              {"#":38,"T":0,        
+                      "click":{"item":"gr_hall3","icmd":"ON"},
+                      "dclick":{"item":"lampbedr3","icmd":"ON"}, 
+                      "tclick":{"item":"lightall","icmd":"REST"}, 
+                      "rpcmd":{"item":"gr_hall3","icmd":"%+2"}
+                    },
+              {"#":40,"T":0, 
+                      "click":{"item":"gr_hall3","icmd":"OFF"},
+                      "dclick":{"item":"lampbedr3","icmd":"OFF"}, 
+                      "tclick":{"item":"lightall","icmd":"HALT"}, 
+                      "rpcmd":{"item":"gr_hall3","icmd":"%-2"}
+                    },
+              {"#":35,"T":0,        
+                      "click":{"item":"gr_gost3","icmd":"ON"},
+                      "dclick":{"item":"lampwc3","icmd":"ON"}, 
+                      "tclick":{"item":"lampbath3","icmd":"ON"}, 
+                      "rpcmd":{"item":"gr_gost3","icmd":"%+2"}
+                    },
+              {"#":37,"T":0, 
+                      "click":{"item":"gr_gost3","icmd":"OFF"},
+                      "dclick":{"item":"lampwc3","icmd":"OFF"}, 
+                      "tclick":{"item":"lampbath3","icmd":"OFF"}, 
+                      "rpcmd":{"item":"gr_gost3","icmd":"%-2"}
+                    },                
+    
+              {"#":39,"emit":"in14"},
+              {"#":41,"emit":"in15"},  
+        
+              {"#":54,"T":0,"act":
+                    [
+                               {
+                                "map":[128,640],
+                                "click":{"item":"gr_gost3","icmd":"ON"},
+                                "dclick":{"item":"lampwc3","icmd":"ON"}, 
+                                "tclick":{"item":"lampbath3","icmd":"ON"}, 
+                                "rpcmd":{"item":"gr_gost3","icmd":"%+2"}
+                               },
+                               {
+                                "map":[641,1024],
+                                "click":{"item":"gr_gost3","icmd":"OFF"},
+                                "dclick":{"item":"lampwc3","icmd":"OFF"}, 
+                                "tclick":{"item":"lampbath3","icmd":"OFF"}, 
+                                "rpcmd":{"item":"gr_gost3","icmd":"%-2"}
+                               }
+                    ]},         
+              {"#":55,"T":66,"emit":"a01","map":[0,1024,0,1024,10]},
+              
+              {"#":56,"T":66,"emit":"a02","map":[0,1024,0,1024,10]},
+              {"#":57,"T":66,"emit":"a03","map":[0,1024,0,1024,10]},
+              
+              {"#":58,"T":66,"emit":"a04","map":[0,1024,0,1024,10]},
+              {"#":59,"T":66,"emit":"a05","map":[0,1024,0,1024,10]},
+              
+              {"#":60,"T":0,"act":
+                    [
+                               {
+                                "map":[128,640],
+                                "click":{"item":"gr_hall3","icmd":"ON"},
+                                "dclick":{"item":"lampbedr3","icmd":"ON"}, 
+                                "tclick":{"item":"lightall","icmd":"REST"}, 
+                                "rpcmd":{"item":"gr_hall3","icmd":"%+2"}
+                               },
+                               {
+                                "map":[641,1024],
+                                "click":{"item":"gr_hall3","icmd":"OFF"},
+                                "dclick":{"item":"lampbedr3","icmd":"OFF"}, 
+                                "tclick":{"item":"lightall","icmd":"HALT"}, 
+                                "rpcmd":{"item":"gr_hall3","icmd":"%-2"}
+                                        }
+                    ]}, 
+              {"#":61,"T":0,"act":
+                    [
+                               {
+                                "map":[128,640],
+                                "click":{"item":"gr_gost3","icmd":"ON"},
+                                "dclick":{"item":"lampwc3","icmd":"ON"}, 
+                                "tclick":{"item":"lampbath3","icmd":"ON"}, 
+                                "rpcmd":{"item":"gr_gost3","icmd":"%+2"}
+                               },
+                               {
+                                "map":[641,1024],
+                                "click":{"item":"gr_gost3","icmd":"OFF"},
+                                "dclick":{"item":"lampwc3","icmd":"OFF"}, 
+                                "tclick":{"item":"lampbath3","icmd":"OFF"}, 
+                                "rpcmd":{"item":"gr_gost3","icmd":"%-2"}
+                              }
+                    ]}, 
+              
+              {"#":62,"T":66,"emit":"a08","map":[0,1024,0,1024,10]},
+              {"#":63,"T":66,"emit":"a09","map":[0,1024,0,1024,10]},
+              
+              {"#":64,"T":66,"emit":"a10","map":[0,1024,0,1024,10]},
+              {"#":65,"T":66,"emit":"a11","map":[0,1024,0,1024,10]},
+              {"#":66,"T":0,"emit":"leak31","item":"water3","scmd":"OFF","rcmd":"ON"},
+              {"#":67,"T":2,"emit":"leak32","item":"water3","scmd":"OFF","rcmd":"ON"},
+              {"#":68,"T":0,"emit":"leak33","item":"water3","scmd":"OFF","rcmd":"ON"},
+              {"#":69,"T":0,"emit":"a15"}
+          ],      
+          
+    "in2":
+          {	  "42":{"emit":"power3","item":"fanwc3"},
+                  "44":{"emit":"in1"},
+                  "46":{"emit":"in2"},
+                  "49":{"emit":"in3"},
+                  "43":{"emit":"in4"},
+              "45":{"emit":"in5"},
+              "47":{"emit":"in6"},
+              "48":{"emit":"in7"},
+                  "34":{"emit":"in8"},
+              "36":{"emit":"in9"},
+              
+              "38":{"T":0,        
+                      "click":{"item":"gr_hall3","icmd":"ON"},
+                      "dclick":{"item":"lampbedr3","icmd":"ON"}, 
+                      "tclick":{"item":"lightall","icmd":"REST"}, 
+                      "rpcmd":{"item":"gr_hall3","icmd":"%+2"}
+                    },
+              "40":{"T":0, 
+                      "click":{"item":"gr_hall3","icmd":"OFF"},
+                      "dclick":{"item":"lampbedr3","icmd":"OFF"}, 
+                      "tclick":{"item":"lightall","icmd":"HALT"}, 
+                      "rpcmd":{"item":"gr_hall3","icmd":"%-2"}
+                    },
+              "35":{"T":0,        
+                      "click":{"item":"gr_gost3","icmd":"ON"},
+                      "dclick":{"item":"lampwc3","icmd":"ON"}, 
+                      "tclick":{"item":"lampbath3","icmd":"ON"}, 
+                      "rpcmd":{"item":"gr_gost3","icmd":"%+2"}
+                    },
+              "37":{"T":0, 
+                      "click":{"item":"gr_gost3","icmd":"OFF"},
+                      "dclick":{"item":"lampwc3","icmd":"OFF"}, 
+                      "tclick":{"item":"lampbath3","icmd":"OFF"}, 
+                      "rpcmd":{"item":"gr_gost3","icmd":"%-2"}
+                    },                
+    
+              "39":{"emit":"in14"},
+              "41":{"emit":"in15"},  
+        
+              "54":{"addr":54,"T":0,"act":
+                    [
+                               {
+                                "map":[128,640],
+                                "click":{"item":"gr_gost3","icmd":"ON"},
+                                "dclick":{"item":"lampwc3","icmd":"ON"}, 
+                                "tclick":{"item":"lampbath3","icmd":"ON"}, 
+                                "rpcmd":{"item":"gr_gost3","icmd":"%+2"}
+                               },
+                               {
+                                "map":[641,1024],
+                                "click":{"item":"gr_gost3","icmd":"OFF"},
+                                "dclick":{"item":"lampwc3","icmd":"OFF"}, 
+                                "tclick":{"item":"lampbath3","icmd":"OFF"}, 
+                                "rpcmd":{"item":"gr_gost3","icmd":"%-2"}
+                               }
+                    ]},         
+              "55":{"T":66,"emit":"a01","map":[0,1024,0,1024,10]},
+              
+              "56":{"T":66,"emit":"a02","map":[0,1024,0,1024,10]},
+              "57":{"T":66,"emit":"a03","map":[0,1024,0,1024,10]},
+              
+              "58":{"T":66,"emit":"a04","map":[0,1024,0,1024,10]},
+              "59":{"T":66,"emit":"a05","map":[0,1024,0,1024,10]},
+              
+              "60":{"T":66,"emit":"a06","map":[0,1024,0,1024,10]},
+              "61":{"T":66,"emit":"a07","map":[0,1024,0,1024,10]},
+              
+              "62":{"T":66,"emit":"a08","map":[0,1024,0,1024,10]},
+              "63":{"T":66,"emit":"a09","map":[0,1024,0,1024,10]},
+              
+              "64":{"T":66,"emit":"a10","map":[0,1024,0,1024,10]},
+              "65":{"T":66,"emit":"a11","map":[0,1024,0,1024,10]},
+              "66":{"T":0,"emit":"leak31","item":"water3","scmd":"OFF","rcmd":"ON"},
+              "67":{"T":2,"emit":"leak32","item":"water3","scmd":"OFF","rcmd":"ON"},
+              "68":{"T":0,"emit":"leak33","item":"water3","scmd":"OFF","rcmd":"ON"}
+          }
+    }

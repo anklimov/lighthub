@@ -720,6 +720,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
                                      // continue processing as SET
                                      case S_SET:
                                      //case S_ESET:
+                                     if ((st.getArgType() == ST_RGB || st.getArgType() == ST_RGBW) && (cmd.getArgType() == ST_HSV ) || (cmd.getArgType() == ST_HSV255)) st.setArgType(cmd.getArgType()); 
                                      if (itemType == CH_GROUP && cmd.isColor()) st.setArgType(ST_HSV);//Extend storage for group channel
                                      st.assignFrom(cmd);
                                      st.saveItem(this);
@@ -1552,13 +1553,22 @@ int Item::SendStatus(int sendFlags) {
       sendFlags |= getFlag(SEND_COMMAND | SEND_PARAMETERS); //if some delayed status is pending
 
       char addrstr[48];
-      char valstr[16] = "";
+      char valstr[20] = "";
       char cmdstr[8] = "";
 
       if (sendFlags & SEND_PARAMETERS)
       {
         // Preparing parameters payload //////////
-        st.toString(valstr, sizeof(valstr), SEND_PARAMETERS);
+           switch (st.getArgType()) {
+                  case ST_RGB:
+                  case ST_RGBW:
+                  //valstr[0]='#';
+                  st.Cmd(CMD_RGB);
+                  st.toString(valstr, sizeof(valstr), SEND_PARAMETERS|SEND_COMMAND);
+                  break;
+            default:         
+           st.toString(valstr, sizeof(valstr), SEND_PARAMETERS);
+           }
       }
 
     if (sendFlags & SEND_COMMAND)
@@ -1577,6 +1587,7 @@ int Item::SendStatus(int sendFlags) {
             strcpy_P(cmdstr, OFF_P);
             break;
         case CMD_VOID:
+        case CMD_RGB:
         sendFlags &= ~SEND_COMMAND; // Not send command for parametrized req
             break;
         default:
@@ -1623,7 +1634,7 @@ int Item::SendStatus(int sendFlags) {
               switch (st.getArgType()) {
                   case ST_RGB:
                   case ST_RGBW:
-                     strncat_P(addrstr, RGB_P, sizeof(addrstr));
+                     strncat_P(addrstr, SET_P, sizeof(addrstr));
                      break;
                   case ST_PERCENTS255:
                   case ST_HSV255:

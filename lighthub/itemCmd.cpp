@@ -384,8 +384,10 @@ itemCmd itemCmd::assignFrom(itemCmd from)
         switch (from.cmd.itemArgType)
           {
             case ST_RGBW:
+                  RGBW_flag=true;
             case ST_RGB:
                   param.asInt32=from.param.asInt32;
+                  cmd.itemArgType=from.cmd.itemArgType;
             break;
             // Those types are not possible to apply over RGB without convertion toward HSV
             case ST_PERCENTS255:
