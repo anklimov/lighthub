@@ -42,7 +42,7 @@ owChangedType owChanged;
 
 int owUpdate() {
 #ifndef OWIRE_DISABLE
-    unsigned long finish = millis() + OW_UPDATE_INTERVAL;
+    unsigned long finish = millis();// + OW_UPDATE_INTERVAL;
 /*
     if (oneWire->getError() == DS2482_ERROR_SHORT)
        {
@@ -54,7 +54,8 @@ int owUpdate() {
     if (oneWire) oneWire->reset_search();
     for (short i = 0; i < t_count; i++) wstat[i] &= ~SW_FIND; //absent
 
-    while (oneWire && oneWire->wireSearch(term[t_count]) > 0 && (t_count < t_max) && finish > millis()) {
+    while (oneWire && oneWire->wireSearch(term[t_count]) > 0 && (t_count < t_max)  && !isTimeOver(finish,millis(), OW_UPDATE_INTERVAL))//&& finish > millis()) 
+    {
         short ifind = -1;
         if (oneWire->crc8(term[t_count], 7) == term[t_count][7]) {
             for (short i = 0; i < t_count; i++)
@@ -202,7 +203,12 @@ int sensors_loop(void) {
 
 
 void owLoop() {
-    if (millis() >= owTimer) owTimer = millis() + sensors_loop();
+    //if (millis() >= owTimer) owTimer = millis() + sensors_loop();
+    if (isTimeOver(owTimer,millis(),INTERVAL_1W))
+    {
+        sensors_loop();
+        owTimer=millis();
+    }
 }
 
 

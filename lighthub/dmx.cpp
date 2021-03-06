@@ -158,7 +158,7 @@ for (short tch=0; tch<=3 ; tch++)
      if (updated)
         {
         DMXImmediateUpdate(tch,DMXin[base],DMXin[base+1],DMXin[base+2],DMXin[base+3]);
-        D_checkT=millis()+D_CHECKT;
+        D_checkT=millisNZ();
         }
     }
     //Serial.print(D_State,BIN);Serial.println();
@@ -185,7 +185,8 @@ short t,tch;
 
        }
 
-if ((millis()<D_checkT) || (D_checkT==0)) return;
+//if ((millis()<D_checkT) || (D_checkT==0)) return;
+  if ( (!D_checkT) || (!isTimeOver(D_checkT,millis(),D_CHECKT))) return;
 D_checkT=0;
 
 // Here code for network update
@@ -274,7 +275,8 @@ void DMXOUT_propagate()
 {
   #ifdef DMX_SMOOTH
   uint32_t now = millis();
-  if (now<checkTimestamp) return;
+  //if (now<checkTimestamp) return;
+  if (!isTimeOver(checkTimestamp,now,DMX_SMOOTH_DELAY)) return;
 
   for(int i=1;i<=DMXOUT_Channels;i++)
   {
@@ -292,7 +294,7 @@ void DMXOUT_propagate()
                         {DmxWrite2(i,currLevel-step);debugSerial<<">";}
         }
   }
-  checkTimestamp=now+DMX_SMOOTH_DELAY;
+  checkTimestamp=now;
   #endif
 }
 

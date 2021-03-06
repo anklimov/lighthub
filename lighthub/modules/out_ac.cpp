@@ -158,7 +158,7 @@ void out_AC::InsertData(byte data[], size_t size){
       publishTopic(item->itemArr->name, s_mode,"/cmd");
 
   else publishTopic(item->itemArr->name, "OFF","/cmd");
-
+/*
   String raw_str;
   char raw[75];
   for (int i=0; i < 37; i++){
@@ -173,7 +173,7 @@ void out_AC::InsertData(byte data[], size_t size){
   raw_str.toCharArray(raw,75);
   publishTopic(item->itemArr->name, raw,"/raw");
   Serial.println(raw);
-
+*/
 ///////////////////////////////////
 }
 
@@ -241,9 +241,10 @@ int out_AC::Poll(short cause)
 {
 if (cause!=POLLING_SLOW) return 0;
 
-long now = millis();
-  if (now - prevPolling > INTERVAL_AC_POLLING) {
-    prevPolling = now;
+//long now = millis();
+  //if (now - prevPolling > INTERVAL_AC_POLLING) {
+  if (isTimeOver(prevPolling,millis(),INTERVAL_AC_POLLING)) {
+    prevPolling = millisNZ();
     Serial.println ("Polling");
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
@@ -259,7 +260,7 @@ delay(100);
       InsertData(data, 37);
     }
   }
-return INTERVAL_POLLING;
+return INTERVAL_SLOW_POLLING;
 };
 
 //int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)

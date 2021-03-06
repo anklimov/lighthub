@@ -68,13 +68,17 @@ if (!item || !show) return 0;
 short   cType=getChanType();
 uint8_t storageType;
 
+/*
 switch (cmd.getCmd()){
   case CMD_OFF:
     cmd.Percents(0);
   break;
 }
+*/
+
 
 debugSerial<<F("DMX ctrl: "); cmd.debugOut();
+
 
 if (cType==CH_DIMMER) //Single channel
   {
@@ -95,8 +99,8 @@ if (cType==CH_DIMMER) //Single channel
    }
 
 itemCmd st(storageType,CMD_VOID);
-
 st.assignFrom(cmd);
+
 debugSerial<<F("Assigned:");st.debugOut();
     switch (cType)
     {

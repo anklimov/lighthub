@@ -144,7 +144,7 @@ if (!store)
               { errorSerial<<F("MBUS: Out of memory")<<endl;
                 return 0;}
 
-store->timestamp=millis();
+store->timestamp=millisNZ();
 if (getConfig())
     {
         //item->clearFlag(ACTION_NEEDED);
@@ -354,7 +354,7 @@ if (store->pollingRegisters && !modbusBusy && (Status() == CST_INITIALIZED) && i
             reg = reg->next;
             }
 
-  store->timestamp=millis();
+  store->timestamp=millisNZ();
   debugSerial<<F("endPoll ")<< item->itemArr->name << endl;
 
   //Non blocking waiting to release line

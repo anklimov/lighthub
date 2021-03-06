@@ -125,12 +125,13 @@ bool   inverse  = (item->getArg()<0);
 short  cType    = getChanType();
 uint8_t storageType;
 
+/*
 switch (cmd.getCmd()){
   case CMD_OFF:
     cmd.Percents(0);
   break;
 }
-
+*/
 
  switch (cType)
   {

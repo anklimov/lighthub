@@ -122,7 +122,7 @@ else //ESP I2C glitch
     Serial.println("I2C Reset");
     i2cReset();
   }
-return INTERVAL_POLLING;
+return INTERVAL_SLOW_POLLING;
 }
 
 int in_ccs811::Poll(short cause)

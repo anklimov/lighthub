@@ -20,7 +20,9 @@ int colorChannel::Ctrl(itemCmd cmd, char* subItem, bool toExecute)
 {
 debugSerial<<F("clrCtr: ");
 cmd.debugOut();
-int suffixCode = cmd.getSuffix();
+int suffixCode;
+if (cmd.isCommand()) suffixCode = S_CMD;
+   else suffixCode = cmd.getSuffix();
 
 switch(suffixCode)
 {
@@ -41,6 +43,7 @@ case S_CMD:
             return 1;
 
             case CMD_OFF:
+              cmd.param.asInt32=0;
               PixelCtrl(cmd, subItem, true);
     //          item->SendStatus(SEND_COMMAND);
             return 1;

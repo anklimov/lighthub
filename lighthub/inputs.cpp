@@ -289,7 +289,8 @@ switch (cause)  {
 
 #ifndef COUNTER_DISABLE
 void Input::counterPoll() {
-    if(nextPollTime()>millis())
+//    if(nextPollTime()>millis())
+      if (!isTimeOver(nextPollTime(),millis(),DHT_POLL_DELAY_DEFAULT))
         return;
     if (store->logicState == 0) {
 #if defined(ARDUINO_ARCH_AVR)
@@ -326,7 +327,7 @@ void Input::counterPoll() {
         sprintf(valstr, "%ld", counterValue);
         if (mqttClient.connected() && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
-        setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
+        setNextPollTime(millis());// + DHT_POLL_DELAY_DEFAULT);
       //  debugSerial<<F(" NextPollMillis=")<<nextPollTime();
     }
     else
@@ -374,7 +375,8 @@ void Input::attachInterruptPinIrq(int realPin, int irq) {
 
 
 void Input::uptimePoll() {
-    if (nextPollTime() > millis())
+    //if (nextPollTime() > millis())
+    if (!isTimeOver(nextPollTime(),millis(),UPTIME_POLL_DELAY_DEFAULT))
         return;
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
     if (emit && emit->type == aJson_String) {
@@ -391,7 +393,7 @@ void Input::uptimePoll() {
         if (mqttClient.connected() && !ethernetIdleCount)
            mqttClient.publish(emit->valuestring, valstr);
     }
-    setNextPollTime(millis() + UPTIME_POLL_DELAY_DEFAULT);
+    setNextPollTime(millis());// + UPTIME_POLL_DELAY_DEFAULT);
 }
 
 void Input::onCounterChanged(int i) {
@@ -456,7 +458,8 @@ void Input::setNextPollTime(unsigned long pollTime) {
 #ifndef DHT_DISABLE
 
 void Input::dht22Poll() {
-    if (nextPollTime() > millis())
+    //if (nextPollTime() > millis())
+    if (!isTimeOver(nextPollTime(),millis(),DHT_POLL_DELAY_DEFAULT))
         return;
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
     DHTesp dhtSensor;
@@ -495,10 +498,12 @@ void Input::dht22Poll() {
         if (mqttClient.connected()  && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
 
-        setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
+        //setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
   //      debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
-    } else
-        setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT / 3);
+    } 
+    //else
+    //    setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT / 3);
+    setNextPollTime(millis());
 }
 #endif
 /*

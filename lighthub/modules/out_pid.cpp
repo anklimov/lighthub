@@ -119,7 +119,7 @@ int out_pid::Poll(short cause)
 if ((Status() == CST_INITIALIZED) && isTimeOver(store->timestamp,millis(),store->pollingInterval))
   {
     
-  store->timestamp=millis();
+  store->timestamp=millisNZ();
   debugSerial<<F("endPoll ")<< item->itemArr->name << endl;
 
   }

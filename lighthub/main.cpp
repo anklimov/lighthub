@@ -67,7 +67,7 @@ PWM Out
 
 #include "main.h"
 #include "statusled.h"
-
+extern long  timer0_overflow_count;	 
 #ifdef WIFI_ENABLE
 WiFiClient ethClient;
 
@@ -109,7 +109,7 @@ NRFFlashStorage EEPROM;
     WiFiUDP udpSyslogClient;
     #endif
 Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_BSD);
-unsigned long nextSyslogPingTime;
+unsigned long timerSyslogPingTime;
 static char syslogDeviceHostname[16];
 
 Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog);
@@ -155,11 +155,11 @@ aJsonObject *dmxArr = NULL;
 bool syslogInitialized = false;
 #endif
 
-uint32_t nextPollingCheck = 0;
-uint32_t nextInputCheck = 0;
-uint32_t nextLanCheckTime = 0;
-uint32_t nextThermostatCheck = 0;
-uint32_t nextSensorCheck =0;
+uint32_t timerPollingCheck = 0;
+uint32_t timerInputCheck = 0;
+uint32_t timerLanCheckTime = 0;
+uint32_t timerThermostatCheck = 0;
+uint32_t timerSensorCheck =0;
 uint32_t WiFiAwaitingTime =0;
 
 aJsonObject *pollingItem = NULL;
@@ -257,11 +257,13 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     if (!payload) return;
 
     payload[length] = 0;
+    
     int fr = freeRam();
     if (fr < 250) {
         errorSerial<<F("OutOfMemory!")<<endl;
         return;
     }
+    
     LED.flash(ledBLUE);
     for (unsigned int i = 0; i < length; i++)
         debugSerial<<((char) payload[i]);
@@ -447,7 +449,8 @@ lan_status lanLoop() {
                lanStatus = HAVE_IP_ADDRESS;
             }
             else
-            if (millis()>WiFiAwaitingTime)
+     //       if (millis()>WiFiAwaitingTime)
+              if (isTimeOver(WiFiAwaitingTime,millis(),WIFI_TIMEOUT))
             {
                 errorSerial<<F("\nProblem with WiFi!");
                 return lanStatus = DO_REINIT;
@@ -487,7 +490,9 @@ lan_status lanLoop() {
             break;
 
         case RETAINING_COLLECTING:
-            if (millis() > nextLanCheckTime) {
+            //if (millis() > timerLanCheckTime) 
+            if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_RETAIN))
+            {
                 char buf[MQTT_TOPIC_LENGTH+1];
 
                 //Unsubscribe from status topics..
@@ -507,14 +512,15 @@ lan_status lanLoop() {
 
         case DO_REINIT: // Pause and re-init LAN
              //if (mqttClient.connected()) mqttClient.disconnect();  // Hmm hungs then cable disconnected
-             nextLanCheckTime = millis() + 5000;
+             timerLanCheckTime = millis();// + 5000;
              lanStatus = REINIT;
              LED.set(ledRED|((configLoaded)?ledBLINK:0));
              break;
 
         case REINIT: // Pause and re-init LAN
 
-            if (millis() > nextLanCheckTime)
+            //if (millis() > timerLanCheckTime)
+            if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_REINIT))
                 {
                 lanStatus = INITIAL_STATE;
                 }
@@ -522,12 +528,13 @@ lan_status lanLoop() {
 
         case DO_RECONNECT: // Pause and re-connect MQTT
             if (mqttClient.connected()) mqttClient.disconnect();
-            nextLanCheckTime = millis() + 5000;
+            timerLanCheckTime = millis();// + 5000;
             lanStatus = RECONNECT;
             break;
 
         case RECONNECT:
-            if (millis() > nextLanCheckTime)
+            //if (millis() > timerLanCheckTime)
+            if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_RECONNECT))
 
                 lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             break;
@@ -535,7 +542,7 @@ lan_status lanLoop() {
         case READ_RE_CONFIG: // Restore config from FLASH, re-init LAN
             if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             else {
-                nextLanCheckTime = millis() + 5000;
+                //timerLanCheckTime = millis();// + 5000;
                 lanStatus = DO_REINIT;//-10;
             }
             break;
@@ -575,7 +582,7 @@ lan_status lanLoop() {
                 case DHCP_CHECK_REBIND_FAIL:
                     errorSerial<<F("Error: rebind fail");
                     if (mqttClient.connected()) mqttClient.disconnect();
-                    nextLanCheckTime = millis() + 1000;
+                    //timerLanCheckTime = millis();// + 1000;
                     lanStatus = DO_REINIT;
                     break;
 
@@ -777,16 +784,15 @@ debugSerial<<F("N:")<<n<<endl;
             Serial.println(buf);
             mqttClient.subscribe(buf);
 
-            //restoreState();
             onMQTTConnect();
             // if (_once) {DMXput(); _once=0;}
             lanStatus = RETAINING_COLLECTING;//4;
-            nextLanCheckTime = millis() + 5000;
+            timerLanCheckTime = millis();// + 5000;
             infoSerial<<F("Awaiting for retained topics");
         } else
            {
             errorSerial<<F("failed, rc=")<<mqttClient.state()<<F(" try again in 5 seconds")<<endl;
-            nextLanCheckTime = millis() + 5000;
+            timerLanCheckTime = millis();// + 5000;
 #ifdef RESTART_LAN_ON_MQTT_ERRORS
             mqttErrorRate++;
                         if(mqttErrorRate>50){
@@ -831,7 +837,7 @@ void onInitialStateInitLAN() {
             }
 #endif
 lanStatus = AWAITING_ADDRESS;
-WiFiAwaitingTime = millis() + 60000L;
+WiFiAwaitingTime = millis();// + 60000L;
 return;
 /*
 if (WiFi.status() == WL_CONNECTED) {
@@ -844,7 +850,7 @@ if (WiFi.status() == WL_CONNECTED) {
     {
         errorSerial<<F("\nProblem with WiFi!");
         lanStatus = DO_REINIT;
-        //nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
+        //timerLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
     }
 */
 #else // Ethernet connection
@@ -854,16 +860,16 @@ if (WiFi.status() == WL_CONNECTED) {
     int res = 1;
     infoSerial<<F("Starting lan")<<endl;
     if (ipLoadFromFlash(OFFSET_IP, ip)) {
-        infoSerial<<"Loaded from flash IP:";
+        infoSerial<<F("Loaded from flash IP:");
         printIPAddress(ip);
         if (ipLoadFromFlash(OFFSET_DNS, dns)) {
-            infoSerial<<" DNS:";
+            infoSerial<<F(" DNS:");
             printIPAddress(dns);
             if (ipLoadFromFlash(OFFSET_GW, gw)) {
-                infoSerial<<" GW:";
+                infoSerial<<F(" GW:");
                 printIPAddress(gw);
                 if (ipLoadFromFlash(OFFSET_MASK, mask)) {
-                    infoSerial<<" MASK:";
+                    infoSerial<<F(" MASK:");
                     printIPAddress(mask);
                     Ethernet.begin(mac, ip, dns, gw, mask);
                 } else Ethernet.begin(mac, ip, dns, gw);
@@ -873,7 +879,7 @@ if (WiFi.status() == WL_CONNECTED) {
     lanStatus = HAVE_IP_ADDRESS;
     }
     else {
-        infoSerial<<"\nuses DHCP\n";
+        infoSerial<<F("\nuses DHCP\n");
         wdt_dis();
 
         #if defined(ARDUINO_ARCH_STM32)
@@ -888,7 +894,7 @@ if (WiFi.status() == WL_CONNECTED) {
     if (res == 0) {
         errorSerial<<F("Failed to configure Ethernet using DHCP. You can set ip manually!")<<F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n");
         lanStatus = DO_REINIT;//-10;
-        nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
+        //timerLanCheckTime = millis();// + DHCP_RETRY_INTERVAL;
 #ifdef RESET_PIN
         resetHard();
 #endif
@@ -1421,7 +1427,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
             if (!root) {
                 errorSerial<<F("Config parsing failed\n");
-                nextLanCheckTime = millis() + 15000;
+//                timerLanCheckTime = millis();// + 15000;
                 return READ_RE_CONFIG;//-11;
             } else {
             infoSerial<<F("Applying.\n");
@@ -1433,14 +1439,14 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         } else {
             errorSerial<<F("ERROR: Server returned ");
             errorSerial<<responseStatusCode<<endl;
-            nextLanCheckTime = millis() + 5000;
+//            timerLanCheckTime = millis();// + 5000;
             return READ_RE_CONFIG;//-11;
         }
 
     } else {
         debugSerial<<F("failed to connect\n");
 //        debugSerial<<F(" try again in 5 seconds\n");
-        nextLanCheckTime = millis() + 5000;
+//        timerLanCheckTime = millis();// + 5000;
         return READ_RE_CONFIG;//-11;
     }
 #endif
@@ -1969,7 +1975,9 @@ void inputLoop(void) {
     if (!inputs) return;
 
 configLocked++;
-    if (millis() > nextInputCheck) {
+    //if (millis() > timerInputCheck) 
+    if (isTimeOver(timerInputCheck,millis(),INTERVAL_CHECK_INPUT))
+    {
         aJsonObject *input = inputs->child;
 
         while (input) {
@@ -1999,11 +2007,13 @@ configLocked++;
             yield();
             input = input->next;
         }
-        nextInputCheck = millis() + INTERVAL_CHECK_INPUT;
+        timerInputCheck = millis();// + INTERVAL_CHECK_INPUT;
         inCache.invalidateInputCache();
     }
 
-    if (millis() > nextSensorCheck) {
+    //if (millis() > timerSensorCheck) 
+    if (isTimeOver(timerSensorCheck,millis(),INTERVAL_CHECK_SENSOR))
+    {
         aJsonObject *input = inputs->child;
         while (input) {
             if ((input->type == aJson_Object)) {
@@ -2013,7 +2023,7 @@ configLocked++;
             yield();
             input = input->next;
         }
-        nextSensorCheck = millis() + INTERVAL_CHECK_SENSOR;
+        timerSensorCheck = millis();// + INTERVAL_CHECK_SENSOR;
     }
 configLocked--;
 }
@@ -2053,14 +2063,16 @@ configLocked--;
 // SLOW POLLING
     boolean done = false;
     if (lanStatus == RETAINING_COLLECTING) return;
-    if (millis() > nextPollingCheck) {
+    //if (millis() > timerPollingCheck) 
+    if (isTimeOver(timerPollingCheck,millis(),INTERVAL_SLOW_POLLING))    
+        {
         while (pollingItem && !done) {
             if (pollingItem->type == aJson_Array) {
                 Item it(pollingItem);
                 uint32_t ret = it.Poll(POLLING_SLOW);
                 if (ret)
                 {
-                  nextPollingCheck = millis() +  ret;  //INTERVAL_CHECK_MODBUS;
+                  timerPollingCheck = millis();// +  ret;  //INTERVAL_CHECK_MODBUS;
                   done = true;
                 }
             }//if
@@ -2095,7 +2107,8 @@ bool thermoDisabledOrDisconnected(aJsonObject *thermoExtensionArray, int thermoS
 
 //TODO: refactoring
 void thermoLoop(void) {
-    if (millis() < nextThermostatCheck)
+ //   if (millis() < timerThermostatCheck)
+ if (!isTimeOver(timerThermostatCheck,millis(),THERMOSTAT_CHECK_PERIOD))
         return;
     if (!items) return;
     bool thermostatCheckPrinted = false;
@@ -2104,9 +2117,21 @@ void thermoLoop(void) {
         if (isThermostatWithMinArraySize(thermoItem, 5)) {
             aJsonObject *thermoExtensionArray = aJson.getArrayItem(thermoItem, I_EXT);
             if (thermoExtensionArray && (aJson.getArraySize(thermoExtensionArray) > 1)) {
-                int thermoPin = aJson.getArrayItem(thermoItem, I_ARG)->valueint;
-                float thermoSetting = aJson.getArrayItem(thermoItem, I_VAL)->valueint; ///
+                
+                Item thermostat(thermoItem);
+                if (!thermostat.isValid()) continue;
+
+                itemCmd thermostatCmd(&thermostat);
+               
+
+                //int thermoPin = aJson.getArrayItem(thermoItem, I_ARG)->valueint;
+                int thermoPin = thermostat.getArg(0);
+
+                //float thermoSetting = aJson.getArrayItem(thermoItem, I_VAL)->valueint; ///
+                float thermoSetting = thermostatCmd.getFloat();
+
                 int thermoStateCommand = aJson.getArrayItem(thermoItem, I_CMD)->valueint;
+
                 float curTemp = aJson.getArrayItem(thermoExtensionArray, IET_TEMP)->valuefloat;
 
                 if (!aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint) {
@@ -2144,7 +2169,7 @@ void thermoLoop(void) {
         }
     }
   configLocked--;
-    nextThermostatCheck = millis() + THERMOSTAT_CHECK_PERIOD;
+    timerThermostatCheck = millis();// + THERMOSTAT_CHECK_PERIOD;
 publishStat();
 #ifndef DISABLE_FREERAM_PRINT
     (thermostatCheckPrinted) ? debugSerial<<F("\nRAM=")<<freeRam()<<" " : debugSerial<<F(" ")<<freeRam()<<F(" ");

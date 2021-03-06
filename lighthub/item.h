@@ -49,7 +49,9 @@ e-mail    anklimov@gmail.com
 #define CH_AC 10  //AC Haier
 #define CH_SPILED 11
 #define CH_MOTOR  12
+#define CH_PID   13
 #define CH_MBUS  14
+
 //#define CHANNEL_TYPES 13
 
 //static uint32_t pollInterval[CHANNEL_TYPES] = {0,0,0,0,MODB};
@@ -125,6 +127,7 @@ class Item
   void setSubtype(uint8_t par);
   int Poll(int cause);
   int SendStatus(int sendFlags);
+  int SendStatusImmediate(int sendFlags);
   int isActive();
   int getChanType();
   inline int On (){return Ctrl(itemCmd(ST_VOID,CMD_ON));};

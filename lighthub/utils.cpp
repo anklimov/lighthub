@@ -632,6 +632,13 @@ itemCmd mapInt(int32_t arg, aJsonObject* map)
   return _itemCmd.Int(arg);
 }
 
+unsigned long millisNZ()
+{
+ unsigned long now = millis();
+ if (!now) now=1;
+ return now;
+}
+
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

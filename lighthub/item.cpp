@@ -47,6 +47,7 @@ e-mail    anklimov@gmail.com
 #include "modules/out_modbus.h"
 #include "modules/out_dmx.h"
 #include "modules/out_pwm.h"
+#include "modules/out_pid.h"
 
 short modbusBusy = 0;
 extern aJsonObject *pollingItem;
@@ -97,12 +98,7 @@ int txt2subItem(char *payload) {
     else if (strcmp_P(payload, HUE_P) == 0) cmd = S_HUE;
     else if (strcmp_P(payload, SAT_P) == 0) cmd = S_SAT;
     else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
-  /*  UnUsed now
-    else if (strcmp_P(payload, SETPOINT_P) == 0) cmd = S_SETPOINT;
-    else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
-    else if (strcmp_P(payload, POWER_P) == 0) cmd = S_POWER;
-    else if (strcmp_P(payload, VOL_P) == 0) cmd = S_VOL;
-  */
+  
     return cmd;
 }
 
@@ -163,6 +159,13 @@ void Item::Parse() {
 #ifndef   MBUS_DISABLE
           case CH_MBUS:
           driver = new out_Modbus (this);
+//          debugSerial<<F("AC driver created")<<endl;
+          break;
+#endif
+
+#ifndef   PID_DISABLE
+          case CH_PID:
+          driver = new out_pid (this);
 //          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
@@ -561,7 +564,7 @@ st.setSuffix(suffixCode);
            case 4: st.RGBW(Par[0],Par[1],Par[2],Par[3]);
            default:;
          }
-         //return   Ctrl(setCommand, i, Par,  suffixCode, subItem);
+         
          return   Ctrl(st,subItem);
       }
       default: //some known command
@@ -586,10 +589,18 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
     if (!suffixCode && defaultSuffixCode)
         suffixCode = defaultSuffixCode;
 
-
-    debugSerial<<F("RAM=")<<freeRam()<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd=");
+    int fr = freeRam();
+    
+   
+    debugSerial<<F("RAM=")<<fr<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd=");
+     if (fr < 180) {
+        errorSerial<<F("OutOfMemory!\n")<<endl;
+        return -1;
+    }
     cmd.debugOut();
     if (!itemArr) return -1;
+   
+    
 
     bool    chActive  = (isActive()>0);
     bool    toExecute = (chActive>0); // execute if channel is active now
@@ -643,7 +654,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
                           case CMD_HALT: //previous command was HALT ?
                               debugSerial << F("Restored from:") << t << endl;
                               toExecute=true;
-                              if (itemType == CH_THERMO) st.Cmd(CMD_AUTO);
+                              if (itemType == CH_THERMO) st.Cmd(CMD_AUTO); ////
                                   else st.Cmd(CMD_ON);    //turning on
                               break;
                           default:
@@ -665,15 +676,15 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
 
                     }
                     break;
-            case CMD_DN:
-            case CMD_UP:
-            {
-            //if (itemType == CH_GROUP) break; ////bug here
-            st.Cmd(CMD_VOID); // Converting to SET value command
-            short step=0;
-            if (cmd.isValue()) step=cmd.getInt();
-            if (!step) step=DEFAULT_INC_STEP;
-            if (cmd.getCmd() == CMD_DN) step=-step;
+              case CMD_DN:
+              case CMD_UP:
+                {
+                //if (itemType == CH_GROUP) break; ////bug here
+                st.Cmd(CMD_VOID); // Converting to SET value command
+                short step=0;
+                if (cmd.isValue()) step=cmd.getInt();
+                if (!step) step=DEFAULT_INC_STEP;
+                if (cmd.getCmd() == CMD_DN) step=-step;
 
                       switch (suffixCode)
                       {
@@ -707,7 +718,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
              case CMD_VOID: // No commands, just set value
                          ////if (itemType == CH_GROUP ) break; ////
                          if (!cmd.isValue()) break;
-////                         if ( cType == CH_RGB || cType == CH_RGBW || cType == CH_GROUP )
+             ////                         if ( cType == CH_RGB || cType == CH_RGBW || cType == CH_GROUP )
                                switch (suffixCode)
                                {
                                      case S_NOTFOUND: //For empty (universal) suffix - turn ON/OFF automatically
@@ -720,7 +731,10 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
                                      // continue processing as SET
                                      case S_SET:
                                      //case S_ESET:
-                                     if ((st.getArgType() == ST_RGB || st.getArgType() == ST_RGBW) && (cmd.getArgType() == ST_HSV ) || (cmd.getArgType() == ST_HSV255)) st.setArgType(cmd.getArgType()); 
+                                     if ((st.getArgType() == ST_RGB || st.getArgType() == ST_RGBW) &&
+                                        (cmd.getArgType() == ST_HSV ) || (cmd.getArgType() == ST_HSV255)) 
+                                                                st.setArgType(cmd.getArgType());
+
                                      if (itemType == CH_GROUP && cmd.isColor()) st.setArgType(ST_HSV);//Extend storage for group channel
                                      st.assignFrom(cmd);
                                      st.saveItem(this);
@@ -754,6 +768,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
 
           default:
                 st.Cmd(cmd.getCmd());
+                st.setSuffix(cmd.getSuffix());
                 toExecute=true;
           } //Switch commands
 
@@ -893,8 +908,19 @@ switch (itemType) {
   } //switch
   if (st.isCommand())
               {
+              if (cmd.getCmd() == CMD_HALT)
+              {
+               if (chActive>0)  //if channel was active before CMD_HALT
+                  {
+                    setCmd(CMD_HALT);
+                    SendStatus(SEND_COMMAND);
+                  }
+               }   
+             else
+             {
               setCmd(st.getCmd());
               SendStatus(SEND_COMMAND);
+              }
               }
  }
 return 1; 
@@ -1495,17 +1521,17 @@ switch (cause)
         case CH_MODBUS:
             checkModbusDimmer();
             sendDelayedStatus();
-            return INTERVAL_CHECK_MODBUS;
+            return INTERVAL_SLOW_POLLING;
             break;
         case CH_VC:
             checkFM();
             sendDelayedStatus();
-            return INTERVAL_CHECK_MODBUS;
+            return INTERVAL_SLOW_POLLING;
             break;
         case CH_VCTEMP:
             checkHeatRetry();
             sendDelayedStatus();
-            return INTERVAL_CHECK_MODBUS;
+            return INTERVAL_SLOW_POLLING;
             break;
         #endif
       /*  case CH_RGB:    //All channels with slider generate too many updates
@@ -1525,7 +1551,7 @@ switch (cause)
                       return driver->Poll(cause);
                       }
 
-    return INTERVAL_POLLING;
+    return 0;
 }
 
 void Item::sendDelayedStatus()
@@ -1541,12 +1567,16 @@ void Item::sendDelayedStatus()
 
 int Item::SendStatus(int sendFlags) {
 
-    if ((sendFlags & SEND_DEFFERED) || (!isNotRetainingStatus() )) {
+    if ((sendFlags & SEND_DEFFERED) ||  freeRam()<150 || (!isNotRetainingStatus() )) {
         setFlag(sendFlags & (SEND_COMMAND | SEND_PARAMETERS));
         debugSerial<<F("Status deffered\n");
         return -1;
     }
-    else {
+    else return SendStatusImmediate(sendFlags);
+}
+    
+    int Item::SendStatusImmediate(int sendFlags) {
+    {
       itemCmd st(ST_VOID,CMD_VOID);  
       st.loadItem(this, true);
 

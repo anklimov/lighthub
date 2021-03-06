@@ -1,0 +1,43 @@
+{
+  "mqtt":["public_test1","m2m.eclipse.org"],
+  "ow":{
+		 "2807FFD503000036":{"emit":"t_balk1","item":"h_balk1"},
+       		 "284811170400005B":{"emit":"t_entr"},
+       		 "28FFF95533160459":{"emit":"t_bath1","item":"h_bath1"},
+       		 "28D2FD1604000051":{"emit":"t_exbath2"},
+		 "28EE634F13160255":{"emit":"t_bath2","item":"h_bath2"},
+		 "28FFB3B02316030C":{"emit":"t_balk2","item":"h_balk2"},
+		 "28EE4A571316027A":{"emit":"t_sasha"},
+		 "28FF0C6A331604FF":{"emit":"t_ext"},
+		 "28FFDD8C3316042C":{"emit":"t_abath2"},
+		 "28FFAEAC3316047F":{"emit":"t_abath1"},
+		 "28EE736E131602D6":{"emit":"t_vika"},
+                 "28EED85C131602DA":{"emit":"t_kitchen"},
+                 "28EE5A62131602CF":{"emit":"t_ac"},
+                 "28EEA76713160204":{"emit":"t_aentr"},
+                 "28EE8A5B1616019D":{"emit":"t_entr2","item":"h_entr"},
+		 "28EED16A13160268":{"emit":"t_bedr"}
+	},
+  "items":{
+	"all":[7,["h_entr","h_bath1","h_bath2","h_balk1","h_balk2","h_boil1","h_boil2","h_polotenc","spots_en","light_en"]],
+	"h_bath1":[5,24,33],
+        "h_bath2":[5,34,32],
+        "h_entr":[5,35,32],
+        "h_balk1":[5,25,28],
+        "h_balk2":[5,27,28],
+        "h_boil1":[6,23],
+        "h_boil2":[6,28,1,1],
+        "h_polotenc":[6,26,1,1],
+	"spots_en":[6,22,1,1],
+	"light_en":[6,29,1,1],
+	"water":[6,36,1,1]
+         },
+   "in":{
+          "41":{"T":0,"emit":"/myhome/in/all","scmd":"HALT","rcmd":"REST"},
+          "37":{"item":"spots_en","scmd":"TOGGLE","rcmd":"TOGGLE"},
+	  "38":{"emit":"/myhome/in/light","scmd":"TOGGLE","rcmd":"TOGGLE"},
+	  "40":{"T":1,"emit":"/myhome/out/all","scmd":"HALT","rcmd":"REST"},
+          "39":{"emit":"/myhome/s_out/water_leak"}
+         }
+}
+

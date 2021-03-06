@@ -180,6 +180,8 @@ public:
 
   itemCmd(uint8_t _type=ST_VOID, uint8_t _code=CMD_VOID);
   itemCmd(float val);
+  itemCmd(Item *item);
+
   itemCmd assignFrom(itemCmd from);
 
   bool loadItem(Item * item, bool includeCommand=false );
@@ -212,6 +214,7 @@ public:
   bool incrementS(int16_t);
 
   long int getInt();
+  float    getFloat();
   long int getSingleInt();
   short    getPercents(bool inverse=false);
   short    getPercents255(bool inverse=false);

@@ -63,6 +63,19 @@ itemCmd::itemCmd(float val)
   param.asfloat=val;
 }
 
+/*!
+     \brief Constructor with loading value from Item
+     \param Item
+*/
+itemCmd::itemCmd(Item *item)
+{
+  cmd.aslong=0;
+  param.aslong=0;
+
+  loadItem(item);
+}
+
+
 itemCmd itemCmd::setChanType(short chanType)
 {
   switch (chanType)
@@ -285,6 +298,8 @@ itemCmd itemCmd::assignFrom(itemCmd from)
 {
   bool RGBW_flag   = false;
   bool HSV255_flag = false;
+  bool toFarenheit = false;
+
   int t=from.getColorTemp();
 
   if (t>=0) 
@@ -372,10 +387,41 @@ itemCmd itemCmd::assignFrom(itemCmd from)
 
         case ST_INT32:
         case ST_UINT32:
+           param.asInt32=from.param.asInt32;
+           break;
+        case ST_FLOAT_FARENHEIT:
+            toFarenheit = true;
         case ST_FLOAT:
         case ST_FLOAT_CELSIUS:
-        case ST_FLOAT_FARENHEIT:
-           param.asInt32=from.param.asInt32;
+           switch (from.cmd.itemArgType)
+           {
+             case ST_TENS:
+              param.asfloat=from.param.asInt32/10.;
+             break;
+
+             case ST_PERCENTS:
+             case ST_PERCENTS255:             
+              param.asfloat=from.param.v; 
+             break;
+
+             case ST_INT32:             
+              param.asfloat=from.param.asInt32; 
+             break;
+             case ST_UINT32:
+              param.asfloat=from.param.asUint32;
+             break;
+
+             case ST_FLOAT_FARENHEIT: 
+             // F to C code should be here
+             // if (!toFarenheit) convert (from.param.asfloat); cmd.itemArgType=ST_FARENHEIT
+             case ST_FLOAT:
+             case ST_FLOAT_CELSIUS:
+              cmd.itemArgType=from.cmd.itemArgType;
+              param.asfloat=from.param.asfloat; 
+           default:
+                     debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
+           }
+           
            break;
 
         case ST_RGBW:
@@ -423,22 +469,25 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                                 from.param.h=100;
                                 from.param.s=0;   
                             #endif
-                      from.cmd.itemArgType=ST_HSV255;         
+                      //from.param.v = map(from.param.v,0,100,0,255);      
+                      from.cmd.itemArgType=ST_HSV;//255;         
                       break;
                       case ST_HS:
 
                             #ifndef ADAFRUIT_LED     
                                 from.param.v = hsv.v;
                             #else
-                                from.param.v=255;
+                                from.param.v=100;
                             #endif     
-                      from.cmd.itemArgType=ST_HSV255;
+                      from.cmd.itemArgType=ST_HSV; //255
                       break;
                  }
              }
            //Converting  current obj to HSV
 
-           debugSerial<<F("Updated:"); from.debugOut();
+           debugSerial<<F("Conv RGB2HSV:"); from.debugOut();
+
+           // Do not convert to RGBx ?
            param=from.param;
            cmd=from.cmd;
            return *this;
@@ -573,6 +622,37 @@ long int itemCmd::getInt()
     return 0;
   }
 }
+
+
+float itemCmd::getFloat()
+{
+  switch (cmd.itemArgType) {
+
+    case ST_INT32:
+    case ST_UINT32:
+    case ST_RGB:
+    case ST_RGBW:
+    case ST_TENS:
+      return param.aslong;
+
+    case ST_PERCENTS:
+    case ST_PERCENTS255:
+    case ST_HSV:
+    case ST_HSV255:
+      return param.v;
+
+    case ST_FLOAT:
+    case ST_FLOAT_CELSIUS:
+    case ST_FLOAT_FARENHEIT:
+      return param.asfloat;
+
+ 
+    default:
+    return 0.;
+  }
+}
+
+
 
 long int itemCmd::getSingleInt()
 {
@@ -790,8 +870,8 @@ bool itemCmd::loadItem(Item * item, bool includeCommand)
           param.asInt32=item->getVal();
           cmd.itemArgType= subtype;
           if (includeCommand) cmd.cmdCode=item->getCmd();
-          debugSerial<<F("Loaded :");
-          debugOut();
+          //debugSerial<<F("Loaded :");
+          //debugOut();
           return 1;
         }
   }
@@ -849,6 +929,7 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags )
                           len=strlen(Buffer);
                           argPtr+=len;
                           bufLen-=len;
+                          bufLen--;
                         }
        if (sendFlags & SEND_PARAMETERS)
        switch (cmd.itemArgType)
@@ -884,7 +965,19 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags )
          case ST_FLOAT_CELSIUS:
          case ST_FLOAT_FARENHEIT:
          case ST_FLOAT:
-         snprintf(argPtr, bufLen, "%.1f", param.asfloat);
+        { 
+        //char *tmpSign = (param.asfloat < 0) ? "-" : "";
+        float tmpVal = (param.asfloat < 0) ? -param.asfloat : param.asfloat;
+        int tmpInt1 = tmpVal;                  // Get the integer 
+        float tmpFrac = tmpVal - tmpInt1;      // Get fraction 
+        int tmpInt2 = trunc(tmpFrac * 10000);  // Turn into integer 
+        // Print as parts, note that you need 0-padding for fractional bit.
+
+        if (param.asfloat < 0)
+        snprintf (argPtr, bufLen, "-%d.%04d",  tmpInt1, tmpInt2);
+        else snprintf (argPtr, bufLen, "%d.%04d", tmpInt1, tmpInt2);
+        }  
+//         snprintf(argPtr, bufLen, "%.1f", param.asfloat);
          break;
          case ST_RGB:
          snprintf(argPtr, bufLen, "%d,%d,%d", param.r, param.g, param.b);

@@ -132,7 +132,8 @@ if (curPos<0) curPos=0;
 if (curPos>100) curPos=100;
 }
 
-if (motorOfftime && motorOfftime<millis()) //Time over
+//if (motorOfftime && motorOfftime<millis()) //Time over
+if (motorOfftime && isTimeOver(motorOfftime,millis(),maxOnTime))
   {dif = 0; debugSerial<<F("Motor timeout")<<endl;}
 else if (curPos>=0)
   dif=targetPos-curPos;
@@ -145,7 +146,7 @@ if (dif<-POS_ERR)
 {
 
   digitalWrite(pinDown,INACTIVE);
-  if (!item->getExt())item->setExt(millis()+maxOnTime);
+  if (!item->getExt())item->setExt(millisNZ());
 
   //
   //PINS_COUNT
@@ -193,7 +194,7 @@ if (dif>POS_ERR)
 {
 digitalWrite(pinUp,INACTIVE);
 
-if (!item->getExt()) item->setExt(millis()+maxOnTime);
+if (!item->getExt()) item->setExt(millisNZ());
 #ifndef ESP32
 if (digitalPinHasPWM(pinDown))
 {
@@ -269,7 +270,7 @@ debugSerial<<F("Forced execution");
 case S_SET:
           if (!cmd.isValue()) return 0;
           // item->setVal(cmd.getPercents());
-          if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+          if (item->getExt()) item->setExt(millisNZ()); //Extend motor time
           /*
           st.assignFrom(cmd);
           //Store
@@ -279,7 +280,7 @@ case S_SET:
             if (chActive>0 && !st.getPercents()) item->setCmd(CMD_OFF);
             if (chActive==0 && st.getPercents()) item->setCmd(CMD_ON);
             item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
-            if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+            if (item->getExt()) item->setExt(millisNZ()); //Extend motor time
           }
           else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
           */
@@ -315,12 +316,12 @@ case S_CMD:
               item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             }
             */
-            if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+            if (item->getExt()) item->setExt(millisNZ()); //Extend motor time
             return 1;
 
             case CMD_OFF:
               ////item->SendStatus(SEND_COMMAND);
-              if (item->getExt()) item->setExt(millis()+maxOnTime); //Extend motor time
+              if (item->getExt()) item->setExt(millisNZ()); //Extend motor time
             return 1;
 
 } //switch cmd

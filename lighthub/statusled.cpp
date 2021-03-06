@@ -19,6 +19,7 @@ e-mail    anklimov@gmail.com
 */
 
 #include "statusled.h"
+#include "utils.h"
 
 
 statusLED::statusLED(uint8_t pattern)
@@ -28,7 +29,7 @@ statusLED::statusLED(uint8_t pattern)
   pinMode(pinGREEN, OUTPUT);
   pinMode(pinBLUE, OUTPUT);
   set(pattern);
-  timestamp=millis()+ledDelayms;
+  timestamp=millis();//+ledDelayms;
 #endif
 }
 
@@ -71,11 +72,12 @@ void statusLED::poll()
       curStat&=~ledFlash;
       show(curStat);
     }
-if (millis()>timestamp)
+//if (millis()>timestamp)
+if (isTimeOver(timestamp,millis(),(curStat & ledFASTBLINK)?ledFastDelayms:ledDelayms))
   {
-
-        if (curStat & ledFASTBLINK) timestamp=millis()+ledFastDelayms;
-                            else    timestamp=millis()+ledDelayms;
+        timestamp=millis();
+        //if (curStat & ledFASTBLINK) timestamp=millis()+ledFastDelayms;
+        //                    else    timestamp=millis()+ledDelayms;
 
     if (( curStat & ledBLINK) || (curStat & ledFASTBLINK))
     {

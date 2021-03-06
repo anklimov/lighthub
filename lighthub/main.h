@@ -75,9 +75,9 @@ extern Streamlog  errorSerial;
 #define wdt_dis()
 #endif
 
-#ifndef DHCP_RETRY_INTERVAL
-#define DHCP_RETRY_INTERVAL 60000
-#endif
+//#ifndef DHCP_RETRY_INTERVAL
+//#define DHCP_RETRY_INTERVAL 60000
+//#endif
 
 #if defined(ESP8266)
 #define wdt_en()   wdt_enable(WDTO_8S)
