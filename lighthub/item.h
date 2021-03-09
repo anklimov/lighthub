@@ -34,7 +34,8 @@ e-mail    anklimov@gmail.com
 #define S_HUE  9
 #define S_SAT  10
 #define S_TEMP 11
-#define S_ADDITIONAL 11
+#define S_VAL  12
+#define S_ADDITIONAL 12
 
 #define CH_DIMMER 0   //DMX 1 ch
 #define CH_RGBW   1   //DMX 4 ch

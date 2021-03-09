@@ -16,7 +16,7 @@ bool out_pid::getConfig()
   int direction = DIRECT;
 
   // Retrieve and store 
-  if (!store || !item || !item->itemArg || (item->itemArg->type != aJson_Array) || aJson.getArraySize(item->itemArg)<2)
+  if (!store || !item || !item->itemArg || (item->itemArg->type != aJson_Array) || aJson.getArraySize(item->itemArg)<1)
   {
     errorSerial<<F("PID: config failed:")<<(bool)store<<F(",")<<(bool)item<<F(",")<<(bool)item->itemArg<<F(",")<<(item->itemArg->type != aJson_Array)<<F(",")<< (aJson.getArraySize(item->itemArg)<2)<<endl;
     return false;
@@ -28,19 +28,30 @@ bool out_pid::getConfig()
               errorSerial<<F("Invalid PID param array.")<<endl;
               return false;
             }
-   
+   double outMin=0.;
+   double outMax=100.;
    aJsonObject * param;         
    switch (aJson.getArraySize(kPIDObj))
-   {
+   {   case 5:
+       param = aJson.getArrayItem(kPIDObj, 4);
+       if (param->type == aJson_Float) outMax=param->valuefloat;
+       else if (param->type == aJson_Int) outMax=param->valueint;
+     case 4:
+       param = aJson.getArrayItem(kPIDObj, 3);
+       if (param->type == aJson_Float) outMin=param->valuefloat;
+       else if (param->type == aJson_Int) outMin=param->valueint;
      case 3:
        param = aJson.getArrayItem(kPIDObj, 2);
        if (param->type == aJson_Float) kD=param->valuefloat;
+       else if (param->type == aJson_Int) kD=param->valueint;
      case 2:
        param = aJson.getArrayItem(kPIDObj, 1);
        if (param->type == aJson_Float) kI=param->valuefloat;
+       else if (param->type == aJson_Int) kI=param->valueint;
      case 1:
        param = aJson.getArrayItem(kPIDObj, 0);
        if (param->type == aJson_Float) kP=param->valuefloat;  
+       else if (param->type == aJson_Int) kP=param->valueint;
               if (kP<0)
                 {
                     kP=-kP;
@@ -50,20 +61,28 @@ bool out_pid::getConfig()
 
    switch (item->itemVal->type)
    {
-    case aJson_Int: item->itemVal->valuefloat = item->itemVal->valueint;
+    case aJson_Int: 
+    store->setpoint = item->itemVal->valueint;
     break;
     case aJson_Float:
+    store->setpoint = item->itemVal->valuefloat;
     break;
     default:
-
+    store->setpoint = 20.;
    }
 
-   item->itemVal->type = aJson_Float;
    
-  if (!store->pid)   store->pid= new PID  (&store->input, &store->output, &item->itemVal->valuefloat, kP, kI, kD, direction);
+  if (!store->pid)   
+  
+      {store->pid= new PID  (&store->input, &store->output, &store->setpoint, kP, kI, kD, direction);
+      if (!store->pid) return false;
+      store->pid->SetMode(AUTOMATIC);
+      store->pid->SetOutputLimits(outMin,outMax);
+     
+      return true;}
+  else errorSerial<<F("PID already initialized")<<endl;    
 
-  return true;
-  //store->addr=item->getArg(0);
+  return false;
   }
 
 
@@ -73,12 +92,10 @@ if (!store) store= (pidPersistent *)item->setPersistent(new pidPersistent);
 if (!store)
               { errorSerial<<F("PID: Out of memory")<<endl;
                 return 0;}
-
+store->pid=NULL;
 //store->timestamp=millis();
 if (getConfig())
     {
-        //item->clearFlag(ACTION_NEEDED);
-        //item->clearFlag(ACTION_IN_PROCESS);
         infoSerial<<F("PID config loaded ")<< item->itemArr->name<<endl;
         store->driverStatus = CST_INITIALIZED;
         return 1;
@@ -93,8 +110,8 @@ else
 
 int  out_pid::Stop()
 {
-Serial.println("Modbus De-Init");
-if (store) delete (store->pid());
+Serial.println("PID De-Init");
+if (store) delete (store->pid);
 delete store;
 item->setPersistent(NULL);
 store = NULL;
@@ -110,99 +127,78 @@ return CST_UNKNOWN;
 
 int out_pid::isActive()
 {
-return item->getVal();
+return (item->getCmd()!=CMD_OFF);
 }
 
 
 int out_pid::Poll(short cause)
 {
-if ((Status() == CST_INITIALIZED) && isTimeOver(store->timestamp,millis(),store->pollingInterval))
-  {
-    
-  store->timestamp=millisNZ();
-  debugSerial<<F("endPoll ")<< item->itemArr->name << endl;
+if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCmd()!=CMD_OFF))   
+      {
+      double prevOut=store->output;  
+      store->pid->Compute();
+      if (abs(store->output-prevOut)>OUTPUT_TRESHOLD)
+          { 
+            aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
+            itemCmd value((float) store->output);
+            executeCommand(oCmd,-1,value);
+          }
 
-  }
+      }
 
-return store->pollingInterval;
+return 1;//store->pollingInterval;
 };
+
 
 int out_pid::getChanType()
 {
-   return CH_MODBUS;
+   return CH_THERMO;
 }
 
 
-//!Control unified Modbus item  
-// Priority of selection sub-items control to:
-// 1. if defined standard suffix Code inside cmd
-// 2. custom textual subItem
-// 3. non-standard numeric  suffix Code equal param id
+//!Control unified PID controller item  
+// /set suffix - to setup setpoint
+// /val suffix - to put value into controller
+// accept ON and OFF commands
 
 int out_pid::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
 {
-//int chActive = item->isActive();
-//bool toExecute = (chActive>0);
-//itemCmd st(ST_UINT32,CMD_VOID);
+if (!store || !store->pid || (Status() != CST_INITIALIZED)) return 0;    
+
+
 int suffixCode = cmd.getSuffix();
-aJsonObject *templateParamObj = NULL;
-short mappedCmdVal = 0;
-
-// trying to find parameter in template with name == subItem (NB!! standard suffixes dint working here)
-if (subItem && strlen (subItem)) templateParamObj = aJson.getObjectItem(store->parameters, subItem);
-
-if (!templateParamObj)
-{
-  // Trying to find template parameter where id == suffixCode
- templateParamObj = store->parameters->child;
-
-  while (templateParamObj)
-          {
-            //aJsonObject *regObj = aJson.getObjectItem(paramObj, "reg");
-            aJsonObject *idObj = aJson.getObjectItem(templateParamObj, "id");
-            if (idObj->type==aJson_Int && idObj->valueint == suffixCode) break;
-
-            aJsonObject *mapObj = aJson.getObjectItem(templateParamObj, "mapcmd");
-            if (mapObj && (mappedCmdVal = cmd.doReverseMappingCmd(mapObj))) break;
-
-            templateParamObj=templateParamObj->next;                       
-          }
-}
-
-
-//                    aJsonObject *typeObj = aJson.getObjectItem(paramObj, "type");
-//                    aJsonObject *mapObj = aJson.getObjectItem(paramObj, "map");
-//                    aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
-//                    uint16_t data = node.getResponseBuffer(posInBuffer);
-
-
 
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 switch(suffixCode)
 {
-case S_NOTFOUND:
-  // turn on  and set
-toExecute = true;
-debugSerial<<F("Forced execution");
-case S_SET:
-          if (!cmd.isValue()) return 0;
+case S_VAL:
+// Input value for PID
+if (!cmd.isValue()) return 0;
+store->input=cmd.getFloat();
+debugSerial<<F("Input value:")<<store->input<<endl;
+return 1;
+//break;
 
-//TODO
-          return 1;
-          //break;
+case S_NOTFOUND:
+case S_SET:
+// Setpoint for PID
+if (!cmd.isValue()) return 0;
+store->setpoint=cmd.getFloat();  
+debugSerial<<F("Setpoint:")<<store->setpoint<<endl;
+//cmd.saveItem(item);
+//item->SendStatus(SEND_PARAMETERS);
+return 1;
+//break;
 
 case S_CMD:
       switch (cmd.getCmd())
           {
           case CMD_ON:
-
+          case CMD_OFF:
+            item->setCmd(cmd.getCmd());
+            item->SendStatus(SEND_COMMAND);
             return 1;
-
-            case CMD_OFF:
-
-            return 1;
-
             default:
             debugSerial<<F("Unknown cmd ")<<cmd.getCmd()<<endl;
           } //switch cmd

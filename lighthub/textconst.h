@@ -114,6 +114,7 @@ const char SAT_P[]   PROGMEM = "sat";
 const char TEMP_P[]   PROGMEM = "temp";
 const char HSV_P[]   PROGMEM = "HSV";
 const char RGB_P[]   PROGMEM = "RGB";
+const char VAL_P[]   PROGMEM = "val";
 
 /*
 const char RPM_P[]   PROGMEM = "rpm";

@@ -926,16 +926,20 @@ void resetHard() {
 void Changed(int i, DeviceAddress addr, float currentTemp) {
     char addrstr[32] = "NIL";
     //char addrbuf[17];
-    char valstr[16] = "NIL";
-    char *owEmitString = NULL;
+    //char valstr[16] = "NIL";
+    //char *owEmitString = NULL;
     char *owItem = NULL;
 
     SetBytes(addr, 8, addrstr);
     addrstr[17] = 0;
     if (!root) return;
-    printFloatValueToStr(currentTemp,valstr);
-    debugSerial<<endl<<F("T:")<<valstr<<F("<");
-    aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);
+    //printFloatValueToStr(currentTemp,valstr);
+    debugSerial<<endl<<F("T:")<<currentTemp<<F("<")<<addrstr<<F(">")<<endl;
+    aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);     
+    if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
+        executeCommand(owObj,-1,itemCmd(currentTemp));
+
+    /*
     if (owObj) {
         owEmitString = getStringFromConfig(owObj, "emit");
         debugSerial<<owEmitString<<F(">")<<endl;
@@ -970,7 +974,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
         } // if valid temperature
   } // if Address in config
   else debugSerial<<addrstr<<F(">")<<endl; // No item found
-
+*/
 }
 
 #endif //_owire

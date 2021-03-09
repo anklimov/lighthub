@@ -532,6 +532,7 @@ bool executeCommand(aJsonObject* cmd, int8_t toggle)
 bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd)
 //bool executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
 {
+if (!cmd) return 0;    
 switch (cmd->type)
 {
   case aJson_String: //legacy - no action
@@ -572,17 +573,21 @@ switch (toggle)
     if (!ecmd) ecmd = aJson.getObjectItem(cmd, "ecmd");
   }
 
-char * itemCommand;
+char * itemCommand = NULL;
 char Buffer[16];
 if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
-  else    itemCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
+  //else    itemCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
 
 char * emitCommand;
 if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
   else    emitCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
 
 //debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
-if (item) debugSerial << item->valuestring<< F(" -> ")<<itemCommand<<endl;
+if (item) {
+            if (itemCommand)
+                debugSerial << item->valuestring<< F(" -> ")<<itemCommand<<endl;
+            else debugSerial << item->valuestring<< F(" -> ");_itemCmd.debugOut();
+            }
 if (emit) debugSerial << emit->valuestring<< F(" -> ")<<emitCommand<<endl;
 
 
@@ -602,7 +607,7 @@ TODO implement
 #endif
 */
 
-{
+
 char addrstr[MQTT_TOPIC_LENGTH];
 strncpy(addrstr,emit->valuestring,sizeof(addrstr));
 if (mqttClient.connected() && !ethernetIdleCount)
@@ -610,12 +615,17 @@ if (mqttClient.connected() && !ethernetIdleCount)
 if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
 mqttClient.publish(addrstr, emitCommand , true);
 }
-}
+
 } // emit
-if (item && itemCommand && item->type == aJson_String) {
+
+if (item &&  item->type == aJson_String) {
   //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
     Item it(item->valuestring);
-    if (it.isValid()) it.Ctrl(itemCommand);
+    if (it.isValid()) 
+       {
+       if (itemCommand) it.Ctrl(itemCommand);
+          else it.Ctrl(_itemCmd);
+       }
     }
 return true;
 }

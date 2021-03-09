@@ -388,6 +388,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
         case ST_INT32:
         case ST_UINT32:
            param.asInt32=from.param.asInt32;
+           cmd.itemArgType=from.cmd.itemArgType;
            break;
         case ST_FLOAT_FARENHEIT:
             toFarenheit = true;
@@ -418,6 +419,7 @@ itemCmd itemCmd::assignFrom(itemCmd from)
              case ST_FLOAT_CELSIUS:
               cmd.itemArgType=from.cmd.itemArgType;
               param.asfloat=from.param.asfloat; 
+              break;
            default:
                      debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
            }
@@ -615,7 +617,7 @@ long int itemCmd::getInt()
     case ST_FLOAT:
     case ST_FLOAT_CELSIUS:
     case ST_FLOAT_FARENHEIT:
-      return int (param.asfloat);
+      return param.asfloat;
 
  
     default:
@@ -673,6 +675,10 @@ short itemCmd::getPercents(bool inverse)
       if (inverse) return map(param.v,0,255,100,0);
           else return map(param.v,0,255,0,100);
 
+    case ST_FLOAT:
+       if (inverse) return param.asfloat;
+            else return 100-param.asfloat;          
+
     default:
     return 0;
   }
@@ -690,6 +696,10 @@ short itemCmd::getPercents255(bool inverse)
     case ST_PERCENTS255:
     case ST_HSV255:
     if (inverse) return 255-param.v; else return param.v;
+
+    case ST_FLOAT:
+       if (inverse) return map(param.asfloat,0,100,255,0);
+            else return map(param.asfloat,0,100,0,255);
 
     default:
     return 0;
@@ -778,6 +788,12 @@ itemCmd itemCmd::Int(uint32_t i)
           return *this;
         }
 
+itemCmd itemCmd::Float(float f)
+        {
+          cmd.itemArgType=ST_FLOAT;
+          param.asfloat=f;
+          return *this;
+        }
 
 itemCmd itemCmd::Tens(int32_t i)
         {
@@ -874,6 +890,17 @@ bool itemCmd::loadItem(Item * item, bool includeCommand)
           //debugOut();
           return 1;
         }
+  switch (item->itemVal->type)
+    {
+      case aJson_Int:
+      Int(item->itemVal->valueint);
+      return true;
+      
+      case aJson_Float:
+      Float(item->itemVal->valueint);
+      return true;
+    }
+
   }
 return false;
 }

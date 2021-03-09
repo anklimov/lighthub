@@ -5,12 +5,14 @@
 #include <item.h>
 #include <PID_v1.h>
 
+#define OUTPUT_TRESHOLD 1
 
 class pidPersistent : public chPersistent  {
 public:
-  PID pid;
+  PID * pid;
   double output;
   double input;
+  double setpoint;
   int driverStatus;
 };
 

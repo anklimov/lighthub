@@ -189,6 +189,7 @@ public:
 
   itemCmd Int(int32_t i);
   itemCmd Int(uint32_t i);
+  itemCmd Float(float f);
   itemCmd Tens(int32_t i);
   itemCmd Cmd(uint8_t i);
   itemCmd HSV(uint16_t h, uint8_t s, uint8_t v);
