@@ -1769,6 +1769,12 @@ infoSerial<<F("\n(+)MCP23017");
 infoSerial<<F("\n(-)MCP23017");
 #endif
 
+#ifndef PID_DISABLE
+infoSerial<<F("\n(+)PID");
+#else
+infoSerial<<F("\n(-)PID");
+#endif
+
 #ifdef SYSLOG_ENABLE
 //udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
 infoSerial<<F("\n(+)SYSLOG");

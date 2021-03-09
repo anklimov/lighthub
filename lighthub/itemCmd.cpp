@@ -893,7 +893,7 @@ bool itemCmd::loadItem(Item * item, bool includeCommand)
   switch (item->itemVal->type)
     {
       case aJson_Int:
-      Int(item->itemVal->valueint);
+      Int((int32_t)item->itemVal->valueint);
       return true;
       
       case aJson_Float:
