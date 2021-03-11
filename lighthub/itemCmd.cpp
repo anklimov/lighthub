@@ -342,8 +342,14 @@ itemCmd itemCmd::assignFrom(itemCmd from)
                    param.v=map(from.param.v,0,255,0,100);
                    break;
               case ST_FLOAT:
-                   param.v =  (int) from.param.asfloat;
-                    break;
+                   if (cmd.itemArgType == ST_HSV)
+                          param.v =  constrain(from.param.asfloat,0,100);
+                    else 
+                    {
+                      param=from.param;
+                      cmd.itemArgType=from.cmd.itemArgType;
+                    }
+                  break;
               default:
                   debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
               }
@@ -378,6 +384,15 @@ itemCmd itemCmd::assignFrom(itemCmd from)
               case ST_PERCENTS255:
                    param.v=from.param.v;
                    break;
+              case ST_FLOAT:
+                   if (cmd.itemArgType == ST_HSV255)
+                          param.v =  constrain(map(from.param.asfloat,0,100,0,255),0,255);
+                    else 
+                    {
+                      param=from.param;
+                      cmd.itemArgType=from.cmd.itemArgType;
+                    }
+                  break;    
               default:
                        debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
               }
@@ -419,6 +434,13 @@ itemCmd itemCmd::assignFrom(itemCmd from)
              case ST_FLOAT_CELSIUS:
               cmd.itemArgType=from.cmd.itemArgType;
               param.asfloat=from.param.asfloat; 
+              break;
+             case ST_HSV255:
+             case ST_HSV:
+             case ST_RGB:
+             case ST_RGBW:
+              cmd.itemArgType=from.cmd.itemArgType;
+              param=from.param; 
               break;
            default:
                      debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
@@ -605,7 +627,7 @@ long int itemCmd::getInt()
     case ST_UINT32:
     case ST_RGB:
     case ST_RGBW:
-    case ST_TENS:
+    
       return param.aslong;
 
     case ST_PERCENTS:
@@ -618,6 +640,9 @@ long int itemCmd::getInt()
     case ST_FLOAT_CELSIUS:
     case ST_FLOAT_FARENHEIT:
       return param.asfloat;
+    case ST_TENS:
+      return param.aslong/10; 
+
 
  
     default:
@@ -677,7 +702,12 @@ short itemCmd::getPercents(bool inverse)
 
     case ST_FLOAT:
        if (inverse) return param.asfloat;
-            else return 100-param.asfloat;          
+            else return 100-param.asfloat;   
+
+    case ST_TENS:
+           if (inverse) return param.asInt32/10;
+            else return 100-param.asInt32/10;
+
 
     default:
     return 0;
@@ -690,16 +720,21 @@ short itemCmd::getPercents255(bool inverse)
 
     case ST_PERCENTS:
     case ST_HSV:
-    if (inverse) return map(param.v,0,100,255,0);
+       if (inverse) return map(param.v,0,100,255,0);
             else return map(param.v,0,100,0,255);
 
     case ST_PERCENTS255:
     case ST_HSV255:
-    if (inverse) return 255-param.v; else return param.v;
+       if (inverse) return 255-param.v; else return param.v;
 
     case ST_FLOAT:
        if (inverse) return map(param.asfloat,0,100,255,0);
             else return map(param.asfloat,0,100,0,255);
+
+    case ST_TENS:
+        if (inverse) return map(param.asInt32,0,1000,255,0);
+            else return map(param.asInt32,0,1000,0,255);
+
 
     default:
     return 0;

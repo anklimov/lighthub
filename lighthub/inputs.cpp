@@ -473,12 +473,25 @@ void Input::dht22Poll() {
     float temp = dht.readTemperature();
     float humidity = dht.readHumidity();
 #endif
+
+debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") << humidity << F("%")<<endl;
+
+// New tyle unified activities
+    aJsonObject *actT = aJson.getObjectItem(inputObj, "temp");
+    aJsonObject *actH = aJson.getObjectItem(inputObj, "hum");
+    executeCommand(actT,-1,itemCmd(temp));
+    executeCommand(actH,-1,itemCmd(humidity));
+
+//Legacy action conf - TODO - remove in further releases
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
-    aJsonObject *item = aJson.getObjectItem(inputObj, "item");
-    if (item && item->type == aJson_String) thermoSetCurTemp(item->valuestring, temp);
-    debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") << humidity << F("%")<<endl;
+ 
+    //aJsonObject *item = aJson.getObjectItem(inputObj, "item");
+    //if (item && item->type == aJson_String) thermoSetCurTemp(item->valuestring, temp);
+    
+    
     if (emit && emit->type == aJson_String && temp && humidity && temp == temp && humidity == humidity) {
         char addrstr[MQTT_TOPIC_LENGTH] = "";
+
 #ifdef WITH_DOMOTICZ
         if(getIdxField()){
             publishDataToDomoticz(DHT_POLL_DELAY_DEFAULT, emit, "{\"idx\":%s,\"svalue\":\"%.1f;%.0f;0\"}", getIdxField(), temp, humidity);
@@ -498,99 +511,10 @@ void Input::dht22Poll() {
         if (mqttClient.connected()  && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
 
-        //setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT);
-  //      debugSerial << F(" NextPollMillis=") << nextPollTime() << endl;
     } 
-    //else
-    //    setNextPollTime(millis() + DHT_POLL_DELAY_DEFAULT / 3);
     setNextPollTime(millis());
 }
 #endif
-/*
-bool Input::executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
-{
-  if (!cmd) return false;
-
-  switch (cmd->type)
-  {
-    case aJson_String: //legacy - no action
-    break;
-    case aJson_Array:  //array - recursive iterate
-    {
-    configLocked++;
-    aJsonObject * command = cmd->child;
-    while (command)
-            {
-            executeCommand(command,toggle,defCmd);
-            command = command->next;
-            }
-    configLocked--;
-    }
-    break;
-    case aJson_Object:
-  {
-  aJsonObject *item = aJson.getObjectItem(cmd, "item");
-  aJsonObject *icmd = aJson.getObjectItem(cmd, "icmd");
-  aJsonObject *irev = aJson.getObjectItem(cmd, "irev");
-  aJsonObject *ecmd = aJson.getObjectItem(cmd, "ecmd");
-  aJsonObject *erev = aJson.getObjectItem(cmd, "erev");
-  aJsonObject *emit = aJson.getObjectItem(cmd, "emit");
-
-  char * itemCommand;
-  if (irev && toggle && irev->type == aJson_String) itemCommand = irev->valuestring;
-  else if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
-    else    itemCommand = defCmd;
-
-  char * emitCommand;
-  if (erev && toggle && erev->type == aJson_String) emitCommand = erev->valuestring;
-  else if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
-    else    emitCommand = defCmd;
-
-  debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
-if (item) debugSerial << item->valuestring<< F(" -> ")<<itemCommand<<endl;
-if (emit) debugSerial << emit->valuestring<< F(" -> ")<<emitCommand<<endl;
-
-
-
-
-  if (emit && emitCommand && emit->type == aJson_String) {
-
-// *
-TODO implement
-#ifdef WITH_DOMOTICZ
-      if (getIdxField())
-      {  (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
-          : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());	                                               getIdxField())
-                     : publishDataToDomoticz(0, emit,
-                                             "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",
-                                             getIdxField());
-                        } else
-#endif
-* //
-
-{
-char addrstr[MQTT_TOPIC_LENGTH];
-strncpy(addrstr,emit->valuestring,sizeof(addrstr));
-if (mqttClient.connected() && !ethernetIdleCount)
-{
-  if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
-  mqttClient.publish(addrstr, emitCommand , true);
-}
-}
-} // emit
-  if (item && itemCommand && item->type == aJson_String) {
-    //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
-      Item it(item->valuestring);
-      if (it.isValid()) it.Ctrl(itemCommand, true);
-      }
-return true;
-}
-default:
-return false;
-} //switch type
-return false;
-}
-*/
 
 // TODO Polling via timed interrupt with CHECK_INTERRUPT cause
 bool Input::changeState(uint8_t newState, short cause)
@@ -1032,6 +956,12 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
 
 void Input::onAnalogChanged(float newValue) {
     debugSerial << F("IN:") << (pin) << F("=") << newValue << endl;
+
+    // New tyle unified activities
+    aJsonObject *act = aJson.getObjectItem(inputObj, "act");
+    executeCommand(act,-1,itemCmd(newValue));
+
+    // Legacy
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
 

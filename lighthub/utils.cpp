@@ -642,9 +642,9 @@ itemCmd mapInt(int32_t arg, aJsonObject* map)
   return _itemCmd.Int(arg);
 }
 
-unsigned long millisNZ()
+unsigned long millisNZ(uint8_t shift)
 {
- unsigned long now = millis();
+ unsigned long now = millis()>>shift;
  if (!now) now=1;
  return now;
 }

@@ -156,3 +156,13 @@ class Item
   int  defaultSuffixCode;
 
 };
+
+typedef union
+{
+struct
+  {
+  int16_t  tempX100;
+  uint16_t timestamp16;
+  };
+int32_t  asint;   
+} thermostatStore;

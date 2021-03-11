@@ -747,7 +747,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
 
                                      break;
                                      case S_VAL:
-                                     st.assignFrom(cmd);
+                                     st=cmd;
                                      break;
 
                                      case S_SAT:
@@ -899,7 +899,24 @@ switch (itemType) {
               }
 
               case CH_THERMO:
-                      ///thermoSet(name,cmd,Par1); all activities done - update temp & cmd
+                     switch (suffixCode)
+                     {
+                      case S_VAL:
+                      //S_NOTFOUND:   
+                      {
+                      thermostatStore tStore;
+                      tStore.asint=getExt();
+                      if (!tStore.timestamp16) mqttClient.publish("/alarmoff/snsr", itemArr->name);
+                      tStore.tempX100=st.getFloat()*100.;         //Save measurement
+                      tStore.timestamp16=millisNZ(8) & 0xFFFF;    //And timestamp
+                      debugSerial<<F(" T:")<<F(":")<<tStore.tempX100<<F(" TS:")<<tStore.timestamp16<<endl;
+                      setExt(tStore.asint);
+                      }
+                      break;
+                      case S_SET:
+                      st.saveItem(this);
+                      break;
+                     }
                    break;
 
 
@@ -941,8 +958,8 @@ return 1;
 
 void printActiveStatus(bool active)
 {
-if (active) debugSerial<<F(" active\n");
-    else debugSerial<<F(" inactive\n");
+if (active) debugSerial<<F(" active ");
+    else debugSerial<<F(" inactive ");
 }
 
 int Item::isActive() {
@@ -996,13 +1013,13 @@ int Item::isActive() {
                         Item it(i->valuestring);
 
                         if (it.isValid() && it.isActive()>0) {
-                            debugSerial<<F(" active\n");
+                            printActiveStatus(true);
                             return 1;
                         }
                     }
                     i = i->next;
                 } //while
-                debugSerial<<F(" inactive\n");
+                printActiveStatus(false);
                 return 0;
             } //if
             break;
@@ -1033,40 +1050,6 @@ int Item::isActive() {
 }
 
 /*
-
-short thermoSet(char * name, short cmd, short t)
-{
-
-if (items)
-  {
-  aJsonObject *item= aJson.getObjectItem(items, name);
-  if (item && (item->type==aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint==CH_THERMO))
-      {
-
-        for (int i=aJson.getArraySize(item);i<4;i++) aJson.addItemToArray(item,aJson.createItem(int(0))); //Enlarge item to 4 elements
-             if (!cmd) aJson.getArrayItem(item, I_VAL)->valueint=t;
-             aJson.getArrayItem(item, I_CMD)->valueint=cmd;
-
-      }
-
-  }
-}
-
-
-void PooledItem::Idle()
-{
-if (PoolingInterval)
-  {
-    Pool();
-    next=millis()+PoolingInterval;
-  }
-
-};
-
-
-
-
-
 addr 10d
 Снять аварию 42001 (2001=7d1) =>4
 

@@ -2097,6 +2097,90 @@ configLocked--;
     }//if
 }
 
+
+void thermoRelay(int pin, bool on)
+{   
+    int thermoPin = abs(pin);
+    pinMode(thermoPin, OUTPUT);
+    
+    if (on)
+            {
+            digitalWrite(thermoPin, (pin<0)?LOW:HIGH); 
+            debugSerial<<F(" ON")<<endl;
+            }
+     else   
+     {
+            digitalWrite(thermoPin, (pin<0)?HIGH:LOW); 
+            debugSerial<<F(" OFF")<<endl;
+     }       
+
+}
+
+void thermoLoop(void) {
+
+ if (!isTimeOver(timerThermostatCheck,millis(),THERMOSTAT_CHECK_PERIOD))
+        return;
+    if (!items) return;
+    bool thermostatCheckPrinted = false;
+    configLocked++;
+    for (aJsonObject *thermoItem = items->child; thermoItem; thermoItem = thermoItem->next) {
+        if ((thermoItem->type == aJson_Array) && (aJson.getArrayItem(thermoItem, I_TYPE)->valueint == CH_THERMO)) 
+        {        
+                Item thermostat(thermoItem); //Init Item
+                if (!thermostat.isValid()) continue;
+                itemCmd thermostatCmd(&thermostat); // Got itemCmd
+
+                thermostatStore tStore;
+                tStore.asint=thermostat.getExt();
+
+                int   thermoPin     = thermostat.getArg(0);
+                float thermoSetting = thermostatCmd.getFloat();
+                int   thermoStateCommand = thermostat.getCmd();
+                float curTemp       = (float) tStore.tempX100/100.;
+                bool  active        = thermostat.isActive();
+
+                debugSerial << F(" Set:") << thermoSetting << F(" Cur:") << curTemp
+                            << F(" cmd:") << thermoStateCommand;
+
+                if (tStore.timestamp16) //Valid temperature
+                   {        
+                        if (isTimeOver(tStore.timestamp16,millisNZ(8) & 0xFFFF,PERIOD_THERMOSTAT_FAILED,0xFFFF))
+                        {
+                        errorSerial<<thermoItem->name<<F(" Alarm Expired\n");
+                        mqttClient.publish("/alarm/snsr", thermoItem->name);
+                        tStore.timestamp16=0; //Stop termostat
+                        thermostat.setExt(tStore.asint);
+                        thermoRelay(thermoPin,false);
+                        }
+                         else
+                         { // Not expired yet
+                            if (curTemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", thermoItem->name); 
+
+                            if (!active) thermoRelay(thermoPin,false);//OFF 
+                               else if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) thermoRelay(thermoPin,true);//ON
+                                    else if (curTemp >= thermoSetting) thermoRelay(thermoPin,false);//OFF
+                                         else debugSerial<<F(" -target zone-")<<endl; // Nothing to do
+
+                         }
+                   }
+                 else debugSerial<<F(" Expired\n");  
+                    thermostatCheckPrinted = true;  
+        } //item is termostat
+    } //for
+  configLocked--;
+    timerThermostatCheck = millis();// + THERMOSTAT_CHECK_PERIOD;
+publishStat();
+#ifndef DISABLE_FREERAM_PRINT
+    (thermostatCheckPrinted) ? debugSerial<<F("\nRAM=")<<freeRam()<<" " : debugSerial<<F(" ")<<freeRam()<<F(" ");
+#endif
+
+
+}
+
+
+/*
+
+
 bool isThermostatWithMinArraySize(aJsonObject *item, int minimalArraySize) {
     return (item->type == aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint == CH_THERMO) &&
            (aJson.getArraySize(item) >= minimalArraySize);
@@ -2113,6 +2197,9 @@ bool thermoDisabledOrDisconnected(aJsonObject *thermoExtensionArray, int thermoS
      default: return true;
    }
 }
+
+
+
 
 
 //TODO: refactoring
@@ -2215,3 +2302,4 @@ short thermoSetCurTemp(char *name, float t) {
         }
     return 1;}
 return 0;}
+*/
