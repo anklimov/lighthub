@@ -17,6 +17,7 @@ public:
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true) override;
     virtual int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true ) =0;
     short getChannelAddr(short n =0);
+    int isActive() override;
 protected:
   short iaddr;
   short numArgs;

@@ -30,13 +30,6 @@ int  out_dmx::Status()
 return driverStatus;
 }
 
-int out_dmx::isActive()
-{
-itemArgStore st;
-st.aslong = item->getVal(); //Restore old params
-debugSerial<< F(" val:")<<st.v<<endl;
-return st.v;
-}
 
 int out_dmx::Poll(short cause)
 {

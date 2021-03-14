@@ -427,6 +427,7 @@ case S_NOTFOUND:
 toExecute = true;
 debugSerial<<F("Forced execution");
 case S_SET:
+case S_ESET:
           if (!cmd.isValue()) return 0;
 
 //TODO

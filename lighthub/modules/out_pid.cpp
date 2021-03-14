@@ -77,7 +77,8 @@ bool out_pid::getConfig()
       {store->pid= new PID  (&store->input, &store->output, &store->setpoint, kP, kI, kD, direction);
       if (!store->pid) return false;
       store->pid->SetMode(AUTOMATIC);
-      store->pid->SetOutputLimits(outMin,outMax);
+      //store->pid->SetOutputLimits(outMin,outMax);
+      store->pid->SetSampleTime(5000); 
      
       return true;}
   else errorSerial<<F("PID already initialized")<<endl;    
@@ -136,11 +137,11 @@ int out_pid::Poll(short cause)
 if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCmd()!=CMD_OFF))   
       {
       double prevOut=store->output;  
-      store->pid->Compute();
-      if (abs(store->output-prevOut)>OUTPUT_TRESHOLD)
+      if(store->pid->Compute())
+      //if (abs(store->output-store-prevOut)>OUTPUT_TRESHOLD)
           { 
             aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
-            itemCmd value((float) store->output);
+            itemCmd value((float) (store->output * (100./255.)));
             executeCommand(oCmd,-1,value);
           }
 
@@ -182,6 +183,7 @@ return 1;
 
 case S_NOTFOUND:
 case S_SET:
+case S_ESET:
 // Setpoint for PID
 if (!cmd.isValue()) return 0;
 store->setpoint=cmd.getFloat();  

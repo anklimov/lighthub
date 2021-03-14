@@ -13,6 +13,7 @@ public:
   double output;
   double input;
   double setpoint;
+  float  prevOut; 
   int driverStatus;
 };
 

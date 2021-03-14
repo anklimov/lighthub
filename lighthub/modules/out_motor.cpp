@@ -161,8 +161,8 @@ if (digitalPinHasPWM(pinUp))
   if (inverted) velocity = map(-dif, 0, 10, 255, 0);
   else          velocity = map(-dif, 0, 10, 0, 255);
 
-      if (velocity>255) velocity=255;
-      if (velocity<0) velocity=0;
+  velocity = constrain (velocity, MIN_PWM, 255);
+
       analogWrite(pinUp,velocity);
     }
 
@@ -176,8 +176,7 @@ else if (digitalPinHasPWM(pinDown))
             velocity = map(-dif, 0, 10, 0, 255);
           else velocity = map(-dif, 0, 10, 255, 0);
 
-          if (velocity>255) velocity=255;
-          if (velocity<0) velocity=0;
+          velocity = constrain (velocity, MIN_PWM, 255);
           analogWrite(pinDown,velocity);
         }
 else
@@ -200,11 +199,11 @@ if (digitalPinHasPWM(pinDown))
 {
   //Serial.println("pinDown PWM");
   int velocity; 
-  if (inverted) velocity = map(dif, 0, 10, 255, 0);
-  else          velocity = map(dif, 0, 10, 0, 255);
+  if (inverted) velocity = map(dif, 0, 20, 255, 0);
+  else          velocity = map(dif, 0, 20, 0, 255);
 
-  if (velocity>255) velocity=255;
-  if (velocity<0) velocity=0;
+  velocity = constrain (velocity, MIN_PWM, 255);
+
   analogWrite(pinDown,velocity);
 }
 else
@@ -268,6 +267,7 @@ case S_NOTFOUND:
 toExecute = true;
 debugSerial<<F("Forced execution");
 case S_SET:
+case S_ESET:
           if (!cmd.isValue()) return 0;
           // item->setVal(cmd.getPercents());
           if (item->getExt()) item->setExt(millisNZ()); //Extend motor time

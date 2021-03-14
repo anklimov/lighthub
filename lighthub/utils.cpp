@@ -106,6 +106,40 @@ int getInt(char **chan) {
 }
 
 
+// chan is pointer to pointer to string
+// Function return first retrived number and move pointer to position next after ','
+itemCmd getNumber(char **chan) {
+    itemCmd val(ST_TENS,CMD_VOID);
+    int fract =0; 
+    if (chan && *chan && **chan)
+    {
+    //Skip non-numeric values
+    while (**chan && !(**chan == '-' || (**chan >= '0' && **chan<='9'))) *chan += 1;
+    int ch = atoi(*chan);
+    
+    char * fractptr = strchr(*chan,'.');
+    if (fractptr) 
+    {
+      //  fract = atoi(fractptr);
+      //  *chan = fractptr;
+      fractptr += 1;
+      fract = constrain(*fractptr-'0',0,9);
+    }
+    
+    //Move pointer to next element (after ,)
+    *chan = strchr(*chan, ',');
+    if (*chan) *chan += 1;
+    //Serial.print(F("Par:")); Serial.println(ch);
+    
+    if (fract)
+      val.Tens(ch*10+((ch>0)?fract:-fract));
+    else
+      val.Int((int32_t)ch);
+   }
+   //val.debugOut();
+   return val;
+}
+
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
 unsigned long freeRam ()
 {return system_get_free_heap_size();}

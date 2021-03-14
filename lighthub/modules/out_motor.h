@@ -5,9 +5,10 @@
 #include <item.h>
 
 #ifndef POS_ERR
-#define POS_ERR 2
+#define POS_ERR 5
 #endif
 
+#define MIN_PWM 70
 // The number of simultaniusly working motors
 #ifndef MOTOR_QUOTE
 #define MOTOR_QUOTE 1

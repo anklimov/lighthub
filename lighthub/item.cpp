@@ -103,7 +103,7 @@ int txt2subItem(char *payload) {
     return cmd;
 }
 
-const short defval[4] = {0, 0, 0, 0}; //Type,Arg,Val,Cmd
+//const short defval[4] = {0, 0, 0, 0}; //Type,Arg,Val,Cmd
 
 Item::Item(aJsonObject *obj)//Constructor
 {
@@ -116,8 +116,8 @@ void Item::Parse() {
     if (isValid()) {
         // Todo - avoid static enlarge for every types
         for (int i = aJson.getArraySize(itemArr); i < 4; i++)
-            aJson.addItemToArray(itemArr, aJson.createItem( (long int)
-                    int(defval[i]))); //Enlarge item to 4 elements. VAL=int if no other definition in conf
+            aJson.addItemToArray(itemArr, aJson.createItem( (long int) 0));
+                   // int(defval[i]) )); //Enlarge item to 4 elements. VAL=int if no other definition in conf
         itemType = aJson.getArrayItem(itemArr, I_TYPE)->valueint;
         itemArg = aJson.getArrayItem(itemArr, I_ARG);
         itemVal = aJson.getArrayItem(itemArr, I_VAL);
@@ -502,42 +502,47 @@ st.setSuffix(suffixCode);
           st.Cmd(0);
       case CMD_VOID:
        {
-         //Parsing integers from payload
+         //Parsing numbers from payload
           short i = 0;
-          int Par[4];
-          while (payload && i < 4)
-              Par[i++] = getInt((char **) &payload);
+          short k = 0;
+          itemCmd Par0 = getNumber((char **) &payload);
+          Par0.setSuffix(suffixCode);
+          if (Par0.getArgType())  i++;
 
+          int Par[3];        
+          while (payload && k < 3)
+              Par[k++] = getInt((char **) &payload);
+          i=i+k; //i=total # of parameters
           switch(suffixCode)
               {case S_HUE:
-                      st.setH(Par[0]);
+                      st.setH(Par0.getInt());
                       break;
                case S_SAT:
-                      st.setS(Par[0]);
+                      st.setS(Par0.getInt());
                       break;
                case S_TEMP:
-                      st.setColorTemp(Par[0]);
+                      st.setColorTemp(Par0.getInt());
                       break;        
                 default:
                     switch (i) //Number of params
                     {
-                      case 1: 
-                            if (set255flag)
-                                  st.Percents255(Par[0]);
-                            else  st.Percents(Par[0]);  //ToDo float
+                      case 1: st=Par0;
+                            //if (set255flag)
+                            //      st.Percents255(Par[0]);
+                            //else  st.Percents(Par[0]);  //ToDo float
                       break;
-                      case 2: st.HS(Par[0],Par[1]);
+                      case 2: st.HS(Par0.getInt(),Par[0]);
                       break;
                       case 3: 
                               if (set255flag)
-                                    st.HSV255(Par[0],Par[1],Par[2]);   
-                              else  st.HSV(Par[0],Par[1],Par[2]);
+                                    st.HSV255(Par0.getInt(),Par[0],Par[1]);   
+                              else  st.HSV(Par0.getInt(),Par[0],Par[1]);
                       break;
                       case 4:
                               if (set255flag)
-                                st.HSV255(Par[0],Par[1],Par[2]);
-                              else st.HSV(Par[0],Par[1],Par[2]);
-                              st.setColorTemp(Par[3]);
+                                st.HSV255(Par0.getInt(),Par[0],Par[1]);
+                              else st.HSV(Par0.getInt(),Par[0],Par[1]);
+                              st.setColorTemp(Par[2]);
                       break;        
                       default:;
                     }
@@ -609,7 +614,8 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
 
     bool    chActive  = (isActive()>0);
     bool    toExecute = (chActive>0); // execute if channel is active now
-
+    debugSerial<<endl;
+    
           if (itemType != CH_GROUP )
           {
           //Check if subitem is some sort of command
@@ -696,23 +702,27 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
                         case S_NOTFOUND:
                              toExecute=true;
                         case S_SET:
-                        //case S_ESET:
+                        case S_ESET:
                              if (st.incrementPercents(step))
-                             {
+                             {  
                                st.saveItem(this);
                                SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
                              }
                         break;
                         case S_HUE:
+                             if (cmd.isColor()) st.convertTo(ST_HSV);//Extend storage for color channel
                              if (st.incrementH(step))
                              {
+                             st.setSuffix(S_SET);      
                              st.saveItem(this);
                              SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
                              }
                              break;
                         case S_SAT:
+                             if (cmd.isColor()) st.convertTo(ST_HSV);//Extend storage for color channel
                              if (st.incrementS(step))
                              {
+                             st.setSuffix(S_SET);      
                              st.saveItem(this);
                              SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
                              }
@@ -735,7 +745,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
 
                                      // continue processing as SET
                                      case S_SET:
-                                     //case S_ESET:
+                                     case S_ESET:
                                      if ((st.getArgType() == ST_RGB || st.getArgType() == ST_RGBW) &&
                                         (cmd.getArgType() == ST_HSV ) || (cmd.getArgType() == ST_HSV255)) 
                                                                 st.setArgType(cmd.getArgType());
@@ -751,23 +761,26 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
                                      break;
 
                                      case S_SAT:
-                                     if (itemType == CH_GROUP && cmd.isColor()) st.setArgType(ST_HSV);//Extend storage for group channel
+                                     if (cmd.isColor()) st.convertTo(ST_HSV);//Extend storage for color channel
                                      if (st.setS(cmd.getS()))
-                                        {
+                                        { 
+                                          st.setSuffix(S_SET);  
                                           st.saveItem(this);
                                           SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
                                         }
                                      break;
 
                                      case S_HUE:
-                                     if (itemType == CH_GROUP && cmd.isColor()) st.setArgType(ST_HSV);//Extend storage for group channel
+                                     if (cmd.isColor()) st.convertTo(ST_HSV);//Extend storage for color channel
                                      if (st.setH(cmd.getH()))
                                         {
+                                          st.setSuffix(S_SET);    
                                           st.saveItem(this);
                                           SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
                                         }
                                     break;
                                     case S_TEMP:
+                                    //st.setSuffix(suffixCode);  
                                     st.setColorTemp(cmd.getColorTemp());
                                     st.saveItem(this);
                                     SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
@@ -831,9 +844,14 @@ if (driver) //New style modular code
             break;
 
             case CMD_VOID:
+            case CMD_DN:
+            case CMD_UP:
             res = driver->Ctrl(st, subItem, toExecute);
-            debugSerial<<F("Driver Res:")<<res<<endl;
+
             break;
+            
+            case CMD_ON:
+            if (chActive) break;
 
             default: //another command
             res = driver->Ctrl(st, subItem);
@@ -843,6 +861,7 @@ if (driver) //New style modular code
                         SendStatus(SEND_COMMAND);
                         }
           }
+          debugSerial<<F("Driver Res:")<<res<<endl;
           return res;
         }
 else //Driver not found
@@ -909,11 +928,12 @@ switch (itemType) {
                       if (!tStore.timestamp16) mqttClient.publish("/alarmoff/snsr", itemArr->name);
                       tStore.tempX100=st.getFloat()*100.;         //Save measurement
                       tStore.timestamp16=millisNZ(8) & 0xFFFF;    //And timestamp
-                      debugSerial<<F(" T:")<<F(":")<<tStore.tempX100<<F(" TS:")<<tStore.timestamp16<<endl;
+                      debugSerial<<F(" T:")<<tStore.tempX100<<F(" TS:")<<tStore.timestamp16<<endl;
                       setExt(tStore.asint);
                       }
                       break;
                       case S_SET:
+                      case S_ESET:
                       st.saveItem(this);
                       break;
                      }
@@ -922,13 +942,13 @@ switch (itemType) {
 
       #ifndef MODBUS_DISABLE
               case CH_MODBUS:
-                  modbusDimmerSet(st);
+                  if (toExecute) modbusDimmerSet(st);
                   break;
               case CH_VC:
-                  VacomSetFan(st);
+                  if (toExecute) VacomSetFan(st);
                   break;
               case CH_VCTEMP:
-                  VacomSetHeat(st);
+                  if (toExecute) VacomSetHeat(st);
                   break;
 
      #endif
@@ -1622,6 +1642,7 @@ int Item::SendStatus(int sendFlags) {
         case CMD_RGB:
         sendFlags &= ~SEND_COMMAND; // Not send command for parametrized req
             break;
+
         default:
             debugSerial<<F("Unknown cmd \n");
             sendFlags &= ~SEND_COMMAND;

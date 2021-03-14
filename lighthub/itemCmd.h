@@ -204,6 +204,7 @@ public:
   uint16_t getH();
   uint16_t getS();
   itemCmd setArgType(uint8_t);
+  itemCmd convertTo(uint8_t);
   itemCmd Percents(int i);
   itemCmd Percents255(int i);
 
@@ -219,6 +220,7 @@ public:
   long int getSingleInt();
   short    getPercents(bool inverse=false);
   short    getPercents255(bool inverse=false);
+  bool     setPercents(int percents);
   uint8_t    getCmd();
   uint8_t    getArgType();
   uint8_t    getCmdParam();

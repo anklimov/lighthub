@@ -83,13 +83,7 @@ int  out_pwm::Status()
 return driverStatus;
 }
 
-int out_pwm::isActive()
-{
-itemArgStore st;
-st.aslong = item->getVal(); //Restore old params
-debugSerial<< F(" val:")<<st.v<<endl;
-return st.v;
-}
+
 
 int out_pwm::Poll(short cause)
 {

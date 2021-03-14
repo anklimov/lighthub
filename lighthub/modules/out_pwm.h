@@ -15,7 +15,7 @@ public:
     int Poll(short cause) override;
     int Stop() override;
     int Status() override;
-    int isActive() override;
+    
     int getChanType() override;
     //int Ctrl(itemCmd cmd, char* subItem=NULL) override;
     int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true ) override;

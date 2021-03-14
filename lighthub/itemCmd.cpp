@@ -238,16 +238,47 @@ bool itemCmd::incrementPercents(int16_t dif)
      par+=dif;
      if (par>100) par=100;
      if (par<0) par=0;
+     param.v=par;
     break;
     case ST_PERCENTS255:
     case ST_HSV255:
      par+=dif;
      if (par>255) par=255;
      if (par<0) par=0;
+    param.v=par;
     break;
+
+    case ST_INT32:
+    case ST_UINT32:
+     par=param.asInt32;
+     par+=dif;
+     if (par>100) par=100;
+     if (par<0) par=0;
+     param.asInt32=par;
+    break;  
+
+    case ST_FLOAT:
+    case ST_FLOAT_CELSIUS:
+    case ST_FLOAT_FARENHEIT:
+     par=param.asfloat;
+     par+=dif;
+     if (par>100) par=100;
+     if (par<0) par=0;
+     param.asfloat=par;
+    break;  
+ 
+    case ST_TENS:
+    
+     par=param.asInt32;
+     par+=dif*10;
+     if (par>1000) par=1000;
+     if (par<0) par=0;
+     param.asInt32=par;
+    break;  
+
    default: return false;
   }
-  param.v=par;
+  
   return true;
 }
 
@@ -332,6 +363,14 @@ itemCmd itemCmd::assignFrom(itemCmd from)
               case ST_PERCENTS:
                    param.v=from.param.v;
                    break;
+              case ST_TENS:
+                   param.v=from.param.asInt32/10;
+                   break;
+              case  ST_INT32:
+              case  ST_UINT32:  
+                   param.v=constrain(from.param.aslong,0,100);
+                   break; 
+
               case ST_HSV255:
                    param.h=from.param.h;
                    //param.s=map(from.param.s,0,255,0,100);
@@ -376,6 +415,12 @@ itemCmd itemCmd::assignFrom(itemCmd from)
               case ST_PERCENTS:
                    param.v=map(from.param.v,0,100,0,255);
                    break;
+              case ST_INT32:
+              case ST_UINT32:
+                   param.v=map(from.param.asInt32,0,100,0,255); //constr
+                   break;
+              case ST_TENS:
+                   param.v=map(from.param.asInt32,0,1000,0,255);                       
               case ST_HSV255:
                    param.h=from.param.h;
                    param.s=from.param.s;
@@ -402,9 +447,23 @@ itemCmd itemCmd::assignFrom(itemCmd from)
 
         case ST_INT32:
         case ST_UINT32:
-           param.asInt32=from.param.asInt32;
-           cmd.itemArgType=from.cmd.itemArgType;
+        case ST_TENS:
+           switch (from.cmd.itemArgType)
+           {
+            case ST_HS:
+              param.v=getPercents();
+              param.h=from.param.h;
+              param.s=from.param.s; 
+              cmd.itemArgType=ST_HSV;  
+           default:
+              param.asInt32=from.param.asInt32;
+              cmd.itemArgType=from.cmd.itemArgType;
+           }
            break;
+        case ST_HS:
+           param.v=from.getPercents();
+           cmd.itemArgType=ST_HSV; 
+           break;     
         case ST_FLOAT_FARENHEIT:
             toFarenheit = true;
         case ST_FLOAT:
@@ -442,6 +501,12 @@ itemCmd itemCmd::assignFrom(itemCmd from)
               cmd.itemArgType=from.cmd.itemArgType;
               param=from.param; 
               break;
+              case ST_HS:
+                   param.v=getPercents();
+                   param.h=from.param.h;
+                   param.s=from.param.s; 
+                   cmd.itemArgType=ST_HSV;
+              break;     
            default:
                      debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
            }
@@ -454,15 +519,20 @@ itemCmd itemCmd::assignFrom(itemCmd from)
         switch (from.cmd.itemArgType)
           {
             case ST_RGBW:
-                  RGBW_flag=true;
+                 // RGBW_flag=true;
             case ST_RGB:
                   param.asInt32=from.param.asInt32;
                   cmd.itemArgType=from.cmd.itemArgType;
-            break;
+                  return *this;
+            //break;
             // Those types are not possible to apply over RGB without convertion toward HSV
+            case ST_FLOAT:
+            case ST_HS:
+            case ST_INT32:
             case ST_PERCENTS255:
             case ST_PERCENTS:
-            case ST_HS:
+            case ST_TENS:
+            case ST_UINT32:
             {
 
              #ifndef ADAFRUIT_LED  
@@ -472,41 +542,50 @@ itemCmd itemCmd::assignFrom(itemCmd from)
               rgb.g = param.g;
               rgb.b = param.b;    
               CHSV hsv = rgb2hsv_approximate(rgb);
-              #endif
- 
-                 switch (from.cmd.itemArgType){
-                      case ST_PERCENTS255:
-                            #ifndef ADAFRUIT_LED 
-                                from.param.h = map(hsv.h, 0, 255, 0, 365);
-                                from.param.s = map(hsv.s, 0, 255, 0, 100);
-                            #else
-                                from.param.h=100;
-                                from.param.s=0;    
-                            #endif    
-                      from.cmd.itemArgType=ST_HSV255;  
-                      break;
-                      case ST_PERCENTS:
-                            #ifndef ADAFRUIT_LED  
-                                from.param.h = map(hsv.h, 0, 255, 0, 365);
-                                from.param.s = map(hsv.s, 0, 255, 0, 100);
-                            #else
-                                from.param.h=100;
-                                from.param.s=0;   
-                            #endif
-                      //from.param.v = map(from.param.v,0,100,0,255);      
-                      from.cmd.itemArgType=ST_HSV;//255;         
-                      break;
-                      case ST_HS:
+             #endif 
 
-                            #ifndef ADAFRUIT_LED     
-                                from.param.v = hsv.v;
-                            #else
-                                from.param.v=100;
-                            #endif     
-                      from.cmd.itemArgType=ST_HSV; //255
-                      break;
-                 }
-             }
+              // Calculate volume
+              int vol=0;
+              switch (from.cmd.itemArgType)
+            {  
+            case ST_PERCENTS255:
+              vol=map(from.param.v,0,255,0,100);
+              break;
+            case ST_PERCENTS:
+              vol=from.param.v;
+              break;
+            case ST_INT32:
+            case ST_UINT32:
+              vol=from.param.asInt32;
+              break; 
+            case ST_TENS:
+              vol=from.param.asInt32/10;
+              break; 
+            case ST_FLOAT:
+              vol=from.param.asfloat;
+              break;
+            case ST_HS:
+               #ifndef ADAFRUIT_LED  
+               vol=hsv.v;
+               #else
+               vol=100;
+               #endif 
+            }
+
+              #ifndef ADAFRUIT_LED  
+              // Restoring HSV from RGB
+              from.param.h = map(hsv.h, 0, 255, 0, 365);
+              from.param.s = map(hsv.s, 0, 255, 0, 100);
+              #else
+              from.param.h=100;
+              from.param.s=0;  
+              #endif
+
+              from.cmd.itemArgType=ST_HSV;
+              from.param.v=vol;
+            }
+            // Continue processing with filled from HSV 
+/*
            //Converting  current obj to HSV
 
            debugSerial<<F("Conv RGB2HSV:"); from.debugOut();
@@ -514,10 +593,10 @@ itemCmd itemCmd::assignFrom(itemCmd from)
            // Do not convert to RGBx ?
            param=from.param;
            cmd=from.cmd;
-           return *this;
+           return *this; */
 
            case ST_HSV255:
-                HSV255_flag=true;
+                if (from.cmd.itemArgType==ST_HSV255) HSV255_flag=true;
            case ST_HSV:
                 { // HSV_XX to RGB_XX translation code
                 int rgbSaturation;
@@ -659,8 +738,10 @@ float itemCmd::getFloat()
     case ST_UINT32:
     case ST_RGB:
     case ST_RGBW:
-    case ST_TENS:
+   
       return param.aslong;
+     case ST_TENS:
+      return param.aslong/10;  
 
     case ST_PERCENTS:
     case ST_PERCENTS255:
@@ -694,6 +775,11 @@ short itemCmd::getPercents(bool inverse)
     case ST_PERCENTS:
     case ST_HSV:
       if (inverse) return 100-param.v; else return param.v;
+  
+    case ST_INT32:
+    case ST_UINT32:
+           if (inverse) return constrain(100-param.asInt32,0,100);
+            else return constrain(param.asInt32,0,100); 
 
     case ST_PERCENTS255:
     case ST_HSV255:
@@ -701,17 +787,44 @@ short itemCmd::getPercents(bool inverse)
           else return map(param.v,0,255,0,100);
 
     case ST_FLOAT:
-       if (inverse) return param.asfloat;
-            else return 100-param.asfloat;   
+       if (inverse) return constrain (100-param.asfloat,0,100);
+            else return constrain (param.asfloat,0,100);   
 
     case ST_TENS:
-           if (inverse) return param.asInt32/10;
-            else return 100-param.asInt32/10;
+           if (inverse) return constrain (100-param.asInt32/10,0,100);
+            else return constrain(param.asInt32/10,0,100);
 
 
     default:
-    return 0;
+    return -1;
   }
+}
+
+bool itemCmd::setPercents(int percents)
+{
+  switch (cmd.itemArgType) {
+
+    case ST_PERCENTS:
+    case ST_HSV:
+      param.v=percents;
+    break;
+    case ST_INT32:
+    case ST_UINT32:
+      param.asInt32=percents;
+    break;       
+    case ST_PERCENTS255:
+    case ST_HSV255:
+      param.v=map(percents,0,100,0,255);
+    break;  
+    case ST_FLOAT:
+      param.asfloat=percents;
+    break;   
+    case ST_TENS:
+    param.asInt32 = percents*10;
+    default:
+    return false;
+  }
+return true;  
 }
 
 short itemCmd::getPercents255(bool inverse)
@@ -721,7 +834,12 @@ short itemCmd::getPercents255(bool inverse)
     case ST_PERCENTS:
     case ST_HSV:
        if (inverse) return map(param.v,0,100,255,0);
-            else return map(param.v,0,100,0,255);
+            else return map(param.v,0,100,0,255);  
+
+    case ST_INT32:
+    case ST_UINT32:
+           if (inverse) return map(param.asInt32,0,100,255,0);
+            else return map(param.asInt32,0,100,0,255); 
 
     case ST_PERCENTS255:
     case ST_HSV255:
@@ -736,8 +854,9 @@ short itemCmd::getPercents255(bool inverse)
             else return map(param.asInt32,0,1000,0,255);
 
 
+
     default:
-    return 0;
+    return -1;
   }
 }
 
@@ -755,6 +874,14 @@ itemCmd itemCmd::setArgType(uint8_t type)
 {
    cmd.itemArgType=type & 0xF;
   return *this;
+}
+
+
+itemCmd itemCmd::convertTo(uint8_t type)
+{ 
+  itemCmd out(type,cmd.cmdCode);
+   out.assignFrom(*this);
+  return out;
 }
 
 uint8_t itemCmd::getCmdParam()
@@ -1008,7 +1135,7 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags )
             snprintf(argPtr, bufLen, "%ld", param.asInt32);
          break;
          case ST_TENS:
-            snprintf(argPtr, bufLen, "%ld.%d", param.asInt32/10, param.asInt32 % 10);
+            snprintf(argPtr, bufLen, "%ld.%d", param.asInt32/10, abs(param.asInt32 % 10));
          break;
          case ST_HSV:
          case ST_HSV255:

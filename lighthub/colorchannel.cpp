@@ -16,6 +16,15 @@ short colorChannel::getChannelAddr(short n)
   return item->getArg(n);
 }
 
+int colorChannel::isActive()
+{
+itemCmd st;
+st.loadItem(item);
+int val = st.getInt();
+debugSerial<< F(" val:")<<val<<endl;
+return val;
+}
+
 int colorChannel::Ctrl(itemCmd cmd, char* subItem, bool toExecute)
 {
 debugSerial<<F("clrCtr: ");
@@ -25,11 +34,12 @@ if (cmd.isCommand()) suffixCode = S_CMD;
    else suffixCode = cmd.getSuffix();
 
 switch(suffixCode)
-{
+{ int vol;
 case S_NOTFOUND:
   // turn on  and set
 toExecute = true;
 case S_SET:
+case S_ESET:
 case S_HSV:
           PixelCtrl(cmd, subItem, toExecute);
           return 1;
@@ -38,6 +48,12 @@ case S_CMD:
       switch (cmd.getCmd())
           {
           case CMD_ON:
+            if (vol=cmd.getPercents()<MIN_VOLUME && vol>=0) 
+                {
+                cmd.setPercents(INIT_VOLUME);
+                cmd.saveItem(item);
+                item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                };
             PixelCtrl(cmd,subItem, true);
     //        item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             return 1;
