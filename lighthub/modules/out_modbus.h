@@ -4,6 +4,11 @@
 #include <abstractout.h>
 #include <item.h>
 
+#if defined(ESP32)
+#define serialParamType uint32_t
+#else
+#define serialParamType uint16_t
+#endif
 
 class mbPersistent : public chPersistent  {
 
@@ -11,10 +16,11 @@ public:
 //  int addr
   int8_t driverStatus;
   int baud;
-  uint16_t serialParam;
+  serialParamType serialParam;
   uint16_t pollingInterval;
   uint32_t timestamp;
   aJsonObject * pollingRegisters;
+  aJsonObject * pollingIrs;
   aJsonObject * parameters;
 };
 
@@ -36,6 +42,7 @@ public:
 protected:
     mbPersistent * store;
     bool getConfig();
-    int findRegister(int registerNum, int posInBuffer);
+    int findRegister(int registerNum, int posInBuffer, int regType);
+    void pollModbus(aJsonObject * reg, int regType);
 };
 #endif

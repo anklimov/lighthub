@@ -25,7 +25,7 @@ struct reg_t
 struct serial_t
 {
   const char verb[4];
-  const uint16_t mode;
+  const serialParamType mode;
 };
 
 #define PAR_I16 1
@@ -55,37 +55,40 @@ const reg_t regSize_P[] PROGMEM =
 
 const serial_t serialModes_P[] PROGMEM =
 {
-  { "8E1", (uint16_t) SERIAL_8E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
-  { "8N1", (uint16_t) SERIAL_8N1},
-  { "8E2", (uint16_t) SERIAL_8E2},
-  { "8N2", (uint16_t) SERIAL_8N2},
-  { "8O1", (uint16_t) SERIAL_8O1},
-  { "8O2", (uint16_t) SERIAL_8O2},
+  { "8E1", (serialParamType) SERIAL_8E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
+  { "8N1", (serialParamType) SERIAL_8N1},
+  { "8E2", (serialParamType) SERIAL_8E2},
+  { "8N2", (serialParamType) SERIAL_8N2},
+  { "8O1", (serialParamType) SERIAL_8O1},
+  { "8O2", (serialParamType) SERIAL_8O2},
 //  { "8M1", SERIAL_8M1},
 //  { "8S1", SERIAL_8S1},
-  { "7E1", (uint16_t) SERIAL_7E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
-  { "7N1", (uint16_t) SERIAL_7N1},
-  { "7E2", (uint16_t) SERIAL_7E2},
-  { "7N2", (uint16_t) SERIAL_7N2},
-  { "7O1", (uint16_t) SERIAL_7O1},
-  { "7O2", (uint16_t) SERIAL_7O2}
+  { "7E1", (serialParamType) SERIAL_7E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
+  { "7N1", (serialParamType) SERIAL_7N1},
+  { "7E2", (serialParamType) SERIAL_7E2},
+  { "7N2", (serialParamType) SERIAL_7N2},
+  { "7O1", (serialParamType) SERIAL_7O1},
+  { "7O2", (serialParamType) SERIAL_7O2}
 //  { "7M1", SERIAL_7M1},
 //  { "7S1", SERIAL_7S1}
 } ;
 
 #define serialModesNum sizeof(serialModes_P)/sizeof(serial_t)
 
-uint16_t  str2SerialParam(char * str)
+serialParamType  str2SerialParam(char * str)
 { debugSerial<<str<<F(" =>");
   for(uint8_t i=0; i<serialModesNum && str;i++)
       if (strcmp_P(str, serialModes_P[i].verb) == 0)
            {
 
-           debugSerial<< i << F(" ") << pgm_read_word_near(&serialModes_P[i].mode)<< endl;
-           return pgm_read_word_near(&serialModes_P[i].mode);
+           //debugSerial<< i << F(" ") << pgm_read_word_near(&serialModes_P[i].mode)<< endl;
+           if (sizeof(serialModesNum)==4)
+             return pgm_read_dword_near(&serialModes_P[i].mode);
+           else 
+             return pgm_read_word_near(&serialModes_P[i].mode);
          }
   debugSerial<< F("Default serial mode N81 used");
-  return static_cast<uint16_t> (SERIAL_8N1);
+  return static_cast<serialParamType> (SERIAL_8N1);
 }
 int  str2regSize(char * str)
 {
@@ -123,13 +126,19 @@ bool out_Modbus::getConfig()
   aJsonObject * baudObj=aJson.getObjectItem(templateObj, "baud");
   if (baudObj && baudObj->type == aJson_Int && baudObj->valueint) store->baud = baudObj->valueint;
      else store->baud = 9600;
+
+  modbusSerial.begin(store->baud, store->serialParam);   
   aJsonObject * pollObj=aJson.getObjectItem(templateObj, "poll");
   if (pollObj && pollObj->type == aJson_Object)
     {
       store->pollingRegisters=aJson.getObjectItem(pollObj, "regs");
-      store->pollingInterval =aJson.getObjectItem(pollObj, "delay")->valueint;
+      store->pollingIrs=aJson.getObjectItem(pollObj, "irs");
+      aJsonObject * delayObj= aJson.getObjectItem(pollObj, "delay");
+      if (delayObj) store->pollingInterval = delayObj->valueint;
+          else store->pollingInterval = 1000;
+
     }
-  else {store->pollingRegisters=NULL;store->pollingInterval = 1000;}
+  else {store->pollingRegisters=NULL;store->pollingInterval = 1000;store->pollingIrs=NULL;}
 
   store->parameters=aJson.getObjectItem(templateObj, "par");
   return true;
@@ -209,14 +218,20 @@ return (result == node.ku8MBSuccess);
 
 
 
-int out_Modbus::findRegister(int registerNum, int posInBuffer)
+int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
 {
   aJsonObject * paramObj = store->parameters->child;
   bool is8bit = false;
   while (paramObj)
           {
-            aJsonObject *regObj = aJson.getObjectItem(paramObj, "reg");
-            if (regObj && regObj->valueint ==registerNum)
+            aJsonObject *regObj;
+            switch (regType) {
+              case MODBUS_HOLDING_REG_TYPE: regObj = aJson.getObjectItem(paramObj, "reg");
+                break;
+              case MODBUS_INPUT_REG_TYPE:  regObj = aJson.getObjectItem(paramObj, "ir");
+            }  
+
+              if (regObj && regObj->valueint ==registerNum)
                     {
                     aJsonObject *typeObj = aJson.getObjectItem(paramObj, "type");
                     aJsonObject *mapObj = aJson.getObjectItem(paramObj, "map");
@@ -301,24 +316,12 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer)
 return is8bit;
 }
 
-int out_Modbus::Poll(short cause)
-{
-if (store->pollingRegisters && !modbusBusy && (Status() == CST_INITIALIZED) && isTimeOver(store->timestamp,millis(),store->pollingInterval))
-  {
-    debugSerial<<F("Poll ")<< item->itemArr->name << endl;
-    modbusBusy=1;
-    //store->serialParam=(USARTClass::USARTModes) SERIAL_8N1;
-    #if defined (__SAM3X8E__)
-    modbusSerial.begin(store->baud, static_cast <USARTClass::USARTModes> (store->serialParam));
-    #elif defined (ARDUINO_ARCH_ESP8266)
-    modbusSerial.begin(store->baud, static_cast <SerialConfig>(store->serialParam));
-    #else
-    modbusSerial.begin(store->baud, (store->serialParam));
-    #endif
-    debugSerial<< store->baud << F("---")<< store->serialParam<<endl;
-    node.begin(item->getArg(0), modbusSerial);
 
-    aJsonObject * reg = store->pollingRegisters->child;
+    void out_Modbus::pollModbus(aJsonObject * reg, int regType)
+    {
+    if (!reg) return;
+    reg=reg->child;  
+    //aJsonObject * reg = store->pollingRegisters->child;
     while (reg)
             {
             switch (reg->type)
@@ -326,9 +329,10 @@ if (store->pollingRegisters && !modbusBusy && (Status() == CST_INITIALIZED) && i
                 case aJson_Int:
                 {
                 int registerNum = reg->valueint;
-                if (readModbus(registerNum,MODBUS_HOLDING_REG_TYPE,1))
+                //if (readModbus(registerNum,MODBUS_HOLDING_REG_TYPE,1)) 
+                if (readModbus(registerNum,regType,1))
                   {
-                    findRegister(registerNum,0);
+                    findRegister(registerNum,0,regType);
                 //    data = node.getResponseBuffer(j);
                   }
                 }
@@ -339,11 +343,12 @@ if (store->pollingRegisters && !modbusBusy && (Status() == CST_INITIALIZED) && i
                   int registerFrom=aJson.getArrayItem(reg, 0)->valueint;
                   int registerTo=aJson.getArrayItem(reg, 1)->valueint;
 
-                  if (readModbus(registerFrom,MODBUS_HOLDING_REG_TYPE,registerTo-registerFrom+1))
+                  //if (readModbus(registerFrom,MODBUS_HOLDING_REG_TYPE,registerTo-registerFrom+1))
+                  if (readModbus(registerFrom,regType,registerTo-registerFrom+1))
                     {
                       for(int i=registerFrom;i<=registerTo;i++)
                         {
-                          findRegister(i,i-registerFrom);
+                          findRegister(i,i-registerFrom,regType);
                         }
                       //data = node.getResponseBuffer(j);
                     }
@@ -353,7 +358,32 @@ if (store->pollingRegisters && !modbusBusy && (Status() == CST_INITIALIZED) && i
               }
             reg = reg->next;
             }
+    }
 
+int out_Modbus::Poll(short cause)
+{
+if ((store->pollingRegisters || store->pollingIrs) && !modbusBusy && (Status() == CST_INITIALIZED) && isTimeOver(store->timestamp,millis(),store->pollingInterval))
+  {
+    debugSerial<<F("Poll ")<< item->itemArr->name << endl;
+    modbusBusy=1;
+    //store->serialParam=(USARTClass::USARTModes) SERIAL_8N1;
+    #if defined (__SAM3X8E__)
+    modbusSerial.begin(store->baud, static_cast <USARTClass::USARTModes> (store->serialParam));
+    #elif defined (ARDUINO_ARCH_ESP8266)
+    modbusSerial.begin(store->baud, static_cast <SerialConfig>(store->serialParam));
+    #elif defined (ESP32)
+    //modbusSerial.begin(store->baud, store->serialParam);
+    //delay(100);
+    modbusSerial.updateBaudRate (store->baud); //Some terrible error in ESP32 core with uart reinit
+    #else
+    modbusSerial.begin(store->baud, (store->serialParam));
+    #endif
+    debugSerial<< store->baud << F("---")<< store->serialParam<<endl;
+    node.begin(item->getArg(0), modbusSerial);
+
+    pollModbus(store->pollingRegisters,MODBUS_HOLDING_REG_TYPE);
+    pollModbus(store->pollingIrs,MODBUS_INPUT_REG_TYPE);
+    
   store->timestamp=millisNZ();
   debugSerial<<F("endPoll ")<< item->itemArr->name << endl;
 
