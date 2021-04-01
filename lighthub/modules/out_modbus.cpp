@@ -127,7 +127,14 @@ bool out_Modbus::getConfig()
   if (baudObj && baudObj->type == aJson_Int && baudObj->valueint) store->baud = baudObj->valueint;
      else store->baud = 9600;
 
-  modbusSerial.begin(store->baud, store->serialParam);   
+    #if defined (__SAM3X8E__)
+    modbusSerial.begin(store->baud, static_cast <USARTClass::USARTModes> (store->serialParam));
+    #elif defined (ARDUINO_ARCH_ESP8266)
+    modbusSerial.begin(store->baud, static_cast <SerialConfig>(store->serialParam));
+    #else
+    modbusSerial.begin(store->baud, (store->serialParam));
+    #endif
+
   aJsonObject * pollObj=aJson.getObjectItem(templateObj, "poll");
   if (pollObj && pollObj->type == aJson_Object)
     {

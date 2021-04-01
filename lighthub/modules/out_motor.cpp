@@ -85,7 +85,17 @@ return driverStatus;
 
 int out_Motor::isActive()
 {
-return item->getVal();
+itemCmd st;  
+switch (item->getCmd())
+{ 
+  case CMD_OFF:
+  case CMD_HALT:
+  return 0;
+  break;
+  default:
+st.loadItem(item);
+return st.getPercents();
+}  
 }
 
 int out_Motor::Poll(short cause)
@@ -114,7 +124,7 @@ switch (item->getCmd())
 { 
   case CMD_ON:
   case CMD_XON:
-  if (targetPos<15) targetPos=100;
+  //if (targetPos<15) targetPos=100;
   
   break;
 
@@ -292,30 +302,6 @@ case S_CMD:
       switch (cmd.getCmd())
           {
           case CMD_ON:
-
-           /*
-           //retrive stored values
-            if (st.loadItem(item))
-            {
-                if (st.getPercents() && (st.getPercents()<MIN_VOLUME))
-                 { //Volume too low
-                        st.Percents(INIT_VOLUME);
-                        st.saveItem(item);
-                        item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
-                 }
-            debugSerial<<F("Restored: ")<<st.getPercents()<<endl;
-            }
-            else
-            {
-              debugSerial<<F(": No stored values - default\n");
-              // Store
-              st.setDefault();
-              st.saveItem(item);
-              //st=100;
-              //item->setVal(st);
-              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
-            }
-            */
             if (item->getExt()) item->setExt(millisNZ()); //Extend motor time
             return 1;
 
