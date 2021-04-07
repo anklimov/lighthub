@@ -48,6 +48,7 @@ void out_Motor::getConfig()
 
 int  out_Motor::Setup()
 {
+abstractOut::Setup();    
 getConfig();
 Serial.println("Motor Init");
 pinMode(pinUp,OUTPUT);
@@ -82,7 +83,7 @@ int  out_Motor::Status()
 {
 return driverStatus;
 }
-
+/*
 int out_Motor::isActive()
 {
 itemCmd st;  
@@ -94,10 +95,10 @@ switch (item->getCmd())
   break;
   default:
 st.loadItem(item);
-return st.getPercents();
+return st.getPercents255();
 }  
 }
-
+*/
 int out_Motor::Poll(short cause)
 {
 int curPos = -1;
@@ -118,7 +119,7 @@ if (!item->getFlag(ACTION_IN_PROCESS))
 uint32_t motorOfftime = item->getExt();
 itemCmd st;
 st.loadItem(item);
-targetPos = st.getPercents();// item->getVal();
+targetPos = st.getPercents255();// item->getVal();
 
 switch (item->getCmd())
 { 
@@ -137,18 +138,17 @@ int fb=-1;
 if (pinFeedback && isAnalogPin(pinFeedback))
 {
   
-curPos=map((fb=analogRead(pinFeedback)),feedbackClosed,feedbackOpen,0,100);
+curPos=map((fb=analogRead(pinFeedback)),feedbackClosed,feedbackOpen,0,255);
 if (curPos<0) curPos=0;
-if (curPos>100) curPos=100;
+if (curPos>255) curPos=255;
 }
 
-//if (motorOfftime && motorOfftime<millis()) //Time over
 if (motorOfftime && isTimeOver(motorOfftime,millis(),maxOnTime))
   {dif = 0; debugSerial<<F("Motor timeout")<<endl;}
 else if (curPos>=0)
   dif=targetPos-curPos;
 else
-  dif=targetPos-50; // Have No feedback
+  dif=targetPos-255/2; // Have No feedback
 
 debugSerial<<F("In:")<<pinFeedback<<F(" Val:")<<fb<<F("/")<<curPos<<F("->")<<targetPos<<F(" delta:")<<dif<<endl;
 
@@ -168,8 +168,8 @@ if (digitalPinHasPWM(pinUp))
     {
 //Serial.println("pinUP PWM");
   int velocity; 
-  if (inverted) velocity = map(-dif, 0, 10, 255, 0);
-  else          velocity = map(-dif, 0, 10, 0, 255);
+  if (inverted) velocity = map(-dif, 0, 255/10, 255, 0);
+  else          velocity = map(-dif, 0, 255/10, 0, 255);
 
   velocity = constrain (velocity, MIN_PWM, 255);
 
@@ -183,8 +183,8 @@ else if (digitalPinHasPWM(pinDown))
 
           int velocity;
           if (inverted)
-            velocity = map(-dif, 0, 10, 0, 255);
-          else velocity = map(-dif, 0, 10, 255, 0);
+            velocity = map(-dif, 0, 255/10, 0, 255);
+          else velocity = map(-dif, 0, 255/10, 255, 0);
 
           velocity = constrain (velocity, MIN_PWM, 255);
           analogWrite(pinDown,velocity);
@@ -209,8 +209,8 @@ if (digitalPinHasPWM(pinDown))
 {
   //Serial.println("pinDown PWM");
   int velocity; 
-  if (inverted) velocity = map(dif, 0, 20, 255, 0);
-  else          velocity = map(dif, 0, 20, 0, 255);
+  if (inverted) velocity = map(dif, 0, 255/5, 255, 0);
+  else          velocity = map(dif, 0, 255/5, 0, 255);
 
   velocity = constrain (velocity, MIN_PWM, 255);
 
@@ -223,8 +223,8 @@ if (digitalPinHasPWM(pinUp))
   digitalWrite(pinDown,ACTIVE);
   
   int velocity; 
-  if (inverted) velocity = map(dif, 0, 10, 0, 255);
-  else          velocity = map(dif, 0, 10, 255, 0); 
+  if (inverted) velocity = map(dif, 0, 255/10, 0, 255);
+  else          velocity = map(dif, 0, 255/10, 255, 0); 
 
   if (velocity>255) velocity=255;
   if (velocity<0) velocity=0;
@@ -277,7 +277,7 @@ case S_NOTFOUND:
 toExecute = true;
 debugSerial<<F("Forced execution");
 case S_SET:
-case S_ESET:
+//case S_ESET:
           if (!cmd.isValue()) return 0;
           // item->setVal(cmd.getPercents());
           if (item->getExt()) item->setExt(millisNZ()); //Extend motor time

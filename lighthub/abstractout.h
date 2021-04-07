@@ -9,10 +9,11 @@ class abstractOut  : public abstractCh{
 public:
     abstractOut(Item * _item):abstractCh(){item=_item;};
     virtual int Ctrl(itemCmd cmd,  char* subItem=NULL, bool toExecute=true) =0;
-    virtual int isActive(){return 0;};
-    virtual itemCmd getDefaultOnVal(){return itemCmd(ST_PERCENTS,CMD_VOID).Percents(100);};
+    virtual int isActive();
+    virtual itemCmd getDefaultOnVal(){return itemCmd().Percents255(255);};
     virtual int getChanType(){return 0;}
-    virtual int getDefaultStorageType(){return ST_PERCENTS;}
+    virtual int getDefaultStorageType(){return ST_PERCENTS255;}  /// Remove?? Now getChanType used instead
+    int Setup()  override;        
 protected:
       Item * item;
 };

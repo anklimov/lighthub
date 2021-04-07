@@ -16,6 +16,23 @@ short colorChannel::getChannelAddr(short n)
   return item->getArg(n);
 }
 
+
+int colorChannel::getDefaultStorageType()
+    {
+
+      if (item)
+          switch (numArgs)
+          {
+            case 3:
+            case 4:
+              return ST_HSV255;
+            case 1:
+              return ST_PERCENTS255;  
+          }
+          return ST_VOID;
+        }
+
+/*
 int colorChannel::isActive()
 {
 itemCmd st;
@@ -24,6 +41,7 @@ int val = st.getInt();
 debugSerial<< F(" val:")<<val<<endl;
 return val;
 }
+*/
 
 int colorChannel::Ctrl(itemCmd cmd, char* subItem, bool toExecute)
 {
@@ -39,7 +57,7 @@ case S_NOTFOUND:
   // turn on  and set
 toExecute = true;
 case S_SET:
-case S_ESET:
+//case S_ESET:
 case S_HSV:
           PixelCtrl(cmd, subItem, toExecute);
           return 1;

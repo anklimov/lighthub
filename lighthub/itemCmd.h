@@ -74,42 +74,26 @@ const cmdstr commands_P[] PROGMEM =
 
 int txt2cmd (char * payload);
 
-/*
-enum itemStoreType {
-ST_VOID         = 0,
-ST_PERCENTS     = 1,
-ST_TENS         = 2,
-ST_HSV          = 3,
-ST_FLOAT_CELSIUS= 4,
-ST_FLOAT_FARENHEIT= 5,
-ST_RGB          = 6,
-ST_RGBW         = 7,
-ST_PERCENTS255  = 8,
-ST_HSV255       = 9,
-ST_INT32        = 10,
-ST_UINT32       = 11,
-ST_STRING       = 12,
-ST_FLOAT        = 13//,
-//ST_COMMAND      = 15
-};
-*/
 
 ///Definition of all possible types of argument, contained in class
 #define ST_VOID         0      /// Not defined
-#define ST_PERCENTS     1      /// Percent value 0..100
-#define ST_TENS         2      /// Int representation of Float point value in tens part (ex 12.3 = 123 in "tens")
-#define ST_HSV          3      /// HUE-SATURATION-VALUE representation of color (0..365, 0..100, 0..100)
-#define ST_HS           4      /// just hue and saturation
-#define ST_FLOAT_CELSIUS   5   /// Float value - temperature in Celsium
-#define ST_FLOAT_FARENHEIT 6   /// Float value - temperature in Farenheit
-#define ST_RGB          7      /// RGB replesentation of color
-#define ST_RGBW         8      /// RGB + White channel
-#define ST_PERCENTS255  9      /// Percent value 0..255
-#define ST_HSV255       10     /// HUE-SATURATION-VALUE representation of color (0..365, 0..255, 0..255)
-#define ST_INT32        11     /// 32 bits signed integer
-#define ST_UINT32       12     /// 32 bits unsigned integer
-#define ST_STRING       13     /// pointer to string (for further use)
-#define ST_FLOAT        14     /// generic Float value
+#define ST_PERCENTS255  1      /// Percent value 0..255
+
+#define ST_HSV255       2     /// HUE-SATURATION-VALUE representation of color (0..365, 0..100, 0..255)
+#define ST_HS           3      /// just hue and saturation
+
+#define ST_RGB          4      /// RGB replesentation of color
+#define ST_RGBW         5      /// RGB + White channel
+
+#define ST_TENS         6      /// Int representation of Float point value in tens part (ex 12.3 = 123 in "tens")
+#define ST_FLOAT        7     /// generic Float value
+#define ST_FLOAT_CELSIUS   8   /// Float value - temperature in Celsium
+#define ST_FLOAT_FARENHEIT 9   /// Float value - temperature in Farenheit
+
+#define ST_INT32        10     /// 32 bits signed integer
+#define ST_UINT32       11     /// 32 bits unsigned integer
+#define ST_STRING       12     /// pointer to string (for further use)
+
 
 #define MAP_SCALE       1
 #define MAP_VAL_CMD     2
@@ -182,7 +166,7 @@ public:
   itemCmd(float val);
   itemCmd(Item *item);
 
-  itemCmd assignFrom(itemCmd from);
+  itemCmd assignFrom(itemCmd from, short chanType=-1);
 
   bool loadItem(Item * item, bool includeCommand=false );
   bool saveItem(Item * item, bool includeCommand=false);
@@ -205,6 +189,8 @@ public:
   uint16_t getS();
   itemCmd setArgType(uint8_t);
   itemCmd convertTo(uint8_t);
+  uint8_t getStoragetypeByChanType(short chanType);
+
   itemCmd Percents(int i);
   itemCmd Percents255(int i);
 
@@ -224,7 +210,7 @@ public:
   uint8_t    getCmd();
   uint8_t    getArgType();
   uint8_t    getCmdParam();
-  char   * toString(char * Buffer, int bufLen, int sendFlags = SEND_COMMAND | SEND_PARAMETERS );
+  char   * toString(char * Buffer, int bufLen, int sendFlags = SEND_COMMAND | SEND_PARAMETERS, int base = 255);
 
   bool isCommand();
   bool isValue();

@@ -43,6 +43,7 @@ void out_SPILed::getConfig()
 
 int  out_SPILed::Setup()
 {
+abstractOut::Setup();    
 getConfig();
 Serial.println("SPI-LED Init");
 

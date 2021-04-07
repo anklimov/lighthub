@@ -29,7 +29,7 @@ bool out_pid::getConfig()
               return false;
             }
    double outMin=0.;
-   double outMax=100.;
+   double outMax=255.;
    aJsonObject * param;         
    switch (aJson.getArraySize(kPIDObj))
    {   case 5:
@@ -89,6 +89,7 @@ bool out_pid::getConfig()
 
 int  out_pid::Setup()
 {
+abstractOut::Setup();    
 if (!store) store= (pidPersistent *)item->setPersistent(new pidPersistent);
 if (!store)
               { errorSerial<<F("PID: Out of memory")<<endl;
@@ -98,6 +99,7 @@ store->pid=NULL;
 if (getConfig())
     {
         infoSerial<<F("PID config loaded ")<< item->itemArr->name<<endl;
+        item->On(); // Turn ON pid by default
         store->driverStatus = CST_INITIALIZED;
         return 1;
       }
@@ -141,7 +143,7 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
       //if (abs(store->output-store-prevOut)>OUTPUT_TRESHOLD)
           { 
             aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
-            itemCmd value((float) (store->output * (100./255.)));
+            itemCmd value((float) (store->output));// * (100./255.)));
             executeCommand(oCmd,-1,value);
           }
 
@@ -183,7 +185,7 @@ return 1;
 
 case S_NOTFOUND:
 case S_SET:
-case S_ESET:
+//case S_ESET:
 // Setpoint for PID
 if (!cmd.isValue()) return 0;
 store->setpoint=cmd.getFloat();  

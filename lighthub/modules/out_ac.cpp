@@ -213,6 +213,7 @@ inline unsigned char toHex( char ch ){
 
 int  out_AC::Setup()
 {
+abstractOut::Setup();    
 Serial.println("AC Init");
 AC_Serial.begin(9600);
 driverStatus = CST_INITIALIZED;
@@ -280,7 +281,7 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
       switch(suffixCode)
       {
       case S_SET:
-      case S_ESET:
+      //case S_ESET:
           set_tmp = cmd.getInt();
           if (set_tmp >= 10 && set_tmp <= 30)
           {

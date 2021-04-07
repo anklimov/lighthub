@@ -4,6 +4,7 @@
 #include <abstractout.h>
 #include <item.h>
 #include <PID_v1.h>
+#include "itemCmd.h"
 
 #define OUTPUT_TRESHOLD 1
 
@@ -29,6 +30,7 @@ public:
     int Status() override;
     int isActive() override;
     int getChanType() override;
+    int getDefaultStorageType(){return ST_FLOAT;};
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true) override;
 
 

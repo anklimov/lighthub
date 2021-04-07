@@ -26,7 +26,7 @@ e-mail    anklimov@gmail.com
 //#define S_SETnCMD 0
 #define S_CMD  1
 #define S_SET  2
-#define S_ESET 4
+//#define S_ESET 4
 #define S_HSV  5
 #define S_RGB  6
 #define S_FAN  7

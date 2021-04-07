@@ -155,6 +155,7 @@ bool out_Modbus::getConfig()
 
 int  out_Modbus::Setup()
 {
+abstractOut::Setup();    
 if (!store) store= (mbPersistent *)item->setPersistent(new mbPersistent);
 if (!store)
               { errorSerial<<F("MBUS: Out of memory")<<endl;
@@ -194,10 +195,6 @@ if (store)
 return CST_UNKNOWN;
 }
 
-int out_Modbus::isActive()
-{
-return item->getVal();
-}
 
 
 bool readModbus(uint16_t reg, int regType, int count)
@@ -464,7 +461,7 @@ case S_NOTFOUND:
 toExecute = true;
 debugSerial<<F("Forced execution");
 case S_SET:
-case S_ESET:
+//case S_ESET:
           if (!cmd.isValue()) return 0;
 
 //TODO

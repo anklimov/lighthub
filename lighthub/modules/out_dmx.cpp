@@ -13,6 +13,7 @@ static int driverStatus = CST_UNKNOWN;
 
 int  out_dmx::Setup()
 {
+abstractOut::Setup();  
 debugSerial<<F("DMX-Out Init")<<endl;
 driverStatus = CST_INITIALIZED;
 return 1;
@@ -88,7 +89,7 @@ if (cType==CH_DIMMER) //Single channel
      storageType=ST_RGBW;
      break;
     default:
-     storageType=ST_PERCENTS;
+     storageType=ST_PERCENTS255;
    }
 
 itemCmd st(storageType,CMD_VOID);

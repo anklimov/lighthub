@@ -19,6 +19,7 @@ void analogWrite(int pin, int val)
 
 int  out_pwm::Setup()
 {
+abstractOut::Setup();    
 debugSerial<<F("PWM-Out Init")<<endl;
 if (!item || iaddr) return 0;
 
@@ -142,7 +143,7 @@ switch (cmd.getCmd()){
      storageType=ST_RGBW;
      break;
     default:
-     storageType=ST_PERCENTS;
+     storageType=ST_PERCENTS255;
    }
 
 itemCmd st(storageType,CMD_VOID);
