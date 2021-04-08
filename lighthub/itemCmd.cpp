@@ -101,6 +101,7 @@ uint8_t itemCmd::getStoragetypeByChanType(short chanType)
     case CH_MOTOR:
     case CH_PWM:
     case CH_RELAY:
+    case CH_VC:
     return ST_PERCENTS255;
     break;
     default:
@@ -339,7 +340,8 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                    param.v=constrain(from.param.asInt32,0,255);
                    break;
               case ST_TENS:
-                   param.v=map(from.param.asInt32,0,2550,0,255);                       
+                   param.v=constrain(from.param.asInt32/10,0,255);   
+                   break;                    
               case ST_HSV255:
                    param.h=from.param.h;
                    param.s=from.param.s;
@@ -458,7 +460,7 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
               switch (from.cmd.itemArgType)
             {  
             case ST_PERCENTS255:
-              vol=map(from.param.v,0,255,0,100);
+              vol=from.param.v;
               break;
             case ST_INT32:
             case ST_UINT32:
@@ -965,7 +967,7 @@ int itemCmd::doMappingCmd(aJsonObject *mappingData)
 
   }
 
-char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, int base )
+char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, bool scale100 )
      {
 
        if (!Buffer || !bufLen) return NULL;
@@ -986,7 +988,7 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, int base )
        { short colorTemp;
 
          case ST_PERCENTS255:
-            snprintf(argPtr, bufLen, "%u", map (param.v,0,255,0,base));
+            snprintf(argPtr, bufLen, "%u", (scale100)?map (param.v,0,255,0,100):param.v);
         break;
          case ST_UINT32:
             snprintf(argPtr, bufLen, "%lu", param.asUint32);
@@ -1000,10 +1002,10 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, int base )
          case ST_HSV255:
          colorTemp=getColorTemp();
 
-         if (colorTemp<0) 
-              snprintf(argPtr, bufLen, "%d,%d,%d", param.h, param.s, map (param.v,0,255,0,base));
+         if (colorTemp<0 || scale100) 
+              snprintf(argPtr, bufLen, "%d,%d,%d", param.h, param.s, (scale100)?map (param.v,0,255,0,100):param.v);
             else   
-              snprintf(argPtr, bufLen, "%d,%d,%d,%d", param.h, param.s, map (param.v,0,255,0,base), colorTemp);    
+              snprintf(argPtr, bufLen, "%d,%d,%d,%d", param.h, param.s, (scale100)?map (param.v,0,255,0,100):param.v, colorTemp);    
 
          break;
          case ST_HS:
@@ -1050,3 +1052,15 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, int base )
        toString(buf,sizeof(buf));
        debugSerial<<buf<<F(" AT:")<<getArgType()<<F(" Suff:")<<getSuffix()<<endl;
      }
+
+bool itemCmd::scale100()
+{
+  switch (cmd.itemArgType)
+  {
+    case ST_PERCENTS255:
+    case ST_HSV255:
+         param.v=constrain(map(param.v,0,100,0,255),0,255);
+    return true;     
+  }
+return false;  
+}

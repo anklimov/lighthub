@@ -476,12 +476,8 @@ int cmd = txt2cmd(payload);
 debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
 
 itemCmd st(ST_VOID,cmd);
-bool set255flag=true;
 
 switch (suffixCode) {
-    case S_NOTFOUND:
-        set255flag=false; 
-    break;
     case S_HSV:
         cmd=CMD_HSV; 
     break;
@@ -526,20 +522,15 @@ st.setSuffix(suffixCode);
                     switch (i) //Number of params
                     {
                       case 1: 
-                            if (set255flag) st=Par0;
-                            else  st.Percents(Par0.getInt());  
+                             st=Par0; 
                       break;
                       case 2: st.HS(Par0.getInt(),Par[0]);
                       break;
                       case 3: 
-                              if (set255flag)
-                                    st.HSV255(Par0.getInt(),Par[0],Par[1]);   
-                              else  st.HSV(Par0.getInt(),Par[0],Par[1]);
+                              st.HSV255(Par0.getInt(),Par[0],Par[1]);   
                       break;
                       case 4:
-                              if (set255flag)
-                                st.HSV255(Par0.getInt(),Par[0],Par[1]);
-                              else st.HSV(Par0.getInt(),Par[0],Par[1]);
+                              st.HSV255(Par0.getInt(),Par[0],Par[1]);
                               st.setColorTemp(Par[2]);
                       break;        
                       default:;
@@ -613,6 +604,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
 
     bool    chActive  = (isActive()>0);
     bool    toExecute = (chActive>0); // execute if channel is active now
+    bool    scale100  = false;
     debugSerial<<endl;
     
           if (itemType != CH_GROUP )
@@ -739,6 +731,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
                                {
                                      case S_NOTFOUND: //For empty (universal) OPENHAB suffix - turn ON/OFF automatically
                                      toExecute=true;
+                                     scale100=true;  //openHab topic format
                                      if (chActive>0 && !cmd.getInt()) st.Cmd(CMD_OFF);
                                      if (chActive==0 && cmd.getInt()) st.Cmd(CMD_ON);
                                      setCmd(st.getCmd());
@@ -746,17 +739,17 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
 
                                      // continue processing as SET
                                      case S_SET:
- //                                    case S_ESET:
                                      // if previous color was in RGB notation but new value is HSV - discard previous val and change type;   
                                      if ((st.getArgType() == ST_RGB || st.getArgType() == ST_RGBW) &&
-                                        /*(cmd.getArgType() == ST_HSV ) || */(cmd.getArgType() == ST_HSV255)) 
+                                        (cmd.getArgType() == ST_HSV255)) 
                                                                 st.setArgType(cmd.getArgType());
 
                                      if (itemType == CH_GROUP && cmd.isColor()) st.setArgType(ST_HSV255);//Extend storage for group channel
                                      
                                       //Convert value to most approptiate type for channel
                                      st.assignFrom(cmd,getChanType());
-                                     st.saveItem(this);
+                                     if (scale100 || SCALE_VOLUME_100) st.scale100();
+                                    st.saveItem(this);
                                      SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
 
                                      break;
@@ -1178,10 +1171,11 @@ int Item::VacomSetFan(itemCmd st) {
     node.begin(addr, modbusSerial);
 
     if (val) {
-        node.writeSingleRegister(2001 - 1, 4 + 1);//delay(500);
+        result=node.writeSingleRegister(2001 - 1, 4 + 1);//delay(500);
         //node.writeSingleRegister(2001-1,1);
-    } else node.writeSingleRegister(2001 - 1, 0);
-    delay(50);
+    } else result=node.writeSingleRegister(2001 - 1, 0);
+    delay(100);
+    if (result == node.ku8MBSuccess) debugSerial << F("MB ok")<<endl;
     result = node.writeSingleRegister(2003 - 1, val * 100);
     modbusBusy = 0;
 
@@ -1196,8 +1190,8 @@ int Item::VacomSetFan(itemCmd st) {
 ///move to float todo
 int Item::VacomSetHeat(itemCmd st)
 {
-int val=st.getPercents();
-int cmd=st.getCmd();
+float val=st.getFloat();
+int   cmd=st.getCmd();
 
 uint8_t result;
 int addr;
@@ -1229,7 +1223,7 @@ int addr;
             break;
 
         default:
-            regval = round(((float) val - b) * 10 / a);
+            regval = round(( val - b) * 10 / a);
     }
 
     //debugSerial<<regval);
@@ -1659,7 +1653,7 @@ int Item::SendStatus(int sendFlags) {
 
                         setTopic(addrstr,sizeof(addrstr),T_OUT);
                         strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
-                        st.toString(valstr, sizeof(valstr), SEND_PARAMETERS,100);   
+                        st.toString(valstr, sizeof(valstr), SEND_PARAMETERS,true);   
 
                         if (sendFlags & SEND_PARAMETERS && st.getCmd() != CMD_OFF && st.getCmd() != CMD_HALT)
                         {
@@ -1700,7 +1694,7 @@ int Item::SendStatus(int sendFlags) {
                   st.toString(valstr, sizeof(valstr), SEND_PARAMETERS|SEND_COMMAND);
                   break;
             default:         
-           st.toString(valstr, sizeof(valstr), SEND_PARAMETERS);
+           st.toString(valstr, sizeof(valstr), SEND_PARAMETERS,(SCALE_VOLUME_100));
            }
               
               switch (st.getArgType()) {
@@ -1708,10 +1702,6 @@ int Item::SendStatus(int sendFlags) {
                   case ST_RGBW:
                      strncat_P(addrstr, SET_P, sizeof(addrstr));
                      break;
-              //    case ST_PERCENTS255:
-              //    case ST_HSV255:
-              //       strncat_P(addrstr, ESET_P, sizeof(addrstr));
-              //       break;
                   default:
                      strncat_P(addrstr, SET_P, sizeof(addrstr));
               }

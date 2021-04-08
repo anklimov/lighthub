@@ -892,7 +892,7 @@ void Input::analogPoll(short cause) {
 
     if ((store->bounce<ANALOG_STATE_ATTEMPTS-1 || mappedInputVal == min || mappedInputVal ==max )&& (inputVal != store->currentValue))//confirmed change
         {
-            onAnalogChanged(mappedInputVal/10.);
+            onAnalogChanged(itemCmd().Tens(mappedInputVal));
       //      store->currentValue = mappedInputVal;
             store->currentValue = inputVal;
         }
@@ -954,12 +954,12 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
     }
 }
 
-void Input::onAnalogChanged(float newValue) {
-    debugSerial << F("IN:") << (pin) << F("=") << newValue << endl;
+void Input::onAnalogChanged(itemCmd newValue) {
+    debugSerial << F("IN:") << (pin) << F("=");  newValue.debugOut();
 
     // New tyle unified activities
     aJsonObject *act = aJson.getObjectItem(inputObj, "act");
-    executeCommand(act,-1,itemCmd(newValue));
+    executeCommand(act,-1,newValue);
 
     // Legacy
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
@@ -978,19 +978,15 @@ void Input::onAnalogChanged(float newValue) {
               strncpy(addrstr,emit->valuestring,sizeof(addrstr));
               if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
               char strVal[16];
-              //itoa(newValue,strVal,10);
-              printFloatValueToStr(newValue, strVal);
+              newValue.toString(strVal,sizeof(strVal),SEND_PARAMETERS);
+
               if (mqttClient.connected() && !ethernetIdleCount)
                   mqttClient.publish(addrstr, strVal, true);
 }
 
     if (item && item->type == aJson_String) {
-        //int intNewValue = round(newValue);
         Item it(item->valuestring);
-        if (it.isValid()) {
-           //it.Ctrl(0, 1, &intNewValue, true);
-           it.Ctrl(itemCmd(newValue));
-        }
+        if (it.isValid())  it.Ctrl(newValue);
     }
 }
 

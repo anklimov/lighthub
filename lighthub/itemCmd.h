@@ -210,7 +210,7 @@ public:
   uint8_t    getCmd();
   uint8_t    getArgType();
   uint8_t    getCmdParam();
-  char   * toString(char * Buffer, int bufLen, int sendFlags = SEND_COMMAND | SEND_PARAMETERS, int base = 255);
+  char   * toString(char * Buffer, int bufLen, int sendFlags = SEND_COMMAND | SEND_PARAMETERS, bool scale100 = false);
 
   bool isCommand();
   bool isValue();
@@ -224,7 +224,7 @@ public:
   int doReverseMapping (aJsonObject *mappingData);
   int doMappingCmd(aJsonObject *mappingData);
   int doReverseMappingCmd (aJsonObject *mappingData);
-
+  bool scale100();
 
   };
 

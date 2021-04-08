@@ -12,6 +12,10 @@
 #define CONTROLLER TM1809
 #endif
 
+#ifndef SCALE_VOLUME_100
+#define SCALE_VOLUME_100 false
+#endif
+
 #ifndef DATA_PIN
 #define DATA_PIN 4
 #endif
