@@ -3,12 +3,14 @@
 #include "main.h"
 #include "Streaming.h"
 #include "item.h"
+#include "bright.h"
 
 #ifdef ADAFRUIT_LED
 #include <Adafruit_NeoPixel.h>
 #else
 #include "FastLED.h"
 #endif
+
 //#include "hsv2rgb.h"
 
 int txt2cmd(char *payload) {
@@ -102,6 +104,7 @@ uint8_t itemCmd::getStoragetypeByChanType(short chanType)
     case CH_PWM:
     case CH_RELAY:
     case CH_VC:
+    case CH_MODBUS:
     return ST_PERCENTS255;
     break;
     default:
@@ -496,17 +499,10 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
 
            case ST_HSV255:
                 { // HSV_XX to RGB_XX translation code
-                int rgbSaturation;
-                int rgbValue;
-
-                    rgbSaturation =map(from.param.s, 0, 100, 0, 255);
-                    rgbValue      = from.param.v;
-
-                  short colorT=from.param.colorTemp-1;
-
-
-                  if (RGBW_flag)
-                  
+                int   rgbSaturation=constrain(map(from.param.s, 0, 100, 0, 255),0,255);
+                int   rgbValue = getBright255(from.param.v);
+                short colorT =from.param.colorTemp-1;
+                  if (RGBW_flag)        
                           {
                               if (colorT<0)
                               { //ColorTemperature not set
@@ -884,7 +880,6 @@ itemCmd itemCmd::RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
 
 itemCmd itemCmd::Cmd(uint8_t i)
     {
-    //      cmd.itemArgType=ST_COMMAND;
           cmd.cmdCode=i;
           return *this;
     }

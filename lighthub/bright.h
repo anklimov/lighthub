@@ -4,6 +4,7 @@
 
 
 #ifdef BRIGHT_LOG
+#undef BRIGHT_LINEAR
 const  uint8_t stepvar[] PROGMEM =
         {
          0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -55,6 +56,7 @@ const  uint8_t stepvar[] PROGMEM =
 
 
 #ifdef BRIGHT_STEP
+#undef BRIGHT_LINEAR
 const  uint8_t stepvar[] PROGMEM =
         {0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
          0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -101,5 +103,4 @@ const  uint8_t stepvar[] PROGMEM =
          0xF6, 0xF9, 0xFC, 0xFF};
 #endif
 
-uint8_t getBright(uint8_t percent);
-uint8_t getBright255(uint8_t percent);
+uint8_t getBright255(uint8_t percent255);

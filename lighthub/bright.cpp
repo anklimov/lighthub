@@ -1,23 +1,19 @@
 #include "bright.h"
+#include <Arduino.h>
 
-uint8_t getBright(uint8_t percent)
-{
- int index = map(percent,0,100,0,255);
- if (index>255) index=255;
- return getBright255(index);
-}
-
-uint8_t getBright255(uint8_t percent)
+uint8_t getBright255(uint8_t percent255)
 {
   #ifdef BRIGHT_LINEAR
-    return percent;
+    return percent255;
   #else
+  return pgm_read_byte_near(stepvar[percent255]);
+  /*
   int val = stepvar[index];
   if (val>255) val=255;
   Serial.print(F("Bright:"));
   Serial.print(percent);
   Serial.print(F("->"));
   Serial.println(val);
-  return val;
+  return val;*/
   #endif
 }

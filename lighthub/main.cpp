@@ -1150,7 +1150,6 @@ void printConfigSummary() {
 
 void cmdFunctionLoad(int arg_cnt, char **args) {
     loadConfigFromEEPROM();
-  //  restoreState();
 }
 
 
@@ -1181,7 +1180,6 @@ int loadConfigFromEEPROM()
 
 void cmdFunctionReq(int arg_cnt, char **args) {
     mqttConfigRequest(arg_cnt, args);
-  //  restoreState();
 }
 
 
@@ -2097,7 +2095,7 @@ configLocked--;
     }//if
 }
 
-
+////// Legacy Thermostat code below - to be moved in module /////
 void thermoRelay(int pin, bool on)
 {   
     int thermoPin = abs(pin);

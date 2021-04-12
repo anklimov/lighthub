@@ -91,7 +91,7 @@ extern aJsonObject *items;
 extern short thermoSetCurTemp(char *name, float t);
 
 int txt2cmd (char * payload);
-int digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem);
+bool digGroup (aJsonObject *itemArr, itemCmd *cmd = NULL, char* subItem = NULL);
 class Item
 {
   public:
@@ -107,7 +107,7 @@ class Item
   boolean Setup();
   void Stop();
   //int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL);
-  int Ctrl(itemCmd cmd, char* subItem=NULL);
+  int Ctrl(itemCmd cmd, char* subItem=NULL, bool allowRecursion = true);
   int Ctrl(char * payload,  char * subItem=NULL);
 
   int getArg(short n=0);
