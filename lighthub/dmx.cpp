@@ -298,7 +298,6 @@ void DMXOUT_propagate()
   #endif
 }
 
-
 void ArtnetSetup()
 {
 #ifdef _artnet
