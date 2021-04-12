@@ -1,0 +1,2 @@
+cscript.exe //nologo sed.vbs "s/void USART0_Handler(void)/void USART0_Handler(void ) __attribute__((weak)); void USART0_Handler(void )/" < %HOMEPATH%\.platformio\packages\framework-arduino-sam\variants\arduino_due_x\variant.cpp >variant.cpp
+rem move variant.cpp %HOMEPATH%\.platformio\packages\framework-arduino-sam\variants\arduino_due_x\

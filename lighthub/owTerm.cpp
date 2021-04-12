@@ -42,7 +42,7 @@ owChangedType owChanged;
 
 int owUpdate() {
 #ifndef OWIRE_DISABLE
-    unsigned long finish = millis() + OW_UPDATE_INTERVAL;
+    unsigned long finish = millis();// + OW_UPDATE_INTERVAL;
 /*
     if (oneWire->getError() == DS2482_ERROR_SHORT)
        {
@@ -54,7 +54,8 @@ int owUpdate() {
     if (oneWire) oneWire->reset_search();
     for (short i = 0; i < t_count; i++) wstat[i] &= ~SW_FIND; //absent
 
-    while (oneWire && oneWire->wireSearch(term[t_count]) > 0 && (t_count < t_max) && finish > millis()) {
+    while (oneWire && oneWire->wireSearch(term[t_count]) > 0 && (t_count < t_max)  && !isTimeOver(finish,millis(), OW_UPDATE_INTERVAL))//&& finish > millis()) 
+    {
         short ifind = -1;
         if (oneWire->crc8(term[t_count], 7) == term[t_count][7]) {
             for (short i = 0; i < t_count; i++)
@@ -95,6 +96,7 @@ int owSetup(owChangedType owCh) {
     if (oneWire) return true;    // Already initialized
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     debugSerial<<F("DS2482_100_I2C_TO_1W_BRIDGE init")<<endl;
+    debugSerial<<F("Free:")<<freeRam()<<endl;
     oneWire = new OneWire;
 #else
     debugSerial.print(F("One wire setup on PIN:"));
@@ -102,12 +104,25 @@ int owSetup(owChangedType owCh) {
     oneWire = new OneWire (USE_1W_PIN);
 #endif
 
+if (!oneWire)
+                {
+                    errorSerial<<F("Error 1-w init #1")<<endl;
+                    return false;
+                }
 // Pass our oneWire reference to Dallas Temperature.
 //    sensors = new DallasTemperature(oneWire);
 
     term = new DeviceAddress[t_max];
+    debugSerial<<F("Term. Free:")<<freeRam()<<endl;
 //regs = new    int [t_max];
     wstat = new uint16_t[t_max];
+    debugSerial<<F("wstat. Free:")<<freeRam()<<endl;
+if (!term || ! wstat)
+                {
+                    errorSerial<<F("Error 1-w init #2 Free:")<<freeRam()<<endl;
+                    return false;
+                }
+
     owChanged = owCh;
 
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
@@ -188,7 +203,12 @@ int sensors_loop(void) {
 
 
 void owLoop() {
-    if (millis() >= owTimer) owTimer = millis() + sensors_loop();
+    //if (millis() >= owTimer) owTimer = millis() + sensors_loop();
+    if (isTimeOver(owTimer,millis(),INTERVAL_1W))
+    {
+        sensors_loop();
+        owTimer=millis();
+    }
 }
 
 

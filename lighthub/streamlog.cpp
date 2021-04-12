@@ -1,6 +1,6 @@
 #include "streamlog.h"
 #include <Arduino.h>
-#include "utils.h"
+#include "statusled.h"
 
 #if defined (STATUSLED)
 extern statusLED LED;

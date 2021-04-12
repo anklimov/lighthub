@@ -1,0 +1,14 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classabstract_ch.html" title=" " alt="" coords="5,107,92,133"/>
+<area shape="rect" id="node2" href="$classabstract_in.html" title=" " alt="" coords="145,56,225,83"/>
+<area shape="rect" id="node5" href="$classabstract_out.html" title=" " alt="" coords="140,157,231,184"/>
+<area shape="rect" id="node3" href="$classin__ccs811.html" title=" " alt="" coords="287,5,369,32"/>
+<area shape="rect" id="node4" href="$classin__hdc1080.html" title=" " alt="" coords="284,56,372,83"/>
+<area shape="rect" id="node6" href="$classcolor_channel.html" title=" " alt="" coords="279,107,377,133"/>
+<area shape="rect" id="node10" href="$classout___a_c.html" title=" " alt="" coords="295,157,361,184"/>
+<area shape="rect" id="node11" href="$classout___modbus.html" title=" " alt="" coords="281,208,375,235"/>
+<area shape="rect" id="node12" href="$classout___motor.html" title=" " alt="" coords="288,259,368,285"/>
+<area shape="rect" id="node7" href="$classout__dmx.html" title=" " alt="" coords="435,56,507,83"/>
+<area shape="rect" id="node8" href="$classout__pwm.html" title=" " alt="" coords="433,107,508,133"/>
+<area shape="rect" id="node9" href="$classout___s_p_i_led.html" title=" " alt="" coords="425,157,516,184"/>
+</map>

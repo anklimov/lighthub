@@ -1,0 +1,265 @@
+\hypertarget{utils_8cpp}{}\doxysection{utils.\+cpp File Reference}
+\label{utils_8cpp}\index{utils.cpp@{utils.cpp}}
+{\ttfamily \#include \char`\"{}utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}options.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}stdarg.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$Wire.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}main.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}item.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$Pub\+Sub\+Client.\+h$>$}\newline
+Include dependency graph for utils.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{utils_8cpp__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{utils_8cpp_ab124609cb16e44db8bf5c1ac5932044f}{A\+R\+D\+B\+U\+F\+F\+ER}}~16
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{utils_8cpp_ab5fb614b925280fc7c8d0e5314dd3b7a}{Print\+Bytes}} (uint8\+\_\+t $\ast$addr, uint8\+\_\+t count, bool newline)
+\item 
+void \mbox{\hyperlink{utils_8cpp_a85a33f14fc0eefef02be4c6bacf5c8f0}{Set\+Bytes}} (uint8\+\_\+t $\ast$addr, uint8\+\_\+t count, char $\ast$out)
+\item 
+byte \mbox{\hyperlink{utils_8cpp_a4cafbb82e446669dd50a2a386c1531fd}{H\+E\+X2\+D\+EC}} (char i)
+\item 
+void \mbox{\hyperlink{utils_8cpp_a4dd6705cb24a3eab32d9abc8393844b3}{Set\+Addr}} (char $\ast$out, uint8\+\_\+t $\ast$addr)
+\item 
+int \mbox{\hyperlink{utils_8cpp_a6037cfc7913c0856e93dbf8fc2133aac}{get\+Int}} (char $\ast$$\ast$chan)
+\item 
+void \mbox{\hyperlink{utils_8cpp_a1938abf1ef99f35bd2578e3db1bcf7b8}{parse\+Bytes}} (const char $\ast$str, char separator, byte $\ast$bytes, int max\+Bytes, int base)
+\item 
+void \mbox{\hyperlink{utils_8cpp_a6c16341dd45c4e557f951818d8d09810}{print\+Float\+Value\+To\+Str}} (float value, char $\ast$valstr)
+\item 
+int \mbox{\hyperlink{utils_8cpp_aadf1050416e46077ad59157173438dad}{log}} (const char $\ast$str,...)
+\item 
+\mbox{\hyperlink{utils_8cpp_abf2ee9f926c45315d1a91ae9d4bdba26}{\+\_\+\+\_\+attribute\+\_\+\+\_\+}} ((section(\char`\"{}.ramfunc\char`\"{}))) void \mbox{\hyperlink{utils_8h_a1380fbc9c2170180770dd1bdcc5ac647}{Read\+Unique\+ID}}(uint32\+\_\+t $\ast$pdw\+Unique\+ID)
+\item 
+int \mbox{\hyperlink{utils_8cpp_a2abeec32a0c7fe0b4aa02a8807ed9cee}{inet\+\_\+aton}} (const char $\ast$a\+I\+P\+Addr\+String, I\+P\+Address \&a\+Result)
+\item 
+char $\ast$ \mbox{\hyperlink{utils_8cpp_a5f3cdb518da692b8859ae48ed58196fc}{inet\+\_\+ntoa\+\_\+r}} (I\+P\+Address addr, char $\ast$buf, int buflen)
+\item 
+void \mbox{\hyperlink{utils_8cpp_af0df006a5ae8d0d730134afdaf1c64dd}{print\+I\+P\+Address}} (I\+P\+Address ip\+Address)
+\item 
+char $\ast$ \mbox{\hyperlink{utils_8cpp_ab33cdb70ba57128d05b7efe3317b5a82}{set\+Topic}} (char $\ast$buf, int8\+\_\+t buflen, \mbox{\hyperlink{utils_8h_a2598bacb04e8f77e8b41cee61ef359fc}{topic\+Type}} tt, const char $\ast$suffix)
+\item 
+void \mbox{\hyperlink{utils_8cpp_afb183532261be04b86e9e535010db6a9}{print\+Ulong\+Value\+To\+Str}} (char $\ast$valstr, unsigned long value)
+\item 
+void \mbox{\hyperlink{utils_8cpp_af585ed9b15b9980b72fbec6d9c9dba67}{scan\+\_\+i2c\+\_\+bus}} ()
+\item 
+bool \mbox{\hyperlink{utils_8cpp_a1c013af2ccb8a6dd130f0ab706b1abc4}{is\+Time\+Over}} (uint32\+\_\+t timestamp, uint32\+\_\+t curr\+Time, uint32\+\_\+t time, uint32\+\_\+t modulo)
+\item 
+bool \mbox{\hyperlink{utils_8cpp_a132faa838403a6db82d1e7e65d4c4ff2}{execute\+Command}} (a\+Json\+Object $\ast$cmd, int8\+\_\+t toggle)
+\item 
+bool \mbox{\hyperlink{utils_8cpp_a2cd15a22b2799d0378a27850c96c6300}{execute\+Command}} (a\+Json\+Object $\ast$cmd, int8\+\_\+t toggle, \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \+\_\+item\+Cmd)
+\item 
+\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{utils_8cpp_ace8fa23ff29c3feb89c5d500ef87b914}{map\+Int}} (int32\+\_\+t arg, a\+Json\+Object $\ast$map)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+int8\+\_\+t \mbox{\hyperlink{utils_8cpp_a58655351bd1d5333e5eb92d4c29f4263}{config\+Locked}}
+\item 
+int8\+\_\+t \mbox{\hyperlink{utils_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}{ethernet\+Idle\+Count}}
+\item 
+Pub\+Sub\+Client \mbox{\hyperlink{utils_8cpp_a86d63f481644da70f063c2593fcafe19}{mqtt\+Client}}
+\item 
+const char out\+Topic\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{utils_8cpp_a3ec4211471d85792b3cb9f0fc8082b4c}{P\+R\+O\+G\+M\+EM}} = \mbox{\hyperlink{options_8h_ad41dc04ab9a3863ee0d70153e844c92a}{O\+U\+T\+T\+O\+P\+IC}}
+\item 
+char $\ast$ \mbox{\hyperlink{utils_8cpp_a5da66826e811349c98b2daf2bafb78c2}{device\+Name}}
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{utils_8cpp_addabf1c5a7be47e4e89beb38a435cb51}{topics}}
+\item 
+const char \mbox{\hyperlink{utils_8cpp_a0317be66119cccdb71b5276f914cef50}{H\+E\+X\+S\+TR}} \mbox{[}$\,$\mbox{]} = \char`\"{}0123456789A\+B\+C\+D\+EF\char`\"{}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{utils_8cpp_ab124609cb16e44db8bf5c1ac5932044f}\label{utils_8cpp_ab124609cb16e44db8bf5c1ac5932044f}} 
+\index{utils.cpp@{utils.cpp}!ARDBUFFER@{ARDBUFFER}}
+\index{ARDBUFFER@{ARDBUFFER}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{ARDBUFFER}{ARDBUFFER}}
+{\footnotesize\ttfamily \#define A\+R\+D\+B\+U\+F\+F\+ER~16}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{utils_8cpp_abf2ee9f926c45315d1a91ae9d4bdba26}\label{utils_8cpp_abf2ee9f926c45315d1a91ae9d4bdba26}} 
+\index{utils.cpp@{utils.cpp}!\_\_attribute\_\_@{\_\_attribute\_\_}}
+\index{\_\_attribute\_\_@{\_\_attribute\_\_}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{\_\_attribute\_\_()}{\_\_attribute\_\_()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+attribute\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{(section(\char`\"{}.ramfunc\char`\"{}))}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a132faa838403a6db82d1e7e65d4c4ff2}\label{utils_8cpp_a132faa838403a6db82d1e7e65d4c4ff2}} 
+\index{utils.cpp@{utils.cpp}!executeCommand@{executeCommand}}
+\index{executeCommand@{executeCommand}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{executeCommand()}{executeCommand()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily bool execute\+Command (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{cmd,  }\item[{int8\+\_\+t}]{toggle }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a2cd15a22b2799d0378a27850c96c6300}\label{utils_8cpp_a2cd15a22b2799d0378a27850c96c6300}} 
+\index{utils.cpp@{utils.cpp}!executeCommand@{executeCommand}}
+\index{executeCommand@{executeCommand}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{executeCommand()}{executeCommand()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily bool execute\+Command (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{cmd,  }\item[{int8\+\_\+t}]{toggle,  }\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{\+\_\+item\+Cmd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a6037cfc7913c0856e93dbf8fc2133aac}\label{utils_8cpp_a6037cfc7913c0856e93dbf8fc2133aac}} 
+\index{utils.cpp@{utils.cpp}!getInt@{getInt}}
+\index{getInt@{getInt}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{getInt()}{getInt()}}
+{\footnotesize\ttfamily int get\+Int (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{chan }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a4cafbb82e446669dd50a2a386c1531fd}\label{utils_8cpp_a4cafbb82e446669dd50a2a386c1531fd}} 
+\index{utils.cpp@{utils.cpp}!HEX2DEC@{HEX2DEC}}
+\index{HEX2DEC@{HEX2DEC}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{HEX2DEC()}{HEX2DEC()}}
+{\footnotesize\ttfamily byte H\+E\+X2\+D\+EC (\begin{DoxyParamCaption}\item[{char}]{i }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a2abeec32a0c7fe0b4aa02a8807ed9cee}\label{utils_8cpp_a2abeec32a0c7fe0b4aa02a8807ed9cee}} 
+\index{utils.cpp@{utils.cpp}!inet\_aton@{inet\_aton}}
+\index{inet\_aton@{inet\_aton}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{inet\_aton()}{inet\_aton()}}
+{\footnotesize\ttfamily int inet\+\_\+aton (\begin{DoxyParamCaption}\item[{const char $\ast$}]{a\+I\+P\+Addr\+String,  }\item[{I\+P\+Address \&}]{a\+Result }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a5f3cdb518da692b8859ae48ed58196fc}\label{utils_8cpp_a5f3cdb518da692b8859ae48ed58196fc}} 
+\index{utils.cpp@{utils.cpp}!inet\_ntoa\_r@{inet\_ntoa\_r}}
+\index{inet\_ntoa\_r@{inet\_ntoa\_r}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{inet\_ntoa\_r()}{inet\_ntoa\_r()}}
+{\footnotesize\ttfamily char$\ast$ inet\+\_\+ntoa\+\_\+r (\begin{DoxyParamCaption}\item[{I\+P\+Address}]{addr,  }\item[{char $\ast$}]{buf,  }\item[{int}]{buflen }\end{DoxyParamCaption})}
+
+Same as ipaddr\+\_\+ntoa, but reentrant since a user-\/supplied buffer is used.
+
+
+\begin{DoxyParams}{Parameters}
+{\em addr} & ip address in network order to convert \\
+\hline
+{\em buf} & target buffer where the string is stored \\
+\hline
+{\em buflen} & length of buf \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+either pointer to buf which now holds the A\+S\+C\+II representation of addr or N\+U\+LL if buf was too small 
+\end{DoxyReturn}
+\mbox{\Hypertarget{utils_8cpp_a1c013af2ccb8a6dd130f0ab706b1abc4}\label{utils_8cpp_a1c013af2ccb8a6dd130f0ab706b1abc4}} 
+\index{utils.cpp@{utils.cpp}!isTimeOver@{isTimeOver}}
+\index{isTimeOver@{isTimeOver}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{isTimeOver()}{isTimeOver()}}
+{\footnotesize\ttfamily bool is\+Time\+Over (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{timestamp,  }\item[{uint32\+\_\+t}]{curr\+Time,  }\item[{uint32\+\_\+t}]{time,  }\item[{uint32\+\_\+t}]{modulo }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_aadf1050416e46077ad59157173438dad}\label{utils_8cpp_aadf1050416e46077ad59157173438dad}} 
+\index{utils.cpp@{utils.cpp}!log@{log}}
+\index{log@{log}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{log()}{log()}}
+{\footnotesize\ttfamily int log (\begin{DoxyParamCaption}\item[{const char $\ast$}]{str,  }\item[{}]{... }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_ace8fa23ff29c3feb89c5d500ef87b914}\label{utils_8cpp_ace8fa23ff29c3feb89c5d500ef87b914}} 
+\index{utils.cpp@{utils.cpp}!mapInt@{mapInt}}
+\index{mapInt@{mapInt}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{mapInt()}{mapInt()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} map\+Int (\begin{DoxyParamCaption}\item[{int32\+\_\+t}]{arg,  }\item[{a\+Json\+Object $\ast$}]{map }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a1938abf1ef99f35bd2578e3db1bcf7b8}\label{utils_8cpp_a1938abf1ef99f35bd2578e3db1bcf7b8}} 
+\index{utils.cpp@{utils.cpp}!parseBytes@{parseBytes}}
+\index{parseBytes@{parseBytes}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{parseBytes()}{parseBytes()}}
+{\footnotesize\ttfamily void parse\+Bytes (\begin{DoxyParamCaption}\item[{const char $\ast$}]{str,  }\item[{char}]{separator,  }\item[{byte $\ast$}]{bytes,  }\item[{int}]{max\+Bytes,  }\item[{int}]{base }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_ab5fb614b925280fc7c8d0e5314dd3b7a}\label{utils_8cpp_ab5fb614b925280fc7c8d0e5314dd3b7a}} 
+\index{utils.cpp@{utils.cpp}!PrintBytes@{PrintBytes}}
+\index{PrintBytes@{PrintBytes}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{PrintBytes()}{PrintBytes()}}
+{\footnotesize\ttfamily void Print\+Bytes (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{addr,  }\item[{uint8\+\_\+t}]{count,  }\item[{bool}]{newline }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a6c16341dd45c4e557f951818d8d09810}\label{utils_8cpp_a6c16341dd45c4e557f951818d8d09810}} 
+\index{utils.cpp@{utils.cpp}!printFloatValueToStr@{printFloatValueToStr}}
+\index{printFloatValueToStr@{printFloatValueToStr}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{printFloatValueToStr()}{printFloatValueToStr()}}
+{\footnotesize\ttfamily void print\+Float\+Value\+To\+Str (\begin{DoxyParamCaption}\item[{float}]{value,  }\item[{char $\ast$}]{valstr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_af0df006a5ae8d0d730134afdaf1c64dd}\label{utils_8cpp_af0df006a5ae8d0d730134afdaf1c64dd}} 
+\index{utils.cpp@{utils.cpp}!printIPAddress@{printIPAddress}}
+\index{printIPAddress@{printIPAddress}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{printIPAddress()}{printIPAddress()}}
+{\footnotesize\ttfamily void print\+I\+P\+Address (\begin{DoxyParamCaption}\item[{I\+P\+Address}]{ip\+Address }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_afb183532261be04b86e9e535010db6a9}\label{utils_8cpp_afb183532261be04b86e9e535010db6a9}} 
+\index{utils.cpp@{utils.cpp}!printUlongValueToStr@{printUlongValueToStr}}
+\index{printUlongValueToStr@{printUlongValueToStr}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{printUlongValueToStr()}{printUlongValueToStr()}}
+{\footnotesize\ttfamily void print\+Ulong\+Value\+To\+Str (\begin{DoxyParamCaption}\item[{char $\ast$}]{valstr,  }\item[{unsigned long}]{value }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_af585ed9b15b9980b72fbec6d9c9dba67}\label{utils_8cpp_af585ed9b15b9980b72fbec6d9c9dba67}} 
+\index{utils.cpp@{utils.cpp}!scan\_i2c\_bus@{scan\_i2c\_bus}}
+\index{scan\_i2c\_bus@{scan\_i2c\_bus}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{scan\_i2c\_bus()}{scan\_i2c\_bus()}}
+{\footnotesize\ttfamily void scan\+\_\+i2c\+\_\+bus (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a4dd6705cb24a3eab32d9abc8393844b3}\label{utils_8cpp_a4dd6705cb24a3eab32d9abc8393844b3}} 
+\index{utils.cpp@{utils.cpp}!SetAddr@{SetAddr}}
+\index{SetAddr@{SetAddr}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{SetAddr()}{SetAddr()}}
+{\footnotesize\ttfamily void Set\+Addr (\begin{DoxyParamCaption}\item[{char $\ast$}]{out,  }\item[{uint8\+\_\+t $\ast$}]{addr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a85a33f14fc0eefef02be4c6bacf5c8f0}\label{utils_8cpp_a85a33f14fc0eefef02be4c6bacf5c8f0}} 
+\index{utils.cpp@{utils.cpp}!SetBytes@{SetBytes}}
+\index{SetBytes@{SetBytes}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{SetBytes()}{SetBytes()}}
+{\footnotesize\ttfamily void Set\+Bytes (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{addr,  }\item[{uint8\+\_\+t}]{count,  }\item[{char $\ast$}]{out }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_ab33cdb70ba57128d05b7efe3317b5a82}\label{utils_8cpp_ab33cdb70ba57128d05b7efe3317b5a82}} 
+\index{utils.cpp@{utils.cpp}!setTopic@{setTopic}}
+\index{setTopic@{setTopic}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{setTopic()}{setTopic()}}
+{\footnotesize\ttfamily char$\ast$ set\+Topic (\begin{DoxyParamCaption}\item[{char $\ast$}]{buf,  }\item[{int8\+\_\+t}]{buflen,  }\item[{\mbox{\hyperlink{utils_8h_a2598bacb04e8f77e8b41cee61ef359fc}{topic\+Type}}}]{tt,  }\item[{const char $\ast$}]{suffix }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{utils_8cpp_a58655351bd1d5333e5eb92d4c29f4263}\label{utils_8cpp_a58655351bd1d5333e5eb92d4c29f4263}} 
+\index{utils.cpp@{utils.cpp}!configLocked@{configLocked}}
+\index{configLocked@{configLocked}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{configLocked}{configLocked}}
+{\footnotesize\ttfamily int8\+\_\+t config\+Locked\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{utils_8cpp_a5da66826e811349c98b2daf2bafb78c2}\label{utils_8cpp_a5da66826e811349c98b2daf2bafb78c2}} 
+\index{utils.cpp@{utils.cpp}!deviceName@{deviceName}}
+\index{deviceName@{deviceName}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{deviceName}{deviceName}}
+{\footnotesize\ttfamily char$\ast$ device\+Name\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{utils_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}\label{utils_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}} 
+\index{utils.cpp@{utils.cpp}!ethernetIdleCount@{ethernetIdleCount}}
+\index{ethernetIdleCount@{ethernetIdleCount}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{ethernetIdleCount}{ethernetIdleCount}}
+{\footnotesize\ttfamily int8\+\_\+t ethernet\+Idle\+Count\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{utils_8cpp_a0317be66119cccdb71b5276f914cef50}\label{utils_8cpp_a0317be66119cccdb71b5276f914cef50}} 
+\index{utils.cpp@{utils.cpp}!HEXSTR@{HEXSTR}}
+\index{HEXSTR@{HEXSTR}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{HEXSTR}{HEXSTR}}
+{\footnotesize\ttfamily const char H\+E\+X\+S\+TR\mbox{[}$\,$\mbox{]} = \char`\"{}0123456789A\+B\+C\+D\+EF\char`\"{}}
+
+\mbox{\Hypertarget{utils_8cpp_a86d63f481644da70f063c2593fcafe19}\label{utils_8cpp_a86d63f481644da70f063c2593fcafe19}} 
+\index{utils.cpp@{utils.cpp}!mqttClient@{mqttClient}}
+\index{mqttClient@{mqttClient}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{mqttClient}{mqttClient}}
+{\footnotesize\ttfamily Pub\+Sub\+Client mqtt\+Client\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{utils_8cpp_a3ec4211471d85792b3cb9f0fc8082b4c}\label{utils_8cpp_a3ec4211471d85792b3cb9f0fc8082b4c}} 
+\index{utils.cpp@{utils.cpp}!PROGMEM@{PROGMEM}}
+\index{PROGMEM@{PROGMEM}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{PROGMEM}{PROGMEM}}
+{\footnotesize\ttfamily const char home\+Topic \mbox{[}$\,$\mbox{]} P\+R\+O\+G\+M\+EM = \mbox{\hyperlink{options_8h_ad41dc04ab9a3863ee0d70153e844c92a}{O\+U\+T\+T\+O\+P\+IC}}}
+
+\mbox{\Hypertarget{utils_8cpp_addabf1c5a7be47e4e89beb38a435cb51}\label{utils_8cpp_addabf1c5a7be47e4e89beb38a435cb51}} 
+\index{utils.cpp@{utils.cpp}!topics@{topics}}
+\index{topics@{topics}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{topics}{topics}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ topics\hspace{0.3cm}{\ttfamily [extern]}}
+

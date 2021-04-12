@@ -1,0 +1,107 @@
+\hypertarget{classabstract_out}{}\doxysection{abstract\+Out Class Reference}
+\label{classabstract_out}\index{abstractOut@{abstractOut}}
+
+
+{\ttfamily \#include $<$abstractout.\+h$>$}
+
+
+
+Inheritance diagram for abstract\+Out\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{classabstract_out__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for abstract\+Out\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=148pt]{classabstract_out__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classabstract_out_adec371468752bd5027c282cf933ba035}{abstract\+Out}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
+\item 
+virtual int \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true)=0
+\item 
+virtual int \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{is\+Active}} ()
+\item 
+virtual int \mbox{\hyperlink{classabstract_out_aedf98f968abc36332dcddb7eab00fe13}{get\+Default\+On\+Val}} ()
+\item 
+virtual int \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}{get\+Chan\+Type}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_item}{Item}} $\ast$ \mbox{\hyperlink{classabstract_out_af93f193ac2f0621d0ba08f1f1d11e8b7}{item}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classabstract_out_adec371468752bd5027c282cf933ba035}\label{classabstract_out_adec371468752bd5027c282cf933ba035}} 
+\index{abstractOut@{abstractOut}!abstractOut@{abstractOut}}
+\index{abstractOut@{abstractOut}!abstractOut@{abstractOut}}
+\doxysubsubsection{\texorpdfstring{abstractOut()}{abstractOut()}}
+{\footnotesize\ttfamily abstract\+Out\+::abstract\+Out (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_item}{Item}} $\ast$}]{\+\_\+item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}\label{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}} 
+\index{abstractOut@{abstractOut}!Ctrl@{Ctrl}}
+\index{Ctrl@{Ctrl}!abstractOut@{abstractOut}}
+\doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}}
+{\footnotesize\ttfamily virtual int abstract\+Out\+::\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{to\+Execute = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classout___motor_aa731e4d1848e07ac7dc4a99a0ddad942}{out\+\_\+\+Motor}}, \mbox{\hyperlink{classout___modbus_a784be57c40d67b41488b9585fe792019}{out\+\_\+\+Modbus}}, \mbox{\hyperlink{classout___a_c_aeaf2ac4088b2b4b2fd4e1b83755c9964}{out\+\_\+\+AC}}, and \mbox{\hyperlink{classcolor_channel_a9d7354cc266c98067b7b43cbf8707feb}{color\+Channel}}.
+
+\mbox{\Hypertarget{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}\label{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}} 
+\index{abstractOut@{abstractOut}!getChanType@{getChanType}}
+\index{getChanType@{getChanType}!abstractOut@{abstractOut}}
+\doxysubsubsection{\texorpdfstring{getChanType()}{getChanType()}}
+{\footnotesize\ttfamily virtual int abstract\+Out\+::get\+Chan\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classout___s_p_i_led_aac304bcdc354a3667ec99d4c06513b72}{out\+\_\+\+S\+P\+I\+Led}}, \mbox{\hyperlink{classout__pwm_a54bea9682560aa628f85a532a363d57a}{out\+\_\+pwm}}, \mbox{\hyperlink{classout___motor_afd67d9b6e08f14074a236d5222809226}{out\+\_\+\+Motor}}, \mbox{\hyperlink{classout___modbus_a2752cf2376840f3763572963be8785db}{out\+\_\+\+Modbus}}, and \mbox{\hyperlink{classout__dmx_a575351786cdc191555757cd39b4382f5}{out\+\_\+dmx}}.
+
+\mbox{\Hypertarget{classabstract_out_aedf98f968abc36332dcddb7eab00fe13}\label{classabstract_out_aedf98f968abc36332dcddb7eab00fe13}} 
+\index{abstractOut@{abstractOut}!getDefaultOnVal@{getDefaultOnVal}}
+\index{getDefaultOnVal@{getDefaultOnVal}!abstractOut@{abstractOut}}
+\doxysubsubsection{\texorpdfstring{getDefaultOnVal()}{getDefaultOnVal()}}
+{\footnotesize\ttfamily virtual int abstract\+Out\+::get\+Default\+On\+Val (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}\label{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}} 
+\index{abstractOut@{abstractOut}!isActive@{isActive}}
+\index{isActive@{isActive}!abstractOut@{abstractOut}}
+\doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
+{\footnotesize\ttfamily virtual int abstract\+Out\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classout___s_p_i_led_ae87041b49ca8c6484a72c3c29955fbfb}{out\+\_\+\+S\+P\+I\+Led}}, \mbox{\hyperlink{classout__pwm_a18f9c90ab80a5bf00049e25c2c4657a5}{out\+\_\+pwm}}, \mbox{\hyperlink{classout___motor_ac2a224d74421c1a28d34a83779a45bdc}{out\+\_\+\+Motor}}, \mbox{\hyperlink{classout___modbus_a6b94efbbbbea5a4ad3b489dba8f9b268}{out\+\_\+\+Modbus}}, \mbox{\hyperlink{classout__dmx_a691d16146df96df12df763a90cdc6d92}{out\+\_\+dmx}}, and \mbox{\hyperlink{classout___a_c_ab2d5debf137c9cc91ce0b58a72da0766}{out\+\_\+\+AC}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classabstract_out_af93f193ac2f0621d0ba08f1f1d11e8b7}\label{classabstract_out_af93f193ac2f0621d0ba08f1f1d11e8b7}} 
+\index{abstractOut@{abstractOut}!item@{item}}
+\index{item@{item}!abstractOut@{abstractOut}}
+\doxysubsubsection{\texorpdfstring{item}{item}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_item}{Item}}$\ast$ abstract\+Out\+::item\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{abstractout_8h}{abstractout.\+h}}\end{DoxyCompactItemize}

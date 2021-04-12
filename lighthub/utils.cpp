@@ -106,6 +106,40 @@ int getInt(char **chan) {
 }
 
 
+// chan is pointer to pointer to string
+// Function return first retrived number and move pointer to position next after ','
+itemCmd getNumber(char **chan) {
+    itemCmd val(ST_TENS,CMD_VOID);
+    int fract =0; 
+    if (chan && *chan && **chan)
+    {
+    //Skip non-numeric values
+    while (**chan && !(**chan == '-' || (**chan >= '0' && **chan<='9'))) *chan += 1;
+    int ch = atoi(*chan);
+    
+    char * fractptr = strchr(*chan,'.');
+    if (fractptr) 
+    {
+      //  fract = atoi(fractptr);
+      //  *chan = fractptr;
+      fractptr += 1;
+      fract = constrain(*fractptr-'0',0,9);
+    }
+    
+    //Move pointer to next element (after ,)
+    *chan = strchr(*chan, ',');
+    if (*chan) *chan += 1;
+    //Serial.print(F("Par:")); Serial.println(ch);
+    
+    if (fract)
+      val.Tens(ch*10+((ch>0)?fract:-fract));
+    else
+      val.Int((int32_t)ch);
+   }
+   //val.debugOut();
+   return val;
+}
+
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
 unsigned long freeRam ()
 {return system_get_free_heap_size();}
@@ -525,14 +559,14 @@ bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t m
 
 bool executeCommand(aJsonObject* cmd, int8_t toggle)
 {
-  itemCmd _itemCmd;
-  _itemCmd.type = ST_VOID;
-  return executeCommand(cmd,toggle,_itemCmd);
+  //itemCmd _itemCmd;
+  return executeCommand(cmd,toggle,itemCmd());
 }
 
 bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd)
 //bool executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
 {
+if (!cmd) return 0;    
 switch (cmd->type)
 {
   case aJson_String: //legacy - no action
@@ -551,6 +585,9 @@ switch (cmd->type)
   break;
   case aJson_Object:
 {
+aJsonObject *act = aJson.getObjectItem(cmd, "act");            
+if (act) return executeCommand(act,toggle,_itemCmd);
+
 aJsonObject *item = aJson.getObjectItem(cmd, "item");
 aJsonObject *emit = aJson.getObjectItem(cmd, "emit");
 aJsonObject *icmd = NULL;
@@ -570,17 +607,21 @@ switch (toggle)
     if (!ecmd) ecmd = aJson.getObjectItem(cmd, "ecmd");
   }
 
-char * itemCommand;
+char * itemCommand = NULL;
 char Buffer[16];
 if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
-  else    itemCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
+  //else    itemCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
 
 char * emitCommand;
 if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
   else    emitCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
 
 //debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
-if (item) debugSerial << item->valuestring<< F(" -> ")<<itemCommand<<endl;
+if (item) {
+            if (itemCommand)
+                debugSerial << item->valuestring<< F(" -> ")<<itemCommand<<endl;
+            else debugSerial << item->valuestring<< F(" -> ");_itemCmd.debugOut();
+            }
 if (emit) debugSerial << emit->valuestring<< F(" -> ")<<emitCommand<<endl;
 
 
@@ -600,7 +641,7 @@ TODO implement
 #endif
 */
 
-{
+
 char addrstr[MQTT_TOPIC_LENGTH];
 strncpy(addrstr,emit->valuestring,sizeof(addrstr));
 if (mqttClient.connected() && !ethernetIdleCount)
@@ -608,12 +649,17 @@ if (mqttClient.connected() && !ethernetIdleCount)
 if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
 mqttClient.publish(addrstr, emitCommand , true);
 }
-}
+
 } // emit
-if (item && itemCommand && item->type == aJson_String) {
+
+if (item &&  item->type == aJson_String) {
   //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
     Item it(item->valuestring);
-    if (it.isValid()) it.Ctrl(itemCommand);
+    if (it.isValid()) 
+       {
+       if (itemCommand) it.Ctrl(itemCommand);
+          else it.Ctrl(_itemCmd);
+       }
     }
 return true;
 }
@@ -630,71 +676,11 @@ itemCmd mapInt(int32_t arg, aJsonObject* map)
   return _itemCmd.Int(arg);
 }
 
-statusLED::statusLED(uint8_t pattern)
+unsigned long millisNZ(uint8_t shift)
 {
-#if defined (STATUSLED)
-  pinMode(pinRED, OUTPUT);
-  pinMode(pinGREEN, OUTPUT);
-  pinMode(pinBLUE, OUTPUT);
-  set(pattern);
-  timestamp=millis()+ledDelayms;
-#endif
-}
-
-void statusLED::show (uint8_t pattern)
-{
-#if defined (STATUSLED)
-    digitalWrite(pinRED,(pattern & ledRED)?HIGH:LOW );
-    digitalWrite(pinGREEN,(pattern & ledGREEN)?HIGH:LOW);
-    digitalWrite(pinBLUE,(pattern & ledBLUE)?HIGH:LOW);
-#endif
-}
-
-void statusLED::set (uint8_t pattern)
-{
-#if defined (STATUSLED)
-    short newStat = pattern & ledParams;
-
-    if (newStat!=(curStat & ledParams))
-    {
-    //if (!(curStat & ledHidden))
-    show(pattern);
-    curStat=newStat | (curStat & ~ledParams);
-    }
-#endif
-}
-
-void statusLED::flash(uint8_t pattern)
-{
-#if defined (STATUSLED)
-  show(pattern);
-  curStat|=ledFlash;
-#endif
-}
-
-void statusLED::poll()
-{
-#if defined (STATUSLED)
-  if (curStat & ledFlash)
-    {
-      curStat&=~ledFlash;
-      show(curStat);
-    }
-if (millis()>timestamp)
-  {
-
-        if (curStat & ledFASTBLINK) timestamp=millis()+ledFastDelayms;
-                            else    timestamp=millis()+ledDelayms;
-
-    if (( curStat & ledBLINK) || (curStat & ledFASTBLINK))
-    {
-    curStat^=ledHidden;
-    if (curStat & ledHidden)
-        show(0);
-    else show(curStat);
-   }
-  }
-#endif
+ unsigned long now = millis()>>shift;
+ if (!now) now=1;
+ return now;
 }
 
 

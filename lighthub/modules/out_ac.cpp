@@ -129,7 +129,7 @@ void out_AC::InsertData(byte data[], size_t size){
   /////////////////////////////////
 
   publishTopic(item->itemArr->name,(long)set_tmp,"/set");
-  publishTopic(item->itemArr->name, (long)cur_tmp, "/temp");
+  if (cur_tmp!=255) publishTopic(item->itemArr->name, (long)cur_tmp, "/temp");
   ////////////////////////////////////
   s_mode[0]='\0';
 
@@ -148,6 +148,9 @@ void out_AC::InsertData(byte data[], size_t size){
   else if (mode == 0x04){
     strcpy_P(s_mode,DRY_P);
   }
+  else if (mode == 109){
+      strcpy_P(s_mode,ERROR_P);
+  }
 
   publishTopic(item->itemArr->name, (long) mode, "/mode");
 
@@ -155,7 +158,7 @@ void out_AC::InsertData(byte data[], size_t size){
       publishTopic(item->itemArr->name, s_mode,"/cmd");
 
   else publishTopic(item->itemArr->name, "OFF","/cmd");
-
+/*
   String raw_str;
   char raw[75];
   for (int i=0; i < 37; i++){
@@ -170,7 +173,7 @@ void out_AC::InsertData(byte data[], size_t size){
   raw_str.toCharArray(raw,75);
   publishTopic(item->itemArr->name, raw,"/raw");
   Serial.println(raw);
-
+*/
 ///////////////////////////////////
 }
 
@@ -210,6 +213,7 @@ inline unsigned char toHex( char ch ){
 
 int  out_AC::Setup()
 {
+abstractOut::Setup();    
 Serial.println("AC Init");
 AC_Serial.begin(9600);
 driverStatus = CST_INITIALIZED;
@@ -238,9 +242,10 @@ int out_AC::Poll(short cause)
 {
 if (cause!=POLLING_SLOW) return 0;
 
-long now = millis();
-  if (now - prevPolling > INTERVAL_AC_POLLING) {
-    prevPolling = now;
+//long now = millis();
+  //if (now - prevPolling > INTERVAL_AC_POLLING) {
+  if (isTimeOver(prevPolling,millis(),INTERVAL_AC_POLLING)) {
+    prevPolling = millisNZ();
     Serial.println ("Polling");
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
@@ -256,23 +261,28 @@ delay(100);
       InsertData(data, 37);
     }
   }
-return INTERVAL_POLLING;
+return INTERVAL_SLOW_POLLING;
 };
 
-int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
+//int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
+int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
 {char s_mode[10];
+  int suffixCode = cmd.getSuffix();
  // Some additional Subitems
        if (strcmp_P(subItem, LOCK_P) == 0) suffixCode = S_LOCK;
   else if (strcmp_P(subItem, SWING_P) == 0) suffixCode = S_SWING;
   else if (strcmp_P(subItem, QUIET_P) == 0) suffixCode = S_QUIET;
   else if (strcmp_P(subItem, RAW_P) == 0) suffixCode = S_RAW;
 
+  if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
+
  //data[B_POWER] = power;
   //    debugSerial<<F(".");
       switch(suffixCode)
       {
       case S_SET:
-          set_tmp = Parameters[0];
+      //case S_ESET:
+          set_tmp = cmd.getInt();
           if (set_tmp >= 10 && set_tmp <= 30)
           {
             data[B_SET_TMP] = set_tmp -16;
@@ -282,7 +292,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* su
 
       case S_CMD:
       s_mode[0]='\0';
-            switch (cmd)
+            switch (cmd.getCmd())
                 {
                   case CMD_ON:
                   case CMD_XON:
@@ -340,7 +350,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* su
 
       case S_FAN:
       s_mode[0]='\0';
-      switch (cmd)
+      switch (cmd.getCmd())
       {
       case CMD_AUTO:
       data[B_FAN_SPD] = 3;
@@ -359,18 +369,20 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* su
       strcpy_P(s_mode,LOW_P);
       break;
       default:
-      if (n) data[B_FAN_SPD] = Parameters[0];
+      //if (n) data[B_FAN_SPD] = Parameters[0];
+      data[B_FAN_SPD] = cmd.getInt();
       //TODO - mapping digits to speed
       }
       publishTopic(item->itemArr->name,s_mode,"/fan");
       break;
 
       case S_MODE:
-      data[B_MODE]    = Parameters[0];
+      //data[B_MODE]    = Parameters[0];
+      data[B_MODE]    = cmd.getInt();
       break;
 
       case S_LOCK:
-      switch (cmd)
+      switch (cmd.getCmd())
           {
             case CMD_ON:
             data[B_LOCK_REM] = 80;
@@ -382,7 +394,7 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* su
       break;
 
       case S_SWING:
-      switch (cmd)
+      switch (cmd.getCmd())
           {
             case CMD_ON:
             data[B_LOCK_REM] = 3;
@@ -391,12 +403,13 @@ int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* su
             data[B_LOCK_REM] = 0;
             break;
             default:
-            if (n) data[B_SWING] = Parameters[0];
+            //if (n) data[B_SWING] = Parameters[0];
+            data[B_SWING] = cmd.getInt();
           }
       break;
 
       case S_QUIET:
-      switch (cmd)
+      switch (cmd.getCmd())
           {
             case CMD_ON:
             data[B_POWER] |= 8;

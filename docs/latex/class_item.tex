@@ -1,0 +1,457 @@
+\hypertarget{class_item}{}\doxysection{Item Class Reference}
+\label{class_item}\index{Item@{Item}}
+
+
+{\ttfamily \#include $<$item.\+h$>$}
+
+
+
+Collaboration diagram for Item\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=209pt]{class_item__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_item_ac6f9ffe686b184cd30fb9ff023af9d35}{Item}} (char $\ast$name)
+\item 
+\mbox{\hyperlink{class_item_a8df555ab7f99a4bc363204c10d946934}{Item}} (a\+Json\+Object $\ast$obj)
+\item 
+\mbox{\hyperlink{class_item_a11663c84075b78c3ae5e30fdfcd7c458}{$\sim$\+Item}} ()
+\item 
+boolean \mbox{\hyperlink{class_item_a3bbd12527ff3638189cae5291e578a96}{is\+Valid}} ()
+\item 
+boolean \mbox{\hyperlink{class_item_ae84f04e796546f4c34db79a060b0d443}{Setup}} ()
+\item 
+void \mbox{\hyperlink{class_item_ac382f69ca11e6eebfec1f40133fddd42}{Stop}} ()
+\item 
+int \mbox{\hyperlink{class_item_a821048224e300ab4bb9eb047bf859b2c}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL)
+\item 
+int \mbox{\hyperlink{class_item_a51166376e10786d0daf684ea85988b75}{Ctrl}} (char $\ast$payload, char $\ast$sub\+Item=N\+U\+LL)
+\item 
+int \mbox{\hyperlink{class_item_a04c95e83741aa896498ddbc869061886}{get\+Arg}} (short n=0)
+\item 
+short \mbox{\hyperlink{class_item_a9469cc0bb8560eb5f669d54903186433}{get\+Arg\+Count}} ()
+\item 
+long int \mbox{\hyperlink{class_item_aba81303d678129315e393e11319b5ec5}{get\+Val}} ()
+\item 
+uint8\+\_\+t \mbox{\hyperlink{class_item_ad00923c702189ad97c6af2c3c20150fa}{get\+Subtype}} ()
+\item 
+uint8\+\_\+t \mbox{\hyperlink{class_item_a25cddf040ae48d36375e54eb7fb31cf1}{get\+Cmd}} ()
+\item 
+long int \mbox{\hyperlink{class_item_ab27cd47af857151cb695f7a4b4000424}{get\+Ext}} ()
+\item 
+void \mbox{\hyperlink{class_item_ad4e62aba1f62917a8df4c47c2894a3ad}{set\+Ext}} (long int par)
+\item 
+\mbox{\hyperlink{classch_persistent}{ch\+Persistent}} $\ast$ \mbox{\hyperlink{class_item_ad1c452e68967188402a96a687aba6af0}{get\+Persistent}} ()
+\item 
+\mbox{\hyperlink{classch_persistent}{ch\+Persistent}} $\ast$ \mbox{\hyperlink{class_item_af023950bb9b9760b98c5de7287bc467d}{set\+Persistent}} (\mbox{\hyperlink{classch_persistent}{ch\+Persistent}} $\ast$par)
+\item 
+void \mbox{\hyperlink{class_item_a188910459fc0ded60ca268664bf9b212}{set\+Cmd}} (uint8\+\_\+t cmd\+Value)
+\item 
+short \mbox{\hyperlink{class_item_a15e9623fffd070c01c3dd87b1cc09ab3}{get\+Flag}} (short flag=\mbox{\hyperlink{item_cmd_8h_a890221cb651a3f30f6d1bca0d9b0e13d}{F\+L\+A\+G\+\_\+\+M\+A\+SK}})
+\item 
+void \mbox{\hyperlink{class_item_abd22bfa75e71849cc0fadcee9eef330d}{set\+Flag}} (short flag)
+\item 
+void \mbox{\hyperlink{class_item_a60c43acb3bd16c858ca4c1fa6b12145b}{clear\+Flag}} (short flag)
+\item 
+void \mbox{\hyperlink{class_item_ad2a38c039f8b3cee14cb97c9526d9260}{set\+Val}} (long int par)
+\item 
+void \mbox{\hyperlink{class_item_a47b261677ded48fb1c51088b9d956dcc}{set\+Subtype}} (uint8\+\_\+t par)
+\item 
+int \mbox{\hyperlink{class_item_aaa6500d9cdb58f9b20f6c2592da40739}{Poll}} (int cause)
+\item 
+int \mbox{\hyperlink{class_item_a525c4e3f723a85af5e818c1b5834e277}{Send\+Status}} (int send\+Flags)
+\item 
+int \mbox{\hyperlink{class_item_a4db79caf8ace960c0bf74181c0bf5faa}{is\+Active}} ()
+\item 
+int \mbox{\hyperlink{class_item_af1a89a9947e7759ce74f17d614346f46}{get\+Chan\+Type}} ()
+\item 
+int \mbox{\hyperlink{class_item_ac6a08d4c2352fa1284c4039441e380c5}{On}} ()
+\item 
+int \mbox{\hyperlink{class_item_a7cc492ae708197b9426c45b15eda714d}{Off}} ()
+\item 
+int \mbox{\hyperlink{class_item_a5ddbe231ea061c1001436dd5d57cc97b}{Toggle}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{class_item_a4332fe989485f159b4fefa871cc213b9}{item\+Arr}}
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{class_item_ab831f5a6f56b59761a8ee5dbf38c0999}{item\+Arg}}
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{class_item_aabf1180ef4ab072817a28020814bce48}{item\+Val}}
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{class_item_a39291138106342bc0d49ccfb125f7a95}{item\+Ext}}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{class_item_ae0bac41fded34ffbd1e3634e15772039}{item\+Type}}
+\item 
+\mbox{\hyperlink{classabstract_out}{abstract\+Out}} $\ast$ \mbox{\hyperlink{class_item_a93f339d62018da733bd6147797388eb2}{driver}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{class_item_a127a28254a55fbd7fcbcd37816afe163}{Vacom\+Set\+Fan}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} st)
+\item 
+int \mbox{\hyperlink{class_item_aa0f1f997dd794068562d43eb4a3911a6}{Vacom\+Set\+Heat}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} st)
+\begin{DoxyCompactList}\small\item\em move to float todo \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{class_item_a6a8cdb4d647ba278a55560cd91bfc031}{modbus\+Dimmer\+Set}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} st)
+\item 
+int \mbox{\hyperlink{class_item_a77913c1f28d823b1a096369e69cc5072}{modbus\+Dimmer\+Set}} (int addr, uint16\+\_\+t \+\_\+reg, int \+\_\+reg\+Type, int \+\_\+mask, uint16\+\_\+t value)
+\item 
+void \mbox{\hyperlink{class_item_a389156098d07ebdc5649668f61d87343}{mb\+\_\+fail}} ()
+\item 
+void \mbox{\hyperlink{class_item_abbcfb98227918e624be294409d21be3d}{Parse}} ()
+\item 
+int \mbox{\hyperlink{class_item_a899707e630b75eeb422fbc7ca3d829ce}{check\+Modbus\+Dimmer}} ()
+\item 
+int \mbox{\hyperlink{class_item_a2d807aa2a634312bde779e174e28c4ce}{check\+Modbus\+Dimmer}} (int \mbox{\hyperlink{out__ac_8cpp_a336725b3b566264f2223495f6294c3c7}{data}})
+\item 
+boolean \mbox{\hyperlink{class_item_a4454719134cb94ff27943cc35207fd74}{check\+Modbus\+Retry}} ()
+\item 
+boolean \mbox{\hyperlink{class_item_a353e817a01d39e0341fdc12b00351169}{check\+V\+C\+Retry}} ()
+\item 
+boolean \mbox{\hyperlink{class_item_a9fa6f17268398679295a57f7506089b8}{check\+Heat\+Retry}} ()
+\item 
+void \mbox{\hyperlink{class_item_af767f604dcaed8a497438255c28129fd}{send\+Delayed\+Status}} ()
+\item 
+int \mbox{\hyperlink{class_item_aac323dbba691d2a1ffd0b760fdc2198d}{check\+FM}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+char \mbox{\hyperlink{class_item_a21371d449e5e6669b3f0eb0e080a7132}{default\+Sub\+Item}} \mbox{[}10\mbox{]}
+\item 
+int \mbox{\hyperlink{class_item_a4ff75a860339d86b006960b750a593e6}{default\+Suffix\+Code}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_item_ac6f9ffe686b184cd30fb9ff023af9d35}\label{class_item_ac6f9ffe686b184cd30fb9ff023af9d35}} 
+\index{Item@{Item}!Item@{Item}}
+\index{Item@{Item}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{Item()}{Item()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Item\+::\+Item (\begin{DoxyParamCaption}\item[{char $\ast$}]{name }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a8df555ab7f99a4bc363204c10d946934}\label{class_item_a8df555ab7f99a4bc363204c10d946934}} 
+\index{Item@{Item}!Item@{Item}}
+\index{Item@{Item}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{Item()}{Item()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Item\+::\+Item (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a11663c84075b78c3ae5e30fdfcd7c458}\label{class_item_a11663c84075b78c3ae5e30fdfcd7c458}} 
+\index{Item@{Item}!````~Item@{$\sim$Item}}
+\index{````~Item@{$\sim$Item}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{$\sim$Item()}{~Item()}}
+{\footnotesize\ttfamily Item\+::$\sim$\+Item (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_item_aac323dbba691d2a1ffd0b760fdc2198d}\label{class_item_aac323dbba691d2a1ffd0b760fdc2198d}} 
+\index{Item@{Item}!checkFM@{checkFM}}
+\index{checkFM@{checkFM}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{checkFM()}{checkFM()}}
+{\footnotesize\ttfamily int Item\+::check\+FM (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a9fa6f17268398679295a57f7506089b8}\label{class_item_a9fa6f17268398679295a57f7506089b8}} 
+\index{Item@{Item}!checkHeatRetry@{checkHeatRetry}}
+\index{checkHeatRetry@{checkHeatRetry}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{checkHeatRetry()}{checkHeatRetry()}}
+{\footnotesize\ttfamily boolean Item\+::check\+Heat\+Retry (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a899707e630b75eeb422fbc7ca3d829ce}\label{class_item_a899707e630b75eeb422fbc7ca3d829ce}} 
+\index{Item@{Item}!checkModbusDimmer@{checkModbusDimmer}}
+\index{checkModbusDimmer@{checkModbusDimmer}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{checkModbusDimmer()}{checkModbusDimmer()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily int Item\+::check\+Modbus\+Dimmer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a2d807aa2a634312bde779e174e28c4ce}\label{class_item_a2d807aa2a634312bde779e174e28c4ce}} 
+\index{Item@{Item}!checkModbusDimmer@{checkModbusDimmer}}
+\index{checkModbusDimmer@{checkModbusDimmer}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{checkModbusDimmer()}{checkModbusDimmer()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily int Item\+::check\+Modbus\+Dimmer (\begin{DoxyParamCaption}\item[{int}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a4454719134cb94ff27943cc35207fd74}\label{class_item_a4454719134cb94ff27943cc35207fd74}} 
+\index{Item@{Item}!checkModbusRetry@{checkModbusRetry}}
+\index{checkModbusRetry@{checkModbusRetry}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{checkModbusRetry()}{checkModbusRetry()}}
+{\footnotesize\ttfamily boolean Item\+::check\+Modbus\+Retry (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a353e817a01d39e0341fdc12b00351169}\label{class_item_a353e817a01d39e0341fdc12b00351169}} 
+\index{Item@{Item}!checkVCRetry@{checkVCRetry}}
+\index{checkVCRetry@{checkVCRetry}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{checkVCRetry()}{checkVCRetry()}}
+{\footnotesize\ttfamily boolean Item\+::check\+V\+C\+Retry (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a60c43acb3bd16c858ca4c1fa6b12145b}\label{class_item_a60c43acb3bd16c858ca4c1fa6b12145b}} 
+\index{Item@{Item}!clearFlag@{clearFlag}}
+\index{clearFlag@{clearFlag}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{clearFlag()}{clearFlag()}}
+{\footnotesize\ttfamily void Item\+::clear\+Flag (\begin{DoxyParamCaption}\item[{short}]{flag }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a51166376e10786d0daf684ea85988b75}\label{class_item_a51166376e10786d0daf684ea85988b75}} 
+\index{Item@{Item}!Ctrl@{Ctrl}}
+\index{Ctrl@{Ctrl}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily int Item\+::\+Ctrl (\begin{DoxyParamCaption}\item[{char $\ast$}]{payload,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL} }\end{DoxyParamCaption})}
+
+possible problem here with truncated default\mbox{\Hypertarget{class_item_a821048224e300ab4bb9eb047bf859b2c}\label{class_item_a821048224e300ab4bb9eb047bf859b2c}} 
+\index{Item@{Item}!Ctrl@{Ctrl}}
+\index{Ctrl@{Ctrl}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily int Item\+::\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL} }\end{DoxyParamCaption})}
+
+possible problem here with truncated default
+
+thermo\+Set(name,cmd,\+Par1); all activities done -\/ update temp \& cmd\mbox{\Hypertarget{class_item_a04c95e83741aa896498ddbc869061886}\label{class_item_a04c95e83741aa896498ddbc869061886}} 
+\index{Item@{Item}!getArg@{getArg}}
+\index{getArg@{getArg}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{getArg()}{getArg()}}
+{\footnotesize\ttfamily int Item\+::get\+Arg (\begin{DoxyParamCaption}\item[{short}]{n = {\ttfamily 0} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a9469cc0bb8560eb5f669d54903186433}\label{class_item_a9469cc0bb8560eb5f669d54903186433}} 
+\index{Item@{Item}!getArgCount@{getArgCount}}
+\index{getArgCount@{getArgCount}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{getArgCount()}{getArgCount()}}
+{\footnotesize\ttfamily short Item\+::get\+Arg\+Count (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_af1a89a9947e7759ce74f17d614346f46}\label{class_item_af1a89a9947e7759ce74f17d614346f46}} 
+\index{Item@{Item}!getChanType@{getChanType}}
+\index{getChanType@{getChanType}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{getChanType()}{getChanType()}}
+{\footnotesize\ttfamily int Item\+::get\+Chan\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a25cddf040ae48d36375e54eb7fb31cf1}\label{class_item_a25cddf040ae48d36375e54eb7fb31cf1}} 
+\index{Item@{Item}!getCmd@{getCmd}}
+\index{getCmd@{getCmd}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{getCmd()}{getCmd()}}
+{\footnotesize\ttfamily uint8\+\_\+t Item\+::get\+Cmd (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_ab27cd47af857151cb695f7a4b4000424}\label{class_item_ab27cd47af857151cb695f7a4b4000424}} 
+\index{Item@{Item}!getExt@{getExt}}
+\index{getExt@{getExt}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{getExt()}{getExt()}}
+{\footnotesize\ttfamily long int Item\+::get\+Ext (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a15e9623fffd070c01c3dd87b1cc09ab3}\label{class_item_a15e9623fffd070c01c3dd87b1cc09ab3}} 
+\index{Item@{Item}!getFlag@{getFlag}}
+\index{getFlag@{getFlag}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{getFlag()}{getFlag()}}
+{\footnotesize\ttfamily short Item\+::get\+Flag (\begin{DoxyParamCaption}\item[{short}]{flag = {\ttfamily \mbox{\hyperlink{item_cmd_8h_a890221cb651a3f30f6d1bca0d9b0e13d}{F\+L\+A\+G\+\_\+\+M\+A\+SK}}} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_ad1c452e68967188402a96a687aba6af0}\label{class_item_ad1c452e68967188402a96a687aba6af0}} 
+\index{Item@{Item}!getPersistent@{getPersistent}}
+\index{getPersistent@{getPersistent}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{getPersistent()}{getPersistent()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classch_persistent}{ch\+Persistent}} $\ast$ Item\+::get\+Persistent (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_ad00923c702189ad97c6af2c3c20150fa}\label{class_item_ad00923c702189ad97c6af2c3c20150fa}} 
+\index{Item@{Item}!getSubtype@{getSubtype}}
+\index{getSubtype@{getSubtype}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{getSubtype()}{getSubtype()}}
+{\footnotesize\ttfamily uint8\+\_\+t Item\+::get\+Subtype (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_aba81303d678129315e393e11319b5ec5}\label{class_item_aba81303d678129315e393e11319b5ec5}} 
+\index{Item@{Item}!getVal@{getVal}}
+\index{getVal@{getVal}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{getVal()}{getVal()}}
+{\footnotesize\ttfamily long int Item\+::get\+Val (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a4db79caf8ace960c0bf74181c0bf5faa}\label{class_item_a4db79caf8ace960c0bf74181c0bf5faa}} 
+\index{Item@{Item}!isActive@{isActive}}
+\index{isActive@{isActive}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
+{\footnotesize\ttfamily int Item\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a3bbd12527ff3638189cae5291e578a96}\label{class_item_a3bbd12527ff3638189cae5291e578a96}} 
+\index{Item@{Item}!isValid@{isValid}}
+\index{isValid@{isValid}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{isValid()}{isValid()}}
+{\footnotesize\ttfamily boolean Item\+::is\+Valid (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a389156098d07ebdc5649668f61d87343}\label{class_item_a389156098d07ebdc5649668f61d87343}} 
+\index{Item@{Item}!mb\_fail@{mb\_fail}}
+\index{mb\_fail@{mb\_fail}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{mb\_fail()}{mb\_fail()}}
+{\footnotesize\ttfamily void Item\+::mb\+\_\+fail (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a77913c1f28d823b1a096369e69cc5072}\label{class_item_a77913c1f28d823b1a096369e69cc5072}} 
+\index{Item@{Item}!modbusDimmerSet@{modbusDimmerSet}}
+\index{modbusDimmerSet@{modbusDimmerSet}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{modbusDimmerSet()}{modbusDimmerSet()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily int Item\+::modbus\+Dimmer\+Set (\begin{DoxyParamCaption}\item[{int}]{addr,  }\item[{uint16\+\_\+t}]{\+\_\+reg,  }\item[{int}]{\+\_\+reg\+Type,  }\item[{int}]{\+\_\+mask,  }\item[{uint16\+\_\+t}]{value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a6a8cdb4d647ba278a55560cd91bfc031}\label{class_item_a6a8cdb4d647ba278a55560cd91bfc031}} 
+\index{Item@{Item}!modbusDimmerSet@{modbusDimmerSet}}
+\index{modbusDimmerSet@{modbusDimmerSet}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{modbusDimmerSet()}{modbusDimmerSet()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily int Item\+::modbus\+Dimmer\+Set (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{st }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a7cc492ae708197b9426c45b15eda714d}\label{class_item_a7cc492ae708197b9426c45b15eda714d}} 
+\index{Item@{Item}!Off@{Off}}
+\index{Off@{Off}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{Off()}{Off()}}
+{\footnotesize\ttfamily int Item\+::\+Off (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{class_item_ac6a08d4c2352fa1284c4039441e380c5}\label{class_item_ac6a08d4c2352fa1284c4039441e380c5}} 
+\index{Item@{Item}!On@{On}}
+\index{On@{On}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{On()}{On()}}
+{\footnotesize\ttfamily int Item\+::\+On (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{class_item_abbcfb98227918e624be294409d21be3d}\label{class_item_abbcfb98227918e624be294409d21be3d}} 
+\index{Item@{Item}!Parse@{Parse}}
+\index{Parse@{Parse}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{Parse()}{Parse()}}
+{\footnotesize\ttfamily void Item\+::\+Parse (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_aaa6500d9cdb58f9b20f6c2592da40739}\label{class_item_aaa6500d9cdb58f9b20f6c2592da40739}} 
+\index{Item@{Item}!Poll@{Poll}}
+\index{Poll@{Poll}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
+{\footnotesize\ttfamily int Item\+::\+Poll (\begin{DoxyParamCaption}\item[{int}]{cause }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_af767f604dcaed8a497438255c28129fd}\label{class_item_af767f604dcaed8a497438255c28129fd}} 
+\index{Item@{Item}!sendDelayedStatus@{sendDelayedStatus}}
+\index{sendDelayedStatus@{sendDelayedStatus}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{sendDelayedStatus()}{sendDelayedStatus()}}
+{\footnotesize\ttfamily void Item\+::send\+Delayed\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a525c4e3f723a85af5e818c1b5834e277}\label{class_item_a525c4e3f723a85af5e818c1b5834e277}} 
+\index{Item@{Item}!SendStatus@{SendStatus}}
+\index{SendStatus@{SendStatus}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{SendStatus()}{SendStatus()}}
+{\footnotesize\ttfamily int Item\+::\+Send\+Status (\begin{DoxyParamCaption}\item[{int}]{send\+Flags }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a188910459fc0ded60ca268664bf9b212}\label{class_item_a188910459fc0ded60ca268664bf9b212}} 
+\index{Item@{Item}!setCmd@{setCmd}}
+\index{setCmd@{setCmd}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{setCmd()}{setCmd()}}
+{\footnotesize\ttfamily void Item\+::set\+Cmd (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{cmd\+Value }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_ad4e62aba1f62917a8df4c47c2894a3ad}\label{class_item_ad4e62aba1f62917a8df4c47c2894a3ad}} 
+\index{Item@{Item}!setExt@{setExt}}
+\index{setExt@{setExt}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{setExt()}{setExt()}}
+{\footnotesize\ttfamily void Item\+::set\+Ext (\begin{DoxyParamCaption}\item[{long int}]{par }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_abd22bfa75e71849cc0fadcee9eef330d}\label{class_item_abd22bfa75e71849cc0fadcee9eef330d}} 
+\index{Item@{Item}!setFlag@{setFlag}}
+\index{setFlag@{setFlag}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{setFlag()}{setFlag()}}
+{\footnotesize\ttfamily void Item\+::set\+Flag (\begin{DoxyParamCaption}\item[{short}]{flag }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_af023950bb9b9760b98c5de7287bc467d}\label{class_item_af023950bb9b9760b98c5de7287bc467d}} 
+\index{Item@{Item}!setPersistent@{setPersistent}}
+\index{setPersistent@{setPersistent}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{setPersistent()}{setPersistent()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classch_persistent}{ch\+Persistent}} $\ast$ Item\+::set\+Persistent (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classch_persistent}{ch\+Persistent}} $\ast$}]{par }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a47b261677ded48fb1c51088b9d956dcc}\label{class_item_a47b261677ded48fb1c51088b9d956dcc}} 
+\index{Item@{Item}!setSubtype@{setSubtype}}
+\index{setSubtype@{setSubtype}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{setSubtype()}{setSubtype()}}
+{\footnotesize\ttfamily void Item\+::set\+Subtype (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{par }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_ae84f04e796546f4c34db79a060b0d443}\label{class_item_ae84f04e796546f4c34db79a060b0d443}} 
+\index{Item@{Item}!Setup@{Setup}}
+\index{Setup@{Setup}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily boolean Item\+::\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_ad2a38c039f8b3cee14cb97c9526d9260}\label{class_item_ad2a38c039f8b3cee14cb97c9526d9260}} 
+\index{Item@{Item}!setVal@{setVal}}
+\index{setVal@{setVal}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{setVal()}{setVal()}}
+{\footnotesize\ttfamily void Item\+::set\+Val (\begin{DoxyParamCaption}\item[{long int}]{par }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_ac382f69ca11e6eebfec1f40133fddd42}\label{class_item_ac382f69ca11e6eebfec1f40133fddd42}} 
+\index{Item@{Item}!Stop@{Stop}}
+\index{Stop@{Stop}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{Stop()}{Stop()}}
+{\footnotesize\ttfamily void Item\+::\+Stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a5ddbe231ea061c1001436dd5d57cc97b}\label{class_item_a5ddbe231ea061c1001436dd5d57cc97b}} 
+\index{Item@{Item}!Toggle@{Toggle}}
+\index{Toggle@{Toggle}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{Toggle()}{Toggle()}}
+{\footnotesize\ttfamily int Item\+::\+Toggle (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{class_item_a127a28254a55fbd7fcbcd37816afe163}\label{class_item_a127a28254a55fbd7fcbcd37816afe163}} 
+\index{Item@{Item}!VacomSetFan@{VacomSetFan}}
+\index{VacomSetFan@{VacomSetFan}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{VacomSetFan()}{VacomSetFan()}}
+{\footnotesize\ttfamily int Item\+::\+Vacom\+Set\+Fan (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{st }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_aa0f1f997dd794068562d43eb4a3911a6}\label{class_item_aa0f1f997dd794068562d43eb4a3911a6}} 
+\index{Item@{Item}!VacomSetHeat@{VacomSetHeat}}
+\index{VacomSetHeat@{VacomSetHeat}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{VacomSetHeat()}{VacomSetHeat()}}
+{\footnotesize\ttfamily int Item\+::\+Vacom\+Set\+Heat (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{st }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+move to float todo 
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_item_a21371d449e5e6669b3f0eb0e080a7132}\label{class_item_a21371d449e5e6669b3f0eb0e080a7132}} 
+\index{Item@{Item}!defaultSubItem@{defaultSubItem}}
+\index{defaultSubItem@{defaultSubItem}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{defaultSubItem}{defaultSubItem}}
+{\footnotesize\ttfamily char Item\+::default\+Sub\+Item\mbox{[}10\mbox{]}\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a4ff75a860339d86b006960b750a593e6}\label{class_item_a4ff75a860339d86b006960b750a593e6}} 
+\index{Item@{Item}!defaultSuffixCode@{defaultSuffixCode}}
+\index{defaultSuffixCode@{defaultSuffixCode}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{defaultSuffixCode}{defaultSuffixCode}}
+{\footnotesize\ttfamily int Item\+::default\+Suffix\+Code\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_item_a93f339d62018da733bd6147797388eb2}\label{class_item_a93f339d62018da733bd6147797388eb2}} 
+\index{Item@{Item}!driver@{driver}}
+\index{driver@{driver}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{driver}{driver}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classabstract_out}{abstract\+Out}}$\ast$ Item\+::driver}
+
+\mbox{\Hypertarget{class_item_ab831f5a6f56b59761a8ee5dbf38c0999}\label{class_item_ab831f5a6f56b59761a8ee5dbf38c0999}} 
+\index{Item@{Item}!itemArg@{itemArg}}
+\index{itemArg@{itemArg}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{itemArg}{itemArg}}
+{\footnotesize\ttfamily a\+Json\+Object $\ast$ Item\+::item\+Arg}
+
+\mbox{\Hypertarget{class_item_a4332fe989485f159b4fefa871cc213b9}\label{class_item_a4332fe989485f159b4fefa871cc213b9}} 
+\index{Item@{Item}!itemArr@{itemArr}}
+\index{itemArr@{itemArr}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{itemArr}{itemArr}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ Item\+::item\+Arr}
+
+\mbox{\Hypertarget{class_item_a39291138106342bc0d49ccfb125f7a95}\label{class_item_a39291138106342bc0d49ccfb125f7a95}} 
+\index{Item@{Item}!itemExt@{itemExt}}
+\index{itemExt@{itemExt}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{itemExt}{itemExt}}
+{\footnotesize\ttfamily a\+Json\+Object $\ast$ Item\+::item\+Ext}
+
+\mbox{\Hypertarget{class_item_ae0bac41fded34ffbd1e3634e15772039}\label{class_item_ae0bac41fded34ffbd1e3634e15772039}} 
+\index{Item@{Item}!itemType@{itemType}}
+\index{itemType@{itemType}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{itemType}{itemType}}
+{\footnotesize\ttfamily uint8\+\_\+t Item\+::item\+Type}
+
+\mbox{\Hypertarget{class_item_aabf1180ef4ab072817a28020814bce48}\label{class_item_aabf1180ef4ab072817a28020814bce48}} 
+\index{Item@{Item}!itemVal@{itemVal}}
+\index{itemVal@{itemVal}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{itemVal}{itemVal}}
+{\footnotesize\ttfamily a\+Json\+Object $\ast$ Item\+::item\+Val}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{item_8h}{item.\+h}}\item 
+\mbox{\hyperlink{item_8cpp}{item.\+cpp}}\end{DoxyCompactItemize}

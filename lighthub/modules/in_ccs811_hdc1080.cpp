@@ -113,6 +113,12 @@ if (reg!=0xff)
     M5.Lcd.print("%\n");
   #endif
 
+// New tyle unified activities
+    aJsonObject *actT = aJson.getObjectItem(in->inputObj, "temp");
+    aJsonObject *actH = aJson.getObjectItem(in->inputObj, "hum");
+    executeCommand(actT,-1,itemCmd(t));
+    executeCommand(actH,-1,itemCmd(h));
+    
   publish(t,"/T");
   publish(h,"/H");
   if (CCS811ready) ccs811.setEnvironmentalData(h,t);
@@ -122,7 +128,7 @@ else //ESP I2C glitch
     Serial.println("I2C Reset");
     i2cReset();
   }
-return INTERVAL_POLLING;
+return INTERVAL_SLOW_POLLING;
 }
 
 int in_ccs811::Poll(short cause)
@@ -165,6 +171,13 @@ int in_ccs811::Poll(short cause)
 
     if (co2<10000.) //Spontaneous calculation error suppress
     {
+
+    // New tyle unified activities
+    aJsonObject *actCO2 = aJson.getObjectItem(in->inputObj, "co2");
+    aJsonObject *actTVOC = aJson.getObjectItem(in->inputObj, "tvoc");
+    executeCommand(actCO2,-1,itemCmd(co2));
+    executeCommand(actTVOC,-1,itemCmd(tvoc));
+
     publish(co2,"/CO2");
     publish(tvoc,"/TVOC");
     publish(ccs811Baseline,"/base");}

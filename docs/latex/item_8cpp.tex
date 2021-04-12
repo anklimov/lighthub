@@ -1,0 +1,150 @@
+\hypertarget{item_8cpp}{}\doxysection{item.\+cpp File Reference}
+\label{item_8cpp}\index{item.cpp@{item.cpp}}
+{\ttfamily \#include \char`\"{}options.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}item.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}a\+J\+S\+O\+N.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}textconst.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}main.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}bright.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}item\+Cmd.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}dmx.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$Adafruit\+\_\+\+Neo\+Pixel.\+h$>$}\newline
+{\ttfamily \#include $<$Modbus\+Master.\+h$>$}\newline
+{\ttfamily \#include $<$Pub\+Sub\+Client.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}modules/out\+\_\+spiled.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}modules/out\+\_\+ac.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}modules/out\+\_\+motor.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}modules/out\+\_\+modbus.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}modules/out\+\_\+dmx.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}modules/out\+\_\+pwm.\+h\char`\"{}}\newline
+Include dependency graph for item.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{item_8cpp__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{item_8cpp_a8d3c3518d793541417a4845125da1ae1}{a}}~0.\+1842f
+\item 
+\#define \mbox{\hyperlink{item_8cpp_ab2d05693952610f937e5acb3c4a8fa1b}{b}}~-\/36.\+68f
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{item_8cpp_a4aef78280fd80bcca6d297030691f57b}{retrieve\+Code}} (char $\ast$$\ast$psub\+Item)
+\item 
+int \mbox{\hyperlink{item_8cpp_a44da304670c8b0446f674b318ebc9294}{subitem2cmd}} (char $\ast$payload)
+\item 
+int \mbox{\hyperlink{item_8cpp_ac002f1e83a05b79e27bda8f93184bcee}{txt2sub\+Item}} (char $\ast$payload)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+short \mbox{\hyperlink{item_8cpp_a02d3e5fb154e56cf7fc169649e232078}{modbus\+Busy}} = 0
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{item_8cpp_aa8f2c895949680c2aadc4843bb350347}{polling\+Item}}
+\item 
+Pub\+Sub\+Client \mbox{\hyperlink{item_8cpp_a86d63f481644da70f063c2593fcafe19}{mqtt\+Client}}
+\item 
+int8\+\_\+t \mbox{\hyperlink{item_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}{ethernet\+Idle\+Count}}
+\item 
+int8\+\_\+t \mbox{\hyperlink{item_8cpp_a58655351bd1d5333e5eb92d4c29f4263}{config\+Locked}}
+\item 
+\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} \mbox{\hyperlink{item_8cpp_a7bbda7cf303a1bc3222e7a270f9040bd}{lan\+Status}}
+\item 
+const short \mbox{\hyperlink{item_8cpp_abcb640867546187e7cbe6229cc3ec872}{defval}} \mbox{[}4\mbox{]} = \{0, 0, 0, 0\}
+\item 
+Modbus\+Master \mbox{\hyperlink{item_8cpp_aed3ca48125de3e138d26fa4884c35c93}{node}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{item_8cpp_a8d3c3518d793541417a4845125da1ae1}\label{item_8cpp_a8d3c3518d793541417a4845125da1ae1}} 
+\index{item.cpp@{item.cpp}!a@{a}}
+\index{a@{a}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{a}{a}}
+{\footnotesize\ttfamily \#define a~0.\+1842f}
+
+\mbox{\Hypertarget{item_8cpp_ab2d05693952610f937e5acb3c4a8fa1b}\label{item_8cpp_ab2d05693952610f937e5acb3c4a8fa1b}} 
+\index{item.cpp@{item.cpp}!b@{b}}
+\index{b@{b}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{b}{b}}
+{\footnotesize\ttfamily \#define b~-\/36.\+68f}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{item_8cpp_a4aef78280fd80bcca6d297030691f57b}\label{item_8cpp_a4aef78280fd80bcca6d297030691f57b}} 
+\index{item.cpp@{item.cpp}!retrieveCode@{retrieveCode}}
+\index{retrieveCode@{retrieveCode}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{retrieveCode()}{retrieveCode()}}
+{\footnotesize\ttfamily int retrieve\+Code (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{psub\+Item }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{item_8cpp_a44da304670c8b0446f674b318ebc9294}\label{item_8cpp_a44da304670c8b0446f674b318ebc9294}} 
+\index{item.cpp@{item.cpp}!subitem2cmd@{subitem2cmd}}
+\index{subitem2cmd@{subitem2cmd}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{subitem2cmd()}{subitem2cmd()}}
+{\footnotesize\ttfamily int subitem2cmd (\begin{DoxyParamCaption}\item[{char $\ast$}]{payload }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{item_8cpp_ac002f1e83a05b79e27bda8f93184bcee}\label{item_8cpp_ac002f1e83a05b79e27bda8f93184bcee}} 
+\index{item.cpp@{item.cpp}!txt2subItem@{txt2subItem}}
+\index{txt2subItem@{txt2subItem}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{txt2subItem()}{txt2subItem()}}
+{\footnotesize\ttfamily int txt2sub\+Item (\begin{DoxyParamCaption}\item[{char $\ast$}]{payload }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{item_8cpp_a58655351bd1d5333e5eb92d4c29f4263}\label{item_8cpp_a58655351bd1d5333e5eb92d4c29f4263}} 
+\index{item.cpp@{item.cpp}!configLocked@{configLocked}}
+\index{configLocked@{configLocked}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{configLocked}{configLocked}}
+{\footnotesize\ttfamily int8\+\_\+t config\+Locked\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{item_8cpp_abcb640867546187e7cbe6229cc3ec872}\label{item_8cpp_abcb640867546187e7cbe6229cc3ec872}} 
+\index{item.cpp@{item.cpp}!defval@{defval}}
+\index{defval@{defval}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{defval}{defval}}
+{\footnotesize\ttfamily const short defval\mbox{[}4\mbox{]} = \{0, 0, 0, 0\}}
+
+\mbox{\Hypertarget{item_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}\label{item_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}} 
+\index{item.cpp@{item.cpp}!ethernetIdleCount@{ethernetIdleCount}}
+\index{ethernetIdleCount@{ethernetIdleCount}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{ethernetIdleCount}{ethernetIdleCount}}
+{\footnotesize\ttfamily int8\+\_\+t ethernet\+Idle\+Count\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{item_8cpp_a7bbda7cf303a1bc3222e7a270f9040bd}\label{item_8cpp_a7bbda7cf303a1bc3222e7a270f9040bd}} 
+\index{item.cpp@{item.cpp}!lanStatus@{lanStatus}}
+\index{lanStatus@{lanStatus}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{lanStatus}{lanStatus}}
+{\footnotesize\ttfamily \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} lan\+Status\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{item_8cpp_a02d3e5fb154e56cf7fc169649e232078}\label{item_8cpp_a02d3e5fb154e56cf7fc169649e232078}} 
+\index{item.cpp@{item.cpp}!modbusBusy@{modbusBusy}}
+\index{modbusBusy@{modbusBusy}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{modbusBusy}{modbusBusy}}
+{\footnotesize\ttfamily short modbus\+Busy = 0}
+
+\mbox{\Hypertarget{item_8cpp_a86d63f481644da70f063c2593fcafe19}\label{item_8cpp_a86d63f481644da70f063c2593fcafe19}} 
+\index{item.cpp@{item.cpp}!mqttClient@{mqttClient}}
+\index{mqttClient@{mqttClient}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{mqttClient}{mqttClient}}
+{\footnotesize\ttfamily Pub\+Sub\+Client mqtt\+Client\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{item_8cpp_aed3ca48125de3e138d26fa4884c35c93}\label{item_8cpp_aed3ca48125de3e138d26fa4884c35c93}} 
+\index{item.cpp@{item.cpp}!node@{node}}
+\index{node@{node}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{node}{node}}
+{\footnotesize\ttfamily Modbus\+Master node\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{item_8cpp_aa8f2c895949680c2aadc4843bb350347}\label{item_8cpp_aa8f2c895949680c2aadc4843bb350347}} 
+\index{item.cpp@{item.cpp}!pollingItem@{pollingItem}}
+\index{pollingItem@{pollingItem}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{pollingItem}{pollingItem}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ polling\+Item\hspace{0.3cm}{\ttfamily [extern]}}
+

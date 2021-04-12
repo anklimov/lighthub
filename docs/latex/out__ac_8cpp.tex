@@ -1,0 +1,139 @@
+\hypertarget{out__ac_8cpp}{}\doxysection{out\+\_\+ac.\+cpp File Reference}
+\label{out__ac_8cpp}\index{out\_ac.cpp@{out\_ac.cpp}}
+{\ttfamily \#include \char`\"{}modules/out\+\_\+ac.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Arduino.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}options.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Streaming.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}item.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}textconst.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}main.\+h\char`\"{}}\newline
+Include dependency graph for out\+\_\+ac.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{out__ac_8cpp__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{out__ac_8cpp_a4c67a3c95b053662ba0e195ff4611ca2}{A\+C\+\_\+\+Serial}}~Serial3
+\item 
+\#define \mbox{\hyperlink{out__ac_8cpp_a4862ba1039c5c7ce3b51609c733cc091}{I\+N\+T\+E\+R\+V\+A\+L\+\_\+\+A\+C\+\_\+\+P\+O\+L\+L\+I\+NG}}~5000L
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+byte \mbox{\hyperlink{out__ac_8cpp_afe1602b340d5fab3a7047498810fed25}{get\+C\+RC}} (byte req\mbox{[}$\,$\mbox{]}, size\+\_\+t size)
+\item 
+void \mbox{\hyperlink{out__ac_8cpp_a59d76c8166fd1a36485f4bdf3323e272}{Send\+Data}} (byte req\mbox{[}$\,$\mbox{]}, size\+\_\+t size)
+\item 
+unsigned char \mbox{\hyperlink{out__ac_8cpp_a609d8aade61dfe61ef1100ddca6c3799}{to\+Hex}} (char ch)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+long \mbox{\hyperlink{out__ac_8cpp_a4155acb94ab76d403c080731ac75dda9}{prev\+Polling}} = 0
+\item 
+byte \mbox{\hyperlink{out__ac_8cpp_a82e58a1f3257f9121902c3edfc841445}{in\+Check}} = 0
+\item 
+byte \mbox{\hyperlink{out__ac_8cpp_ab239dd88a94012660135822f7c629acd}{qstn}} \mbox{[}$\,$\mbox{]} = \{255,255,10,0,0,0,0,0,1,1,77,1,90\}
+\item 
+byte \mbox{\hyperlink{out__ac_8cpp_a336725b3b566264f2223495f6294c3c7}{data}} \mbox{[}37\mbox{]} = \{\}
+\item 
+byte \mbox{\hyperlink{out__ac_8cpp_a1fa5a75e467ea8c74cca76051f03a1d4}{on}} \mbox{[}$\,$\mbox{]} = \{255,255,10,0,0,0,0,0,1,1,77,2,91\}
+\item 
+byte \mbox{\hyperlink{out__ac_8cpp_a92ecc0652f4769feb490ae0cf20093b5}{off}} \mbox{[}$\,$\mbox{]} = \{255,255,10,0,0,0,0,0,1,1,77,3,92\}
+\item 
+byte \mbox{\hyperlink{out__ac_8cpp_a8348487a31a8c5d8e2f94ea77c5e70a7}{lock}} \mbox{[}$\,$\mbox{]} = \{255,255,10,0,0,0,0,0,1,3,0,0,14\}
+\item 
+const char L\+O\+C\+K\+\_\+P\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{out__ac_8cpp_a98bd41348071f8af054dad33e25cb935}{P\+R\+O\+G\+M\+EM}} = \char`\"{}lock\char`\"{}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{out__ac_8cpp_a4c67a3c95b053662ba0e195ff4611ca2}\label{out__ac_8cpp_a4c67a3c95b053662ba0e195ff4611ca2}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!AC\_Serial@{AC\_Serial}}
+\index{AC\_Serial@{AC\_Serial}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{AC\_Serial}{AC\_Serial}}
+{\footnotesize\ttfamily \#define A\+C\+\_\+\+Serial~Serial3}
+
+\mbox{\Hypertarget{out__ac_8cpp_a4862ba1039c5c7ce3b51609c733cc091}\label{out__ac_8cpp_a4862ba1039c5c7ce3b51609c733cc091}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!INTERVAL\_AC\_POLLING@{INTERVAL\_AC\_POLLING}}
+\index{INTERVAL\_AC\_POLLING@{INTERVAL\_AC\_POLLING}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{INTERVAL\_AC\_POLLING}{INTERVAL\_AC\_POLLING}}
+{\footnotesize\ttfamily \#define I\+N\+T\+E\+R\+V\+A\+L\+\_\+\+A\+C\+\_\+\+P\+O\+L\+L\+I\+NG~5000L}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{out__ac_8cpp_afe1602b340d5fab3a7047498810fed25}\label{out__ac_8cpp_afe1602b340d5fab3a7047498810fed25}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!getCRC@{getCRC}}
+\index{getCRC@{getCRC}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{getCRC()}{getCRC()}}
+{\footnotesize\ttfamily byte get\+C\+RC (\begin{DoxyParamCaption}\item[{byte}]{req\mbox{[}$\,$\mbox{]},  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{out__ac_8cpp_a59d76c8166fd1a36485f4bdf3323e272}\label{out__ac_8cpp_a59d76c8166fd1a36485f4bdf3323e272}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!SendData@{SendData}}
+\index{SendData@{SendData}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{SendData()}{SendData()}}
+{\footnotesize\ttfamily void Send\+Data (\begin{DoxyParamCaption}\item[{byte}]{req\mbox{[}$\,$\mbox{]},  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{out__ac_8cpp_a609d8aade61dfe61ef1100ddca6c3799}\label{out__ac_8cpp_a609d8aade61dfe61ef1100ddca6c3799}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!toHex@{toHex}}
+\index{toHex@{toHex}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{toHex()}{toHex()}}
+{\footnotesize\ttfamily unsigned char to\+Hex (\begin{DoxyParamCaption}\item[{char}]{ch }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{out__ac_8cpp_a336725b3b566264f2223495f6294c3c7}\label{out__ac_8cpp_a336725b3b566264f2223495f6294c3c7}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!data@{data}}
+\index{data@{data}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{data}{data}}
+{\footnotesize\ttfamily byte data\mbox{[}37\mbox{]} = \{\}}
+
+\mbox{\Hypertarget{out__ac_8cpp_a82e58a1f3257f9121902c3edfc841445}\label{out__ac_8cpp_a82e58a1f3257f9121902c3edfc841445}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!inCheck@{inCheck}}
+\index{inCheck@{inCheck}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{inCheck}{inCheck}}
+{\footnotesize\ttfamily byte in\+Check = 0}
+
+\mbox{\Hypertarget{out__ac_8cpp_a8348487a31a8c5d8e2f94ea77c5e70a7}\label{out__ac_8cpp_a8348487a31a8c5d8e2f94ea77c5e70a7}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!lock@{lock}}
+\index{lock@{lock}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{lock}{lock}}
+{\footnotesize\ttfamily byte lock\mbox{[}$\,$\mbox{]} = \{255,255,10,0,0,0,0,0,1,3,0,0,14\}}
+
+\mbox{\Hypertarget{out__ac_8cpp_a92ecc0652f4769feb490ae0cf20093b5}\label{out__ac_8cpp_a92ecc0652f4769feb490ae0cf20093b5}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!off@{off}}
+\index{off@{off}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{off}{off}}
+{\footnotesize\ttfamily byte off\mbox{[}$\,$\mbox{]} = \{255,255,10,0,0,0,0,0,1,1,77,3,92\}}
+
+\mbox{\Hypertarget{out__ac_8cpp_a1fa5a75e467ea8c74cca76051f03a1d4}\label{out__ac_8cpp_a1fa5a75e467ea8c74cca76051f03a1d4}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!on@{on}}
+\index{on@{on}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{on}{on}}
+{\footnotesize\ttfamily byte on\mbox{[}$\,$\mbox{]} = \{255,255,10,0,0,0,0,0,1,1,77,2,91\}}
+
+\mbox{\Hypertarget{out__ac_8cpp_a4155acb94ab76d403c080731ac75dda9}\label{out__ac_8cpp_a4155acb94ab76d403c080731ac75dda9}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!prevPolling@{prevPolling}}
+\index{prevPolling@{prevPolling}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{prevPolling}{prevPolling}}
+{\footnotesize\ttfamily long prev\+Polling = 0}
+
+\mbox{\Hypertarget{out__ac_8cpp_a98bd41348071f8af054dad33e25cb935}\label{out__ac_8cpp_a98bd41348071f8af054dad33e25cb935}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!PROGMEM@{PROGMEM}}
+\index{PROGMEM@{PROGMEM}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{PROGMEM}{PROGMEM}}
+{\footnotesize\ttfamily const char R\+A\+W\+\_\+P \mbox{[}$\,$\mbox{]} P\+R\+O\+G\+M\+EM = \char`\"{}lock\char`\"{}}
+
+\mbox{\Hypertarget{out__ac_8cpp_ab239dd88a94012660135822f7c629acd}\label{out__ac_8cpp_ab239dd88a94012660135822f7c629acd}} 
+\index{out\_ac.cpp@{out\_ac.cpp}!qstn@{qstn}}
+\index{qstn@{qstn}!out\_ac.cpp@{out\_ac.cpp}}
+\doxysubsubsection{\texorpdfstring{qstn}{qstn}}
+{\footnotesize\ttfamily byte qstn\mbox{[}$\,$\mbox{]} = \{255,255,10,0,0,0,0,0,1,1,77,1,90\}}
+

@@ -3,14 +3,16 @@
 #ifndef MOTOR_DISABLE
 #include <abstractout.h>
 #include <item.h>
+#include "itemCmd.h"
 
 #ifndef POS_ERR
-#define POS_ERR 2
+#define POS_ERR 10
 #endif
 
+#define MIN_PWM 70
 // The number of simultaniusly working motors
 #ifndef MOTOR_QUOTE
-#define MOTOR_QUOTE 2
+#define MOTOR_QUOTE 1
 #endif
 
 static int8_t motorQuote = MOTOR_QUOTE;
@@ -23,9 +25,11 @@ public:
     int Poll(short cause) override;
     int Stop() override;
     int Status() override;
-    int isActive() override;
+    //int isActive() override;
     int getChanType() override;
-    int Ctrl(short cmd, short n=0, int * Parameters=NULL,  int suffixCode=0, char* subItem=NULL) override;
+    int getDefaultStorageType(){return ST_PERCENTS255;};
+    //int Ctrl(short cmd, short n=0, int * Parameters=NULL,  int suffixCode=0, char* subItem=NULL) override;
+    int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true) override;
 
     int8_t pinUp;
     int8_t pinDown;
@@ -33,6 +37,7 @@ public:
     int16_t maxOnTime;
     uint16_t feedbackOpen;
     uint16_t feedbackClosed;
+    bool inverted;
 protected:
     void getConfig();
 };

@@ -43,6 +43,7 @@ void out_SPILed::getConfig()
 
 int  out_SPILed::Setup()
 {
+abstractOut::Setup();    
 getConfig();
 Serial.println("SPI-LED Init");
 
@@ -87,13 +88,7 @@ int  out_SPILed::Status()
 return driverStatus;
 }
 
-int out_SPILed::isActive()
-{
-itemStore st;
-st.aslong = item->getVal(); //Restore old params
-debugSerial<< F(" val:")<<st.v<<endl;
-return st.v;
-}
+
 
 int out_SPILed::Poll(short cause)
 {
@@ -102,41 +97,41 @@ return 0;
 
 int out_SPILed::getChanType()
 {
+
   if  ((ledsType>>4) == (ledsType>>6))
    return CH_RGB;
   else
    return CH_RGBW;
 }
 
-int out_SPILed::PixelCtrl(itemStore *st, short cmd, int from, int to, bool show, bool rgb)
+int out_SPILed::PixelCtrl(itemCmd cmd, char* subItem, bool show )
+//int out_SPILed::PixelCtrl(itemCmd cmd, int from, int to, bool show)
 {
-  //debugSerial<<F("cmd: ")<<cmd<<endl;
+
+int from=0, to=numLeds-1; //All LEDs on the strip by default
+  // retrive LEDs range from suffix
+ if (subItem)
+  { //Just single LED to control todo - range
+  //  debugSerial<<F("Range:")<<subItem<<endl;
+    if (sscanf(subItem,"%d-%d",&from,&to) == 1) to=from;
+  }
+  debugSerial<<from<<F("-")<<to<<F(" cmd=")<<cmd.getCmd()<<endl;
+
+
+itemCmd st(ST_RGB,CMD_VOID);
+
 #ifdef ADAFRUIT_LED
 uint32_t pixel;
 #else
 CRGB pixel;
 #endif
-  if (!rgb)
-  {
-  int Saturation = map(st->s, 0, 100, 0, 255);
-  int Value      = map(st->v, 0, 100, 0, 255);
 
-#ifdef ADAFRUIT_LED
-  uint16_t Hue        = map(st->h, 0, 365, 0, 65535);
-  pixel      = leds->ColorHSV(Hue, Saturation, Value);
-#else
-  int Hue        = map(st->h, 0, 365, 0, 255);
-  pixel      = CHSV(Hue, Saturation, Value);
-#endif
-
-  debugSerial<<F("hsv: ")<<st->h<<F(",")<<st->s<<F(",")<<st->v<<endl;
-  }
   if (to>numLeds-1) to=numLeds-1;
   if (from<0) from=0;
 
   for (int i=from;i<=to;i++)
   {
-    switch (cmd) {
+    switch (cmd.getCmd()) {
       case CMD_ON:
 
       #ifdef ADAFRUIT_LED
@@ -144,9 +139,8 @@ CRGB pixel;
       #else
       if (!leds[i].r && !leds[i].g &&!leds[i].b) leds[i] = CRGB::White;
       #endif
-
-
       break;
+
       case CMD_OFF:
        #ifdef ADAFRUIT_LED
        leds->setPixelColor(i, leds->Color(0, 0, 0));
@@ -156,26 +150,18 @@ CRGB pixel;
 
        break;
       default:
-    if (rgb)
-    {
-    #ifdef ADAFRUIT_LED
-      leds->setPixelColor(i, leds->Color(st->r,st->g,st->b));
-    #else
-      leds[i] = CRGB(st->r,st->g,st->b);
-    #endif
-    }
-    else
-    {
-    #ifdef ADAFRUIT_LED
-      leds->setPixelColor(i, pixel);
-    #else
-      leds[i] = pixel;
-    #endif
+      st.assignFrom(cmd);
 
-    }
-
+      #ifdef ADAFRUIT_LED
+        leds->setPixelColor(i, leds->Color(st.param.r,st.param.g,st.param.b));
+      #else
+        leds[i] = CRGB(st.param.r,st.param.g,st.param.b);
+      #endif
    }
   } //for
+
+
+
      if (show)
           {
           #ifdef ADAFRUIT_LED
@@ -183,18 +169,20 @@ CRGB pixel;
           #else
           FastLED.show();
           #endif
-
           debugSerial<<F("Show")<<endl;
           }
 return 1;
+
 }
 
-int out_SPILed::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
+/*
+int out_SPILed::Ctrl(itemCmd cmd,   char* subItem)
 {
 int chActive = item->isActive();
 bool toExecute = (chActive>0);
-itemStore st;
-if (cmd>0 && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
+int suffixCode = cmd.getSuffix();
+itemCmd st(ST_HSV);
+if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 int from=0, to=numLeds-1; //All LEDs on the strip by default
 // retrive LEDs range from suffix
@@ -203,7 +191,7 @@ if (subItem)
 //  debugSerial<<F("Range:")<<subItem<<endl;
   if (sscanf(subItem,"%d-%d",&from,&to) == 1) to=from;
 }
-debugSerial<<from<<F("-")<<to<<F(" cmd=")<<cmd<<endl;
+debugSerial<<from<<F("-")<<to<<F(" cmd=")<<cmd.getCmd()<<endl;
 
 
 switch(suffixCode)
@@ -213,113 +201,71 @@ case S_NOTFOUND:
 toExecute = true;
 case S_SET:
 case S_HSV:
-          st.aslong = item->getVal(); //Restore old params
-          switch (n) //How many parameters are passed?
-          {
-            case 1:
-            st.v = Parameters[0]; //Volume only
-            if (!st.hsv_flag)
-              {
-                st.h = 0; //Filling by default
-                st.s = 0;
-                st.hsv_flag = 1; // Mark stored vals as HSV
-              }
-            break;
-            case 2: // Just hue and saturation
-              st.h = Parameters[0];
-              st.s = Parameters[1];
-              st.hsv_flag = 1;
-            break;
-            case 3: //complete triplet
-            st.h = Parameters[0];
-            st.s = Parameters[1];
-            st.v = Parameters[2];
-            st.hsv_flag = 1;
-          }
-          PixelCtrl(&st,0,from,to,toExecute);
+          //st.Int(item->getVal()); //Restore old params
+          st.loadItem(item);
+          st.assignFrom(cmd);
+
+          PixelCtrl(st,from,to,toExecute);
 
           if (!subItem) //Whole strip
           {
-          item->setVal(st.aslong); //Store
+          //item->setVal(st.getInt()); //Store
+          st.saveItem(item);
           if (!suffixCode)
           {
-            if (chActive>0 && !st.v) item->setCmd(CMD_OFF);
-            if (chActive==0 && st.v) item->setCmd(CMD_ON);
+            if (chActive>0 && !st.getPercents()) item->setCmd(CMD_OFF);
+            if (chActive==0 && st.getPercents()) item->setCmd(CMD_ON);
             item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
           }
           else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
           }
           return 1;
           //break;
-case S_RGB:
-  st.r = Parameters[0];
-  st.g = Parameters[1];
-  st.b = Parameters[2];
-  st.w = 0;
-  st.hsv_flag = 0;
-PixelCtrl(&st,0,from,to,toExecute,true);
-//item->setVal(st.aslong); //Store
-if (!suffixCode)
-{
-  if (chActive>0 && !st.aslong) item->setCmd(CMD_OFF);
-  if (chActive==0 && st.aslong) item->setCmd(CMD_ON);
-  item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
-}
-else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
-return 1;
-//break;
+
 case S_CMD:
-      item->setCmd(cmd);
-      switch (cmd)
+      item->setCmd(cmd.getCmd());
+      switch (cmd.getCmd())
           {
           case CMD_ON:
-
-            /*
-            if (chActive>0 && send)
-                               {
-                                 SendStatus(SEND_COMMAND);
-                                 return 1;
-                               }
-            */
            //retrive stored values
-           st.aslong = item->getVal();
+           st.loadItem(item);
 
            if (subItem) // LED range, not whole strip
-                      PixelCtrl(&st,CMD_ON,from,to);
+                      PixelCtrl(st.Cmd(CMD_ON),from,to);
            else  //whole strip
             {
-            if (st.aslong && (st.v<MIN_VOLUME) /* && send */) st.v=INIT_VOLUME;
-            item->setVal(st.aslong);
+            if (st.param.aslong && (st.param.v<MIN_VOLUME) ) st.Percents(INIT_VOLUME);
+            //item->setVal(st.getInt());
+            st.saveItem(item);
 
-            if (st.aslong )  //Stored smthng
+            if (st.getInt() )  //Stored smthng
             {
               item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
-              debugSerial<<F("Restored: ")<<st.h<<F(",")<<st.s<<F(",")<<st.v<<endl;
+              debugSerial<<F("Restored: ")<<st.param.h<<F(",")<<st.param.s<<F(",")<<st.param.v<<endl;
             }
             else
             {
-              debugSerial<<st.aslong<<F(": No stored values - default\n");
-              st.h = 100;
-              st.s = 0;
-              st.v = 100;
-              st.hsv_flag=1;
+              debugSerial<<st.param.aslong<<F(": No stored values - default\n");
+              st.setDefault();
+              //st.param.hsv_flag=1; ///tyta
               // Store
-              item->setVal(st.aslong);
+              //item->setVal(st.getInt());
+              st.saveItem(item);
               item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
             }
 
-            PixelCtrl(&st,0,from,to);
+            PixelCtrl(st,from,to);
             }
 
             return 1;
 
             case CMD_OFF:
             if (subItem) // LED range, not whole strip
-            PixelCtrl(&st,CMD_OFF,from,to);
+            PixelCtrl(st.Cmd(CMD_OFF),from,to);
             else
             {
-              st.v=0;
-              PixelCtrl(&st,0,from,to);
+              st.Percents(0);
+              PixelCtrl(st,from,to);
               item->SendStatus(SEND_COMMAND);
               //  if (send) item->publishTopic(item->itemArr->name,"OFF","/cmd");
             }
@@ -332,5 +278,7 @@ break;
 debugSerial<<F("Unknown cmd")<<endl;
 return 0;
 }
+
+*/
 
 #endif

@@ -1,0 +1,133 @@
+\hypertarget{classout___a_c}{}\doxysection{out\+\_\+\+AC Class Reference}
+\label{classout___a_c}\index{out\_AC@{out\_AC}}
+
+
+{\ttfamily \#include $<$out\+\_\+ac.\+h$>$}
+
+
+
+Inheritance diagram for out\+\_\+\+AC\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=148pt]{classout___a_c__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for out\+\_\+\+AC\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=195pt]{classout___a_c__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classout___a_c_a68dc76d1632c64bcd4e9c19bea1a7443}{out\+\_\+\+AC}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
+\item 
+int \mbox{\hyperlink{classout___a_c_a3a7b5b20a7d66870551f3dd485e66de2}{Setup}} () override
+\item 
+int \mbox{\hyperlink{classout___a_c_a40fd702a4d9d621c19bfa140c905e64b}{Poll}} (short cause) override
+\item 
+int \mbox{\hyperlink{classout___a_c_a763ace53db4e64692d061db48f396aba}{Stop}} () override
+\item 
+int \mbox{\hyperlink{classout___a_c_aba0d1953f95f7d04a24582c40cd26196}{Status}} () override
+\item 
+int \mbox{\hyperlink{classout___a_c_ab2d5debf137c9cc91ce0b58a72da0766}{is\+Active}} () override
+\item 
+int \mbox{\hyperlink{classout___a_c_aeaf2ac4088b2b4b2fd4e1b83755c9964}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classout___a_c_ae1fe864367b2837872ad28f8f94f6cf0}{Insert\+Data}} (byte \mbox{\hyperlink{out__ac_8cpp_a336725b3b566264f2223495f6294c3c7}{data}}\mbox{[}$\,$\mbox{]}, size\+\_\+t size)
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classout___a_c_a68dc76d1632c64bcd4e9c19bea1a7443}\label{classout___a_c_a68dc76d1632c64bcd4e9c19bea1a7443}} 
+\index{out\_AC@{out\_AC}!out\_AC@{out\_AC}}
+\index{out\_AC@{out\_AC}!out\_AC@{out\_AC}}
+\doxysubsubsection{\texorpdfstring{out\_AC()}{out\_AC()}}
+{\footnotesize\ttfamily out\+\_\+\+A\+C\+::out\+\_\+\+AC (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_item}{Item}} $\ast$}]{\+\_\+item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classout___a_c_aeaf2ac4088b2b4b2fd4e1b83755c9964}\label{classout___a_c_aeaf2ac4088b2b4b2fd4e1b83755c9964}} 
+\index{out\_AC@{out\_AC}!Ctrl@{Ctrl}}
+\index{Ctrl@{Ctrl}!out\_AC@{out\_AC}}
+\doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}}
+{\footnotesize\ttfamily int out\+\_\+\+A\+C\+::\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{to\+Execute = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___a_c_ae1fe864367b2837872ad28f8f94f6cf0}\label{classout___a_c_ae1fe864367b2837872ad28f8f94f6cf0}} 
+\index{out\_AC@{out\_AC}!InsertData@{InsertData}}
+\index{InsertData@{InsertData}!out\_AC@{out\_AC}}
+\doxysubsubsection{\texorpdfstring{InsertData()}{InsertData()}}
+{\footnotesize\ttfamily void out\+\_\+\+A\+C\+::\+Insert\+Data (\begin{DoxyParamCaption}\item[{byte}]{data\mbox{[}$\,$\mbox{]},  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classout___a_c_ab2d5debf137c9cc91ce0b58a72da0766}\label{classout___a_c_ab2d5debf137c9cc91ce0b58a72da0766}} 
+\index{out\_AC@{out\_AC}!isActive@{isActive}}
+\index{isActive@{isActive}!out\_AC@{out\_AC}}
+\doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
+{\footnotesize\ttfamily int out\+\_\+\+A\+C\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___a_c_a40fd702a4d9d621c19bfa140c905e64b}\label{classout___a_c_a40fd702a4d9d621c19bfa140c905e64b}} 
+\index{out\_AC@{out\_AC}!Poll@{Poll}}
+\index{Poll@{Poll}!out\_AC@{out\_AC}}
+\doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
+{\footnotesize\ttfamily int out\+\_\+\+A\+C\+::\+Poll (\begin{DoxyParamCaption}\item[{short}]{cause }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___a_c_a3a7b5b20a7d66870551f3dd485e66de2}\label{classout___a_c_a3a7b5b20a7d66870551f3dd485e66de2}} 
+\index{out\_AC@{out\_AC}!Setup@{Setup}}
+\index{Setup@{Setup}!out\_AC@{out\_AC}}
+\doxysubsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily int out\+\_\+\+A\+C\+::\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_aeaf6346625245be1774a6d27d9cece4e}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___a_c_aba0d1953f95f7d04a24582c40cd26196}\label{classout___a_c_aba0d1953f95f7d04a24582c40cd26196}} 
+\index{out\_AC@{out\_AC}!Status@{Status}}
+\index{Status@{Status}!out\_AC@{out\_AC}}
+\doxysubsubsection{\texorpdfstring{Status()}{Status()}}
+{\footnotesize\ttfamily int out\+\_\+\+A\+C\+::\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_aefb8821172a2e66f49ea0da9b7c205a5}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___a_c_a763ace53db4e64692d061db48f396aba}\label{classout___a_c_a763ace53db4e64692d061db48f396aba}} 
+\index{out\_AC@{out\_AC}!Stop@{Stop}}
+\index{Stop@{Stop}!out\_AC@{out\_AC}}
+\doxysubsubsection{\texorpdfstring{Stop()}{Stop()}}
+{\footnotesize\ttfamily int out\+\_\+\+A\+C\+::\+Stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac08061e5ae0}{abstract\+Ch}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{out__ac_8h}{out\+\_\+ac.\+h}}\item 
+\mbox{\hyperlink{out__ac_8cpp}{out\+\_\+ac.\+cpp}}\end{DoxyCompactItemize}

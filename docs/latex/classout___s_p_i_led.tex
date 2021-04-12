@@ -1,0 +1,175 @@
+\hypertarget{classout___s_p_i_led}{}\doxysection{out\+\_\+\+S\+P\+I\+Led Class Reference}
+\label{classout___s_p_i_led}\index{out\_SPILed@{out\_SPILed}}
+
+
+{\ttfamily \#include $<$out\+\_\+spiled.\+h$>$}
+
+
+
+Inheritance diagram for out\+\_\+\+S\+P\+I\+Led\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=154pt]{classout___s_p_i_led__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for out\+\_\+\+S\+P\+I\+Led\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=213pt]{classout___s_p_i_led__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classout___s_p_i_led_ae865d0b2e9d098e3e370488a2eaa1b40}{out\+\_\+\+S\+P\+I\+Led}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
+\item 
+int \mbox{\hyperlink{classout___s_p_i_led_adbe9d6b9a2a5e515e9a372a4c4675b15}{Setup}} () override
+\item 
+int \mbox{\hyperlink{classout___s_p_i_led_a8566a7b80d1a132c00dbaf989880649c}{Poll}} (short cause) override
+\item 
+int \mbox{\hyperlink{classout___s_p_i_led_a4e24b8a490f8353452b8594dffff8396}{Stop}} () override
+\item 
+int \mbox{\hyperlink{classout___s_p_i_led_a9486de18e156758a12fa257f68314e20}{Status}} () override
+\item 
+int \mbox{\hyperlink{classout___s_p_i_led_ae87041b49ca8c6484a72c3c29955fbfb}{is\+Active}} () override
+\item 
+int \mbox{\hyperlink{classout___s_p_i_led_aac304bcdc354a3667ec99d4c06513b72}{get\+Chan\+Type}} () override
+\item 
+int \mbox{\hyperlink{classout___s_p_i_led_a75d1e9b7333a0bb9777df807634607b3}{Pixel\+Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool show=true) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{classout___s_p_i_led_a4d13edbe6d02a9519c73283d65d38086}{num\+Leds}}
+\item 
+int8\+\_\+t \mbox{\hyperlink{classout___s_p_i_led_a1ef26d145d52578110f56087df1aa228}{pin}}
+\item 
+int \mbox{\hyperlink{classout___s_p_i_led_a974b04b25156932c97dac2ba794c729f}{leds\+Type}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classout___s_p_i_led_a6bcd6f13a335b380dfa655d5de4cbe75}{get\+Config}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classout___s_p_i_led_ae865d0b2e9d098e3e370488a2eaa1b40}\label{classout___s_p_i_led_ae865d0b2e9d098e3e370488a2eaa1b40}} 
+\index{out\_SPILed@{out\_SPILed}!out\_SPILed@{out\_SPILed}}
+\index{out\_SPILed@{out\_SPILed}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{out\_SPILed()}{out\_SPILed()}}
+{\footnotesize\ttfamily out\+\_\+\+S\+P\+I\+Led\+::out\+\_\+\+S\+P\+I\+Led (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_item}{Item}} $\ast$}]{\+\_\+item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classout___s_p_i_led_aac304bcdc354a3667ec99d4c06513b72}\label{classout___s_p_i_led_aac304bcdc354a3667ec99d4c06513b72}} 
+\index{out\_SPILed@{out\_SPILed}!getChanType@{getChanType}}
+\index{getChanType@{getChanType}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{getChanType()}{getChanType()}}
+{\footnotesize\ttfamily int out\+\_\+\+S\+P\+I\+Led\+::get\+Chan\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___s_p_i_led_a6bcd6f13a335b380dfa655d5de4cbe75}\label{classout___s_p_i_led_a6bcd6f13a335b380dfa655d5de4cbe75}} 
+\index{out\_SPILed@{out\_SPILed}!getConfig@{getConfig}}
+\index{getConfig@{getConfig}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{getConfig()}{getConfig()}}
+{\footnotesize\ttfamily void out\+\_\+\+S\+P\+I\+Led\+::get\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classout___s_p_i_led_ae87041b49ca8c6484a72c3c29955fbfb}\label{classout___s_p_i_led_ae87041b49ca8c6484a72c3c29955fbfb}} 
+\index{out\_SPILed@{out\_SPILed}!isActive@{isActive}}
+\index{isActive@{isActive}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
+{\footnotesize\ttfamily int out\+\_\+\+S\+P\+I\+Led\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___s_p_i_led_a75d1e9b7333a0bb9777df807634607b3}\label{classout___s_p_i_led_a75d1e9b7333a0bb9777df807634607b3}} 
+\index{out\_SPILed@{out\_SPILed}!PixelCtrl@{PixelCtrl}}
+\index{PixelCtrl@{PixelCtrl}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{PixelCtrl()}{PixelCtrl()}}
+{\footnotesize\ttfamily int out\+\_\+\+S\+P\+I\+Led\+::\+Pixel\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{show = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classcolor_channel_a6c835d00ee8af04679f03465617c2873}{color\+Channel}}.
+
+\mbox{\Hypertarget{classout___s_p_i_led_a8566a7b80d1a132c00dbaf989880649c}\label{classout___s_p_i_led_a8566a7b80d1a132c00dbaf989880649c}} 
+\index{out\_SPILed@{out\_SPILed}!Poll@{Poll}}
+\index{Poll@{Poll}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
+{\footnotesize\ttfamily int out\+\_\+\+S\+P\+I\+Led\+::\+Poll (\begin{DoxyParamCaption}\item[{short}]{cause }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___s_p_i_led_adbe9d6b9a2a5e515e9a372a4c4675b15}\label{classout___s_p_i_led_adbe9d6b9a2a5e515e9a372a4c4675b15}} 
+\index{out\_SPILed@{out\_SPILed}!Setup@{Setup}}
+\index{Setup@{Setup}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily int out\+\_\+\+S\+P\+I\+Led\+::\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_aeaf6346625245be1774a6d27d9cece4e}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___s_p_i_led_a9486de18e156758a12fa257f68314e20}\label{classout___s_p_i_led_a9486de18e156758a12fa257f68314e20}} 
+\index{out\_SPILed@{out\_SPILed}!Status@{Status}}
+\index{Status@{Status}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{Status()}{Status()}}
+{\footnotesize\ttfamily int out\+\_\+\+S\+P\+I\+Led\+::\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_aefb8821172a2e66f49ea0da9b7c205a5}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___s_p_i_led_a4e24b8a490f8353452b8594dffff8396}\label{classout___s_p_i_led_a4e24b8a490f8353452b8594dffff8396}} 
+\index{out\_SPILed@{out\_SPILed}!Stop@{Stop}}
+\index{Stop@{Stop}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{Stop()}{Stop()}}
+{\footnotesize\ttfamily int out\+\_\+\+S\+P\+I\+Led\+::\+Stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac08061e5ae0}{abstract\+Ch}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classout___s_p_i_led_a974b04b25156932c97dac2ba794c729f}\label{classout___s_p_i_led_a974b04b25156932c97dac2ba794c729f}} 
+\index{out\_SPILed@{out\_SPILed}!ledsType@{ledsType}}
+\index{ledsType@{ledsType}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{ledsType}{ledsType}}
+{\footnotesize\ttfamily int out\+\_\+\+S\+P\+I\+Led\+::leds\+Type}
+
+\mbox{\Hypertarget{classout___s_p_i_led_a4d13edbe6d02a9519c73283d65d38086}\label{classout___s_p_i_led_a4d13edbe6d02a9519c73283d65d38086}} 
+\index{out\_SPILed@{out\_SPILed}!numLeds@{numLeds}}
+\index{numLeds@{numLeds}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{numLeds}{numLeds}}
+{\footnotesize\ttfamily int out\+\_\+\+S\+P\+I\+Led\+::num\+Leds}
+
+\mbox{\Hypertarget{classout___s_p_i_led_a1ef26d145d52578110f56087df1aa228}\label{classout___s_p_i_led_a1ef26d145d52578110f56087df1aa228}} 
+\index{out\_SPILed@{out\_SPILed}!pin@{pin}}
+\index{pin@{pin}!out\_SPILed@{out\_SPILed}}
+\doxysubsubsection{\texorpdfstring{pin}{pin}}
+{\footnotesize\ttfamily int8\+\_\+t out\+\_\+\+S\+P\+I\+Led\+::pin}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{out__spiled_8h}{out\+\_\+spiled.\+h}}\item 
+\mbox{\hyperlink{out__spiled_8cpp}{out\+\_\+spiled.\+cpp}}\end{DoxyCompactItemize}

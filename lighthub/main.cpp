@@ -66,7 +66,8 @@ PWM Out
 */
 
 #include "main.h"
-
+#include "statusled.h"
+extern long  timer0_overflow_count;	 
 #ifdef WIFI_ENABLE
 WiFiClient ethClient;
 
@@ -108,7 +109,7 @@ NRFFlashStorage EEPROM;
     WiFiUDP udpSyslogClient;
     #endif
 Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_BSD);
-unsigned long nextSyslogPingTime;
+unsigned long timerSyslogPingTime;
 static char syslogDeviceHostname[16];
 
 Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog);
@@ -154,11 +155,11 @@ aJsonObject *dmxArr = NULL;
 bool syslogInitialized = false;
 #endif
 
-uint32_t nextPollingCheck = 0;
-uint32_t nextInputCheck = 0;
-uint32_t nextLanCheckTime = 0;
-uint32_t nextThermostatCheck = 0;
-uint32_t nextSensorCheck =0;
+uint32_t timerPollingCheck = 0;
+uint32_t timerInputCheck = 0;
+uint32_t timerLanCheckTime = 0;
+uint32_t timerThermostatCheck = 0;
+uint32_t timerSensorCheck =0;
 uint32_t WiFiAwaitingTime =0;
 
 aJsonObject *pollingItem = NULL;
@@ -256,11 +257,13 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     if (!payload) return;
 
     payload[length] = 0;
+    
     int fr = freeRam();
     if (fr < 250) {
         errorSerial<<F("OutOfMemory!")<<endl;
         return;
     }
+    
     LED.flash(ledBLUE);
     for (unsigned int i = 0; i < length; i++)
         debugSerial<<((char) payload[i]);
@@ -446,7 +449,8 @@ lan_status lanLoop() {
                lanStatus = HAVE_IP_ADDRESS;
             }
             else
-            if (millis()>WiFiAwaitingTime)
+     //       if (millis()>WiFiAwaitingTime)
+              if (isTimeOver(WiFiAwaitingTime,millis(),WIFI_TIMEOUT))
             {
                 errorSerial<<F("\nProblem with WiFi!");
                 return lanStatus = DO_REINIT;
@@ -486,7 +490,9 @@ lan_status lanLoop() {
             break;
 
         case RETAINING_COLLECTING:
-            if (millis() > nextLanCheckTime) {
+            //if (millis() > timerLanCheckTime) 
+            if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_RETAIN))
+            {
                 char buf[MQTT_TOPIC_LENGTH+1];
 
                 //Unsubscribe from status topics..
@@ -506,14 +512,15 @@ lan_status lanLoop() {
 
         case DO_REINIT: // Pause and re-init LAN
              //if (mqttClient.connected()) mqttClient.disconnect();  // Hmm hungs then cable disconnected
-             nextLanCheckTime = millis() + 5000;
+             timerLanCheckTime = millis();// + 5000;
              lanStatus = REINIT;
              LED.set(ledRED|((configLoaded)?ledBLINK:0));
              break;
 
         case REINIT: // Pause and re-init LAN
 
-            if (millis() > nextLanCheckTime)
+            //if (millis() > timerLanCheckTime)
+            if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_REINIT))
                 {
                 lanStatus = INITIAL_STATE;
                 }
@@ -521,12 +528,13 @@ lan_status lanLoop() {
 
         case DO_RECONNECT: // Pause and re-connect MQTT
             if (mqttClient.connected()) mqttClient.disconnect();
-            nextLanCheckTime = millis() + 5000;
+            timerLanCheckTime = millis();// + 5000;
             lanStatus = RECONNECT;
             break;
 
         case RECONNECT:
-            if (millis() > nextLanCheckTime)
+            //if (millis() > timerLanCheckTime)
+            if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_RECONNECT))
 
                 lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             break;
@@ -534,7 +542,7 @@ lan_status lanLoop() {
         case READ_RE_CONFIG: // Restore config from FLASH, re-init LAN
             if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             else {
-                nextLanCheckTime = millis() + 5000;
+                //timerLanCheckTime = millis();// + 5000;
                 lanStatus = DO_REINIT;//-10;
             }
             break;
@@ -558,7 +566,7 @@ lan_status lanLoop() {
 
             switch (etherStatus) {
                    case NO_LINK:
-                    errorSerial<<F("No link")<<endl;
+                    errorSerial<<F("\nNo link")<<endl;
                     lanStatus = DO_REINIT;
                     break;
                 case DHCP_CHECK_RENEW_FAIL:
@@ -574,7 +582,7 @@ lan_status lanLoop() {
                 case DHCP_CHECK_REBIND_FAIL:
                     errorSerial<<F("Error: rebind fail");
                     if (mqttClient.connected()) mqttClient.disconnect();
-                    nextLanCheckTime = millis() + 1000;
+                    //timerLanCheckTime = millis();// + 1000;
                     lanStatus = DO_REINIT;
                     break;
 
@@ -720,7 +728,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
     deviceName = getStringFromConfig(mqttArr, 0);
     infoSerial<<F("Device Name:")<<deviceName<<endl;
-
+debugSerial<<F("N:")<<n<<endl;
 
     char *servername = getStringFromConfig(mqttArr, 1);
     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
@@ -728,7 +736,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
     if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5))
         {
             password = getStringFromConfig(mqttArr, 4);
-            infoSerial<<F("Using MQTT password from config");
+            infoSerial<<F("Using MQTT password from config")<<endl;
         }
 
     mqttClient.setServer(servername, port);
@@ -776,16 +784,15 @@ void ip_ready_config_loaded_connecting_to_broker() {
             Serial.println(buf);
             mqttClient.subscribe(buf);
 
-            //restoreState();
             onMQTTConnect();
             // if (_once) {DMXput(); _once=0;}
             lanStatus = RETAINING_COLLECTING;//4;
-            nextLanCheckTime = millis() + 5000;
+            timerLanCheckTime = millis();// + 5000;
             infoSerial<<F("Awaiting for retained topics");
         } else
            {
             errorSerial<<F("failed, rc=")<<mqttClient.state()<<F(" try again in 5 seconds")<<endl;
-            nextLanCheckTime = millis() + 5000;
+            timerLanCheckTime = millis();// + 5000;
 #ifdef RESTART_LAN_ON_MQTT_ERRORS
             mqttErrorRate++;
                         if(mqttErrorRate>50){
@@ -830,7 +837,7 @@ void onInitialStateInitLAN() {
             }
 #endif
 lanStatus = AWAITING_ADDRESS;
-WiFiAwaitingTime = millis() + 60000L;
+WiFiAwaitingTime = millis();// + 60000L;
 return;
 /*
 if (WiFi.status() == WL_CONNECTED) {
@@ -843,7 +850,7 @@ if (WiFi.status() == WL_CONNECTED) {
     {
         errorSerial<<F("\nProblem with WiFi!");
         lanStatus = DO_REINIT;
-        //nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
+        //timerLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
     }
 */
 #else // Ethernet connection
@@ -853,16 +860,16 @@ if (WiFi.status() == WL_CONNECTED) {
     int res = 1;
     infoSerial<<F("Starting lan")<<endl;
     if (ipLoadFromFlash(OFFSET_IP, ip)) {
-        infoSerial<<"Loaded from flash IP:";
+        infoSerial<<F("Loaded from flash IP:");
         printIPAddress(ip);
         if (ipLoadFromFlash(OFFSET_DNS, dns)) {
-            infoSerial<<" DNS:";
+            infoSerial<<F(" DNS:");
             printIPAddress(dns);
             if (ipLoadFromFlash(OFFSET_GW, gw)) {
-                infoSerial<<" GW:";
+                infoSerial<<F(" GW:");
                 printIPAddress(gw);
                 if (ipLoadFromFlash(OFFSET_MASK, mask)) {
-                    infoSerial<<" MASK:";
+                    infoSerial<<F(" MASK:");
                     printIPAddress(mask);
                     Ethernet.begin(mac, ip, dns, gw, mask);
                 } else Ethernet.begin(mac, ip, dns, gw);
@@ -872,7 +879,7 @@ if (WiFi.status() == WL_CONNECTED) {
     lanStatus = HAVE_IP_ADDRESS;
     }
     else {
-        infoSerial<<"\nNo IP data found in flash\n";
+        infoSerial<<F("\nuses DHCP\n");
         wdt_dis();
 
         #if defined(ARDUINO_ARCH_STM32)
@@ -887,7 +894,7 @@ if (WiFi.status() == WL_CONNECTED) {
     if (res == 0) {
         errorSerial<<F("Failed to configure Ethernet using DHCP. You can set ip manually!")<<F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n");
         lanStatus = DO_REINIT;//-10;
-        nextLanCheckTime = millis() + DHCP_RETRY_INTERVAL;
+        //timerLanCheckTime = millis();// + DHCP_RETRY_INTERVAL;
 #ifdef RESET_PIN
         resetHard();
 #endif
@@ -919,16 +926,20 @@ void resetHard() {
 void Changed(int i, DeviceAddress addr, float currentTemp) {
     char addrstr[32] = "NIL";
     //char addrbuf[17];
-    char valstr[16] = "NIL";
-    char *owEmitString = NULL;
+    //char valstr[16] = "NIL";
+    //char *owEmitString = NULL;
     char *owItem = NULL;
 
     SetBytes(addr, 8, addrstr);
     addrstr[17] = 0;
     if (!root) return;
-    printFloatValueToStr(currentTemp,valstr);
-    debugSerial<<endl<<F("T:")<<valstr<<F("<");
-    aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);
+    //printFloatValueToStr(currentTemp,valstr);
+    debugSerial<<endl<<F("T:")<<currentTemp<<F("<")<<addrstr<<F(">")<<endl;
+    aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);     
+    if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
+        executeCommand(owObj,-1,itemCmd(currentTemp));
+
+    /*
     if (owObj) {
         owEmitString = getStringFromConfig(owObj, "emit");
         debugSerial<<owEmitString<<F(">")<<endl;
@@ -963,7 +974,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
         } // if valid temperature
   } // if Address in config
   else debugSerial<<addrstr<<F(">")<<endl; // No item found
-
+*/
 }
 
 #endif //_owire
@@ -1032,6 +1043,7 @@ setupSyslog();
     if (dmxoutArr &&  (numParams=aJson.getArraySize(dmxoutArr)) >=1 ) {
         DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, numParams-1)->valueint);
         infoSerial<<F("DMX out started. Channels: ")<<maxChannels<<endl;
+        debugSerial<<F("Free:")<<freeRam()<<endl;
     }
 #endif
 #ifdef _modbus
@@ -1138,7 +1150,6 @@ void printConfigSummary() {
 
 void cmdFunctionLoad(int arg_cnt, char **args) {
     loadConfigFromEEPROM();
-  //  restoreState();
 }
 
 
@@ -1169,7 +1180,6 @@ int loadConfigFromEEPROM()
 
 void cmdFunctionReq(int arg_cnt, char **args) {
     mqttConfigRequest(arg_cnt, args);
-  //  restoreState();
 }
 
 
@@ -1419,7 +1429,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
             if (!root) {
                 errorSerial<<F("Config parsing failed\n");
-                nextLanCheckTime = millis() + 15000;
+//                timerLanCheckTime = millis();// + 15000;
                 return READ_RE_CONFIG;//-11;
             } else {
             infoSerial<<F("Applying.\n");
@@ -1431,14 +1441,14 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         } else {
             errorSerial<<F("ERROR: Server returned ");
             errorSerial<<responseStatusCode<<endl;
-            nextLanCheckTime = millis() + 5000;
+//            timerLanCheckTime = millis();// + 5000;
             return READ_RE_CONFIG;//-11;
         }
 
     } else {
         debugSerial<<F("failed to connect\n");
 //        debugSerial<<F(" try again in 5 seconds\n");
-        nextLanCheckTime = millis() + 5000;
+//        timerLanCheckTime = millis();// + 5000;
         return READ_RE_CONFIG;//-11;
     }
 #endif
@@ -1466,17 +1476,21 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     htclient.stop();
     wdt_res();
     infoSerial<<F("HTTP Status code: ")<<responseStatusCode<<endl;
-    //debugSerial<<"GET Response: ");
+    
 //delay(1000);
     if (responseStatusCode == 200) {
+        debugSerial<<F("GET Response: ")<<response<<endl;
+        debugSerial<<F("Free:")<<freeRam()<<endl;
         cleanConf();
         debugSerial<<F("Configuration cleaned")<<endl;
+        debugSerial<<F("Free:")<<freeRam()<<endl;
         root = aJson.parse((char *) response.c_str());
 
         if (!root) {
             errorSerial<<F("Config parsing failed\n");
             return READ_RE_CONFIG;//-11; //Load from NVRAM
         } else {
+            debugSerial<<F("Parsed. Free:")<<freeRam()<<endl;
             //debugSerial<<response;
             applyConfig();
             infoSerial<<F("Done.\n");
@@ -1753,6 +1767,12 @@ infoSerial<<F("\n(+)MCP23017");
 infoSerial<<F("\n(-)MCP23017");
 #endif
 
+#ifndef PID_DISABLE
+infoSerial<<F("\n(+)PID");
+#else
+infoSerial<<F("\n(-)PID");
+#endif
+
 #ifdef SYSLOG_ENABLE
 //udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
 infoSerial<<F("\n(+)SYSLOG");
@@ -1963,7 +1983,9 @@ void inputLoop(void) {
     if (!inputs) return;
 
 configLocked++;
-    if (millis() > nextInputCheck) {
+    //if (millis() > timerInputCheck) 
+    if (isTimeOver(timerInputCheck,millis(),INTERVAL_CHECK_INPUT))
+    {
         aJsonObject *input = inputs->child;
 
         while (input) {
@@ -1993,11 +2015,13 @@ configLocked++;
             yield();
             input = input->next;
         }
-        nextInputCheck = millis() + INTERVAL_CHECK_INPUT;
+        timerInputCheck = millis();// + INTERVAL_CHECK_INPUT;
         inCache.invalidateInputCache();
     }
 
-    if (millis() > nextSensorCheck) {
+    //if (millis() > timerSensorCheck) 
+    if (isTimeOver(timerSensorCheck,millis(),INTERVAL_CHECK_SENSOR))
+    {
         aJsonObject *input = inputs->child;
         while (input) {
             if ((input->type == aJson_Object)) {
@@ -2007,7 +2031,7 @@ configLocked++;
             yield();
             input = input->next;
         }
-        nextSensorCheck = millis() + INTERVAL_CHECK_SENSOR;
+        timerSensorCheck = millis();// + INTERVAL_CHECK_SENSOR;
     }
 configLocked--;
 }
@@ -2047,14 +2071,16 @@ configLocked--;
 // SLOW POLLING
     boolean done = false;
     if (lanStatus == RETAINING_COLLECTING) return;
-    if (millis() > nextPollingCheck) {
+    //if (millis() > timerPollingCheck) 
+    if (isTimeOver(timerPollingCheck,millis(),INTERVAL_SLOW_POLLING))    
+        {
         while (pollingItem && !done) {
             if (pollingItem->type == aJson_Array) {
                 Item it(pollingItem);
                 uint32_t ret = it.Poll(POLLING_SLOW);
                 if (ret)
                 {
-                  nextPollingCheck = millis() +  ret;  //INTERVAL_CHECK_MODBUS;
+                  timerPollingCheck = millis();// +  ret;  //INTERVAL_CHECK_MODBUS;
                   done = true;
                 }
             }//if
@@ -2069,76 +2095,78 @@ configLocked--;
     }//if
 }
 
-bool isThermostatWithMinArraySize(aJsonObject *item, int minimalArraySize) {
-    return (item->type == aJson_Array) && (aJson.getArrayItem(item, I_TYPE)->valueint == CH_THERMO) &&
-           (aJson.getArraySize(item) >= minimalArraySize);
+////// Legacy Thermostat code below - to be moved in module /////
+void thermoRelay(int pin, bool on)
+{   
+    int thermoPin = abs(pin);
+    pinMode(thermoPin, OUTPUT);
+    
+    if (on)
+            {
+            digitalWrite(thermoPin, (pin<0)?LOW:HIGH); 
+            debugSerial<<F(" ON")<<endl;
+            }
+     else   
+     {
+            digitalWrite(thermoPin, (pin<0)?HIGH:LOW); 
+            debugSerial<<F(" OFF")<<endl;
+     }       
+
 }
 
-bool thermoDisabledOrDisconnected(aJsonObject *thermoExtensionArray, int thermoStateCommand) {
-  if (aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint == 0) return true;
-  switch (thermoStateCommand) {
-  case CMD_ON:
-  case CMD_XON:
-  case CMD_AUTO:
-  case CMD_HEAT:
-  return false;
-     default: return true;
-   }
-}
-
-
-//TODO: refactoring
 void thermoLoop(void) {
-    if (millis() < nextThermostatCheck)
+
+ if (!isTimeOver(timerThermostatCheck,millis(),THERMOSTAT_CHECK_PERIOD))
         return;
     if (!items) return;
     bool thermostatCheckPrinted = false;
-   configLocked++;
+    configLocked++;
     for (aJsonObject *thermoItem = items->child; thermoItem; thermoItem = thermoItem->next) {
-        if (isThermostatWithMinArraySize(thermoItem, 5)) {
-            aJsonObject *thermoExtensionArray = aJson.getArrayItem(thermoItem, I_EXT);
-            if (thermoExtensionArray && (aJson.getArraySize(thermoExtensionArray) > 1)) {
-                int thermoPin = aJson.getArrayItem(thermoItem, I_ARG)->valueint;
-                float thermoSetting = aJson.getArrayItem(thermoItem, I_VAL)->valueint; ///
-                int thermoStateCommand = aJson.getArrayItem(thermoItem, I_CMD)->valueint;
-                float curTemp = aJson.getArrayItem(thermoExtensionArray, IET_TEMP)->valuefloat;
+        if ((thermoItem->type == aJson_Array) && (aJson.getArrayItem(thermoItem, I_TYPE)->valueint == CH_THERMO)) 
+        {        
+                Item thermostat(thermoItem); //Init Item
+                if (!thermostat.isValid()) continue;
+                itemCmd thermostatCmd(&thermostat); // Got itemCmd
 
-                if (!aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint) {
-                    errorSerial<<thermoItem->name<<F(" Expired\n");
+                thermostatStore tStore;
+                tStore.asint=thermostat.getExt();
 
-                } else {
-                    if (!(--aJson.getArrayItem(thermoExtensionArray, IET_ATTEMPTS)->valueint))
-                        mqttClient.publish("/alarm/snsr", thermoItem->name);
+                int   thermoPin     = thermostat.getArg(0);
+                float thermoSetting = thermostatCmd.getFloat();
+                int   thermoStateCommand = thermostat.getCmd();
+                float curTemp       = (float) tStore.tempX100/100.;
+                bool  active        = thermostat.isActive();
 
-                }
-                if (curTemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", thermoItem->name);
-
-
-                debugSerial << endl << thermoItem->name << F(" Set:") << thermoSetting << F(" Cur:") << curTemp
+                debugSerial << F(" Set:") << thermoSetting << F(" Cur:") << curTemp
                             << F(" cmd:") << thermoStateCommand;
-                if (thermoPin<0) pinMode(-thermoPin, OUTPUT); else pinMode(thermoPin, OUTPUT);
-                if (thermoDisabledOrDisconnected(thermoExtensionArray, thermoStateCommand)) {
-                    if (thermoPin<0) digitalWrite(-thermoPin, LOW); else digitalWrite(thermoPin, LOW);
-                    // Caution - for water heaters (negative pin#) if some comes wrong (or no connection with termometers output is LOW - valve OPEN)
-                    // OFF - also VALVE is OPEN (no teat control)
-                    debugSerial<<F(" OFF");
-                } else {
-                    if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) {
-                        if (thermoPin<0) digitalWrite(-thermoPin, LOW); else digitalWrite(thermoPin, HIGH);
-                        debugSerial<<F(" ON");
-                    } //too cold
-                    else if (curTemp >= thermoSetting) {
-                        if (thermoPin<0) digitalWrite(-thermoPin, HIGH); else digitalWrite(thermoPin, LOW);
-                        debugSerial<<F(" OFF");
-                    } //Reached settings
-                    else debugSerial<<F(" -target zone-"); // Nothing to do
-                }
-                thermostatCheckPrinted = true;
-            }
-        }
-    }
+
+                if (tStore.timestamp16) //Valid temperature
+                   {        
+                        if (isTimeOver(tStore.timestamp16,millisNZ(8) & 0xFFFF,PERIOD_THERMOSTAT_FAILED,0xFFFF))
+                        {
+                        errorSerial<<thermoItem->name<<F(" Alarm Expired\n");
+                        mqttClient.publish("/alarm/snsr", thermoItem->name);
+                        tStore.timestamp16=0; //Stop termostat
+                        thermostat.setExt(tStore.asint);
+                        thermoRelay(thermoPin,false);
+                        }
+                         else
+                         { // Not expired yet
+                            if (curTemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", thermoItem->name); 
+
+                            if (!active) thermoRelay(thermoPin,false);//OFF 
+                               else if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) thermoRelay(thermoPin,true);//ON
+                                    else if (curTemp >= thermoSetting) thermoRelay(thermoPin,false);//OFF
+                                         else debugSerial<<F(" -target zone-")<<endl; // Nothing to do
+
+                         }
+                   }
+                 else debugSerial<<F(" Expired\n");  
+                    thermostatCheckPrinted = true;  
+        } //item is termostat
+    } //for
   configLocked--;
-    nextThermostatCheck = millis() + THERMOSTAT_CHECK_PERIOD;
+    timerThermostatCheck = millis();// + THERMOSTAT_CHECK_PERIOD;
 publishStat();
 #ifndef DISABLE_FREERAM_PRINT
     (thermostatCheckPrinted) ? debugSerial<<F("\nRAM=")<<freeRam()<<" " : debugSerial<<F(" ")<<freeRam()<<F(" ");
@@ -2147,30 +2175,3 @@ publishStat();
 
 }
 
-short thermoSetCurTemp(char *name, float t) {
-  if (!name || !strlen(name)) return 0;
-    if (items) {
-        aJsonObject *thermoItem = aJson.getObjectItem(items, name);
-        if (!thermoItem) return 0;
-        if (isThermostatWithMinArraySize(thermoItem, 4)) {
-            aJsonObject *extArray = NULL;
-
-            if (aJson.getArraySize(thermoItem) == 4) //No thermo extension yet
-            {
-                extArray = aJson.createArray(); //Create Ext Array
-
-                aJsonObject *ocurt = aJson.createItem(t);  //Create float
-                aJsonObject *oattempts = aJson.createItem((long int) T_ATTEMPTS); //Create int
-                aJson.addItemToArray(extArray, ocurt);
-                aJson.addItemToArray(extArray, oattempts);
-                aJson.addItemToArray(thermoItem, extArray); //Adding to thermoItem
-            }
-            else if (extArray = aJson.getArrayItem(thermoItem, I_EXT)) {
-                aJsonObject *att = aJson.getArrayItem(extArray, IET_ATTEMPTS);
-                aJson.getArrayItem(extArray, IET_TEMP)->valuefloat = t;
-                if (att->valueint == 0) mqttClient.publish("/alarmoff/snsr", thermoItem->name);
-                att->valueint = (int) T_ATTEMPTS;
-            }
-        }
-    return 1;}
-return 0;}

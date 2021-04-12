@@ -1,0 +1,147 @@
+\hypertarget{ow_term_8cpp}{}\doxysection{ow\+Term.\+cpp File Reference}
+\label{ow_term_8cpp}\index{owTerm.cpp@{owTerm.cpp}}
+{\ttfamily \#include \char`\"{}ow\+Term.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$Arduino.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}options.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}main.\+h\char`\"{}}\newline
+Include dependency graph for ow\+Term.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{ow_term_8cpp__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{ow_term_8cpp_aff3811570b1dd6182d7f45bd573afcfd}{ow\+Update}} ()
+\item 
+int \mbox{\hyperlink{ow_term_8cpp_ac78e14aeb04a12acf45919b64fe0d280}{ow\+Setup}} (\mbox{\hyperlink{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}{ow\+Changed\+Type}} ow\+Ch)
+\item 
+int \mbox{\hyperlink{ow_term_8cpp_a3c7848115ede4d67192d7964e5157591}{sensors\+\_\+loop}} (void)
+\item 
+void \mbox{\hyperlink{ow_term_8cpp_a3d8b76952ce1af677267e10c981e6dd5}{ow\+Loop}} ()
+\item 
+int \mbox{\hyperlink{ow_term_8cpp_a38798dcd7c98c38975db6e3f19de63a3}{ow\+Find}} (Device\+Address addr)
+\item 
+void \mbox{\hyperlink{ow_term_8cpp_ac9fd793efbaca8922408effe06e71650}{ow\+Add}} (Device\+Address addr)
+\item 
+void \mbox{\hyperlink{ow_term_8cpp_aaa733da2383859748e802f38409546da}{setup\+Ow\+Idle}} (void($\ast$ptr)())
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+One\+Wire $\ast$ \mbox{\hyperlink{ow_term_8cpp_a385b7fa9c4553fcb57ee60a03932b60c}{one\+Wire}} = N\+U\+LL
+\item 
+Device\+Address $\ast$ \mbox{\hyperlink{ow_term_8cpp_ac8f950395764bcd345b63d2887dae1a0}{term}} = N\+U\+LL
+\item 
+uint16\+\_\+t $\ast$ \mbox{\hyperlink{ow_term_8cpp_a31e8c0d5ba0869a2bfbf32fd8caaac57}{wstat}} = N\+U\+LL
+\item 
+Dallas\+Temperature $\ast$ \mbox{\hyperlink{ow_term_8cpp_ab5e031d55a57a0dd79468e5a7cbb5e64}{sensors}} = N\+U\+LL
+\item 
+short \mbox{\hyperlink{ow_term_8cpp_ac37ce0c409c53b6a18aefbfc3ad46b4a}{si}} = 0
+\item 
+int \mbox{\hyperlink{ow_term_8cpp_a4e9707ca4dbcd2ddd6d14657f2e12700}{t\+\_\+count}} = 0
+\item 
+unsigned long \mbox{\hyperlink{ow_term_8cpp_a72d7dd39e835325dedcc977f3b23adb8}{ow\+Timer}} = 0
+\item 
+\mbox{\hyperlink{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}{ow\+Changed\+Type}} \mbox{\hyperlink{ow_term_8cpp_ac7999c9efd1309081d54939dc27687ba}{ow\+Changed}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{ow_term_8cpp_ac9fd793efbaca8922408effe06e71650}\label{ow_term_8cpp_ac9fd793efbaca8922408effe06e71650}} 
+\index{owTerm.cpp@{owTerm.cpp}!owAdd@{owAdd}}
+\index{owAdd@{owAdd}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{owAdd()}{owAdd()}}
+{\footnotesize\ttfamily void ow\+Add (\begin{DoxyParamCaption}\item[{Device\+Address}]{addr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8cpp_a38798dcd7c98c38975db6e3f19de63a3}\label{ow_term_8cpp_a38798dcd7c98c38975db6e3f19de63a3}} 
+\index{owTerm.cpp@{owTerm.cpp}!owFind@{owFind}}
+\index{owFind@{owFind}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{owFind()}{owFind()}}
+{\footnotesize\ttfamily int ow\+Find (\begin{DoxyParamCaption}\item[{Device\+Address}]{addr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8cpp_a3d8b76952ce1af677267e10c981e6dd5}\label{ow_term_8cpp_a3d8b76952ce1af677267e10c981e6dd5}} 
+\index{owTerm.cpp@{owTerm.cpp}!owLoop@{owLoop}}
+\index{owLoop@{owLoop}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{owLoop()}{owLoop()}}
+{\footnotesize\ttfamily void ow\+Loop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8cpp_ac78e14aeb04a12acf45919b64fe0d280}\label{ow_term_8cpp_ac78e14aeb04a12acf45919b64fe0d280}} 
+\index{owTerm.cpp@{owTerm.cpp}!owSetup@{owSetup}}
+\index{owSetup@{owSetup}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{owSetup()}{owSetup()}}
+{\footnotesize\ttfamily int ow\+Setup (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}{ow\+Changed\+Type}}}]{ow\+Ch }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8cpp_aff3811570b1dd6182d7f45bd573afcfd}\label{ow_term_8cpp_aff3811570b1dd6182d7f45bd573afcfd}} 
+\index{owTerm.cpp@{owTerm.cpp}!owUpdate@{owUpdate}}
+\index{owUpdate@{owUpdate}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{owUpdate()}{owUpdate()}}
+{\footnotesize\ttfamily int ow\+Update (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8cpp_a3c7848115ede4d67192d7964e5157591}\label{ow_term_8cpp_a3c7848115ede4d67192d7964e5157591}} 
+\index{owTerm.cpp@{owTerm.cpp}!sensors\_loop@{sensors\_loop}}
+\index{sensors\_loop@{sensors\_loop}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{sensors\_loop()}{sensors\_loop()}}
+{\footnotesize\ttfamily int sensors\+\_\+loop (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{ow_term_8cpp_aaa733da2383859748e802f38409546da}\label{ow_term_8cpp_aaa733da2383859748e802f38409546da}} 
+\index{owTerm.cpp@{owTerm.cpp}!setupOwIdle@{setupOwIdle}}
+\index{setupOwIdle@{setupOwIdle}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{setupOwIdle()}{setupOwIdle()}}
+{\footnotesize\ttfamily void setup\+Ow\+Idle (\begin{DoxyParamCaption}\item[{void($\ast$)()}]{ptr }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{ow_term_8cpp_a385b7fa9c4553fcb57ee60a03932b60c}\label{ow_term_8cpp_a385b7fa9c4553fcb57ee60a03932b60c}} 
+\index{owTerm.cpp@{owTerm.cpp}!oneWire@{oneWire}}
+\index{oneWire@{oneWire}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{oneWire}{oneWire}}
+{\footnotesize\ttfamily One\+Wire$\ast$ one\+Wire = N\+U\+LL}
+
+\mbox{\Hypertarget{ow_term_8cpp_ac7999c9efd1309081d54939dc27687ba}\label{ow_term_8cpp_ac7999c9efd1309081d54939dc27687ba}} 
+\index{owTerm.cpp@{owTerm.cpp}!owChanged@{owChanged}}
+\index{owChanged@{owChanged}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{owChanged}{owChanged}}
+{\footnotesize\ttfamily \mbox{\hyperlink{ow_term_8h_a9312b7daea28d63649c1548f056f75e6}{ow\+Changed\+Type}} ow\+Changed}
+
+\mbox{\Hypertarget{ow_term_8cpp_a72d7dd39e835325dedcc977f3b23adb8}\label{ow_term_8cpp_a72d7dd39e835325dedcc977f3b23adb8}} 
+\index{owTerm.cpp@{owTerm.cpp}!owTimer@{owTimer}}
+\index{owTimer@{owTimer}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{owTimer}{owTimer}}
+{\footnotesize\ttfamily unsigned long ow\+Timer = 0}
+
+\mbox{\Hypertarget{ow_term_8cpp_ab5e031d55a57a0dd79468e5a7cbb5e64}\label{ow_term_8cpp_ab5e031d55a57a0dd79468e5a7cbb5e64}} 
+\index{owTerm.cpp@{owTerm.cpp}!sensors@{sensors}}
+\index{sensors@{sensors}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{sensors}{sensors}}
+{\footnotesize\ttfamily Dallas\+Temperature$\ast$ sensors = N\+U\+LL}
+
+\mbox{\Hypertarget{ow_term_8cpp_ac37ce0c409c53b6a18aefbfc3ad46b4a}\label{ow_term_8cpp_ac37ce0c409c53b6a18aefbfc3ad46b4a}} 
+\index{owTerm.cpp@{owTerm.cpp}!si@{si}}
+\index{si@{si}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{si}{si}}
+{\footnotesize\ttfamily short si = 0}
+
+\mbox{\Hypertarget{ow_term_8cpp_a4e9707ca4dbcd2ddd6d14657f2e12700}\label{ow_term_8cpp_a4e9707ca4dbcd2ddd6d14657f2e12700}} 
+\index{owTerm.cpp@{owTerm.cpp}!t\_count@{t\_count}}
+\index{t\_count@{t\_count}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{t\_count}{t\_count}}
+{\footnotesize\ttfamily int t\+\_\+count = 0}
+
+\mbox{\Hypertarget{ow_term_8cpp_ac8f950395764bcd345b63d2887dae1a0}\label{ow_term_8cpp_ac8f950395764bcd345b63d2887dae1a0}} 
+\index{owTerm.cpp@{owTerm.cpp}!term@{term}}
+\index{term@{term}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{term}{term}}
+{\footnotesize\ttfamily Device\+Address$\ast$ term = N\+U\+LL}
+
+\mbox{\Hypertarget{ow_term_8cpp_a31e8c0d5ba0869a2bfbf32fd8caaac57}\label{ow_term_8cpp_a31e8c0d5ba0869a2bfbf32fd8caaac57}} 
+\index{owTerm.cpp@{owTerm.cpp}!wstat@{wstat}}
+\index{wstat@{wstat}!owTerm.cpp@{owTerm.cpp}}
+\doxysubsubsection{\texorpdfstring{wstat}{wstat}}
+{\footnotesize\ttfamily uint16\+\_\+t$\ast$ wstat = N\+U\+LL}
+

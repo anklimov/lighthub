@@ -1,0 +1,46 @@
+{
+  "dmxin":["kuhm","kuhwin","gost","bthr"],
+  "dmx":[3,60],
+  "modbus": [96,97],
+  "items": {
+    "light":[7,["kuh","ktc","gst","gost"]],
+    "kuhwin":[1,5],
+    "kuhline":[1,13],
+    "kuhfre":[1,25],
+    "kuhwork":[1,1],
+    "gost":[1,47],
+    "sasha1":[1,17],
+    "sasha2":[1,21],
+    "vika1":[1,31],
+    "vika2":[1,35],
+    "bedr1":[1,39],
+    "bedr2":[1,43],
+    "kuhm":[7,["kuhline","kuhfre","kuhwork"]],
+    "kuh":[7,["kuhline","kuhfre","kuhwork","kuhwin"]],
+    "sasha":[7,["sasha1","sasha2"]],
+    "vika":[7,["vika1","vika2"]],
+    "bedr":[7,["bedr1","bedr2"]],
+    "balk1":[7,["balk11","balk12"]],
+    "balk2":[0,53],
+    "balk11":[0,51],
+    "balk12":[0,52],
+    "all":[7,["kuh","gost","vika","sasha","bedr","bth","gst","ktc","balk1","balk2","fm"]],
+    "bth1":[4,[96,0,0]],
+    "bth2":[4,[96,0,1]],
+    "bthr":[1,57],
+    "bth":[7,["bth1","bth2"]],
+    "ktc":[4,[97,0,0]],
+    "gst":[4,[97,0,1]],
+    "a_vika":[3,8],
+    "a_sasha":[3,7],
+    "a_bedr":[3,6],
+    "a_ext":[3,5],
+    "fm":[9,10],
+    "fm_t":[8,"fm"],
+    "fm_h":[8,"fm"]
+   
+    },
+  "mqtt":["public_test2","m2m.eclipse.org"]    
+  }
+
+	

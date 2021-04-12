@@ -3,7 +3,13 @@
 #ifndef MBUS_DISABLE
 #include <abstractout.h>
 #include <item.h>
+#include "itemCmd.h"
 
+#if defined(ESP32)
+#define serialParamType uint32_t
+#else
+#define serialParamType uint16_t
+#endif
 
 class mbPersistent : public chPersistent  {
 
@@ -11,12 +17,12 @@ public:
 //  int addr
   int8_t driverStatus;
   int baud;
-  uint16_t serialParam;
+  serialParamType serialParam;
   uint16_t pollingInterval;
   uint32_t timestamp;
   aJsonObject * pollingRegisters;
+  aJsonObject * pollingIrs;
   aJsonObject * parameters;
-
 };
 
 
@@ -29,14 +35,15 @@ public:
     int Poll(short cause) override;
     int Stop() override;
     int Status() override;
-    int isActive() override;
     int getChanType() override;
-    int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL) override;
-
+    int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true) override;
+    int getDefaultStorageType(){return ST_INT32;};
+    //int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL) override;
 
 protected:
     mbPersistent * store;
     bool getConfig();
-    int findRegister(int registerNum, int posInBuffer);
+    int findRegister(int registerNum, int posInBuffer, int regType);
+    void pollModbus(aJsonObject * reg, int regType);
 };
 #endif

@@ -1,0 +1,14 @@
+<map id="abstractCh" name="abstractCh">
+<area shape="rect" id="node1" title=" " alt="" coords="224,5,311,32"/>
+<area shape="rect" id="node2" href="$classabstract_in.html" title=" " alt="" coords="115,80,195,107"/>
+<area shape="rect" id="node5" href="$classabstract_out.html" title=" " alt="" coords="334,80,425,107"/>
+<area shape="rect" id="node3" href="$classin__ccs811.html" title=" " alt="" coords="5,155,87,181"/>
+<area shape="rect" id="node4" href="$classin__hdc1080.html" title=" " alt="" coords="111,155,199,181"/>
+<area shape="rect" id="node6" href="$classcolor_channel.html" title=" " alt="" coords="223,155,322,181"/>
+<area shape="rect" id="node10" href="$classout___a_c.html" title=" " alt="" coords="346,155,413,181"/>
+<area shape="rect" id="node11" href="$classout___modbus.html" title=" " alt="" coords="437,155,530,181"/>
+<area shape="rect" id="node12" href="$classout___motor.html" title=" " alt="" coords="554,155,634,181"/>
+<area shape="rect" id="node7" href="$classout__dmx.html" title=" " alt="" coords="139,229,211,256"/>
+<area shape="rect" id="node8" href="$classout__pwm.html" title=" " alt="" coords="235,229,310,256"/>
+<area shape="rect" id="node9" href="$classout___s_p_i_led.html" title=" " alt="" coords="334,229,425,256"/>
+</map>

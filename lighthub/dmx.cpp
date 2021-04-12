@@ -22,6 +22,7 @@ e-mail    anklimov@gmail.com
 //#include <DMXSerial.h>
 #include "options.h"
 #include "item.h"
+#include "main.h"
 
 #ifdef _dmxin
 #if defined(ARDUINO_ARCH_AVR)
@@ -157,7 +158,7 @@ for (short tch=0; tch<=3 ; tch++)
      if (updated)
         {
         DMXImmediateUpdate(tch,DMXin[base],DMXin[base+1],DMXin[base+2],DMXin[base+3]);
-        D_checkT=millis()+D_CHECKT;
+        D_checkT=millisNZ();
         }
     }
     //Serial.print(D_State,BIN);Serial.println();
@@ -184,7 +185,8 @@ short t,tch;
 
        }
 
-if ((millis()<D_checkT) || (D_checkT==0)) return;
+//if ((millis()<D_checkT) || (D_checkT==0)) return;
+  if ( (!D_checkT) || (!isTimeOver(D_checkT,millis(),D_CHECKT))) return;
 D_checkT=0;
 
 // Here code for network update
@@ -259,12 +261,13 @@ dmxout.setTxMaxChannels(channels);
 #ifndef DMX_DISABLE
 for (int i=1;i<=channels;i++) DmxWrite(i,0);
 #endif
-
+debugSerial<<F("DMXOut. Free:")<<freeRam()<<endl;
 #ifdef DMX_SMOOTH
 if (DMXinterimBuf) delete DMXinterimBuf;
 DMXinterimBuf = new uint8_t [channels+1];
 DMXOUT_Channels=channels;
 for (int i=1;i<=channels;i++) DMXinterimBuf[i]=0;
+debugSerial<<F("DMXInterim. Free:")<<freeRam()<<endl;
 #endif
 }
 
@@ -272,7 +275,8 @@ void DMXOUT_propagate()
 {
   #ifdef DMX_SMOOTH
   uint32_t now = millis();
-  if (now<checkTimestamp) return;
+  //if (now<checkTimestamp) return;
+  if (!isTimeOver(checkTimestamp,now,DMX_SMOOTH_DELAY)) return;
 
   for(int i=1;i<=DMXOUT_Channels;i++)
   {
@@ -284,13 +288,13 @@ void DMXOUT_propagate()
         if (!step) step=1;
 
         if (delta<0)
-                        {DmxWrite2(i,currLevel+step);}
+                        {DmxWrite2(i,currLevel+step);debugSerial<<"<";}
 
         if (delta>0)
-                        {DmxWrite2(i,currLevel-step);}
+                        {DmxWrite2(i,currLevel-step);debugSerial<<">";}
         }
   }
-  checkTimestamp=now+DMX_SMOOTH_DELAY;
+  checkTimestamp=now;
   #endif
 }
 
