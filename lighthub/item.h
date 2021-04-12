@@ -91,7 +91,7 @@ extern aJsonObject *items;
 extern short thermoSetCurTemp(char *name, float t);
 
 int txt2cmd (char * payload);
-
+int digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem);
 class Item
 {
   public:

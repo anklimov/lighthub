@@ -109,6 +109,8 @@ Item::Item(aJsonObject *obj)//Constructor
 {
     itemArr = obj;
     driver = NULL;
+    *defaultSubItem = 0;
+    defaultSuffixCode = 0;
     Parse();
 }
 
@@ -570,6 +572,37 @@ st.setSuffix(suffixCode);
 return 0;
 }
 
+// Recursive function with small stack consumption
+int digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem)
+{    if (!itemArr || itemArr->type!=aJson_Array) return 0; 
+    debugSerial<< F("Sub:")<<subItem<<endl;
+     // Iterate across array of names
+      aJsonObject *i = itemArr->child;                                        
+                configLocked++;
+                while (i) {
+                    if (i->type == aJson_String)
+                    {   debugSerial<< i->valuestring<<endl;
+                        aJsonObject *nextItem = aJson.getObjectItem(items, i->valuestring);
+                        if (nextItem && nextItem->type == aJson_Array)
+                               {        
+                                short itemtype = aJson.getArrayItem(nextItem,0)->valueint;
+                                if (itemtype == CH_GROUP) 
+                                    {
+                                    aJsonObject * itemSubArray = aJson.getArrayItem(nextItem,1);
+                                    digGroup(itemSubArray,cmd,subItem);
+                                    }
+                                else // Normal channel
+                                {    
+                                Item it(nextItem);
+                                if (it.isValid()) it.Ctrl(*cmd,subItem);
+                                }
+                               } 
+                    }    
+                    i = i->next;
+                } //while
+                configLocked--;
+return 1;
+}
 
 int Item::Ctrl(itemCmd cmd,  char* subItem)
 {
@@ -593,7 +626,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem)
     
    
     debugSerial<<F("RAM=")<<fr<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd=")<<F("; ");
-     if (fr < 180) {
+     if (fr < 200) {
         errorSerial<<F("OutOfMemory!\n")<<endl;
         return -1;
     }
@@ -868,6 +901,8 @@ switch (itemType) {
                 case CH_GROUP:
                 {
                     if (itemArg->type == aJson_Array && operation) {
+                        digGroup(itemArg,&cmd,subItem);
+                        /*
                         aJsonObject *i = itemArg->child;
                         configLocked++;
                         while (i) {
@@ -879,6 +914,7 @@ switch (itemType) {
                             i = i->next;
                         } //while
                         configLocked--;
+                      */  
                     } //if
                 } //case
                break;
