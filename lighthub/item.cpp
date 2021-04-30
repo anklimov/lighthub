@@ -48,6 +48,7 @@ e-mail    anklimov@gmail.com
 #include "modules/out_dmx.h"
 #include "modules/out_pwm.h"
 #include "modules/out_pid.h"
+#include "modules/out_multivent.h"
 
 short modbusBusy = 0;
 extern aJsonObject *pollingItem;
@@ -169,6 +170,13 @@ void Item::Parse() {
 #ifndef   PID_DISABLE
           case CH_PID:
           driver = new out_pid (this);
+//          debugSerial<<F("AC driver created")<<endl;
+          break;
+#endif
+
+#ifndef   MULTIVENT_DISABLE
+          case CH_MULTIVENT:
+          driver = new out_Multivent (this);
 //          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
@@ -1125,7 +1133,7 @@ int Item::SendStatus(int sendFlags) {
     else return SendStatusImmediate(sendFlags);
 }
     
-    int Item::SendStatusImmediate(int sendFlags) {
+    int Item::SendStatusImmediate(int sendFlags, char * subItem) {
     {
       itemCmd st(ST_VOID,CMD_VOID);  
       st.loadItem(this, true);
@@ -1171,7 +1179,7 @@ int Item::SendStatus(int sendFlags) {
           case ST_HSV255:
           case ST_FLOAT_CELSIUS:
 
-                      if (mqttClient.connected()  && !ethernetIdleCount)
+                      if (mqttClient.connected()  && !ethernetIdleCount && !subItem)
                       {
 
                         setTopic(addrstr,sizeof(addrstr),T_OUT);
@@ -1206,6 +1214,12 @@ int Item::SendStatus(int sendFlags) {
              {
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
+              if (subItem) 
+                            {
+                            strncat(addrstr, "/", sizeof(addrstr));    
+                            strncat(addrstr, subItem, sizeof(addrstr)-1);
+                            }
+
               strncat(addrstr, "/", sizeof(addrstr));
 
         // Preparing parameters payload //////////
@@ -1263,6 +1277,11 @@ int Item::SendStatus(int sendFlags) {
 
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
+              if (subItem) 
+                            {
+                            strncat(addrstr, "/", sizeof(addrstr));    
+                            strncat(addrstr, subItem, sizeof(addrstr)-1);
+                            }
               strncat(addrstr, "/", sizeof(addrstr));
               strncat_P(addrstr, CMD_P, sizeof(addrstr));
 

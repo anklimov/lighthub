@@ -52,6 +52,7 @@ e-mail    anklimov@gmail.com
 #define CH_MOTOR  12
 #define CH_PID   13
 #define CH_MBUS  14
+#define CH_MULTIVENT 18
 
 //#define CHANNEL_TYPES 13
 
@@ -128,7 +129,7 @@ class Item
   void setSubtype(uint8_t par);
   int Poll(int cause);
   int SendStatus(int sendFlags);
-  int SendStatusImmediate(int sendFlags);
+  int SendStatusImmediate(int sendFlags, char * subItem=NULL);
   int isActive();
   int getChanType();
   inline int On (){return Ctrl(itemCmd(ST_VOID,CMD_ON));};
