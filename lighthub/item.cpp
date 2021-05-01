@@ -648,6 +648,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     bool    chActive  = (isActive()>0);
     bool    toExecute = chActive; // execute if channel is active now
     bool    scale100  = false;
+    
     debugSerial<<endl;
     
           if (itemType != CH_GROUP )
@@ -655,14 +656,29 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
           //Check if subitem is some sort of command
           int subitemCmd = subitem2cmd(subItem);
           short prevCmd  = getCmd();
-          if (!prevCmd && chActive>0) prevCmd=CMD_ON;
-
-          if (subitemCmd && subitemCmd != prevCmd)
+          if (!prevCmd && chActive) prevCmd=CMD_ON;
+          
+          if (subitemCmd) //Find some COMMAND in subitem
+           {           
+            if (subitemCmd != prevCmd)
               {
                 debugSerial<<F("Ignored, channel cmd=")<<prevCmd<<endl;
                 return -1;
               }
+           subItem=NULL;   
+           }  
           }
+
+     if (subItem) // Fast track for commands to subitems
+     {   
+         if (itemType==CH_GROUP) 
+                        {
+                        if (allowRecursion && itemArg->type == aJson_Array && operation) digGroup(itemArg,&cmd,subItem);
+                        return 1;
+                        }
+         if (driver) return driver->Ctrl(cmd,subItem,toExecute);
+         return 0;
+     }
 
           itemCmd st(ST_VOID,CMD_VOID);
 
@@ -1130,16 +1146,17 @@ int Item::SendStatus(int sendFlags) {
         debugSerial<<F("Status deffered\n");
         return -1;
     }
-    else return SendStatusImmediate(sendFlags);
-}
-    
-    int Item::SendStatusImmediate(int sendFlags, char * subItem) {
+    else 
     {
-      itemCmd st(ST_VOID,CMD_VOID);  
-      st.loadItem(this, true);
-
-      sendFlags |= getFlag(SEND_COMMAND | SEND_PARAMETERS); //if some delayed status is pending
-
+        itemCmd st(ST_VOID,CMD_VOID);  
+        st.loadItem(this, true);
+        sendFlags |= getFlag(SEND_COMMAND | SEND_PARAMETERS); //if some delayed status is pending
+        return SendStatusImmediate(st,sendFlags);
+    }
+  }
+    
+    int Item::SendStatusImmediate(itemCmd st, int sendFlags, char * subItem) {
+    {
       char addrstr[48];
       char valstr[20] = "";
       char cmdstr[8] = "";

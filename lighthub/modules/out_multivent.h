@@ -6,7 +6,7 @@
 #include "itemCmd.h"
 
 
-static int8_t motorQuote = 0;
+//static int8_t motorQuote = 0;
 
 class out_Multivent : public abstractOut {
 public:

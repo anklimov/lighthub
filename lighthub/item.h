@@ -129,7 +129,7 @@ class Item
   void setSubtype(uint8_t par);
   int Poll(int cause);
   int SendStatus(int sendFlags);
-  int SendStatusImmediate(int sendFlags, char * subItem=NULL);
+  int SendStatusImmediate(itemCmd st, int sendFlags, char * subItem=NULL);
   int isActive();
   int getChanType();
   inline int On (){return Ctrl(itemCmd(ST_VOID,CMD_ON));};

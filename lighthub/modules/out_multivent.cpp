@@ -13,8 +13,8 @@ static int driverStatus = CST_UNKNOWN;
 void out_Multivent::getConfig()
 {
  gatesObj = NULL;
-  if (!item || !item->itemArg || !item->itemArg->type != aJson_Array) return;
- gatesObj = aJson.getArrayItem(item->itemArg,1);
+  if (!item || !item->itemArg || item->itemArg->type != aJson_Object) return;
+ gatesObj = item->itemArg;
   }
 
 int  out_Multivent::Setup()
@@ -23,31 +23,36 @@ abstractOut::Setup();
 //getConfig();
 
 //Expand Argument storage to 2
-for (int i = aJson.getArraySize(item->itemArg); i < 2; i++)
-            aJson.addItemToArray(item->itemArg, aJson.createItem( (long int) 0));
+//for (int i = aJson.getArraySize(item->itemArg); i < 2; i++)
+//            aJson.addItemToArray(item->itemArg, aJson.createItem( (long int) 0));
 
 //Allocate objects to store persistent data in config tree
-if (gatesObj)
+if (gatesObj /*&& aJson.getArraySize(item->itemArg)>=2*/)
       {
       aJsonObject * i = gatesObj->child;            
       while (i)
           {
+             if (i->name && *i->name)
+             {
              aJsonObject  * setObj = aJson.getObjectItem(i, "set");
              if (!setObj) aJson.addNumberToObject(i, "set", (long int) -1);
 
              aJsonObject  * cmdObj  = aJson.getObjectItem(i, "cmd");
-             if (!setObj) aJson.addNumberToObject(i, "cmd", (long int) -1);
+             if (!cmdObj) aJson.addNumberToObject(i, "cmd", (long int) -1);
 
              aJsonObject * outObj = aJson.getObjectItem(i, "out");
-             if (!setObj) aJson.addNumberToObject(i, "out", (long int) -1);
-
+             if (!outObj) aJson.addNumberToObject(i, "out", (long int) -1);
+             } 
              i=i->next; 
           }
+      debugSerial << F ("MultiVent init")<< endl;
+      driverStatus = CST_INITIALIZED;
+      return 1;
       }
 
-debugSerial << F ("MultiVent init")<< endl;
-driverStatus = CST_INITIALIZED;
-return 1;
+debugSerial << F ("MultiVent config failed")<< endl;
+return 0;
+
 }
 
 int  out_Multivent::Stop()
@@ -96,91 +101,97 @@ int suffixCode = cmd.getSuffix();
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 aJsonObject * i = NULL;
-aJsonObject * currentGateObj = NULL;
 
 if (gatesObj) i = gatesObj->child; // Pass 1 - calculate summ air value, max value etc
 
 int activeV = 0;
 int totalV  = 0;
-int gateV   = 0;
-//char * gateEmit = NULL;
-int gateCmd = 0;
 int maxV=0;
+int maxRequestedV=0;
+int maxPercent=0;
+
 
 while (i)
 {
+
   aJsonObject * setObj=aJson.getObjectItem(i, "set");
   aJsonObject * cmdObj=aJson.getObjectItem(i, "cmd");
-   if (!setObj || !cmdObj || setObj->type!=aJson_Int || cmdObj->type!=aJson_Int) continue;
+   if (setObj && cmdObj && setObj->type==aJson_Int && cmdObj->type==aJson_Int) 
+   {
 
-  int V         =aJson.getObjectItem(i,"V")->valueint;
-  int requestedV=0;
+      int V         =aJson.getObjectItem(i,"V")->valueint;
+      int requestedV=0;
 
-  if (subItem && !strcmp (i->name,subItem)) 
-          {
-          currentGateObj=i;
-          gateV=V;
-  //        gateEmit=aJson.getObjectItem(i,"emit")->valuestring;
-          
-          gateCmd=cmdObj->valueint;
-          if (cmdObj && cmd.isCommand()) 
-                                      {
-                                      cmdObj->valueint = cmd.getCmd();
-                                      //publishTopic(i->name,cmdObj->valueint,"/set");
-                                      item->SendStatusImmediate(SEND_COMMAND,i->name);
-                                      }
-          if (setObj && cmd.isValue())   
-                                      {
-                                      setObj->valueint = cmd.getPercents255();
-                                      //publishTopic(i->name,setObj->valueint,"/set");
-                                      item->SendStatusImmediate(SEND_PARAMETERS,i->name);
-                                      }
-          }
+      if (subItem && !strcmp (i->name,subItem)) 
+              {
+              if (cmdObj && cmd.isCommand()) 
+                                          {
+                                          cmdObj->valueint = cmd.getCmd();
+                                          //publishTopic(i->name,cmdObj->valueint,"/set");
+                                          if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_COMMAND,i->name);
+                                          }
+              if (setObj && cmd.isValue())   
+                                          {
+                                          setObj->valueint = cmd.getPercents255();
+                                          //publishTopic(i->name,setObj->valueint,"/set");
+                                          if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_PARAMETERS,i->name);
+                                          }
+              }
 
-   if (cmdObj->valueint != CMD_OFF) 
-                  { 
-                  requestedV=V*setObj->valueint;
-                  activeV+=requestedV;
-                  }
-   totalV+=V;
-  // numberGates++;
+      if (cmdObj->valueint != CMD_OFF) 
+                      { 
+                      requestedV=V*setObj->valueint;
+                      activeV+=requestedV;
+                      }
+      totalV+=V;
 
-   if(requestedV>maxV) maxV=requestedV;
-
+      //if(requestedV>maxRequestedV) 
+      if (setObj->valueint>maxPercent)
+                      {
+                      maxRequestedV=requestedV;
+                      maxV=V;
+                      maxPercent=setObj->valueint;
+                      }
+   }
   i=i->next;
 }
 
-int fanV=activeV/totalV;
-debugSerial << F("Total V:")<<totalV<<F(" active V:")<<activeV<< F(" %:")<<fanV<< endl;
+if (!totalV) return 0;
 
-//uint8_t nGate=0;
+int fanV=activeV/totalV;
+debugSerial << F("Total V:")<<totalV<<F(" active V:")<<activeV/255<< F(" fan%:")<<fanV<< F(" Max request:")<<maxRequestedV/255 <<F(" from ")<<maxV<<F(" m3")<< endl;
+
+executeCommand(aJson.getObjectItem(gatesObj, ""),-1,itemCmd().Percents255(fanV));
+
 i=NULL;
 if (gatesObj) i = gatesObj->child; //Pass 2: re-distribute airflow
 
 while (i)
 {
-//  nGate++;
   int V  =aJson.getObjectItem(i,"V")->valueint;
 
   aJsonObject * outObj=aJson.getObjectItem(i, "out"); 
   aJsonObject * setObj=aJson.getObjectItem(i, "set");
   aJsonObject * cmdObj=aJson.getObjectItem(i, "cmd");
 
-  if (!outObj || !setObj || !cmdObj || outObj->type!=aJson_Int || setObj->type!=aJson_Int || cmdObj->type!=aJson_Int) continue;
-  int out = 0;
-  if (cmdObj->valueint != CMD_OFF) 
-    {
-      int requestedV=V*setObj->valueint;
-      int out = requestedV*255/maxV;
-      debugSerial<<i->name,(" Req:")<<requestedV<<F( Out:)<<out<<endl;
-    } 
-      if (out != outObj->valueint)
+  if (outObj && setObj && cmdObj && outObj->type==aJson_Int && setObj->type==aJson_Int && cmdObj->type==aJson_Int && V) 
+  {
+         long int out = 0;
+        if (cmdObj->valueint != CMD_OFF && maxRequestedV) 
           {
-            //report out
-            executeCommand(i,-1,itemCmd().Percents255(out));
-            outObj->valueint=out;
-          }
-    
+            int requestedV=V*setObj->valueint;
+            out = (( long)requestedV*255L)/(( long)V)*( long)maxV/( long)maxRequestedV;
+            debugSerial<<i->name<<(" Req:")<<requestedV/255<<F(" Out:")<<out<<endl;
+          } 
+
+          // executeCommand(i,-1,itemCmd().Percents255(out));
+            if (out != outObj->valueint)
+                {
+                  //report out
+                  executeCommand(i,-1,itemCmd().Percents255(out));
+                  outObj->valueint=out;
+                }
+  }        
   i=i->next;
 }
 
