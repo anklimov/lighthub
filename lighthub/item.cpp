@@ -1521,7 +1521,9 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
         break;
        case 2:
         break;
-       case 3: //Swap high and low bytes
+       case 3: 
+        value++;
+       case 4: //Swap high and low bytes
         t = (value & 0xff00) >> 8;
         value <<=8;
         value |= t;
