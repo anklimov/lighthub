@@ -101,7 +101,7 @@ int  str2regSize(char * str)
 bool out_Modbus::getConfig()
 {
   // Retrieve and store template values from global modbus settings
-  if (!store || !item || !item->itemArg || (item->itemArg->type != aJson_Array) || aJson.getArraySize(item->itemArg)<2)
+  if (!store || !item || !item->itemArg || (item->itemArg->type != aJson_Array) || aJson.getArraySize(item->itemArg)<2 || !modbusObj)
   {
     errorSerial<<F("MBUS: config failed:")<<(bool)store<<F(",")<<(bool)item<<F(",")<<(bool)item->itemArg<<F(",")<<(item->itemArg->type != aJson_Array)<<F(",")<< (aJson.getArraySize(item->itemArg)<2)<<endl;
     return false;
@@ -216,7 +216,7 @@ switch (regType) {
     default:
         debugSerial<<F("Not supported reg type\n");
  }
-if (result != node.ku8MBSuccess) errorSerial<<F("MBUS: Polling error ")<<result<<endl;
+if (result != node.ku8MBSuccess) errorSerial<<F("MBUS: Polling error ")<<_HEX(result)<<endl;
 return (result == node.ku8MBSuccess);
 }
 

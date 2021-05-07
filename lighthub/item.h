@@ -143,7 +143,7 @@ class Item
   int modbusDimmerSet(itemCmd st);
 
   int modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value);
-  void mb_fail();
+  void mb_fail(int result=0);
   void Parse();
   int checkModbusDimmer();
   int checkModbusDimmer(int data);

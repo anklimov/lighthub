@@ -1391,8 +1391,8 @@ int Item::modbusDimmerSet(itemCmd st)
         }
 #endif
 
-void Item::mb_fail() {
-    debugSerial<<F("Modbus op failed\n");
+void Item::mb_fail(int result) {
+    debugSerial<<F("Modbus op failed:")<<_HEX(result)<<endl;
     setFlag(SEND_RETRY);
 }
 
@@ -1440,7 +1440,7 @@ int Item::VacomSetFan(itemCmd st) {
     modbusBusy = 0;
 
     if (result == node.ku8MBSuccess) return 1;
-    mb_fail();
+    mb_fail(result);
     return 0;
 }
 
@@ -1490,7 +1490,7 @@ int addr;
     result=node.writeSingleRegister(2004 - 1, regval);
     modbusBusy = 0;
     if (result == node.ku8MBSuccess) return 1;
-    mb_fail();
+    mb_fail(result);
     return 0;
 
 }
@@ -1532,7 +1532,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
     modbusBusy = 0;
 
     if (result == node.ku8MBSuccess) return 1;
-    mb_fail();
+    mb_fail(result);
     return 0;
 
 }
