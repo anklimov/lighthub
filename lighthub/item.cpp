@@ -1509,6 +1509,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
 
     modbusSerial.begin(MODBUS_SERIAL_BAUD, dimPar);
     node.begin(addr, modbusSerial);
+    uint8_t t;
     switch (_mask) {
        case 1:
         value <<= 8;
@@ -1517,6 +1518,15 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
        case 0:
         value &= 0xff;
         value |= (0xff00);
+        break;
+       case 2:
+        break;
+       case 3: //Swap high and low bytes
+        t = (value & 0xff00) >> 8;
+        value <<=8;
+        value |= t;
+
+
     }
     debugSerial<<addr<<F("=>")<<_HEX(_reg)<<F("(T:")<<_regType<<F("):")<<_HEX(value)<<endl;
     switch (_regType) {
