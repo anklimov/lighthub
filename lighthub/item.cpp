@@ -978,7 +978,18 @@ switch (itemType) {
 
       #ifndef MODBUS_DISABLE
               case CH_MODBUS:
-                  if (toExecute) modbusDimmerSet(st);
+                if (toExecute)
+                {
+                int vol;    
+                if (st.getCmd()== CMD_ON && (vol=st.getPercents())<MIN_VOLUME && vol>=0) 
+                        {
+                        st.setPercents(INIT_VOLUME);
+                        st.saveItem(this);
+                        SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                        };
+
+                  modbusDimmerSet(st);
+                }
                   break;
               case CH_VC:
                   if (toExecute) VacomSetFan(st);
@@ -1521,8 +1532,10 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
         break;
        case 2:
         break;
-       case 3: 
-        value++;
+       case 3: // Modbus relay
+        //value++;
+          if (value) value = 1;
+             else    value = 2;   
        case 4: //Swap high and low bytes
         t = (value & 0xff00) >> 8;
         value <<=8;
