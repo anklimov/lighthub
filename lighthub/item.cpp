@@ -51,6 +51,8 @@ e-mail    anklimov@gmail.com
 #include "modules/out_multivent.h"
 
 short modbusBusy = 0;
+bool isPendedModbusWrites = false;
+
 extern aJsonObject *pollingItem;
 extern PubSubClient mqttClient;
 extern int8_t ethernetIdleCount;
@@ -1095,8 +1097,40 @@ int Item::isActive() {
     if (val) return 1; else return 0;
 }
 
+void Item::resumeModbus()
+{
+ //   return;
+if (modbusBusy) return;
+configLocked++;
+if (items) {
+    aJsonObject * item = items->child;
+    while (items && item)
+        if (item->type == aJson_Array && aJson.getArraySize(item)>1)  {
+            Item it(item);
+            if (it.isValid()) {
+                switch (it.itemType){
+                    case CH_MODBUS:
+                        checkModbusRetry(); 
+                }
+               
+            } //isValid
+            yield();
+            item = item->next;
+        }  //if
+}
+configLocked--;
+}
+
+
 int Item::Poll(int cause) {
 
+   #ifndef MODBUS_DISABLE
+   if (isPendedModbusWrites) 
+                      {
+                          resumeModbus();
+                          isPendedModbusWrites=false;
+                      }        
+   #endif   
 switch (cause)
 {
   case POLLING_SLOW:
@@ -1134,7 +1168,7 @@ switch (cause)
   if (driver && driver->Status())
                       {
                       return driver->Poll(cause);
-                      }
+                      }                             
 
     return 0;
 }
@@ -1400,14 +1434,15 @@ int Item::modbusDimmerSet(itemCmd st)
             }
             return 0;
         }
-#endif
+
 
 void Item::mb_fail(int result) {
     debugSerial<<F("Modbus op failed:")<<_HEX(result)<<endl;
     setFlag(SEND_RETRY);
+    isPendedModbusWrites=true;
 }
 
-#ifndef MODBUS_DISABLE
+
 extern ModbusMaster node;
 
 
@@ -1449,6 +1484,7 @@ int Item::VacomSetFan(itemCmd st) {
     if (result == node.ku8MBSuccess) debugSerial << F("MB ok")<<endl;
     result = node.writeSingleRegister(2003 - 1, val * 100);
     modbusBusy = 0;
+    //resumeModbus();
 
     if (result == node.ku8MBSuccess) return 1;
     mb_fail(result);
@@ -1500,6 +1536,7 @@ int addr;
     //debugSerial<<regval);
     result=node.writeSingleRegister(2004 - 1, regval);
     modbusBusy = 0;
+    //resumeModbus();
     if (result == node.ku8MBSuccess) return 1;
     mb_fail(result);
     return 0;
@@ -1543,7 +1580,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
 
 
     }
-    debugSerial<<addr<<F("=>")<<_HEX(_reg)<<F("(T:")<<_regType<<F("):")<<_HEX(value)<<endl;
+    debugSerial<<F("Addr:")<<addr<<F(" Reg:0x")<<_HEX(_reg)<<F(" T:")<<_regType<<F(" Val:0x")<<_HEX(value)<<endl;
     switch (_regType) {
         case MODBUS_HOLDING_REG_TYPE:
             result = node.writeSingleRegister(_reg, value);
@@ -1555,6 +1592,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
             debugSerial<<F("Not supported reg type\n");
     }
     modbusBusy = 0;
+    //resumeModbus();
 
     if (result == node.ku8MBSuccess) return 1;
     mb_fail(result);
@@ -1627,6 +1665,8 @@ int Item::checkFM() {
         result = node.readHoldingRegisters(2111 - 1, 1);
         if (result == node.ku8MBSuccess) aJson.addNumberToObject(out, "flt", (long int) node.getResponseBuffer(0));
         modbusBusy=0;
+        //resumeModbus();
+
         if (isActive()>0) Off(); //Shut down ///
         modbusBusy=1;
     } else aJson.addNumberToObject(out, "flt", (long int)0);
@@ -1666,6 +1706,7 @@ int Item::checkFM() {
     free(outch);
     aJson.deleteItem(out);
     modbusBusy = 0;
+    //resumeModbus();
     return 1;
 }
 
@@ -1779,6 +1820,7 @@ int Item::checkModbusDimmer() {
     } else
         debugSerial << F("Modbus polling error=") << _HEX(result) << endl;
     modbusBusy = 0;
+    //resumeModbus();
 
 return 1;
 }

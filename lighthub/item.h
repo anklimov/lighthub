@@ -151,6 +151,8 @@ class Item
   boolean checkVCRetry();
   boolean checkHeatRetry();
   void sendDelayedStatus();
+  void resumeModbus();
+
 
   int checkFM();
   char defaultSubItem[10];
