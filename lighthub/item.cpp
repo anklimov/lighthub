@@ -1097,10 +1097,10 @@ int Item::isActive() {
     if (val) return 1; else return 0;
 }
 
-void Item::resumeModbus()
+bool Item::resumeModbus()
 {
- //   return;
-if (modbusBusy) return;
+
+if (modbusBusy) return false;
 configLocked++;
 if (items) {
     aJsonObject * item = items->child;
@@ -1119,17 +1119,16 @@ if (items) {
         }  //if
 }
 configLocked--;
+return true;
 }
 
 
 int Item::Poll(int cause) {
 
    #ifndef MODBUS_DISABLE
-   if (isPendedModbusWrites) 
-                      {
-                          resumeModbus();
+   if (isPendedModbusWrites && resumeModbus())
                           isPendedModbusWrites=false;
-                      }        
+                             
    #endif   
 switch (cause)
 {
