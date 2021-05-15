@@ -1101,6 +1101,7 @@ bool Item::resumeModbus()
 {
 
 if (modbusBusy) return false;
+debugSerial<<F("Pushing MB: ");
 configLocked++;
 if (items) {
     aJsonObject * item = items->child;
@@ -1110,13 +1111,15 @@ if (items) {
             if (it.isValid()) {
                 switch (it.itemType){
                     case CH_MODBUS:
-                        checkModbusRetry(); 
+                        bool res = it.checkModbusRetry(); 
+                        debugSerial<<it.itemArr->name<<F(":")<<res<<F("; ");
                 }
                
             } //isValid
             yield();
             item = item->next;
         }  //if
+debugSerial<<endl;
 }
 configLocked--;
 return true;
