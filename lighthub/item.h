@@ -35,12 +35,13 @@ e-mail    anklimov@gmail.com
 #define S_SAT  10
 #define S_TEMP 11
 #define S_VAL  12
-#define S_ADDITIONAL 12
+#define S_DELAYED 13
+#define S_ADDITIONAL 13
 
-#define CH_DIMMER 0   //DMX 1 ch
+#define CH_DIMMER 0   //DMX 1-4 ch
 #define CH_RGBW   1   //DMX 4 ch
 #define CH_RGB    2   //DMX 3 ch
-#define CH_PWM    3   //PWM output directly to PIN
+#define CH_PWM    3   //PWM output directly to PIN 1-4 CH
 #define CH_MODBUS 4   //Modbus AC Dimmer
 #define CH_THERMO 5   //Simple ON/OFF thermostat
 #define CH_RELAY  6   //ON_OFF relay output
@@ -74,6 +75,7 @@ e-mail    anklimov@gmail.com
 #define I_VAL  2 //Latest preset (int or array of presets)
 #define I_CMD  3 //Latest CMD received
 #define I_EXT  4 //Chanell-depended extension - array
+#define I_TIMESTAMP 5
 
 #define MODBUS_CMD_ARG_ADDR 0
 #define MODBUS_CMD_ARG_REG 1
@@ -137,7 +139,7 @@ class Item
   inline int Toggle(){return Ctrl(itemCmd(ST_VOID,CMD_TOGGLE));};
 
   protected:
-  //short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
+ 
   int VacomSetFan (itemCmd st);
   int VacomSetHeat(itemCmd st);
   int modbusDimmerSet(itemCmd st);
@@ -147,9 +149,10 @@ class Item
   void Parse();
   int checkModbusDimmer();
   int checkModbusDimmer(int data);
-  boolean checkModbusRetry();
-  boolean checkVCRetry();
-  boolean checkHeatRetry();
+
+  int checkModbusRetry();
+  //boolean checkVCRetry();
+  //boolean checkHeatRetry();
   void sendDelayedStatus();
   bool resumeModbus();
 

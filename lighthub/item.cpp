@@ -102,6 +102,7 @@ int txt2subItem(char *payload) {
     else if (strcmp_P(payload, SAT_P) == 0) cmd = S_SAT;
     else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
     else if (strcmp_P(payload, VAL_P) == 0) cmd = S_VAL;
+    else if (strcmp_P(payload, DEL_P) == 0) cmd = S_DELAYED;
   
     return cmd;
 }
@@ -500,11 +501,26 @@ switch (suffixCode) {
 st.setSuffix(suffixCode);
 
   switch (cmd) {
+
+      /*
+      case CMD_ON:
+      case CMD_OFF:
+      case CMD_TOGGLE:
+      case CMD_HALT:
+      case CMD_RESTORE:
+      case CMD_XON:
+      case CMD_XOFF:
+
       case CMD_UP:
       case CMD_DN:
-          st.Int((int32_t)getInt((char **) &payload));
+      {
+ 
+          
           return   Ctrl(st,subItem);
+      }
       break;
+      */
+
       case CMD_HSV: 
           st.Cmd(0);
       case CMD_VOID:
@@ -550,7 +566,7 @@ st.setSuffix(suffixCode);
               }
  
           return   Ctrl(st,subItem);
-      }
+        } //Void command
           break;
 
       case CMD_UNKNOWN: //Not known command
@@ -576,8 +592,11 @@ st.setSuffix(suffixCode);
          return   Ctrl(st,subItem);
       }
       default: //some known command
+      {
+      int32_t intParam = getInt((char **) &payload);
+      if (intParam) st.Int(intParam);
       return Ctrl(st, subItem);
-
+      }
   } //ctrl
 return 0;
 }
@@ -637,7 +656,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     int fr = freeRam();
     
    
-    debugSerial<<F("RAM=")<<fr<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd=")<<F("; ");
+    debugSerial<<F("RAM=")<<fr<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd:");
      if (fr < 200) {
         errorSerial<<F("OutOfMemory!\n")<<endl;
         return -1;
@@ -645,6 +664,29 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     cmd.debugOut();
     if (!itemArr) return -1;
    
+     if (suffixCode == S_DELAYED)
+        {
+                for (int i = aJson.getArraySize(itemArr); i < I_TIMESTAMP+1; i++)
+                            aJson.addItemToArray(itemArr, aJson.createItem( (long int) 0));
+            
+                aJsonObject *timestampObj = aJson.getArrayItem(itemArr, I_TIMESTAMP);
+                if (timestampObj && cmd.getCmd()<=0xf)
+                { 
+                   if (cmd.getInt()>0)       
+                    {
+                        timestampObj->valueint = millis()+cmd.getInt();
+                        timestampObj->subtype=cmd.getCmd();
+                        debugSerial<<F( "Armed for ")<< cmd.getInt() << F(" ms :")<<timestampObj->valueint<<endl;
+                    }
+                    else
+                    {
+                        timestampObj->subtype=0;
+                        debugSerial<<F( "Disarmed")<<endl;
+                    }         
+                return 1;
+                }        
+         return 0;              
+        }
     
 
     bool    chActive  = (isActive()>0);
@@ -980,10 +1022,10 @@ switch (itemType) {
 
       #ifndef MODBUS_DISABLE
               case CH_MODBUS:
-                if (toExecute)
+                if (toExecute && !(chActive && st.getCmd()==CMD_ON && !cmd.isValue()))
                 {
                 int vol;    
-                if (st.getCmd()== CMD_ON && (vol=st.getPercents())<MIN_VOLUME && vol>=0) 
+                if (!chActive && st.getCmd()== CMD_ON && (vol=st.getPercents())<MIN_VOLUME && vol>=0) 
                         {
                         st.setPercents(INIT_VOLUME);
                         st.saveItem(this);
@@ -994,10 +1036,10 @@ switch (itemType) {
                 }
                   break;
               case CH_VC:
-                  if (toExecute) VacomSetFan(st);
+                  if (toExecute && !(chActive && st.getCmd()==CMD_ON && !cmd.isValue())) VacomSetFan(st);
                   break;
               case CH_VCTEMP:
-                  if (toExecute) VacomSetHeat(st);
+                  if (toExecute && !(chActive && st.getCmd()==CMD_ON && !cmd.isValue())) VacomSetHeat(st);
                   break;
      #endif
 /// rest of Legacy monolite core code (to be refactored ) END ///
@@ -1097,42 +1139,36 @@ int Item::isActive() {
     if (val) return 1; else return 0;
 }
 
-bool Item::resumeModbus()
-{
-
-if (modbusBusy) return false;
-debugSerial<<F("Pushing MB: ");
-configLocked++;
-if (items) {
-    aJsonObject * item = items->child;
-    while (items && item)
-        if (item->type == aJson_Array && aJson.getArraySize(item)>1)  {
-            Item it(item);
-            if (it.isValid()) {
-                switch (it.itemType){
-                    case CH_MODBUS:
-                        bool res = it.checkModbusRetry(); 
-                        debugSerial<<it.itemArr->name<<F(":")<<res<<F("; ");
-                }
-               
-            } //isValid
-            yield();
-            item = item->next;
-        }  //if
-debugSerial<<endl;
-}
-configLocked--;
-return true;
-}
-
 
 int Item::Poll(int cause) {
 
-   #ifndef MODBUS_DISABLE
-   if (isPendedModbusWrites && resumeModbus())
-                          isPendedModbusWrites=false;
-                             
-   #endif   
+if (isPendedModbusWrites) resumeModbus();                         
+
+aJsonObject *timestampObj = aJson.getArrayItem(itemArr, I_TIMESTAMP);
+if (timestampObj)
+{
+  uint8_t  cmd = timestampObj->subtype;
+  int32_t remain = (uint32_t) timestampObj->valueint - (uint32_t)millis(); 
+
+  if (cmd)    {
+                 itemCmd st(ST_UINT32,cmd);
+                 st.Int(remain);
+
+                if (!(remain % 1000))
+                {     
+                    SendStatusImmediate(st,SEND_DELAYED);
+                    debugSerial<< remain/1000 << F(" sec remaining") << endl;
+                }
+
+                if (remain <0 && abs(remain)< 0xFFFFFFFFUL/2)
+                {
+                SendStatusImmediate(st,SEND_DELAYED);    
+                Ctrl(itemCmd(ST_VOID,cmd));
+                timestampObj->subtype=0;
+                }
+              }  
+}
+
 switch (cause)
 {
   case POLLING_SLOW:
@@ -1149,11 +1185,13 @@ switch (cause)
             sendDelayedStatus();
             return INTERVAL_SLOW_POLLING;
             break;
+   /*
         case CH_VCTEMP:
             checkHeatRetry();
             sendDelayedStatus();
             return INTERVAL_SLOW_POLLING;
-            break;
+            break; */
+
         #endif
       /*  case CH_RGB:    //All channels with slider generate too many updates
         case CH_RGBW:
@@ -1274,17 +1312,21 @@ int Item::SendStatus(int sendFlags) {
             // myhome/s_out/item/cmd
             // myhome/s_out/item/set
 
-          if (sendFlags & SEND_PARAMETERS)
+          if ((sendFlags & SEND_PARAMETERS) || (sendFlags & SEND_DELAYED))
              {
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
               if (subItem) 
                             {
-                            strncat(addrstr, "/", sizeof(addrstr));    
+                            strncat(addrstr, "/", sizeof(addrstr)-1);    
                             strncat(addrstr, subItem, sizeof(addrstr)-1);
                             }
 
-              strncat(addrstr, "/", sizeof(addrstr));
+              strncat(addrstr, "/", sizeof(addrstr)-1);
+              
+              if (sendFlags & SEND_DELAYED)
+                     strncat_P(addrstr, DEL_P, sizeof(addrstr)-1);
+              else   strncat_P(addrstr, SET_P, sizeof(addrstr)-1); 
 
         // Preparing parameters payload //////////
            switch (st.getArgType()) {
@@ -1295,17 +1337,11 @@ int Item::SendStatus(int sendFlags) {
                   st.toString(valstr, sizeof(valstr), SEND_PARAMETERS|SEND_COMMAND);
                   break;
             default:         
-           st.toString(valstr, sizeof(valstr), SEND_PARAMETERS,(SCALE_VOLUME_100));
+           st.toString(valstr, sizeof(valstr), (sendFlags & SEND_DELAYED)?SEND_COMMAND|SEND_PARAMETERS:SEND_PARAMETERS,(SCALE_VOLUME_100));
            }
               
-              switch (st.getArgType()) {
-                  case ST_RGB:
-                  case ST_RGBW:
-                     strncat_P(addrstr, SET_P, sizeof(addrstr));
-                     break;
-                  default:
-                     strncat_P(addrstr, SET_P, sizeof(addrstr));
-              }
+
+              
 
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
               if (mqttClient.connected()  && !ethernetIdleCount)
@@ -1371,6 +1407,94 @@ if (driver) return driver->getChanType();
 return itemType;
 }
 
+
+// Setup SEND_RETRY flag to repeat unsucsessfull modbus tranzaction after release line
+void Item::mb_fail(int result) {
+    debugSerial<<F("Modbus op failed:")<<_HEX(result)<<endl;
+    setFlag(SEND_RETRY);
+    isPendedModbusWrites=true;
+}
+
+#define M_SUCCESS 1
+#define M_FAILED  0
+#define M_BUSY    -1
+#define M_CLEAN   2
+
+//Check pended transactoin
+//Output:
+//M_SUCCESS (1)  - Succeded 
+//M_FAILED  (0)  - Failed
+//M_BUSY    (-1) - Modbus busy
+//M_CLEAN   (2)  - Clean. Not needed to repeat 
+
+int Item::checkModbusRetry() {
+  int result = -1;  
+  if (modbusBusy) return M_BUSY;
+    if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
+      itemCmd val(ST_VOID,CMD_VOID);
+      val.loadItem(this, true);
+      debugSerial<<F("Retrying modbus CMD\n");
+      clearFlag(SEND_RETRY);     // Clean retry flag
+      if (driver) result=driver->Ctrl(val);
+      #ifndef MODBUS_DISABLE
+      else switch (itemType) 
+      {
+
+      case CH_MODBUS:
+           result=modbusDimmerSet(val);
+          break;
+      case CH_VC:
+           result=VacomSetFan(val);
+           break;     
+      case CH_VCTEMP:
+           result=VacomSetHeat(val);
+           break;           
+      default:
+          break;
+      }
+      #endif
+
+      switch (result){
+          case -1: return M_CLEAN;
+          case 0:  
+                    debugSerial<<itemArr->name<<F(":")<<F(" failed")<<endl;
+                    return M_FAILED; 
+      }
+      debugSerial<<itemArr->name<<F(":")<<F(" ok")<<endl;
+      return M_SUCCESS;
+    }
+return M_CLEAN;
+}
+
+bool Item::resumeModbus()
+{
+
+if (modbusBusy) return false;
+bool success = true;
+
+//debugSerial<<F("Pushing MB: ");
+configLocked++;
+if (items) {
+    aJsonObject * item = items->child;
+    while (items && item)
+        if (item->type == aJson_Array && aJson.getArraySize(item)>1)  {
+            Item it(item);
+            if (it.isValid()) {
+
+                        short res = it.checkModbusRetry(); 
+                        if (res<=0) success = false;
+               
+            } //isValid
+            yield();
+            item = item->next;
+        }  //if
+debugSerial<<endl;
+}
+configLocked--;
+ if (success) isPendedModbusWrites=false;
+return true;
+}
+
 //////////////////// Begin of legacy MODBUS code - to be moved in separate module /////////////////////
 
 
@@ -1406,7 +1530,10 @@ POLL  2101x10
 [22:27:29] => poll: 0A 03 08 34 00 0A 87 18
 
 */
+
 #ifndef MODBUS_DISABLE
+extern ModbusMaster node;
+
 int Item::modbusDimmerSet(itemCmd st)
         {
 
@@ -1436,17 +1563,6 @@ int Item::modbusDimmerSet(itemCmd st)
             }
             return 0;
         }
-
-
-void Item::mb_fail(int result) {
-    debugSerial<<F("Modbus op failed:")<<_HEX(result)<<endl;
-    setFlag(SEND_RETRY);
-    isPendedModbusWrites=true;
-}
-
-
-extern ModbusMaster node;
-
 
 
 int Item::VacomSetFan(itemCmd st) {
@@ -1604,7 +1720,8 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
 
 int Item::checkFM() {
     if (modbusBusy) return -1;
-    if (checkVCRetry()) return -2;
+    //if (checkVCRetry()) return -2;
+    //if (checkModbusRetry()) return -2;
     modbusBusy = 1;
 
     uint8_t j, result;
@@ -1711,10 +1828,9 @@ int Item::checkFM() {
     //resumeModbus();
     return 1;
 }
-
+/*
 boolean Item::checkModbusRetry() {
   if (modbusBusy) return false;
-//    int cmd = getCmd();
     if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
       itemCmd val(ST_VOID,CMD_VOID);
       val.loadItem(this, true);
@@ -1728,7 +1844,6 @@ return false;
 
 boolean Item::checkVCRetry() {
     if (modbusBusy) return false;
-    //int cmd = getCmd();
     if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
       itemCmd val(ST_VOID,CMD_VOID);
       val.loadItem(this, true);
@@ -1742,7 +1857,6 @@ return false;
 
 boolean Item::checkHeatRetry() {
     if (modbusBusy) return false;
-    //int cmd = getCmd();
     if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
       itemCmd val(ST_VOID,CMD_VOID);
       val.loadItem(this, true);
@@ -1754,6 +1868,7 @@ boolean Item::checkHeatRetry() {
 return false;
 }
 
+*/
 int Item::checkModbusDimmer() {
     if (modbusBusy) return -1;
     if (checkModbusRetry()) return -2;

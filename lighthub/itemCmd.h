@@ -68,8 +68,10 @@ const cmdstr commands_P[] PROGMEM =
 #define SEND_PARAMETERS 0x200
 #define SEND_RETRY 0x400
 #define SEND_DEFFERED 0x800
-#define ACTION_NEEDED 0x1000
-#define ACTION_IN_PROCESS 0x2000
+#define SEND_DELAYED 0x1000
+#define ACTION_NEEDED 0x2000
+#define ACTION_IN_PROCESS 0x4000
+
 
 
 int txt2cmd (char * payload);
@@ -93,7 +95,7 @@ int txt2cmd (char * payload);
 #define ST_INT32        10     /// 32 bits signed integer
 #define ST_UINT32       11     /// 32 bits unsigned integer
 #define ST_STRING       12     /// pointer to string (for further use)
-
+//#define ST_TIMESTAMP    13     /// Timestamp for delayed cmd execution
 
 #define MAP_SCALE       1
 #define MAP_VAL_CMD     2
