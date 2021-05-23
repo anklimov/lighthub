@@ -22,11 +22,13 @@ struct reg_t
   const uint8_t id;
 };
 
+/*
 struct serial_t
 {
   const char verb[4];
   const serialParamType mode;
 };
+*/
 
 #define PAR_I16 1
 #define PAR_I32 2
@@ -53,6 +55,7 @@ const reg_t regSize_P[] PROGMEM =
 } ;
 #define regSizeNum sizeof(regSize_P)/sizeof(reg_t)
 
+/*
 const serial_t serialModes_P[] PROGMEM =
 {
   { "8E1", (serialParamType) SERIAL_8E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
@@ -90,6 +93,8 @@ serialParamType  str2SerialParam(char * str)
   debugSerial<< F("Default serial mode N81 used");
   return static_cast<serialParamType> (SERIAL_8N1);
 }
+*/
+
 int  str2regSize(char * str)
 {
   for(uint8_t i=0; i<regSizeNum && str;i++)
@@ -131,6 +136,8 @@ bool out_Modbus::getConfig()
     modbusSerial.begin(store->baud, static_cast <USARTClass::USARTModes> (store->serialParam));
     #elif defined (ARDUINO_ARCH_ESP8266)
     modbusSerial.begin(store->baud, static_cast <SerialConfig>(store->serialParam));
+    #elif defined (ARDUINO_ARCH_ESP32)
+    modbusSerial.begin(store->baud, (store->serialParam),MODBUS_UART_RX_PIN,MODBUS_UART_TX_PIN);
     #else
     modbusSerial.begin(store->baud, (store->serialParam));
     #endif
@@ -375,6 +382,7 @@ if ((store->pollingRegisters || store->pollingIrs) && !modbusBusy && (Status() =
     modbusSerial.begin(store->baud, static_cast <USARTClass::USARTModes> (store->serialParam));
     #elif defined (ARDUINO_ARCH_ESP8266)
     modbusSerial.begin(store->baud, static_cast <SerialConfig>(store->serialParam));
+    Serial1.begin()
     #elif defined (ESP32)
     //modbusSerial.begin(store->baud, store->serialParam);
     //delay(100);

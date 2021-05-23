@@ -43,6 +43,12 @@ enum topicType {
     T_OUT = 3
   };
 
+#if defined(ESP32)
+#define serialParamType uint32_t
+#else
+#define serialParamType uint16_t
+#endif
+
 void PrintBytes(uint8_t* addr, uint8_t count, bool newline);
 void SetBytes(uint8_t* addr, uint8_t count, char * out);
 void SetAddr(char * out,  uint8_t* addr);
@@ -67,3 +73,4 @@ bool executeCommand(aJsonObject* cmd, int8_t toggle = -1);
 bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd);
 itemCmd mapInt(int32_t arg, aJsonObject* map);
 unsigned long millisNZ(uint8_t shift=0);
+serialParamType  str2SerialParam(char * str);

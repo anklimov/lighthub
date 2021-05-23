@@ -49,6 +49,7 @@ e-mail    anklimov@gmail.com
 #include "modules/out_pwm.h"
 #include "modules/out_pid.h"
 #include "modules/out_multivent.h"
+#include "modules/out_uartbridge.h"
 
 short modbusBusy = 0;
 bool isPendedModbusWrites = false;
@@ -180,6 +181,13 @@ void Item::Parse() {
 #ifndef   MULTIVENT_DISABLE
           case CH_MULTIVENT:
           driver = new out_Multivent (this);
+//          debugSerial<<F("AC driver created")<<endl;
+          break;
+#endif
+
+#ifdef   UARTBRIDGE_ENABLE
+          case CH_UARTBRIDGE:
+          driver = new out_UARTbridge (this);
 //          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
@@ -1871,7 +1879,7 @@ return false;
 */
 int Item::checkModbusDimmer() {
     if (modbusBusy) return -1;
-    if (checkModbusRetry()) return -2;
+    //if (checkModbusRetry()) return -2;
 
     short numpar = 0;
     if ((itemArg->type != aJson_Array) || ((numpar = aJson.getArraySize(itemArg)) < 2)) {

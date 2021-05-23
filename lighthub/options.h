@@ -158,6 +158,7 @@
 
 #define DEFAULT_INC_STEP 5
 
+
 #if defined(ARDUINO_ARCH_AVR)
 //All options available
 #ifdef CONTROLLINO
@@ -172,8 +173,14 @@
 #endif
 
 #if defined(__SAM3X8E__)
+#ifndef modbusSerial
 #define modbusSerial Serial2
+#endif
+
+#ifndef AC_Serial
 #define AC_Serial Serial3
+#endif
+
 #define dmxout DmxDue1
 #define dmxin  DmxDue1
 #endif
@@ -193,8 +200,14 @@
 #define _espdmx
 #endif
 
+#ifndef modbusSerial
 #define modbusSerial Serial1
+#endif
+
+#ifndef AC_Serial
 #define AC_Serial Serial1
+#endif
+
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -206,8 +219,23 @@
 #endif
 //#undef _dmxout
 //#undef modbusSerial
+#ifndef modbusSerial
 #define modbusSerial Serial2
+#endif
+
+#ifndef AC_Serial
 #define AC_Serial Serial2
+#endif
+
+
+#ifndef MODBUS_UART_RX_PIN
+#define MODBUS_RX_PIN -1
+#endif
+
+#ifndef MODBUS_UART_TX_PIN
+#define MODBUS_TX_PIN -1
+#endif
+
 #endif
 
 #ifndef _dmxout

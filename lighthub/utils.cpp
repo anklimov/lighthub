@@ -26,6 +26,8 @@ e-mail    anklimov@gmail.com
 
 #include "item.h"
 #include <PubSubClient.h>
+#include <HardwareSerial.h>
+
 extern int8_t configLocked;
 extern int8_t ethernetIdleCount;
 extern PubSubClient mqttClient;
@@ -683,6 +685,49 @@ unsigned long millisNZ(uint8_t shift)
  return now;
 }
 
+struct serial_t
+{
+  const char verb[4];
+  const serialParamType mode;
+};
 
+
+const serial_t serialModes_P[] PROGMEM =
+{
+  { "8E1", (serialParamType) SERIAL_8E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
+  { "8N1", (serialParamType) SERIAL_8N1},
+  { "8E2", (serialParamType) SERIAL_8E2},
+  { "8N2", (serialParamType) SERIAL_8N2},
+  { "8O1", (serialParamType) SERIAL_8O1},
+  { "8O2", (serialParamType) SERIAL_8O2},
+//  { "8M1", SERIAL_8M1},
+//  { "8S1", SERIAL_8S1},
+  { "7E1", (serialParamType) SERIAL_7E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
+  { "7N1", (serialParamType) SERIAL_7N1},
+  { "7E2", (serialParamType) SERIAL_7E2},
+  { "7N2", (serialParamType) SERIAL_7N2},
+  { "7O1", (serialParamType) SERIAL_7O1},
+  { "7O2", (serialParamType) SERIAL_7O2}
+//  { "7M1", SERIAL_7M1},
+//  { "7S1", SERIAL_7S1}
+} ;
+
+#define serialModesNum sizeof(serialModes_P)/sizeof(serial_t)
+
+serialParamType  str2SerialParam(char * str)
+{ debugSerial<<str<<F(" =>");
+  for(uint8_t i=0; i<serialModesNum && str;i++)
+      if (strcmp_P(str, serialModes_P[i].verb) == 0)
+           {
+
+           //debugSerial<< i << F(" ") << pgm_read_word_near(&serialModes_P[i].mode)<< endl;
+           if (sizeof(serialModesNum)==4)
+             return pgm_read_dword_near(&serialModes_P[i].mode);
+           else 
+             return pgm_read_word_near(&serialModes_P[i].mode);
+         }
+  debugSerial<< F("Default serial mode N81 used");
+  return static_cast<serialParamType> (SERIAL_8N1);
+}
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

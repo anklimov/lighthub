@@ -53,6 +53,7 @@ e-mail    anklimov@gmail.com
 #define CH_MOTOR  12
 #define CH_PID   13
 #define CH_MBUS  14
+#define CH_UARTBRIDGE  15
 #define CH_MULTIVENT 18
 
 //#define CHANNEL_TYPES 13
