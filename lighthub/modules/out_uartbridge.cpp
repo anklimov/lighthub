@@ -11,6 +11,22 @@
 #include "main.h"
 #include <HardwareSerial.h>
 
+#include "main.h"
+
+#if defined (ESP32)
+#include <AsyncUDP.h>
+AsyncUDP udp;
+AsyncUDPMessage udpMessageA;
+AsyncUDPMessage udpMessageB;
+
+IPAddress       targetIP;
+uint16_t        targetPort=5555;
+#endif
+
+uint32_t timerA = 0;
+uint32_t timerB = 0;
+
+
 extern aJsonObject *modbusObj;
 extern ModbusMaster node;
 extern short modbusBusy;
@@ -87,6 +103,14 @@ bool out_UARTbridge::getConfig()
     MODULE_UATRBRIDGE_UARTA.begin(store->baud, (store->serialParam));
     MODULE_UATRBRIDGE_UARTB.begin(store->baud, (store->serialParam));
     #endif
+    
+    aJsonObject * debugIPObj=aJson.getObjectItem(item->itemArg, "ip");
+    aJsonObject * debugPortObj=aJson.getObjectItem(item->itemArg, "port");
+
+    if (debugIPObj)
+          inet_aton(debugIPObj->valuestring, targetIP);
+
+    if (debugPortObj) targetPort = debugPortObj->valueint;      
 
   return true;
   }
@@ -94,7 +118,8 @@ bool out_UARTbridge::getConfig()
 
 int  out_UARTbridge::Setup()
 {
-abstractOut::Setup();    
+abstractOut::Setup();  
+
 if (!store) store= (ubPersistent *)item->setPersistent(new ubPersistent);
 if (!store)
               { errorSerial<<F("UARTbridge: Out of memory")<<endl;
@@ -134,22 +159,60 @@ return CST_UNKNOWN;
 
 int out_UARTbridge::Poll(short cause)
 {
-  int chA;
-  int chB;
+  uint8_t chA;
+  uint8_t chB;
 
-  while (MODULE_UATRBRIDGE_UARTA.available())
+if ((lanStatus>=HAVE_IP_ADDRESS) && udpMessageA.length() && (isTimeOver(timerA,millis(),PDELAY) || timerB))
+{
+  udp.sendTo(udpMessageA,targetIP,targetPort);
+  udpMessageA.flush();
+  debugSerial<<endl;
+  timerA=0;   
+}
+
+if ((lanStatus>=HAVE_IP_ADDRESS) && udpMessageB.length() && (isTimeOver(timerB,millis(),PDELAY) || timerA))
+{
+  udp.sendTo(udpMessageB,targetIP,targetPort);
+  udpMessageB.flush();
+  debugSerial<<endl;
+  timerB=0;   
+}
+
+  while (MODULE_UATRBRIDGE_UARTA.available() || MODULE_UATRBRIDGE_UARTB.available())
           {
-          chA=MODULE_UATRBRIDGE_UARTA.read();  
-          MODULE_UATRBRIDGE_UARTB.write(chA);
-          debugSerial<<F("<")<<_HEX(chA);
-          }
 
+          if (MODULE_UATRBRIDGE_UARTA.available())
+              {
+              timerA=millisNZ();
+              if (timerB) return 1;
+              chA=MODULE_UATRBRIDGE_UARTA.read();  
+              MODULE_UATRBRIDGE_UARTB.write(chA);
+              debugSerial<<F("<")<<((chA<16)?"0":"")<<_HEX(chA);
+              udpMessageA.write(chA);           
+              }
+
+          if (MODULE_UATRBRIDGE_UARTB.available())
+              {
+              timerB=millisNZ();  
+              if (timerA) return 1;
+              chB=MODULE_UATRBRIDGE_UARTB.read();  
+              MODULE_UATRBRIDGE_UARTA.write(chB);
+              debugSerial<<F(">")<<((chB<16)?"0":"")<<_HEX(chB);
+              udpMessageB.write(chB);
+              }
+          }
+/*
     while (MODULE_UATRBRIDGE_UARTB.available())
           {
           chB=MODULE_UATRBRIDGE_UARTB.read();  
           MODULE_UATRBRIDGE_UARTA.write(chB);
-          debugSerial<<F(">")<<_HEX(chB);
+          debugSerial<<F(">")<<((chB<10)?"0":"")<<_HEX(chB);
+          udpMessageB.write(chB);
+          timerB=millisNZ();
           }        
+*/
+
+
 
 return 1;//store->pollingInterval;
 };

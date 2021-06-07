@@ -50,7 +50,7 @@ public:
   //aJsonObject * parameters;
 };
 
-
+#define PDELAY 50 
 
 class out_UARTbridge : public abstractOut {
 public:

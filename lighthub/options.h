@@ -1,6 +1,14 @@
 // Configuration of drivers enabled
 #define SYSLOG_LOCAL_SOCKET 514
 
+#ifndef MODBUS_UART_RX_PIN
+#define MODBUS_RX_PIN -1
+#endif
+
+#ifndef MODBUS_UART_TX_PIN
+#define MODBUS_TX_PIN -1
+#endif
+
 #ifndef FASTLED
 #define ADAFRUIT_LED
 #endif
@@ -194,7 +202,6 @@
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #undef _dmxin
-//#undef _modbus
 
 #ifndef DMX_DISABLE
 #define _espdmx
@@ -212,28 +219,16 @@
 
 #if defined(ARDUINO_ARCH_ESP32)
 #undef _dmxin
-//#undef _modbus
-
 #ifndef DMX_DISABLE
 #define _espdmx
 #endif
-//#undef _dmxout
-//#undef modbusSerial
+
 #ifndef modbusSerial
 #define modbusSerial Serial2
 #endif
 
 #ifndef AC_Serial
 #define AC_Serial Serial2
-#endif
-
-
-#ifndef MODBUS_UART_RX_PIN
-#define MODBUS_RX_PIN -1
-#endif
-
-#ifndef MODBUS_UART_TX_PIN
-#define MODBUS_TX_PIN -1
 #endif
 
 #endif

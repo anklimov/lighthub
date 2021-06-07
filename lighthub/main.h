@@ -211,6 +211,8 @@ enum lan_status {
     DO_NOTHING = -15
 };
 
+extern lan_status lanStatus;
+
 typedef union {
     uint32_t  UID_Long[5];
     uint8_t   UID_Byte[20];

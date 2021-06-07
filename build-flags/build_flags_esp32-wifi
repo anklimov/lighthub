@@ -16,10 +16,11 @@
 #-DPID_DISABLE
 
 #Define pins for Serial1. Default - 9/10 is utilized by ESP flash 
-#-DRX1=15
-#-DTX1=2
+#-DMODBUS_UART_RX_PIN=15
+#-DMODBUS_UART_TX_PIN=2
+#-DmodbusSerial=Serial1
 
--DMODBUS_UART_RX_PIN=15
--DMODBUS_UART_TX_PIN=2
--DmodbusSerial=Serial1
+# Use default pins
+-DMODBUS_UART_RX_PIN=-1
+-DMODBUS_UART_TX_PIN=-1
 

@@ -31,6 +31,7 @@
 
 #if defined (ARDUINO_ARCH_ESP32)
 #undef WAK_PIN
+#undef SCL_RESET
 //#ifndef WAK_PIN
 //#define WAK_PIN 17
 //#endif
