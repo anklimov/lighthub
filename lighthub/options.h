@@ -1,12 +1,13 @@
+#include <Arduino.h>
 // Configuration of drivers enabled
 #define SYSLOG_LOCAL_SOCKET 514
 
 #ifndef MODBUS_UART_RX_PIN
-#define MODBUS_RX_PIN -1
+#define MODBUS_UART_RX_PIN -1
 #endif
 
 #ifndef MODBUS_UART_TX_PIN
-#define MODBUS_TX_PIN -1
+#define MODBUS_UART_TX_PIN -1
 #endif
 
 #ifndef FASTLED
@@ -77,6 +78,7 @@
 #define OFFSET_SIGNATURE OFFSET_MQTT_PWD+PWDFLASHSTR
 #define EEPROM_offset_NotAlligned OFFSET_SIGNATURE+EEPROM_SIGNATURE_LENGTH
 #define EEPROM_offsetJSON EEPROM_offset_NotAlligned + (4 -(EEPROM_offset_NotAlligned & 3))
+//#define EEPROM_offsetJSON IFLASH_PAGE_SIZE
 #define EEPROM_FIX_PART_LEN EEPROM_offsetJSON-OFFSET_MAC
 
 
