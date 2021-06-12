@@ -631,10 +631,18 @@ bool digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem)
                                     { //is Group
                                     aJsonObject * itemSubArray = aJson.getArrayItem(nextItem,1);
                                     short res = digGroup(itemSubArray,cmd,subItem);
-                                    if (!cmd && res) return true; //Not execution, just activity check. If any channel is active - return true
+                                    if (!cmd && res) 
+                                                    {
+                                                    configLocked--;    
+                                                    return true; //Not execution, just activity check. If any channel is active - return true
+                                                    }
                                     }
                                 else // Normal channel
-                                if (!cmd && it.isValid() && it.isActive()) return true; //Not execution, just activity check. If any channel is active - return true
+                                if (!cmd && it.isValid() && it.isActive()) 
+                                                    {
+                                                    configLocked--;    
+                                                    return true; //Not execution, just activity check. If any channel is active - return true
+                                                    }
                                } 
                     }    
                     i = i->next;

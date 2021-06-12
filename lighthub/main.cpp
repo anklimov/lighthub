@@ -191,7 +191,8 @@ void cleanConf()
 {
   if (!root) return;
 debugSerial<<F("Unlocking config ...")<<endl;
-while (configLocked)
+uint32_t stamp=millis();
+while (configLocked && !isTimeOver(stamp,millis(),10000))
 {
           //wdt_res();
           cmdPoll();
@@ -206,6 +207,12 @@ while (configLocked)
           inputLoop();
           yield();
 }
+
+if (configLocked)
+{
+    errorSerial<<F("Not unlocked in 10s - continue ...")<<endl;
+}
+
 debugSerial<<F("Stopping channels ...")<<endl;
 //Stoping the channels
 aJsonObject * item = items->child;
@@ -371,7 +378,11 @@ if (element && element->type == aJson_String) return element->valuestring;
   return NULL;
 }
 
-
+ #if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
+ #define flashStorage InternalStorage
+ #else
+InternalStorageClass flashStorage(EEPROM_offsetJSON);
+#endif
 
 void setupOTA(void)
 {
@@ -379,7 +390,7 @@ void setupOTA(void)
 //if (OTA_initialized) return;
 //        ArduinoOTA.end();
         // start the OTEthernet library with internal (flash) based storage
-        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", flashStorage);
         infoSerial<<F("OTA initialized\n");
 //OTA_initialized=true;
 #endif
@@ -475,7 +486,7 @@ lan_status lanLoop() {
 
         case LIBS_INITIALIZED:
             LED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
-            if (configLocked) return LIBS_INITIALIZED;
+            if (configLocked) return LIBS_INITIALIZED;      
 
             if (!configOk)
                 lanStatus = loadConfigFromHttp(0, NULL);
@@ -728,7 +739,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
     deviceName = getStringFromConfig(mqttArr, 0);
     infoSerial<<F("Device Name:")<<deviceName<<endl;
-debugSerial<<F("N:")<<n<<endl;
+//debugSerial<<F("N:")<<n<<endl;
 
     char *servername = getStringFromConfig(mqttArr, 1);
     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
@@ -1159,6 +1170,7 @@ int loadConfigFromEEPROM()
     infoSerial<<F("Loading Config from EEPROM")<<endl;
 
     ch = EEPROM.read(EEPROM_offsetJSON);
+    Serial.print(ch);
     if (ch == '{') {
         aJsonEEPROMStream as = aJsonEEPROMStream(EEPROM_offsetJSON);
         cleanConf();
@@ -2169,7 +2181,7 @@ void thermoLoop(void) {
     timerThermostatCheck = millis();// + THERMOSTAT_CHECK_PERIOD;
 publishStat();
 #ifndef DISABLE_FREERAM_PRINT
-    (thermostatCheckPrinted) ? debugSerial<<F("\nRAM=")<<freeRam()<<" " : debugSerial<<F(" ")<<freeRam()<<F(" ");
+    (thermostatCheckPrinted) ? debugSerial<<F("\nRAM=")<<freeRam()<<F(" Locks:")<<configLocked: debugSerial<<F(" ")<<freeRam()<<F(" Locks:")<<configLocked;
 #endif
 
 
