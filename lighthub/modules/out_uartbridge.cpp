@@ -108,7 +108,7 @@ bool out_UARTbridge::getConfig()
     aJsonObject * debugPortObj=aJson.getObjectItem(item->itemArg, "port");
 
     if (debugIPObj)
-          inet_aton(debugIPObj->valuestring, targetIP);
+          _inet_aton(debugIPObj->valuestring, targetIP);
 
     if (debugPortObj) targetPort = debugPortObj->valueint;      
 
