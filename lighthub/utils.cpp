@@ -685,14 +685,14 @@ unsigned long millisNZ(uint8_t shift)
  return now;
 }
 
-struct serial_t
+struct serial_st
 {
   const char verb[4];
   const serialParamType mode;
 };
 
 
-const serial_t serialModes_P[] PROGMEM =
+const serial_st serialModes_P[] PROGMEM =
 {
   { "8E1", (serialParamType) SERIAL_8E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
   { "8N1", (serialParamType) SERIAL_8N1},
@@ -703,16 +703,18 @@ const serial_t serialModes_P[] PROGMEM =
 //  { "8M1", SERIAL_8M1},
 //  { "8S1", SERIAL_8S1},
   { "7E1", (serialParamType) SERIAL_7E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
-  { "7N1", (serialParamType) SERIAL_7N1},
   { "7E2", (serialParamType) SERIAL_7E2},
-  { "7N2", (serialParamType) SERIAL_7N2},
   { "7O1", (serialParamType) SERIAL_7O1},
   { "7O2", (serialParamType) SERIAL_7O2}
+#ifndef ARDUINO_ARCH_STM32
+  ,{ "7N1", (serialParamType) SERIAL_7N1}   
+  ,{ "7N2", (serialParamType) SERIAL_7N2}
+#endif  
 //  { "7M1", SERIAL_7M1},
 //  { "7S1", SERIAL_7S1}
 } ;
 
-#define serialModesNum sizeof(serialModes_P)/sizeof(serial_t)
+#define serialModesNum sizeof(serialModes_P)/sizeof(serial_st)
 
 serialParamType  str2SerialParam(char * str)
 { debugSerial<<str<<F(" =>");

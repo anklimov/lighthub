@@ -356,7 +356,7 @@ return is8bit;
 
                   //if (readModbus(registerFrom,MODBUS_HOLDING_REG_TYPE,registerTo-registerFrom+1))
                   if (readModbus(registerFrom,regType,registerTo-registerFrom+1))
-                    {
+                    { debugSerial<<endl;
                       for(int i=registerFrom;i<=registerTo;i++)
                         {
                           findRegister(i,i-registerFrom,regType);
@@ -382,7 +382,6 @@ if ((store->pollingRegisters || store->pollingIrs) && !modbusBusy && (Status() =
     modbusSerial.begin(store->baud, static_cast <USARTClass::USARTModes> (store->serialParam));
     #elif defined (ARDUINO_ARCH_ESP8266)
     modbusSerial.begin(store->baud, static_cast <SerialConfig>(store->serialParam));
-    Serial1.begin()
     #elif defined (ESP32)
     //modbusSerial.begin(store->baud, store->serialParam);
     //delay(100);

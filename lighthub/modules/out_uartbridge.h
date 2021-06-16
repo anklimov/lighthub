@@ -12,6 +12,10 @@
 #define serialParamType uint16_t
 #endif
 
+#define SOURCE_PORT_A 5551
+#define SOURCE_PORT_B 5552
+#define MAX_PDU 1024
+
 #ifndef MODULE_UATRBRIDGE_UARTA
 #define MODULE_UATRBRIDGE_UARTA Serial1
 #endif

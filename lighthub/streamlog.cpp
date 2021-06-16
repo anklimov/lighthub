@@ -3,7 +3,7 @@
 #include "statusled.h"
 
 #if defined (STATUSLED)
-extern statusLED LED;
+extern StatusLED statusLED;
 #endif
 
 #ifdef SYSLOG_ENABLE
@@ -77,7 +77,7 @@ if (syslogInitialized)
 #endif
 
   #if defined (STATUSLED)
-  if ((ch=='\n') && ledPattern) LED.flash(ledPattern);
+  if ((ch=='\n') && ledPattern) statusLED.flash(ledPattern);
   #endif
 
   if (serialPort) return serialPort->write(ch);

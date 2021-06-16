@@ -82,7 +82,6 @@ EthernetClient ethClient;
 
 #if defined(OTA)
 #include <ArduinoOTA.h>
-//bool OTA_initialized=false;
 #endif
 
 #if defined(__SAM3X8E__)
@@ -103,6 +102,7 @@ NRFFlashStorage EEPROM;
 
 #ifdef SYSLOG_ENABLE
 #include <Syslog.h>
+
     #ifndef WIFI_ENABLE
     EthernetUDP udpSyslogClient;
     #else
@@ -121,7 +121,7 @@ Streamlog errorSerial(&debugSerialPort,LOG_ERROR, ledRED);
 Streamlog infoSerial (&debugSerialPort,LOG_INFO);
 #endif
 
-statusLED LED(ledRED);
+StatusLED statusLED(ledRED);
 
 
 lan_status lanStatus = INITIAL_STATE;
@@ -271,7 +271,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
         return;
     }
     
-    LED.flash(ledBLUE);
+    statusLED.flash(ledBLUE);
     for (unsigned int i = 0; i < length; i++)
         debugSerial<<((char) payload[i]);
     debugSerial<<endl;
@@ -378,23 +378,40 @@ if (element && element->type == aJson_String) return element->valuestring;
   return NULL;
 }
 
- #if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
- #define flashStorage InternalStorage
- #else
-InternalStorageClass flashStorage(EEPROM_offsetJSON);
-#endif
-
-void setupOTA(void)
-{
 #ifdef OTA
-//if (OTA_initialized) return;
-//        ArduinoOTA.end();
-        // start the OTEthernet library with internal (flash) based storage
-        ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", flashStorage);
-        infoSerial<<F("OTA initialized\n");
-//OTA_initialized=true;
+    #if (defined(ARDUINO_ARCH_ESP32) || defined(ESP8266))
+    void setupOTA(void)
+    {
+
+            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+            infoSerial<<F("OTA initialized\n");
+
+    }
+    #elif defined (ARDUINO_ARCH_AVR)
+    InternalStorageAVRClass flashStorage;
+        void setupOTA(void)
+    {
+
+            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", flashStorage);
+            infoSerial<<F("OTA initialized\n");
+
+    }
+    #else 
+    InternalStorageClass flashStorage(EEPROM_offsetJSON);
+    void setupOTA(void)
+    {
+
+            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", flashStorage);
+            infoSerial<<F("OTA initialized\n");
+
+    }
+    #endif
+
+
+
+#else 
+void setupOTA(void) {};
 #endif
-}
 
 void setupSyslog()
 {
@@ -414,7 +431,7 @@ void setupSyslog()
         char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
         if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
 
-        inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
+        _inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
         infoSerial<<F("Syslog params:")<<syslogServer<<":"<<syslogPort<<":"<<syslogDeviceHostname<<endl;
         udpSyslog.server(syslogServer, syslogPort);
         udpSyslog.deviceHostname(syslogDeviceHostname);
@@ -439,8 +456,8 @@ lan_status lanLoop() {
     switch (lanStatus) {
 
         case INITIAL_STATE:
-          //  LED.set(ledRED|((configLoaded)?ledBLINK:0));
-              LED.set(ledRED|((configLoaded)?ledBLINK:0));
+          //  statusLED.set(ledRED|((configLoaded)?ledBLINK:0));
+              statusLED.set(ledRED|((configLoaded)?ledBLINK:0));
 
             #if  defined(WIFI_ENABLE)
                 onInitialStateInitLAN(); // Moves state to AWAITING_ADDRESS or HAVE_IP_ADDRESS
@@ -485,7 +502,7 @@ lan_status lanLoop() {
         break;
 
         case LIBS_INITIALIZED:
-            LED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
+            statusLED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
             if (configLocked) return LIBS_INITIALIZED;      
 
             if (!configOk)
@@ -496,7 +513,7 @@ lan_status lanLoop() {
 
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
             wdt_res();
-            LED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
+            statusLED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
             ip_ready_config_loaded_connecting_to_broker();
             break;
 
@@ -517,7 +534,7 @@ lan_status lanLoop() {
             }
             break;
         case OPERATION:
-            LED.set(ledGREEN|((configLoaded)?ledBLINK:0));
+            statusLED.set(ledGREEN|((configLoaded)?ledBLINK:0));
             if (!mqttClient.connected()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             break;
 
@@ -525,7 +542,7 @@ lan_status lanLoop() {
              //if (mqttClient.connected()) mqttClient.disconnect();  // Hmm hungs then cable disconnected
              timerLanCheckTime = millis();// + 5000;
              lanStatus = REINIT;
-             LED.set(ledRED|((configLoaded)?ledBLINK:0));
+             statusLED.set(ledRED|((configLoaded)?ledBLINK:0));
              break;
 
         case REINIT: // Pause and re-init LAN
@@ -831,7 +848,9 @@ void onInitialStateInitLAN() {
                 WiFi.mode(WIFI_STA); // ESP 32 - WiFi.disconnect(); instead
                 infoSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD)<<endl;
 
+                #ifndef ARDUINO_ARCH_ESP32
                 wifi_set_macaddr(STATION_IF,mac); //ESP32 to check
+                #endif
 
                 WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
 
@@ -1276,16 +1295,16 @@ void cmdFunctionIp(int arg_cnt, char **args)
 
   //  switch (arg_cnt) {
     //    case 5:
-            if (arg_cnt>4 && inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
+            if (arg_cnt>4 && _inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
             else saveFlash(OFFSET_MASK, ip0);
     //    case 4:
-            if (arg_cnt>3 && inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
+            if (arg_cnt>3 && _inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
             else saveFlash(OFFSET_GW, ip0);
     //    case 3:
-            if (arg_cnt>2 && inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
+            if (arg_cnt>2 && _inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
             else saveFlash(OFFSET_DNS, ip0);
     //    case 2:
-            if (arg_cnt>1 && inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
+            if (arg_cnt>1 && _inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
             else saveFlash(OFFSET_IP, ip0);
     //        break;
 
@@ -1422,15 +1441,18 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     //if (freeRam()<512) cleanConf();
 
     HTTPClient hclient(configServer, 80);
+    debugSerial<<F("free ")<<freeRam()<<endl;delay(100);
     // FILE is the return STREAM type of the HTTPClient
     configStream = hclient.getURI(URI);
+    debugSerial<<F("hclient")<<endl;delay(100);
     responseStatusCode = hclient.getLastReturnCode();
+    debugSerial<<F("retcode ")<<responseStatusCode<<endl;delay(100);
     //wdt_en();
-
+    
     if (configStream != NULL) {
         if (responseStatusCode == 200) {
 
-            infoSerial<<F("got Config\n");
+            infoSerial<<F("got Config\n"); delay(500);
             char c;
             aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
@@ -1519,10 +1541,11 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32) //|| defined (NRF5)
     HTTPClient httpClient;
+    WiFiClient wifiClient;
     String fullURI = "http://";
     fullURI+=configServer;
     fullURI+=URI;
-    httpClient.begin(fullURI);
+    httpClient.begin(wifiClient,fullURI);
     int httpResponseCode = httpClient.GET();
     if (httpResponseCode > 0) {
         infoSerial.printf("[HTTP] GET... code: %d\n", httpResponseCode);
@@ -1786,10 +1809,15 @@ infoSerial<<F("\n(-)PID");
 #endif
 
 #ifdef SYSLOG_ENABLE
-//udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
 infoSerial<<F("\n(+)SYSLOG");
 #else
 infoSerial<<F("\n(-)SYSLOG");
+#endif
+
+#ifdef UARTBRIDGE_ENABLE
+infoSerial<<F("\n(+)UARTBRIDGE");
+#else
+infoSerial<<F("\n(-)UARTBRIDGE");
 #endif
 infoSerial<<endl;
 
@@ -1888,8 +1916,8 @@ void setupCmdArduino() {
     cmdAdd("reboot",cmdFunctionReboot);
 }
 
-void loop_main() {
-  LED.poll();
+void loop_main() { 
+  statusLED.poll();
 
   #if defined(M5STACK)
    // Initialize the M5Stack object
@@ -1900,7 +1928,7 @@ void loop_main() {
     wdt_res();
     yield();
     cmdPoll();
-    if (lanLoop() > HAVE_IP_ADDRESS) {
+    if (lanLoop() > HAVE_IP_ADDRESS) { 
         mqttClient.loop();
 
         #if defined(OTA)
@@ -1967,7 +1995,7 @@ ethernetIdleCount--;
 };
 
 void modbusIdle(void) {
-    LED.poll();
+    statusLED.poll();
     yield();
     cmdPoll();
     wdt_res();
@@ -2065,9 +2093,9 @@ configLocked--;
 
 
 void pollingLoop(void) {
+ if (!items) return;   
 // FAST POLLINT - as often AS possible every item
 configLocked++;
-if (items) {
     aJsonObject * item = items->child;
     while (items && item)
         if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
@@ -2078,7 +2106,6 @@ if (items) {
             yield();
             item = item->next;
         }  //if
-}
 configLocked--;
 // SLOW POLLING
     boolean done = false;
