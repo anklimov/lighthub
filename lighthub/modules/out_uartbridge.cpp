@@ -168,7 +168,7 @@ int out_UARTbridge::Poll(short cause)
   uint8_t chA;
   uint8_t chB;
 
-  while (MODULE_UATRBRIDGE_UARTA.available() || MODULE_UATRBRIDGE_UARTB.available())
+ // while (MODULE_UATRBRIDGE_UARTA.available() || MODULE_UATRBRIDGE_UARTB.available())
           {
 
           if (MODULE_UATRBRIDGE_UARTA.available())

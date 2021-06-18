@@ -259,6 +259,12 @@ bool isNotRetainingStatus() {
   return (lanStatus != RETAINING_COLLECTING);
 }
 
+int httpHandler(Client& client, String request, long contentLength)
+{
+    debugSerial<<request<<endl;
+    return -1;
+}
+
 void mqttCallback(char *topic, byte *payload, unsigned int length) {
     debugSerial<<F("\n[")<<topic<<F("] ");
     if (!payload) return;
@@ -384,15 +390,17 @@ if (element && element->type == aJson_String) return element->valuestring;
     {
 
             ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+            ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
     }
     #elif defined (ARDUINO_ARCH_AVR)
-    InternalStorageAVRClass flashStorage;
+    InternalStorageAVRClass flashStorage(EEPROM_offsetJSON);
         void setupOTA(void)
     {
 
             ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", flashStorage);
+            ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
     }
@@ -402,6 +410,7 @@ if (element && element->type == aJson_String) return element->valuestring;
     {
 
             ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", flashStorage);
+            ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
     }
@@ -756,6 +765,9 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
     deviceName = getStringFromConfig(mqttArr, 0);
     infoSerial<<F("Device Name:")<<deviceName<<endl;
+    #ifdef OTA
+    ArduinoOTA.setDeviceName(deviceName);
+    #endif
 //debugSerial<<F("N:")<<n<<endl;
 
     char *servername = getStringFromConfig(mqttArr, 1);
@@ -1541,11 +1553,12 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32) //|| defined (NRF5)
     HTTPClient httpClient;
-    WiFiClient wifiClient;
+   // WiFiClient wifiClient;
     String fullURI = "http://";
     fullURI+=configServer;
     fullURI+=URI;
-    httpClient.begin(wifiClient,fullURI);
+    //httpClient.begin(wifiClient,fullURI);
+    httpClient.begin(fullURI);
     int httpResponseCode = httpClient.GET();
     if (httpResponseCode > 0) {
         infoSerial.printf("[HTTP] GET... code: %d\n", httpResponseCode);
