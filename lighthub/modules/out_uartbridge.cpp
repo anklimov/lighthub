@@ -25,6 +25,7 @@ WiFiUDP udpClientB;
 
 IPAddress       targetIP;
 uint16_t        targetPort=5555;
+int             loglev=0;
 
 short halfduplex=1;
 bool  udpdump=false;
@@ -32,6 +33,10 @@ uint32_t timerA = 0;
 uint32_t timerB = 0;
 uint16_t sizeA  = 0;
 uint16_t sizeB  = 0;
+char * PDUbondaries = NULL;
+
+char bufA[MAX_PDU];
+char bufB[MAX_PDU];
 
 //extern aJsonObject *modbusObj;
 //extern ModbusMaster node;
@@ -73,6 +78,9 @@ bool out_UARTbridge::getConfig()
     aJsonObject * debugIPObj=aJson.getObjectItem(item->itemArg, "ip");
     aJsonObject * debugPortObj=aJson.getObjectItem(item->itemArg, "port");
     aJsonObject * hdObj=aJson.getObjectItem(item->itemArg, "hd");
+    aJsonObject * logObj=aJson.getObjectItem(item->itemArg, "log");
+    aJsonObject * bondObj=aJson.getObjectItem(item->itemArg, "bond");
+
 
     if (debugIPObj)
           {
@@ -86,6 +94,8 @@ bool out_UARTbridge::getConfig()
 
     if (debugPortObj) targetPort = debugPortObj->valueint;     
     if (hdObj) halfduplex = hdObj->valueint;  
+    if (logObj) loglev = logObj->valueint; 
+    if (bondObj) PDUbondaries = bondObj->valuestring; 
 
   return true;
   }
@@ -105,6 +115,8 @@ if (!store)
  sizeB=0;
  timerA=0;
  timerB=0;           
+ bufA[0]=0;
+ bufB[0]=0;
 
 if (getConfig())
     {
@@ -141,15 +153,88 @@ if (store)
 return CST_UNKNOWN;
 }
 
+String _RR_A;
+String _WR_A;
+String _RR_B;
+String _WR_B;
+
+ void strcat_c (char *str, char c, int len)
+  {
+  char strn[]="-";
+  strn[0]=c;
+  ///str[1]=0;
+  strncat(str,strn,len);
+  /*
+  return;
+    int i;
+    for (i=0;*str && (i<len);i++) str++; // note the terminating semicolon here. 
+    if (i+1<len)
+        {
+        *str++ = c; 
+        *str++ = 0;
+        }
+  */      
+  }
+
+void logA(char c)
+{
+strcat_c(bufA,c,sizeof(bufA)-1);              
+}
+
+void logB(char c)
+{
+strcat_c(bufB,c,sizeof(bufB)-1);              
+}
+
 void flushA()
 {
 if (sizeA)
   {  
     if (lanStatus>=HAVE_IP_ADDRESS && udpdump)  udpClientA.endPacket();
-    debugSerial<<endl;
+    //logA('\n');
   }
 timerA=0;   
 sizeA=0;
+String curStr(bufA);
+bufA[0]=0;
+
+{
+              
+              //if (curStr[0]<0x20) curStr.remove(0);
+              curStr.trim();
+              if (!curStr.length()) return;
+              
+              //if(loglev) debugSerial<<curStr<<endl;
+
+              if (curStr.startsWith("@00RR"))
+                {
+                  if (_RR_A == curStr) return;
+                     else _RR_A = curStr;
+                }
+              else if (curStr.startsWith("@00WR"))
+                 {
+                     if (_WR_A == curStr) return;
+                     else _WR_A = curStr;
+                 }
+
+              if(!loglev) return;  
+
+              debugSerial<<F("<");
+              short i=0;
+              while (curStr[i] && i<curStr.length())
+                { 
+                    switch (loglev)
+                    {
+                    case 1: debugSerial<<((curStr[i]<16)?"0":"")<<_HEX(curStr[i]);
+                    break;
+                    case 2: debugSerial<<curStr[i];
+                    }
+                i++;
+                }     
+              debugSerial<<endl;   
+                
+              }
+
 }
 
 void flushB()
@@ -157,10 +242,47 @@ void flushB()
 if (sizeB)
    {   
      if (lanStatus>=HAVE_IP_ADDRESS && udpdump)  udpClientB.endPacket();
-      debugSerial<<endl;
+      //logB('\n');
    }
 timerB=0;
-sizeB=0;   
+sizeB=0; 
+String curStr(bufB);  
+bufB[0]=0; 
+{
+              
+              //if (curStr[0]<0x20) curStr.remove(0);
+              curStr.trim();
+              if (!curStr.length()) return;
+              //if(loglev) debugSerial<<curStr<<endl;
+              if (curStr.startsWith("@00RR"))
+                {
+                  if (_RR_B == curStr) return;
+                     else _RR_B = curStr;
+                }
+              else if (curStr.startsWith("@00WR"))
+                 {
+                     if (_WR_B == curStr) return;
+                     else _WR_B = curStr;
+                 }   
+
+              if(!loglev) return;                  
+              debugSerial<<F(">");
+              short i=0;
+              while (curStr[i] && i<curStr.length())
+                { 
+                    switch (loglev)
+                    {
+                    case 1: debugSerial<<((curStr[i]<16)?"0":"")<<_HEX(curStr[i]);
+                    break;
+                    case 2: debugSerial<<curStr[i];
+                    }
+                i++;
+                }     
+              debugSerial<<endl;     
+             
+  }
+
+
 }
 
 int out_UARTbridge::Poll(short cause)
@@ -183,7 +305,7 @@ int out_UARTbridge::Poll(short cause)
               ////if (timerB) return 1;
               chA=MODULE_UATRBRIDGE_UARTA.read();  
               MODULE_UATRBRIDGE_UARTB.write(chA);
-              debugSerial<<F("<")<<((chA<16)?"0":"")<<_HEX(chA);
+              logA(chA);
               if (lanStatus>=HAVE_IP_ADDRESS && udpdump) {udpClientA.write(chA);}
               sizeA++;           
               }
@@ -199,14 +321,14 @@ int out_UARTbridge::Poll(short cause)
               ////if (timerA) return 1;
               chB=MODULE_UATRBRIDGE_UARTB.read();  
               MODULE_UATRBRIDGE_UARTA.write(chB);
-              debugSerial<<F(">")<<((chB<16)?"0":"")<<_HEX(chB);
+              logB(chB);
               if (lanStatus>=HAVE_IP_ADDRESS && udpdump) {udpClientB.write(chB);};
               sizeB++;
               }
           }
 
-if ((timerA && (isTimeOver(timerA,millis(),PDELAY)) || sizeA>=MAX_PDU)) flushA();
-if ((timerB && (isTimeOver(timerB,millis(),PDELAY)) || sizeB>=MAX_PDU)) flushB();
+if ((timerA && (isTimeOver(timerA,millis(),PDELAY)) || (chA=='*') || (chA=='\r') || sizeA>=MAX_PDU)) flushA();
+if ((timerB && (isTimeOver(timerB,millis(),PDELAY)) || (chB=='*') || (chB=='\r') || sizeB>=MAX_PDU)) flushB();
 
 
 /*

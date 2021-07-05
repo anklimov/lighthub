@@ -14,7 +14,7 @@
 
 #define SOURCE_PORT_A 5551
 #define SOURCE_PORT_B 5552
-#define MAX_PDU 1024
+#define MAX_PDU 64
 
 #ifndef MODULE_UATRBRIDGE_UARTA
 #define MODULE_UATRBRIDGE_UARTA Serial1
@@ -54,7 +54,7 @@ public:
   //aJsonObject * parameters;
 };
 
-#define PDELAY 50 
+#define PDELAY 10 
 
 class out_UARTbridge : public abstractOut {
 public:

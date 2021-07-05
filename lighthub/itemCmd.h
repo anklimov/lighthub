@@ -183,6 +183,7 @@ public:
   itemCmd HS(uint16_t h, uint8_t s);
   itemCmd RGB(uint8_t r, uint8_t g, uint8_t b);
   itemCmd RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w);
+  itemCmd Str(char * str);
   bool setH(uint16_t);
   bool setS(uint8_t);
   bool setColorTemp(int);
@@ -205,6 +206,7 @@ public:
 
   long int getInt();
   float    getFloat();
+  char *   getString();
   long int getSingleInt();
   short    getPercents(bool inverse=false);
   short    getPercents255(bool inverse=false);

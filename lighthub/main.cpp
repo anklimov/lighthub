@@ -63,10 +63,30 @@ SSL
 ESP32
 PWM Out
 
+
+
+#if defined(ESP8266) || defined(ESP32)
+#include "FS.h"
+#endif
 */
 
 #include "main.h"
 #include "statusled.h"
+
+#include "flashstream.h"
+#include "config.h"
+
+#if defined(ESP32)
+flashStream sysConfStream("config.bin"); 
+flashStream JSONStream("config.json"); 
+#else
+flashStream sysConfStream(SYSCONF_OFFSET,EEPROM_offsetJSON); 
+flashStream JSONStream(EEPROM_offsetJSON,MAX_JSON_CONF_SIZE); 
+#endif
+
+systemConfig sysConf(&sysConfStream);
+
+
 extern long  timer0_overflow_count;	 
 #ifdef WIFI_ENABLE
 WiFiClient ethClient;
@@ -84,9 +104,20 @@ EthernetClient ethClient;
 #include <ArduinoOTA.h>
 #endif
 
+#ifdef MDNS_ENABLE
+    #ifndef WIFI_ENABLE
+    EthernetUDP mdnsUDP;
+    #else
+    WiFiUDP mdnsUDP;
+    #endif
+MDNS mdns(mdnsUDP);
+#endif
+
+/*
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
 #endif
+
 
 #ifdef ARDUINO_ARCH_ESP32
 NRFFlashStorage EEPROM;
@@ -99,6 +130,7 @@ NRFFlashStorage EEPROM;
 #ifdef NRF5
 NRFFlashStorage EEPROM;
 #endif
+*/
 
 #ifdef SYSLOG_ENABLE
 #include <Syslog.h>
@@ -109,7 +141,7 @@ NRFFlashStorage EEPROM;
     WiFiUDP udpSyslogClient;
     #endif
 Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_BSD);
-unsigned long timerSyslogPingTime;
+//unsigned long timerSyslogPingTime;
 static char syslogDeviceHostname[16];
 
 Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog);
@@ -175,7 +207,7 @@ int8_t configLocked = 0;
 ModbusMaster node;
 #endif
 
-byte mac[6];
+//byte mac[6];
 
 PubSubClient mqttClient(ethClient);
 
@@ -350,15 +382,12 @@ else
 
 
 void printMACAddress() {
+    //macAddress * mac = sysConf.getMAC();
     infoSerial<<F("MAC:");
     for (byte i = 0; i < 6; i++)
 {
-  if (mac[i]<16) infoSerial<<"0";
-#ifdef WITH_PRINTEX_LIB
-        (i < 5) ?infoSerial<<hex <<(mac[i])<<F(":"):infoSerial<<hex<<(mac[i])<<endl;
-#else
-        (i < 5) ?infoSerial<<_HEX(mac[i])<<F(":"):infoSerial<<_HEX(mac[i])<<endl;
-#endif
+  if (sysConf.mac[i]<16) infoSerial<<"0";
+        (i < 5) ?infoSerial<<_HEX(sysConf.mac[i])<<F(":"):infoSerial<<_HEX(sysConf.mac[i])<<endl;
 }
 }
 
@@ -385,15 +414,16 @@ if (element && element->type == aJson_String) return element->valuestring;
 }
 
 #ifdef OTA
-    #if (defined(ARDUINO_ARCH_ESP32) || defined(ESP8266))
+ //   #if (defined(ARDUINO_ARCH_ESP32) || defined(ESP8266))
     void setupOTA(void)
     {
 
-            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
+            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage, sysConfStream, JSONStream);
             ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
     }
+   /*
     #elif defined (ARDUINO_ARCH_AVR)
     InternalStorageAVRClass flashStorage(EEPROM_offsetJSON);
         void setupOTA(void)
@@ -405,17 +435,17 @@ if (element && element->type == aJson_String) return element->valuestring;
 
     }
     #else 
-    InternalStorageClass flashStorage(EEPROM_offsetJSON);
+    //InternalStorageClass flashStorage(EEPROM_offsetJSON);
     void setupOTA(void)
     {
 
-            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", flashStorage);
+            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
             ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
     }
     #endif
-
+*/
 
 
 #else 
@@ -765,15 +795,22 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
     deviceName = getStringFromConfig(mqttArr, 0);
     infoSerial<<F("Device Name:")<<deviceName<<endl;
-    #ifdef OTA
-    ArduinoOTA.setDeviceName(deviceName);
+    
+  //  #ifdef OTA
+  //  ArduinoOTA.setDeviceName(deviceName);
+  //  #endif
+
+    #ifdef MDNS_ENABLE
+    mdns.setName(deviceName);
     #endif
+
 //debugSerial<<F("N:")<<n<<endl;
 
     char *servername = getStringFromConfig(mqttArr, 1);
     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
     if (n >= 4) user = getStringFromConfig(mqttArr, 3);
-    if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5))
+    //if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5))
+    if (!sysConf.getMQTTpwd(passwordBuf, sizeof(passwordBuf)) && (n >= 5))
         {
             password = getStringFromConfig(mqttArr, 4);
             infoSerial<<F("Using MQTT password from config")<<endl;
@@ -861,7 +898,7 @@ void onInitialStateInitLAN() {
                 infoSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD)<<endl;
 
                 #ifndef ARDUINO_ARCH_ESP32
-                wifi_set_macaddr(STATION_IF,mac); //ESP32 to check
+                wifi_set_macaddr(STATION_IF,sysConf.mac); //ESP32 to check
                 #endif
 
                 WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
@@ -897,26 +934,26 @@ if (WiFi.status() == WL_CONNECTED) {
 */
 #else // Ethernet connection
 
-
+    //macAddress * mac = sysConf.getMAC();
     IPAddress ip, dns, gw, mask;
     int res = 1;
     infoSerial<<F("Starting lan")<<endl;
-    if (ipLoadFromFlash(OFFSET_IP, ip)) {
+    if (sysConf.getIP(ip)) {
         infoSerial<<F("Loaded from flash IP:");
         printIPAddress(ip);
-        if (ipLoadFromFlash(OFFSET_DNS, dns)) {
+        if (sysConf.getDNS(dns)) {
             infoSerial<<F(" DNS:");
             printIPAddress(dns);
-            if (ipLoadFromFlash(OFFSET_GW, gw)) {
+            if (sysConf.getGW(gw)) {
                 infoSerial<<F(" GW:");
                 printIPAddress(gw);
-                if (ipLoadFromFlash(OFFSET_MASK, mask)) {
+                if (sysConf.getMask(mask)) {
                     infoSerial<<F(" MASK:");
                     printIPAddress(mask);
-                    Ethernet.begin(mac, ip, dns, gw, mask);
-                } else Ethernet.begin(mac, ip, dns, gw);
-            } else Ethernet.begin(mac, ip, dns);
-        } else Ethernet.begin(mac, ip);
+                    Ethernet.begin(sysConf.mac, ip, dns, gw, mask);
+                } else Ethernet.begin(sysConf.mac, ip, dns, gw);
+            } else Ethernet.begin(sysConf.mac, ip, dns);
+        } else Ethernet.begin(sysConf.mac, ip);
     infoSerial<<endl;
     lanStatus = HAVE_IP_ADDRESS;
     }
@@ -925,9 +962,9 @@ if (WiFi.status() == WL_CONNECTED) {
         wdt_dis();
 
         #if defined(ARDUINO_ARCH_STM32)
-                res = Ethernet.begin(mac);
+                res = Ethernet.begin(sysConf.mac);
         #else
-                res = Ethernet.begin(mac, 12000);
+                res = Ethernet.begin(sysConf.mac, 12000);
         #endif
         wdt_en();
         wdt_res();
@@ -944,6 +981,25 @@ if (WiFi.status() == WL_CONNECTED) {
         infoSerial<<F("Got IP address:");
         printIPAddress(Ethernet.localIP());
         lanStatus = HAVE_IP_ADDRESS;
+        
+        #ifdef MDNS_ENABLE
+        #ifndef OTA_PORT
+        #define OTA_PORT  65280
+        #endif
+
+        mdns.begin(Ethernet.localIP(), "lighthub");
+        mdns.addServiceRecord(("LightHub controller._http"),
+                        OTA_PORT,
+                        MDNSServiceTCP);
+
+         mdns.addServiceRecord("Lighthub TXT"
+                         "._http",
+                         OTA_PORT,
+                         MDNSServiceTCP,
+                         "\x7path=/2");                
+
+        #endif
+
     }
   }
     #endif
@@ -1158,6 +1214,7 @@ setupSyslog();
 
     printConfigSummary();
 configLoaded=true;
+if (sysConf.getSaveSuccedConfig()) cmdFunctionSave(0,NULL);
 configLocked--;
 }
 
@@ -1200,10 +1257,14 @@ int loadConfigFromEEPROM()
     char ch;
     infoSerial<<F("Loading Config from EEPROM")<<endl;
 
-    ch = EEPROM.read(EEPROM_offsetJSON);
-    Serial.print(ch);
-    if (ch == '{') {
-        aJsonEEPROMStream as = aJsonEEPROMStream(EEPROM_offsetJSON);
+    //ch = EEPROM.read(EEPROM_offsetJSON);
+    //Serial.print(ch);
+    //if (ch == '{') {
+    JSONStream.seek();    
+    if (JSONStream.peek() == '{') {
+        //aJsonEEPROMStream as = aJsonEEPROMStream(EEPROM_offsetJSON);
+        //flashStream fs = flashStream(EEPROM_offsetJSON);
+        aJsonStream as = aJsonStream(&JSONStream);
         cleanConf();
         root = aJson.parse(&as);
         if (!root) {
@@ -1221,6 +1282,7 @@ int loadConfigFromEEPROM()
     return 0;
 }
 
+/*
 void cmdFunctionReq(int arg_cnt, char **args) {
     mqttConfigRequest(arg_cnt, args);
 }
@@ -1256,38 +1318,46 @@ int mqttConfigResp(char *as) {
     return 1;
 }
 
-#if defined(__SAM3X8E__)
+*/
 
-#define saveBufLen 16000
+#if defined(__SAM3X8E__) 
+
+//#define saveBufLen 16000
 void cmdFunctionSave(int arg_cnt, char **args)
 {
-  char* outBuf = (char*) malloc(saveBufLen); /* XXX: Dynamic size. */
+  char* outBuf = (char*) malloc(MAX_JSON_CONF_SIZE); /* XXX: Dynamic size. */
   if (outBuf == NULL)
     {
       return;
     }
-  infoSerial<<F("Saving config to EEPROM..");
-  aJsonStringStream stringStream(NULL, outBuf, saveBufLen);
+  infoSerial<<F("Saving config to EEPROM..")<<endl;
+  aJsonStringStream stringStream(NULL, outBuf, MAX_JSON_CONF_SIZE);
   aJson.print(root, &stringStream);
   int len = strlen(outBuf);
   outBuf[len++]= EOF;
-  EEPROM.write(EEPROM_offsetJSON,(byte*) outBuf,len);
-
+  
+  //EEPROM.write(EEPROM_offsetJSON,(byte*) outBuf,len);
+  JSONStream.seek();
+  size_t res = JSONStream.write((byte*) outBuf,len);
   free (outBuf);
-  infoSerial<<F("Saved to EEPROM");
+  infoSerial<<res<< F("bytes from ")<<len<<F(" are saved to EEPROM")<<endl;
 }
 
 #else
 void cmdFunctionSave(int arg_cnt, char **args)
 {
-    aJsonEEPROMStream jsonEEPROMStream = aJsonEEPROMStream(EEPROM_offsetJSON);
+    //aJsonEEPROMStream jsonEEPROMStream = aJsonEEPROMStream(EEPROM_offsetJSON);
+    //flashStream fs = flashStream(EEPROM_offsetJSON);
+    JSONStream.seek();
+    aJsonStream jsonEEPROMStream = aJsonStream(&JSONStream);
+    
     infoSerial<<F("Saving config to EEPROM..");
 
     aJson.print(root, &jsonEEPROMStream);
-    jsonEEPROMStream.putEOF();
+    JSONStream.putEOF();
 
 
-    infoSerial<<F("Saved to EEPROM");
+    infoSerial<<F("Saved to EEPROM")<<endl;
 }
 
 #endif
@@ -1307,23 +1377,23 @@ void cmdFunctionIp(int arg_cnt, char **args)
 
   //  switch (arg_cnt) {
     //    case 5:
-            if (arg_cnt>4 && _inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
-            else saveFlash(OFFSET_MASK, ip0);
+            if (arg_cnt>4 && _inet_aton(args[4], ip)) sysConf.setMask(ip);
+            else sysConf.setMask(ip0);
     //    case 4:
-            if (arg_cnt>3 && _inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
-            else saveFlash(OFFSET_GW, ip0);
+            if (arg_cnt>3 && _inet_aton(args[3], ip)) sysConf.setGW(ip);
+            else sysConf.setGW(ip0);
     //    case 3:
-            if (arg_cnt>2 && _inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
-            else saveFlash(OFFSET_DNS, ip0);
+            if (arg_cnt>2 && _inet_aton(args[2], ip)) sysConf.setDNS(ip);
+            else sysConf.setDNS(ip0);
     //    case 2:
-            if (arg_cnt>1 && _inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
-            else saveFlash(OFFSET_IP, ip0);
+            if (arg_cnt>1 && _inet_aton(args[1], ip)) sysConf.setIP(ip);
+            else sysConf.setIP(ip0);
     //        break;
 
     //    case 1: //dynamic IP
        if (arg_cnt==1)
        {
-        saveFlash(OFFSET_IP,ip0);
+        sysConf.setIP(ip0);
         infoSerial<<F("Set dynamic IP\n");
       }
 /*
@@ -1345,32 +1415,37 @@ void cmdFunctionIp(int arg_cnt, char **args)
 }
 
 void cmdFunctionClearEEPROM(int arg_cnt, char **args){
+    /*
     for (int i = OFFSET_MAC; i < OFFSET_MAC+EEPROM_FIX_PART_LEN+1; i++) //Fi[ part +{]
         EEPROM.write(i, 0);
 
     for (int i = 0; i < EEPROM_SIGNATURE_LENGTH; i++)
             EEPROM.write(i+OFFSET_SIGNATURE,EEPROM_signature[i]);
-
-    infoSerial<<F("EEPROM cleared\n");
+    */
+   sysConf.clear();
+   infoSerial<<F("EEPROM cleared\n");
 
 }
 
 void cmdFunctionPwd(int arg_cnt, char **args)
-{ char empty[]="";
+{ //char empty[]="";
     if (arg_cnt)
-        saveFlash(OFFSET_MQTT_PWD,args[1]);
-    else saveFlash(OFFSET_MQTT_PWD,empty);
+         sysConf.setMQTTpwd(args[1]);
+    else sysConf.setMQTTpwd();
     infoSerial<<F("Password updated\n");
 }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
     char dummy;
+    uint8_t mac[6];
     if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%c", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5], &dummy) < 6) {
         errorSerial<<F("could not parse: ")<<args[1];
         return;
     }
+    sysConf.setMAC(mac);
     printMACAddress();
-    for (short i = 0; i < 6; i++) { EEPROM.write(i, mac[i]); }
+    
+    //for (short i = 0; i < 6; i++) { EEPROM.write(i, mac[i]); }
     infoSerial<<F("Updated\n");
 }
 
@@ -1382,60 +1457,26 @@ void cmdFunctionGet(int arg_cnt, char **args) {
 
 void printBool(bool arg) { (arg) ? infoSerial<<F("+") : infoSerial<<F("-"); }
 
-void saveFlash(short n, char *str) {
-    short len=strlen(str);
-    if (len>MAXFLASHSTR-1) len=MAXFLASHSTR-1;
-    for(int i=0;i<len;i++) EEPROM.write(n+i,str[i]);
-    EEPROM.write(n+len,0);
 
-   #if defined(ARDUINO_ARCH_ESP8266)
-  // write the data to EEPROM
-   short res  = EEPROM.commitReset();
-  Serial.println((res) ? "EEPROM Commit OK" : "Commit failed");
-  #endif
-}
-
-int loadFlash(short n, char *str, short l) {
-    short i;
-    uint8_t ch = EEPROM.read(n);
-    if (!ch || (ch == 0xff)) return 0;
-    for (i=0;i<l-1 && (str[i] = EEPROM.read(n++));i++);
-    str[i]=0;
-    return 1;
-}
-
-void saveFlash(short n, IPAddress& ip) {
-    for(int i=0;i<4;i++) EEPROM.write(n++,ip[i]);
-
-    #if defined(ARDUINO_ARCH_ESP8266)
-   // write the data to EEPROM
-    short res  = EEPROM.commitReset();
-   Serial.println((res) ? "EEPROM Commit OK" : "Commit failed");
-   #endif
-}
-
-int ipLoadFromFlash(short n, IPAddress &ip) {
-    for (int i = 0; i < 4; i++)
-        ip[i] = EEPROM.read(n++);
-    return (ip[0] && ((ip[0] != 0xff) || (ip[1] != 0xff) || (ip[2] != 0xff) || (ip[3] != 0xff)));
-}
 lan_status loadConfigFromHttp(int arg_cnt, char **args)
 {
+    //macAddress * mac = sysConf.getMAC();
     int responseStatusCode = 0;
     char URI[64];
     char configServer[32]="";
     if (arg_cnt > 1) {
         strncpy(configServer, args[1], sizeof(configServer) - 1);
-        saveFlash(OFFSET_CONFIGSERVER, configServer);
+        sysConf.setServer(configServer);
+        //saveFlash(OFFSET_CONFIGSERVER, configServer);
         infoSerial<<configServer<<F(" Saved")<<endl;
-    } else if (!loadFlash(OFFSET_CONFIGSERVER, configServer))
+    } else if (!sysConf.getServer(configServer))
         {
         strncpy_P(configServer,configserver,sizeof(configServer));
         infoSerial<<F(" Default config server used: ")<<configServer<<endl;
       }
 #ifndef DEVICE_NAME
-    snprintf(URI, sizeof(URI), "/cnf/%02x-%02x-%02x-%02x-%02x-%02x.config.json", mac[0], mac[1], mac[2], mac[3], mac[4],
-             mac[5]);
+    snprintf(URI, sizeof(URI), "/cnf/%02x-%02x-%02x-%02x-%02x-%02x.config.json", sysConf.mac[0], sysConf.mac[1], sysConf.mac[2], sysConf.mac[3], sysConf.mac[4],
+             sysConf.mac[5]);
 #else
 #ifndef FLASH_64KB
     snprintf(URI, sizeof(URI), "/cnf/%s_config.json",QUOTE(DEVICE_NAME));
@@ -1554,11 +1595,21 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32) //|| defined (NRF5)
     HTTPClient httpClient;
    // WiFiClient wifiClient;
+    #if defined(WIFI_ENABLE)
+        WiFiClient configEthClient;
+    #else
+        EthernetClient configEthClient;
+    #endif
     String fullURI = "http://";
     fullURI+=configServer;
     fullURI+=URI;
-    //httpClient.begin(wifiClient,fullURI);
+    
+    #if defined(ARDUINO_ARCH_ESP8266) 
+    httpClient.begin(configEthClient,fullURI);
+    #else
     httpClient.begin(fullURI);
+    #endif
+
     int httpResponseCode = httpClient.GET();
     if (httpResponseCode > 0) {
         infoSerial.printf("[HTTP] GET... code: %d\n", httpResponseCode);
@@ -1609,6 +1660,7 @@ void postTransmission() {
 }
 
 void setup_main() {
+
   #if defined(__SAM3X8E__)
   memset(&UniqueID,0,sizeof(UniqueID));
   #endif
@@ -1622,23 +1674,42 @@ void setup_main() {
     printFirmwareVersionAndBuildOptions();
 
     //Checkin EEPROM integrity (signature)
-    for (int i=0;i<EEPROM_SIGNATURE_LENGTH;i++)
-        if (EEPROM.read(i+OFFSET_SIGNATURE)!=EEPROM_signature[i])
-                      {
-                      cmdFunctionClearEEPROM(0,NULL);
-                      break;
-                       }
+
+    if (!sysConf.isValidSysConf()) sysConf.clear();                   
   //  scan_i2c_bus();
 
 #ifdef SD_CARD_INSERTED
     sd_card_w5100_setup();
 #endif
     setupMacAddress();
-
-#if defined(ARDUINO_ARCH_ESP8266)
+/*
+#if defined(ARDUINO_ARCH_ESP8266) 
       EEPROM.begin(ESP_EEPROM_SIZE);
 #endif
+*/
 
+#if defined(ESP32)
+
+//Initialize File System
+  if(SPIFFS.begin(true))
+  {
+    debugSerial<<("SPIFFS Initialize....ok")<<endl;
+  }
+  else
+  {
+    debugSerial<<("SPIFFS Initialization...failed")<<endl;
+  }
+
+  //Format File System
+  if(SPIFFS.format())
+  {
+    debugSerial<<("File System Formated")<<endl;
+  }
+  else
+  {
+    debugSerial<<("File System Formatting Error")<<endl;
+  }
+#endif
 
 #ifdef _modbus
         #ifdef CONTROLLINO
@@ -1832,6 +1903,12 @@ infoSerial<<F("\n(+)UARTBRIDGE");
 #else
 infoSerial<<F("\n(-)UARTBRIDGE");
 #endif
+
+#ifdef MDNS_ENABLE
+infoSerial<<F("\n(+)MDNS");
+#else
+infoSerial<<F("\n(-)MDNS");
+#endif
 infoSerial<<endl;
 
 //    WDT_Disable( WDT ) ;
@@ -1871,39 +1948,42 @@ void publishStat(){
     mqttClient.publish(topic,intbuf,true);
 }
 
-void setupMacAddress() {
+void setupMacAddress() {  
 //Check MAC, stored in NVRAM
-bool isMacValid = false;
+//macAddress * mac = sysConf.getMAC(); 
+//bool isMacValid = sysConf.getMAC(&mac);
+
+/*
 for (short i = 0; i < 6; i++) {
         mac[i] = EEPROM.read(i);
         if (mac[i] != 0 && mac[i] != 0xff) isMacValid = true;
     }
-
-if (!isMacValid) {
+*/
+if (!sysConf.getMAC()) {
     infoSerial<<F("No MAC configured: set firmware's MAC\n");
 
     #if defined (CUSTOM_FIRMWARE_MAC) //Forced MAC from compiler's directive
     const char *macStr = QUOTE(CUSTOM_FIRMWARE_MAC);//colon(:) separated from build options
-    parseBytes(macStr, ':', mac, 6, 16);
+    parseBytes(macStr, ':', sysConf.mac, 6, 16);
 
-    mac[0]&=0xFE;
-    mac[0]|=2;
+    sysConf.mac[0]&=0xFE;
+    sysConf.mac[0]|=2;
 
     #elif defined(WIFI_ENABLE)
     //Using original MPU MAC
     WiFi.begin();
-    WiFi.macAddress(mac);
+    WiFi.macAddress(sysConf.mac);
 
     #elif defined(__SAM3X8E__)
     //Lets make MAC from MPU serial#
-    mac[0]=0xDE;
+    sysConf.mac[0]=0xDE;
 
     for (byte b = 0 ; b < 5 ; b++)
-              mac[b+1]=UniqueID.UID_Byte [b*3] + UniqueID.UID_Byte [b*3+1] + UniqueID.UID_Byte [b*3+2];
+              sysConf.mac[b+1]=UniqueID.UID_Byte [b*3] + UniqueID.UID_Byte [b*3+1] + UniqueID.UID_Byte [b*3+2];
 
     #elif defined DEFAULT_FIRMWARE_MAC
     uint8_t defaultMac[6] = DEFAULT_FIRMWARE_MAC;//comma(,) separated hex-array, hard-coded
-    memcpy(mac,defaultMac,6);
+    memcpy(sysConf.mac,defaultMac,6);
     #endif
     }
 
@@ -1922,7 +2002,7 @@ void setupCmdArduino() {
     cmdAdd("mac", cmdFunctionSetMac);
 #endif
     cmdAdd("kill", cmdFunctionKill);
-    cmdAdd("req", cmdFunctionReq);
+    //cmdAdd("req", cmdFunctionReq);
     cmdAdd("ip", cmdFunctionIp);
     cmdAdd("pwd", cmdFunctionPwd);
     cmdAdd("clear",cmdFunctionClearEEPROM);
@@ -1979,6 +2059,9 @@ void loop_main() {
     dmxout.update();
 #endif
 
+#ifdef MDNS_ENABLE
+        mdns.run();
+#endif
 }
 
 void owIdle(void) {
@@ -2021,7 +2104,9 @@ void modbusIdle(void) {
         yield();
         inputLoop();
     }
-
+#ifdef MDNS_ENABLE
+        mdns.run();
+#endif
 
 #ifdef _dmxin
     DMXCheck();

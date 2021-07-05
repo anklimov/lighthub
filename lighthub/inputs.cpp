@@ -34,8 +34,8 @@ e-mail    anklimov@gmail.com
 #endif
 
 #ifdef MCP23017
-#include "Adafruit_MCP23017.h"
-Adafruit_MCP23017 mcp;
+#include "Adafruit_MCP23X17.h"
+Adafruit_MCP23X17 mcp;
 #endif
 
 extern PubSubClient mqttClient;
@@ -181,10 +181,10 @@ switch (inType)
   case IN_I2C | IN_PUSH_ON     | IN_ACTIVE_HIGH:
   case IN_I2C | IN_PUSH_TOGGLE | IN_ACTIVE_HIGH:
 
-  mcp.begin(); //TBD - multiple chip
-  mcp.pinMode(pin, INPUT);
-  if (inputPinMode == INPUT_PULLUP) mcp.pullUp(0, HIGH);  // turn on a 100K pullup internally
-
+  mcp.begin_I2C(); //TBD - multiple chip
+  // CHECK! mcp.pinMode(pin, INPUT);
+  // CHECK! if (inputPinMode == INPUT_PULLUP) mcp.pullUp(0, HIGH);  // turn on a 100K pullup internally
+  mcp.pinMode(pin,inputPinMode);
   store->state=IS_IDLE;
   break;
   #endif

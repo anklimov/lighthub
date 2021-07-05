@@ -1,3 +1,4 @@
+#pragma once
 #include <Print.h>
 #include <HardwareSerial.h>
 #include <inttypes.h>

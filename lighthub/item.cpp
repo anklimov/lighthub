@@ -51,6 +51,10 @@ e-mail    anklimov@gmail.com
 #include "modules/out_multivent.h"
 #include "modules/out_uartbridge.h"
 
+#ifdef ELEVATOR_ENABLE
+#include "modules/out_elevator.h"
+#endif
+
 short modbusBusy = 0;
 bool isPendedModbusWrites = false;
 
@@ -104,7 +108,7 @@ int txt2subItem(char *payload) {
     else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
     else if (strcmp_P(payload, VAL_P) == 0) cmd = S_VAL;
     else if (strcmp_P(payload, DEL_P) == 0) cmd = S_DELAYED;
-  
+    else if (strcmp_P(payload, _RAW_P) == 0) cmd = S_RAW;
     return cmd;
 }
 
@@ -188,6 +192,13 @@ void Item::Parse() {
 #ifdef   UARTBRIDGE_ENABLE
           case CH_UARTBRIDGE:
           driver = new out_UARTbridge (this);
+//          debugSerial<<F("AC driver created")<<endl;
+          break;
+#endif
+
+#ifdef ELEVATOR_ENABLE
+          case CH_ELEVATOR:
+          driver = new out_elevator (this);
 //          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
@@ -489,6 +500,12 @@ if (subItem && strlen(subItem))
 if (!suffixCode && defaultSuffixCode)
         suffixCode = defaultSuffixCode;
 
+if (suffixCode == S_RAW)
+{   itemCmd ic;
+    ic.Str(payload);
+    ic.setSuffix(suffixCode);
+    return   Ctrl(ic,subItem);
+}
 
 int i=0;
 while (payload[i]) {payload[i]=toupper(payload[i]);i++;};
@@ -848,6 +865,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                                      if (chActive>0 && !cmd.getInt()) st.Cmd(CMD_OFF);
                                      if (chActive==0 && cmd.getInt()) st.Cmd(CMD_ON);
                                      setCmd(st.getCmd());
+                                     st.saveItem(this);
                                      SendStatus(SEND_COMMAND | SEND_DEFFERED);
 
                                      // continue processing as SET
@@ -913,8 +931,10 @@ if (driver) //New style modular code
             if (!chActive)  //if channel was'nt active before CMD_XON
                   {
                     debugSerial<<F("Turning XON\n");
-                    res = driver->Ctrl(st.Cmd(CMD_ON), subItem);
+                    st.Cmd(CMD_ON);
+                    res = driver->Ctrl(st, subItem);
                     setCmd(CMD_XON);
+                    st.saveItem(this);
                     SendStatus(SEND_COMMAND);
                   }
               else
@@ -926,8 +946,10 @@ if (driver) //New style modular code
             case CMD_HALT:
             if (chActive)  //if channel was active before CMD_HALT
                   {
-                    res = driver->Ctrl(st.Cmd(CMD_OFF), subItem);
+                    st.Cmd(CMD_OFF);  
+                    res = driver->Ctrl(st, subItem);
                     setCmd(CMD_HALT);
+                    st.saveItem(this);
                     SendStatus(SEND_COMMAND);
                     return res;
                   }
@@ -940,8 +962,12 @@ if (driver) //New style modular code
             case CMD_OFF:
             if (getCmd() != CMD_HALT) //Halted, ignore OFF
                  {
-                   res = driver->Ctrl(st.Cmd(CMD_OFF), subItem);
+                     //debugSerial<<"OFF! ";
+                     //st.debugOut();
+                   st.Cmd(CMD_OFF);  
+                   res = driver->Ctrl(st, subItem);
                    setCmd(CMD_OFF);
+                   st.saveItem(this);
                    SendStatus(SEND_COMMAND);
                  }
             else
@@ -959,10 +985,15 @@ if (driver) //New style modular code
             break;
             
             case CMD_ON:
+            //debugSerial<<"ON!"<<endl;
             if (chActive) break;
 
             default: //another command
+            if (cmd.isCommand()) st.Cmd(cmd.getCmd());
+            //debugSerial<<"DEF!"<<endl;
+            //st.debugOut();
             res = driver->Ctrl(st, subItem);
+            st.saveItem(this);
             if (st.isCommand())
                         {
                         setCmd(st.getCmd());
@@ -1068,12 +1099,14 @@ switch (itemType) {
                if (chActive>0)  //if channel was active before CMD_HALT
                   {
                     setCmd(CMD_HALT);
+                    cmd.saveItem(this); ///
                     SendStatus(SEND_COMMAND);
                   }
                }   
              else
              {
               setCmd(st.getCmd());
+              st.saveItem(this);
               SendStatus(SEND_COMMAND);
               }
               }
@@ -1261,7 +1294,7 @@ int Item::SendStatus(int sendFlags) {
       char addrstr[48];
       char valstr[20] = "";
       char cmdstr[8] = "";
-
+    st.debugOut();
     if (sendFlags & SEND_COMMAND)
     {
     // Preparing Command payload  //////////////
@@ -1287,6 +1320,8 @@ int Item::SendStatus(int sendFlags) {
             sendFlags &= ~SEND_COMMAND;
     }
    }
+
+   //debugSerial<<"C"<<cmdstr<<endl;
       // publish to MQTT - OpenHab Legacy style to 
       // myhome/s_out/item - mix: value and command
       // send only for OH bus supported types

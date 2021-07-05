@@ -36,7 +36,8 @@ e-mail    anklimov@gmail.com
 #define S_TEMP 11
 #define S_VAL  12
 #define S_DELAYED 13
-#define S_ADDITIONAL 13
+#define S_RAW 14
+#define S_ADDITIONAL 14
 
 #define CH_DIMMER 0   //DMX 1-4 ch
 #define CH_RGBW   1   //DMX 4 ch
@@ -54,6 +55,7 @@ e-mail    anklimov@gmail.com
 #define CH_PID   13
 #define CH_MBUS  14
 #define CH_UARTBRIDGE  15
+#define CH_ELEVATOR 16
 #define CH_MULTIVENT 18
 
 //#define CHANNEL_TYPES 13

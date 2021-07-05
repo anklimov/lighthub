@@ -116,9 +116,10 @@ const char HSV_P[]   PROGMEM = "HSV";
 const char RGB_P[]   PROGMEM = "RGB";
 const char VAL_P[]   PROGMEM = "val";
 const char DEL_P[]   PROGMEM = "del";
+const char _RAW_P[]   PROGMEM = "raw";
 
 /*
 const char RPM_P[]   PROGMEM = "rpm";
 const char STATE_P[] PROGMEM = "state";
 */
-const char EEPROM_signature[] = EEPROM_SIGNATURE;
+

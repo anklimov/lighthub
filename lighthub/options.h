@@ -1,4 +1,19 @@
 #include <Arduino.h>
+
+#ifndef MAX_JSON_CONF_SIZE
+
+#if defined(__SAM3X8E__)
+#define MAX_JSON_CONF_SIZE 16000
+#elif defined(ARDUINO_ARCH_AVR)
+#define MAX_JSON_CONF_SIZE 4096
+#elif defined(ARDUINO_ARCH_ESP32)
+#define MAX_JSON_CONF_SIZE 65535
+#else
+#define MAX_JSON_CONF_SIZE 32000
+#endif
+
+#endif
+
 // Configuration of drivers enabled
 #define SYSLOG_LOCAL_SOCKET 514
 
@@ -39,7 +54,7 @@
 #define TXEnablePin MODBUS_TX_PIN
 #endif
 
-#define ESP_EEPROM_SIZE 2048
+//#define ESP_EEPROM_SIZE 2048
 
 #ifndef AVR_DMXOUT_PIN
 #define AVR_DMXOUT_PIN 18
@@ -63,6 +78,7 @@
 #define MIN_VOLUME 25
 #define INIT_VOLUME 40
 
+/*
 #define MAXFLASHSTR 32
 #define PWDFLASHSTR 16
 #define EEPROM_SIGNATURE "LHCF"
@@ -80,7 +96,7 @@
 #define EEPROM_offsetJSON EEPROM_offset_NotAlligned + (4 -(EEPROM_offset_NotAlligned & 3))
 //#define EEPROM_offsetJSON IFLASH_PAGE_SIZE
 #define EEPROM_FIX_PART_LEN EEPROM_offsetJSON-OFFSET_MAC
-
+*/
 
 #ifndef INTERVAL_CHECK_INPUT
 #define INTERVAL_CHECK_INPUT  15

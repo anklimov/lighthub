@@ -616,6 +616,17 @@ long int itemCmd::getInt()
   }
 }
 
+char*  itemCmd::getString()
+{
+  switch (cmd.itemArgType) {
+
+    case ST_STRING:
+      return param.asString;
+    default:
+    return NULL;
+  }
+}
+
 
 float itemCmd::getFloat()
 {
@@ -875,7 +886,12 @@ itemCmd itemCmd::RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
   return *this;
 }
 
-
+itemCmd itemCmd::Str(char * str)
+{
+ cmd.itemArgType=ST_STRING;
+ param.asString = str;
+ return *this;  
+}
 
 
 itemCmd itemCmd::Cmd(uint8_t i)
@@ -906,18 +922,23 @@ bool itemCmd::loadItem(Item * item, bool includeCommand)
           param.asInt32=item->getVal();
           cmd.itemArgType= subtype;
           if (includeCommand) cmd.cmdCode=item->getCmd();
-          //debugSerial<<F("Loaded :");
-          //debugOut();
+          debugSerial<<F("Loaded :");
+          debugOut();
           return 1;
         }
   switch (item->itemVal->type)
     {
       case aJson_Int:
+
       Int((int32_t)item->itemVal->valueint);
+          debugSerial<<F("Loaded Int:");
+          debugOut();
       return true;
       
       case aJson_Float:
       Float(item->itemVal->valueint);
+          debugSerial<<F("Loaded Float:");
+          debugOut();
       return true;
     }
 

@@ -7,7 +7,7 @@
 #endif
 
 #if defined(__SAM3X8E__)
-#include <DueFlashStorage.h>
+//#include <DueFlashStorage.h>
 #include <watchdog.h>
 #include <ArduinoHttpClient.h>
 #endif
@@ -16,13 +16,13 @@
 #include "HTTPClientAVR.h"
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
-#include <EEPROM.h>
+//#include <EEPROM.h>
 #endif
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 //#include "SPIFFS.h"
-#include <ESP_EEPROM.h>
+//#include <ESP_EEPROM.h>
 //#include <ESP8266HTTPClient.h>
 //#include <ArduinoHttpClient.h>
 //#include "HttpClient.h"
@@ -38,7 +38,7 @@
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 //#include "SPIFFS.h"
 //#include <EEPROM.h>
-#include <NRFFlashStorage.h>
+//#include <NRFFlashStorage.h>
 //#include "HttpClient.h"
 //#include <ArduinoHttpClient.h>
 //#include <HTTPClient.h>
@@ -53,14 +53,14 @@
 #endif
 
 #ifdef NRF5
-#include <NRFFlashStorage.h>
+//#include <NRFFlashStorage.h>
 #include <ArduinoHttpClient.h>
 #endif
 
 #ifdef ARDUINO_ARCH_STM32
 #include "HttpClient.h"
 //#include "UIPEthernet.h"
-#include <NRFFlashStorage.h>
+//#include <NRFFlashStorage.h>
 //#include <EEPROM.h>
 #endif
 
@@ -178,6 +178,10 @@ extern Streamlog  errorSerial;
 #include "sd_card_w5100.h"
 #endif
 
+#ifdef MDNS_ENABLE
+#include <ArduinoMDNS.h>
+#endif
+
 #include "Arduino.h"
 #include "utils.h"
 #include "textconst.h"
@@ -243,11 +247,11 @@ void cmdFunctionLoad(int arg_cnt, char **args);
 
 int loadConfigFromEEPROM();
 
-void cmdFunctionReq(int arg_cnt, char **args);
+//void cmdFunctionReq(int arg_cnt, char **args);
 
-int mqttConfigRequest(int arg_cnt, char **args);
+//int mqttConfigRequest(int arg_cnt, char **args);
 
-int mqttConfigResp(char *as);
+//int mqttConfigResp(char *as);
 
 void cmdFunctionSave(int arg_cnt, char **args);
 
@@ -256,7 +260,7 @@ void cmdFunctionSetMac(int arg_cnt, char **args);
 void cmdFunctionGet(int arg_cnt, char **args);
 
 void printBool(bool arg);
-
+/*
 void saveFlash(short n, char *str);
 
 int loadFlash(short n, char *str, short l=MAXFLASHSTR);
@@ -264,6 +268,7 @@ int loadFlash(short n, char *str, short l=MAXFLASHSTR);
 void saveFlash(short n, IPAddress& ip);
 
 int ipLoadFromFlash(short n, IPAddress &ip);
+*/
 
 lan_status loadConfigFromHttp(int arg_cnt = 0, char **args = NULL);
 
