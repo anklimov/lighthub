@@ -15,59 +15,6 @@ limitations under the License.
 Homepage: http://lazyhome.ru
 GIT:      https://github.com/anklimov/lighthub
 e-mail    anklimov@gmail.com
-
-
-
- *
- *
- * Done:
- * MQMT/openhab
- * 1-wire
- * DMX - out
- * DMX IN
- * 1809 strip out (discarded)
- * Modbus master Out
- * DHCP
- * JSON config
- * cli
- * PWM Out 7,8,9
- * 1-w relay out
- * Termostat out
-
-Todo (backlog)
-===
-rotary encoder local ctrl ?
-analog in local ctrl
-Smooth regulation/fading
-PID Termostat out ?
-dmx relay out
-Relay array channel
-Relay DMX array channel
-Config URL & MQTT password commandline configuration
-1-wire Update refactoring (save memory)
-Topic configuration
-Timer
-Modbus response check
-control/debug (Commandline) over MQTT
-more Modbus dimmers
-
-todo DUE related:
-PWM freq fix
-Config webserver
-SSL
-
-todo ESP:
-Config webserver
-SSL
-
-ESP32
-PWM Out
-
-
-
-#if defined(ESP8266) || defined(ESP32)
-#include "FS.h"
-#endif
 */
 
 #include "main.h"
@@ -76,7 +23,7 @@ PWM Out
 #include "flashstream.h"
 #include "config.h"
 
-#if defined(ESP32)
+#if defined(FS_STORAGE)
 flashStream sysConfStream("config.bin"); 
 flashStream JSONStream("config.json"); 
 #else
@@ -291,92 +238,158 @@ bool isNotRetainingStatus() {
   return (lanStatus != RETAINING_COLLECTING);
 }
 
-int httpHandler(Client& client, String request, long contentLength)
+int httpHandler(Client& client, String request, long contentLength, bool authorized)
 {
+    String response = "";
+
     debugSerial<<request<<endl;
-    return -1;
+
+
+    if (request == (F("GET /"))) 
+        {
+         client.println(F("HTTP/1.1 301 Moved permanently"));
+         client.print(F("Location: http://lazyhome.ru/pwa?mac="));
+         for (int i=0; i<6; i++) {client.print(sysConf.mac[i]>>4,HEX);client.print(sysConf.mac[i]&0xf,HEX);}
+         client.print(F("&ip="));
+         client.println(Ethernet.localIP());
+         delay(100);
+         return 1;
+        }
+    if (!authorized) return 401;
+
+    if (request.startsWith(F("POST /item/")))
+       {
+        request.remove(0,11);      
+        String body=client.readStringUntil('\n');
+        Item   item((char*)request.c_str());
+          if (!item.isValid() || !item.Ctrl((char*) body.c_str())) return 400;
+
+        itemCmd ic;
+        ic.loadItem(&item,true);
+        char buf[32];
+        response=ic.toString(buf, sizeof(buf));             
+       }
+    else if (request.startsWith(F("GET /item/")))
+       {
+        request.remove(0,10);
+        Item   item((char*)request.c_str());
+          if (!item.isValid()) return 400; 
+
+         itemCmd ic;
+         ic.loadItem(&item,true);
+         char buf[32];
+         response=ic.toString(buf, sizeof(buf));
+        
+       }  
+    else if (request.startsWith(F("POST /command/"))) 
+        {
+        request.remove(0,14);      
+        String body=client.readStringUntil('\n');  
+        
+        request+=" ";
+        request+=body;
+
+        debugSerial<<F("Cmd: ")<<request<<endl;
+        if (request=="reboot") client.stop();
+        const char* res=request.c_str();
+        cmd_parse((char*) res);        
+        } 
+    else return -1;  //Unknown
+
+        client.println(F("HTTP/1.1 200 OK"));
+        client.println(F("Connection: close"));
+        
+          #ifdef CORS
+          client.print(F("Access-Control-Allow-Origin: "));
+          client.println(CORS);
+          #endif
+          
+        if (response!="") {
+              client.println("Content-Type: text/plain");
+              client.println();
+              client.println(response);
+              }
+  
+        delay(100);
+return 1;
 }
 
-void mqttCallback(char *topic, byte *payload, unsigned int length) {
-    debugSerial<<F("\n[")<<topic<<F("] ");
-    if (!payload) return;
+int inTopic (char * topic,  topicType tt)
+{
+char buf[MQTT_TOPIC_LENGTH + 1];
+int pfxlen;
+int intopic;
+  setTopic(buf,sizeof(buf)-1,tt);
+  pfxlen = strlen(buf);
+  intopic = strncmp(topic, buf, pfxlen);
+  // debugSerial<<buf<<" "<<pfxlen<<" "<<intopic<<endl;
+  if (!intopic) return pfxlen;
+  return 0; 
+}    
 
-    payload[length] = 0;
-    
+void mqttCallback(char *topic, byte *payload, unsigned int length) 
+                {
+                        if (!payload) return;
+                        payload[length] = 0;
+         //               itemCommand(topic, (char*) payload);
+          //      }
+
+            
+
+//int itemCommand(char *topic, char *payload){ 
+
     int fr = freeRam();
+
+    debugSerial<<F("\n")<<fr<<F(":[")<<topic<<F("] ");
+
     if (fr < 250) {
         errorSerial<<F("OutOfMemory!")<<endl;
-        return;
+        return;// -2;
     }
     
     statusLED.flash(ledBLUE);
-    for (unsigned int i = 0; i < length; i++)
-        debugSerial<<((char) payload[i]);
-    debugSerial<<endl;
-
-    short intopic = 0;
+    debugSerial<<(char*)payload<<endl;
     short pfxlen  = 0;
     char * itemName = NULL;
     char * subItem = NULL;
 
-{
-char buf[MQTT_TOPIC_LENGTH + 1];
-
-
-if  (lanStatus == RETAINING_COLLECTING)
-{
-  setTopic(buf,sizeof(buf),T_OUT);
-  pfxlen = strlen(buf);
-  intopic = strncmp(topic, buf, pfxlen);
-}
-
+// in Retaining status - trying to restore previous state from retained output topic. Retained input topics are not relevant.
+if  (lanStatus == RETAINING_COLLECTING) pfxlen=inTopic(topic,T_OUT);
 else
 {
-       setTopic(buf,sizeof(buf),T_BCST);
-        pfxlen = strlen(buf);
-        intopic = strncmp(topic, buf, pfxlen );
-
-        if (intopic)
-        {
-        setTopic(buf,sizeof(buf),T_DEV);
-        pfxlen = strlen(buf);
-        intopic = strncmp(topic, buf, pfxlen);
-        }
-}
-}
-    // in Retaining status - trying to restore previous state from retained output topic. Retained input topics are not relevant.
-    if (intopic) {
-        debugSerial<<F("Skipping..");
-        return;
+        pfxlen=inTopic(topic,T_BCST);
+        if (!pfxlen) pfxlen = inTopic(topic,T_DEV);      
+}   
+    if (!pfxlen) {
+        debugSerial<<F("Skipping..")<<endl;
+        return;// -3;
     }
 
     itemName=topic+pfxlen;
 
+     debugSerial<<itemName<<endl;
+
     if(!strcmp(itemName,CMDTOPIC) && payload && (strlen((char*) payload)>1)) {
       //  mqttClient.publish(topic, "");
         cmd_parse((char *)payload);
-        return;
+        return;// -4;
     }
 
     if (subItem = strchr(itemName, '/'))
       {
         *subItem = 0;
         subItem++;
-        if (*subItem=='$') return; //Skipping homie stuff
-
-        //  debugSerial<<F("Subitem:")<<subItem<<endl;
+        if (*subItem=='$') return;// -5; //Skipping homie stuff
       }
-       // debugSerial<<F("Item:")<<itemName<<endl;
 
-    if (itemName[0]=='$') return; //Skipping homie stuff
+    if (itemName[0]=='$') return;// -6; //Skipping homie stuff
 
     Item item(itemName);
     if (item.isValid()) {
-      /*
-        if (item.itemType == CH_GROUP && (lanStatus == RETAINING_COLLECTING))
-            return; //Do not restore group channels - they consist not relevant data */
-        item.Ctrl((char *)payload,subItem);
+        //return 
+        item.Ctrl((char *)payload,subItem);        
     } //valid item
+ return;// -7;   
 }
 
 
@@ -414,40 +427,13 @@ if (element && element->type == aJson_String) return element->valuestring;
 }
 
 #ifdef OTA
- //   #if (defined(ARDUINO_ARCH_ESP32) || defined(ESP8266))
     void setupOTA(void)
     {
-
             ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage, sysConfStream, JSONStream);
             ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
     }
-   /*
-    #elif defined (ARDUINO_ARCH_AVR)
-    InternalStorageAVRClass flashStorage(EEPROM_offsetJSON);
-        void setupOTA(void)
-    {
-
-            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", flashStorage);
-            ArduinoOTA.setCustomHandler(httpHandler);
-            infoSerial<<F("OTA initialized\n");
-
-    }
-    #else 
-    //InternalStorageClass flashStorage(EEPROM_offsetJSON);
-    void setupOTA(void)
-    {
-
-            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage);
-            ArduinoOTA.setCustomHandler(httpHandler);
-            infoSerial<<F("OTA initialized\n");
-
-    }
-    #endif
-*/
-
-
 #else 
 void setupOTA(void) {};
 #endif
@@ -1256,14 +1242,8 @@ int loadConfigFromEEPROM()
 {
     char ch;
     infoSerial<<F("Loading Config from EEPROM")<<endl;
-
-    //ch = EEPROM.read(EEPROM_offsetJSON);
-    //Serial.print(ch);
-    //if (ch == '{') {
     JSONStream.seek();    
     if (JSONStream.peek() == '{') {
-        //aJsonEEPROMStream as = aJsonEEPROMStream(EEPROM_offsetJSON);
-        //flashStream fs = flashStream(EEPROM_offsetJSON);
         aJsonStream as = aJsonStream(&JSONStream);
         cleanConf();
         root = aJson.parse(&as);
@@ -1276,49 +1256,13 @@ int loadConfigFromEEPROM()
         ethClient.stop(); //Refresh MQTT connect to get retained info
         return 1;
     } else {
+        JSONStream.write(255); //truncate garbage
         infoSerial<<F("No stored config")<<endl;
         return 0;
     }
     return 0;
 }
 
-/*
-void cmdFunctionReq(int arg_cnt, char **args) {
-    mqttConfigRequest(arg_cnt, args);
-}
-
-
-int mqttConfigRequest(int arg_cnt, char **args)
-{
-    char buf[25] = "/";
-    infoSerial<<F("\nrequest MQTT Config");
-    SetBytes((uint8_t *) mac, 6, buf + 1);
-    buf[13] = 0;
-    strncat(buf, "/resp/#", 25);
-    debugSerial<<buf;
-    mqttClient.subscribe(buf);
-    buf[13] = 0;
-    strncat(buf, "/req/conf", 25);
-    debugSerial<<buf;
-    mqttClient.publish(buf, "1");
-    return 1;
-}
-
-
-int mqttConfigResp(char *as) {
-    infoSerial<<F("got MQTT Config");
-    root = aJson.parse(as);
-
-    if (!root) {
-        errorSerial<<F("\nload failed\n");
-        return 0;
-    }
-    infoSerial<<F("\nLoaded");
-    applyConfig();
-    return 1;
-}
-
-*/
 
 #if defined(__SAM3X8E__) 
 
@@ -1415,16 +1359,8 @@ void cmdFunctionIp(int arg_cnt, char **args)
 }
 
 void cmdFunctionClearEEPROM(int arg_cnt, char **args){
-    /*
-    for (int i = OFFSET_MAC; i < OFFSET_MAC+EEPROM_FIX_PART_LEN+1; i++) //Fi[ part +{]
-        EEPROM.write(i, 0);
-
-    for (int i = 0; i < EEPROM_SIGNATURE_LENGTH; i++)
-            EEPROM.write(i+OFFSET_SIGNATURE,EEPROM_signature[i]);
-    */
    sysConf.clear();
    infoSerial<<F("EEPROM cleared\n");
-
 }
 
 void cmdFunctionPwd(int arg_cnt, char **args)
@@ -1432,6 +1368,14 @@ void cmdFunctionPwd(int arg_cnt, char **args)
     if (arg_cnt)
          sysConf.setMQTTpwd(args[1]);
     else sysConf.setMQTTpwd();
+    infoSerial<<F("Password updated\n");
+}
+
+void cmdFunctionOTAPwd(int arg_cnt, char **args)
+{ //char empty[]="";
+    if (arg_cnt)
+         sysConf.setOTApwd(args[1]);
+    else sysConf.setOTApwd();
     infoSerial<<F("Password updated\n");
 }
 
@@ -1452,7 +1396,6 @@ void cmdFunctionSetMac(int arg_cnt, char **args) {
 void cmdFunctionGet(int arg_cnt, char **args) {
     lanStatus= loadConfigFromHttp(arg_cnt, args);
     ethClient.stop(); //Refresh MQTT connect to get retained info
-    //restoreState();
 }
 
 void printBool(bool arg) { (arg) ? infoSerial<<F("+") : infoSerial<<F("-"); }
@@ -1688,7 +1631,7 @@ void setup_main() {
 #endif
 */
 
-#if defined(ESP32)
+#if defined(FS_PREPARE)
 
 //Initialize File System
   if(SPIFFS.begin(true))
@@ -1698,16 +1641,6 @@ void setup_main() {
   else
   {
     debugSerial<<("SPIFFS Initialization...failed")<<endl;
-  }
-
-  //Format File System
-  if(SPIFFS.format())
-  {
-    debugSerial<<("File System Formated")<<endl;
-  }
-  else
-  {
-    debugSerial<<("File System Formatting Error")<<endl;
   }
 #endif
 
@@ -1950,15 +1883,6 @@ void publishStat(){
 
 void setupMacAddress() {  
 //Check MAC, stored in NVRAM
-//macAddress * mac = sysConf.getMAC(); 
-//bool isMacValid = sysConf.getMAC(&mac);
-
-/*
-for (short i = 0; i < 6; i++) {
-        mac[i] = EEPROM.read(i);
-        if (mac[i] != 0 && mac[i] != 0xff) isMacValid = true;
-    }
-*/
 if (!sysConf.getMAC()) {
     infoSerial<<F("No MAC configured: set firmware's MAC\n");
 
@@ -1986,8 +1910,6 @@ if (!sysConf.getMAC()) {
     memcpy(sysConf.mac,defaultMac,6);
     #endif
     }
-
-
     printMACAddress();
 }
 
@@ -2005,6 +1927,7 @@ void setupCmdArduino() {
     //cmdAdd("req", cmdFunctionReq);
     cmdAdd("ip", cmdFunctionIp);
     cmdAdd("pwd", cmdFunctionPwd);
+    cmdAdd("otapwd", cmdFunctionOTAPwd);
     cmdAdd("clear",cmdFunctionClearEEPROM);
     cmdAdd("reboot",cmdFunctionReboot);
 }

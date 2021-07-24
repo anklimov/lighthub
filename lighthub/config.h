@@ -65,6 +65,10 @@ class systemConfig {
 
  bool             getMQTTpwd(char * buffer, uint16_t bufLen);
  bool             setMQTTpwd(char * pwd = NULL);
+
+ bool             getOTApwd(char * buffer, uint16_t bufLen);
+ bool             setOTApwd(char * pwd = NULL);
+
  bool             setMAC(macAddress mac);
  bool             setServer(char* url);
  bool             getServer(char* url);  

@@ -4,7 +4,7 @@
 
 #include <main.h>
 
-#if defined(ESP32)
+#if defined(FS_STORAGE)
 #include <FS.h>
 #include <SPIFFS.h>
 #endif
@@ -13,7 +13,11 @@
 #include <EEPROM.h>
 #endif
 
-#if defined(ARDUINO_ARCH_ESP8266)
+#if defined(ESP32) && !defined(FS_STORAGE)
+#include <EEPROM.h>
+#endif
+
+#if defined(ARDUINO_ARCH_ESP8266) 
 #include <ESP_EEPROM.h>
 #endif
 
@@ -39,6 +43,7 @@ extern NRFFlashStorage EEPROM;
 
 class seekableStream : public Stream 
 {
+protected:    
 unsigned int streamSize;       
 public:
 seekableStream(unsigned int size):Stream(),streamSize(size) {};
@@ -46,18 +51,22 @@ unsigned int getSize() {return streamSize;}
 virtual unsigned int seek(unsigned int _pos = 0) = 0;
 };
 
-#if defined(ESP32)
+#if defined(FS_STORAGE)
 class flashStream : public seekableStream
 {
 private:
  File fs;
 public:
-flashStream(String _filename):seekableStream(65535) {fs = SPIFFS.open(_filename, "r+");} 
-   virtual int available() { return 1;  };
+flashStream(String _filename):seekableStream(65535) 
+            {
+                fs = SPIFFS.open(_filename, "a+");
+                if (!fs) SPIFFS.open(_filename, "w+");
+            }  
+   virtual int available() { return fs.available();  };
    virtual int read() {return fs.read();};
    virtual int peek() { return fs.peek();};
    virtual unsigned int seek(unsigned int _pos = 0){return fs.seek(_pos,SeekSet);};         
-   virtual void flush() {};
+   virtual void flush() {return fs.flush();};
    virtual size_t write(uint8_t ch) {return fs.write(ch);};
    void putEOF(){write (255);};
 virtual ~flashStream () {if (fs) fs.close();} ;
@@ -71,29 +80,36 @@ class flashStream : public seekableStream
 protected:
 unsigned int pos;  
 unsigned int startPos; 
-unsigned int size; 
+
 
 public:
 flashStream(unsigned int _startPos=0, unsigned int _size=4096 ):seekableStream(_size) 
             {
-            pos = _startPos; startPos = _startPos; size = _size;
+            pos = _startPos; startPos = _startPos; 
              #if defined(ESP8266)
              size_t len = EEPROM.length();
              if (len) EEPROM.commit();
-             EEPROM.begin(len+size); //Re-init
+             EEPROM.begin(len+streamSize); //Re-init
              #endif
             };
 
     virtual unsigned int seek(unsigned int _pos = 0) 
-        {   pos=min(startPos+_pos, startPos+size);
+        {   pos=min(startPos+_pos, startPos+streamSize);
             debugSerial<<F("Seek:")<<pos<<endl;
             return pos;
         };
-    virtual int available() { return 1;};
-    virtual int read() {int ch = peek(); pos++; return ch;};
-    virtual int peek() 
+    virtual int available() { return (pos<streamSize);};
+    virtual int read() 
             {
-                 return EEPROM.read(pos);
+                int ch = peek(); 
+                pos++; 
+                return ch;
+                };
+    virtual int peek() 
+            {    
+                if (pos<streamSize) 
+                     return EEPROM.read(pos);
+                else return -1;    
             };
    virtual void flush() {
         #if defined(ESP8266)

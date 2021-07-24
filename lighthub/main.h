@@ -225,6 +225,7 @@ typedef union {
 bool isNotRetainingStatus();
 //void watchdogSetup(void);
 
+//int itemCommand(char *topic, char *payload);
 void mqttCallback(char *topic, byte *payload, unsigned int length);
 
 void printMACAddress();

@@ -10,4 +10,5 @@
 -DARDUINO_OTA_MDNS_DISABLE
 -DMDNS_ENABLE
 -DMCP23017
+-DCORS=\"http://lazyhome.ru\"
 

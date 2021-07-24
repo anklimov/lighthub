@@ -1,0 +1,11 @@
+{
+    "name": "Спальня LED_", 
+    "command_topic": "myhome/in/bedr/cmd", 
+    "state_topic": "myhome/s_out/bedr/cmd", 
+    "hs_command_topic": "myhome/in/bedr/set", 
+    "hs_state_topic": "myhome/s_out/bedr/set", 
+    "hs_value_template": "{%set a=value.split(',')%} {% if a[1] -%} {{a[0]+','+a[1]}} {%- endif %}", 
+    "brightness_scale": 100, 
+    "brightness_command_topic": "myhome/in/bedr/set", 
+    "brightness_state_topic": "myhome/s_out/bedr/set", 
+    "brightness_value_template": "{{ value.split(',')[2] }}" }

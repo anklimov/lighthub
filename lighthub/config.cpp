@@ -49,7 +49,7 @@ bool             systemConfig::isValidSysConf()
 {    
      if (!stream) return false; 
      stream->seek(offsetof(systemConfigData,signature));
-     for (int i=0;i<EEPROM_SIGNATURE_LENGTH;i++)
+     for (int i=0;i<sizeof(systemConfigData::signature);i++)
         if (stream->read()!=EEPROM_signature[i])
                       {
                        return false;
@@ -74,10 +74,23 @@ bool             systemConfig::isValidSysConf()
 
  bool             systemConfig::getMQTTpwd(char * buffer, uint16_t bufLen)
  {
+  return 0;
 
  }
  
  bool             systemConfig::setMQTTpwd(char * pwd)
+ {
+
+ }
+
+
+ bool             systemConfig::getOTApwd(char * buffer, uint16_t bufLen)
+ {
+  return 0;
+
+ }
+ 
+ bool             systemConfig::setOTApwd(char * pwd)
  {
 
  }
@@ -94,61 +107,71 @@ bool             systemConfig::isValidSysConf()
  
  bool             systemConfig::getServer(char* url)
  {
-
+  return 0;
  }
   
 
  bool             systemConfig::getIP(IPAddress& ip)
  {
+  return 0;
 
  }
  
  bool             systemConfig::getMask(IPAddress& mask)
  {
+  return 0;
 
  }
  
  bool             systemConfig::getDNS(IPAddress& dns)
  {
+  return 0;
 
  }
  
  bool             systemConfig::getGW(IPAddress& gw)
  {
+      return 0;
+  
          }
  
 
  bool             systemConfig::setIP(IPAddress& ip)
  {
+  return 0;
 
  }
  
  bool             systemConfig::setMask(IPAddress& mask)
  {
+  return 0;
 
  }
  
  bool             systemConfig::setDNS(IPAddress& dns)
  {
+  return 0;
 
  }
  
  bool             systemConfig::setGW(IPAddress& gw)
  {
+  return 0;
 
  }
  
 
  void             systemConfig::clear()
  {
-
-     return;
-
    if (!stream) return ; 
     stream->seek(0);
      for (unsigned int i = 0; i < stream->getSize(); i++) {
-        mac[i] = stream->write(255);
+        stream->write(0);
     }
+     stream->seek(offsetof(systemConfigData,signature));
+     for (unsigned int i=0;i<sizeof(systemConfigData::signature);i++)
+        if (stream->write(EEPROM_signature[i]));
+    stream->flush();
  }
  
  bool             systemConfig::getSaveSuccedConfig()

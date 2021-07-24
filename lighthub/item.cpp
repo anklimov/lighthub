@@ -925,7 +925,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
 if (driver) //New style modular code
         {
           int res = -1;
-          switch (cmd.getCmd())
+          switch (st.getCmd())   ///cmd///???????st ??? wtf
           {
             case CMD_XON:
             if (!chActive)  //if channel was'nt active before CMD_XON
@@ -987,7 +987,11 @@ if (driver) //New style modular code
             case CMD_ON:
             //debugSerial<<"ON!"<<endl;
             if (chActive) break;
-
+            res = driver->Ctrl(st, subItem);
+            st.saveItem(this);
+            setCmd(st.getCmd());
+            SendStatus(SEND_COMMAND);
+            break;
             default: //another command
             if (cmd.isCommand()) st.Cmd(cmd.getCmd());
             //debugSerial<<"DEF!"<<endl;

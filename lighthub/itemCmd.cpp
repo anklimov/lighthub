@@ -922,8 +922,8 @@ bool itemCmd::loadItem(Item * item, bool includeCommand)
           param.asInt32=item->getVal();
           cmd.itemArgType= subtype;
           if (includeCommand) cmd.cmdCode=item->getCmd();
-          debugSerial<<F("Loaded :");
-          debugOut();
+   //       debugSerial<<F("Loaded :");
+   //       debugOut();
           return 1;
         }
   switch (item->itemVal->type)
@@ -931,14 +931,14 @@ bool itemCmd::loadItem(Item * item, bool includeCommand)
       case aJson_Int:
 
       Int((int32_t)item->itemVal->valueint);
-          debugSerial<<F("Loaded Int:");
-          debugOut();
+     //     debugSerial<<F("Loaded Int:");
+     //     debugOut();
       return true;
       
       case aJson_Float:
       Float(item->itemVal->valueint);
-          debugSerial<<F("Loaded Float:");
-          debugOut();
+     //     debugSerial<<F("Loaded Float:");
+     //     debugOut();
       return true;
     }
 
