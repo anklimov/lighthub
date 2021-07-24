@@ -2,6 +2,7 @@ cp ../.pio/build/due/firmware.bin due
 cp ../.pio/build/controllino/firmware.hex controllino
 cp ../.pio/build/m5stack/firmware.bin m5stack
 cp ../.pio/build/mega2560slim-5100/firmware.hex mega2560slim-5100
+cp ../.pio/build/mega2560slim-5100/firmware.bin mega2560slim-5100
 cp ../.pio/build/mega2560slim2/firmware.hex mega2560slim2
 cp ../.pio/build/mega2560slim2/firmware.bin mega2560slim2
 cp ../.pio/build/due-5100/firmware.bin due-5100
