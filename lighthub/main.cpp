@@ -403,7 +403,7 @@ void setupSyslog()
         char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
         if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
 
-        inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
+        _inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
         infoSerial<<F("Syslog params:")<<syslogServer<<":"<<syslogPort<<":"<<syslogDeviceHostname<<endl;
         udpSyslog.server(syslogServer, syslogPort);
         udpSyslog.deviceHostname(syslogDeviceHostname);
@@ -820,7 +820,9 @@ void onInitialStateInitLAN() {
                 WiFi.mode(WIFI_STA); // ESP 32 - WiFi.disconnect(); instead
                 infoSerial<<F("WIFI AP/Password:")<<QUOTE(ESP_WIFI_AP)<<F("/")<<QUOTE(ESP_WIFI_PWD)<<endl;
 
+                #ifndef ARDUINO_ARCH_ESP32
                 wifi_set_macaddr(STATION_IF,mac); //ESP32 to check
+                #endif
 
                 WiFi.begin(QUOTE(ESP_WIFI_AP), QUOTE(ESP_WIFI_PWD));
 
@@ -1256,24 +1258,24 @@ void cmdFunctionIp(int arg_cnt, char **args)
 /*
     #if defined(ARDUINO_ARCH_AVR) || defined(__SAM3X8E__) || defined(NRF5)
     DNSClient dns;
-    #define inet_aton(cp, addr)   dns.inet_aton(cp, addr)
+    #define _inet_aton(cp, addr)   dns._inet_aton(cp, addr)
     #else
-    #define inet_aton(cp, addr)   inet_aton(cp, addr)
+    #define _inet_aton(cp, addr)   _inet_aton(cp, addr)
     #endif
 */
 
   //  switch (arg_cnt) {
     //    case 5:
-            if (arg_cnt>4 && inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
+            if (arg_cnt>4 && _inet_aton(args[4], ip)) saveFlash(OFFSET_MASK, ip);
             else saveFlash(OFFSET_MASK, ip0);
     //    case 4:
-            if (arg_cnt>3 && inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
+            if (arg_cnt>3 && _inet_aton(args[3], ip)) saveFlash(OFFSET_GW, ip);
             else saveFlash(OFFSET_GW, ip0);
     //    case 3:
-            if (arg_cnt>2 && inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
+            if (arg_cnt>2 && _inet_aton(args[2], ip)) saveFlash(OFFSET_DNS, ip);
             else saveFlash(OFFSET_DNS, ip0);
     //    case 2:
-            if (arg_cnt>1 && inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
+            if (arg_cnt>1 && _inet_aton(args[1], ip)) saveFlash(OFFSET_IP, ip);
             else saveFlash(OFFSET_IP, ip0);
     //        break;
 
@@ -1507,10 +1509,23 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
 
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32) //|| defined (NRF5)
     HTTPClient httpClient;
+    
+    #if defined(WIFI_ENABLE)
+        WiFiClient configEthClient;
+    #else
+        EthernetClient configEthClient;
+    #endif
+    
     String fullURI = "http://";
     fullURI+=configServer;
     fullURI+=URI;
+
+    #if defined(ARDUINO_ARCH_ESP8266) 
+    httpClient.begin(configEthClient,fullURI);
+    #else
     httpClient.begin(fullURI);
+    #endif
+
     int httpResponseCode = httpClient.GET();
     if (httpResponseCode > 0) {
         infoSerial.printf("[HTTP] GET... code: %d\n", httpResponseCode);

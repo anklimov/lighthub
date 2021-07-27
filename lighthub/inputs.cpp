@@ -1041,6 +1041,7 @@ uint16_t readCache::analogReadCached (uint8_t _pin)
 uint8_t  readCache::digitalReadCached(uint8_t _pin)
 {
   ///TBD
+  return 0;
 }
 
 #ifdef MCP23017

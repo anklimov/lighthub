@@ -323,7 +323,7 @@ void ReadUniqueID( uint32_t * pdwUniqueID )
 }
 
 
-int inet_aton(const char* aIPAddrString, IPAddress& aResult)
+int _inet_aton(const char* aIPAddrString, IPAddress& aResult)
 {
     // See if we've been given a valid IP address
     const char* p =aIPAddrString;
@@ -393,7 +393,7 @@ int inet_aton(const char* aIPAddrString, IPAddress& aResult)
  * @return either pointer to buf which now holds the ASCII
  *         representation of addr or NULL if buf was too small
  */
-char *inet_ntoa_r(IPAddress addr, char *buf, int buflen)
+char *_inet_ntoa_r(IPAddress addr, char *buf, int buflen)
 {
   short n;
   char intbuf[4];

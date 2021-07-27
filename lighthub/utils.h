@@ -54,8 +54,8 @@ void parseBytes(const char* str, char separator, byte* bytes, int maxBytes, int 
 int log(const char *str, ...);
 void printFloatValueToStr(float value, char *valstr);
 void ReadUniqueID( uint32_t * pdwUniqueID );
-int inet_aton(const char* aIPAddrString, IPAddress& aResult);
-char *inet_ntoa_r(IPAddress addr, char *buf, int buflen);
+int _inet_aton(const char* aIPAddrString, IPAddress& aResult);
+char *_inet_ntoa_r(IPAddress addr, char *buf, int buflen);
 void printIPAddress(IPAddress ipAddress);
 char* setTopic(char* buf, int8_t buflen, topicType tt, const char* suffix = NULL);
 void printUlongValueToStr(char *valstr, unsigned long value);

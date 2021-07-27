@@ -594,6 +594,46 @@ bool digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem)
                                     { //is Group
                                     aJsonObject * itemSubArray = aJson.getArrayItem(nextItem,1);
                                     short res = digGroup(itemSubArray,cmd,subItem);
+                                    if (!cmd && res) 
+                                                    {
+                                                    configLocked--;    
+                                                    return true; //Not execution, just activity check. If any channel is active - return true
+                                                    }
+                                    }
+                                else // Normal channel
+                                if (!cmd && it.isValid() && it.isActive()) 
+                                                    {
+                                                    configLocked--;    
+                                                    return true; //Not execution, just activity check. If any channel is active - return true
+                                                    }
+                               } 
+                    }    
+                    i = i->next;
+                } //while
+                configLocked--;
+return false;
+}
+/*  LOCKS LEAK - maintenance critical fix
+
+bool digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem)
+{    if (!itemArr || itemArr->type!=aJson_Array) return false; 
+     // Iterate across array of names
+      aJsonObject *i = itemArr->child;                                        
+                configLocked++;
+                while (i) {
+                    if (i->type == aJson_String)
+                    {   //debugSerial<< i->valuestring<<endl;
+                        aJsonObject *nextItem = aJson.getObjectItem(items, i->valuestring);
+                        if (nextItem && nextItem->type == aJson_Array) //nextItem is correct item
+                               {    
+                                Item it(nextItem);  
+                                if (cmd && it.isValid()) it.Ctrl(*cmd,subItem,false); //Execute (non recursive)
+                                //Retrieve itemType    
+                                aJsonObject * itemtype = aJson.getArrayItem(nextItem,0);
+                                if (itemtype && itemtype->type == aJson_Int  && itemtype->valueint == CH_GROUP) 
+                                    { //is Group
+                                    aJsonObject * itemSubArray = aJson.getArrayItem(nextItem,1);
+                                    short res = digGroup(itemSubArray,cmd,subItem);
                                     if (!cmd && res) return true; //Not execution, just activity check. If any channel is active - return true
                                     }
                                 else // Normal channel
@@ -605,6 +645,7 @@ bool digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem)
                 configLocked--;
 return false;
 }
+*/
 
 int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
 {
