@@ -136,7 +136,8 @@ flashStream(unsigned int _startPos=0, unsigned int _size=4096 ):seekableStream(_
 
                 #if defined(__SAM3X8E__)
                 return EEPROM.write(pos++,(char)ch);
-                #endif               
+                #endif   
+            return 0;                
             };
     void putEOF(){write (255);
     #if defined(ESP8266)

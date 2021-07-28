@@ -964,22 +964,23 @@ return false;
   int itemCmd::doMapping(aJsonObject *mappingData)
   {
 
-
+  return 0;
   }
   int itemCmd::doReverseMapping (aJsonObject *mappingData)
 
   {
-
+  return 0; 
   }
 
 int itemCmd::doMappingCmd(aJsonObject *mappingData)
   {
-
+  return 0;
 
   }
   int itemCmd::doReverseMappingCmd (aJsonObject *mappingData)
 
   {
+  return 0;  
 
   }
 

@@ -1,3 +1,4 @@
+#pragma once
 #include <Arduino.h>
 
 #ifndef MAX_JSON_CONF_SIZE
@@ -317,6 +318,6 @@
 #endif
 
 #if defined(NRF5)
-#define PINS_COUNT NUM_DIGITAL_PINS
+//#define PINS_COUNT NUM_DIGITAL_PINS
 #define isAnalogPin(p)  ((p >= 14) && (p<=21))
 #endif

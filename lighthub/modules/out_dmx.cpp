@@ -52,6 +52,7 @@ int out_dmx::getChanType()
   }
   return 0;
  }
+return 0; 
 }
 
 int out_dmx::PixelCtrl(itemCmd cmd, char* subItem, bool show)

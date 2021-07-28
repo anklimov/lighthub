@@ -339,9 +339,9 @@ void Input::counterPoll() {
 void Input::attachInterruptPinIrq(int realPin, int irq) {
     pinMode(realPin, INPUT);
     int real_irq;
-#if defined(ARDUINO_ARCH_AVR)
+//#if defined(ARDUINO_ARCH_AVR)
     real_irq = irq;
-#endif
+//#endif
 #if defined(__SAM3X8E__)
     real_irq = realPin;
 #endif
@@ -1041,6 +1041,7 @@ uint16_t readCache::analogReadCached (uint8_t _pin)
 uint8_t  readCache::digitalReadCached(uint8_t _pin)
 {
   ///TBD
+  return 0;
 }
 
 #ifdef MCP23017

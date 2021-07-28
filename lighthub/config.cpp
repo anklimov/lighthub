@@ -80,7 +80,7 @@ bool             systemConfig::isValidSysConf()
  
  bool             systemConfig::setMQTTpwd(char * pwd)
  {
-
+  return 0;
  }
 
 
@@ -92,17 +92,17 @@ bool             systemConfig::isValidSysConf()
  
  bool             systemConfig::setOTApwd(char * pwd)
  {
-
+  return 0;
  }
  
  bool             systemConfig::setMAC(macAddress mac)
  {
-
+  return 0;
  }
  
  bool             systemConfig::setServer(char* url)
  {
-
+  return 0;
  }
  
  bool             systemConfig::getServer(char* url)

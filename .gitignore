@@ -22,3 +22,4 @@ custom-build-flags/build_flags_nrf52840
 lighthub/modules/out_elevator.cpp
 lighthub/modules/out_elevator.h
 spare_files/*
+lib/*
