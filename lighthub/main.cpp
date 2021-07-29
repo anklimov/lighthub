@@ -183,7 +183,7 @@ while (configLocked && !isTimeOver(stamp,millis(),10000))
           #endif
           if (isNotRetainingStatus())  pollingLoop();
           thermoLoop();
-          inputLoop();
+          inputLoop(CHECK_INPUT);
           yield();
 }
 
@@ -623,17 +623,18 @@ lan_status lanLoop() {
                     lanStatus = DO_REINIT;
                     break;
                 case DHCP_CHECK_RENEW_FAIL:
-                    errorSerial<<F("Error: renewed fail");
+                    errorSerial<<F("Error: renewed fail")<<endl;
                     lanStatus = DO_REINIT;
                     break;
 
                 case DHCP_CHECK_RENEW_OK:
                     infoSerial<<F("Renewed success. IP address:");
                     printIPAddress(Ethernet.localIP());
+                    infoSerial<<endl;
                     break;
 
                 case DHCP_CHECK_REBIND_FAIL:
-                    errorSerial<<F("Error: rebind fail");
+                    errorSerial<<F("Error: rebind fail")<<endl;
                     if (mqttClient.connected()) mqttClient.disconnect();
                     //timerLanCheckTime = millis();// + 1000;
                     lanStatus = DO_REINIT;
@@ -642,12 +643,14 @@ lan_status lanLoop() {
                 case DHCP_CHECK_REBIND_OK:
                     infoSerial<<F("Rebind success. IP address:");
                     printIPAddress(Ethernet.localIP());
+                    infoSerial<<endl;
                     break;
 
                 default:
                     break;
 
             }
+            
           }
         wdt_en();
 #endif
@@ -1975,7 +1978,7 @@ void loop_main() {
     }
 
     yield();
-    inputLoop();
+    inputLoop(CHECK_INPUT);
 
 #if defined (_espdmx)
     yield();
@@ -2009,7 +2012,7 @@ void ethernetIdle(void){
 ethernetIdleCount++;
     wdt_res();
     yield();
-    inputLoop();
+    inputLoop(CHECK_INPUT);
 ethernetIdleCount--;
 };
 
@@ -2025,7 +2028,7 @@ void modbusIdle(void) {
         if (artnet) artnet->read();
 #endif
         yield();
-        inputLoop();
+        inputLoop(CHECK_INPUT);
     }
 #ifdef MDNS_ENABLE
         mdns.run();
@@ -2040,7 +2043,7 @@ void modbusIdle(void) {
 #endif
 }
 
-void inputLoop(void) {
+void inputLoop(short cause) {
     if (!inputs) return;
 
 configLocked++;
@@ -2060,9 +2063,9 @@ configLocked++;
                       while(inputObj)
                         {
                           Input in(inputObj,input);
-                          in.Poll(CHECK_INPUT);
+                          in.Poll(cause);
 
-                          yield();
+                          //yield();
                           inputObj = inputObj->next;
 
                         }
@@ -2070,18 +2073,18 @@ configLocked++;
                 else
                 {
                  Input in(input);
-                 in.Poll(CHECK_INPUT);
+                 in.Poll(cause);
                 }
             }
-            yield();
+            //yield();
             input = input->next;
         }
-        timerInputCheck = millis();// + INTERVAL_CHECK_INPUT;
+        if (cause != CHECK_INTERRUPT) timerInputCheck = millis();// + INTERVAL_CHECK_INPUT;
         inCache.invalidateInputCache();
     }
 
     //if (millis() > timerSensorCheck) 
-    if (isTimeOver(timerSensorCheck,millis(),INTERVAL_CHECK_SENSOR))
+    if (cause != CHECK_INTERRUPT && isTimeOver(timerSensorCheck,millis(),INTERVAL_CHECK_SENSOR))
     {
         aJsonObject *input = inputs->child;
         while (input) {
@@ -2096,6 +2099,29 @@ configLocked++;
     }
 configLocked--;
 }
+volatile unsigned long timerCount=0; 
+
+void TimerHandler(void)
+{
+    timerCount=millis();
+     inputLoop(CHECK_INTERRUPT);
+    timerCount=millis()-timerCount;
+
+}
+
+#define TIMER_INTERVAL_MS        200      // 0.1s = 100ms
+
+#if defined(__SAM3X8E__)
+int16_t attachTimer(double microseconds, timerCallback callback, const char* TimerName)
+{
+  int16_t timerNumber=-1;
+    DueTimerInterrupt dueTimerInterrupt = DueTimer.getAvailable();
+    dueTimerInterrupt.attachInterruptInterval(microseconds, callback);
+    timerNumber = dueTimerInterrupt.getTimerNumber();
+    debugSerial<<TimerName<<F(" attached to Timer(")<<timerNumber<<F(")")<<endl;
+  return timerNumber;
+}
+#endif
 
 void inputSetup(void) {
     if (!inputs) return;
@@ -2109,6 +2135,10 @@ configLocked++;
             yield();
             input = input->next;
         }
+#if defined(__SAM3X8E__)        
+// Interval in microsecs
+attachTimer(TIMER_INTERVAL_MS * 1000, TimerHandler, "ITimer");  
+#endif      
 configLocked--;
 }
 
@@ -2230,8 +2260,9 @@ void thermoLoop(void) {
 publishStat();
 #ifndef DISABLE_FREERAM_PRINT
     (thermostatCheckPrinted) ? debugSerial<<F("\nRAM=")<<freeRam()<<F(" Locks:")<<configLocked: debugSerial<<F(" ")<<freeRam()<<F(" Locks:")<<configLocked;
+   
 #endif
-
+ debugSerial<<F("Timer:")<<timerCount<<endl;
 
 }
 

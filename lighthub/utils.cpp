@@ -417,7 +417,7 @@ void printIPAddress(IPAddress ipAddress) {
 #ifdef WITH_PRINTEX_LIB
             (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : debugSerial << (ipAddress[i])<<F(", ");
 #else
-            (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i]) << F(", ");
+            (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i]) << F(" ");
 #endif
 }
 
@@ -565,106 +565,123 @@ bool executeCommand(aJsonObject* cmd, int8_t toggle)
   return executeCommand(cmd,toggle,itemCmd());
 }
 
-bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd)
+bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd, aJsonObject* defaultItem, aJsonObject* defaultEmit)
 //bool executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
 {
-if (!cmd) return 0;    
-switch (cmd->type)
+//char * legacyString =NULL;
+aJsonObject *item = NULL;
+aJsonObject *emit = NULL;
+aJsonObject *icmd = NULL;
+aJsonObject *ecmd = NULL;
+char cmdType = 0;
+
+if (cmd) cmdType = cmd->type;
+   
+switch (cmdType)
 {
-  case aJson_String: //legacy - no action
-  break;
   case aJson_Array:  //array - recursive iterate
   {
   configLocked++;
   aJsonObject * command = cmd->child;
   while (command)
           {
-          executeCommand(command,toggle,_itemCmd);
+          executeCommand(command,toggle,_itemCmd,defaultItem,defaultEmit);
           command = command->next;
           }
   configLocked--;
   }
   break;
-  case aJson_Object:
-{
-aJsonObject *act = aJson.getObjectItem(cmd, "act");            
-if (act) return executeCommand(act,toggle,_itemCmd);
+  
+  case aJson_Object: //Modern way
+     {
+        aJsonObject *act = aJson.getObjectItem(cmd, "act");            
+        if (act) return executeCommand(act,toggle,_itemCmd);
 
-aJsonObject *item = aJson.getObjectItem(cmd, "item");
-aJsonObject *emit = aJson.getObjectItem(cmd, "emit");
-aJsonObject *icmd = NULL;
-aJsonObject *ecmd = NULL;
+        item = aJson.getObjectItem(cmd, "item");
+        emit = aJson.getObjectItem(cmd, "emit");
+    
 
-switch (toggle)
-    {
-    case 0:
-    icmd = aJson.getObjectItem(cmd, "icmd");
-    ecmd = aJson.getObjectItem(cmd, "ecmd");
-    break;
-    case 1:
-    icmd = aJson.getObjectItem(cmd, "irev");
-    ecmd = aJson.getObjectItem(cmd, "erev");
-    //no *rev parameters - fallback
-    if (!icmd) icmd = aJson.getObjectItem(cmd, "icmd");
-    if (!ecmd) ecmd = aJson.getObjectItem(cmd, "ecmd");
-  }
-
-char * itemCommand = NULL;
-char Buffer[16];
-if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
-  //else    itemCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
-
-char * emitCommand;
-if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
-  else    emitCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
-
-//debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
-if (item) {
-            if (itemCommand)
-                debugSerial << item->valuestring<< F(" -> ")<<itemCommand<<endl;
-            else debugSerial << item->valuestring<< F(" -> ");_itemCmd.debugOut();
-            }
-if (emit) debugSerial << emit->valuestring<< F(" -> ")<<emitCommand<<endl;
-
-
-
-
-if (emit && emitCommand && emit->type == aJson_String) {
-/*
-TODO implement
-#ifdef WITH_DOMOTICZ
-    if (getIdxField())
-    {  (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
-        : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());	                                               getIdxField())
-                   : publishDataToDomoticz(0, emit,
-                                           "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",
-                                           getIdxField());
-                      } else
-#endif
-*/
-
-
-char addrstr[MQTT_TOPIC_LENGTH];
-strncpy(addrstr,emit->valuestring,sizeof(addrstr));
-if (mqttClient.connected() && !ethernetIdleCount)
-{
-if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
-mqttClient.publish(addrstr, emitCommand , true);
-}
-
-} // emit
-
-if (item &&  item->type == aJson_String) {
-  //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
-    Item it(item->valuestring);
-    if (it.isValid()) 
-       {
-       if (itemCommand) it.Ctrl(itemCommand);
-          else it.Ctrl(_itemCmd);
-       }
+        switch (toggle)
+            {
+            case 0:
+            icmd = aJson.getObjectItem(cmd, "icmd");
+            ecmd = aJson.getObjectItem(cmd, "ecmd");
+            break;
+            case 1:
+            icmd = aJson.getObjectItem(cmd, "irev");
+            ecmd = aJson.getObjectItem(cmd, "erev");
+            //no *rev parameters - fallback
+            if (!icmd) icmd = aJson.getObjectItem(cmd, "icmd");
+            if (!ecmd) ecmd = aJson.getObjectItem(cmd, "ecmd");
+        }
     }
-return true;
-}
+   //Continue   
+   case aJson_String: //legacy
+    if (!icmd) icmd=cmd;
+    if (!ecmd) ecmd=cmd;
+   //Continue    
+   case 0: // NULL command object  
+    {
+    if (!item) item = defaultItem;
+    if (!emit) emit = defaultEmit;
+
+    char * itemCommand = NULL;
+    char Buffer[16];
+    if(icmd && icmd->type == aJson_String) itemCommand = icmd->valuestring;
+    //else    itemCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
+
+    char * emitCommand;
+    if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
+    else    emitCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
+
+    //debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
+    if (item) {
+                if (itemCommand)
+                    debugSerial << F("Item: ")<< item->valuestring<< F(" -> ")<<itemCommand<<endl;
+                else debugSerial << F("ItemCmd: ")<<item->valuestring<< F(" -> ");_itemCmd.debugOut();
+                }
+   
+
+
+
+
+    if (emit && emitCommand && emit->type == aJson_String) {
+    debugSerial << F("Emit: ")<<emit->valuestring<< F(" -> ")<<emitCommand<<endl;    
+    /*
+    TODO implement
+    #ifdef WITH_DOMOTICZ
+        if (getIdxField())
+        {  (newValue) ? publishDataToDomoticz(0, emit, "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"On\"}",
+            : publishDataToDomoticz(0,emit,"{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",getIdxField());	                                               getIdxField())
+                    : publishDataToDomoticz(0, emit,
+                                            "{\"command\":\"switchlight\",\"idx\":%s,\"switchcmd\":\"Off\"}",
+                                            getIdxField());
+                        } else
+    #endif
+    */
+
+
+    char addrstr[MQTT_TOPIC_LENGTH];
+    strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+    if (mqttClient.connected() && !ethernetIdleCount)
+    {
+    if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
+    mqttClient.publish(addrstr, emitCommand , true);
+    }
+
+    } // emit
+
+    if (item &&  item->type == aJson_String) {
+    //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
+        Item it(item->valuestring);
+        if (it.isValid()) 
+        {
+        if (itemCommand) it.Ctrl(itemCommand);
+            else it.Ctrl(_itemCmd);
+        }
+        }
+    return true;
+    }
 default:
 return false;
 } //switch type

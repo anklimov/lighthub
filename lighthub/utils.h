@@ -70,7 +70,7 @@ void softRebootFunc();
 bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo = 0xFFFFFFFF);
 //bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
 bool executeCommand(aJsonObject* cmd, int8_t toggle = -1);
-bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd);
+bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd, aJsonObject* defaultItem=NULL, aJsonObject* defaultEmit=NULL);
 itemCmd mapInt(int32_t arg, aJsonObject* map);
 unsigned long millisNZ(uint8_t shift=0);
 serialParamType  str2SerialParam(char * str);

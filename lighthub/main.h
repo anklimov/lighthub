@@ -10,6 +10,7 @@
 //#include <DueFlashStorage.h>
 #include <watchdog.h>
 #include <ArduinoHttpClient.h>
+#include "TimerInterrupt_Generic.h"
 #endif
 
 #if defined(ARDUINO_ARCH_AVR)
@@ -285,7 +286,7 @@ void owIdle(void);
 
 void modbusIdle(void);
 
-void inputLoop(void);
+void inputLoop(short);
 
 void inputSetup(void);
 
