@@ -10,7 +10,7 @@
 //#include <DueFlashStorage.h>
 #include <watchdog.h>
 #include <ArduinoHttpClient.h>
-#include "TimerInterrupt_Generic.h"
+//#include "TimerInterrupt_Generic.h"
 #endif
 
 #if defined(ARDUINO_ARCH_AVR)

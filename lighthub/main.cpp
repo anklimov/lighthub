@@ -23,6 +23,10 @@ e-mail    anklimov@gmail.com
 #include "flashstream.h"
 #include "config.h"
 
+#if defined(__SAM3X8E__)
+#include "TimerInterrupt_Generic.h"
+#endif
+
 #if defined(FS_STORAGE)
 flashStream sysConfStream("config.bin"); 
 flashStream JSONStream("config.json"); 
@@ -212,7 +216,7 @@ debugSerial<<F("Stopped")<<endl;
 #ifdef SYSLOG_ENABLE
 syslogInitialized=false; //Garbage in memory
 #endif
-
+configLoaded=false;
 debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
     aJson.deleteItem(root);
     root   = NULL;
@@ -230,7 +234,7 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
   modbusObj = NULL;
   #endif
      debugSerial<<F(" is ")<<freeRam()<<endl;
-     configLoaded=false;
+     
      configOk=false;
 }
 
@@ -1605,6 +1609,32 @@ void postTransmission() {
     #endif
 }
 
+#define TIMER_INTERVAL_MS        200      // 0.1s = 100ms
+
+volatile unsigned long timerCount=0; 
+volatile int16_t timerNumber=-1;
+
+void TimerHandler(void)
+{
+    timerCount=millis();
+     if (configLoaded) inputLoop(CHECK_INTERRUPT);
+    timerCount=millis()-timerCount;
+
+}
+
+#if defined(__SAM3X8E__)
+int16_t attachTimer(double microseconds, timerCallback callback, const char* TimerName)
+{  
+    if (timerNumber!=-1) return timerNumber;
+
+    DueTimerInterrupt dueTimerInterrupt = DueTimer.getAvailable();
+    dueTimerInterrupt.attachInterruptInterval(microseconds, callback);
+    timerNumber = dueTimerInterrupt.getTimerNumber();
+    debugSerial<<TimerName<<F(" attached to Timer(")<<timerNumber<<F(")")<<endl;
+  return timerNumber;
+}
+#endif
+
 void setup_main() {
 
   #if defined(__SAM3X8E__)
@@ -1697,6 +1727,7 @@ void setup_main() {
     #endif
 
         loadConfigFromEEPROM();
+    #if defined(__SAM3X8E__)         
 }
 
 void printFirmwareVersionAndBuildOptions() {
@@ -2099,29 +2130,7 @@ configLocked++;
     }
 configLocked--;
 }
-volatile unsigned long timerCount=0; 
 
-void TimerHandler(void)
-{
-    timerCount=millis();
-     inputLoop(CHECK_INTERRUPT);
-    timerCount=millis()-timerCount;
-
-}
-
-#define TIMER_INTERVAL_MS        200      // 0.1s = 100ms
-
-#if defined(__SAM3X8E__)
-int16_t attachTimer(double microseconds, timerCallback callback, const char* TimerName)
-{
-  int16_t timerNumber=-1;
-    DueTimerInterrupt dueTimerInterrupt = DueTimer.getAvailable();
-    dueTimerInterrupt.attachInterruptInterval(microseconds, callback);
-    timerNumber = dueTimerInterrupt.getTimerNumber();
-    debugSerial<<TimerName<<F(" attached to Timer(")<<timerNumber<<F(")")<<endl;
-  return timerNumber;
-}
-#endif
 
 void inputSetup(void) {
     if (!inputs) return;
@@ -2135,10 +2144,9 @@ configLocked++;
             yield();
             input = input->next;
         }
-#if defined(__SAM3X8E__)        
-// Interval in microsecs
-attachTimer(TIMER_INTERVAL_MS * 1000, TimerHandler, "ITimer");  
-#endif      
+    // Interval in microsecs
+    attachTimer(TIMER_INTERVAL_MS * 1000, TimerHandler, "ITimer");  
+    #endif     
 configLocked--;
 }
 
@@ -2260,9 +2268,9 @@ void thermoLoop(void) {
 publishStat();
 #ifndef DISABLE_FREERAM_PRINT
     (thermostatCheckPrinted) ? debugSerial<<F("\nRAM=")<<freeRam()<<F(" Locks:")<<configLocked: debugSerial<<F(" ")<<freeRam()<<F(" Locks:")<<configLocked;
-   
+     debugSerial<<F(" Timer:")<<timerCount<<endl;
 #endif
- debugSerial<<F("Timer:")<<timerCount<<endl;
+ 
 
 }
 
