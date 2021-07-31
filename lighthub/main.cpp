@@ -1609,7 +1609,7 @@ void postTransmission() {
     #endif
 }
 
-#define TIMER_INTERVAL_MS        200      // 0.1s = 100ms
+
 
 volatile unsigned long timerCount=0; 
 volatile int16_t timerNumber=-1;
@@ -2074,8 +2074,10 @@ void modbusIdle(void) {
 #endif
 }
 
+volatile bool inputLoopBusy = false;
 void inputLoop(short cause) {
-    if (!inputs) return;
+    if (!inputs || inputLoopBusy) return;
+inputLoopBusy = true;
 
 configLocked++;
     //if (millis() > timerInputCheck) 
@@ -2129,6 +2131,7 @@ configLocked++;
         timerSensorCheck = millis();// + INTERVAL_CHECK_SENSOR;
     }
 configLocked--;
+inputLoopBusy= false;
 }
 
 
@@ -2145,7 +2148,7 @@ configLocked++;
             input = input->next;
         }
     // Interval in microsecs
-    attachTimer(TIMER_INTERVAL_MS * 1000, TimerHandler, "ITimer");  
+    attachTimer(TIMER_CHECK_INPUT * 1000, TimerHandler, "ITimer");  
     #endif     
 configLocked--;
 }
