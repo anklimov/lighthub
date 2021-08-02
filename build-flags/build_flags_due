@@ -11,4 +11,5 @@
 -DMDNS_ENABLE
 -DMCP23017
 -DCORS=\"http://lazyhome.ru\"
+-DTIMER_INT
 

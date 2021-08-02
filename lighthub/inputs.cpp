@@ -797,7 +797,8 @@ if (cause != CHECK_INTERRUPT) switch (store->state) //Timer based transitions
                 if ( //No future
                     !aJson.getObjectItem(inputObj, "scmd2") && 
                     !aJson.getObjectItem(inputObj, "lcmd2") && 
-                    !aJson.getObjectItem(inputObj, "rpcmd2") 
+                    !aJson.getObjectItem(inputObj, "rpcmd2") &&
+                    !aJson.getObjectItem(inputObj, "dclick")
                     )
                        res = changeState(IS_PRESSED, cause);
 
@@ -829,7 +830,8 @@ if (cause != CHECK_INTERRUPT) switch (store->state) //Timer based transitions
                  if ( //No future
                     !aJson.getObjectItem(inputObj, "scmd2") && 
                     !aJson.getObjectItem(inputObj, "lcmd2") && 
-                    !aJson.getObjectItem(inputObj, "rpcmd2") 
+                    !aJson.getObjectItem(inputObj, "rpcmd2") &&
+                    !aJson.getObjectItem(inputObj, "dclick")
                     ) res = changeState(IS_IDLE, cause);
                   else res = changeState(IS_RELEASED2, cause);
                 break;

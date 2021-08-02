@@ -1622,7 +1622,7 @@ void TimerHandler(void)
 
 }
 
-#if defined(__SAM3X8E__)
+#if defined(__SAM3X8E__) && defined (TIMER_INT)
 int16_t attachTimer(double microseconds, timerCallback callback, const char* TimerName)
 {  
     if (timerNumber!=-1) return timerNumber;
@@ -1726,8 +1726,7 @@ void setup_main() {
         infoSerial<<QUOTE(W5500_CS_PIN)<<endl;
     #endif
 
-        loadConfigFromEEPROM();
-    #if defined(__SAM3X8E__)         
+        loadConfigFromEEPROM();       
 }
 
 void printFirmwareVersionAndBuildOptions() {
@@ -2147,6 +2146,7 @@ configLocked++;
             yield();
             input = input->next;
         }
+    #if defined(__SAM3X8E__) && defined (TIMER_INT)  
     // Interval in microsecs
     attachTimer(TIMER_CHECK_INPUT * 1000, TimerHandler, "ITimer");  
     #endif     
