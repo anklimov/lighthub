@@ -81,6 +81,7 @@ itemCmd::itemCmd(Item *item)
 itemCmd itemCmd::setChanType(short chanType)
 {
   cmd.itemArgType=getStoragetypeByChanType(chanType);
+  debugSerial<<F("Chan type:")<<chanType<<F(" -> AT:")<<cmd.itemArgType<<endl;
   return *this;
 }
 
@@ -105,6 +106,7 @@ uint8_t itemCmd::getStoragetypeByChanType(short chanType)
     case CH_RELAY:
     case CH_VC:
     case CH_MODBUS:
+    case CH_GROUP:
     return ST_PERCENTS255;
     break;
     default:
@@ -355,7 +357,9 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                    break;
               case ST_FLOAT:
                           param.v=constrain(from.param.asfloat,0.,255.);
-                  break;    
+                  break;   
+              case ST_VOID:
+                  break;     
               default:
                        debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
               }
@@ -421,7 +425,9 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                    param.h=from.param.h;
                    param.s=from.param.s; 
                    cmd.itemArgType=ST_HSV255;
-              break;     
+              break;    
+              case ST_VOID:
+              break; 
            default:
                      debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
            }
@@ -559,6 +565,8 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                   debugOut();
                   break;
                 }
+            case ST_VOID:
+                  break;    
             default:
                     debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
          } //Translation to RGB_XX
@@ -685,7 +693,8 @@ short itemCmd::getPercents(bool inverse)
     case ST_TENS:
            if (inverse) return constrain (100-param.asInt32/10,0,100);
             else return constrain(param.asInt32/10,0,100);
-
+    case ST_VOID:
+          return 0;
 
     default:
     return -1;
@@ -732,7 +741,9 @@ short itemCmd::getPercents255(bool inverse)
 
     case ST_TENS:
       if (inverse) return 255-constrain(param.asInt32/10,0,255); else return constrain(param.asInt32/10,0,255); 
-
+    
+    case ST_VOID:
+      return 0;
     default:
     return -1;
   }
@@ -912,47 +923,73 @@ itemCmd itemCmd::setSuffix(uint8_t suffix)
   return *this;
 }
 
-bool itemCmd::loadItem(Item * item, bool includeCommand)
+bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
 {
+   bool res = false;
+
   if (item && item->isValid())
   {
   short subtype =item->getSubtype();
+  if (optionsFlag & SEND_COMMAND)    cmd.cmdCode    =  item->getCmd();
+
   if (subtype)
         {
-          param.asInt32=item->getVal();
           cmd.itemArgType= subtype;
-          if (includeCommand) cmd.cmdCode=item->getCmd();
-   //       debugSerial<<F("Loaded :");
-   //       debugOut();
-          return 1;
+          if (optionsFlag & SEND_PARAMETERS) param.asInt32  =  item->getVal();
+          debugSerial<<F("Loaded :");
+          debugOut();
+          return true;
         }
-  switch (item->itemVal->type)
-    {
-      case aJson_Int:
+ 
+        if (optionsFlag & SEND_PARAMETERS) 
+          switch (item->itemVal->type)
+          {
+            case aJson_Int:
 
-      Int((int32_t)item->itemVal->valueint);
-     //     debugSerial<<F("Loaded Int:");
-     //     debugOut();
-      return true;
-      
-      case aJson_Float:
-      Float(item->itemVal->valueint);
-     //     debugSerial<<F("Loaded Float:");
-     //     debugOut();
-      return true;
-    }
+            Int((int32_t)item->itemVal->valueint);
+               debugSerial<<F("Loaded Int:");
+               debugOut();
+            return true;
+            
+            case aJson_Float:
+            Float(item->itemVal->valueint);
+               debugSerial<<F("Loaded Float:");
+               debugOut();
+            return true;
+          }
 
   }
 return false;
 }
 
-bool itemCmd::saveItem(Item * item, bool includeCommand)
+
+bool itemCmd::loadItemDef(Item * item, uint16_t optionsFlag)
+{
+           //Restrieve previous channel state to "stored"
+           //if no values - set default values, save and put to MQTT
+           if (!loadItem(item,optionsFlag))
+                                    {
+                                    debugSerial<<F("No stored values - default: ");
+                                    setChanType(item->getChanType());
+                                    setDefault();
+                                    saveItem(item);
+                                    debugOut();
+                                    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                                    return false;
+                                    }
+return true;                                    
+}
+
+bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
 {
   if (item && item->isValid())
   {
-  item->setVal(param.asInt32);
-  item->setSubtype(cmd.itemArgType);
-  if (includeCommand) item->setCmd(cmd.cmdCode);
+  if (optionsFlag & SEND_COMMAND)    item->setCmd(cmd.cmdCode);
+  if (optionsFlag & SEND_PARAMETERS) 
+                                    {
+                                     item->setSubtype(cmd.itemArgType); 
+                                     item->setVal(param.asInt32);
+                                    }
   debugSerial<<F("Saved:");
   debugOut();
   return true;

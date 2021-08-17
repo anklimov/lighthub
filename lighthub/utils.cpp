@@ -53,11 +53,11 @@ extern aJsonObject *topics;
 
 void PrintBytes(uint8_t *addr, uint8_t count, bool newline) {
     for (uint8_t i = 0; i < count; i++) {
-        Serial.print(addr[i] >> 4, HEX);
-        Serial.print(addr[i] & 0x0f, HEX);
+        infoSerial<< _HEX(addr[i] >> 4);
+        infoSerial<< _HEX(addr[i] & 0x0f);
     }
     if (newline)
-        Serial.println();
+        infoSerial<<endl;
 }
 
 const char HEXSTR[] = "0123456789ABCDEF";

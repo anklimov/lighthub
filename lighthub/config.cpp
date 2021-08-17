@@ -58,7 +58,7 @@ bool             systemConfig::isValidSysConf()
 }; 
 
 
- bool             systemConfig::getMAC()
+  bool             systemConfig::getMAC()
  { 
     if (!stream || !isValidSysConf()) return false; 
     stream->seek(offsetof(systemConfigData,mac));
@@ -71,49 +71,74 @@ bool             systemConfig::isValidSysConf()
    return isMacValid;
  }
  
-
- bool             systemConfig::getMQTTpwd(char * buffer, uint16_t bufLen)
+  bool             systemConfig::setMAC(macAddress& _mac)
  {
-  return 0;
+   if (!stream || !isValidSysConf()) return false;    
+   stream->seek(offsetof(systemConfigData,mac));
+   ///stream->write ((const uint8_t *)&_mac,sizeof(_mac));
+   memcpy(mac, _mac, sizeof(mac));
 
+  return true;
+ }
+
+  char *             systemConfig::getMQTTpwd(char * buffer, uint16_t bufLen)
+ {
+    if (!stream || !isValidSysConf()) return NULL; 
+    stream->seek(offsetof(systemConfigData,MQTTpwd));   
+    if (stream->readBytesUntil(0,buffer,bufLen)) return buffer;
+    return NULL;
  }
  
  bool             systemConfig::setMQTTpwd(char * pwd)
  {
-  return 0;
+    if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,MQTTpwd));   
+    stream->print(pwd);   
+    return stream->write(0);
  }
 
 
- bool             systemConfig::getOTApwd(char * buffer, uint16_t bufLen)
+  char *             systemConfig::getOTApwd(char * buffer, uint16_t bufLen)
  {
-  return 0;
-
+    if (!stream || !isValidSysConf()) return NULL; 
+    stream->seek(offsetof(systemConfigData,OTApwd));   
+    if (stream->readBytesUntil(0,buffer,bufLen)) return buffer;
+    return NULL;
  }
  
  bool             systemConfig::setOTApwd(char * pwd)
  {
-  return 0;
+     if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,OTApwd));   
+    stream->print(pwd);   
+    return stream->write(0);
  }
  
- bool             systemConfig::setMAC(macAddress mac)
+
+  char *             systemConfig::getServer(char * buffer, uint16_t bufLen)
  {
-  return 0;
+  if (!stream || !isValidSysConf()) return NULL; 
+    stream->seek(offsetof(systemConfigData,configURL));   
+    if (stream->readBytesUntil(0,buffer,bufLen)) return buffer;
+    return NULL;
  }
  
  bool             systemConfig::setServer(char* url)
  {
-  return 0;
- }
- 
- bool             systemConfig::getServer(char* url)
- {
-  return 0;
+  if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,OTApwd));   
+    stream->print(url);   
+    return stream->write(0);
+
  }
   
 
  bool             systemConfig::getIP(IPAddress& ip)
  {
-  return 0;
+    if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,ip));   
+    stream->readBytes((char *)&ip,sizeof(ip));
+    return ip;
 
  }
  

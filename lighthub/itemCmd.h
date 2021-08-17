@@ -64,6 +64,7 @@ const cmdstr commands_P[] PROGMEM =
 #define CMD_UNKNOWN  -1
 #define CMD_JSON -2
 
+#define SEND_IMMEDIATE 0x1
 #define SEND_COMMAND 0x100
 #define SEND_PARAMETERS 0x200
 #define SEND_RETRY 0x400
@@ -170,8 +171,9 @@ public:
 
   itemCmd assignFrom(itemCmd from, short chanType=-1);
 
-  bool loadItem(Item * item, bool includeCommand=false );
-  bool saveItem(Item * item, bool includeCommand=false);
+  bool loadItem(Item * item, uint16_t optionsFlag=SEND_PARAMETERS);
+  bool loadItemDef(Item * item, uint16_t optionsFlag=SEND_PARAMETERS );
+  bool saveItem(Item * item, uint16_t optionsFlag=SEND_PARAMETERS);
 
   itemCmd Int(int32_t i);
   itemCmd Int(uint32_t i);

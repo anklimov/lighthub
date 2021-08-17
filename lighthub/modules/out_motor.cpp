@@ -298,7 +298,7 @@ case S_SET:
           //break;
 
 case S_CMD:
-      item->setCmd(cmd.getCmd());
+      //item->setCmd(cmd.getCmd());
       switch (cmd.getCmd())
           {
           case CMD_ON:

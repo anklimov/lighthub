@@ -200,8 +200,8 @@ case S_CMD:
           {
           case CMD_ON:
           case CMD_OFF:
-            item->setCmd(cmd.getCmd());
-            item->SendStatus(SEND_COMMAND);
+            //item->setCmd(cmd.getCmd());
+            //item->SendStatus(SEND_COMMAND);
             return 1;
             default:
             debugSerial<<F("Unknown cmd ")<<cmd.getCmd()<<endl;

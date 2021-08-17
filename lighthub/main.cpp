@@ -332,15 +332,9 @@ int intopic;
 }    
 
 void mqttCallback(char *topic, byte *payload, unsigned int length) 
-                {
-                        if (!payload) return;
-                        payload[length] = 0;
-         //               itemCommand(topic, (char*) payload);
-          //      }
-
-            
-
-//int itemCommand(char *topic, char *payload){ 
+{
+    if (!payload) return;
+    payload[length] = 0;
 
     int fr = freeRam();
 
@@ -370,9 +364,7 @@ else
     }
 
     itemName=topic+pfxlen;
-
-     debugSerial<<itemName<<endl;
-
+    // debugSerial<<itemName<<endl;
     if(!strcmp(itemName,CMDTOPIC) && payload && (strlen((char*) payload)>1)) {
       //  mqttClient.publish(topic, "");
         cmd_parse((char *)payload);
@@ -1419,7 +1411,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         sysConf.setServer(configServer);
         //saveFlash(OFFSET_CONFIGSERVER, configServer);
         infoSerial<<configServer<<F(" Saved")<<endl;
-    } else if (!sysConf.getServer(configServer))
+    } else if (!sysConf.getServer(configServer,sizeof(configServer)))
         {
         strncpy_P(configServer,configserver,sizeof(configServer));
         infoSerial<<F(" Default config server used: ")<<configServer<<endl;
@@ -1615,10 +1607,10 @@ volatile unsigned long timerCount=0;
 volatile int16_t timerNumber=-1;
 
 void TimerHandler(void)
-{
-    timerCount=millis();
+{   interrupts();
+    timerCount=micros();
      if (configLoaded) inputLoop(CHECK_INTERRUPT);
-    timerCount=millis()-timerCount;
+    timerCount=micros()-timerCount;
 
 }
 
@@ -2073,10 +2065,10 @@ void modbusIdle(void) {
 #endif
 }
 
-volatile bool inputLoopBusy = false;
+volatile int8_t inputLoopBusy = 0;
 void inputLoop(short cause) {
     if (!inputs || inputLoopBusy) return;
-inputLoopBusy = true;
+inputLoopBusy++;
 
 configLocked++;
     //if (millis() > timerInputCheck) 
@@ -2130,7 +2122,7 @@ configLocked++;
         timerSensorCheck = millis();// + INTERVAL_CHECK_SENSOR;
     }
 configLocked--;
-inputLoopBusy= false;
+inputLoopBusy--;
 }
 
 

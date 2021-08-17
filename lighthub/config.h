@@ -57,21 +57,20 @@ class systemConfig {
  macAddress mac;
  systemConfig() {stream=NULL;};
  systemConfig(flashStream * fs){stream=fs;};
- //systemConfigData data;
+ 
  bool             isValidSysConf();
- //bool             isValidJSON();
+ 
  bool             getMAC();
- //inline macAddress *     getMAC() {return &mac;};
+ bool             setMAC(macAddress& mac);
 
- bool             getMQTTpwd(char * buffer, uint16_t bufLen);
+ char *           getMQTTpwd(char * buffer, uint16_t bufLen);
  bool             setMQTTpwd(char * pwd = NULL);
 
- bool             getOTApwd(char * buffer, uint16_t bufLen);
+ char *           getOTApwd(char * buffer, uint16_t bufLen);
  bool             setOTApwd(char * pwd = NULL);
 
- bool             setMAC(macAddress mac);
  bool             setServer(char* url);
- bool             getServer(char* url);  
+ char *           getServer(char * buffer, uint16_t bufLen);  
 
  bool             getIP(IPAddress& ip);
  bool             getMask(IPAddress& mask);
