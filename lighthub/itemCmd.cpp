@@ -106,7 +106,7 @@ uint8_t itemCmd::getStoragetypeByChanType(short chanType)
     case CH_RELAY:
     case CH_VC:
     case CH_MODBUS:
-    case CH_GROUP:
+    //case CH_GROUP:
     return ST_PERCENTS255;
     break;
     default:
@@ -936,7 +936,7 @@ bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
         {
           cmd.itemArgType= subtype;
           if (optionsFlag & SEND_PARAMETERS) param.asInt32  =  item->getVal();
-          debugSerial<<F("Loaded :");
+          //debugSerial<<F("Loaded :");
           debugOut();
           return true;
         }
@@ -947,13 +947,13 @@ bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
             case aJson_Int:
 
             Int((int32_t)item->itemVal->valueint);
-               debugSerial<<F("Loaded Int:");
+               //debugSerial<<F("Loaded Int:");
                debugOut();
             return true;
             
             case aJson_Float:
             Float(item->itemVal->valueint);
-               debugSerial<<F("Loaded Float:");
+               //debugSerial<<F("Loaded Float:");
                debugOut();
             return true;
           }

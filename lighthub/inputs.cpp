@@ -641,16 +641,22 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
   else
   {
     //Postpone actual execution
-    store->reqState=newState;
-    store->delayedState=true;
+    if (newState != store->state)
+            {
+            store->reqState=newState;
+            store->delayedState=true;
+            }
     return true;
   }
 
 }
 
+static volatile uint8_t contactPollBusy = 0;
+
 void Input::contactPoll(short cause) {
     boolean currentInputState;
-    if (!store) return;
+    if (!store || contactPollBusy) return;
+    contactPollBusy++;
 
     changeState(IS_REQSTATE,cause); //Check for postponed states transitions
 
@@ -853,6 +859,7 @@ if (cause != CHECK_INTERRUPT) switch (store->state) //Timer based transitions
         }
     } else // no change
         store->bounce = SAME_STATE_ATTEMPTS;
+contactPollBusy--;        
 }
 
 

@@ -680,7 +680,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
         return -1;
         }
     cmd.debugOut();
-    debugSerial<<endl; 
+    //debugSerial<<endl; 
 
     if (!itemArr) return -1;
     
@@ -712,6 +712,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     int8_t  chActive  = -1;
     bool    toExecute = false;
     bool    scale100  = false;
+    bool    invalidArgument = false;
     int     res       = -1;
     uint16_t status2Send = 0;
     uint8_t  command2Set = 0;
@@ -719,6 +720,71 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     /// Common (GRP & NO GRP) commands
     switch (cmd.getCmd()) 
     {
+            case CMD_VOID: // No commands, just set value
+                         {   
+                         itemCmd stored;
+                         if (!cmd.isValue()) break;
+                               switch (suffixCode)
+                               {
+                                     case S_NOTFOUND: //For empty (universal) OPENHAB suffix - turn ON/OFF automatically
+                                     toExecute=true;
+                                     scale100=true;  //openHab topic format
+                                     chActive=(isActive()>0);
+
+                                     if (chActive>0 && !cmd.getInt()) {cmd.Cmd(CMD_OFF);status2Send |= SEND_COMMAND | SEND_IMMEDIATE;}
+                                     if (chActive==0 && cmd.getInt()) {cmd.Cmd(CMD_ON);status2Send |= SEND_COMMAND | SEND_IMMEDIATE;}
+            
+                                     // continue processing as SET
+                                     case S_SET:
+                                     stored.loadItemDef(this);
+                                     // if previous color was in RGB notation but new value is HSV - discard previous val and change type;   
+                                     if ((stored.getArgType() == ST_RGB || stored.getArgType() == ST_RGBW) &&
+                                        (cmd.getArgType() == ST_HSV255)) 
+                                                                stored.setArgType(cmd.getArgType());
+
+                                     if (itemType == CH_GROUP && cmd.isColor()) stored.setArgType(ST_HSV255);//Extend storage for group channel
+                                     
+                                      //Convert value to most approptiate type for channel
+                                     stored.assignFrom(cmd,getChanType());
+                                     stored.debugOut();
+
+                                     if ((scale100 || SCALE_VOLUME_100) && (cmd.getArgType()==ST_HSV255 || cmd.getArgType()==ST_PERCENTS255 || cmd.getArgType()==ST_INT32 || cmd.getArgType()==ST_UINT32)) 
+                                            stored.scale100();
+                                     cmd=stored;
+                                     status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
+
+                                     break;
+                                     case S_VAL:
+                                     break;
+
+                                     case S_SAT:
+                                     stored.loadItemDef(this);
+                                     if (stored.setS(cmd.getS()))
+                                        { 
+                                          cmd=stored;
+                                          cmd.setSuffix(S_SET);  
+                                          status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
+                                        } else invalidArgument=true;
+                                     break;
+
+                                     case S_HUE:
+                                     stored.loadItemDef(this);
+                                     if (stored.setH(cmd.getH()))
+                                        {
+                                          cmd=stored;  
+                                          cmd.setSuffix(S_SET);   
+                                          status2Send |= SEND_PARAMETERS | SEND_DEFFERED;    
+                                        } else invalidArgument=true;
+                                    break;
+                                    case S_TEMP:
+                                    stored.loadItemDef(this);
+                                    stored.setColorTemp(cmd.getColorTemp());
+                                    cmd=stored;
+                                    status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
+                                   }
+
+                        }   
+                        break;
               case CMD_TOGGLE:
                   chActive=(isActive()>0);
                   toExecute=true;
@@ -730,88 +796,13 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               cmd.Cmd(CMD_ON);
                             }   
                   status2Send |=SEND_COMMAND | SEND_IMMEDIATE;    
-                  break;
-    // TBD - INCREMENT-DECREMENT
-    }
-    
-    ///
+                break;
 
-    if (itemType==CH_GROUP) 
-    {
-    
-    if (allowRecursion && itemArg->type == aJson_Array && operation) 
-                {
-                digGroup(itemArg,&cmd,subItem);
-                status2Send |= SEND_COMMAND | SEND_PARAMETERS | SEND_IMMEDIATE; 
-                res=1;     
-                }
-    //                    return 1; 
-    } // GROUP
-    
-    else
-    {  // NON GROUP part
-        if (chActive<0) chActive  = (isActive()>0);
-        toExecute=chActive || toExecute; // Execute if active
-        
 
-        if (subItem) 
-        {
-        //Check if subitem is some sort of command    
-        int subitemCmd = subitem2cmd(subItem);
-        short prevCmd  = getCmd();
-        if (!prevCmd && chActive) prevCmd=CMD_ON;
-
-            if (subitemCmd) //Find some COMMAND in subitem
-                {           
-                if (subitemCmd != prevCmd)
-                    {
-                        debugSerial<<F("Ignored, channel cmd=")<<prevCmd<<endl;
-                        return -1;
-                    }
-                subItem=NULL;   
-                }
-        ///
-            else // Fast track for commands to subitems
-            {   
-                if (driver) return driver->Ctrl(cmd,subItem,toExecute);
-                return 0;
-            }
-        }
-
-        // Commands for NON GROUP
-        //threating Restore, XOFF (special conditional commands)/ convert to ON, OFF and SET values
-          switch (cmd.getCmd()) {
-              int t;
-              case CMD_RESTORE:
-                      switch (t = getCmd()) {
-                          case CMD_HALT: //previous command was HALT ?
-                              debugSerial << F("Restored from:") << t << endl;
-                              cmd.loadItemDef(this);
-                              toExecute=true;
-                              if (itemType == CH_THERMO) cmd.Cmd(CMD_AUTO); ////
-                                  else cmd.Cmd(CMD_ON);    //turning on
-                              break;
-                          default:
-                              return -3;
-                      }
-                  status2Send |= SEND_COMMAND;     
-                  break;
-              case CMD_XOFF:
-                      switch (t = getCmd()) {
-                          case CMD_XON: //previous command was CMD_XON ?
-                              debugSerial << F("Turned off from:") << t << endl;
-                              toExecute=true;
-                              cmd.Cmd(CMD_OFF);    //turning Off
-                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
-                              break;
-                          default:
-                              debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
-                            return -3;
-                    }
-                    break;
               case CMD_DN:
               case CMD_UP:
                 {
+                itemCmd fallbackCmd=cmd;    
                 short step=0;    
                 if (cmd.isValue()) step=cmd.getInt();
                 if (!step) step=DEFAULT_INC_STEP;
@@ -830,7 +821,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                              if (cmd.incrementPercents(step))
                              {  
                                status2Send |= SEND_PARAMETERS | SEND_DEFFERED;    
-                             }
+                             } else {cmd=fallbackCmd;invalidArgument=true;}
                         break;
                       
                         case S_HUE:
@@ -838,82 +829,154 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                              {
                                status2Send |= SEND_PARAMETERS | SEND_DEFFERED;     
                                cmd.setSuffix(S_SET);      
-                             }
+                             } else {cmd=fallbackCmd;invalidArgument=true;}
                              break;
                         case S_SAT:
                              if (cmd.incrementS(step))
                              {
                                status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
                                cmd.setSuffix(S_SET);  
-                             }
+                             } else {cmd=fallbackCmd;invalidArgument=true;}
                       } //switch suffix
 
              } //Case UP/DOWN
-             break;
-             case CMD_VOID: // No commands, just set value
-                         {   
-                         itemCmd stored;
-                         if (!cmd.isValue()) break;
-                               switch (suffixCode)
-                               {
-                                     case S_NOTFOUND: //For empty (universal) OPENHAB suffix - turn ON/OFF automatically
-                                     toExecute=true;
-                                     scale100=true;  //openHab topic format
-                                     if (chActive>0 && !cmd.getInt()) {cmd.Cmd(CMD_OFF);status2Send |= SEND_COMMAND | SEND_IMMEDIATE;}
-                                     if (chActive==0 && cmd.getInt()) {cmd.Cmd(CMD_ON);status2Send |= SEND_COMMAND | SEND_IMMEDIATE;}
-            
-                                     // continue processing as SET
-                                     case S_SET:
-                                     stored.loadItemDef(this);
-                                     // if previous color was in RGB notation but new value is HSV - discard previous val and change type;   
-                                     if ((stored.getArgType() == ST_RGB || stored.getArgType() == ST_RGBW) &&
-                                        (cmd.getArgType() == ST_HSV255)) 
-                                                                stored.setArgType(cmd.getArgType());
+             break;   
+    // 
+    }
+    if (itemType==CH_GROUP) 
+    {
+    if (allowRecursion && itemArg->type == aJson_Array && operation) 
+                {
+                digGroup(itemArg,&cmd,subItem);
+                res=1;     
+                }
 
-                                     //if (itemType == CH_GROUP && cmd.isColor()) stored.setArgType(ST_HSV255);//Extend storage for group channel
-                                     
-                                      //Convert value to most approptiate type for channel
-                                     stored.assignFrom(cmd,getChanType());
-                                     if (scale100 || SCALE_VOLUME_100) stored.scale100();
-                                     cmd=stored;
-                                     status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
-
-                                     break;
-                                     case S_VAL:
-                                     break;
-
-                                     case S_SAT:
-                                     stored.loadItemDef(this);
-                                     if (stored.setS(cmd.getS()))
-                                        { 
-                                          cmd=stored;
-                                          cmd.setSuffix(S_SET);  
-                                          status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
-                                        }
-                                     break;
-
-                                     case S_HUE:
-                                     stored.loadItemDef(this);
-                                     if (stored.setH(cmd.getH()))
-                                        {
-                                          cmd=stored;  
-                                          cmd.setSuffix(S_SET);   
-                                          status2Send |= SEND_PARAMETERS | SEND_DEFFERED;    
-                                        }
-                                    break;
-                                    case S_TEMP:
-                                    stored.loadItemDef(this);
-                                    stored.setColorTemp(cmd.getColorTemp());
-                                    cmd=stored;
-                                    status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
-                                   }
-
-                        }   
-                        break;
+      // Post-processing of group command - converting HALT,REST,XON,XOFF to conventional ON/OFF for status
+      switch (cmd.getCmd()) {
+              int t;
+              case CMD_RESTORE:  // individual for group members
+                      switch (t = getCmd()) {
+                          case CMD_HALT: //previous command was HALT ?
+                              debugSerial << F("Restored from:") << t << endl;
+                              cmd.loadItemDef(this);
+                              cmd.Cmd(CMD_ON);    //turning on
+                              break;
+                          default:
+                              return -3;
+                      }
+                  status2Send |= SEND_COMMAND;     
+                  break;
+              case CMD_XOFF:    // individual for group members
+                      switch (t = getCmd()) {
+                          case CMD_XON: //previous command was CMD_XON ?
+                              debugSerial << F("Turned off from:") << t << endl;
+                              cmd.Cmd(CMD_OFF);    //turning Off
+                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                              break;
+                          default:
+                              debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
+                            return -3;
+                    }
+                    break;
           
             case CMD_XON:
             if (!chActive)  //if channel was'nt active before CMD_XON
                   {
+                    cmd.loadItemDef(this);
+                    cmd.Cmd(CMD_ON);
+                    command2Set=CMD_XON;
+                    status2Send |= SEND_COMMAND | SEND_IMMEDIATE;  
+                  }
+              else
+              { 
+                debugSerial<<F("XON:Already Active\n");
+                return -3;
+              }
+            break;
+            case CMD_HALT:
+            if (chActive)  //if channel was active before CMD_HALT
+                  {
+                    cmd.Cmd(CMD_OFF);  
+                    command2Set=CMD_HALT;
+                    status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                  }
+            else    
+                  {
+                    debugSerial<<F("HALT:Already Inactive\n");
+                    return -3;
+                  }
+            break;
+      }
+
+     status2Send |= SEND_IMMEDIATE;  
+     if (cmd.isCommand()) status2Send |= SEND_COMMAND;       
+     if (cmd.isValue() || cmd.loadItem(this,SEND_PARAMETERS)) status2Send |= SEND_PARAMETERS; ;
+    } // end GROUP
+    
+    else
+    {  // NON GROUP part
+        if (chActive<0) chActive  = (isActive()>0);
+        toExecute=chActive || toExecute; // Execute if active 
+        debugSerial<<F("Active:")<<chActive<<F( " Exec:")<<toExecute<<endl;
+        if (subItem) 
+        {
+        //Check if subitem is some sort of command    
+        int subitemCmd = subitem2cmd(subItem);
+        short prevCmd  = getCmd();
+        if (!prevCmd && chActive) prevCmd=CMD_ON;
+
+            if (subitemCmd) //Find some COMMAND in subitem
+                {           
+                if (subitemCmd != prevCmd)
+                    {
+                        debugSerial<<F("Ignored, channel cmd=")<<prevCmd<<endl;
+                        return -1;
+                    }
+                subItem=NULL;   
+                }
+            else // Fast track for commands to subitems
+            {   
+                if (driver) return driver->Ctrl(cmd,subItem,toExecute);
+                return 0;
+            }
+        }
+
+        // Commands for NON GROUP
+        //threating Restore, XOFF (special conditional commands)/ convert to ON, OFF and SET values
+          switch (cmd.getCmd()) {
+              int t;
+              case CMD_RESTORE:  // individual for group members
+                      switch (t = getCmd()) {
+                          case CMD_HALT: //previous command was HALT ?
+                              debugSerial << F("Restored from:") << t << endl;
+                              cmd.loadItemDef(this);
+                              toExecute=true;
+                              if (itemType == CH_THERMO) cmd.Cmd(CMD_AUTO); ////
+                                  else cmd.Cmd(CMD_ON);    //turning on
+                              break;
+                          default:
+                              return -3;
+                      }
+                  status2Send |= SEND_COMMAND;     
+                  break;
+              case CMD_XOFF:    // individual for group members
+                      switch (t = getCmd()) {
+                          case CMD_XON: //previous command was CMD_XON ?
+                              debugSerial << F("Turned off from:") << t << endl;
+                              toExecute=true;
+                              cmd.Cmd(CMD_OFF);    //turning Off
+                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                              break;
+                          default:
+                              debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
+                            return -3;
+                    }
+                    break;
+          
+            case CMD_XON:
+            if (!chActive)  //if channel was'nt active before CMD_XON
+                  {
+                    cmd.loadItemDef(this);
                     cmd.Cmd(CMD_ON);
                     command2Set=CMD_XON;
                     status2Send |= SEND_COMMAND | SEND_IMMEDIATE;  
@@ -956,6 +1019,11 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
             status2Send |= SEND_COMMAND | SEND_PARAMETERS | SEND_IMMEDIATE; 
             toExecute=true; 
             break;
+          case CMD_VOID:
+          case CMD_TOGGLE:
+          case CMD_DN:
+          case CMD_UP:
+            break;   
 
           default:
             if (cmd.isCommand()) status2Send |= SEND_COMMAND;
@@ -963,7 +1031,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
             toExecute=true;
           } //Switch commands
 } // NO GROUP
-
+if (invalidArgument) return -4;
 // UPDATE internal variables 
 if (status2Send) cmd.saveItem(this,status2Send);
 //debugSerial<<F("sts:")<<status2Send<<endl;
@@ -1317,7 +1385,7 @@ int Item::SendStatus(int sendFlags) {
             // myhome/s_out/item/cmd
             // myhome/s_out/item/set
 
-          if ((sendFlags & SEND_PARAMETERS) || (sendFlags & SEND_DELAYED))
+          if ((st.isValue() && (sendFlags & SEND_PARAMETERS) || (sendFlags & SEND_DELAYED)))
              {
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
