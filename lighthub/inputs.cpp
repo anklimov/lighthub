@@ -655,7 +655,7 @@ static volatile uint8_t contactPollBusy = 0;
 
 void Input::contactPoll(short cause) {
     boolean currentInputState;
-    if (!store || contactPollBusy) return;
+    if (!store /*|| contactPollBusy*/) return;
     contactPollBusy++;
 
     changeState(IS_REQSTATE,cause); //Check for postponed states transitions

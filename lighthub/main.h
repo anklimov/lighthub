@@ -162,7 +162,7 @@ extern Streamlog  errorSerial;
         #ifdef Wiz5500
         #include <Ethernet2.h>
         #else
-            #ifdef ARDUINO_ARCH_STM32
+            #ifdef UIPETHERNET
             #include "UIPEthernet.h"
             #else
             #include <Ethernet.h>

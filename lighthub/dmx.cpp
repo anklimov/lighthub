@@ -288,10 +288,16 @@ void DMXOUT_propagate()
         if (!step) step=1;
 
         if (delta<0)
-                        {DmxWrite2(i,currLevel+step);debugSerial<<"<";}
+                        {
+                          DmxWrite2(i,currLevel+step);
+                          //debugSerial<<"<";
+                          }
 
         if (delta>0)
-                        {DmxWrite2(i,currLevel-step);debugSerial<<">";}
+                        {
+                          DmxWrite2(i,currLevel-step);
+                          //debugSerial<<">";
+                          }
         }
   }
   checkTimestamp=now;

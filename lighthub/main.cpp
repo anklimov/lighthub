@@ -1605,13 +1605,17 @@ void postTransmission() {
 
 volatile unsigned long timerCount=0; 
 volatile int16_t timerNumber=-1;
+volatile int8_t timerHandlerBusy=0;
 
 void TimerHandler(void)
-{   interrupts();
+{   
+    timerHandlerBusy++;
+    interrupts();
     timerCount=micros();
-     if (configLoaded) inputLoop(CHECK_INTERRUPT);
+     if (configLoaded && !timerHandlerBusy) inputLoop(CHECK_INTERRUPT);
+     DMXOUT_propagate();
     timerCount=micros()-timerCount;
-
+    timerHandlerBusy--;
 }
 
 #if defined(__SAM3X8E__) && defined (TIMER_INT)
@@ -2017,8 +2021,9 @@ void owIdle(void) {
     if (artnet && (lanStatus>=HAVE_IP_ADDRESS)) artnet->read();
 #endif
 
-    wdt_res();
-    return;
+wdt_res();
+inputLoop(CHECK_INTERRUPT);
+    return; //?????
 
 #ifdef _dmxin
     yield();
