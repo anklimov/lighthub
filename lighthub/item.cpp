@@ -880,6 +880,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                     break;
           
             case CMD_XON:
+            chActive=(isActive()>0);
             if (!chActive)  //if channel was'nt active before CMD_XON
                   {
                     cmd.loadItemDef(this);
@@ -894,6 +895,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
               }
             break;
             case CMD_HALT:
+            chActive=(isActive()>0);
             if (chActive)  //if channel was active before CMD_HALT
                   {
                     cmd.Cmd(CMD_OFF);  
