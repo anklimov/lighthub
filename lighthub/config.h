@@ -28,22 +28,26 @@ const char EEPROM_signature[] = EEPROM_SIGNATURE;
  typedef struct
       { 
         char    signature[4];  
-        macAddress  mac;
+        macAddress  mac;  //6 bytes
+        union {
+                uint16_t configFlags;
+                struct
+                      { 
+                        uint8_t  serialDebugLevel:4; 
+                        uint8_t  syslogDebugLevel:4; 
+                        uint8_t  notGetConfigFromHTTP:1;
+                        uint8_t  saveToFlash:1;
+                      };
+              };  
         uint32_t ip;
         uint32_t dns;
         uint32_t gw;
         uint32_t mask;
-        union {
-                uint8_t configFlags;
-                struct
-                      { uint8_t  notGetConfigFromHTTP:1;
-                        uint8_t  saveToFlash:1;
-                      };
-              };  
+
         flashstr configURL;
         flashpwd MQTTpwd;
         flashpwd OTApwd;
-        uint8_t  serialDebugLevel; 
+
         uint16_t sysConfigHash;
         uint16_t JSONHash;
             
@@ -82,8 +86,15 @@ class systemConfig {
  bool             setDNS(IPAddress& dns);
  bool             setGW(IPAddress& gw);
 
+ bool             setSerialDebuglevel(short);
+ bool             setUdpDebuglevel(short);
+ uint8_t          getSerialDebuglevel();
+ uint8_t          getUdpDebuglevel();
+
  void             clear();
  bool             getSaveSuccedConfig();
+ bool             setSaveSuccedConfig(bool);
  bool             getLoadHTTPConfig();
+ bool             setLoadHTTPConfig(bool);
  //bool             Save();  
 };

@@ -1,49 +1,5 @@
 #include "config.h"
 
-//#if defined(ARDUINO_ARCH_AVR)
-//#include <EEPROM.h>
-//#endif
-
-/*
-void saveFlash(short n, char *str) {
-    short len=strlen(str);
-    if (len>MAXFLASHSTR-1) len=MAXFLASHSTR-1;
-    for(int i=0;i<len;i++) EEPROM.write(n+i,str[i]);
-    EEPROM.write(n+len,0);
-
-   #if defined(ARDUINO_ARCH_ESP8266)
-  // write the data to EEPROM
-   short res  = EEPROM.commitReset();
-  Serial.println((res) ? "EEPROM Commit OK" : "Commit failed");
-  #endif
-}
-
-
-int loadFlash(short n, char *str, short l) {
-    short i;
-    uint8_t ch = EEPROM.read(n);
-    if (!ch || (ch == 0xff)) return 0;
-    for (i=0;i<l-1 && (str[i] = EEPROM.read(n++));i++);
-    str[i]=0;
-    return 1;
-}
-
-void saveFlash(short n, IPAddress& ip) {
-    for(int i=0;i<4;i++) EEPROM.write(n++,ip[i]);
-
-    #if defined(ARDUINO_ARCH_ESP8266)
-   // write the data to EEPROM
-    short res  = EEPROM.commitReset();
-   Serial.println((res) ? "EEPROM Commit OK" : "Commit failed");
-   #endif
-}
-
-int ipLoadFromFlash(short n, IPAddress &ip) {
-    for (int i = 0; i < 4; i++)
-        ip[i] = EEPROM.read(n++);
-    return (ip[0] && ((ip[0] != 0xff) || (ip[1] != 0xff) || (ip[2] != 0xff) || (ip[3] != 0xff)));
-}
-*/
 
 bool             systemConfig::isValidSysConf()
 {    
@@ -75,7 +31,7 @@ bool             systemConfig::isValidSysConf()
  {
    if (!stream || !isValidSysConf()) return false;    
    stream->seek(offsetof(systemConfigData,mac));
-   ///stream->write ((const uint8_t *)&_mac,sizeof(_mac));
+   stream->write ((const uint8_t *)&_mac,sizeof(_mac));
    memcpy(mac, _mac, sizeof(mac));
 
   return true;
@@ -85,16 +41,21 @@ bool             systemConfig::isValidSysConf()
  {
     if (!stream || !isValidSysConf()) return NULL; 
     stream->seek(offsetof(systemConfigData,MQTTpwd));   
-    if (stream->readBytesUntil(0,buffer,bufLen)) return buffer;
+     short bytes=stream->readBytesUntil(0,buffer,bufLen-1);
+    if (bytes) 
+            {
+            buffer[bytes]=0;  
+            return buffer;
+            }
     return NULL;
  }
  
  bool             systemConfig::setMQTTpwd(char * pwd)
  {
-    if (!stream || !isValidSysConf()) return false; 
+    if (!stream || !isValidSysConf() || (strlen(pwd)>=sizeof(systemConfigData::MQTTpwd))) return false; 
     stream->seek(offsetof(systemConfigData,MQTTpwd));   
     stream->print(pwd);   
-    return stream->write(0);
+    return stream->write((uint8_t)'\0');
  }
 
 
@@ -102,87 +63,112 @@ bool             systemConfig::isValidSysConf()
  {
     if (!stream || !isValidSysConf()) return NULL; 
     stream->seek(offsetof(systemConfigData,OTApwd));   
-    if (stream->readBytesUntil(0,buffer,bufLen)) return buffer;
+    short bytes=stream->readBytesUntil(0,buffer,bufLen-1);
+    if (bytes) 
+            {
+            buffer[bytes]=0;  
+            return buffer;
+            }
     return NULL;
  }
  
  bool             systemConfig::setOTApwd(char * pwd)
  {
-     if (!stream || !isValidSysConf()) return false; 
+     if (!stream || !isValidSysConf() || (strlen(pwd)>=sizeof(systemConfigData::OTApwd))) return false; 
     stream->seek(offsetof(systemConfigData,OTApwd));   
     stream->print(pwd);   
-    return stream->write(0);
+    return stream->write((uint8_t)'\0');
  }
  
 
-  char *             systemConfig::getServer(char * buffer, uint16_t bufLen)
+  char *          systemConfig::getServer(char * buffer, uint16_t bufLen)
  {
   if (!stream || !isValidSysConf()) return NULL; 
     stream->seek(offsetof(systemConfigData,configURL));   
-    if (stream->readBytesUntil(0,buffer,bufLen)) return buffer;
+    short bytes=stream->readBytesUntil(0,buffer,bufLen-1);
+    if (bytes) 
+            {
+            buffer[bytes]=0;  
+            return buffer;
+            }
     return NULL;
  }
  
  bool             systemConfig::setServer(char* url)
  {
-  if (!stream || !isValidSysConf()) return false; 
-    stream->seek(offsetof(systemConfigData,OTApwd));   
+  if (!stream || !isValidSysConf() || (strlen(url)>=sizeof(systemConfigData::configURL))) return false; 
+    stream->seek(offsetof(systemConfigData,configURL));   
     stream->print(url);   
-    return stream->write(0);
-
+    return stream->write((uint8_t)'\0');
  }
   
 
  bool             systemConfig::getIP(IPAddress& ip)
  {
+    uint32_t addr;
     if (!stream || !isValidSysConf()) return false; 
     stream->seek(offsetof(systemConfigData,ip));   
-    stream->readBytes((char *)&ip,sizeof(ip));
-    return ip;
-
+    stream->readBytes((uint8_t *) &addr,4);
+    ip=addr;
+    return (ip[0] && ((ip[0] != 0xff) || (ip[1] != 0xff) || (ip[2] != 0xff) || (ip[3] != 0xff)));
  }
  
  bool             systemConfig::getMask(IPAddress& mask)
  {
-  return 0;
-
+     uint32_t addr;
+    if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,mask));   
+    stream->readBytes((uint8_t *) &addr,4);
+    mask=addr;
+    return (mask[0] && ((mask[0] != 0xff) || (mask[1] != 0xff) || (mask[2] != 0xff) || (mask[3] != 0xff)));
  }
  
  bool             systemConfig::getDNS(IPAddress& dns)
- {
-  return 0;
-
+ {   uint32_t addr;
+    if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,dns));   
+    stream->readBytes((uint8_t *) &addr,4);
+    dns = addr;
+    return (dns[0] && ((dns[0] != 0xff) || (dns[1] != 0xff) || (dns[2] != 0xff) || (dns[3] != 0xff)));
  }
  
  bool             systemConfig::getGW(IPAddress& gw)
- {
-      return 0;
-  
-         }
+ {   uint32_t addr;
+    if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,gw));   
+    stream->readBytes((uint8_t *) &addr,4);
+    gw=addr;
+    return (gw[0] && ((gw[0] != 0xff) || (gw[1] != 0xff) || (gw[2] != 0xff) || (gw[3] != 0xff)));  
+}
  
 
  bool             systemConfig::setIP(IPAddress& ip)
- {
-  return 0;
-
+ {  uint32_t addr=ip;
+  if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,ip));   
+    return stream->write((uint8_t *) &addr, 4);   
  }
  
  bool             systemConfig::setMask(IPAddress& mask)
- {
-  return 0;
-
+ {  uint32_t addr = mask;
+  if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,mask));   
+    return stream->write((uint8_t *) &addr, 4);   
  }
  
  bool             systemConfig::setDNS(IPAddress& dns)
- {
-  return 0;
+ {  uint32_t addr = dns;
+  if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,dns));   
+    return stream->write((uint8_t *) &addr, 4);  
 
  }
  
  bool             systemConfig::setGW(IPAddress& gw)
- {
-  return 0;
-
+ { uint32_t addr = gw;
+  if (!stream || !isValidSysConf()) return false; 
+    stream->seek(offsetof(systemConfigData,gw));   
+    return stream->write((uint8_t *) &addr, 4);   
  }
  
 
@@ -191,7 +177,7 @@ bool             systemConfig::isValidSysConf()
    if (!stream) return ; 
     stream->seek(0);
      for (unsigned int i = 0; i < stream->getSize(); i++) {
-        stream->write(0);
+        stream->write((uint8_t)'\0');
     }
      stream->seek(offsetof(systemConfigData,signature));
      for (unsigned int i=0;i<sizeof(systemConfigData::signature);i++)
@@ -199,9 +185,49 @@ bool             systemConfig::isValidSysConf()
     stream->flush();
  }
  
+///
  bool             systemConfig::getSaveSuccedConfig()
  {
     return false;
  }
+
+  bool             systemConfig::setSaveSuccedConfig(bool)
+ {
+    return false;
+ }
+
+///
  
-  
+bool             systemConfig::setSerialDebuglevel(short level)
+{
+return false;
+}
+
+bool             systemConfig::setUdpDebuglevel(short level)
+{
+return false;
+}
+
+
+uint8_t           systemConfig::getSerialDebuglevel()
+{
+return 7;
+}
+
+uint8_t           systemConfig::getUdpDebuglevel()
+{
+return 7;   
+}
+
+//
+bool             systemConfig::setLoadHTTPConfig(bool load)
+{
+return false;
+}
+
+bool             systemConfig::getLoadHTTPConfig()
+{
+return false;
+}
+
+

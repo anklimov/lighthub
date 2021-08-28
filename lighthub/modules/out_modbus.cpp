@@ -187,7 +187,7 @@ else
 
 int  out_Modbus::Stop()
 {
-Serial.println("Modbus De-Init");
+debugSerial.println("Modbus De-Init");
 
 delete store;
 item->setPersistent(NULL);

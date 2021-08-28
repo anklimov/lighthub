@@ -22,6 +22,10 @@ GIT:      https://github.com/anklimov/lighthub
 #include <Arduino.h>
 #include "utils.h"
 
+#ifndef debugSerialPort
+#define debugSerialPort Serial
+#endif
+
 int owRead2408(uint8_t* addr) {
   uint8_t buf[13];
 //   PrintBytes(buf, 13, true);
@@ -38,7 +42,7 @@ if (!net) return -1;
   net->reset();
 
   if (!OneWire::check_crc16(buf, 11, &buf[11])) {
-    Serial.print(F("CRC failure in DS2408 at "));
+    debugSerialPort.print(F("CRC failure in DS2408 at "));
     PrintBytes(addr, 8, true);
     PrintBytes(buf+3,10);
     return -1;
@@ -51,8 +55,8 @@ if (!net) return -1;
 int read1W(int i)
 {
   
-  Serial.print("1W requested: ");
-  Serial.println (i);
+  debugSerialPort.print("1W requested: ");
+  debugSerialPort.println (i);
   
   int t=-1;  
   switch (term[i][0]){
@@ -80,10 +84,10 @@ int ow2408out(DeviceAddress addr,uint8_t cur)
   net->read_bytes(buf+3, 2);     
   //net.reset();
   PrintBytes(buf, 5);
-    Serial.print(F(" Out: "));Serial.print(buf[1],BIN);
-    Serial.print(F(" In: "));Serial.println(buf[4],BIN);
+    debugSerialPort.print(F(" Out: "));debugSerialPort.print(buf[1],BIN);
+    debugSerialPort.print(F(" In: "));debugSerialPort.println(buf[4],BIN);
   if (buf[3] != 0xAA) {
-      Serial.print(F("Write failure in DS2408 at "));
+      debugSerialPort.print(F("Write failure in DS2408 at "));
         PrintBytes(addr, 8, true);
         return -2;
      }  
@@ -97,7 +101,7 @@ if (!net) return -1;
  
  if ((devnum=owFind(addr))<0) return -1; 
  buf=regs[devnum];
-  Serial.print(F("Current: "));Serial.println(buf,BIN);
+  debugSerialPort.print(F("Current: "));debugSerialPort.println(buf,BIN);
   mask=0;
   int r,f;
   switch (subchan) {
@@ -107,7 +111,7 @@ if (!net) return -1;
            if (wstat[devnum] & (SW_PULSE0|SW_PULSE_P0)) 
               {
               wstat[devnum]|=SW_CHANGED_P0;
-              Serial.println(F("Rollback 0"));
+              debugSerialPort.println(F("Rollback 0"));
               } 
            else {
            wstat[devnum]|=SW_PULSE0;
@@ -122,7 +126,7 @@ if (!net) return -1;
            if (wstat[devnum] & (SW_PULSE1|SW_PULSE_P1)) 
               {
               wstat[devnum]|=SW_CHANGED_P1;
-              Serial.println(F("Rollback 1"));
+              debugSerialPort.println(F("Rollback 1"));
               } 
            else {
            wstat[devnum]|=SW_PULSE1;  
@@ -156,8 +160,8 @@ int cntrl2890(uint8_t* addr, int val) {
  uint8_t buf[13];
  if (!net) return -1; 
  // case 0x2C: //Dimmer
-     Serial.print(F("Update dimmer "));PrintBytes(addr, 8, true);Serial.print(F(" = "));
-     Serial.println(val);
+     debugSerialPort.print(F("Update dimmer "));PrintBytes(addr, 8, true);debugSerialPort.print(F(" = "));
+     debugSerialPort.println(val);
   
   net->reset();
   net->select(addr); 
@@ -270,7 +274,7 @@ int cntrl2413(uint8_t* addr, int subchan, int val) {
  uint8_t count =10;
  if (!net) return -1;  
  // case 0x85: //Switch
-     Serial.print(F("Update switch "));PrintBytes(addr, 8, false); Serial.print(F("/"));Serial.print(subchan);Serial.print(F(" = "));Serial.println(val);
+     debugSerialPort.print(F("Update switch "));PrintBytes(addr, 8, false); debugSerialPort.print(F("/"));debugSerialPort.print(subchan);debugSerialPort.print(F(" = "));debugSerialPort.println(val);
   while (count--)
   {
   net->reset();
@@ -281,13 +285,13 @@ int cntrl2413(uint8_t* addr, int subchan, int val) {
   net->write(cmd);
   
   results = net->read();  
-  Serial.print(F("Got: ")); Serial.println(results,BIN);
-    //Serial.println((~results & 0x0F),BIN); Serial.println ((results >> 4),BIN);
+  debugSerialPort.print(F("Got: ")); debugSerialPort.println(results,BIN);
+    //debugSerialPort.println((~results & 0x0F),BIN); debugSerialPort.println ((results >> 4),BIN);
   
   ok = (~results & 0x0F) == (results >> 4); // Compare nibbles            
   results &= 0x0F;                          // Clear inverted values      
 
-  if (ok) {Serial.println(F("Read ok"));break;} else {Serial.println(F("read Error"));delay(1);}
+  if (ok) {debugSerialPort.println(F("Read ok"));break;} else {debugSerialPort.println(F("read Error"));delay(1);}
   } //while
   
   if (ok && (val>=0))
@@ -309,7 +313,7 @@ int cntrl2413(uint8_t* addr, int subchan, int val) {
         if (!val) set|=DS2413_OUT_PinB; else set &= ~DS2413_OUT_PinB;
   };
    set |= 0xFC;
-   Serial.print(F("New: "));Serial.println(set,BIN);
+   debugSerialPort.print(F("New: "));debugSerialPort.println(set,BIN);
    cmd = DS2413_ACCESS_WRITE;   
    net->write(cmd);
   
@@ -321,17 +325,17 @@ int cntrl2413(uint8_t* addr, int subchan, int val) {
   if (ack == DS2413_ACK_SUCCESS)
   {
   results=net->read();  
-  Serial.print(F("Updated ok: ")); Serial.println(results,BIN);
+  debugSerialPort.print(F("Updated ok: ")); debugSerialPort.println(results,BIN);
   ok = (~results & 0x0F) == (results >> 4); // Compare nibbles     
   {
   if (ok) 
-        {Serial.println(F("Readback ok"));
+        {debugSerialPort.println(F("Readback ok"));
         break;} 
-    else {Serial.println(F("readback Error"));delay(1);}    
+    else {debugSerialPort.println(F("readback Error"));delay(1);}    
   }     
   results &= 0x0F;                          // Clear inverted values      
   } 
-  else Serial.println (F("Write failed"));;
+  else debugSerialPort.println (F("Write failed"));;
  
   } //while
   } //if 
@@ -347,12 +351,12 @@ int  sensors_ext(void)
   int t;  
    switch (term[si][0]){
   case 0x29: // DS2408
-    //Serial.println(wstat[si],BIN);
+    //debugSerialPort.println(wstat[si],BIN);
     
     if (wstat[si] & SW_PULSE0) {
       wstat[si]&=~SW_PULSE0;
       wstat[si]|=SW_PULSE_P0;
-      Serial.println(F("Pulse0 in progress"));
+      debugSerialPort.println(F("Pulse0 in progress"));
   
       return 500;
     }
@@ -361,7 +365,7 @@ int  sensors_ext(void)
       wstat[si]&=~SW_PULSE0_R;
       wstat[si]|=SW_PULSE_P0;
       regs[si] =(ow2408out(term[si],(regs[si] | SW_MASK) & ~SW_OUT0) & SW_INMASK) ^ SW_STAT0; 
-      Serial.println(F("Pulse0 in activated"));
+      debugSerialPort.println(F("Pulse0 in activated"));
   
       return 500;
     }
@@ -369,7 +373,7 @@ int  sensors_ext(void)
       if (wstat[si] & SW_PULSE1) {
       wstat[si]&=~SW_PULSE1;
       wstat[si]|=SW_PULSE_P1;
-      Serial.println(F("Pulse1 in progress"));
+      debugSerialPort.println(F("Pulse1 in progress"));
  
       return 500;
     }
@@ -378,14 +382,14 @@ int  sensors_ext(void)
       wstat[si]&=~SW_PULSE1_R;
       wstat[si]|=SW_PULSE_P1;
       regs[si] =(ow2408out(term[si],(regs[si] | SW_MASK) & ~SW_OUT1) & SW_INMASK) ^ SW_STAT1; 
-      Serial.println(F("Pulse0 in activated"));
+      debugSerialPort.println(F("Pulse0 in activated"));
   
       return 500;
     }
 
     if (wstat[si] & SW_PULSE_P0) {
       wstat[si]&=~SW_PULSE_P0;
-      Serial.println(F("Pulse0 clearing"));
+      debugSerialPort.println(F("Pulse0 clearing"));
       ow2408out(term[si],regs[si] | SW_MASK | SW_OUT0);
       
       if (wstat[si] & SW_CHANGED_P0) {
@@ -397,7 +401,7 @@ int  sensors_ext(void)
 
 if (wstat[si] & SW_PULSE_P1) {
       wstat[si]&=~SW_PULSE_P1;
-      Serial.println(F("Pulse1 clearing"));
+      debugSerialPort.println(F("Pulse1 clearing"));
       ow2408out(term[si],regs[si] | SW_MASK | SW_OUT1);
       
       if (wstat[si] & SW_CHANGED_P1) {
@@ -415,18 +419,18 @@ if (wstat[si] & SW_PULSE_P1) {
     
     if (t!=regs[si]) {
                
-        Serial.print(F("DS2408 data = "));
-        Serial.println(t, BIN);
+        debugSerialPort.print(F("DS2408 data = "));
+        debugSerialPort.println(t, BIN);
         
         if (!(wstat[si] & SW_DOUBLECHECK))
           {
           wstat[si]|=SW_DOUBLECHECK; //suspected
-          Serial.println(F("DOUBLECHECK"));
+          debugSerialPort.println(F("DOUBLECHECK"));
           return recheck_interval;
           }
         
             
-            Serial.println(F("Really Changed"));    
+            debugSerialPort.println(F("Really Changed"));    
             if (owChanged) owChanged(si,term[si],t);    
             regs[si]=t;
     
@@ -441,7 +445,7 @@ if (wstat[si] & SW_PULSE_P1) {
   case 0x81:
   t=wstat[si];
   if (t!=regs[si]) 
-    { Serial.println(F("Changed")); 
+    { debugSerialPort.println(F("Changed")); 
      if (owChanged) owChanged(si,term[si],t);    
      regs[si]=t;
     }

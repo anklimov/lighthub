@@ -134,7 +134,7 @@ else
 
 int  out_UARTbridge::Stop()
 {
-Serial.println("UARTbridge De-Init");
+debugSerial.println("UARTbridge De-Init");
  
  udpClientA.stop();
  udpClientB.stop();

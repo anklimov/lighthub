@@ -113,7 +113,7 @@ else
 
 int  out_pid::Stop()
 {
-Serial.println("PID De-Init");
+debugSerial.println("PID De-Init");
 if (store) delete (store->pid);
 delete store;
 item->setPersistent(NULL);

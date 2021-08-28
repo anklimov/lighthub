@@ -261,6 +261,8 @@ void cmdFunctionSetMac(int arg_cnt, char **args);
 
 void cmdFunctionGet(int arg_cnt, char **args);
 
+void cmdFunctionLoglevel(int arg_cnt, char **args);
+
 void printBool(bool arg);
 /*
 void saveFlash(short n, char *str);

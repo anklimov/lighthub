@@ -321,7 +321,9 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
               setColorTemp(t);
               }
   cmd.suffixCode=from.cmd.suffixCode;
-  
+  cmd.cmdCode=from.cmd.cmdCode;
+  //cmd.cmdFlag
+  //cmd.cmdParam  
   
   switch (cmd.itemArgType){ //Destination
         case ST_HSV255:

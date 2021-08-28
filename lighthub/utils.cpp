@@ -28,6 +28,10 @@ e-mail    anklimov@gmail.com
 #include <PubSubClient.h>
 #include <HardwareSerial.h>
 
+#ifndef debugSerialPort
+#define debugSerialPort Serial
+#endif
+
 extern int8_t configLocked;
 extern int8_t ethernetIdleCount;
 extern PubSubClient mqttClient;
@@ -63,7 +67,7 @@ void PrintBytes(uint8_t *addr, uint8_t count, bool newline) {
 const char HEXSTR[] = "0123456789ABCDEF";
 
 void SetBytes(uint8_t *addr, uint8_t count, char *out) {
-    // Serial.println("SB:");
+    // debugSerialPort.println("SB:");
     for (uint8_t i = 0; i < count; i++) {
         *(out++) = HEXSTR[(addr[i] >> 4)];
         *(out++) = HEXSTR[(addr[i] & 0x0f)];
@@ -101,7 +105,7 @@ int getInt(char **chan) {
     //Move pointer to next element (after ,)
     *chan = strchr(*chan, ',');
     if (*chan) *chan += 1;
-    //Serial.print(F("Par:")); Serial.println(ch);
+    //debugSerialPort.print(F("Par:")); debugSerialPort.println(ch);
     return ch;
    }
    return 0;
@@ -131,7 +135,7 @@ itemCmd getNumber(char **chan) {
     //Move pointer to next element (after ,)
     *chan = strchr(*chan, ',');
     if (*chan) *chan += 1;
-    //Serial.print(F("Par:")); Serial.println(ch);
+    //debugSerialPort.print(F("Par:")); debugSerialPort.println(ch);
     
     if (fract)
       val.Tens(ch*10+((ch>0)?fract:-fract));
@@ -248,7 +252,7 @@ int log(const char *str, ...)//TODO: __FlashStringHelper str support
         {
             //Clear buffer
             temp[j] = '\0';
-            Serial.print(temp);
+            debugSerialPort.print(temp);
             j=0;
             temp[0] = '\0';
 
@@ -282,7 +286,7 @@ int log(const char *str, ...)//TODO: __FlashStringHelper str support
         }
     };
 
-    Serial.println(); //Print trailing newline
+    debugSerialPort.println(); //Print trailing newline
     return count + 1; //Return number of arguments detected
 }
 
@@ -415,9 +419,9 @@ for(n = 0; n < 4; n++) {
 void printIPAddress(IPAddress ipAddress) {
     for (byte i = 0; i < 4; i++)
 #ifdef WITH_PRINTEX_LIB
-            (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : debugSerial << (ipAddress[i])<<F(", ");
+            (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : infoSerial << (ipAddress[i])<<F(", ");
 #else
-            (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : debugSerial << _DEC(ipAddress[i]) << F(" ");
+            (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : infoSerial << _DEC(ipAddress[i]) << F(" ");
 #endif
 }
 

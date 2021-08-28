@@ -64,25 +64,6 @@ EthernetClient ethClient;
 MDNS mdns(mdnsUDP);
 #endif
 
-/*
-#if defined(__SAM3X8E__)
-DueFlashStorage EEPROM;
-#endif
-
-
-#ifdef ARDUINO_ARCH_ESP32
-NRFFlashStorage EEPROM;
-#endif
-
-#ifdef ARDUINO_ARCH_STM32
-NRFFlashStorage EEPROM;
-#endif
-
-#ifdef NRF5
-NRFFlashStorage EEPROM;
-#endif
-*/
-
 #ifdef SYSLOG_ENABLE
 #include <Syslog.h>
 
@@ -138,12 +119,12 @@ aJsonObject *dmxArr = NULL;
 bool syslogInitialized = false;
 #endif
 
-uint32_t timerPollingCheck = 0;
-uint32_t timerInputCheck = 0;
-uint32_t timerLanCheckTime = 0;
-uint32_t timerThermostatCheck = 0;
-uint32_t timerSensorCheck =0;
-uint32_t WiFiAwaitingTime =0;
+volatile uint32_t timerPollingCheck = 0;
+volatile uint32_t timerInputCheck = 0;
+volatile uint32_t timerLanCheckTime = 0;
+volatile uint32_t timerThermostatCheck = 0;
+volatile uint32_t timerSensorCheck =0;
+volatile uint32_t WiFiAwaitingTime =0;
 
 aJsonObject *pollingItem = NULL;
 
@@ -269,7 +250,7 @@ int httpHandler(Client& client, String request, long contentLength, bool authori
           if (!item.isValid() || !item.Ctrl((char*) body.c_str())) return 400;
 
         itemCmd ic;
-        ic.loadItem(&item,true);
+        ic.loadItem(&item,SEND_COMMAND|SEND_PARAMETERS);
         char buf[32];
         response=ic.toString(buf, sizeof(buf));             
        }
@@ -280,7 +261,7 @@ int httpHandler(Client& client, String request, long contentLength, bool authori
           if (!item.isValid()) return 400; 
 
          itemCmd ic;
-         ic.loadItem(&item,true);
+         ic.loadItem(&item,SEND_COMMAND|SEND_PARAMETERS);
          char buf[32];
          response=ic.toString(buf, sizeof(buf));
         
@@ -424,8 +405,15 @@ if (element && element->type == aJson_String) return element->valuestring;
 
 #ifdef OTA
     void setupOTA(void)
-    {
-            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", "password", InternalStorage, sysConfStream, JSONStream);
+    {       char passwordBuf[16];
+            if (!sysConf.getOTApwd(passwordBuf, sizeof(passwordBuf))) 
+                        {
+                        strcpy(passwordBuf,"password");
+                        errorSerial<<F("DEFAULT password for OTA API. Use otapwd command to set")<<endl;
+                        }
+
+            debugSerial<<passwordBuf<<endl;            
+            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", passwordBuf, InternalStorage, sysConfStream, JSONStream);
             ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
@@ -838,12 +826,12 @@ void ip_ready_config_loaded_connecting_to_broker() {
             //strncpy_P(buf, inprefix, sizeof(buf));
             setTopic(buf,sizeof(buf),T_BCST);
             strncat(buf, "#", sizeof(buf));
-            Serial.println(buf);
+            debugSerial.println(buf);
             mqttClient.subscribe(buf);
 
             setTopic(buf,sizeof(buf),T_DEV);
             strncat(buf, "#", sizeof(buf));
-            Serial.println(buf);
+            debugSerialPort.println(buf);
             mqttClient.subscribe(buf);
 
             onMQTTConnect();
@@ -966,27 +954,24 @@ if (WiFi.status() == WL_CONNECTED) {
         infoSerial<<F("Got IP address:");
         printIPAddress(Ethernet.localIP());
         lanStatus = HAVE_IP_ADDRESS;
-        
-        #ifdef MDNS_ENABLE
+    }
+  }//DHCP
+
+   #ifdef MDNS_ENABLE
         #ifndef OTA_PORT
         #define OTA_PORT  65280
         #endif
 
         mdns.begin(Ethernet.localIP(), "lighthub");
-        mdns.addServiceRecord(("LightHub controller._http"),
-                        OTA_PORT,
-                        MDNSServiceTCP);
-
-         mdns.addServiceRecord("Lighthub TXT"
-                         "._http",
-                         OTA_PORT,
-                         MDNSServiceTCP,
-                         "\x7path=/2");                
-
+         
+         char txtRecord[32] = "\x7mac=";
+         SetBytes(sysConf.mac,6,txtRecord+5);
+         char mdnsName[32] = "LightHub";
+         SetBytes(sysConf.mac+4,2,mdnsName+8);
+         strncat(mdnsName,"._http",sizeof(mdnsName));
+         mdns.addServiceRecord(mdnsName, OTA_PORT, MDNSServiceTCP, txtRecord);                
         #endif
 
-    }
-  }
     #endif
 }
 
@@ -1070,10 +1055,12 @@ void cmdFunctionHelp(int arg_cnt, char **args)
     infoSerial<<F("\nUse these commands: 'help' - this text\n"
                           "'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
                           "'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n"
-                          "'save' - save config in NVRAM\n"
-                          "'get' [config addr]' - get config from pre-configured URL and store addr\n"
+                          "'save' - save current config in NVRAM; ON|OFF - enable/disable autosave\n"
+                          "'get' [config addr]' - get config from pre-configured URL and store addr, ON|OFF - enable/disable download on startup\n"
                           "'load' - load config from NVRAM\n"
-                          "'pwd' - define MQTT password\n"
+                          "'pwd' - define and store MQTT password\n"
+                          "'otapwd' - define and store HTTP API password\n"
+                          "'log [serial_loglevel] [udp_loglevel]' - define log level (0..7)\n"
                           "'kill' - test watchdog\n"
                           "'clear' - clear EEPROM\n"
                           "'reboot' - reboot controller");
@@ -1081,9 +1068,12 @@ void cmdFunctionHelp(int arg_cnt, char **args)
 void printCurentLanConfig() {
     infoSerial << F("Current LAN config(ip,dns,gw,subnet):");
     printIPAddress(Ethernet.localIP());
-//    printIPAddress(Ethernet.dnsServerIP());
+    #if not defined(ESP8266) and not defined(ESP32)
+    printIPAddress(Ethernet.dnsServerIP());
+    #endif
     printIPAddress(Ethernet.gatewayIP());
     printIPAddress(Ethernet.subnetMask());
+
 }
 
 void cmdFunctionKill(int arg_cnt, char **args) {
@@ -1262,12 +1252,16 @@ int loadConfigFromEEPROM()
     return 0;
 }
 
-
-#if defined(__SAM3X8E__) 
-
-//#define saveBufLen 16000
 void cmdFunctionSave(int arg_cnt, char **args)
+{ 
+if (arg_cnt>1)
 {
+    if (!strcasecmp_P(args[1],ON_P)) sysConf.setSaveSuccedConfig(true);
+    if (!strcasecmp_P(args[1],OFF_P)) sysConf.setSaveSuccedConfig(false);
+    infoSerial<<F("Config autosave:")<<sysConf.getSaveSuccedConfig()<<endl;
+    return;
+}
+#if defined(__SAM3X8E__) 
   char* outBuf = (char*) malloc(MAX_JSON_CONF_SIZE); /* XXX: Dynamic size. */
   if (outBuf == NULL)
     {
@@ -1278,32 +1272,36 @@ void cmdFunctionSave(int arg_cnt, char **args)
   aJson.print(root, &stringStream);
   int len = strlen(outBuf);
   outBuf[len++]= EOF;
-  
-  //EEPROM.write(EEPROM_offsetJSON,(byte*) outBuf,len);
   JSONStream.seek();
   size_t res = JSONStream.write((byte*) outBuf,len);
   free (outBuf);
   infoSerial<<res<< F("bytes from ")<<len<<F(" are saved to EEPROM")<<endl;
-}
-
 #else
-void cmdFunctionSave(int arg_cnt, char **args)
-{
-    //aJsonEEPROMStream jsonEEPROMStream = aJsonEEPROMStream(EEPROM_offsetJSON);
-    //flashStream fs = flashStream(EEPROM_offsetJSON);
     JSONStream.seek();
     aJsonStream jsonEEPROMStream = aJsonStream(&JSONStream);
-    
     infoSerial<<F("Saving config to EEPROM..");
-
     aJson.print(root, &jsonEEPROMStream);
     JSONStream.putEOF();
-
-
     infoSerial<<F("Saved to EEPROM")<<endl;
+#endif
 }
 
-#endif
+
+void cmdFunctionLoglevel(int arg_cnt, char **args)
+{
+if (arg_cnt>1)
+        {
+        serialDebugLevel=atoi(args[1]);
+        sysConf.setSerialDebuglevel(serialDebugLevel);
+        }
+
+if (arg_cnt>2)
+        {
+        udpDebugLevel=atoi(args[2]);
+        sysConf.setUdpDebuglevel(udpDebugLevel);
+        }
+infoSerial<<F("Serial debug level:")<<serialDebugLevel<<F("\nSyslog debug level:")<<udpDebugLevel<<endl;
+}
 
 void cmdFunctionIp(int arg_cnt, char **args)
 {
@@ -1367,7 +1365,7 @@ void cmdFunctionPwd(int arg_cnt, char **args)
     if (arg_cnt)
          sysConf.setMQTTpwd(args[1]);
     else sysConf.setMQTTpwd();
-    infoSerial<<F("Password updated\n");
+    infoSerial<<F("MQTT Password updated\n");
 }
 
 void cmdFunctionOTAPwd(int arg_cnt, char **args)
@@ -1375,7 +1373,7 @@ void cmdFunctionOTAPwd(int arg_cnt, char **args)
     if (arg_cnt)
          sysConf.setOTApwd(args[1]);
     else sysConf.setOTApwd();
-    infoSerial<<F("Password updated\n");
+    infoSerial<<F("OTA Password updated\n");
 }
 
 void cmdFunctionSetMac(int arg_cnt, char **args) {
@@ -1393,6 +1391,14 @@ void cmdFunctionSetMac(int arg_cnt, char **args) {
 }
 
 void cmdFunctionGet(int arg_cnt, char **args) {
+if (arg_cnt>1)
+{
+    if (!strcasecmp_P(args[1],ON_P)) sysConf.setLoadHTTPConfig(true);
+    if (!strcasecmp_P(args[1],OFF_P)) sysConf.setLoadHTTPConfig(false);
+    infoSerial<<F("Loading HTTP config on startup:")<<sysConf.getLoadHTTPConfig()<<endl;
+    return;
+}
+
     lanStatus= loadConfigFromHttp(arg_cnt, args);
     ethClient.stop(); //Refresh MQTT connect to get retained info
 }
@@ -1613,7 +1619,9 @@ void TimerHandler(void)
     interrupts();
     timerCount=micros();
      if (configLoaded && !timerHandlerBusy) inputLoop(CHECK_INTERRUPT);
+     #ifdef DMX_SMOOTH
      DMXOUT_propagate();
+     #endif
     timerCount=micros()-timerCount;
     timerHandlerBusy--;
 }
@@ -1632,6 +1640,19 @@ int16_t attachTimer(double microseconds, timerCallback callback, const char* Tim
 #endif
 
 void setup_main() {
+
+  #if (SERIAL_BAUD)
+  debugSerialPort.begin(SERIAL_BAUD);
+  #else 
+
+  #if not defined (__SAM3X8E__)
+  debugSerialPort.begin();
+  #endif
+  delay(1000);
+  #endif
+
+  serialDebugLevel=sysConf.getSerialDebuglevel();
+  udpDebugLevel=sysConf.getUdpDebuglevel();
 
   #if defined(__SAM3X8E__)
   memset(&UniqueID,0,sizeof(UniqueID));
@@ -1943,7 +1964,8 @@ if (!sysConf.getMAC()) {
 }
 
 void setupCmdArduino() {
-    cmdInit(uint32_t(SERIAL_BAUD));
+    //cmdInit(uint32_t(SERIAL_BAUD));
+    cmdInit();
     debugSerial<<(F(">>>"));
     cmdAdd("help", cmdFunctionHelp);
     cmdAdd("save", cmdFunctionSave);
@@ -1959,6 +1981,7 @@ void setupCmdArduino() {
     cmdAdd("otapwd", cmdFunctionOTAPwd);
     cmdAdd("clear",cmdFunctionClearEEPROM);
     cmdAdd("reboot",cmdFunctionReboot);
+    cmdAdd("log",cmdFunctionLoglevel);
 }
 
 void loop_main() { 
@@ -1983,7 +2006,11 @@ void loop_main() {
 
 #ifdef _artnet
         yield();
-        if (artnet) artnet->read();  ///hung
+        if (artnet) artnet->read();  ///hung if network not initialized
+#endif
+#ifdef MDNS_ENABLE
+        yield();
+        mdns.run();
 #endif
     }
 
@@ -2011,9 +2038,7 @@ void loop_main() {
     dmxout.update();
 #endif
 
-#ifdef MDNS_ENABLE
-        mdns.run();
-#endif
+
 }
 
 void owIdle(void) {
@@ -2044,27 +2069,32 @@ ethernetIdleCount--;
 };
 
 void modbusIdle(void) {
+    wdt_res();
     statusLED.poll();
     yield();
     cmdPoll();
-    wdt_res();
-    if (lanLoop() > HAVE_IP_ADDRESS) {
+    yield();
+    inputLoop(CHECK_INPUT);
+
+    if (lanLoop() > HAVE_IP_ADDRESS) 
+    { // Begin network runners
         yield();
         mqttClient.loop();
 #ifdef _artnet
         if (artnet) artnet->read();
 #endif
+#if defined(OTA)
         yield();
-        inputLoop(CHECK_INPUT);
-    }
+        ArduinoOTA.poll();
+#endif
 #ifdef MDNS_ENABLE
         mdns.run();
-#endif
+#endif        
+    } //End network runners
 
 #ifdef _dmxin
     DMXCheck();
 #endif
-
 #if defined (_espdmx)
     dmxout.update();
 #endif

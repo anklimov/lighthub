@@ -300,9 +300,9 @@ void Input::counterPoll() {
             short real_pin = mega_interrupt_array[interrupt_number];
             attachInterruptPinIrq(real_pin,interrupt_number);
         } else {
-            Serial.print(F("IRQ:"));
-            Serial.print(pin);
-            Serial.print(F(" Counter type. INCORRECT Interrupt number!!!"));
+            debugSerial.print(F("IRQ:"));
+            debugSerial.print(pin);
+            debugSerial.print(F(" Counter type. INCORRECT Interrupt number!!!"));
             return;
         }
 #endif
@@ -365,7 +365,7 @@ void Input::attachInterruptPinIrq(int realPin, int irq) {
                 attachInterrupt(real_irq, onCounterChanged5, RISING);
                 break;
         default:
-            Serial.print(F("Incorrect irq:"));Serial.println(irq);
+            debugSerial.print(F("Incorrect irq:"));debugSerial.println(irq);
             break;
         }
 }

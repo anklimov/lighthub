@@ -82,8 +82,8 @@ void out_AC::InsertData(byte data[], size_t size){
   }
   */
 
-  Serial.print ("Power=");
-  Serial.println(power);
+  debugSerial.print ("Power=");
+  debugSerial.println(power);
 
   if (power & 0x08)
       publishTopic(item->itemArr->name, "ON", "/quiet");
@@ -189,7 +189,7 @@ void SendData(byte req[], size_t size){
   AC_Serial.write(req, size - 1);
   AC_Serial.write(getCRC(req, size-1));
   AC_Serial.flush();
-
+/*
  Serial.print("<<");
   for (int i=0; i < size-1; i++)
   {
@@ -203,6 +203,7 @@ void SendData(byte req[], size_t size){
              }
   }
 Serial.println();
+*/
 }
 
 inline unsigned char toHex( char ch ){
@@ -214,7 +215,7 @@ inline unsigned char toHex( char ch ){
 int  out_AC::Setup()
 {
 abstractOut::Setup();    
-Serial.println("AC Init");
+debugSerial.println("AC Init");
 AC_Serial.begin(9600);
 driverStatus = CST_INITIALIZED;
 return 1;
@@ -222,7 +223,7 @@ return 1;
 
 int  out_AC::Stop()
 {
-Serial.println("AC De-Init");
+debugSerial.println("AC De-Init");
 
 driverStatus = CST_UNKNOWN;
 return 1;
@@ -246,7 +247,7 @@ if (cause!=POLLING_SLOW) return 0;
   //if (now - prevPolling > INTERVAL_AC_POLLING) {
   if (isTimeOver(prevPolling,millis(),INTERVAL_AC_POLLING)) {
     prevPolling = millisNZ();
-    Serial.println ("Polling");
+    debugSerial.println ("Polling");
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
 delay(100);

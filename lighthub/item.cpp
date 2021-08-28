@@ -653,6 +653,7 @@ return false;
 //Main routine to control Item
 int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
 {
+  uint32_t time=millis();  
   int suffixCode = cmd.getSuffix();
   bool operation = isNotRetainingStatus();
   
@@ -730,7 +731,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                                      toExecute=true;
                                      scale100=true;  //openHab topic format
                                      chActive=(isActive()>0);
-
+                                        debugSerial<<chActive<<" "<<cmd.getInt()<<endl;
                                      if (chActive>0 && !cmd.getInt()) {cmd.Cmd(CMD_OFF);status2Send |= SEND_COMMAND | SEND_IMMEDIATE;}
                                      if (chActive==0 && cmd.getInt()) {cmd.Cmd(CMD_ON);status2Send |= SEND_COMMAND | SEND_IMMEDIATE;}
             
@@ -1132,7 +1133,7 @@ switch (itemType) {
  if (command2Set) setCmd(command2Set | SEND_COMMAND);
  if (operation) SendStatus(status2Send);
 
-debugSerial<<F("Ctrl Res:")<<res<<endl; 
+debugSerial<<F("Ctrl Res:")<<res<<F(" time:")<<millis()-time<<endl; 
 return res; 
 }
 

@@ -12,3 +12,15 @@
 -DARDUINO_OTA_MDNS_DISABLE
 -DMDNS_ENABLE
 -DTIMER_INT
+
+#Put modbus exchange in debug hex dump 
+#-DMODBUS_DEBUG
+
+#Uncomment next 3 lines  (or add it to custom build flags) to use Native USB port for debug/CLI instead Serial
+#-DdebugSerialPort=SerialUSB
+#-DSerialPortType=Serial_
+#-DSERIAL_BAUD=0
+
+#Default SerialDebug settings
+#-DSERIAL_BAUD=115200
+#-DdebugSerialPort=Serial

@@ -39,14 +39,14 @@ DMXESPSerial dmxout;
 uint8_t * DMXin = NULL;
 
 #ifdef DMX_SMOOTH
-uint8_t * DMXinterimBuf = NULL;
-uint16_t DMXOUT_Channels=0;
-uint32_t checkTimestamp=0L;
+volatile uint8_t * DMXinterimBuf = NULL;
+volatile uint16_t DMXOUT_Channels=0;
+volatile uint32_t checkTimestamp=0L;
 #endif
 
-int D_State=0;
+volatile uint32_t D_State=0;
 
-unsigned long D_checkT=0;
+volatile unsigned long D_checkT=0;
 
 #ifdef _artnet
 #include <Artnet.h>
@@ -123,6 +123,7 @@ void DMXSemiImmediateUpdate(short tch,short trh, int val)
 
 void DMXput(void)
 {
+if (!DMXin) return;  
 for (short tch=0; tch<=3 ; tch++)
     {
     short base = tch*4;
@@ -130,34 +131,44 @@ for (short tch=0; tch<=3 ; tch++)
     }
 };
 
+extern volatile uint8_t timerHandlerBusy;
+volatile int DMXinDoublecheck=0;
 
 void DMXUpdate(void)
 {
 #if defined(_dmxin)
 int t;
 if(!DMXin) return;
+
 #if defined(__SAM3X8E__)
 if (dmxin.getRxLength()<16) return;
 #endif
 for (short tch=0; tch<=3 ; tch++)
     {
     short base = tch*4;
-    bool updated = 0;
+    bool updated   = 0;
+    bool confirmed = 0;
 
     for (short trh=0; trh<4 ; trh++)
-    if ((t=dmxin.read(base+trh+1)) != DMXin[base+trh])
+    if (((t=dmxin.read(base+trh+1)) != DMXin[base+trh]))
       {
-        D_State |= (1<<tch);
         updated=1;
-        //Serial.print("onContactChanged :"); Serial.print(DMXin[tch*4+trh]); Serial.print(" => "); Serial.print(t);Serial.println();
-        DMXin[base+trh]=t;
-        //DMXImmediateUpdate(tch,trh,t);
-        //break;
-      }
+         if (DMXinDoublecheck>2)
+           {
+            D_State |= (1<<tch);
+            DMXin[base+trh]=t;
+            confirmed = 1;
+           }
+      } 
 
-     if (updated)
+    if (updated) DMXinDoublecheck++; else DMXinDoublecheck=0;
+
+
+     if (confirmed)
         {
+
         DMXImmediateUpdate(tch,DMXin[base],DMXin[base+1],DMXin[base+2],DMXin[base+3]);
+        //for (int i=1; i<17; i++) {debugSerial.print(dmxin.read(i));debugSerial.print("-");};debugSerial.print("|");
         D_checkT=millisNZ();
         }
     }
@@ -191,11 +202,14 @@ D_checkT=0;
 
 // Here code for network update
 //int ch = 0;
+
 DMXput();
+
 #ifdef _dmxout
-for (int i=1; i<17; i++) {Serial.print(dmxin.read(i));Serial.print(";");}
+for (int i=1; i<17; i++) {debugSerial.print(dmxin.read(i));debugSerial.print(";");}
+debugSerial.println();
 #endif
-       Serial.println();
+
 #endif
 }
 
@@ -221,7 +235,7 @@ void DMXinSetup(int channels)
    DMXin = new uint8_t [channels];
 #if defined(ARDUINO_ARCH_AVR)
    DMXSerial.init(DMXReceiver,0,channels);
-    if (DMXSerial.getBuffer()) {Serial.print(F("Init in ch:"));Serial.println(channels);} else Serial.println(F("DMXin Buffer alloc err"));
+    if (DMXSerial.getBuffer()) {debugSerial.print(F("Init in ch:"));debugSerial.println(channels);} else debugSerial.println(F("DMXin Buffer alloc err"));
    //DMXSerial.maxChannel(channels);
    DMXSerial.attachOnUpdate(&DMXUpdate);
 #endif
@@ -271,36 +285,41 @@ debugSerial<<F("DMXInterim. Free:")<<freeRam()<<endl;
 #endif
 }
 
+volatile int8_t propagateBusy = 0;
 void DMXOUT_propagate()
 {
   #ifdef DMX_SMOOTH
+  if (propagateBusy) return;
+  propagateBusy++;
   uint32_t now = millis();
   //if (now<checkTimestamp) return;
-  if (!isTimeOver(checkTimestamp,now,DMX_SMOOTH_DELAY)) return;
-
-  for(int i=1;i<=DMXOUT_Channels;i++)
+  if (isTimeOver(checkTimestamp,now,DMX_SMOOTH_DELAY)) 
   {
-  uint8_t currLevel=dmxout.getTx(i);
-  int32_t delta = currLevel-DMXinterimBuf[i-1];
-  if (delta)
-        {
-        uint16_t step  = abs(delta) >> 4;
-        if (!step) step=1;
+      for(int i=1;i<=DMXOUT_Channels;i++)
+      {
+      uint8_t currLevel=dmxout.getTx(i);
+      int32_t delta = currLevel-DMXinterimBuf[i-1];
+      if (delta)
+            {
+            uint16_t step  = abs(delta) >> 4;
+            if (!step) step=1;
 
-        if (delta<0)
-                        {
-                          DmxWrite2(i,currLevel+step);
-                          //debugSerial<<"<";
-                          }
+            if (delta<0)
+                            {
+                              DmxWrite2(i,currLevel+step);
+                              //debugSerial<<"<";
+                              }
 
-        if (delta>0)
-                        {
-                          DmxWrite2(i,currLevel-step);
-                          //debugSerial<<">";
-                          }
-        }
+            if (delta>0)
+                            {
+                              DmxWrite2(i,currLevel-step);
+                              //debugSerial<<">";
+                              }
+            }
+      }
+      checkTimestamp=now;
   }
-  checkTimestamp=now;
+  propagateBusy--;
   #endif
 }
 

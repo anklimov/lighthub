@@ -50,7 +50,7 @@ int  out_Motor::Setup()
 {
 abstractOut::Setup();    
 getConfig();
-Serial.println("Motor Init");
+debugSerial.println("Motor Init");
 pinMode(pinUp,OUTPUT);
 pinMode(pinDown,OUTPUT);
 
@@ -70,7 +70,7 @@ return 1;
 
 int  out_Motor::Stop()
 {
-Serial.println("Motor De-Init");
+debugSerial.println("Motor De-Init");
 digitalWrite(pinUp,INACTIVE);
 digitalWrite(pinDown,INACTIVE);
 
@@ -240,7 +240,7 @@ else
 
 }
 else //Target zone
-{ Serial.println("Target");
+{ debugSerial.println("Target");
   digitalWrite(pinUp,INACTIVE);
   digitalWrite(pinDown,INACTIVE);
   item->setExt(0);

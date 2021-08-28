@@ -45,7 +45,7 @@ int  out_SPILed::Setup()
 {
 abstractOut::Setup();    
 getConfig();
-Serial.println("SPI-LED Init");
+debugSerial.println("SPI-LED Init");
 
 if (!leds)
 {
@@ -69,7 +69,7 @@ return 1;
 
 int  out_SPILed::Stop()
 {
-Serial.println("SPI-LED De-Init");
+debugSerial.println("SPI-LED De-Init");
 //FastLED.addLeds<TM1809, DATA_PIN, BRG>(leds, NUM_LEDS);
 #ifdef ADAFRUIT_LED
 leds->clear();
