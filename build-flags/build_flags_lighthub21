@@ -24,3 +24,5 @@
 #Default SerialDebug settings
 #-DSERIAL_BAUD=115200
 #-DdebugSerialPort=Serial
+
+-DRESTART_LAN_ON_MQTT_ERRORS

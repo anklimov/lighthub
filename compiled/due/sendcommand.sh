@@ -1,0 +1,2 @@
+#../tools/mac/arduinoOTA -address 192.168.88.21 -port 65280 -username arduino -password password -sketch firmware.bin -b -upload /sketch
+curl --basic --user arduino:password --data-ascii "$2" --url http://192.168.88.21:65280/command/$1

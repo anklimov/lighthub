@@ -861,6 +861,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               debugSerial << F("Restored from:") << t << endl;
                               cmd.loadItemDef(this);
                               cmd.Cmd(CMD_ON);    //turning on
+                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
                               break;
                           default:
                               return -3;
@@ -956,6 +957,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               toExecute=true;
                               if (itemType == CH_THERMO) cmd.Cmd(CMD_AUTO); ////
                                   else cmd.Cmd(CMD_ON);    //turning on
+                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE;     
                               break;
                           default:
                               return -3;

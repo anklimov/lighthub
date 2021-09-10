@@ -91,7 +91,7 @@ class systemConfig {
  uint8_t          getSerialDebuglevel();
  uint8_t          getUdpDebuglevel();
 
- void             clear();
+ bool             clear();
  bool             getSaveSuccedConfig();
  bool             setSaveSuccedConfig(bool);
  bool             getLoadHTTPConfig();

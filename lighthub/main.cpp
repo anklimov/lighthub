@@ -27,16 +27,36 @@ e-mail    anklimov@gmail.com
 #include "TimerInterrupt_Generic.h"
 #endif
 
+
+#ifdef SYSLOG_ENABLE
+#include <Syslog.h>
+
+    #ifndef WIFI_ENABLE
+    EthernetUDP udpSyslogClient;
+    #else
+    WiFiUDP udpSyslogClient;
+    #endif
+Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_BSD);
+static char syslogDeviceHostname[16];
+
+Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog);
+Streamlog errorSerial(&debugSerialPort,LOG_ERROR,&udpSyslog,ledRED);
+Streamlog infoSerial (&debugSerialPort,LOG_INFO,&udpSyslog);
+#else
+Streamlog debugSerial(&debugSerialPort,LOG_DEBUG);
+Streamlog errorSerial(&debugSerialPort,LOG_ERROR, ledRED);
+Streamlog infoSerial (&debugSerialPort,LOG_INFO);
+#endif
+
 #if defined(FS_STORAGE)
-flashStream sysConfStream("config.bin"); 
-flashStream JSONStream("config.json"); 
+flashStream sysConfStream("/config.bin"); 
+flashStream JSONStream("/config.json"); 
 #else
 flashStream sysConfStream(SYSCONF_OFFSET,EEPROM_offsetJSON); 
 flashStream JSONStream(EEPROM_offsetJSON,MAX_JSON_CONF_SIZE); 
 #endif
 
 systemConfig sysConf(&sysConfStream);
-
 
 extern long  timer0_overflow_count;	 
 #ifdef WIFI_ENABLE
@@ -64,32 +84,9 @@ EthernetClient ethClient;
 MDNS mdns(mdnsUDP);
 #endif
 
-#ifdef SYSLOG_ENABLE
-#include <Syslog.h>
-
-    #ifndef WIFI_ENABLE
-    EthernetUDP udpSyslogClient;
-    #else
-    WiFiUDP udpSyslogClient;
-    #endif
-Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_BSD);
-//unsigned long timerSyslogPingTime;
-static char syslogDeviceHostname[16];
-
-Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog);
-Streamlog errorSerial(&debugSerialPort,LOG_ERROR,&udpSyslog,ledRED);
-Streamlog infoSerial (&debugSerialPort,LOG_INFO,&udpSyslog);
-#else
-Streamlog debugSerial(&debugSerialPort,LOG_DEBUG);
-Streamlog errorSerial(&debugSerialPort,LOG_ERROR, ledRED);
-Streamlog infoSerial (&debugSerialPort,LOG_INFO);
-#endif
-
 StatusLED statusLED(ledRED);
 
-
 lan_status lanStatus = INITIAL_STATE;
-
 
 const char configserver[] PROGMEM = CONFIG_SERVER;
 const char verval_P[] PROGMEM = QUOTE(PIO_SRC_REV);
@@ -132,20 +129,18 @@ bool owReady = false;
 bool configOk = false; // At least once connected to MQTT
 bool configLoaded = false;
 bool initializedListeners = false;
-int8_t ethernetIdleCount =0;
-int8_t configLocked = 0;
+volatile int8_t ethernetIdleCount =0;
+volatile int8_t configLocked = 0;
 
 #if defined (_modbus)
 ModbusMaster node;
 #endif
 
-//byte mac[6];
-
 PubSubClient mqttClient(ethClient);
 
 bool wifiInitialized;
 
-int mqttErrorRate;
+int8_t mqttErrorRate=0;
 
 #if defined(__SAM3X8E__)
 void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
@@ -286,11 +281,11 @@ int httpHandler(Client& client, String request, long contentLength, bool authori
         
           #ifdef CORS
           client.print(F("Access-Control-Allow-Origin: "));
-          client.println(CORS);
+          client.println(F(CORS));
           #endif
           
         if (response!="") {
-              client.println("Content-Type: text/plain");
+              client.println(F("Content-Type: text/plain"));
               client.println();
               client.println(response);
               }
@@ -846,7 +841,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 #ifdef RESTART_LAN_ON_MQTT_ERRORS
             mqttErrorRate++;
                         if(mqttErrorRate>50){
-                            errorSerial<<F("Too many MQTT connection errors. Restart LAN"));
+                            errorSerial<<F("Too many MQTT connection errors. Restart LAN")<<endl;
                             mqttErrorRate=0;
 #ifdef RESET_PIN
                             resetHard();
@@ -907,7 +902,6 @@ if (WiFi.status() == WL_CONNECTED) {
 */
 #else // Ethernet connection
 
-    //macAddress * mac = sysConf.getMAC();
     IPAddress ip, dns, gw, mask;
     int res = 1;
     infoSerial<<F("Starting lan")<<endl;
@@ -1212,12 +1206,7 @@ void printConfigSummary() {
     infoSerial<<F("\n1-wire ");
     printBool(owArr);
 #endif
-/*
-#ifdef SYSLOG_ENABLE
-    infoSerial<<F("\nudp syslog ");
-    printBool(udpSyslogArr);
-#endif
-*/
+
     infoSerial << endl;
     infoSerial<<F("RAM=")<<freeRam()<<endl;
 }
@@ -1231,6 +1220,7 @@ int loadConfigFromEEPROM()
 {
     char ch;
     infoSerial<<F("Loading Config from EEPROM")<<endl;
+    JSONStream.open('r');
     JSONStream.seek();    
     if (JSONStream.peek() == '{') {
         aJsonStream as = aJsonStream(&JSONStream);
@@ -1271,17 +1261,19 @@ if (arg_cnt>1)
   aJsonStringStream stringStream(NULL, outBuf, MAX_JSON_CONF_SIZE);
   aJson.print(root, &stringStream);
   int len = strlen(outBuf);
-  outBuf[len++]= EOF;
+  outBuf[len++]= 255;
   JSONStream.seek();
   size_t res = JSONStream.write((byte*) outBuf,len);
   free (outBuf);
   infoSerial<<res<< F("bytes from ")<<len<<F(" are saved to EEPROM")<<endl;
 #else
+    JSONStream.open('w');
     JSONStream.seek();
     aJsonStream jsonEEPROMStream = aJsonStream(&JSONStream);
     infoSerial<<F("Saving config to EEPROM..");
     aJson.print(root, &jsonEEPROMStream);
     JSONStream.putEOF();
+    JSONStream.flush();
     infoSerial<<F("Saved to EEPROM")<<endl;
 #endif
 }
@@ -1356,8 +1348,8 @@ void cmdFunctionIp(int arg_cnt, char **args)
 }
 
 void cmdFunctionClearEEPROM(int arg_cnt, char **args){
-   sysConf.clear();
-   infoSerial<<F("EEPROM cleared\n");
+   if (sysConf.clear())
+        infoSerial<<F("EEPROM cleared\n");
 }
 
 void cmdFunctionPwd(int arg_cnt, char **args)
@@ -1651,6 +1643,39 @@ void setup_main() {
   delay(1000);
   #endif
 
+  #ifndef ESP_EEPROM_SIZE
+  #define ESP_EEPROM_SIZE 4096-10
+  #endif
+
+  #if defined (FS_STORAGE)
+    #if defined(FS_PREPARE)
+            //Initialize File System
+            if(SPIFFS.begin(true))
+            {
+                debugSerial<<("SPIFFS Initialize....ok")<<endl;
+            }
+            else
+            {
+                debugSerial<<("SPIFFS Initialization...failed")<<endl;
+            }
+    #endif
+ #else
+    #if defined(ESP8266) || defined(ESP32)
+        EEPROM.begin(ESP_EEPROM_SIZE); 
+        int streamSize = EEPROM.length();
+        JSONStream.setSize(streamSize-EEPROM_offsetJSON);
+        debugSerial<<F("FLASH Init: ")<<streamSize<<endl;
+    #endif
+ #endif
+//Checkin EEPROM integrity (signature)
+
+    if (!sysConf.isValidSysConf()) 
+                {
+                infoSerial<<F("No valid EEPROM data")<<endl;    
+                sysConf.clear();
+                }                   
+  //  scan_i2c_bus();
+
   serialDebugLevel=sysConf.getSerialDebuglevel();
   udpDebugLevel=sysConf.getUdpDebuglevel();
 
@@ -1666,33 +1691,11 @@ void setup_main() {
     setupCmdArduino();
     printFirmwareVersionAndBuildOptions();
 
-    //Checkin EEPROM integrity (signature)
-
-    if (!sysConf.isValidSysConf()) sysConf.clear();                   
-  //  scan_i2c_bus();
-
+    
 #ifdef SD_CARD_INSERTED
     sd_card_w5100_setup();
 #endif
     setupMacAddress();
-/*
-#if defined(ARDUINO_ARCH_ESP8266) 
-      EEPROM.begin(ESP_EEPROM_SIZE);
-#endif
-*/
-
-#if defined(FS_PREPARE)
-
-//Initialize File System
-  if(SPIFFS.begin(true))
-  {
-    debugSerial<<("SPIFFS Initialize....ok")<<endl;
-  }
-  else
-  {
-    debugSerial<<("SPIFFS Initialization...failed")<<endl;
-  }
-#endif
 
 #ifdef _modbus
         #ifdef CONTROLLINO
@@ -1735,7 +1738,6 @@ void setup_main() {
 #endif
 
     delay(LAN_INIT_DELAY);//for LAN-shield initializing
-    //TODO: checkForRemoteSketchUpdate();
 
     #if defined(W5500_CS_PIN) && ! defined(WIFI_ENABLE)
         Ethernet.init(W5500_CS_PIN);
@@ -2064,7 +2066,9 @@ void ethernetIdle(void){
 ethernetIdleCount++;
     wdt_res();
     yield();
-    inputLoop(CHECK_INPUT);
+    inputLoop(CHECK_INTERRUPT);
+    yield();
+    cmdPoll();
 ethernetIdleCount--;
 };
 

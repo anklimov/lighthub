@@ -13,3 +13,4 @@
 -DCORS=\"http://lazyhome.ru\"
 -DTIMER_INT
 
+-DRESTART_LAN_ON_MQTT_ERRORS

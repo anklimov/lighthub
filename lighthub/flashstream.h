@@ -56,18 +56,49 @@ class flashStream : public seekableStream
 {
 private:
  File fs;
+ String filename;
+ char openedMode;
+
 public:
 flashStream(String _filename):seekableStream(65535) 
             {
-                fs = SPIFFS.open(_filename, "a+");
-                if (!fs) SPIFFS.open(_filename, "w+");
-            }  
-   virtual int available() { return fs.available();  };
-   virtual int read() {return fs.read();};
-   virtual int peek() { return fs.peek();};
-   virtual unsigned int seek(unsigned int _pos = 0){return fs.seek(_pos,SeekSet);};         
-   virtual void flush() {return fs.flush();};
-   virtual size_t write(uint8_t ch) {return fs.write(ch);};
+                filename=_filename;
+                openedMode='\0';
+                open('r');
+            } 
+
+   int open(char mode='\0') 
+            {   
+               if (!mode  && openedMode) mode=openedMode;
+               if (!mode  && !openedMode) mode='r'; 
+               if (openedMode!=mode)
+                 { 
+                  char modestr[2];
+                  modestr[0]=mode;modestr[1]=0;  
+
+                  unsigned int savedPos=fs.position();
+                  if (fs) fs.close();
+
+                  if (fs =  SPIFFS.open(filename,modestr))
+                     {
+                        openedMode=mode;
+                        fs.seek(savedPos);
+                        debugSerial<<("Opened/")<<modestr<<(":")<<filename<<endl;
+                     }
+                  else 
+                     {
+                         openedMode='\0';  
+                         debugSerial<<("Open error/")<<modestr<<(":")<<filename<<endl; 
+                     }   
+            }
+       return fs;
+    }                  
+   virtual int available() { if (!fs) return 0; return fs.available();  };
+   virtual int read() {open('r');return fs.read();};
+   virtual int peek() {open('r'); return fs.peek();};
+   virtual unsigned int seek(unsigned int _pos = 0){return open();fs.seek(_pos,SeekSet);};         
+   virtual void flush() {fs.flush(); open('r'); };
+   virtual size_t write(uint8_t ch) {open('w'); return fs.write(ch);};
    using Print::write;
    void putEOF(){write (255);};
 virtual ~flashStream () {if (fs) fs.close();} ;
@@ -87,23 +118,26 @@ public:
 flashStream(unsigned int _startPos=0, unsigned int _size=4096 ):seekableStream(_size) 
             {
             pos = _startPos; startPos = _startPos; 
-             #if defined(ESP8266)
-             size_t len = EEPROM.length();
-             if (len) EEPROM.commit();
-             EEPROM.begin(len+streamSize); //Re-init
-             #endif
+
             };
+
+    void setSize(unsigned int _size) {streamSize=_size;}; 
+    int  open(bool write=false) {return 1;};       
 
     virtual unsigned int seek(unsigned int _pos = 0) 
         {   pos=min(startPos+_pos, startPos+streamSize);
-            //debugSerial<<F("Seek:")<<pos<<endl;
+            debugSerial<<F("Seek:")<<pos<<endl;
             return pos;
         };
-    virtual int available() { return (pos<streamSize);};
+    virtual int available() { 
+            //debugSerial<<pos<<"%"<<streamSize<<";"; 
+            return (pos<streamSize);
+            };
     virtual int read() 
             {
                 int ch = peek(); 
                 pos++; 
+                //debugSerial<<"<"<<(char)ch;
                 return ch;
                 };
     virtual int peek() 
@@ -113,22 +147,33 @@ flashStream(unsigned int _startPos=0, unsigned int _size=4096 ):seekableStream(_
                 else return -1;    
             };
    virtual void flush() {
-        #if defined(ESP8266)
-        EEPROM.commit();
+        #if defined(ESP8266) || defined(ESP32)
+        if (EEPROM.commitReset())
+                infoSerial<<"Commited to FLASH"<<endl;
+        else    errorSerial<<"Commit error. len:"<<EEPROM.length()<<endl;       
         #endif
    };
           
    virtual size_t write(uint8_t ch) 
             {
-                #if defined(__AVR__)
+                //debugSerial<<">"<<(char)ch;
+               #if defined(__AVR__)
                   EEPROM.update(pos++,(char)ch);
                   return 1;
-                #endif   
+               #elif  defined(__SAM3X8E__)
+                  return EEPROM.write(pos++,(char)ch);
+               #else 
+                  EEPROM.write(pos++,(char)ch);
+                  return 1;  
+               #endif   
 
-                #if defined(__SAM3X8E__)
-                return EEPROM.write(pos++,(char)ch);
-                #endif   
-            return 0;                
+     //           #if defined(__SAM3X8E__)
+     //           return EEPROM.write(pos++,(char)ch);
+     //           #else
+     //           EEPROM.update(pos++,(char)ch);
+     //           return 1;
+     //           #endif   
+     //       return 0;                
             };
     
    #if defined(__SAM3X8E__)
@@ -143,7 +188,7 @@ flashStream(unsigned int _startPos=0, unsigned int _size=4096 ):seekableStream(_
    using Print::write;//(const uint8_t *buffer, size_t size);         
    #endif          
     void putEOF(){write (255);
-    #if defined(ESP8266)
+    #if defined(ESP8266) || defined(ESP32)
     EEPROM.commit();
     #endif
     };

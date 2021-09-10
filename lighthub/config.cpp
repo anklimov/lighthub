@@ -4,6 +4,7 @@
 bool             systemConfig::isValidSysConf()
 {    
      if (!stream) return false; 
+     stream->open('r');
      stream->seek(offsetof(systemConfigData,signature));
      for (int i=0;i<sizeof(systemConfigData::signature);i++)
         if (stream->read()!=EEPROM_signature[i])
@@ -17,6 +18,7 @@ bool             systemConfig::isValidSysConf()
   bool             systemConfig::getMAC()
  { 
     if (!stream || !isValidSysConf()) return false; 
+    stream->open('r');
     stream->seek(offsetof(systemConfigData,mac));
 
     bool isMacValid = false; 
@@ -30,16 +32,18 @@ bool             systemConfig::isValidSysConf()
   bool             systemConfig::setMAC(macAddress& _mac)
  {
    if (!stream || !isValidSysConf()) return false;    
+   stream->open('w');
    stream->seek(offsetof(systemConfigData,mac));
    stream->write ((const uint8_t *)&_mac,sizeof(_mac));
    memcpy(mac, _mac, sizeof(mac));
-
+   stream->flush();
   return true;
  }
 
   char *             systemConfig::getMQTTpwd(char * buffer, uint16_t bufLen)
  {
     if (!stream || !isValidSysConf()) return NULL; 
+    stream->open('r');
     stream->seek(offsetof(systemConfigData,MQTTpwd));   
      short bytes=stream->readBytesUntil(0,buffer,bufLen-1);
     if (bytes) 
@@ -52,16 +56,20 @@ bool             systemConfig::isValidSysConf()
  
  bool             systemConfig::setMQTTpwd(char * pwd)
  {
-    if (!stream || !isValidSysConf() || (strlen(pwd)>=sizeof(systemConfigData::MQTTpwd))) return false; 
+    if (!stream || !isValidSysConf() || (strlen(pwd)>=sizeof(systemConfigData::MQTTpwd))) return false;
+    stream->open('w'); 
     stream->seek(offsetof(systemConfigData,MQTTpwd));   
-    stream->print(pwd);   
-    return stream->write((uint8_t)'\0');
+    stream->print(pwd); 
+    int bytes = stream->write((uint8_t)'\0');
+    stream->flush();  
+    return bytes;
  }
 
 
   char *             systemConfig::getOTApwd(char * buffer, uint16_t bufLen)
  {
     if (!stream || !isValidSysConf()) return NULL; 
+    stream->open('r');
     stream->seek(offsetof(systemConfigData,OTApwd));   
     short bytes=stream->readBytesUntil(0,buffer,bufLen-1);
     if (bytes) 
@@ -75,15 +83,19 @@ bool             systemConfig::isValidSysConf()
  bool             systemConfig::setOTApwd(char * pwd)
  {
      if (!stream || !isValidSysConf() || (strlen(pwd)>=sizeof(systemConfigData::OTApwd))) return false; 
+    stream->open('w'); 
     stream->seek(offsetof(systemConfigData,OTApwd));   
     stream->print(pwd);   
-    return stream->write((uint8_t)'\0');
+    int bytes = stream->write((uint8_t)'\0');
+    stream->flush();  
+    return bytes;
  }
  
 
   char *          systemConfig::getServer(char * buffer, uint16_t bufLen)
  {
   if (!stream || !isValidSysConf()) return NULL; 
+    stream->open('r');
     stream->seek(offsetof(systemConfigData,configURL));   
     short bytes=stream->readBytesUntil(0,buffer,bufLen-1);
     if (bytes) 
@@ -97,9 +109,12 @@ bool             systemConfig::isValidSysConf()
  bool             systemConfig::setServer(char* url)
  {
   if (!stream || !isValidSysConf() || (strlen(url)>=sizeof(systemConfigData::configURL))) return false; 
+    stream->open('w');
     stream->seek(offsetof(systemConfigData,configURL));   
     stream->print(url);   
-    return stream->write((uint8_t)'\0');
+    int bytes = stream->write((uint8_t)'\0');
+    stream->flush();  
+    return bytes;
  }
   
 
@@ -107,6 +122,7 @@ bool             systemConfig::isValidSysConf()
  {
     uint32_t addr;
     if (!stream || !isValidSysConf()) return false; 
+    stream->open('r');
     stream->seek(offsetof(systemConfigData,ip));   
     stream->readBytes((uint8_t *) &addr,4);
     ip=addr;
@@ -117,6 +133,7 @@ bool             systemConfig::isValidSysConf()
  {
      uint32_t addr;
     if (!stream || !isValidSysConf()) return false; 
+    stream->open('r');
     stream->seek(offsetof(systemConfigData,mask));   
     stream->readBytes((uint8_t *) &addr,4);
     mask=addr;
@@ -126,6 +143,7 @@ bool             systemConfig::isValidSysConf()
  bool             systemConfig::getDNS(IPAddress& dns)
  {   uint32_t addr;
     if (!stream || !isValidSysConf()) return false; 
+    stream->open('r');
     stream->seek(offsetof(systemConfigData,dns));   
     stream->readBytes((uint8_t *) &addr,4);
     dns = addr;
@@ -135,6 +153,7 @@ bool             systemConfig::isValidSysConf()
  bool             systemConfig::getGW(IPAddress& gw)
  {   uint32_t addr;
     if (!stream || !isValidSysConf()) return false; 
+    stream->open('r');
     stream->seek(offsetof(systemConfigData,gw));   
     stream->readBytes((uint8_t *) &addr,4);
     gw=addr;
@@ -145,36 +164,49 @@ bool             systemConfig::isValidSysConf()
  bool             systemConfig::setIP(IPAddress& ip)
  {  uint32_t addr=ip;
   if (!stream || !isValidSysConf()) return false; 
-    stream->seek(offsetof(systemConfigData,ip));   
-    return stream->write((uint8_t *) &addr, 4);   
+    stream->open('r');
+    stream->seek(offsetof(systemConfigData,ip));
+    int bytes = stream->write((uint8_t *) &addr, 4);
+    stream->flush();  
+    return bytes;      
  }
  
  bool             systemConfig::setMask(IPAddress& mask)
  {  uint32_t addr = mask;
   if (!stream || !isValidSysConf()) return false; 
+    stream->open('w');
     stream->seek(offsetof(systemConfigData,mask));   
-    return stream->write((uint8_t *) &addr, 4);   
+    int bytes = stream->write((uint8_t *) &addr, 4);
+    stream->flush();  
+    return bytes;    
  }
  
  bool             systemConfig::setDNS(IPAddress& dns)
  {  uint32_t addr = dns;
   if (!stream || !isValidSysConf()) return false; 
+    stream->open('w');
     stream->seek(offsetof(systemConfigData,dns));   
-    return stream->write((uint8_t *) &addr, 4);  
+    int bytes = stream->write((uint8_t *) &addr, 4);
+    stream->flush();  
+    return bytes;   
 
  }
  
  bool             systemConfig::setGW(IPAddress& gw)
  { uint32_t addr = gw;
   if (!stream || !isValidSysConf()) return false; 
+    stream->open('w');
     stream->seek(offsetof(systemConfigData,gw));   
-    return stream->write((uint8_t *) &addr, 4);   
+    int bytes = stream->write((uint8_t *) &addr, 4);
+    stream->flush();  
+    return bytes;   
  }
  
 
- void             systemConfig::clear()
+ bool             systemConfig::clear()
  {
-   if (!stream) return ; 
+   if (!stream) return false; 
+    stream->open('w');
     stream->seek(0);
      for (unsigned int i = 0; i < stream->getSize(); i++) {
         stream->write((uint8_t)'\0');
@@ -183,6 +215,7 @@ bool             systemConfig::isValidSysConf()
      for (unsigned int i=0;i<sizeof(systemConfigData::signature);i++)
         if (stream->write(EEPROM_signature[i]));
     stream->flush();
+    return true;
  }
  
 ///
