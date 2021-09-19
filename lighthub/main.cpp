@@ -48,6 +48,7 @@ Streamlog errorSerial(&debugSerialPort,LOG_ERROR, ledRED);
 Streamlog infoSerial (&debugSerialPort,LOG_INFO);
 #endif
 
+/*
 #if defined(FS_STORAGE)
 flashStream sysConfStream("/config.bin"); 
 flashStream JSONStream("/config.json"); 
@@ -55,6 +56,9 @@ flashStream JSONStream("/config.json");
 flashStream sysConfStream(SYSCONF_OFFSET,EEPROM_offsetJSON); 
 flashStream JSONStream(EEPROM_offsetJSON,MAX_JSON_CONF_SIZE); 
 #endif
+*/
+
+flashStream sysConfStream();
 
 systemConfig sysConf(&sysConfStream);
 
@@ -257,6 +261,8 @@ int httpHandler(Client& client, String request, long contentLength, bool authori
 
          itemCmd ic;
          ic.loadItem(&item,SEND_COMMAND|SEND_PARAMETERS);
+         if (item.itemType == CH_GROUP)
+           {if (item.isActive()) item.setCmd(CMD_ON); else item.setCmd(CMD_OFF);} 
          char buf[32];
          response=ic.toString(buf, sizeof(buf));
         
@@ -270,7 +276,7 @@ int httpHandler(Client& client, String request, long contentLength, bool authori
         request+=body;
 
         debugSerial<<F("Cmd: ")<<request<<endl;
-        if (request=="reboot") client.stop();
+        if (request=="reboot ") client.stop();
         const char* res=request.c_str();
         cmd_parse((char*) res);        
         } 
@@ -408,7 +414,7 @@ if (element && element->type == aJson_String) return element->valuestring;
                         }
 
             debugSerial<<passwordBuf<<endl;            
-            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", passwordBuf, InternalStorage, sysConfStream, JSONStream);
+            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", passwordBuf, InternalStorage, sysConfStream);//, JSONStream);
             ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
@@ -518,7 +524,12 @@ lan_status lanLoop() {
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
             wdt_res();
             statusLED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
-            ip_ready_config_loaded_connecting_to_broker();
+            if (!mqttArr || ((aJson.getArraySize(mqttArr)) < 2)) 
+                {
+                infoSerial<<F("No MQTT configured")<<endl;    
+                lanStatus=OPERATION_NO_MQTT;
+                } 
+            else ip_ready_config_loaded_connecting_to_broker();
             break;
 
         case RETAINING_COLLECTING:
@@ -579,7 +590,9 @@ lan_status lanLoop() {
             }
             break;
 
-        case DO_NOTHING:;
+        case DO_NOTHING:
+        case OPERATION_NO_MQTT:
+        ;
     }
 
 
@@ -614,7 +627,7 @@ lan_status lanLoop() {
 
                 case DHCP_CHECK_REBIND_FAIL:
                     errorSerial<<F("Error: rebind fail")<<endl;
-                    if (mqttClient.connected()) mqttClient.disconnect();
+              ///      if (mqttClient.connected()) mqttClient.disconnect(); ??
                     //timerLanCheckTime = millis();// + 1000;
                     lanStatus = DO_REINIT;
                     break;
@@ -1220,14 +1233,21 @@ int loadConfigFromEEPROM()
 {
     char ch;
     infoSerial<<F("Loading Config from EEPROM")<<endl;
-    JSONStream.open('r');
-    JSONStream.seek();    
+    #if defined(FS_STORAGE)
+    sysConfStream.open("/config.json",'r');
+    #else
+    sysConfStream.open(EEPROM_offsetJSON,'r');
+    #endif
+
+    //JSONStream.seek();    
     if (JSONStream.peek() == '{') {
         aJsonStream as = aJsonStream(&JSONStream);
         cleanConf();
         root = aJson.parse(&as);
+        sysConfStream.close();
         if (!root) {
             errorSerial<<F("load failed")<<endl;
+        //    sysConfStream.close();
             return 0;
         }
         infoSerial<<F("Loaded")<<endl;
@@ -1235,8 +1255,9 @@ int loadConfigFromEEPROM()
         ethClient.stop(); //Refresh MQTT connect to get retained info
         return 1;
     } else {
-        JSONStream.write(255); //truncate garbage
+        JSONStream.writeEOF(); //truncate garbage
         infoSerial<<F("No stored config")<<endl;
+        sysConfStream.close();
         return 0;
     }
     return 0;
@@ -1251,10 +1272,17 @@ if (arg_cnt>1)
     infoSerial<<F("Config autosave:")<<sysConf.getSaveSuccedConfig()<<endl;
     return;
 }
+    #if defined(FS_STORAGE)
+    sysConfStream.open("/config.json",'w');
+    #else
+    sysConfStream.open(EEPROM_offsetJSON,'w');
+    #endif
+
 #if defined(__SAM3X8E__) 
   char* outBuf = (char*) malloc(MAX_JSON_CONF_SIZE); /* XXX: Dynamic size. */
   if (outBuf == NULL)
     {
+      sysConfStream.close();  
       return;
     }
   infoSerial<<F("Saving config to EEPROM..")<<endl;
@@ -1267,13 +1295,13 @@ if (arg_cnt>1)
   free (outBuf);
   infoSerial<<res<< F("bytes from ")<<len<<F(" are saved to EEPROM")<<endl;
 #else
-    JSONStream.open('w');
-    JSONStream.seek();
+    //JSONStream.open('w');
+    //JSONStream.seek();
     aJsonStream jsonEEPROMStream = aJsonStream(&JSONStream);
     infoSerial<<F("Saving config to EEPROM..");
     aJson.print(root, &jsonEEPROMStream);
     JSONStream.putEOF();
-    JSONStream.flush();
+    JSONStream.close();
     infoSerial<<F("Saved to EEPROM")<<endl;
 #endif
 }

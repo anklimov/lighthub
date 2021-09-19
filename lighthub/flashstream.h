@@ -44,21 +44,25 @@ extern NRFFlashStorage EEPROM;
 class seekableStream : public Stream 
 {
 protected:    
-unsigned int streamSize;       
+unsigned int streamSize;  
+bool textMode;
+
 public:
 seekableStream(unsigned int size):Stream(),streamSize(size) {};
 unsigned int getSize() {return streamSize;}
 virtual unsigned int seek(unsigned int _pos = 0) = 0;
+virtual int  open(unsigned int _startPos=0, unsigned int _size=4096, char mode='\0') = 0;
+virtual int  open(String _filename, char mode='\0') = 0; 
+virtual void close() = 0;
 };
 
 #if defined(FS_STORAGE)
 class flashStream : public seekableStream
 {
 private:
- File fs;
- String filename;
- char openedMode;
-
+String       filename; 
+char         openedMode; 
+File         fs;
 public:
 flashStream(String _filename):seekableStream(65535) 
             {
@@ -66,8 +70,12 @@ flashStream(String _filename):seekableStream(65535)
                 openedMode='\0';
                 open('r');
             } 
-
-   int open(char mode='\0') 
+   virtual int open(String _filename, char mode='\0') 
+   {
+       textMode = _filename suffix == txt or json
+       open file
+   }; 
+   virtual int open(char mode='\0') 
             {   
                if (!mode  && openedMode) mode=openedMode;
                if (!mode  && !openedMode) mode='r'; 
@@ -97,7 +105,7 @@ flashStream(String _filename):seekableStream(65535)
    virtual int read() {open('r');return fs.read();};
    virtual int peek() {open('r'); return fs.peek();};
    virtual unsigned int seek(unsigned int _pos = 0){return open();fs.seek(_pos,SeekSet);};         
-   virtual void flush() {fs.flush(); open('r'); };
+   virtual void close() {fs.flush(); open('r'); };
    virtual size_t write(uint8_t ch) {open('w'); return fs.write(ch);};
    using Print::write;
    void putEOF(){write (255);};
@@ -117,15 +125,44 @@ unsigned int startPos;
 public:
 flashStream(unsigned int _startPos=0, unsigned int _size=4096 ):seekableStream(_size) 
             {
-            pos = _startPos; startPos = _startPos; 
+            pos = 0; startPos = _startPos; 
 
             };
 
     void setSize(unsigned int _size) {streamSize=_size;}; 
-    int  open(bool write=false) {return 1;};       
+
+    virtual int open(String _filename, char mode='\0') 
+                {
+                  if (_filename == "config.json")
+                    {
+                        pos = 0;
+                        streamSize = _size;  
+                        startPos = EEPROM_offsetJSON;
+                        textMode = true;
+
+                        return 1;    
+                    }
+                  else if (_filename == "config.bin")
+                    {
+                        pos = 0;
+                        startPos = SYSCONF_OFFSET;
+                        streamSize = SYSCONF_SIZE;
+                        textMode =false;
+                        return 1;
+                    }
+                  else return 0;    
+                };
+
+    virtual int  open(unsigned int _startPos=0, unsigned int _size=4096 char mode='\0') 
+            {
+                pos = 0;
+                startPos = _startPos;
+                streamSize = _size;
+                return 1;
+            };       
 
     virtual unsigned int seek(unsigned int _pos = 0) 
-        {   pos=min(startPos+_pos, startPos+streamSize);
+        {   pos=min(_pos, streamSize);
             debugSerial<<F("Seek:")<<pos<<endl;
             return pos;
         };
@@ -158,12 +195,12 @@ flashStream(unsigned int _startPos=0, unsigned int _size=4096 ):seekableStream(_
             {
                 //debugSerial<<">"<<(char)ch;
                #if defined(__AVR__)
-                  EEPROM.update(pos++,(char)ch);
+                  EEPROM.update(startPos+pos++,(char)ch);
                   return 1;
                #elif  defined(__SAM3X8E__)
-                  return EEPROM.write(pos++,(char)ch);
+                  return EEPROM.write(startPos+pos++,(char)ch);
                #else 
-                  EEPROM.write(pos++,(char)ch);
+                  EEPROM.write(startPos+pos++,(char)ch);
                   return 1;  
                #endif   
 
@@ -180,7 +217,7 @@ flashStream(unsigned int _startPos=0, unsigned int _size=4096 ):seekableStream(_
    virtual size_t write(const uint8_t *buffer, size_t size) override
             {     
                   //debugSerial<<("Write from:")<<pos<<" "<<size<<" bytes"<<endl;    
-                  EEPROM.write(pos,(byte*)buffer,size);
+                  EEPROM.write(startPos+pos,(byte*)buffer,size);
                   pos+=size;
                 return size;          
             };

@@ -16,6 +16,7 @@ const char EEPROM_signature[] = EEPROM_SIGNATURE;
 #define SYSCONF_OFFSET 0
 
 #define EEPROM_offset_NotAlligned SYSCONF_OFFSET+sizeof(systemConfigData)
+#define SYSCONF_SIZE EEPROM_offsetJSON
 #define EEPROM_offsetJSON EEPROM_offset_NotAlligned + (4 -(EEPROM_offset_NotAlligned & 3))
 //#define EEPROM_offsetJSON IFLASH_PAGE_SIZE
 #define EEPROM_FIX_PART_LEN EEPROM_offsetJSON-SYSCONF_OFFSET
@@ -57,6 +58,15 @@ const char EEPROM_signature[] = EEPROM_SIGNATURE;
 class systemConfig {
  private:
  flashStream * stream;
+ int openStream(char mode = '\0') 
+      {
+            #if defined(FS_STORAGE)
+            stream.open("/config.bin",mode);
+            #else
+            stream.open(EEPROM_offsetJSON,mode);
+            #endif
+        };
+
  public:  
  macAddress mac;
  systemConfig() {stream=NULL;};
