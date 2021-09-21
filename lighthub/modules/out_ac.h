@@ -18,7 +18,7 @@
 #define S_LOCK S_ADDITIONAL+1
 #define S_QUIET S_ADDITIONAL+2
 #define S_SWING S_ADDITIONAL+3
-#define S_RAW S_ADDITIONAL+4
+//#define S_RAW S_ADDITIONAL+4
 
 extern void modbusIdle(void) ;
 class out_AC : public abstractOut {
