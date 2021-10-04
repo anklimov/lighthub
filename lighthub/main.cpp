@@ -257,6 +257,8 @@ int httpHandler(Client& client, String request, long contentLength, bool authori
 
          itemCmd ic;
          ic.loadItem(&item,SEND_COMMAND|SEND_PARAMETERS);
+         if (item.itemType == CH_GROUP)
+           {if (item.isActive()) item.setCmd(CMD_ON); else item.setCmd(CMD_OFF);} 
          char buf[32];
          response=ic.toString(buf, sizeof(buf));
         
@@ -270,7 +272,7 @@ int httpHandler(Client& client, String request, long contentLength, bool authori
         request+=body;
 
         debugSerial<<F("Cmd: ")<<request<<endl;
-        if (request=="reboot") client.stop();
+        if (request=="reboot ") client.stop();
         const char* res=request.c_str();
         cmd_parse((char*) res);        
         } 
@@ -518,7 +520,12 @@ lan_status lanLoop() {
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
             wdt_res();
             statusLED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
-            ip_ready_config_loaded_connecting_to_broker();
+            if (!mqttArr || ((aJson.getArraySize(mqttArr)) < 2)) 
+                {
+                infoSerial<<F("No MQTT configured")<<endl;    
+                lanStatus=OPERATION_NO_MQTT;
+                } 
+            else ip_ready_config_loaded_connecting_to_broker();
             break;
 
         case RETAINING_COLLECTING:
@@ -579,7 +586,9 @@ lan_status lanLoop() {
             }
             break;
 
-        case DO_NOTHING:;
+        case DO_NOTHING:
+        case OPERATION_NO_MQTT:
+        ;
     }
 
 

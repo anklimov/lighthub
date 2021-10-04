@@ -974,7 +974,7 @@ bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
             return true;
             
             case aJson_Float:
-            Float(item->itemVal->valueint);
+            Float(item->itemVal->valuefloat);
                //debugSerial<<F("Loaded Float:");
                //debugOut();
             return true;
@@ -1011,8 +1011,9 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
                                     switch (cmd.itemArgType)
                                     {
                                      case ST_FLOAT:
+                                     case ST_FLOAT_CELSIUS:
                                      item->setFloatVal(param.asfloat);
-                                     //case ST_FLOAT_CELSIUS:
+                                     //
                                      break;
 
                                      case ST_INT32:

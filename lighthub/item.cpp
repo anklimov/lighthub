@@ -1074,9 +1074,9 @@ switch (itemType) {
                       pinMode(iaddr, OUTPUT);
 
                       if (inverse)
-                          digitalWrite(iaddr, k = ((icmd == CMD_ON) ? LOW : HIGH));
+                          digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_AUTO) ? LOW : HIGH));
                       else
-                          digitalWrite(iaddr, k = ((icmd == CMD_ON) ? HIGH : LOW));
+                          digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_AUTO) ? HIGH : LOW));
                       debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
                       status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
                       res=1;
