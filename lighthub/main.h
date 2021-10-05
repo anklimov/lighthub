@@ -208,7 +208,6 @@ enum lan_status {
     RETAINING_COLLECTING = 5,
     OPERATION = 6,
     OPERATION_NO_MQTT = 7,
-
     DO_REINIT = -10,
     REINIT = - 11,
     DO_RECONNECT =  12,

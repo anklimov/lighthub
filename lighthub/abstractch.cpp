@@ -31,7 +31,7 @@ int abstractCh::publishTopic(const char* topic, const char * value, const char* 
      {
        strncpy(addrstr,topic,sizeof(addrstr));
        if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,topic);
-       strncat(addrstr,subtopic,sizeof(addrstr));
+       strncat(addrstr,subtopic,sizeof(addrstr)-1);
        if (mqttClient.connected() && lanStatus == OPERATION  && !ethernetIdleCount)
                        {
                         mqttClient.publish(addrstr, value, true);

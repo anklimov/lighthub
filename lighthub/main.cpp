@@ -1494,16 +1494,15 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         } else {
             errorSerial<<F("ERROR: Server returned ");
             errorSerial<<responseStatusCode<<endl;
-//            timerLanCheckTime = millis();// + 5000;
-            return READ_RE_CONFIG;//-11;
-        }
+        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+           else return READ_RE_CONFIG; //Load from NVRAM        
+           }
 
     } else {
         debugSerial<<F("failed to connect\n");
-//        debugSerial<<F(" try again in 5 seconds\n");
-//        timerLanCheckTime = millis();// + 5000;
-        return READ_RE_CONFIG;//-11;
-    }
+        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+           else return READ_RE_CONFIG; //Load from NVRAM    
+           }
 #endif
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) || defined (NRF5) //|| defined(ARDUINO_ARCH_ESP32) //|| defined(ARDUINO_ARCH_ESP8266)
     #if defined(WIFI_ENABLE)
@@ -1550,11 +1549,13 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         }
       } else  {
           errorSerial<<F("Config retrieving failed\n");
-          return READ_RE_CONFIG;//-11; //Load from NVRAM
+        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+           else return READ_RE_CONFIG; //Load from NVRAM
       }
     } else {
         errorSerial<<F("Connect failed\n");
-        return READ_RE_CONFIG;//-11; //Load from NVRAM
+        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+           else return READ_RE_CONFIG; //Load from NVRAM
     }
 #endif
 
@@ -1594,13 +1595,15 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             }
         } else {
             errorSerial<<F("Config retrieving failed\n");
-            return READ_RE_CONFIG;//-11; //Load from NVRAM
+        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+           else return READ_RE_CONFIG; //Load from NVRAM
         }
     } else {
         errorSerial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(httpResponseCode).c_str());
         httpClient.end();
-        return READ_RE_CONFIG;
-    }
+        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+           else return READ_RE_CONFIG; //Load from NVRAM
+        }
     httpClient.end();
 #endif
 

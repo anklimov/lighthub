@@ -131,6 +131,7 @@ class Item
   void setFlag   (short flag);
   void clearFlag (short flag);
   void setVal(long int par);
+  void setFloatVal(float par);
   void setSubtype(uint8_t par);
   int Poll(int cause);
   int SendStatus(int sendFlags);

@@ -361,13 +361,19 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                           param.v=constrain(from.param.asfloat,0.,255.);
                   break;   
               case ST_VOID:
-                  break;     
+                  break; 
+              case ST_STRING:
+                   cmd.itemArgType=from.cmd.itemArgType;
+                   param.asString=from.param.asString;
+                  break;    
               default:
                        debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
               }
              break;
         case ST_VOID:
              cmd.itemArgType=from.cmd.itemArgType;
+             param=from.param;
+        break;     
 
         case ST_INT32:
         case ST_UINT32:
@@ -379,12 +385,17 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
               param.h=from.param.h;
               param.s=from.param.s; 
               cmd.itemArgType=ST_HSV255;  
+            break;  
+            case ST_STRING:
+                  cmd.itemArgType=from.cmd.itemArgType;
+                  param.asString=from.param.asString;
+            break;               
            default:
               param.asInt32=from.param.asInt32;
               cmd.itemArgType=from.cmd.itemArgType;
            }
            break;
-        case ST_HS:
+        case ST_HS: //ToDo - string ?
            param.v=from.getPercents255();
            cmd.itemArgType=ST_HSV255; 
            break;     
@@ -394,6 +405,11 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
         case ST_FLOAT_CELSIUS:
            switch (from.cmd.itemArgType)
            {
+             case ST_STRING:
+              cmd.itemArgType=from.cmd.itemArgType;
+              param.asString=from.param.asString;
+             break; 
+
              case ST_TENS:
               param.asfloat=from.param.asInt32/10.;
              break;
@@ -427,7 +443,7 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                    param.h=from.param.h;
                    param.s=from.param.s; 
                    cmd.itemArgType=ST_HSV255;
-              break;    
+              break;                
               case ST_VOID:
               break; 
            default:
@@ -441,6 +457,10 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
         case ST_RGB:
         switch (from.cmd.itemArgType)
           {
+            case ST_STRING:
+                  cmd.itemArgType=from.cmd.itemArgType;
+                  param.asString=from.param.asString;
+            break; 
             case ST_RGBW:
                  // RGBW_flag=true;
             case ST_RGB:
@@ -950,13 +970,13 @@ bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
 
             Int((int32_t)item->itemVal->valueint);
                //debugSerial<<F("Loaded Int:");
-               debugOut();
+               //debugOut();
             return true;
             
             case aJson_Float:
-            Float(item->itemVal->valueint);
+            Float(item->itemVal->valuefloat);
                //debugSerial<<F("Loaded Float:");
-               debugOut();
+               //debugOut();
             return true;
           }
 
@@ -988,7 +1008,20 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
   {
   if (optionsFlag & SEND_COMMAND)    item->setCmd(cmd.cmdCode);
   if (optionsFlag & SEND_PARAMETERS) 
+                                    switch (cmd.itemArgType)
                                     {
+                                     case ST_FLOAT:
+                                     case ST_FLOAT_CELSIUS:
+                                     item->setFloatVal(param.asfloat);
+                                     //
+                                     break;
+
+                                     case ST_INT32:
+                                     case ST_UINT32:
+                                     item->setVal(param.asInt32);
+                                     break;
+
+                                     default: 
                                      item->setSubtype(cmd.itemArgType); 
                                      item->setVal(param.asInt32);
                                     }
