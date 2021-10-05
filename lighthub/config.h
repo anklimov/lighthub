@@ -61,9 +61,9 @@ class systemConfig {
  int openStream(char mode = '\0') 
       {
             #if defined(FS_STORAGE)
-            stream.open("/config.bin",mode);
+            stream->open("/config.bin",mode);
             #else
-            stream.open(EEPROM_offsetJSON,mode);
+            stream->open(EEPROM_offsetJSON,mode);
             #endif
         };
 
