@@ -9,8 +9,9 @@
 -DSYSLOG_ENABLE
 # - udp errors
 -DOTA
-#-DARDUINO_OTA_MDNS_DISABLE
-#-DMDNS_ENABLE - ArduinoMDNS didnt working
+-DARDUINO_OTA_MDNS_DISABLE
+#-DMDNS_ENABLE 
+#- ArduinoMDNS didnt working
 
 -DMCP23017
 -DMODBUS_TX_PIN=13
@@ -43,3 +44,5 @@
 
 -DFS_STORAGE
 -DFS_PREPARE
+
+-D CORS=\"http://lazyhome.ru\"

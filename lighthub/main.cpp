@@ -176,20 +176,23 @@ if (configLocked)
     errorSerial<<F("Not unlocked in 10s - continue ...")<<endl;
 }
 
-debugSerial<<F("Stopping channels ...")<<endl;
-//Stoping the channels
-aJsonObject * item = items->child;
-while (items && item)
-   {
-    if (item->type == aJson_Array && aJson.getArraySize(item)>0)
+if (root && items)
+{
+    debugSerial<<F("Stopping channels ...")<<endl;
+    //Stoping the channels
+    aJsonObject * item = items->child;
+    while (item)
     {
-        Item it(item->name);
-        if (it.isValid()) it.Stop();
-        yield();
+        if (item->type == aJson_Array && aJson.getArraySize(item)>0)
+        {
+            Item it(item->name);
+            if (it.isValid()) it.Stop();
+            yield();
 
+        }
+    item = item->next;
     }
-   item = item->next;
-  }
+} 
 pollingItem = NULL;
 debugSerial<<F("Stopped")<<endl;
 
@@ -237,12 +240,15 @@ uint16_t httpHandler(Client& client, String request, long contentLength, bool au
     debugSerial<<request<<endl;
     if (request == (F("GET /"))) 
         {
-         response = "Location: http://lazyhome.ru/pwa?mac=";
+         ArduinoOTA.sendHttpResponse(client,301,false);  // Send only HTTP header, no close socket 
+         client.println(F("Location: http://lazyhome.ru/pwa?mac="));
          // todo for (int i=0; i<6; i++) {response+=(sysConf.mac[i]>>4,HEX);response+=(sysConf.mac[i]&0xf,HEX);}
-         response+=(F("&ip="));
+         //response+=(F("&ip="));
          //todo response+=(Ethernet.localIP());
+         client.println();
          delay(100);
-         return 301;
+         client.stop();
+         return 1;
         }
     if (!authorized) return 401;
 
@@ -405,7 +411,7 @@ if (element && element->type == aJson_String) return element->valuestring;
                         }
 
             debugSerial<<passwordBuf<<endl;            
-            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", passwordBuf, InternalStorage, sysConfStream);//, JSONStream);
+            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", passwordBuf, InternalStorage, sysConfStream);
             ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
@@ -1227,7 +1233,7 @@ int loadConfigFromEEPROM()
     #if defined(FS_STORAGE)
     sysConfStream.open("/config.json",'r');
     #else
-    sysConfStream.open(EEPROM_offsetJSON,'r');
+    sysConfStream.open(FN_CONFIG_JSON,'r');
     #endif
 
     //JSONStream.seek();    
@@ -1266,7 +1272,7 @@ if (arg_cnt>1)
     #if defined(FS_STORAGE)
     sysConfStream.open("/config.json",'w');
     #else
-    sysConfStream.open(EEPROM_offsetJSON,'w');
+    sysConfStream.open(FN_CONFIG_JSON,'w');
     #endif
 
 #if defined(__SAM3X8E__) 
@@ -1281,8 +1287,8 @@ if (arg_cnt>1)
   aJson.print(root, &stringStream);
   int len = strlen(outBuf);
   outBuf[len++]= 255;
-  JSONStream.seek();
-  size_t res = JSONStream.write((byte*) outBuf,len);
+  //JSONStream.seek();
+  size_t res = sysConfStream.write((byte*) outBuf,len);
   free (outBuf);
   infoSerial<<res<< F("bytes from ")<<len<<F(" are saved to EEPROM")<<endl;
 #else
@@ -1404,10 +1410,11 @@ void cmdFunctionSetMac(int arg_cnt, char **args) {
 void cmdFunctionGet(int arg_cnt, char **args) {
 if (arg_cnt>1)
 {
-    if (!strcasecmp_P(args[1],ON_P)) sysConf.setLoadHTTPConfig(true);
-    if (!strcasecmp_P(args[1],OFF_P)) sysConf.setLoadHTTPConfig(false);
+    if (!strcasecmp_P(args[1],ON_P)) {sysConf.setLoadHTTPConfig(true); return;};
+    if (!strcasecmp_P(args[1],OFF_P)) {sysConf.setLoadHTTPConfig(false); return;};
+    
     infoSerial<<F("Loading HTTP config on startup:")<<sysConf.getLoadHTTPConfig()<<endl;
-    return;
+
 }
 
     lanStatus= loadConfigFromHttp(arg_cnt, args);
