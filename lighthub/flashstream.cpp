@@ -176,7 +176,7 @@ NRFFlashStorage EEPROM;
      int flashStream::peek() 
             {    
                 if (pos<streamSize) 
-                     return EEPROM.read(pos);
+                     return EEPROM.read(startPos+pos);
                 else return -1;    
             };
     void flashStream::flush() {
