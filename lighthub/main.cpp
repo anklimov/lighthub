@@ -279,10 +279,12 @@ uint16_t httpHandler(Client& client, String request, long contentLength, bool au
         Item   item((char*)request.c_str());
           if (!item.isValid()) return 400; 
 
-         itemCmd ic;
-         ic.loadItem(&item,SEND_COMMAND|SEND_PARAMETERS);
          if (item.itemType == CH_GROUP)
            {if (item.isActive()) item.setCmd(CMD_ON); else item.setCmd(CMD_OFF);} 
+
+         itemCmd ic;
+         ic.loadItem(&item,SEND_COMMAND|SEND_PARAMETERS);
+
          char buf[32];
          response=ic.toString(buf, sizeof(buf));
          return 200 | HTTP_TEXT_PLAIN;  
@@ -297,10 +299,10 @@ uint16_t httpHandler(Client& client, String request, long contentLength, bool au
         request+=body;
 
         debugSerial<<F("Cmd: ")<<request<<endl;
-        if (request=="reboot ") client.stop();
+        if (request=="reboot ") ArduinoOTA.sendHttpResponse(client,200);  
         const char* res=request.c_str();
         cmd_parse((char*) res);     
-        return 200 | HTTP_TEXT_PLAIN;    
+        return 200;    
         } 
     else return 0;  //Unknown
 }
@@ -1295,14 +1297,12 @@ if (arg_cnt>1)
   aJsonStringStream stringStream(NULL, outBuf, MAX_JSON_CONF_SIZE);
   aJson.print(root, &stringStream);
   int len = strlen(outBuf);
-  outBuf[len++]= 255;
-  //JSONStream.seek();
+  outBuf[len++]= EOFchar;
+  
   size_t res = sysConfStream.write((byte*) outBuf,len);
   free (outBuf);
   infoSerial<<res<< F("bytes from ")<<len<<F(" are saved to EEPROM")<<endl;
 #else
-    //JSONStream.open('w');
-    //JSONStream.seek();
     aJsonStream jsonEEPROMStream = aJsonStream(&sysConfStream);
     infoSerial<<F("Saving config to EEPROM..");
     aJson.print(root, &jsonEEPROMStream);

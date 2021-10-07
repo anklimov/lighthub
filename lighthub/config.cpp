@@ -58,10 +58,7 @@ bool             systemConfig::isValidSysConf()
     stream->seek(offsetof(systemConfigData,MQTTpwd));   
     short bytes=stream->readBytesUntil(0,buffer,bufLen-1);
     stream->close(); 
-    Serial.println("valid");
-    Serial.println(offsetof(systemConfigData,MQTTpwd));
-    Serial.println(bytes);
-    Serial.write(buffer,bytes);
+
     if (bytes) 
             {
             buffer[bytes]=0;  

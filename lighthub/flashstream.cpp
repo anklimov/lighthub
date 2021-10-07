@@ -121,7 +121,7 @@ NRFFlashStorage EEPROM;
                  switch (fileNum) {
                    case FN_CONFIG_JSON:     
                         pos = 0;
-                        //streamSize = _size;  
+                        streamSize = MAX_JSON_CONF_SIZE;  
                         startPos = EEPROM_offsetJSON;
                         textMode = true;
                         contentType = HTTP_TEXT_JSON;
@@ -204,7 +204,6 @@ NRFFlashStorage EEPROM;
    #if defined(__SAM3X8E__)
     size_t flashStream::write(const uint8_t *buffer, size_t size) 
             {     
-                  //debugSerial<<("Write from:")<<pos<<" "<<size<<" bytes"<<endl;    
                   EEPROM.write(startPos+pos,(byte*)buffer,size);
                   pos+=size;
                 return size;          
@@ -215,7 +214,7 @@ NRFFlashStorage EEPROM;
     #if defined(ESP8266) || defined(ESP32)      
      void flashStream::putEOF()  
             {
-                write (255);
+                if (textMode) write (EOFchar);
                 EEPROM.commit();
             };
     #endif        

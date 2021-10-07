@@ -4,7 +4,7 @@
 #ifndef MAX_JSON_CONF_SIZE
 
 #if defined(__SAM3X8E__)
-#define MAX_JSON_CONF_SIZE 16000
+#define MAX_JSON_CONF_SIZE 24000
 #elif defined(ARDUINO_ARCH_AVR)
 #define MAX_JSON_CONF_SIZE 4096
 #elif defined(ARDUINO_ARCH_ESP32)
