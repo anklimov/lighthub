@@ -122,6 +122,9 @@ volatile uint32_t timerLanCheckTime = 0;
 volatile uint32_t timerThermostatCheck = 0;
 volatile uint32_t timerSensorCheck =0;
 volatile uint32_t WiFiAwaitingTime =0;
+volatile unsigned long timerCount=0; 
+volatile int16_t  timerNumber=-1;
+volatile int8_t   timerHandlerBusy=0;
 
 aJsonObject *pollingItem = NULL;
 
@@ -173,6 +176,7 @@ if (configLocked)
 }
 
 debugSerial<<F("Stopping channels ...")<<endl;
+timerHandlerBusy++;
 //Stoping the channels
 aJsonObject * item = items->child;
 while (items && item)
@@ -212,6 +216,7 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
      debugSerial<<F(" is ")<<freeRam()<<endl;
      
      configOk=false;
+ timerHandlerBusy--;     
 }
 
 bool isNotRetainingStatus() {
@@ -1194,6 +1199,7 @@ setupSyslog();
 configLoaded=true;
 if (sysConf.getSaveSuccedConfig()) cmdFunctionSave(0,NULL);
 configLocked--;
+ethClient.stop(); //Refresh MQTT connection
 }
 
 void printConfigSummary() {
@@ -1221,7 +1227,7 @@ void printConfigSummary() {
 }
 
 void cmdFunctionLoad(int arg_cnt, char **args) {
-    loadConfigFromEEPROM();
+    if (!loadConfigFromEEPROM()) lanStatus=DO_REINIT;
 }
 
 
@@ -1241,7 +1247,7 @@ int loadConfigFromEEPROM()
         }
         infoSerial<<F("Loaded")<<endl;
         applyConfig();
-        ethClient.stop(); //Refresh MQTT connect to get retained info
+        //ethClient.stop(); //Refresh MQTT connect to get retained info
         return 1;
     } else {
         JSONStream.write(255); //truncate garbage
@@ -1401,7 +1407,7 @@ if (arg_cnt>1)
 }
 
     lanStatus= loadConfigFromHttp(arg_cnt, args);
-    ethClient.stop(); //Refresh MQTT connect to get retained info
+    //ethClient.stop(); //Refresh MQTT connect to get retained info
 }
 
 void printBool(bool arg) { (arg) ? infoSerial<<F("+") : infoSerial<<F("-"); }
@@ -1499,6 +1505,7 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     htclient.setHttpResponseTimeout(4000);
     wdt_res();
     //debugSerial<<"making GET request");get
+    debugSerial<<F("Before request: Free:")<<freeRam()<<endl;
     htclient.beginRequest();
     responseStatusCode = htclient.get(URI);
     htclient.endRequest();
@@ -1514,8 +1521,9 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     
 //delay(1000);
     if (responseStatusCode == 200) {
-        debugSerial<<F("GET Response: ")<<response<<endl;
         debugSerial<<F("Free:")<<freeRam()<<endl;
+        debugSerial<<F("Response Len:")<<response.length()<<endl;
+        //debugSerial<<F("GET Response: ")<<response<<endl;
         cleanConf();
         debugSerial<<F("Configuration cleaned")<<endl;
         debugSerial<<F("Free:")<<freeRam()<<endl;
@@ -1611,21 +1619,18 @@ void postTransmission() {
     #endif
 }
 
-
-
-volatile unsigned long timerCount=0; 
-volatile int16_t timerNumber=-1;
-volatile int8_t timerHandlerBusy=0;
-
 void TimerHandler(void)
 {   
     timerHandlerBusy++;
     interrupts();
     timerCount=micros();
-     if (configLoaded && !timerHandlerBusy) inputLoop(CHECK_INTERRUPT);
-     #ifdef DMX_SMOOTH
-     DMXOUT_propagate();
-     #endif
+     if (configLoaded && !timerHandlerBusy) 
+                    {
+                    inputLoop(CHECK_INTERRUPT);
+                    #ifdef DMX_SMOOTH
+                    DMXOUT_propagate();
+                    #endif
+                    }
     timerCount=micros()-timerCount;
     timerHandlerBusy--;
 }
