@@ -182,21 +182,24 @@ if (configLocked)
 debugSerial<<F("Stopping channels ...")<<endl;
 timerHandlerBusy++;
 //Stoping the channels
+if (items)
+{
 aJsonObject * item = items->child;
-while (items && item)
-   {
-    if (item->type == aJson_Array && aJson.getArraySize(item)>0)
+    while (item)
     {
         if (item->type == aJson_Array && aJson.getArraySize(item)>0)
         {
-            Item it(item->name);
-            if (it.isValid()) it.Stop();
-            yield();
+            if (item->type == aJson_Array && aJson.getArraySize(item)>0)
+            {
+                Item it(item->name);
+                if (it.isValid()) it.Stop();
+                yield();
 
+            }
+        item = item->next;
         }
-    item = item->next;
-    }
-} 
+    } 
+}
 pollingItem = NULL;
 debugSerial<<F("Stopped")<<endl;
 
