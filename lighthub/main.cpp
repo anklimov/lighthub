@@ -48,6 +48,7 @@ Streamlog errorSerial(&debugSerialPort,LOG_ERROR, ledRED);
 Streamlog infoSerial (&debugSerialPort,LOG_INFO);
 #endif
 
+/*
 #if defined(FS_STORAGE)
 flashStream sysConfStream("/config.bin"); 
 flashStream JSONStream("/config.json"); 
@@ -55,6 +56,9 @@ flashStream JSONStream("/config.json");
 flashStream sysConfStream(SYSCONF_OFFSET,EEPROM_offsetJSON); 
 flashStream JSONStream(EEPROM_offsetJSON,MAX_JSON_CONF_SIZE); 
 #endif
+*/
+
+flashStream sysConfStream;
 
 systemConfig sysConf(&sysConfStream);
 
@@ -183,13 +187,16 @@ while (items && item)
    {
     if (item->type == aJson_Array && aJson.getArraySize(item)>0)
     {
-        Item it(item->name);
-        if (it.isValid()) it.Stop();
-        yield();
+        if (item->type == aJson_Array && aJson.getArraySize(item)>0)
+        {
+            Item it(item->name);
+            if (it.isValid()) it.Stop();
+            yield();
 
+        }
+    item = item->next;
     }
-   item = item->next;
-  }
+} 
 pollingItem = NULL;
 debugSerial<<F("Stopped")<<endl;
 
@@ -222,22 +229,30 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
 bool isNotRetainingStatus() {
   return (lanStatus != RETAINING_COLLECTING);
 }
+// Custom HTTP request handler
+// Return values: 
+// 1 - work completed. Dont need to respond, just close socket
+// 0 - no match continue with default lib behavior
+// 401 - not authorized
+// 400 - bad request
+// 200 | CONTENT_TYPE - ok + content_type
+//  ... same sor other http codes
+// if response != "" - put response in http answer
 
-int httpHandler(Client& client, String request, long contentLength, bool authorized)
+uint16_t httpHandler(Client& client, String request, long contentLength, bool authorized, String& response )
 {
-    String response = "";
-
+    //String response = "";
     debugSerial<<request<<endl;
-
-
     if (request == (F("GET /"))) 
         {
-         client.println(F("HTTP/1.1 301 Moved permanently"));
-         client.print(F("Location: http://lazyhome.ru/pwa?mac="));
-         for (int i=0; i<6; i++) {client.print(sysConf.mac[i]>>4,HEX);client.print(sysConf.mac[i]&0xf,HEX);}
-         client.print(F("&ip="));
-         client.println(Ethernet.localIP());
+         ArduinoOTA.sendHttpResponse(client,301,false);  // Send only HTTP header, no close socket 
+         client.println(F("Location: http://lazyhome.ru/pwa?mac="));
+         // todo for (int i=0; i<6; i++) {response+=(sysConf.mac[i]>>4,HEX);response+=(sysConf.mac[i]&0xf,HEX);}
+         //response+=(F("&ip="));
+         //todo response+=(Ethernet.localIP());
+         client.println();
          delay(100);
+         client.stop();
          return 1;
         }
     if (!authorized) return 401;
@@ -252,7 +267,8 @@ int httpHandler(Client& client, String request, long contentLength, bool authori
         itemCmd ic;
         ic.loadItem(&item,SEND_COMMAND|SEND_PARAMETERS);
         char buf[32];
-        response=ic.toString(buf, sizeof(buf));             
+        response=ic.toString(buf, sizeof(buf));    
+        return 200 | HTTP_TEXT_PLAIN;         
        }
     else if (request.startsWith(F("GET /item/")))
        {
@@ -266,6 +282,7 @@ int httpHandler(Client& client, String request, long contentLength, bool authori
            {if (item.isActive()) item.setCmd(CMD_ON); else item.setCmd(CMD_OFF);} 
          char buf[32];
          response=ic.toString(buf, sizeof(buf));
+         return 200 | HTTP_TEXT_PLAIN;  
         
        }  
     else if (request.startsWith(F("POST /command/"))) 
@@ -279,26 +296,10 @@ int httpHandler(Client& client, String request, long contentLength, bool authori
         debugSerial<<F("Cmd: ")<<request<<endl;
         if (request=="reboot ") client.stop();
         const char* res=request.c_str();
-        cmd_parse((char*) res);        
+        cmd_parse((char*) res);     
+        return 200 | HTTP_TEXT_PLAIN;    
         } 
-    else return -1;  //Unknown
-
-        client.println(F("HTTP/1.1 200 OK"));
-        client.println(F("Connection: close"));
-        
-          #ifdef CORS
-          client.print(F("Access-Control-Allow-Origin: "));
-          client.println(F(CORS));
-          #endif
-          
-        if (response!="") {
-              client.println(F("Content-Type: text/plain"));
-              client.println();
-              client.println(response);
-              }
-  
-        delay(100);
-return 1;
+    else return 0;  //Unknown
 }
 
 int inTopic (char * topic,  topicType tt)
@@ -415,7 +416,7 @@ if (element && element->type == aJson_String) return element->valuestring;
                         }
 
             debugSerial<<passwordBuf<<endl;            
-            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", passwordBuf, InternalStorage, sysConfStream, JSONStream);
+            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", passwordBuf, InternalStorage, sysConfStream);
             ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
@@ -628,7 +629,7 @@ lan_status lanLoop() {
 
                 case DHCP_CHECK_REBIND_FAIL:
                     errorSerial<<F("Error: rebind fail")<<endl;
-                    if (mqttClient.connected()) mqttClient.disconnect();
+              ///      if (mqttClient.connected()) mqttClient.disconnect(); ??
                     //timerLanCheckTime = millis();// + 1000;
                     lanStatus = DO_REINIT;
                     break;
@@ -1004,7 +1005,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
     //char addrbuf[17];
     //char valstr[16] = "NIL";
     //char *owEmitString = NULL;
-    char *owItem = NULL;
+    //char *owItem = NULL;
 
     SetBytes(addr, 8, addrstr);
     addrstr[17] = 0;
@@ -1235,14 +1236,21 @@ int loadConfigFromEEPROM()
 {
     char ch;
     infoSerial<<F("Loading Config from EEPROM")<<endl;
-    JSONStream.open('r');
-    JSONStream.seek();    
-    if (JSONStream.peek() == '{') {
-        aJsonStream as = aJsonStream(&JSONStream);
+    #if defined(FS_STORAGE)
+    sysConfStream.open("/config.json",'r');
+    #else
+    sysConfStream.open(FN_CONFIG_JSON,'r');
+    #endif
+
+    //JSONStream.seek();    
+    if (sysConfStream.peek() == '{') {
+        aJsonStream as = aJsonStream(&sysConfStream);
         cleanConf();
         root = aJson.parse(&as);
+        sysConfStream.close();
         if (!root) {
             errorSerial<<F("load failed")<<endl;
+        //    sysConfStream.close();
             return 0;
         }
         infoSerial<<F("Loaded")<<endl;
@@ -1250,8 +1258,9 @@ int loadConfigFromEEPROM()
         //ethClient.stop(); //Refresh MQTT connect to get retained info
         return 1;
     } else {
-        JSONStream.write(255); //truncate garbage
+        sysConfStream.putEOF(); //truncate garbage
         infoSerial<<F("No stored config")<<endl;
+        sysConfStream.close();
         return 0;
     }
     return 0;
@@ -1266,10 +1275,17 @@ if (arg_cnt>1)
     infoSerial<<F("Config autosave:")<<sysConf.getSaveSuccedConfig()<<endl;
     return;
 }
+    #if defined(FS_STORAGE)
+    sysConfStream.open("/config.json",'w');
+    #else
+    sysConfStream.open(FN_CONFIG_JSON,'w');
+    #endif
+
 #if defined(__SAM3X8E__) 
   char* outBuf = (char*) malloc(MAX_JSON_CONF_SIZE); /* XXX: Dynamic size. */
   if (outBuf == NULL)
     {
+      sysConfStream.close();  
       return;
     }
   infoSerial<<F("Saving config to EEPROM..")<<endl;
@@ -1277,18 +1293,18 @@ if (arg_cnt>1)
   aJson.print(root, &stringStream);
   int len = strlen(outBuf);
   outBuf[len++]= 255;
-  JSONStream.seek();
-  size_t res = JSONStream.write((byte*) outBuf,len);
+  //JSONStream.seek();
+  size_t res = sysConfStream.write((byte*) outBuf,len);
   free (outBuf);
   infoSerial<<res<< F("bytes from ")<<len<<F(" are saved to EEPROM")<<endl;
 #else
-    JSONStream.open('w');
-    JSONStream.seek();
-    aJsonStream jsonEEPROMStream = aJsonStream(&JSONStream);
+    //JSONStream.open('w');
+    //JSONStream.seek();
+    aJsonStream jsonEEPROMStream = aJsonStream(&sysConfStream);
     infoSerial<<F("Saving config to EEPROM..");
     aJson.print(root, &jsonEEPROMStream);
-    JSONStream.putEOF();
-    JSONStream.flush();
+    sysConfStream.putEOF();
+    sysConfStream.close();
     infoSerial<<F("Saved to EEPROM")<<endl;
 #endif
 }
@@ -1400,10 +1416,11 @@ void cmdFunctionSetMac(int arg_cnt, char **args) {
 void cmdFunctionGet(int arg_cnt, char **args) {
 if (arg_cnt>1)
 {
-    if (!strcasecmp_P(args[1],ON_P)) sysConf.setLoadHTTPConfig(true);
-    if (!strcasecmp_P(args[1],OFF_P)) sysConf.setLoadHTTPConfig(false);
+    if (!strcasecmp_P(args[1],ON_P)) {sysConf.setLoadHTTPConfig(true); return;};
+    if (!strcasecmp_P(args[1],OFF_P)) {sysConf.setLoadHTTPConfig(false); return;};
+    
     infoSerial<<F("Loading HTTP config on startup:")<<sysConf.getLoadHTTPConfig()<<endl;
-    return;
+
 }
 
     lanStatus= loadConfigFromHttp(arg_cnt, args);
