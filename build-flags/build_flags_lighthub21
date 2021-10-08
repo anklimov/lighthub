@@ -26,3 +26,4 @@
 #-DdebugSerialPort=Serial
 
 -DRESTART_LAN_ON_MQTT_ERRORS
+-D CORS=\"http://lazyhome.ru\"

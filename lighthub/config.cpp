@@ -1,5 +1,12 @@
 #include "config.h"
 
+String             systemConfig::getMACString()
+{
+String res;   
+for (int i=0; i<6; i++) {res+= (((char)mac[i]>>4)+'0');res+=(((char)mac[i]&0xf)+'0');}
+return res;
+}
+
 int systemConfig::openStream(char mode) 
       {
             #if defined(FS_STORAGE)
@@ -7,7 +14,7 @@ int systemConfig::openStream(char mode)
             #else
             stream->open(FN_CONFIG_BIN,mode);
             #endif
-            stream->setSize(SYSCONF_SIZE);
+            //stream->setSize(SYSCONF_SIZE);
         };
 
 bool             systemConfig::isValidSysConf()

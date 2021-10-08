@@ -1,6 +1,6 @@
 #pragma once
 #include <Arduino.h>
-
+#define DEFAULT_FILESIZE_LIMIT 65535
 #ifndef MAX_JSON_CONF_SIZE
 
 #if defined(__SAM3X8E__)

@@ -60,9 +60,10 @@ NRFFlashStorage EEPROM;
                   if (fs =  SPIFFS.open(_filename,modestr))
                      {
                         openedMode=mode;
+                        streamSize = DEFAULT_FILESIZE_LIMIT;
 
-                        if (_filename.endsWith(".json")) {contentType=HTTP_TEXT_JSON;textMode=true;}
-                           else if (_filename.endsWith(".bin")) {contentType=HTTP_OCTET_STREAM;textMode=false;}
+                        if (_filename.endsWith(".json")) {contentType=HTTP_TEXT_JSON;textMode=true;streamSize = MAX_JSON_CONF_SIZE; }
+                           else if (_filename.endsWith(".bin")) {contentType=HTTP_OCTET_STREAM;textMode=false;streamSize = SYSCONF_SIZE;  }
                                 else if (_filename.endsWith(".txt")) {contentType=HTTP_TEXT_PLAIN;textMode=true;}
                                      else if (_filename.endsWith(".html")) {contentType=HTTP_TEXT_HTML;textMode=true;} 
                                           else if (_filename.endsWith(".gif")) {contentType=HTTP_IMAGE_GIF;textMode=false;}

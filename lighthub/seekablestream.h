@@ -15,6 +15,7 @@ uint16_t     contentType;
 
 public:
 seekableStream(unsigned int size):Stream(),streamSize(size) {};
+virtual bool    checkPermissions(char mode) {return true;};
 unsigned int    getSize() {return streamSize;}
 void            setSize (unsigned int size) {streamSize = size;};
 virtual unsigned int seek(unsigned int _pos = 0) = 0;

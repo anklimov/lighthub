@@ -48,18 +48,7 @@ Streamlog errorSerial(&debugSerialPort,LOG_ERROR, ledRED);
 Streamlog infoSerial (&debugSerialPort,LOG_INFO);
 #endif
 
-/*
-#if defined(FS_STORAGE)
-flashStream sysConfStream("/config.bin"); 
-flashStream JSONStream("/config.json"); 
-#else
-flashStream sysConfStream(SYSCONF_OFFSET,EEPROM_offsetJSON); 
-flashStream JSONStream(EEPROM_offsetJSON,MAX_JSON_CONF_SIZE); 
-#endif
-*/
-
 flashStream sysConfStream;
-
 systemConfig sysConf(&sysConfStream);
 
 extern long  timer0_overflow_count;	 
@@ -242,15 +231,19 @@ bool isNotRetainingStatus() {
 //  ... same sor other http codes
 // if response != "" - put response in http answer
 
-uint16_t httpHandler(Client& client, String request, long contentLength, bool authorized, String& response )
+uint16_t httpHandler(Client& client, String request, uint8_t method, long contentLength, bool authorized, String& response )
 {
     //String response = "";
     debugSerial<<request<<endl;
-    if (request == (F("GET /"))) 
+    if (method == HTTP_GET && request == (F("/"))) 
         {
          ArduinoOTA.sendHttpResponse(client,301,false);  // Send only HTTP header, no close socket 
-         client.println(F("Location: http://lazyhome.ru/pwa?mac="));
-         // todo for (int i=0; i<6; i++) {response+=(sysConf.mac[i]>>4,HEX);response+=(sysConf.mac[i]&0xf,HEX);}
+         client.println(
+             "Location: http://lazyhome.ru/pwa?mac="+sysConf.getMACString()
+             +"&ip="+Ethernet.localIP()//.toString()
+             +"&port="+ OTA_PORT
+             );
+        
          //response+=(F("&ip="));
          //todo response+=(Ethernet.localIP());
          client.println();
@@ -258,11 +251,12 @@ uint16_t httpHandler(Client& client, String request, long contentLength, bool au
          client.stop();
          return 1;
         }
-    if (!authorized) return 401;
+    
 
-    if (request.startsWith(F("POST /item/")))
+    if (method == HTTP_POST && request.startsWith(F("/item/")))
        {
-        request.remove(0,11);      
+        if (!authorized) return 401;   
+        request.remove(0,6);      
         String body=client.readStringUntil('\n');
         Item   item((char*)request.c_str());
           if (!item.isValid() || !item.Ctrl((char*) body.c_str())) return 400;
@@ -273,9 +267,10 @@ uint16_t httpHandler(Client& client, String request, long contentLength, bool au
         response=ic.toString(buf, sizeof(buf));    
         return 200 | HTTP_TEXT_PLAIN;         
        }
-    else if (request.startsWith(F("GET /item/")))
+    else if (method == HTTP_GET && request.startsWith(F("/item/")))
        {
-        request.remove(0,10);
+        if (!authorized) return 401;   
+        request.remove(0,6);
         Item   item((char*)request.c_str());
           if (!item.isValid()) return 400; 
 
@@ -290,9 +285,10 @@ uint16_t httpHandler(Client& client, String request, long contentLength, bool au
          return 200 | HTTP_TEXT_PLAIN;  
         
        }  
-    else if (request.startsWith(F("POST /command/"))) 
+    else if (method == HTTP_POST && request.startsWith(F("/command/"))) 
         {
-        request.remove(0,14);      
+        if (!authorized) return 401;    
+        request.remove(0,9);      
         String body=client.readStringUntil('\n');  
         
         request+=" ";
@@ -469,11 +465,10 @@ lan_status lanLoop() {
     #ifdef NOETHER
     lanStatus=DO_NOTHING;//-14;
     #endif
-//Serial.println(lanStatus);
     switch (lanStatus) {
 
         case INITIAL_STATE:
-          //  statusLED.set(ledRED|((configLoaded)?ledBLINK:0));
+
               statusLED.set(ledRED|((configLoaded)?ledBLINK:0));
 
             #if  defined(WIFI_ENABLE)

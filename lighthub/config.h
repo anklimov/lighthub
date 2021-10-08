@@ -22,6 +22,7 @@ class systemConfig {
  bool             isValidSysConf();
  
  bool             getMAC();
+ String           getMACString();
  bool             setMAC(macAddress& mac);
 
  char *           getMQTTpwd(char * buffer, uint16_t bufLen);
