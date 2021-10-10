@@ -415,6 +415,9 @@ for(n = 0; n < 4; n++) {
   return buf;
 }
 
+String toString(const IPAddress& address){
+  return String() + address[0] + "." + address[1] + "." + address[2] + "." + address[3];
+}
 
 void printIPAddress(IPAddress ipAddress) {
     for (byte i = 0; i < 4; i++)

@@ -237,13 +237,22 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
     debugSerial<<request<<endl;
     if (method == HTTP_GET && request == (F("/"))) 
         {
+          
          ArduinoOTA.sendHttpResponse(client,301,false);  // Send only HTTP header, no close socket 
          client.println(
-             "Location: http://lazyhome.ru/pwa?mac="+sysConf.getMACString()
-             +"&ip="+Ethernet.localIP()//.toString()
-             +"&port="+ OTA_PORT
+#ifdef CORS
+//Redirect to cloud PWA application               
+             String(F("Location: "))+QUOTE(CORS)+String(F("/pwa"))
+#else
+             String(F("Location: /index.html"))
+#endif   
+
+             +String(F("?mac="))+sysConf.getMACString()
+             +String(F("&ip="))+ toString( Ethernet.localIP())
+             +String(F("&port="))+ OTA_PORT 
+             + String(F("&name="))+deviceName
              );
-        
+     
          //response+=(F("&ip="));
          //todo response+=(Ethernet.localIP());
          client.println();

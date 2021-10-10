@@ -3,7 +3,7 @@
 String             systemConfig::getMACString()
 {
 String res;   
-for (int i=0; i<6; i++) {res+= (((char)mac[i]>>4)+'0');res+=(((char)mac[i]&0xf)+'0');}
+for (int i=0; i<6; i++) {res+= ((String(mac[i]>>4,HEX)));res+=((String(mac[i]&0xf,HEX)));}
 return res;
 }
 
