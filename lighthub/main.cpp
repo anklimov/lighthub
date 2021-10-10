@@ -242,7 +242,7 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
          client.println(
 #ifdef CORS
 //Redirect to cloud PWA application               
-             String(F("Location: "))+QUOTE(CORS)+String(F("/pwa"))
+             String(F("Location: "))+(CORS)+String(F("/pwa"))
 #else
              String(F("Location: /index.html"))
 #endif   
