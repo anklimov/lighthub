@@ -19,7 +19,7 @@ e-mail    anklimov@gmail.com
 */
 #pragma once
 #include "Arduino.h"
-#include "aJson.h"
+#include "aJSON.h"
 
 typedef  char cmdstr[9];
 
