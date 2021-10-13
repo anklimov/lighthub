@@ -802,7 +802,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                   if (chActive) cmd.Cmd(CMD_OFF);
                       else 
                             { 
-                              cmd.loadItemDef(this);  
+                             // cmd.loadItemDef(this);  ///
                               cmd.Cmd(CMD_ON);
                             }   
                   status2Send |=SEND_COMMAND | SEND_IMMEDIATE;    
@@ -1029,7 +1029,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                         debugSerial<<F("ON:Already Active\n");
                         return -3;
                 }
-            cmd.loadItemDef(this);
+            if (!cmd.isValue()) cmd.loadItemDef(this); // if no_suffix - both, command ON and value provided
             status2Send |= SEND_COMMAND | SEND_PARAMETERS | SEND_IMMEDIATE; 
             toExecute=true; 
             break;

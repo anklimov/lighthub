@@ -242,7 +242,7 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
          client.println(
 #ifdef CORS
 //Redirect to cloud PWA application               
-             String(F("Location: "))+(CORS)+String(F("/pwa"))
+             String(F("Location: " CORS "/pwa"))
 #else
              String(F("Location: /index.html"))
 #endif   
@@ -250,7 +250,7 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
              +String(F("?mac="))+sysConf.getMACString()
              +String(F("&ip="))+ toString( Ethernet.localIP())
              +String(F("&port="))+ OTA_PORT 
-             + String(F("&name="))+deviceName
+             +String(F("&name="))+deviceName
              );
      
          //response+=(F("&ip="));
@@ -982,7 +982,7 @@ if (WiFi.status() == WL_CONNECTED) {
 
         mdns.begin(Ethernet.localIP(), "lighthub");
          
-         char txtRecord[32] = "\x7mac=";
+         char txtRecord[32] = "\x10mac=";
          SetBytes(sysConf.mac,6,txtRecord+5);
          char mdnsName[32] = "LightHub";
          SetBytes(sysConf.mac+4,2,mdnsName+8);
