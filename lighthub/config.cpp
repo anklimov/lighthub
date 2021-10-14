@@ -10,9 +10,9 @@ return res;
 int systemConfig::openStream(char mode) 
       {
             #if defined(FS_STORAGE)
-            stream->open("/config.bin",mode);
+            return stream->open("/config.bin",mode);
             #else
-            stream->open(FN_CONFIG_BIN,mode);
+            return stream->open(FN_CONFIG_BIN,mode);
             #endif
             //stream->setSize(SYSCONF_SIZE);
         };

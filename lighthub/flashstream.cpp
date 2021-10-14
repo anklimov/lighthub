@@ -14,7 +14,7 @@
 #include <EEPROM.h>
 #endif
 
-#if defined(ARDUINO_ARCH_ESP8266) 
+#if defined(ARDUINO_ARCH_ESP8266) && !defined(FS_STORAGE)
 #include <ESP_EEPROM.h>
 #endif
 
@@ -53,24 +53,31 @@ NRFFlashStorage EEPROM;
  int flashStream::open(String _filename, char mode) 
    {
                   char modestr[4];
-                  modestr[0]=mode; modestr[1]='b'; modestr[2]='+'; modestr[3]='\0';
+                  int paramPos=-1;
+                  //modestr[0]=mode; modestr[1]='b'; modestr[2]='+'; modestr[3]='\0';
+                  modestr[0]=mode; modestr[1]='+'; modestr[2]='\0';
                   if (fs) fs.close();
-                  filename=_filename;
 
-                  if (fs =  SPIFFS.open(_filename,modestr))
+                  if ((paramPos=_filename.indexOf('?'))>=0)
+                     {
+                        filename=_filename.substring(0,paramPos);
+                     }
+                  else filename=_filename;
+
+                  if (fs =  SPIFFS.open(filename,modestr))
                      {
                         openedMode=mode;
                         streamSize = DEFAULT_FILESIZE_LIMIT;
 
-                        if (_filename.endsWith(".json")) {contentType=HTTP_TEXT_JSON;textMode=true;streamSize = MAX_JSON_CONF_SIZE; }
-                           else if (_filename.endsWith(".bin")) {contentType=HTTP_OCTET_STREAM;textMode=false;streamSize = SYSCONF_SIZE;  }
-                                else if (_filename.endsWith(".txt")) {contentType=HTTP_TEXT_PLAIN;textMode=true;}
-                                     else if (_filename.endsWith(".html")) {contentType=HTTP_TEXT_HTML;textMode=true;} 
-                                          else if (_filename.endsWith(".gif")) {contentType=HTTP_IMAGE_GIF;textMode=false;}
-                                               else if (_filename.endsWith(".jpg")) {contentType=HTTP_IMAGE_JPEG;textMode=false;}
+                        if (filename.endsWith(".json")) {contentType=HTTP_TEXT_JSON;textMode=true;streamSize = MAX_JSON_CONF_SIZE; }
+                           else if (filename.endsWith(".bin")) {contentType=HTTP_OCTET_STREAM;textMode=false;streamSize = SYSCONF_SIZE;  }
+                                else if (filename.endsWith(".txt")) {contentType=HTTP_TEXT_PLAIN;textMode=true;}
+                                     else if (filename.endsWith(".html")) {contentType=HTTP_TEXT_HTML;textMode=true;} 
+                                          else if (filename.endsWith(".gif")) {contentType=HTTP_IMAGE_GIF;textMode=false;}
+                                               else if (filename.endsWith(".jpg")) {contentType=HTTP_IMAGE_JPEG;textMode=false;}
 
 
-                        debugSerial<<(F("Opened ("))<<modestr<<(F(")"))<<filename<<endl;
+                        debugSerial<<(F("Opened ("))<<modestr<<(F(")"))<<filename<<F(" Size:")<<streamSize<<endl;
                         return fs;
                      }
                   else 
@@ -144,6 +151,13 @@ NRFFlashStorage EEPROM;
 
      int flashStream::open(String _filename, char mode) 
                 {
+                  
+                  int paramPos;
+                  if ((paramPos=_filename.indexOf('?'))>=0)
+                     {
+                        _filename=_filename.substring(0,paramPos);
+                     }
+                    
                   if (_filename == "/config.json") return open (FN_CONFIG_JSON,mode);
                   else if (_filename == "/config.bin")  return open (FN_CONFIG_BIN,mode);
                   else return 0;    

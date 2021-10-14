@@ -23,7 +23,9 @@
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 //#include "SPIFFS.h"
-//#include <ESP_EEPROM.h>
+#ifndef FS_STORAGE
+#include <ESP_EEPROM.h>
+#endif
 //#include <ESP8266HTTPClient.h>
 //#include <ArduinoHttpClient.h>
 //#include "HttpClient.h"
@@ -239,13 +241,13 @@ void Changed(int i, DeviceAddress addr, float currentTemp);
 
 void modbusIdle(void);
 
-void cmdFunctionHelp(int arg_cnt, char **args);
+int cmdFunctionHelp(int arg_cnt, char **args);
 
-void cmdFunctionKill(int arg_cnt, char **args);
+int cmdFunctionKill(int arg_cnt, char **args);
 
 void applyConfig();
 
-void cmdFunctionLoad(int arg_cnt, char **args);
+int cmdFunctionLoad(int arg_cnt, char **args);
 
 int loadConfigFromEEPROM();
 
@@ -255,13 +257,13 @@ int loadConfigFromEEPROM();
 
 //int mqttConfigResp(char *as);
 
-void cmdFunctionSave(int arg_cnt, char **args);
+int cmdFunctionSave(int arg_cnt, char **args);
 
-void cmdFunctionSetMac(int arg_cnt, char **args);
+int cmdFunctionSetMac(int arg_cnt, char **args);
 
-void cmdFunctionGet(int arg_cnt, char **args);
+int cmdFunctionGet(int arg_cnt, char **args);
 
-void cmdFunctionLoglevel(int arg_cnt, char **args);
+int cmdFunctionLoglevel(int arg_cnt, char **args);
 
 void printBool(bool arg);
 /*
@@ -274,7 +276,7 @@ void saveFlash(short n, IPAddress& ip);
 int ipLoadFromFlash(short n, IPAddress &ip);
 */
 
-lan_status loadConfigFromHttp(int arg_cnt = 0, char **args = NULL);
+bool loadConfigFromHttp(int arg_cnt = 0, char **args = NULL);
 
 void preTransmission();
 

@@ -279,7 +279,8 @@ uint8_t Item::getCmd() {
 void Item::setCmd(uint8_t cmdValue) {
     aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
     if (itemCmd)
-    {
+    {   
+        itemCmd->type = aJson_Int;
         itemCmd->valueint = cmdValue & CMD_MASK | itemCmd->valueint & FLAG_MASK;   // Preserve special bits
         debugSerial<<F("SetCmd:")<<cmdValue<<endl;
       }
@@ -299,7 +300,8 @@ void Item::setFlag   (short flag)
 {
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
   if (itemCmd)
-  {
+  {   
+      itemCmd->type = aJson_Int;
       itemCmd->valueint |= flag & FLAG_MASK;   // Preserve CMD bits
     //  debugSerial<<F("SetFlag:")<<flag<<endl;
     }

@@ -111,21 +111,11 @@ typedef union
   struct
       {
         uint8_t cmdCode;
-            union {
-                  uint8_t cmdFlag;
-/*
-                  struct
-                      { uint8_t  suffixCode:4;
-                        uint8_t  itemArgType:4;
-                      };
-                      */
-                  };
-                  struct
-                      { uint8_t  suffixCode:4;
-                        uint8_t  itemArgType:4;
-                      };
-    //    uint8_t cmdEffect;
-        uint8_t cmdParam;
+        uint8_t  suffixCode:4;
+        uint8_t  itemArgType:4;
+        
+        uint8_t cmdEffect; //Reserve
+        uint8_t cmdParam;  //Reserve
       };
 } itemCmdStore;
 

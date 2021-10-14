@@ -11,7 +11,9 @@
 
 #if defined(FS_STORAGE)
 #include <FS.h>
+#if defined ARDUINO_ARCH_ESP32
 #include <SPIFFS.h>
+#endif
 #endif
 
 #define FN_CONFIG_JSON 1

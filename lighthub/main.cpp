@@ -252,9 +252,7 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
              +String(F("&port="))+ OTA_PORT 
              +String(F("&name="))+deviceName
              );
-     
-         //response+=(F("&ip="));
-         //todo response+=(Ethernet.localIP());
+
          client.println();
          delay(100);
          client.stop();
@@ -294,8 +292,39 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
          return 200 | HTTP_TEXT_PLAIN;  
         
        }  
+    else if (method == HTTP_GET && request.startsWith(F("/ram/")))
+    {
+    if (!authorized) return 401;  
+    aJsonObject * dumpObject; 
+    request.remove(0,5);
+    
+    if (request == "." && items)  dumpObject = items;
+    else if (request != "" && items)
+        {
+         dumpObject =  aJson.getObjectItem(items, request.c_str());
+         if (!dumpObject) return 404;
+        }
+    else dumpObject = root;
+
+    ArduinoOTA.sendHttpResponse(client,200 | HTTP_TEXT_JSON,false);  // Send only HTTP header, no close socket 
+    client.println();
+   // char* outBuf = (char*) malloc(MAX_JSON_CONF_SIZE); /* XXX: Dynamic size. */
+   // if (outBuf == NULL) return 500;
+    aJsonStream socketStream = aJsonStream(&client);
+  //aJsonStringStream stringStream(NULL, outBuf, MAX_JSON_CONF_SIZE);
+    aJson.print(dumpObject, &socketStream);
+    delay(100);
+    client.stop();
+    return 1;
+  
+  //size_t res = sysConfStream.write((byte*) outBuf,len);
+  //free (outBuf);
+
+    }
+
     else if (method == HTTP_POST && request.startsWith(F("/command/"))) 
         {
+        int result = 400;    
         if (!authorized) return 401;    
         request.remove(0,9);      
         String body=client.readStringUntil('\n');  
@@ -306,8 +335,9 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
         debugSerial<<F("Cmd: ")<<request<<endl;
         if (request=="reboot ") ArduinoOTA.sendHttpResponse(client,200);  
         const char* res=request.c_str();
-        cmd_parse((char*) res);     
-        return 200;    
+        result =  cmd_parse((char*) res);   
+        if (! result) return 404;
+        return result;      
         } 
     else return 0;  //Unknown
 }
@@ -526,10 +556,20 @@ lan_status lanLoop() {
             statusLED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
             if (configLocked) return LIBS_INITIALIZED;      
 
-            if (!configOk)
-                lanStatus = loadConfigFromHttp(0, NULL);
-            else lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-
+           if (!configOk)
+                {
+                if (loadConfigFromHttp(0, NULL)) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+                   else if (configLoaded)   {
+                                            infoSerial<<F("Continue with previously loaded config")<<endl;
+                                            lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+                                            }
+                else lanStatus = READ_RE_CONFIG; //Load from NVRAM
+                }
+            else 
+                {
+                infoSerial<<F("Config is valid")<<endl;
+                lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;  
+                }
             break;
 
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
@@ -1065,7 +1105,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
 
 #endif //_owire
 
-void cmdFunctionHelp(int arg_cnt, char **args)
+int cmdFunctionHelp(int arg_cnt, char **args)
 {
     printFirmwareVersionAndBuildOptions();
     printCurentLanConfig();
@@ -1082,7 +1122,9 @@ void cmdFunctionHelp(int arg_cnt, char **args)
                           "'kill' - test watchdog\n"
                           "'clear' - clear EEPROM\n"
                           "'reboot' - reboot controller");
+return 200;                            
 }
+
 void printCurentLanConfig() {
     infoSerial << F("Current LAN config(ip,dns,gw,subnet):");
     printIPAddress(Ethernet.localIP());
@@ -1094,16 +1136,18 @@ void printCurentLanConfig() {
 
 }
 
-void cmdFunctionKill(int arg_cnt, char **args) {
+int cmdFunctionKill(int arg_cnt, char **args) {
     for (byte i = 1; i < 20; i++) {
         delay(1000);
         infoSerial<<i;
     };
+return 500;    
 }
 
-void cmdFunctionReboot(int arg_cnt, char **args) {
+int cmdFunctionReboot(int arg_cnt, char **args) {
     infoSerial<<F("Soft rebooting...");
     softRebootFunc();
+return 500;    
 }
 
 void applyConfig() {
@@ -1236,8 +1280,14 @@ void printConfigSummary() {
     infoSerial<<F("RAM=")<<freeRam()<<endl;
 }
 
-void cmdFunctionLoad(int arg_cnt, char **args) {
-    if (!loadConfigFromEEPROM()) lanStatus=DO_REINIT;
+int cmdFunctionLoad(int arg_cnt, char **args) {
+
+    if (!loadConfigFromEEPROM()) 
+                                    {
+                                        lanStatus=DO_REINIT;
+                                        return 500;
+                                    }
+ return 200;                                   
 }
 
 
@@ -1275,14 +1325,14 @@ int loadConfigFromEEPROM()
     return 0;
 }
 
-void cmdFunctionSave(int arg_cnt, char **args)
+int cmdFunctionSave(int arg_cnt, char **args)
 { 
 if (arg_cnt>1)
 {
     if (!strcasecmp_P(args[1],ON_P)) sysConf.setSaveSuccedConfig(true);
     if (!strcasecmp_P(args[1],OFF_P)) sysConf.setSaveSuccedConfig(false);
     infoSerial<<F("Config autosave:")<<sysConf.getSaveSuccedConfig()<<endl;
-    return;
+    return 200;
 }
     #if defined(FS_STORAGE)
     sysConfStream.open("/config.json",'w');
@@ -1295,7 +1345,7 @@ if (arg_cnt>1)
   if (outBuf == NULL)
     {
       sysConfStream.close();  
-      return;
+      return 500;
     }
   infoSerial<<F("Saving config to EEPROM..")<<endl;
   aJsonStringStream stringStream(NULL, outBuf, MAX_JSON_CONF_SIZE);
@@ -1311,29 +1361,35 @@ if (arg_cnt>1)
     infoSerial<<F("Saving config to EEPROM..");
     aJson.print(root, &jsonEEPROMStream);
     sysConfStream.putEOF();
+    sysConfStream.flush();
     sysConfStream.close();
     infoSerial<<F("Saved to EEPROM")<<endl;
 #endif
+return 200;
 }
 
 
-void cmdFunctionLoglevel(int arg_cnt, char **args)
+int cmdFunctionLoglevel(int arg_cnt, char **args)
 {
+int res = 400;    
 if (arg_cnt>1)
         {
         serialDebugLevel=atoi(args[1]);
         sysConf.setSerialDebuglevel(serialDebugLevel);
+        res = 200;
         }
 
 if (arg_cnt>2)
         {
         udpDebugLevel=atoi(args[2]);
         sysConf.setUdpDebuglevel(udpDebugLevel);
+        res = 200;
         }
 infoSerial<<F("Serial debug level:")<<serialDebugLevel<<F("\nSyslog debug level:")<<udpDebugLevel<<endl;
+return res;
 }
 
-void cmdFunctionIp(int arg_cnt, char **args)
+int cmdFunctionIp(int arg_cnt, char **args)
 {
     IPAddress ip0(0, 0, 0, 0);
     IPAddress ip;
@@ -1383,61 +1439,76 @@ void cmdFunctionIp(int arg_cnt, char **args)
             printIPAddress(current_mask); */
     //}
     infoSerial<<F("Saved\n");
+    return 200;
 }
 
-void cmdFunctionClearEEPROM(int arg_cnt, char **args){
-   if (sysConf.clear())
-        infoSerial<<F("EEPROM cleared\n");
+int cmdFunctionClearEEPROM(int arg_cnt, char **args){
+   #ifdef FS_STORAGE
+   if (SPIFFS.format()) infoSerial<<F("FS Formatted\n");
+   #endif
+   if (sysConf.clear()) infoSerial<<F("EEPROM cleared\n");
+   return 200;
 }
 
-void cmdFunctionPwd(int arg_cnt, char **args)
+int cmdFunctionPwd(int arg_cnt, char **args)
 { //char empty[]="";
     if (arg_cnt)
          sysConf.setMQTTpwd(args[1]);
     else sysConf.setMQTTpwd();
     infoSerial<<F("MQTT Password updated\n");
+    return 200;
 }
 
-void cmdFunctionOTAPwd(int arg_cnt, char **args)
+int cmdFunctionOTAPwd(int arg_cnt, char **args)
 { //char empty[]="";
     if (arg_cnt)
          sysConf.setOTApwd(args[1]);
     else sysConf.setOTApwd();
     infoSerial<<F("OTA Password updated\n");
+    return 200;
 }
 
-void cmdFunctionSetMac(int arg_cnt, char **args) {
+int cmdFunctionSetMac(int arg_cnt, char **args) {
     char dummy;
     uint8_t mac[6];
     if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%c", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5], &dummy) < 6) {
         errorSerial<<F("could not parse: ")<<args[1];
-        return;
+        return 400;
     }
     sysConf.setMAC(mac);
     printMACAddress();
     
     //for (short i = 0; i < 6; i++) { EEPROM.write(i, mac[i]); }
     infoSerial<<F("Updated\n");
+    return 200;
 }
 
-void cmdFunctionGet(int arg_cnt, char **args) {
+int cmdFunctionGet(int arg_cnt, char **args) {
+int result;    
 if (arg_cnt>1)
 {
-    if (!strcasecmp_P(args[1],ON_P)) {sysConf.setLoadHTTPConfig(true); return;};
-    if (!strcasecmp_P(args[1],OFF_P)) {sysConf.setLoadHTTPConfig(false); return;};
+    if (!strcasecmp_P(args[1],ON_P)) {sysConf.setLoadHTTPConfig(true); return 200;};
+    if (!strcasecmp_P(args[1],OFF_P)) {sysConf.setLoadHTTPConfig(false); return 200;};
     
     infoSerial<<F("Loading HTTP config on startup:")<<sysConf.getLoadHTTPConfig()<<endl;
 
 }
 
-    lanStatus= loadConfigFromHttp(arg_cnt, args);
-    //ethClient.stop(); //Refresh MQTT connect to get retained info
+    if (loadConfigFromHttp(arg_cnt, args))
+    {
+       lanStatus =IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+       return 200;
+    }
+    // Not Loaded
+    if (configLoaded) lanStatus =IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+       else lanStatus = READ_RE_CONFIG;
+    return 500;
 }
 
 void printBool(bool arg) { (arg) ? infoSerial<<F("+") : infoSerial<<F("-"); }
 
 
-lan_status loadConfigFromHttp(int arg_cnt, char **args)
+bool loadConfigFromHttp(int arg_cnt, char **args)
 {
     //macAddress * mac = sysConf.getMAC();
     int responseStatusCode = 0;
@@ -1493,28 +1564,27 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
             interrupts();
             hclient.closeStream(configStream);  // this is very important -- be sure to close the STREAM
 
-            if (!root) {
+            if (!root) 
+                {
                 errorSerial<<F("Config parsing failed\n");
-//                timerLanCheckTime = millis();// + 15000;
-                return READ_RE_CONFIG;//-11;
-            } else {
+                return false;
+                } 
+            else {
             infoSerial<<F("Applying.\n");
-                applyConfig();
+            applyConfig();
             infoSerial<<F("Done.\n");
-
+            return true; 
             }
 
         } else {
             errorSerial<<F("ERROR: Server returned ");
             errorSerial<<responseStatusCode<<endl;
-        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-           else return READ_RE_CONFIG; //Load from NVRAM        
+            return false;
            }
 
     } else {
         debugSerial<<F("failed to connect\n");
-        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-           else return READ_RE_CONFIG; //Load from NVRAM    
+            return false;
            }
 #endif
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) || defined (NRF5) //|| defined(ARDUINO_ARCH_ESP32) //|| defined(ARDUINO_ARCH_ESP8266)
@@ -1554,34 +1624,37 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
         root = aJson.parse((char *) response.c_str());
 
         if (!root) {
-            errorSerial<<F("Config parsing failed\n");
-            return READ_RE_CONFIG;//-11; //Load from NVRAM
-        } else {
+                    errorSerial<<F("Config parsing failed\n");
+                    return false;
+                    } 
+        else {
             debugSerial<<F("Parsed. Free:")<<freeRam()<<endl;
             //debugSerial<<response;
             applyConfig();
             infoSerial<<F("Done.\n");
+            return true;
         }
       } else  {
           errorSerial<<F("Config retrieving failed\n");
-        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-           else return READ_RE_CONFIG; //Load from NVRAM
+          return false;
       }
-    } else {
+    } 
+      else 
+    {
         errorSerial<<F("Connect failed\n");
-        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-           else return READ_RE_CONFIG; //Load from NVRAM
+        return false;
     }
 #endif
 
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32) //|| defined (NRF5)
-    HTTPClient httpClient;
-   // WiFiClient wifiClient;
     #if defined(WIFI_ENABLE)
         WiFiClient configEthClient;
     #else
         EthernetClient configEthClient;
     #endif
+
+    HTTPClient httpClient;
+
     String fullURI = "http://";
     fullURI+=configServer;
     fullURI+=URI;
@@ -1593,36 +1666,40 @@ lan_status loadConfigFromHttp(int arg_cnt, char **args)
     #endif
 
     int httpResponseCode = httpClient.GET();
+
     if (httpResponseCode > 0) {
         infoSerial.printf("[HTTP] GET... code: %d\n", httpResponseCode);
         if (httpResponseCode == HTTP_CODE_OK) {
             String response = httpClient.getString();
+            
+            httpClient.end();
+
             debugSerial<<response;
             cleanConf();
             root = aJson.parse((char *) response.c_str());
             if (!root) {
                 errorSerial<<F("Config parsing failed\n");
-                return READ_RE_CONFIG;
+                return false;
             } else {
                 infoSerial<<F("Config OK, Applying\n");
                 applyConfig();
-                infoSerial<<F("Done.\n");
+                infoSerial<<F("Done.\n");   
+                return true;             
             }
-        } else {
+        } 
+        else
+        {        
+            httpClient.end();
             errorSerial<<F("Config retrieving failed\n");
-        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-           else return READ_RE_CONFIG; //Load from NVRAM
+            return false;
         }
-    } else {
+    } else 
+        {
         errorSerial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(httpResponseCode).c_str());
         httpClient.end();
-        if (configLoaded) return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-           else return READ_RE_CONFIG; //Load from NVRAM
+        return false;
         }
-    httpClient.end();
 #endif
-
-    return IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
 }
 
 void preTransmission() {
@@ -1691,7 +1768,11 @@ void setup_main() {
   #if defined (FS_STORAGE)
     #if defined(FS_PREPARE)
             //Initialize File System
+            #if defined ARDUINO_ARCH_ESP32
             if(SPIFFS.begin(true))
+            #else 
+            if(SPIFFS.begin())
+            #endif
             {
                 debugSerial<<("SPIFFS Initialize....ok")<<endl;
             }
@@ -1704,7 +1785,7 @@ void setup_main() {
     #if defined(ESP8266) || defined(ESP32)
         EEPROM.begin(ESP_EEPROM_SIZE); 
         int streamSize = EEPROM.length();
-        JSONStream.setSize(streamSize-EEPROM_offsetJSON);
+        sysConfStream.setSize(streamSize-EEPROM_offsetJSON);
         debugSerial<<F("FLASH Init: ")<<streamSize<<endl;
     #endif
  #endif
