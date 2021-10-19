@@ -15,6 +15,12 @@
 
 #endif
 
+#ifdef MDNS_ENABLE
+    #ifndef OTA_PORT
+    #define OTA_PORT  65280
+    #endif
+#endif    
+
 // Configuration of drivers enabled
 #define SYSLOG_LOCAL_SOCKET 514
 

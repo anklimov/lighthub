@@ -10,7 +10,7 @@
 # - udp errors
 -DOTA
 -DARDUINO_OTA_MDNS_DISABLE
-#-DMDNS_ENABLE 
+-DMDNS_ENABLE 
 #- ArduinoMDNS didnt working
 
 -DMCP23017

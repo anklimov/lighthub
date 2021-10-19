@@ -71,10 +71,8 @@ EthernetClient ethClient;
 #ifdef MDNS_ENABLE
     #ifndef WIFI_ENABLE
     EthernetUDP mdnsUDP;
-    #else
-    WiFiUDP mdnsUDP;
+    MDNS mdns(mdnsUDP);
     #endif
-MDNS mdns(mdnsUDP);
 #endif
 
 StatusLED statusLED(ledRED);
@@ -526,6 +524,18 @@ lan_status lanLoop() {
                infoSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP()<<endl;
                wifiInitialized = true;
                lanStatus = HAVE_IP_ADDRESS;
+
+                #ifdef MDNS_ENABLE
+
+                char mdnsName[32] = "LightHub";
+                SetBytes(sysConf.mac+4,2,mdnsName+8);    
+
+                if (!MDNS.begin(mdnsName)) 
+                errorSerial<<("Error setting up MDNS responder!")<<endl;
+                else    infoSerial<<("mDNS responder started")<<endl;
+                MDNS.addService("http", "tcp", OTA_PORT);
+
+                #endif
             }
             else
      //       if (millis()>WiFiAwaitingTime)
@@ -828,12 +838,8 @@ void ip_ready_config_loaded_connecting_to_broker() {
     deviceName = getStringFromConfig(mqttArr, 0);
     infoSerial<<F("Device Name:")<<deviceName<<endl;
     
-  //  #ifdef OTA
-  //  ArduinoOTA.setDeviceName(deviceName);
-  //  #endif
-
-    #ifdef MDNS_ENABLE
-    mdns.setName(deviceName);
+    #if defined  (MDNS_ENABLE) && ! defined (WIFI_ENABLE)             
+     mdns.setName(deviceName);
     #endif
 
 //debugSerial<<F("N:")<<n<<endl;
@@ -950,6 +956,7 @@ void onInitialStateInitLAN() {
 lanStatus = AWAITING_ADDRESS;
 WiFiAwaitingTime = millis();// + 60000L;
 return;
+            
 /*
 if (WiFi.status() == WL_CONNECTED) {
         infoSerial<<F("WiFi connected. IP address: ")<<WiFi.localIP()<<endl;
@@ -1015,22 +1022,19 @@ if (WiFi.status() == WL_CONNECTED) {
     }
   }//DHCP
 
-   #ifdef MDNS_ENABLE
-        #ifndef OTA_PORT
-        #define OTA_PORT  65280
+        #ifdef MDNS_ENABLE
+        char mdnsName[32] = "LightHub";
+        SetBytes(sysConf.mac+4,2,mdnsName+8);
+
+        mdns.begin(Ethernet.localIP(), mdnsName);         
+        char txtRecord[32] = "\x10mac=";
+        SetBytes(sysConf.mac,6,txtRecord+5);
+       
+        strncat(mdnsName,"._http",sizeof(mdnsName));
+        mdns.addServiceRecord(mdnsName, OTA_PORT, MDNSServiceTCP, txtRecord);                
         #endif
 
-        mdns.begin(Ethernet.localIP(), "lighthub");
-         
-         char txtRecord[32] = "\x10mac=";
-         SetBytes(sysConf.mac,6,txtRecord+5);
-         char mdnsName[32] = "LightHub";
-         SetBytes(sysConf.mac+4,2,mdnsName+8);
-         strncat(mdnsName,"._http",sizeof(mdnsName));
-         mdns.addServiceRecord(mdnsName, OTA_PORT, MDNSServiceTCP, txtRecord);                
-        #endif
-
-    #endif
+#endif //Ethernet
 }
 
 
@@ -2133,8 +2137,10 @@ void loop_main() {
         if (artnet) artnet->read();  ///hung if network not initialized
 #endif
 #ifdef MDNS_ENABLE
+        #ifndef WIFI_ENABLE
         yield();
         mdns.run();
+        #endif
 #endif
     }
 
@@ -2214,7 +2220,9 @@ void modbusIdle(void) {
         ArduinoOTA.poll();
 #endif
 #ifdef MDNS_ENABLE
+        #ifndef WIFI_ENABLE
         mdns.run();
+        #endif
 #endif        
     } //End network runners
 

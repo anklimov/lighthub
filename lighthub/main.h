@@ -152,12 +152,14 @@ extern Streamlog  errorSerial;
         #include <WiFiClientSecure.h>
         #include <WiFiManager.h>
         #include <WebServer.h>
+        #include <ESPmDNS.h>
   #else
         #include <ESP8266WiFi.h>
         #include <ESP8266HTTPClient.h>
         #include <WiFiManager.h>
         #include <DNSServer.h>
         #include <ESP8266WebServer.h>
+        #include <ESP8266mDNS.h>
   #endif
 #define Ethernet WiFi
 #else  //Wired connection
@@ -182,7 +184,9 @@ extern Streamlog  errorSerial;
 #endif
 
 #ifdef MDNS_ENABLE
-#include <ArduinoMDNS.h>
+    #ifndef WIFI_ENABLE
+    #include <ArduinoMDNS.h>
+    #endif
 #endif
 
 #include "Arduino.h"
