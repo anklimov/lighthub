@@ -1,0 +1,46 @@
+{
+  "syslog":["192.168.88.2"],
+  "mqtt":["elev","192.168.88.22"],
+  "dmx":[30],
+  "items": {
+    "relay1":[6,32],
+    "relay2":[6,33],
+    "relays":[7,["relay1","relay2"]],
+    "sensair1":[44,[254,
+                  "sensair",
+                  {"co2":{"emit":"co2"}},
+                  {"mode":"auto"}
+                  ]
+              ],
+    "elevator":[15,{"baud":9600,"serial":"8N1"]       
+    },
+   "modbus":
+   {
+   "sensair":{"baud":9600,
+             "poll":{"irs":[[0,3],21,[25,30]],"regs":[0,1,31],"delay":1000},
+             "par":{
+                            "co2":{"ir":3},
+                            "meterStat":{"ir":0},
+                            "alarmStat":{"ir":1},
+                            "outStat":{"ir":0},
+                            "pwm":{"ir":21},
+                            "typeid":{"ir":25,"type":"u32"},
+                            "mapver":{"ir":27},
+                            "fwver":{"ir":28},
+                            "sensorid":{"ir":29,"type":"u32"},
+                            "ack":{"reg":0},
+                            "command":{"reg":1},
+                            "abc":{"reg":31}
+                            
+                            
+             }
+          
+    }
+   },
+  
+"in":{    "23":{"item":"relays","emit":"in1"},
+          "25":{"item":"relays","emit":"in2"},
+          "27":{"item":"relays","emit":"in3"},
+          "29":{"item":"relays","emit":"in4"}
+         }
+}

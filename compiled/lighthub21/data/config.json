@@ -1,0 +1,215 @@
+{
+  "dmx":[3,60],
+  "syslog":["192.168.88.2"],
+  "dmxin":["led5","led6","led7","led8"],
+  "topics":{"root":"lazyhome.ru"},
+  "mqtt":["lazyhome.ru-939a","192.168.88.3"], 
+  "modbus":
+  {
+    "airset":{
+              "baud":9600,
+              "serial":"8E1",
+              "poll":{"regs":[[0,38],[1000,1008]],"delay":100000},
+              "par":{ 
+                            "uheat":{"reg":0,"type":"u16"},
+                            "umot":{"reg":2,"type":"u16"},
+                            "amode":{"reg":3,"type":"u8","map":{}},
+                            "onoff":{"reg":1000},
+                            "fsauto":{"reg":1001},
+                            "pmode":{"reg":1002},
+                            "set":{"reg":1003},
+                            "frcautoff":{"reg":1007},
+                            "fault":{"reg":1008},
+                
+                            "t_heat":{"reg":8,"map":[0,1024,0,1024],"type":"i16"},
+                            "mode":{"reg":24}
+                  
+              }
+              },
+    "dim4":{"serial":"8N1",
+             "poll":{"regs":[[0,4]],"delay":100000},
+             "par":{
+                            "ch1":{"reg":0,"map":[]},
+                            "ch2":{"reg":1,"map":[]},
+                            "ch3":{"reg":2,"map":[]},
+                            "ch4":{"reg":3,"map":[]}
+             }
+            },
+    "panel":{
+            "serial":"8E1",
+            "poll":{"regs":[[40000,40014],[30000,30002]],"delay":10000},
+             "par":{
+                            "fan"  :{"reg":40000,"map":[1,[0,7,0,100]],"id":1},
+                            "mode" :{"reg":40001,"mapcmd":[2,[[1,"FAN_ONLY"],[2,"HEAT"],[4,"COOL"],[8,"AUTO"]]]},
+                            "set"  :{"reg":40002,"id":2},
+                            "pwr"  :{"reg":40003,"mapcmd":[2,[[0,2],[1,1]]]},
+                            "alm01":{"reg":40004},
+                            "alm17":{"reg":40005},
+                            "alm33":{"reg":40006},
+                            "sethum" :{"reg":40007,"id":3},
+                            "setvoc" :{"reg":40008,"id":4},
+                            
+                            "temp" :{"reg":30000,"map":[1,[-1000,1000,-100.0,100.0]],"type":"x10"},
+                            "hum"  :{"reg":30001},
+                            "voc"  :{"reg":30002},
+                            
+                            "ch_temp"  :{"reg":40009,"type":"x10","id":5},
+                            "ext_temp" :{"reg":40010,"type":"x10","id":6},
+                            "out_temp" :{"reg":40011,"type":"x10","id":7},
+                            "water_temp" :{"reg":40012,"type":"x10","id":8},
+                            "ch_hum"  :{"reg":40013},
+                            "heat_pwr":{"reg":40014}
+             }   
+    }
+  },
+  
+  "ow":{
+                 "2861641227C1EFED":[{"emit":"t_1","item":"pid0/val"},{"emit":"pid_t"}]
+        },
+  "items": {
+    "dimer1":[44,[1,
+                  "dim4",
+                  {"ch1":{"emit":"aaa1"},"ch2":{"emit":"aaa2"},"ch3":{"emit":"aaa3"}},
+                  {"mode":"auto"}
+                  ]
+              ],
+              
+    "p_bedr":[44,[2,"panel",
+              {
+                "fan" :{"sa":10, "act":
+                            [
+                            {"emit":"edem/ac/bedr/fan"},
+                            {"emit":"edem/vent/bedr/fan"}
+                            ]
+                        },
+                            
+                "mode":{"sa":11,"emit":"edem/ac/bedr/mode"},
+                "pwr" :{"sa":12,"emit":"edem/ac/bedr/pwr"},
+                
+                "sethum":{"emit":"edem/vent/hum_bedr/set","item":"thermostat/set"},
+                "hum"   :{"emit":"edem/vent/hum_bedr/val"},
+                
+                "setvoc":{"emit":"edem/vent/bedr/set","item":"lled/sat"},
+                "voc"   :{"emit":"edem/vent/bedr/val"},
+                
+                "set"   :{"sa":13, "act":
+                            [
+                              {"emit":"edem/fl2/term_bedr/set"},
+                              {"emit":"edem/ac/bedr/set","item":"pid0/set"}
+                            ]
+                          },
+                "temp"  :{"emit":"edem/fl2/term_bedr/1/val"},
+                "ch_temp":{"sa":14},
+                "ch_hum":{"sa":15},
+                "ext_temp":{"sa":16},
+                "out_temp":{"sa":17},
+                "water_temp":{"sa":18},
+                "heat_pwr":{"sa":19},
+                "cmd":{"sa":2,"reg":"mode","on":1,"off":0}
+              }  
+              ]],
+    "airset1":[44,[247,"airset"]],
+    "mbusdim1":[44,[1,0,3,100]],
+    "mbusdim2":[44,[1,1,3,100]],
+    "mbusdim3":[44,[1,2,3,100]],
+    "mbusdim4":[44,[1,3,3,100]],
+                "relay":[6,22],
+                "pout1":[6,23],
+                "pout2":[6,24],
+                "pout3":[6,25],
+                "pout4":[33,9],
+                "pout5":[33,8],
+                "pout6":[33,11],
+                "pout7":[33,12],
+                "lled":[3,[9,8,11,12]],
+                "pwm0" :[33,4],
+                "pwm1" :[33,5],
+                "pwm2" :[3,6],
+                "pwm3" :[3,7],
+                "pwm10":[3,3],
+                "thermostat":[5,2,33],
+                "airgate1":[12,[-4,-27,59,617,284,5000]],
+                "airgate2":[12,[-5,-26,60,750,160,5000]],
+                "airgates":[7,["airgate1","airgate2"]],
+                "pid0":[413,
+                        [
+                          [20,0.2,7,0,100],
+                          [{"item":"airgates/set","emit":"pid_out","pin":29},{"item":"pwm10/set"}]],
+                        32.1],
+                "relaytermostat":[16,[[2,3.5,10000],{"pin":28},33]],
+                "virtualAC0":[17,[]],
+                "vent5":[18,
+                              {
+                              "":{"item":"dimmer3/set"},  
+                              "airgate1":{"V":100,"set":255,"item":"airgate1/set"},
+                              "airgate2":{"V":200,"set":128,"cmd":2,"item":"airgate2/set"},
+                              "airgate4":{"V":150,"set":0,"emit":"edem/in/airgate4/set"}
+                              }             
+                        ],
+                
+                
+		"unprot0":[6,33],
+		"unprot1":[6,32],
+		"unprot2":[6,31],
+		"unprot3":[6,30],
+		"unprot4":[6,29],
+		"unprot5":[6,28],
+		"unprot6":[66,27],
+		"unprot7":[66,26],
+		"led": [1,1],
+		"led2":[1,5],
+		"led3":[1,9],
+		"led4":[1,13],
+		"led5":[1,17],
+		"led6":[1,21],
+		"led7":[1,25],
+		"led8":[1,29],
+		"dimmer" :[0,33],
+		"dimmer2":[0,34],
+	  "dimmer3":[0,35],
+		"dimmer4":[0,36],
+		"dimmer5":[0,37],
+		"dimmer6":[0,38],
+		"dimmers":[7,["dimmer","dimmer2","dimmer3","dimmer4","dimmer5","dimmer6"]],
+		"leds":[7,["led","led2","led3","led4","led5","led6"]],
+		"mbuses":[7,["mbusdim1","mbusdim2","mbusdim3","mbusdim4"]],
+		"all":[7,["dimmers","uouts","relays","leds","mbuses"]],
+		"relays":[7,["relay","pout1","pout2","pout3","pout4","pout5","pout6","pout7"]],
+		"uouts":[7,["unprot0","unprot1","unprot2","unprot3","unprot4","unprot5","unprot6","unprot7"]]
+    },
+ "in":{
+    "42":{"emit":"in0"},
+    "44":{"emit":"in1"},
+    "46":{"emit":"in2"},
+    "49":{"emit":"in3"},
+    "43":{"emit":"in4"},
+    "45":{"emit":"in5"},
+    "47":{"emit":"in6"},
+    "48":{"emit":"in7"},
+    "34":{"emit":"in8"},
+    "36":{"emit":"in9","item":"unprot0","scmd":"TOGGLE","rcmd":""},
+    "38":{"emit":"in10","item":"dimmers","scmd":"TOGGLE","rcmd":""},
+    "40":{"emit":"in11","item":"leds","scmd":"TOGGLE","rcmd":""},
+    "35":{"emit":"in12","item":"mbuses","scmd":"TOGGLE","rcmd":""},
+    "37":{"emit":"in13","item":"relays","scmd":"TOGGLE","rcmd":""},
+    "39":{"emit":"in14","item":"uouts","scmd":"TOGGLE","rcmd":""},
+    "41":{"emit":"in15","item":"all","scmd":"TOGGLE","rcmd":""},  
+    
+                "54":{"T":66,"emit":"myhome/in/a00","map":[0,1024,0,1024,10]},
+                "55":{"T":66,"emit":"myhome/in/a01","map":[0,1024,0,1024,10]},
+                "56":{"T":66,"emit":"myhome/in/a02","map":[0,1024,0,1024,10]},
+                "57":{"T":66,"emit":"myhome/in/a03","map":[0,1024,0,1024,10]},
+                "58":{"T":66,"emit":"myhome/in/a04","map":[0,1024,0,1024,10]},
+
+                "61":{"T":66,"emit":"myhome/in/a07","map":[0,1024,0,1024,10]},
+                "62":{"T":66,"emit":"myhome/in/a08","map":[0,1024,0,1024,10]},
+                "63":{"T":66,"emit":"myhome/in/a09","map":[0,1024,0,1024,10]},
+                "64":{"T":66,"emit":"myhome/in/a10","map":[0,1024,0,1024,10]},
+                "65":{"T":66,"emit":"myhome/in/a11","map":[0,1024,0,1024,10]},
+                "66":{"T":0,"emit":"myhome/in/d12"},
+                "67":{"T":0,"emit":"myhome/in/d13"},
+                "68":{"T":0,"emit":"myhome/in/d14"},
+                "69":{"T":0,"emit":"myhome/in/d15"}
+    
+         }
+  }

@@ -231,6 +231,7 @@ bool isNotRetainingStatus() {
 
 uint16_t httpHandler(Client& client, String request, uint8_t method, long contentLength, bool authorized, String& response )
 {
+  #ifdef OTA  
     //String response = "";
     debugSerial<<request<<endl;
     if (method == HTTP_GET && request == (F("/"))) 
@@ -337,7 +338,9 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
         if (! result) return 404;
         return result;      
         } 
-    else return 0;  //Unknown
+    else
+#endif     
+    return 0;  //Unknown
 }
 
 int inTopic (char * topic,  topicType tt)
