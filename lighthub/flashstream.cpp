@@ -2,8 +2,10 @@
 #include "systemconfigdata.h"
 
 #include <main.h>
-#include <WiFiOTA.h>
 
+#ifdef OTA
+#include <WiFiOTA.h>
+#endif
 
 
 #if defined(ARDUINO_ARCH_AVR) 
@@ -133,7 +135,9 @@ NRFFlashStorage EEPROM;
                         streamSize = MAX_JSON_CONF_SIZE;  
                         startPos = EEPROM_offsetJSON;
                         textMode = true;
+                        #ifdef OTA
                         contentType = HTTP_TEXT_JSON;
+                        #endif
                         return 1;    
                     
                   case FN_CONFIG_BIN:                    
@@ -141,7 +145,9 @@ NRFFlashStorage EEPROM;
                         startPos = SYSCONF_OFFSET;
                         streamSize = SYSCONF_SIZE;
                         textMode =false;
+                        #ifdef OTA
                         contentType = HTTP_OCTET_STREAM;
+                        #endif
                         return 1;
 
                    default:
