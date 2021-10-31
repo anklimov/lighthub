@@ -56,6 +56,7 @@ e-mail    anklimov@gmail.com
 #define CH_MBUS  14
 #define CH_UARTBRIDGE  15
 #define CH_ELEVATOR 16
+#define CH_RGBWW    17
 #define CH_MULTIVENT 18
 
 //#define CHANNEL_TYPES 13

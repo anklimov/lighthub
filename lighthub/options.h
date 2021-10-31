@@ -199,10 +199,14 @@
 //All options available
 #ifdef CONTROLLINO
 #define modbusSerial Serial3
-#define AC_Serial Serial2
+    #ifndef AC_Serial
+    #define AC_Serial Serial2
+    #endif
 #else
 #define modbusSerial Serial2
-#define AC_Serial Serial3
+    #ifndef AC_Serial
+    #define AC_Serial Serial3
+    #endif
 #endif
 #define dmxin DMXSerial
 #define dmxout DmxSimple

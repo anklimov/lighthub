@@ -143,6 +143,7 @@ void Item::Parse() {
             case CH_RGBW:
             case CH_RGB:
             case CH_DIMMER:
+            case CH_RGBWW:
             driver = new out_dmx (this);
   //          debugSerial<<F("DMX driver created")<<endl;
             break;

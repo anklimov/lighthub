@@ -46,7 +46,9 @@ int out_dmx::getChanType()
     case 3:
       return CH_RGB;
     case 4:
-      return CH_RGBW;
+      return CH_RGBW; 
+    case 5:
+      return CH_RGBWW;
     default:
       return item->itemType;
   }
@@ -81,11 +83,15 @@ if (cType==CH_DIMMER) //Single channel
     return 1;
   }
 
+ int colorTemp = cmd.getColorTemp(); 
+
   switch (cType)
   {
     case CH_RGB:
      storageType=ST_RGB;
      break;
+    case CH_RGBWW:    
+    cmd.setColorTemp(0); //Supress cold conversoin
     case CH_RGBW:
      storageType=ST_RGBW;
      break;
@@ -98,9 +104,19 @@ st.assignFrom(cmd);
 
 debugSerial<<F("Assigned:");st.debugOut();
     switch (cType)
-    {
+    {      
+      case CH_RGBWW:    
+      if (colorTemp == -1) colorTemp = 255/2;
+            else colorTemp=map(colorTemp,153,500,0,255);
+      DmxWrite(getChannelAddr(3), map(st.param.w,0,255,0,colorTemp));
+      DmxWrite(getChannelAddr(4), map(st.param.w,0,255,0,255-colorTemp));
+      DmxWrite(iaddr, st.param.r);
+      DmxWrite(getChannelAddr(1), st.param.g);
+      DmxWrite(getChannelAddr(2), st.param.b);
+     
+      break;
       case CH_RGBW:
-      DmxWrite(getChannelAddr(3), st.param.w);
+          DmxWrite(getChannelAddr(3), st.param.w);
       case CH_RGB:
       DmxWrite(iaddr, st.param.r);
       DmxWrite(getChannelAddr(1), st.param.g);

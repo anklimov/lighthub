@@ -35,13 +35,14 @@ public:
             };   
    virtual int open(String _filename, char mode) override;
    virtual int available() override;             
-   virtual int read(); 
-   virtual int peek(); 
+   virtual int read() override;  
+   virtual int peek() override;  
    virtual unsigned int seek  (unsigned int _pos = 0) override;    
    virtual void close() override;
    virtual void flush() override;
    virtual size_t write(uint8_t ch);              
    using Print::write; 
+   virtual void putEOF() override {}; 
    virtual ~flashStream ();
 };
 
@@ -58,15 +59,6 @@ public:
     void setSize(unsigned int _size);
     int open(short fileNum, char mode='\0') ; 
     virtual int open(String _filename, char mode='\0') override;
-/*
-    virtual int  open(unsigned int _startPos=0, unsigned int _size=4096 char mode='\0') 
-            {
-                pos = 0;
-                startPos = _startPos;
-                streamSize = _size;
-                return 1;
-            };       
-*/
     virtual unsigned int seek(unsigned int _pos = 0); 
     virtual int available() override;    
     virtual int read() ;

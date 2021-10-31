@@ -1,4 +1,5 @@
 #include "config.h"
+#include "main.h"
 
 String             systemConfig::getMACString()
 {
@@ -28,6 +29,7 @@ bool             systemConfig::isValidSysConf()
                        stream->close();  
                        return false;
                        } 
+    stream->close();                    
     return true;                   
 }; 
 
@@ -289,4 +291,13 @@ bool             systemConfig::getLoadHTTPConfig()
 return false;
 }
 
+ String           systemConfig::getETAG()
+{
+return "123";
+}
 
+bool             systemConfig::setETAG(String etag)
+{
+debugSerial<<F("ETAG:")<<etag<<endl;   
+return 1;
+}

@@ -91,7 +91,8 @@ NRFFlashStorage EEPROM;
     int flashStream::available() 
                 { 
                     if (!fs) return 0;
-                    if (textMode && peek()==EOFchar) return 0;  
+                    //if (textMode && (peek()==EOFchar)) {debugSerial<<"X";return 0;}  //Not working for esp8266
+                    if (fs.position()>=streamSize) return 0;
                     return fs.available();  
                 };
                 
@@ -111,8 +112,8 @@ NRFFlashStorage EEPROM;
         debugSerial<<(F(" Res:"))<<res<<endl;
         return res;
       };         
-    void flashStream::close()  {fs.close();  };
-    void flashStream::flush()  {fs.flush();  };
+    void flashStream::close()  {fs.close(); debugSerial<<filename<<"  Closed\n";};
+    void flashStream::flush()  {fs.flush(); debugSerial<<filename<<"  Flushed\n";};
     size_t flashStream::write(uint8_t ch) 
                 {
                     return fs.write(ch);
@@ -162,38 +163,33 @@ NRFFlashStorage EEPROM;
                   else if (_filename == "/config.bin")  return open (FN_CONFIG_BIN,mode);
                   else return 0;    
                 };
-/*
-    virtual int  open(unsigned int _startPos=0, unsigned int _size=4096 char mode='\0') 
-            {
-                pos = 0;
-                startPos = _startPos;
-                streamSize = _size;
-                return 1;
-            };       
-*/
+
      unsigned int flashStream::seek(unsigned int _pos) 
         {   pos=min(_pos, streamSize);
             debugSerial<<F("Seek:")<<pos<<endl;
             return pos;
         };
-     int flashStream::available() { 
-            //debugSerial<<pos<<"%"<<streamSize<<";"; 
+
+     int flashStream::available() 
+        { 
             if (textMode && peek()==EOFchar) return 0; 
             return (pos<streamSize);
-            };
+         };
+
      int flashStream::read() 
-            {
-                int ch = peek(); 
-                pos++; 
-                //debugSerial<<"<"<<(char)ch;
-                return ch;
-                };
+         {
+            int ch = peek(); 
+            pos++; 
+            return ch;
+         };
+
      int flashStream::peek() 
-            {    
-                if (pos<streamSize) 
-                     return EEPROM.read(startPos+pos);
-                else return -1;    
+         {    
+            if (pos<streamSize) 
+               return EEPROM.read(startPos+pos);
+            else return -1;    
             };
+
     void flashStream::flush() {
         #if defined(ESP8266) || defined(ESP32)
         if (EEPROM.commitReset())
@@ -204,7 +200,6 @@ NRFFlashStorage EEPROM;
           
     size_t flashStream::write(uint8_t ch) 
             {
-                //debugSerial<<">"<<(char)ch;
                #if defined(__AVR__)
                   EEPROM.update(startPos+pos++,(char)ch);
                   return 1;
@@ -235,8 +230,8 @@ NRFFlashStorage EEPROM;
     #endif        
 
  void flashStream::close()  
-    {
-       flush();
+    {  
+       putEOF();
     }    
 
 

@@ -1305,7 +1305,6 @@ int loadConfigFromEEPROM()
     sysConfStream.open(FN_CONFIG_JSON,'r');
     #endif
 
-    //JSONStream.seek();    
     if (sysConfStream.peek() == '{') {
         aJsonStream as = aJsonStream(&sysConfStream);
         cleanConf();
@@ -1364,8 +1363,8 @@ if (arg_cnt>1)
     aJsonStream jsonEEPROMStream = aJsonStream(&sysConfStream);
     infoSerial<<F("Saving config to EEPROM..");
     aJson.print(root, &jsonEEPROMStream);
-    sysConfStream.putEOF();
-    sysConfStream.flush();
+    //sysConfStream.putEOF();
+    //sysConfStream.flush();
     sysConfStream.close();
     infoSerial<<F("Saved to EEPROM")<<endl;
 #endif
@@ -1488,7 +1487,7 @@ int cmdFunctionSetMac(int arg_cnt, char **args) {
 }
 
 int cmdFunctionGet(int arg_cnt, char **args) {
-int result;    
+
 if (arg_cnt>1)
 {
     if (!strcasecmp_P(args[1],ON_P)) {sysConf.setLoadHTTPConfig(true); return 200;};
@@ -1518,6 +1517,7 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
     int responseStatusCode = 0;
     char URI[64];
     char configServer[32]="";
+    String etag=sysConf.getETAG();
     if (arg_cnt > 1) {
         strncpy(configServer, args[1], sizeof(configServer) - 1);
         sysConf.setServer(configServer);
@@ -1605,6 +1605,7 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
     //debugSerial<<"making GET request");get
     debugSerial<<F("Before request: Free:")<<freeRam()<<endl;
     htclient.beginRequest();
+    htclient.sendHeader("If-None-Match:",etag);
     responseStatusCode = htclient.get(URI);
     htclient.endRequest();
 
@@ -1612,12 +1613,15 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
     {
     // read the status code and body of the response
     responseStatusCode = htclient.responseStatusCode();
+    
+    while (htclient.headerAvailable()) 
+                    if (htclient.readHeaderName() == "ETAG") sysConf.setETAG(htclient.readHeaderValue());
+   
     response = htclient.responseBody();
     htclient.stop();
     wdt_res();
     infoSerial<<F("HTTP Status code: ")<<responseStatusCode<<endl;
-    
-//delay(1000);
+
     if (responseStatusCode == 200) {
         debugSerial<<F("Free:")<<freeRam()<<endl;
         debugSerial<<F("Response Len:")<<response.length()<<endl;
@@ -1643,7 +1647,12 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
           return false;
       }
     } 
-      else 
+      else if (responseStatusCode == 304) 
+      {
+          errorSerial<<F("Config not changed\n");
+          return false;
+      }
+     else    
     {
         errorSerial<<F("Connect failed\n");
         return false;

@@ -179,6 +179,11 @@ bool itemCmd::setS(uint8_t s)
 //! Internally  1 - cold, 101 - warm light
 bool itemCmd::setColorTemp(int t)
 {
+  if (!t)
+  {
+  param.colorTemp=0;  
+  return true;  
+  }
   int par=map(t,153,500,0,100);
   switch (cmd.itemArgType)
   {
@@ -199,7 +204,7 @@ bool itemCmd::setColorTemp(int t)
   return true;
 }
 
-//! Setup color tempetature parameter from HSV or HSV255 types. return 0..100 value in success.
+//! Return color tempetature parameter from HSV or HSV255 types. return 153..500 value in success.
 //! -1 - if no value stored
 int itemCmd::getColorTemp()
 {

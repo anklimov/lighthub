@@ -54,5 +54,8 @@ class systemConfig {
  bool             setSaveSuccedConfig(bool);
  bool             getLoadHTTPConfig();
  bool             setLoadHTTPConfig(bool);
+ String           getETAG();
+ bool             setETAG(String etag); 
+
  //bool             Save();  
 };

@@ -25,6 +25,7 @@ int colorChannel::getDefaultStorageType()
           {
             case 3:
             case 4:
+            case 5:
               return ST_HSV255;
             case 1:
               return ST_PERCENTS255;  
