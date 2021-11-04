@@ -571,7 +571,7 @@ lan_status lanLoop() {
 
            if (!configOk)
                 {
-                if (loadConfigFromHttp(0, NULL)) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+                if (loadConfigFromHttp()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
                    else if (configLoaded)   {
                                             infoSerial<<F("Continue with previously loaded config")<<endl;
                                             lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
@@ -1315,19 +1315,23 @@ int loadConfigFromEEPROM()
         sysConfStream.close();
         if (!root) {
             errorSerial<<F("load failed")<<endl;
+            sysConf.setETAG("");
         //    sysConfStream.close();
             return 0;
         }
         infoSerial<<F("Loaded")<<endl;
         applyConfig();
+        sysConf.loadETAG();
         //ethClient.stop(); //Refresh MQTT connect to get retained info
         return 1;
-    } else {
-        sysConfStream.putEOF(); //truncate garbage
-        infoSerial<<F("No stored config")<<endl;
-        sysConfStream.close();
-        return 0;
-    }
+    } else if (sysConfStream.available())
+          {
+           sysConfStream.putEOF(); //truncate garbage        
+           sysConf.setETAG("");
+           sysConf.saveETAG();
+           }
+    sysConfStream.close();   
+    infoSerial<<F("No stored config")<<endl;
     return 0;
 }
 
@@ -1371,6 +1375,7 @@ if (arg_cnt>1)
     sysConfStream.close();
     infoSerial<<F("Saved to EEPROM")<<endl;
 #endif
+sysConf.saveETAG();
 return 200;
 }
 
@@ -1453,6 +1458,14 @@ int cmdFunctionClearEEPROM(int arg_cnt, char **args){
    if (SPIFFS.format()) infoSerial<<F("FS Formatted\n");
    #endif
    if (sysConf.clear()) infoSerial<<F("EEPROM cleared\n");
+       #if defined(FS_STORAGE)
+
+    sysConfStream.open("/config.json",'r');
+    #else
+    sysConfStream.open(FN_CONFIG_JSON,'r');
+    #endif
+    sysConfStream.putEOF();
+    sysConfStream.close();
    return 200;
 }
 
@@ -1498,8 +1511,20 @@ if (arg_cnt>1)
     
     infoSerial<<F("Loading HTTP config on startup:")<<sysConf.getLoadHTTPConfig()<<endl;
 
+    sysConf.setServer(args[1]);
+    infoSerial<<args[1]<<F(" Saved")<<endl;
 }
 
+if (lanStatus>=HAVE_IP_ADDRESS)
+{
+configOk=false;
+lanStatus=LIBS_INITIALIZED;
+return 200;
+}
+errorSerial<<F("No IP adress")<<endl;
+return 500;
+
+/*
     if (loadConfigFromHttp(arg_cnt, args))
     {
        lanStatus =IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
@@ -1508,25 +1533,20 @@ if (arg_cnt>1)
     // Not Loaded
     if (configLoaded) lanStatus =IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
        else lanStatus = READ_RE_CONFIG;
-    return 500;
+    return 500; */
 }
 
 void printBool(bool arg) { (arg) ? infoSerial<<F("+") : infoSerial<<F("-"); }
 
+const char * headerKeys[]={"ETag"};
 
-bool loadConfigFromHttp(int arg_cnt, char **args)
+bool loadConfigFromHttp()
 {
     //macAddress * mac = sysConf.getMAC();
     int responseStatusCode = 0;
     char URI[64];
     char configServer[32]="";
-    String etag=sysConf.getETAG();
-    if (arg_cnt > 1) {
-        strncpy(configServer, args[1], sizeof(configServer) - 1);
-        sysConf.setServer(configServer);
-        //saveFlash(OFFSET_CONFIGSERVER, configServer);
-        infoSerial<<configServer<<F(" Saved")<<endl;
-    } else if (!sysConf.getServer(configServer,sizeof(configServer)))
+if (!sysConf.getServer(configServer,sizeof(configServer)))
         {
         strncpy_P(configServer,configserver,sizeof(configServer));
         infoSerial<<F(" Default config server used: ")<<configServer<<endl;
@@ -1573,6 +1593,7 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
 
             if (!root) 
                 {
+                sysConf.setETAG("");    
                 errorSerial<<F("Config parsing failed\n");
                 return false;
                 } 
@@ -1583,7 +1604,14 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
             return true; 
             }
 
-        } else {
+        } 
+        else if (responseStatusCode == 304) 
+        {
+            errorSerial<<F("Config not changed\n");
+            return false;
+        }
+        else 
+          {
             errorSerial<<F("ERROR: Server returned ");
             errorSerial<<responseStatusCode<<endl;
             return false;
@@ -1600,7 +1628,7 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
     #else
     EthernetClient configEthClient;
     #endif
-    String response;
+    //String response;
     HttpClient htclient = HttpClient(configEthClient, configServer, 80);
     //htclient.stop(); //_socket =MAX
     htclient.setHttpResponseTimeout(4000);
@@ -1608,8 +1636,8 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
     //debugSerial<<"making GET request");get
     debugSerial<<F("Before request: Free:")<<freeRam()<<endl;
     htclient.beginRequest();
-    htclient.sendHeader("If-None-Match:",etag);
     responseStatusCode = htclient.get(URI);
+    htclient.sendHeader("If-None-Match",sysConf.getETAG());
     htclient.endRequest();
 
     if (responseStatusCode == HTTP_SUCCESS)
@@ -1618,24 +1646,27 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
     responseStatusCode = htclient.responseStatusCode();
     
     while (htclient.headerAvailable()) 
-                    if (htclient.readHeaderName() == "ETAG") sysConf.setETAG(htclient.readHeaderValue());
+                    if (htclient.readHeaderName().equalsIgnoreCase("ETAG")) sysConf.setETAG(htclient.readHeaderValue());
    
-    response = htclient.responseBody();
-    htclient.stop();
+    //response = htclient.responseBody();
+   
     wdt_res();
     infoSerial<<F("HTTP Status code: ")<<responseStatusCode<<endl;
 
     if (responseStatusCode == 200) {
+        aJsonStream socketStream = aJsonStream(&htclient);
         debugSerial<<F("Free:")<<freeRam()<<endl;
-        debugSerial<<F("Response Len:")<<response.length()<<endl;
+        //debugSerial<<F("Response Len:")<<response.length()<<endl;
         //debugSerial<<F("GET Response: ")<<response<<endl;
         cleanConf();
         debugSerial<<F("Configuration cleaned")<<endl;
         debugSerial<<F("Free:")<<freeRam()<<endl;
-        root = aJson.parse((char *) response.c_str());
-
+        //root = aJson.parse((char *) response.c_str());
+        root = aJson.parse(&socketStream);
+        htclient.stop();
         if (!root) {
                     errorSerial<<F("Config parsing failed\n");
+                    sysConf.setETAG("");
                     return false;
                     } 
         else {
@@ -1645,16 +1676,19 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
             infoSerial<<F("Done.\n");
             return true;
         }
-      } else  {
+      } 
+        else if (responseStatusCode == 304) 
+      {
+          errorSerial<<F("Config not changed\n");
+           htclient.stop();
+          return false;
+      }
+       else  {
           errorSerial<<F("Config retrieving failed\n");
+           htclient.stop();
           return false;
       }
     } 
-      else if (responseStatusCode == 304) 
-      {
-          errorSerial<<F("Config not changed\n");
-          return false;
-      }
      else    
     {
         errorSerial<<F("Connect failed\n");
@@ -1676,32 +1710,53 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
     fullURI+=URI;
     
     #if defined(ARDUINO_ARCH_ESP8266) 
+    
     httpClient.begin(configEthClient,fullURI);
     #else
     httpClient.begin(fullURI);
     #endif
+    httpClient.addHeader("If-None-Match",sysConf.getETAG());
+    httpClient.collectHeaders(headerKeys,1);
+    responseStatusCode = httpClient.GET();
 
-    int httpResponseCode = httpClient.GET();
-
-    if (httpResponseCode > 0) {
-        infoSerial.printf("[HTTP] GET... code: %d\n", httpResponseCode);
-        if (httpResponseCode == HTTP_CODE_OK) {
-            String response = httpClient.getString();
-            
-            httpClient.end();
-
-            debugSerial<<response;
+    if (responseStatusCode > 0) {
+        infoSerial.printf("[HTTP] GET... code: %d\n", responseStatusCode);
+        if (responseStatusCode == HTTP_CODE_OK) 
+        {
+            WiFiClient * stream = httpClient.getStreamPtr();
+            if (stream)
+            {
+            aJsonStream socketStream = aJsonStream(stream);
+            sysConf.setETAG(httpClient.header("ETag"));
+            //String response = httpClient.getString();
+            //debugSerial<<response;
             cleanConf();
-            root = aJson.parse((char *) response.c_str());
+            //root = aJson.parse((char *) response.c_str());
+            root = aJson.parse(&socketStream);
+    
+            httpClient.end();
+            } else
+                    {   
+                        httpClient.end();
+                        return false;
+                    }
             if (!root) {
+                sysConf.setETAG("");
                 errorSerial<<F("Config parsing failed\n");
                 return false;
             } else {
                 infoSerial<<F("Config OK, Applying\n");
                 applyConfig();
+                
                 infoSerial<<F("Done.\n");   
                 return true;             
             }
+        } 
+        else if (responseStatusCode == HTTP_CODE_NOT_MODIFIED) 
+        {
+          httpClient.end();
+          errorSerial<<F("Config not changed\n");
+          return false;
         } 
         else
         {        
@@ -1711,7 +1766,7 @@ bool loadConfigFromHttp(int arg_cnt, char **args)
         }
     } else 
         {
-        errorSerial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(httpResponseCode).c_str());
+        errorSerial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(responseStatusCode).c_str());
         httpClient.end();
         return false;
         }
@@ -1805,7 +1860,7 @@ void setup_main() {
         debugSerial<<F("FLASH Init: ")<<streamSize<<endl;
     #endif
  #endif
-//Checkin EEPROM integrity (signature)
+//debugSerialPort << "Checkin EEPROM integrity (signature)"<<endl;
 
     if (!sysConf.isValidSysConf()) 
                 {

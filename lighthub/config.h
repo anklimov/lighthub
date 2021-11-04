@@ -12,12 +12,14 @@
 class systemConfig {
  private:
  flashStream * stream;
+ String currentConfigETAG;
  int openStream(char mode = '\0'); 
   
  public:  
  macAddress mac;
- systemConfig() {stream=NULL;};
- systemConfig(flashStream * fs){stream=fs;};
+ 
+ systemConfig():currentConfigETAG() {stream=NULL;};
+ systemConfig(flashStream * fs):currentConfigETAG() {stream=fs;};
  
  bool             isValidSysConf();
  
@@ -56,6 +58,8 @@ class systemConfig {
  bool             setLoadHTTPConfig(bool);
  String           getETAG();
  bool             setETAG(String etag); 
+ bool             saveETAG(); 
+ bool             loadETAG(); 
 
  //bool             Save();  
 };

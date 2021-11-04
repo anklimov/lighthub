@@ -1,6 +1,7 @@
 #include "config.h"
 #include "main.h"
 
+
 String             systemConfig::getMACString()
 {
 String res;   
@@ -293,11 +294,40 @@ return false;
 
  String           systemConfig::getETAG()
 {
-return "123";
+debugSerial<<F("Get ETAG: ")<<currentConfigETAG<<endl;     
+return String("\"")+currentConfigETAG+String("\"");
 }
 
 bool             systemConfig::setETAG(String etag)
 {
-debugSerial<<F("ETAG:")<<etag<<endl;   
+int firstPos = etag.indexOf('"');
+int lastPos =  etag.lastIndexOf('"');
+
+if ((firstPos>=0) && (lastPos>0)) currentConfigETAG=etag.substring(firstPos+1,lastPos);
+   else currentConfigETAG=etag;   
+debugSerial<<F("Set ETAG: ")<<currentConfigETAG<<endl;   
 return 1;
+}
+
+bool             systemConfig::saveETAG()
+{
+  if (!stream || !isValidSysConf() || (currentConfigETAG.length()>=sizeof(systemConfigData::ETAG))) return false; 
+    openStream('r');
+    stream->seek(offsetof(systemConfigData,ETAG));   
+    stream->print(currentConfigETAG);   
+    int bytes = stream->write((uint8_t)'\0');
+    stream->close();  
+    if (bytes) debugSerial<<F("Saved ETAG:")<<currentConfigETAG<<endl;   
+    return bytes;   
+}
+
+bool             systemConfig::loadETAG()
+{
+  if (!stream || !isValidSysConf()) return false; 
+    openStream('r');
+    stream->seek(offsetof(systemConfigData,ETAG));   
+    currentConfigETAG=stream->readStringUntil(0);
+    stream->close(); 
+    debugSerial<<F("Loaded ETAG:")<<currentConfigETAG<<endl;   
+    return currentConfigETAG.length();
 }

@@ -5,7 +5,7 @@
 
 #define MAXFLASHSTR 32
 #define PWDFLASHSTR 16
-#define EEPROM_SIGNATURE "LHCF"
+#define EEPROM_SIGNATURE "LHC0"
 #define EEPROM_SIGNATURE_LENGTH 4
 
 //#define EEPROM_offsetJSON IFLASH_PAGE_SIZE
@@ -39,10 +39,9 @@ const char EEPROM_signature[] = EEPROM_SIGNATURE;
 
         flashstr configURL;
         flashpwd MQTTpwd;
-        flashpwd OTApwd;
-
+        flashpwd OTApwd; 
+        flashstr ETAG;
         uint16_t sysConfigHash;
-        uint16_t JSONHash;
             
       } systemConfigData;
  #pragma (pop) 

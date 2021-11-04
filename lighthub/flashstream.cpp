@@ -172,7 +172,7 @@ NRFFlashStorage EEPROM;
 
      unsigned int flashStream::seek(unsigned int _pos) 
         {   pos=min(_pos, streamSize);
-            debugSerial<<F("Seek:")<<pos<<endl;
+            //debugSerial<<F("Seek:")<<pos<<endl;
             return pos;
         };
 

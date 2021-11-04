@@ -280,7 +280,7 @@ void saveFlash(short n, IPAddress& ip);
 int ipLoadFromFlash(short n, IPAddress &ip);
 */
 
-bool loadConfigFromHttp(int arg_cnt = 0, char **args = NULL);
+bool loadConfigFromHttp();
 
 void preTransmission();
 
