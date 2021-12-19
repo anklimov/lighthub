@@ -279,7 +279,7 @@ uint8_t Item::getCmd() {
 
 void Item::setCmd(uint8_t cmdValue) {
     aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
-    if (itemCmd)
+    if (itemCmd && (itemCmd->type == aJson_Int || itemCmd->type == aJson_NULL))
     {   
         itemCmd->type = aJson_Int;
         itemCmd->valueint = cmdValue & CMD_MASK | itemCmd->valueint & FLAG_MASK;   // Preserve special bits
@@ -290,7 +290,7 @@ void Item::setCmd(uint8_t cmdValue) {
 short Item::getFlag   (short flag)
 {
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
-  if (itemCmd)
+  if (itemCmd && (itemCmd->type == aJson_Int))
   {
       return itemCmd->valueint & flag & FLAG_MASK;
     }
@@ -300,7 +300,7 @@ return 0;
 void Item::setFlag   (short flag)
 {
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
-  if (itemCmd)
+  if (itemCmd && (itemCmd->type == aJson_Int || itemCmd->type == aJson_NULL))
   {   
       itemCmd->type = aJson_Int;
       itemCmd->valueint |= flag & FLAG_MASK;   // Preserve CMD bits
@@ -312,7 +312,7 @@ void Item::setFlag   (short flag)
 void Item::clearFlag (short flag)
 {
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
-  if (itemCmd)
+  if (itemCmd && (itemCmd->type == aJson_Int || itemCmd->type == aJson_NULL))
   {
       itemCmd->valueint &= CMD_MASK | ~(flag & FLAG_MASK);    // Preserve CMD bits
     //  debugSerial<<F("ClrFlag:")<<flag<<endl;
@@ -705,7 +705,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                 aJsonObject *timestampObj = aJson.getArrayItem(itemArr, I_TIMESTAMP);
                 if (timestampObj && cmd.getCmd()<=0xf)
                 { 
-                   if (cmd.getInt()>0)       
+                   if ((cmd.getInt()>0) && (timestampObj->type == aJson_Int || timestampObj->type == aJson_NULL))       
                     {
                         timestampObj->valueint = millis()+cmd.getInt();
                         timestampObj->type = aJson_Int;

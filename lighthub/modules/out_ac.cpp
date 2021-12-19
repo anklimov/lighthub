@@ -188,7 +188,7 @@ byte getCRC(byte req[], size_t size){
 void SendData(byte req[], size_t size){
   AC_Serial.write(req, size - 1);
   AC_Serial.write(getCRC(req, size-1));
-  AC_Serial.flush();
+  //AC_Serial.flush();
 /*
  Serial.print("<<");
   for (int i=0; i < size-1; i++)

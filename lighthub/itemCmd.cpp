@@ -92,6 +92,7 @@ uint8_t itemCmd::getStoragetypeByChanType(short chanType)
   {
     case CH_RGB:
     case CH_RGBW:
+    case CH_RGBWW:
     case CH_SPILED:
     return ST_HSV255;
     break;

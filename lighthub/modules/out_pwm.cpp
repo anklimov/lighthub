@@ -20,7 +20,7 @@ void analogWrite(int pin, int val)
 int  out_pwm::Setup()
 {
 abstractOut::Setup();    
-debugSerial<<F("PWM-Out Init")<<endl;
+debugSerial<<F("PWM-Out #")<<iaddr<<F(" init")<<endl;
 if (!item || iaddr) return 0;
 
 switch (getChanType())
@@ -61,7 +61,7 @@ return 1;
 
 int  out_pwm::Stop()
 {
-debugSerial<<F("PWM-Out stop")<<endl;
+debugSerial<<F("PWM-Out #")<<iaddr<<F(" stop")<<endl;
 
 switch (getChanType())
 {
@@ -95,17 +95,23 @@ int out_pwm::getChanType()
 {
   if (item)
   {
+  debugSerial<<F("PWM Chan type ");  
   switch (numArgs)
   {
     case 3:
-    debugSerial<<F("RGB PWM")<<endl;
+    debugSerial<<F("RGB")<<endl;
       return CH_RGB;
 
     case 4:
-    debugSerial<<F("RGBW PWM")<<endl;
+    debugSerial<<F("RGBW")<<endl;
       return CH_RGBW;
+
+    case 5:
+    debugSerial<<F("RGBWW")<<endl;
+      return CH_RGBWW;
+
     default:
-    debugSerial<<item->itemType<<F(" PWM")<<endl;
+    debugSerial<<F("#")<<item->itemType<<endl;
       return item->itemType;
   }
  }

@@ -189,7 +189,7 @@ aJsonObject * item = items->child;
 }
 pollingItem = NULL;
 debugSerial<<F("Stopped")<<endl;
-
+delay(100);
 #ifdef SYSLOG_ENABLE
 syslogInitialized=false; //Garbage in memory
 #endif
@@ -201,6 +201,8 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
     items  = NULL;
     topics = NULL;
     mqttArr = NULL;
+    deviceName = NULL;
+    topics = NULL;
   #ifdef _dmxout
   dmxArr = NULL;
   #endif
@@ -647,6 +649,7 @@ lan_status lanLoop() {
             break;
 
         case READ_RE_CONFIG: // Restore config from FLASH, re-init LAN
+            debugSerial<<F("Restoring config from EEPROM")<<endl; 
             if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             else {
                 //timerLanCheckTime = millis();// + 5000;
@@ -833,6 +836,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
     if (!mqttArr || ((n = aJson.getArraySize(mqttArr)) < 2)) //At least device name and broker IP must be configured
         {
+          errorSerial<<F("At least device name and broker IP must be configured")<<endl;  
           lanStatus = READ_RE_CONFIG;
           return;
         }
@@ -1158,9 +1162,9 @@ return 500;
 }
 
 void applyConfig() {
-    if (!root) return;
+    if (!root || configLocked) return;
 configLocked++;
-
+infoSerial<<F("Applying config")<<endl;
 items = aJson.getObjectItem(root, "items");
 topics = aJson.getObjectItem(root, "topics");
 inputs = aJson.getObjectItem(root, "in");
@@ -1183,9 +1187,33 @@ setupSyslog();
     short numParams;
     aJsonObject *dmxoutArr = aJson.getObjectItem(root, "dmx");
     if (dmxoutArr &&  (numParams=aJson.getArraySize(dmxoutArr)) >=1 ) {
-        DMXoutSetup(maxChannels = aJson.getArrayItem(dmxoutArr, numParams-1)->valueint);
+        maxChannels = aJson.getArrayItem(dmxoutArr, numParams-1)->valueint;
+
+        #ifdef _artnet
+          aJsonObject *artnetArr = aJson.getObjectItem(root, "artnet");
+          if (artnetArr)
+          {   
+             uint8_t artnetMinCh = 1;
+             uint8_t artnetMaxCh = maxChannels;  
+             short artnetNumParams;
+
+             if (artnetNumParams=aJson.getArraySize(artnetArr)>=2)
+             {
+                 artnetMinCh = aJson.getArrayItem(artnetArr, 0)->valueint;
+                 if (artnetMinCh<1) artnetMinCh = 1; 
+                 artnetMaxCh = aJson.getArrayItem(artnetArr, 1)->valueint;
+                 if (artnetMaxCh>maxChannels) artnetMaxCh=maxChannels;
+             } 
+             infoSerial<<F("Artnet start. Channels:")<<artnetMinCh<<F("-")<<artnetMaxCh<<endl;
+             artnetSetChans(artnetMinCh,artnetMaxCh);
+             //artnetInitialized=true;
+          }  
+        #endif
+        DMXoutSetup(maxChannels);
         infoSerial<<F("DMX out started. Channels: ")<<maxChannels<<endl;
         debugSerial<<F("Free:")<<freeRam()<<endl;
+        
+     
     }
 #endif
 #ifdef _modbus
@@ -1259,8 +1287,8 @@ setupSyslog();
     printConfigSummary();
 configLoaded=true;
 if (sysConf.getSaveSuccedConfig()) cmdFunctionSave(0,NULL);
-configLocked--;
 ethClient.stop(); //Refresh MQTT connection
+configLocked--;
 }
 
 void printConfigSummary() {
@@ -1300,7 +1328,7 @@ int cmdFunctionLoad(int arg_cnt, char **args) {
 
 int loadConfigFromEEPROM()
 {
-    char ch;
+    if (configLocked) return 0;
     infoSerial<<F("Loading Config from EEPROM")<<endl;
     #if defined(FS_STORAGE)
     sysConfStream.open("/config.json",'r');
@@ -1319,7 +1347,7 @@ int loadConfigFromEEPROM()
         //    sysConfStream.close();
             return 0;
         }
-        infoSerial<<F("Loaded")<<endl;
+        infoSerial<<F("Loaded from EEPROM")<<endl;
         applyConfig();
         sysConf.loadETAG();
         //ethClient.stop(); //Refresh MQTT connect to get retained info
@@ -1365,7 +1393,7 @@ if (arg_cnt>1)
   
   size_t res = sysConfStream.write((byte*) outBuf,len);
   free (outBuf);
-  infoSerial<<res<< F("bytes from ")<<len<<F(" are saved to EEPROM")<<endl;
+  infoSerial<<res<< F(" bytes from ")<<len<<F(" are saved to EEPROM")<<endl;
 #else
     aJsonStream jsonEEPROMStream = aJsonStream(&sysConfStream);
     infoSerial<<F("Saving config to EEPROM..");
@@ -1571,9 +1599,18 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
     //if (freeRam()<512) cleanConf();
 
     HTTPClient hclient(configServer, 80);
+   
+    String ETAG = sysConf.getETAG();
+
+    http_client_parameter get_header[] = {
+    {"If-None-Match",NULL},{NULL,NULL}
+    };
+    get_header[0].value = ETAG.c_str();
+    
+
     debugSerial<<F("free ")<<freeRam()<<endl;delay(100);
     // FILE is the return STREAM type of the HTTPClient
-    configStream = hclient.getURI(URI);
+    configStream = hclient.getURI(URI,get_header);
     debugSerial<<F("hclient")<<endl;delay(100);
     responseStatusCode = hclient.getLastReturnCode();
     debugSerial<<F("retcode ")<<responseStatusCode<<endl;delay(100);
@@ -1598,7 +1635,6 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
                 return false;
                 } 
             else {
-            infoSerial<<F("Applying.\n");
             applyConfig();
             infoSerial<<F("Done.\n");
             return true; 
@@ -1622,7 +1658,7 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
             return false;
            }
 #endif
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) || defined (NRF5) //|| defined(ARDUINO_ARCH_ESP32) //|| defined(ARDUINO_ARCH_ESP8266)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) || defined (NRF5) //|| defined(ARDUINO_ARCH_AVR)//|| defined(ARDUINO_ARCH_ESP32) //|| defined(ARDUINO_ARCH_ESP8266)
     #if defined(WIFI_ENABLE)
     WiFiClient configEthClient;
     #else
@@ -1656,8 +1692,6 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
     if (responseStatusCode == 200) {
         aJsonStream socketStream = aJsonStream(&htclient);
         debugSerial<<F("Free:")<<freeRam()<<endl;
-        //debugSerial<<F("Response Len:")<<response.length()<<endl;
-        //debugSerial<<F("GET Response: ")<<response<<endl;
         cleanConf();
         debugSerial<<F("Configuration cleaned")<<endl;
         debugSerial<<F("Free:")<<freeRam()<<endl;
@@ -1745,7 +1779,6 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
                 errorSerial<<F("Config parsing failed\n");
                 return false;
             } else {
-                infoSerial<<F("Config OK, Applying\n");
                 applyConfig();
                 
                 infoSerial<<F("Done.\n");   
@@ -1915,7 +1948,7 @@ void setup_main() {
     mqttClient.setCallback(mqttCallback);
 
 #ifdef _artnet
-    ArtnetSetup();
+    artnetSetup();
 #endif
 
 #if defined(WIFI_ENABLE) and not defined(WIFI_MANAGER_DISABLE)
@@ -2425,21 +2458,30 @@ configLocked--;
 }
 
 ////// Legacy Thermostat code below - to be moved in module /////
-void thermoRelay(int pin, bool on)
+
+enum heaterMode {HEAT,OFF,ERROR};
+
+void thermoRelay(int pin, heaterMode on)
 {   
     int thermoPin = abs(pin);
     pinMode(thermoPin, OUTPUT);
     
-    if (on)
+    if (on == ERROR)
+            {
+            digitalWrite(thermoPin, LOW); 
+            debugSerial<<F(" BYPASS")<<endl;
+            }
+
+    else if (on == HEAT)
             {
             digitalWrite(thermoPin, (pin<0)?LOW:HIGH); 
             debugSerial<<F(" ON")<<endl;
             }
      else   
-     {
+            {
             digitalWrite(thermoPin, (pin<0)?HIGH:LOW); 
             debugSerial<<F(" OFF")<<endl;
-     }       
+            }       
 
 }
 
@@ -2477,15 +2519,15 @@ void thermoLoop(void) {
                         mqttClient.publish("/alarm/snsr", thermoItem->name);
                         tStore.timestamp16=0; //Stop termostat
                         thermostat.setExt(tStore.asint);
-                        thermoRelay(thermoPin,false);
+                        thermoRelay(thermoPin,ERROR);
                         }
                          else
                          { // Not expired yet
                             if (curTemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", thermoItem->name); 
 
-                            if (!active) thermoRelay(thermoPin,false);//OFF 
-                               else if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) thermoRelay(thermoPin,true);//ON
-                                    else if (curTemp >= thermoSetting) thermoRelay(thermoPin,false);//OFF
+                            if (!active) thermoRelay(thermoPin,OFF);//OFF 
+                               else if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) thermoRelay(thermoPin,HEAT);//ON
+                                    else if (curTemp >= thermoSetting) thermoRelay(thermoPin,OFF);//OFF
                                          else debugSerial<<F(" -target zone-")<<endl; // Nothing to do
 
                          }

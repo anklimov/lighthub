@@ -51,6 +51,8 @@ volatile unsigned long D_checkT=0;
 #ifdef _artnet
 #include <Artnet.h>
 Artnet *artnet = NULL;
+uint8_t artnetMinCh=1;
+uint8_t artnetMaxCh=512;
 #endif
 
 
@@ -216,8 +218,8 @@ debugSerial.println();
 
 void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP)
 {
-#ifdef _dmxout
-  for (unsigned int i = 0 ; i < length && i<MAX_CHANNELS ; i++)
+#if defined  (_dmxout) && defined (_artnet)
+  for (unsigned int i = artnetMinCh-1 ; i < length && i<artnetMaxCh ; i++)
   {
     DmxWrite(i+1,data[i]);
   }
@@ -256,6 +258,11 @@ dmxin.begin();
 void DMXoutSetup(int channels)
 {
 #ifdef _dmxout
+
+//#ifdef _artnet
+//if (channels<artnetMaxCh) artnetMaxCh=channels;
+//#endif
+
 #if defined(ARDUINO_ARCH_AVR)
  DmxSimple.usePin(AVR_DMXOUT_PIN);
  DmxSimple.maxChannel(channels);
@@ -323,7 +330,7 @@ void DMXOUT_propagate()
   #endif
 }
 
-void ArtnetSetup()
+void artnetSetup()
 {
 #ifdef _artnet
  if (!artnet)  artnet = new Artnet;
@@ -332,6 +339,13 @@ void ArtnetSetup()
 #endif
 }
 
+void artnetSetChans(uint8_t minCh, uint8_t maxCh)
+{
+#ifdef _artnet
+artnetMinCh=minCh;
+artnetMaxCh=maxCh;
+#endif
+}
 
 void DmxWriteBuf(uint16_t chan,uint8_t val)
 {

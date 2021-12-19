@@ -49,8 +49,8 @@ class Streamlog : public Print
   private:
     uint8_t severity;
     SerialPortType *serialPort;
+    uint8_t ledPattern;
     #ifdef SYSLOG_ENABLE
     Syslog * syslog;
-    uint8_t ledPattern;
     #endif
 };

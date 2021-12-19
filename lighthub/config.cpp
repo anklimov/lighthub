@@ -244,6 +244,7 @@ bool             systemConfig::isValidSysConf()
      for (unsigned int i=0;i<sizeof(systemConfigData::signature);i++)
         if (stream->write(EEPROM_signature[i]));
     stream->close();
+    setETAG("");
     return true;
  }
  
