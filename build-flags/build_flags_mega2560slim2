@@ -24,3 +24,4 @@
 
 # Example of UARTBRIDGE configuration
 #-DUARTBRIDGE_ENABLE
+-DOTA_PORT=80

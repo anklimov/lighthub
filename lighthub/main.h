@@ -14,8 +14,8 @@
 #endif
 
 #if defined(ARDUINO_ARCH_AVR)
-#include "HTTPClientAVR.h"
-#include <ArduinoHttpClient.h>
+#include "HTTPClient.h"
+//#include <ArduinoHttpClient.h>
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
 //#include <EEPROM.h>

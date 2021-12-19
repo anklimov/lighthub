@@ -235,7 +235,7 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
 {
   #ifdef OTA  
     //String response = "";
-    debugSerial<<request<<endl;
+    debugSerial<<method<<F(" ")<<request<<endl;
     if (method == HTTP_GET && request == (F("/"))) 
         {
           
@@ -1568,6 +1568,16 @@ void printBool(bool arg) { (arg) ? infoSerial<<F("+") : infoSerial<<F("-"); }
 
 const char * headerKeys[]={"ETag"};
 
+void headerHandlerProc(String header)
+{
+    debugSerial<<header<<endl;
+    //ETag: W/"51e-17bffcd0547"
+  if (header.startsWith("ETag: "))
+        {
+            sysConf.setETAG(header);
+        }
+} 
+
 bool loadConfigFromHttp()
 {
     //macAddress * mac = sysConf.getMAC();
@@ -1609,8 +1619,9 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
     
 
     debugSerial<<F("free ")<<freeRam()<<endl;delay(100);
+    hclient.setHeaderHandler(headerHandlerProc);
     // FILE is the return STREAM type of the HTTPClient
-    configStream = hclient.getURI(URI,get_header);
+    configStream = hclient.getURI(URI,NULL,get_header);
     debugSerial<<F("hclient")<<endl;delay(100);
     responseStatusCode = hclient.getLastReturnCode();
     debugSerial<<F("retcode ")<<responseStatusCode<<endl;delay(100);
@@ -2459,20 +2470,20 @@ configLocked--;
 
 ////// Legacy Thermostat code below - to be moved in module /////
 
-enum heaterMode {HEAT,OFF,ERROR};
+enum heaterMode {HEATER_HEAT,HEATER_OFF,HEATER_ERROR};
 
 void thermoRelay(int pin, heaterMode on)
 {   
     int thermoPin = abs(pin);
     pinMode(thermoPin, OUTPUT);
     
-    if (on == ERROR)
+    if (on == HEATER_ERROR)
             {
             digitalWrite(thermoPin, LOW); 
             debugSerial<<F(" BYPASS")<<endl;
             }
 
-    else if (on == HEAT)
+    else if (on == HEATER_HEAT)
             {
             digitalWrite(thermoPin, (pin<0)?LOW:HIGH); 
             debugSerial<<F(" ON")<<endl;
@@ -2519,15 +2530,15 @@ void thermoLoop(void) {
                         mqttClient.publish("/alarm/snsr", thermoItem->name);
                         tStore.timestamp16=0; //Stop termostat
                         thermostat.setExt(tStore.asint);
-                        thermoRelay(thermoPin,ERROR);
+                        thermoRelay(thermoPin,HEATER_ERROR);
                         }
                          else
                          { // Not expired yet
                             if (curTemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", thermoItem->name); 
 
-                            if (!active) thermoRelay(thermoPin,OFF);//OFF 
-                               else if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) thermoRelay(thermoPin,HEAT);//ON
-                                    else if (curTemp >= thermoSetting) thermoRelay(thermoPin,OFF);//OFF
+                            if (!active) thermoRelay(thermoPin,HEATER_OFF);//OFF 
+                               else if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) thermoRelay(thermoPin,HEATER_HEAT);//ON
+                                    else if (curTemp >= thermoSetting) thermoRelay(thermoPin,HEATER_OFF);//OFF
                                          else debugSerial<<F(" -target zone-")<<endl; // Nothing to do
 
                          }

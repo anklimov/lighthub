@@ -20,3 +20,4 @@
 #-DMDNS_ENABLE
 -DRESTART_LAN_ON_MQTT_ERRORS
 -D CORS=\"http://lazyhome.ru\"
+-DOTA_PORT=80
