@@ -135,9 +135,11 @@ void Item::Parse() {
         itemExt = aJson.getArrayItem(itemArr, I_EXT);
         switch (itemType)
         {
+#ifndef  PWM_DISABLE            
           case CH_PWM:
           driver = new out_pwm (this);
           break;
+#endif          
 
 #ifndef   DMX_DISABLE
             case CH_RGBW:

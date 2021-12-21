@@ -107,12 +107,15 @@ aJsonObject *dmxArr = NULL;
 bool syslogInitialized = false;
 #endif
 
+#ifdef WIFI_ENABLE
+volatile uint32_t WiFiAwaitingTime =0;
+#endif
+
 volatile uint32_t timerPollingCheck = 0;
 volatile uint32_t timerInputCheck = 0;
 volatile uint32_t timerLanCheckTime = 0;
 volatile uint32_t timerThermostatCheck = 0;
 volatile uint32_t timerSensorCheck =0;
-volatile uint32_t WiFiAwaitingTime =0;
 volatile unsigned long timerCount=0; 
 volatile int16_t  timerNumber=-1;
 volatile int8_t   timerHandlerBusy=0;
@@ -334,7 +337,7 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
         request+=body;
 
         debugSerial<<F("Cmd: ")<<request<<endl;
-        if (request=="reboot ") ArduinoOTA.sendHttpResponse(client,200);  
+        if (request.equalsIgnoreCase(F("reboot "))) ArduinoOTA.sendHttpResponse(client,200);  
         const char* res=request.c_str();
         result =  cmd_parse((char*) res);   
         if (! result) return 404;
@@ -450,11 +453,12 @@ if (element && element->type == aJson_String) return element->valuestring;
 }
 
 #ifdef OTA
+    const char defaultPassword[] PROGMEM = "password";
     void setupOTA(void)
     {       char passwordBuf[16];
             if (!sysConf.getOTApwd(passwordBuf, sizeof(passwordBuf))) 
                         {
-                        strcpy(passwordBuf,"password");
+                        strcpy_P(passwordBuf,defaultPassword);
                         errorSerial<<F("DEFAULT password for OTA API. Use otapwd command to set")<<endl;
                         }
 
@@ -1524,8 +1528,6 @@ int cmdFunctionSetMac(int arg_cnt, char **args) {
     }
     sysConf.setMAC(mac);
     printMACAddress();
-    
-    //for (short i = 0; i < 6; i++) { EEPROM.write(i, mac[i]); }
     infoSerial<<F("Updated\n");
     return 200;
 }
@@ -1572,7 +1574,7 @@ void headerHandlerProc(String header)
 {
     debugSerial<<header<<endl;
     //ETag: W/"51e-17bffcd0547"
-  if (header.startsWith("ETag: "))
+  if (header.startsWith(F("ETag: ")))
         {
             sysConf.setETAG(header);
         }
@@ -1622,9 +1624,8 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
     hclient.setHeaderHandler(headerHandlerProc);
     // FILE is the return STREAM type of the HTTPClient
     configStream = hclient.getURI(URI,NULL,get_header);
-    debugSerial<<F("hclient")<<endl;delay(100);
     responseStatusCode = hclient.getLastReturnCode();
-    debugSerial<<F("retcode ")<<responseStatusCode<<endl;delay(100);
+    debugSerial<<F("http retcode ")<<responseStatusCode<<endl;delay(100);
     //wdt_en();
     
     if (configStream != NULL) {

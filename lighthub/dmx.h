@@ -23,7 +23,7 @@ e-mail    anklimov@gmail.com
 #define D_UPDATED4 8
 #define D_CHECKT 300
 
-#define MAX_CHANNELS 60
+//#define MAX_CHANNELS 60
 //define MAX_IN_CHANNELS 16
 
 //#define DMX_OUT_PIN  3

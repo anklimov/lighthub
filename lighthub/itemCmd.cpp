@@ -5,10 +5,12 @@
 #include "item.h"
 #include "bright.h"
 
+#ifndef HSV_DISABLE
 #ifdef ADAFRUIT_LED
 #include <Adafruit_NeoPixel.h>
 #else
 #include "FastLED.h"
+#endif
 #endif
 
 //#include "hsv2rgb.h"
@@ -576,7 +578,7 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                               } 
                           }                
 
-                  
+                  #ifndef HSV_DISABLE
                   #ifdef ADAFRUIT_LED
                     Adafruit_NeoPixel strip(0, 0, 0);
                     uint32_t rgb = strip.ColorHSV(map(from.param.h, 0, 365, 0, 65535), rgbSaturation, rgbValue);
@@ -588,6 +590,9 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                     param.r=rgb.r;
                     param.g=rgb.g;
                     param.b=rgb.b;
+                  #endif
+                  #else
+                  debugSerial<<F("HSV disabled")<<endl;
                   #endif
                   debugSerial<<F("RGBx: ");
                   debugOut();

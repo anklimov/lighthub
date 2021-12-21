@@ -7,7 +7,6 @@
 #endif
 
 #if defined(__SAM3X8E__)
-//#include <DueFlashStorage.h>
 #include <watchdog.h>
 #include <ArduinoHttpClient.h>
 //#include "TimerInterrupt_Generic.h"
@@ -18,12 +17,10 @@
 //#include <ArduinoHttpClient.h>
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
-//#include <EEPROM.h>
 #endif
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
-//#include "SPIFFS.h"
 #ifndef FS_STORAGE
 #include <ESP_EEPROM.h>
 #endif
@@ -132,10 +129,6 @@ extern Streamlog  errorSerial;
 #include <ModbusMaster.h>
 #endif
 
-//#ifndef DMX_DISABLE
-//#include "FastLED.h"
-//#endif
-
 #ifdef _owire
 #include "owTerm.h"
 #endif
@@ -231,9 +224,7 @@ typedef union {
 } UID;
 
 bool isNotRetainingStatus();
-//void watchdogSetup(void);
 
-//int itemCommand(char *topic, char *payload);
 void mqttCallback(char *topic, byte *payload, unsigned int length);
 
 void printMACAddress();
@@ -255,12 +246,6 @@ void applyConfig();
 int cmdFunctionLoad(int arg_cnt, char **args);
 
 int loadConfigFromEEPROM();
-
-//void cmdFunctionReq(int arg_cnt, char **args);
-
-//int mqttConfigRequest(int arg_cnt, char **args);
-
-//int mqttConfigResp(char *as);
 
 int cmdFunctionSave(int arg_cnt, char **args);
 

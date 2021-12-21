@@ -44,9 +44,10 @@ volatile uint16_t DMXOUT_Channels=0;
 volatile uint32_t checkTimestamp=0L;
 #endif
 
+#if defined(_dmxin)
 volatile uint32_t D_State=0;
-
 volatile unsigned long D_checkT=0;
+#endif
 
 #ifdef _artnet
 #include <Artnet.h>
@@ -134,7 +135,10 @@ for (short tch=0; tch<=3 ; tch++)
 };
 
 extern volatile uint8_t timerHandlerBusy;
+
+#if defined(_dmxin)
 volatile int DMXinDoublecheck=0;
+#endif
 
 void DMXUpdate(void)
 {
