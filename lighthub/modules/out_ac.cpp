@@ -53,6 +53,7 @@ void out_AC::InsertData(byte data[], size_t size){
 
     char s_mode[10];
     set_tmp = data[B_SET_TMP]+16;
+    if (set_tmp>40 || set_tmp<16) return;
     cur_tmp = data[B_CUR_TMP];
     mode    = data[B_MODE];
     fan_spd = data[B_FAN_SPD];
@@ -250,8 +251,8 @@ if (cause!=POLLING_SLOW) return 0;
     debugSerial.println ("Polling");
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
-delay(100);
-  if(AC_Serial.available() > 0){
+///delay(100);
+  if(AC_Serial.available() >= 37){ //was 0
     AC_Serial.readBytes(data, 37);
     while(AC_Serial.available()){
       delay(2);
@@ -282,13 +283,14 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
       switch(suffixCode)
       {
       case S_SET:
-      //case S_ESET:
           set_tmp = cmd.getInt();
-          if (set_tmp >= 10 && set_tmp <= 30)
+          if (set_tmp >= 16 && set_tmp <= 40)
           {
+            //if (set_tmp>40 || set_tmp<16) set_temp=21;
             data[B_SET_TMP] = set_tmp -16;
             publishTopic(item->itemArr->name,(long) set_tmp,"/set");
             }
+          else return -1;  
       break;
 
       case S_CMD:

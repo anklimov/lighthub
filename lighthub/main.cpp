@@ -343,7 +343,13 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
         if (! result) return 404;
         return result;      
         } 
-    else
+    else if (method == HTTP_POST && request.startsWith(F("/config.json"))) 
+        {
+        sysConf.setLoadHTTPConfig(false);
+        infoSerial<<(F("Config changed locally, portal disabled"))<<endl;
+        sysConf.setETAG("");
+        return 0;    
+        }
 #endif     
     return 0;  //Unknown
 }
@@ -574,21 +580,34 @@ lan_status lanLoop() {
         case LIBS_INITIALIZED:
             statusLED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
             if (configLocked) return LIBS_INITIALIZED;      
+            if (sysConf.getLoadHTTPConfig())
+               {     
+                    if (!configOk)
+                            {
+                            if (loadConfigFromHttp()==200) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+                            else if (configLoaded)   {
+                                                        infoSerial<<F("Continue with previously loaded config")<<endl;
+                                                        lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+                                                        }
+                            
+                            else if (Ethernet.localIP()) lanStatus = DO_READ_RE_CONFIG;
 
-           if (!configOk)
-                {
-                if (loadConfigFromHttp()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-                   else if (configLoaded)   {
-                                            infoSerial<<F("Continue with previously loaded config")<<endl;
-                                            lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-                                            }
-                else lanStatus = READ_RE_CONFIG; //Load from NVRAM
-                }
-            else 
-                {
-                infoSerial<<F("Config is valid")<<endl;
-                lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;  
-                }
+                            else lanStatus = DO_REINIT; //Load from NVRAM
+                            }
+                        else 
+                            {
+                            infoSerial<<F("Config is valid")<<endl;
+                            lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;  
+                            }
+               } else 
+               {
+                   if (configLoaded)
+                      lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;  
+                   else 
+                      lanStatus = DO_READ_RE_CONFIG;  
+
+                   infoSerial<<F("Loading config from portal disabled. use get ON to enable")<<endl;    
+               }        
             break;
 
         case IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
@@ -625,6 +644,7 @@ lan_status lanLoop() {
 
         case DO_REINIT: // Pause and re-init LAN
              //if (mqttClient.connected()) mqttClient.disconnect();  // Hmm hungs then cable disconnected
+             // problem here - if no sockets - DHCP will failed. finally (())
              timerLanCheckTime = millis();// + 5000;
              lanStatus = REINIT;
              statusLED.set(ledRED|((configLoaded)?ledBLINK:0));
@@ -652,13 +672,22 @@ lan_status lanLoop() {
                 lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             break;
 
+       case DO_READ_RE_CONFIG: // Pause and re-read EEPROM
+             timerLanCheckTime = millis();
+             lanStatus = READ_RE_CONFIG;
+             //statusLED.set(ledRED|((configLoaded)?ledBLINK:0));
+             break;
+
         case READ_RE_CONFIG: // Restore config from FLASH, re-init LAN
-            debugSerial<<F("Restoring config from EEPROM")<<endl; 
-            if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
-            else {
-                //timerLanCheckTime = millis();// + 5000;
-                lanStatus = DO_REINIT;//-10;
-            }
+            if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_REINIT))
+                {
+                    debugSerial<<F("Restoring config from EEPROM")<<endl; 
+                    if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
+                    else {
+                        //timerLanCheckTime = millis();// + 5000;
+                        lanStatus = DO_REINIT;//-10;
+                    }
+                }
             break;
 
         case DO_NOTHING:
@@ -841,7 +870,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
     if (!mqttArr || ((n = aJson.getArraySize(mqttArr)) < 2)) //At least device name and broker IP must be configured
         {
           errorSerial<<F("At least device name and broker IP must be configured")<<endl;  
-          lanStatus = READ_RE_CONFIG;
+          lanStatus = DO_READ_RE_CONFIG;
           return;
         }
 
@@ -1261,7 +1290,9 @@ setupSyslog();
                     int cmd = it.getCmd();
                     switch (it.itemType) {
                         case CH_THERMO:
-                            if (cmd<1) it.setCmd(CMD_OFF);
+                            if (cmd<1) it.setCmd(CMD_OFF); 
+                            it.setFlag(SEND_COMMAND);
+                            if (it.itemVal) it.setFlag(SEND_PARAMETERS);
                             pinMode(pin, OUTPUT);
                             digitalWrite(pin, false); //Initially, all thermostates are LOW (OFF for electho heaters, open for water NO)
                             debugSerial<<F("Thermo:")<<pin<<F("=LOW")<<F(";");
@@ -1290,7 +1321,6 @@ setupSyslog();
 
     printConfigSummary();
 configLoaded=true;
-if (sysConf.getSaveSuccedConfig()) cmdFunctionSave(0,NULL);
 ethClient.stop(); //Refresh MQTT connection
 configLocked--;
 }
@@ -1547,23 +1577,29 @@ if (arg_cnt>1)
 
 if (lanStatus>=HAVE_IP_ADDRESS)
 {
-configOk=false;
-lanStatus=LIBS_INITIALIZED;
-return 200;
-}
-errorSerial<<F("No IP adress")<<endl;
-return 500;
 
-/*
-    if (loadConfigFromHttp(arg_cnt, args))
+
+int retCode=loadConfigFromHttp();
+    if (retCode==200)
     {
        lanStatus =IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
        return 200;
     }
+    else if (retCode == -1)
+    {
+     debugSerial<<F("Releasing socket and retry")<<endl;   
+     configOk=false;
+     lanStatus=LIBS_INITIALIZED;
+     ethClient.stop(); // Release MQTT socket
+     return 201; 
+    }
     // Not Loaded
     if (configLoaded) lanStatus =IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-       else lanStatus = READ_RE_CONFIG;
-    return 500; */
+       else lanStatus = DO_READ_RE_CONFIG;
+    return retCode; 
+}
+errorSerial<<F("No IP adress")<<endl;
+return 500;
 }
 
 void printBool(bool arg) { (arg) ? infoSerial<<F("+") : infoSerial<<F("-"); }
@@ -1580,7 +1616,7 @@ void headerHandlerProc(String header)
         }
 } 
 
-bool loadConfigFromHttp()
+int loadConfigFromHttp()
 {
     //macAddress * mac = sysConf.getMAC();
     int responseStatusCode = 0;
@@ -1625,14 +1661,13 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
     // FILE is the return STREAM type of the HTTPClient
     configStream = hclient.getURI(URI,NULL,get_header);
     responseStatusCode = hclient.getLastReturnCode();
-    debugSerial<<F("http retcode ")<<responseStatusCode<<endl;delay(100);
+    //debugSerial<<F("http retcode ")<<responseStatusCode<<endl;delay(100);
     //wdt_en();
     
     if (configStream != NULL) {
         if (responseStatusCode == 200) {
 
             infoSerial<<F("got Config\n"); delay(500);
-            char c;
             aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
             cleanConf();
@@ -1644,30 +1679,33 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
                 {
                 sysConf.setETAG("");    
                 errorSerial<<F("Config parsing failed\n");
-                return false;
+                return 0;
                 } 
             else {
             applyConfig();
+            if (configLoaded && sysConf.getSaveSuccedConfig()) cmdFunctionSave(0,NULL);
             infoSerial<<F("Done.\n");
-            return true; 
+            return 200; 
             }
 
         } 
         else if (responseStatusCode == 304) 
         {
-            errorSerial<<F("Config not changed\n");
-            return false;
+            infoSerial<<F("Config not changed\n");
+            hclient.closeStream(configStream); 
+            return responseStatusCode;
         }
         else 
           {
             errorSerial<<F("ERROR: Server returned ");
+            hclient.closeStream(configStream); 
             errorSerial<<responseStatusCode<<endl;
-            return false;
+            return responseStatusCode;
            }
 
     } else {
         debugSerial<<F("failed to connect\n");
-            return false;
+            return -1;
            }
 #endif
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32) || defined (NRF5) //|| defined(ARDUINO_ARCH_AVR)//|| defined(ARDUINO_ARCH_ESP32) //|| defined(ARDUINO_ARCH_ESP8266)
@@ -1713,32 +1751,33 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
         if (!root) {
                     errorSerial<<F("Config parsing failed\n");
                     sysConf.setETAG("");
-                    return false;
+                    return 0;
                     } 
         else {
             debugSerial<<F("Parsed. Free:")<<freeRam()<<endl;
             //debugSerial<<response;
             applyConfig();
             infoSerial<<F("Done.\n");
-            return true;
+            if (configLoaded && sysConf.getSaveSuccedConfig()) cmdFunctionSave(0,NULL);
+            return 200;
         }
       } 
         else if (responseStatusCode == 304) 
       {
           errorSerial<<F("Config not changed\n");
            htclient.stop();
-          return false;
+          return responseStatusCode;
       }
        else  {
           errorSerial<<F("Config retrieving failed\n");
            htclient.stop();
-          return false;
+          return responseStatusCode;
       }
     } 
      else    
     {
         errorSerial<<F("Connect failed\n");
-        return false;
+        return -1;
     }
 #endif
 
@@ -1784,36 +1823,36 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
             } else
                     {   
                         httpClient.end();
-                        return false;
+                        return -1;
                     }
             if (!root) {
                 sysConf.setETAG("");
                 errorSerial<<F("Config parsing failed\n");
-                return false;
+                return 0;
             } else {
                 applyConfig();
-                
+                if (configLoaded && sysConf.getSaveSuccedConfig()) cmdFunctionSave(0,NULL);
                 infoSerial<<F("Done.\n");   
-                return true;             
+                return 200;             
             }
         } 
         else if (responseStatusCode == HTTP_CODE_NOT_MODIFIED) 
         {
           httpClient.end();
           errorSerial<<F("Config not changed\n");
-          return false;
+          return responseStatusCode;
         } 
         else
         {        
             httpClient.end();
             errorSerial<<F("Config retrieving failed\n");
-            return false;
+            return responseStatusCode;
         }
     } else 
         {
         errorSerial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(responseStatusCode).c_str());
         httpClient.end();
-        return false;
+        return responseStatusCode;
         }
 #endif
 }
@@ -1890,11 +1929,11 @@ void setup_main() {
             if(SPIFFS.begin())
             #endif
             {
-                debugSerial<<("SPIFFS Initialize....ok")<<endl;
+                debugSerialPort.println("SPIFFS Initialize....ok");
             }
             else
             {
-                debugSerial<<("SPIFFS Initialization...failed")<<endl;
+                debugSerialPort.println("SPIFFS Initialization...failed");
             }
     #endif
  #else
@@ -1909,7 +1948,7 @@ void setup_main() {
 
     if (!sysConf.isValidSysConf()) 
                 {
-                infoSerial<<F("No valid EEPROM data")<<endl;    
+                debugSerialPort.println(F("No valid EEPROM data. Initializing."));    
                 sysConf.clear();
                 }                   
   //  scan_i2c_bus();

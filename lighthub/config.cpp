@@ -245,52 +245,93 @@ bool             systemConfig::isValidSysConf()
         if (stream->write(EEPROM_signature[i]));
     stream->close();
     setETAG("");
+    setSerialDebuglevel(7);
+    setUdpDebuglevel(7);
     return true;
  }
  
-///
+systemConfigFlags systemConfig::getConfigFlags()
+{   
+   systemConfigFlags flags;
+   flags.configFlags32bit=0;
+   flags.serialDebugLevel=7;
+   flags.udpDebugLevel=7;
+   
+    if (stream && isValidSysConf()) 
+    { 
+      openStream('r');
+      stream->seek(offsetof(systemConfigData,configFlags));  
+      stream->readBytes((uint8_t *) &flags,sizeof (flags));
+      stream->close();
+    } 
+    return flags;
+
+}
+
+bool systemConfig::setConfigFlags(systemConfigFlags flags)
+{
+    if (!stream || !isValidSysConf()) return false; 
+    openStream('r');
+    stream->seek(offsetof(systemConfigData,configFlags));   
+
+    int bytes = stream->write((uint8_t *) &flags, sizeof (flags));
+    stream->close();  
+    return bytes;
+   
+}
+
  bool             systemConfig::getSaveSuccedConfig()
  {
-    return false;
+  systemConfigFlags flags = getConfigFlags();
+  return !flags.notSaveSuccedConfig;
  }
 
-  bool             systemConfig::setSaveSuccedConfig(bool)
+  bool             systemConfig::setSaveSuccedConfig(bool flag)
  {
-    return false;
+  systemConfigFlags flags = getConfigFlags();
+  flags.notSaveSuccedConfig=!flag;   
+  return setConfigFlags(flags);
  }
 
-///
+bool             systemConfig::getLoadHTTPConfig()
+{
+  systemConfigFlags flags = getConfigFlags();
+  return !flags.notGetConfigFromHTTP;
+}
+
+bool             systemConfig::setLoadHTTPConfig(bool load)
+{
+  systemConfigFlags flags = getConfigFlags();
+  flags.notGetConfigFromHTTP=!load;   
+  return setConfigFlags(flags);
+}
+
  
 bool             systemConfig::setSerialDebuglevel(short level)
 {
-return false;
+  systemConfigFlags flags = getConfigFlags();
+  flags.serialDebugLevel=level;   
+  return setConfigFlags(flags);
 }
 
 bool             systemConfig::setUdpDebuglevel(short level)
 {
-return false;
+  systemConfigFlags flags = getConfigFlags();
+  flags.udpDebugLevel=level;   
+  return setConfigFlags(flags);
 }
 
 
 uint8_t           systemConfig::getSerialDebuglevel()
 {
-return 7;
+  systemConfigFlags flags = getConfigFlags();
+  return flags.serialDebugLevel;   
 }
 
 uint8_t           systemConfig::getUdpDebuglevel()
 {
-return 7;   
-}
-
-//
-bool             systemConfig::setLoadHTTPConfig(bool load)
-{
-return false;
-}
-
-bool             systemConfig::getLoadHTTPConfig()
-{
-return false;
+  systemConfigFlags flags = getConfigFlags();
+  return flags.udpDebugLevel;    
 }
 
  String           systemConfig::getETAG()

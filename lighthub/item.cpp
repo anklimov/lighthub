@@ -1056,7 +1056,10 @@ if (status2Send) cmd.saveItem(this,status2Send);
 //debugSerial<<F("sts:")<<status2Send<<endl;
 
 if (driver) //New style modular code
-          res = driver->Ctrl(cmd, subItem, toExecute);        
+          {
+          res = driver->Ctrl(cmd, subItem, toExecute);   
+          //if (res==-1) status2Send=0;  ///////not working
+          }     
 else 
 {
 switch (itemType) {

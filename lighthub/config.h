@@ -61,5 +61,8 @@ class systemConfig {
  bool             saveETAG(); 
  bool             loadETAG(); 
 
+ systemConfigFlags getConfigFlags();
+ bool setConfigFlags(systemConfigFlags flags);
+
  //bool             Save();  
 };

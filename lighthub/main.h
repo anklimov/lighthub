@@ -213,6 +213,7 @@ enum lan_status {
     DO_RECONNECT =  12,
     RECONNECT = 13,
     READ_RE_CONFIG = 14,
+    DO_READ_RE_CONFIG = 15,
     DO_NOTHING = -15
 };
 
@@ -266,7 +267,7 @@ void saveFlash(short n, IPAddress& ip);
 int ipLoadFromFlash(short n, IPAddress &ip);
 */
 
-bool loadConfigFromHttp();
+int loadConfigFromHttp();
 
 void preTransmission();
 
