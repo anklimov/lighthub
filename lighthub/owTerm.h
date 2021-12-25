@@ -48,7 +48,7 @@ e-mail    anklimov@gmail.com
 #define recheck_interval 5
 #define check_circle 2000/t_count
 
-#if defined (OW_DEVICES_LIMIT)
+#if not defined (OW_DEVICES_LIMIT)
 #define t_max 20 //Maximum number of 1w devices
 #else
 #define t_max OW_DEVICES_LIMIT
