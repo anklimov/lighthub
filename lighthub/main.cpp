@@ -543,11 +543,12 @@ lan_status lanLoop() {
                 #ifdef MDNS_ENABLE
 
                 char mdnsName[32] = "LightHub";
-                SetBytes(sysConf.mac+4,2,mdnsName+8);    
+                SetBytes(sysConf.mac+4,2,mdnsName+8);   
+                mdnsName[8+4]='\0'; 
 
                 if (!MDNS.begin(mdnsName)) 
                 errorSerial<<("Error setting up MDNS responder!")<<endl;
-                else    infoSerial<<("mDNS responder started")<<endl;
+                else    infoSerial<<F("mDNS responder started: ")<<mdnsName<<F(".local")<<endl;
                 MDNS.addService("http", "tcp", OTA_PORT);
 
                 #endif
@@ -2291,6 +2292,8 @@ void loop_main() {
         #ifndef WIFI_ENABLE
         yield();
         mdns.run();
+        #elif defined(ARDUINO_ARCH_ESP8266)
+        MDNS.update();
         #endif
 #endif
     }
@@ -2373,6 +2376,8 @@ void modbusIdle(void) {
 #ifdef MDNS_ENABLE
         #ifndef WIFI_ENABLE
         mdns.run();
+        #elif defined(ARDUINO_ARCH_ESP8266)
+        MDNS.update();
         #endif
 #endif        
     } //End network runners
