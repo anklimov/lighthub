@@ -1108,7 +1108,7 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
     debugSerial<<endl<<F("T:")<<currentTemp<<F("<")<<addrstr<<F(">")<<endl;
     aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);     
     if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
-        executeCommand(owObj,-1,itemCmd(currentTemp));
+        executeCommand(owObj,-1,itemCmd(currentTemp).setSuffix(S_VAL));
 
     /*
     if (owObj) {
@@ -1322,7 +1322,11 @@ setupSyslog();
 
     printConfigSummary();
 configLoaded=true;
-ethClient.stop(); //Refresh MQTT connection
+if (ethClient.connected()) 
+                    {
+                    ethClient.stop(); //Refresh MQTT connection
+                    lanStatus=IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+                    }
 configLocked--;
 }
 

@@ -50,6 +50,7 @@ e-mail    anklimov@gmail.com
 #include "modules/out_pid.h"
 #include "modules/out_multivent.h"
 #include "modules/out_uartbridge.h"
+#include "modules/out_relay.h"
 
 #ifdef ELEVATOR_ENABLE
 #include "modules/out_elevator.h"
@@ -147,48 +148,48 @@ void Item::Parse() {
             case CH_DIMMER:
             case CH_RGBWW:
             driver = new out_dmx (this);
-  //          debugSerial<<F("DMX driver created")<<endl;
             break;
 #endif
 #ifndef   SPILED_DISABLE
           case CH_SPILED:
           driver = new out_SPILed (this);
-//          debugSerial<<F("SPILED driver created")<<endl;
           break;
 #endif
 
 #ifndef   AC_DISABLE
           case CH_AC:
           driver = new out_AC (this);
-//          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
 
 #ifndef   MOTOR_DISABLE
           case CH_MOTOR:
           driver = new out_Motor (this);
-//          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
 
 #ifndef   MBUS_DISABLE
           case CH_MBUS:
           driver = new out_Modbus (this);
-//          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
 
 #ifndef   PID_DISABLE
           case CH_PID:
           driver = new out_pid (this);
-//          debugSerial<<F("AC driver created")<<endl;
+          break;
+#endif
+
+
+#ifndef   RELAY_DISABLE
+          case CH_RELAYX:
+          driver = new out_relay (this);
           break;
 #endif
 
 #ifndef   MULTIVENT_DISABLE
           case CH_MULTIVENT:
           driver = new out_Multivent (this);
-//          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
 
@@ -217,7 +218,11 @@ boolean Item::Setup()
 if (driver)
        {
         if (driver->Status()) driver->Stop();
-        driver->Setup();
+        if (driver->Setup())
+                {
+                         if (getCmd()) setFlag(SEND_COMMAND);
+                         if (itemVal)  setFlag(SEND_PARAMETERS);
+                }
         return true;
        }
 else return false;
@@ -237,7 +242,6 @@ Item::~Item()
   if (driver)
               {
               delete driver;
-//              debugSerial<<F("Driver destroyed")<<endl;
               }
 }
 

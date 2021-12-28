@@ -28,27 +28,37 @@ bool out_pid::getConfig()
               errorSerial<<F("Invalid PID param array.")<<endl;
               return false;
             }
-   double outMin=0.;
-   double outMax=255.;
+   double outMin=0.;  //UNUSED
+   double outMax=255.;//UNUSED
+   unsigned int   alarmTO=0;
+
    aJsonObject * param;         
    switch (aJson.getArraySize(kPIDObj))
-   {   case 5:
-       param = aJson.getArrayItem(kPIDObj, 4);
+   { case 7: //kP,kI,kD, alarmTO, alarmVal, outMin, outMax
+       param = aJson.getArrayItem(kPIDObj, 6);
        if (param->type == aJson_Float) outMax=param->valuefloat;
        else if (param->type == aJson_Int) outMax=param->valueint;
-     case 4:
-       param = aJson.getArrayItem(kPIDObj, 3);
+
+     case 6: //kP,kI,kD, alarmTO, alarmVal, outMin
+       param = aJson.getArrayItem(kPIDObj, 5);
        if (param->type == aJson_Float) outMin=param->valuefloat;
-       else if (param->type == aJson_Int) outMin=param->valueint;
-     case 3:
+       else if (param->type == aJson_Int) outMin=param->valueint;    
+
+     case 5: //kP,kI,kD, alarmTO, alarmVal
+     case 4: //kP,kI,kD, alarmTO
+       param = aJson.getArrayItem(kPIDObj, 3);
+       if (param->type == aJson_Int) alarmTO=param->valueint; 
+     case 3: //kP,kI,kD
        param = aJson.getArrayItem(kPIDObj, 2);
        if (param->type == aJson_Float) kD=param->valuefloat;
        else if (param->type == aJson_Int) kD=param->valueint;
-     case 2:
+
+     case 2: //kP,kI
        param = aJson.getArrayItem(kPIDObj, 1);
        if (param->type == aJson_Float) kI=param->valuefloat;
        else if (param->type == aJson_Int) kI=param->valueint;
-     case 1:
+
+     case 1: //kP
        param = aJson.getArrayItem(kPIDObj, 0);
        if (param->type == aJson_Float) kP=param->valuefloat;  
        else if (param->type == aJson_Int) kP=param->valueint;
@@ -56,7 +66,7 @@ bool out_pid::getConfig()
                 {
                     kP=-kP;
                     direction=REVERSE;
-                }      
+                }        
    }
 
    switch (item->itemVal->type)
@@ -79,6 +89,9 @@ bool out_pid::getConfig()
       store->pid->SetMode(AUTOMATIC);
       //store->pid->SetOutputLimits(outMin,outMax);
       store->pid->SetSampleTime(5000); 
+      store->alarmTimer=millis();
+      store->alarmArmed=false;
+      store->alarmTimeout=alarmTO; //in sec
      
       return true;}
   else errorSerial<<F("PID already initialized")<<endl;    
@@ -99,7 +112,10 @@ store->pid=NULL;
 if (getConfig())
     {
         infoSerial<<F("PID config loaded ")<< item->itemArr->name<<endl;
-        item->On(); // Turn ON pid by default
+        //item->On(); // Turn ON pid by default
+  //      if (item->getCmd()) item->setFlag(SEND_COMMAND);
+  //      if (item->itemVal)  item->setFlag(SEND_PARAMETERS);
+        store->prevOut = -2.0;
         store->driverStatus = CST_INITIALIZED;
         return 1;
       }
@@ -138,19 +154,90 @@ int out_pid::Poll(short cause)
 {
 if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCmd()!=CMD_OFF))   
       {
-      double prevOut=store->output;  
-      if(store->pid->Compute())
-      //if (abs(store->output-store-prevOut)>OUTPUT_TRESHOLD)
+      //double prevOut=store->output;  
+      //itemCmd st;
+      //st.loadItem(item);
+      //short cmd = st.getCmd();
+      if (item->getCmd() != CMD_OFF)
+      { 
+      if(store->pid->Compute() && !store->alarmArmed)
+      if (abs(store->output-store->prevOut)>OUTPUT_TRESHOLD)
           { 
             aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
             itemCmd value((float) (store->output));// * (100./255.)));
+            value.setSuffix(S_SET);
             executeCommand(oCmd,-1,value);
+            store->prevOut=store->output;
           }
 
+      if(!store->alarmArmed && isTimeOver(store->alarmTimer,millis(),store->alarmTimeout*1000) )
+        {
+          store->alarmArmed=true;
+          alarm(true);
+        }
+      }  
       }
 
 return 1;//store->pollingInterval;
 };
+
+
+void  out_pid::alarm(bool state)
+{
+
+if (!item || item->itemArg) return;
+  if (state)
+  {
+
+   aJsonObject * kPIDObj = aJson.getArrayItem(item->itemArg, 0);
+   if (kPIDObj->type != aJson_Array)
+            {
+              errorSerial<<F("Invalid PID param array.")<<endl;
+              return;
+            }
+
+   float outAlarm=0.;
+   double kP=0.;
+   
+   bool alarmValDefined = false;
+   aJsonObject * param;         
+   switch (aJson.getArraySize(kPIDObj))
+   { 
+     case 7: //kP,kI,kD, alarmTO, alarmVal, outMin, outMax
+     case 6: //kP,kI,kD, alarmTO, alarmVal, outMin
+     case 5: //kP,kI,kD, alarmTO, alarmVal
+       param = aJson.getArrayItem(kPIDObj, 4);
+       alarmValDefined=true;
+       if (param->type == aJson_Float) outAlarm=param->valuefloat;
+       else if (param->type == aJson_Int) outAlarm=param->valueint;   
+       else alarmValDefined=false; 
+
+     case 4: //kP,kI,kD, alarmTO
+     case 3: //kP,kI,kD
+     case 2: //kP,kI
+     case 1: //kP
+       param = aJson.getArrayItem(kPIDObj, 0);
+       if (param->type == aJson_Float) kP=param->valuefloat;  
+       else if (param->type == aJson_Int) kP=param->valueint;
+              {
+              if (kP<0)
+                {
+                    if (!alarmValDefined) outAlarm = 0.;
+                } 
+               else if (!alarmValDefined) outAlarm = .255; 
+              }     
+   }  
+   errorSerial<<item->itemArr->name<<F(" PID alarm. Set out to ")<<outAlarm<<endl;
+
+   aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
+   itemCmd value (outAlarm);// * (100./255.)));
+            executeCommand(oCmd,-1,value);
+  }
+  else 
+  {
+  infoSerial<<item->itemArr->name<<F(" PID alarm: closed")<<endl;
+  }
+}
 
 
 int out_pid::getChanType()
@@ -180,6 +267,13 @@ case S_VAL:
 if (!cmd.isValue()) return 0;
 store->input=cmd.getFloat();
 debugSerial<<F("Input value:")<<store->input<<endl;
+
+store->alarmTimer=millis();
+if (store->alarmArmed)
+        {
+         alarm(false); 
+         store->alarmArmed=false;
+        }
 return 1;
 //break;
 
@@ -196,17 +290,40 @@ return 1;
 //break;
 
 case S_CMD:
-      switch (cmd.getCmd())
+      {
+      aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);   
+      short command = cmd.getCmd();  
+      itemCmd value(ST_VOID,command);
+      value.setSuffix(S_CMD);       
+      switch (command)
           {
-          case CMD_ON:
           case CMD_OFF:
-            //item->setCmd(cmd.getCmd());
-            //item->SendStatus(SEND_COMMAND);
+            //value.Percents255(0);
+
+          case CMD_ON:
+          case CMD_HEAT:
+          case CMD_COOL:
+          case CMD_AUTO:
+          case CMD_FAN:
+          case CMD_DRY:
+
+             executeCommand(oCmd,-1,value); 
+          return 1;
+          
+/*
+          case CMD_OFF:
+          {  
+            aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
+            itemCmd value((float) 0.);// * (100./255.)));
+            value.setSuffix(S_SET);
+            executeCommand(oCmd,-1,value);
             return 1;
+          } */
+
             default:
             debugSerial<<F("Unknown cmd ")<<cmd.getCmd()<<endl;
           } //switch cmd
-
+      }
     default:
   debugSerial<<F("Unknown suffix ")<<suffixCode<<endl;
 } //switch suffix

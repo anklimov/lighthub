@@ -6,7 +6,7 @@
 #include <PID_v1.h>
 #include "itemCmd.h"
 
-#define OUTPUT_TRESHOLD 1
+#define OUTPUT_TRESHOLD 1.0
 
 class pidPersistent : public chPersistent  {
 public:
@@ -16,6 +16,9 @@ public:
   double setpoint;
   float  prevOut; 
   int driverStatus;
+  uint32_t alarmTimer;
+  bool alarmArmed;
+  uint16_t alarmTimeout; //in sec
 };
 
 
@@ -32,6 +35,7 @@ public:
     int getChanType() override;
     int getDefaultStorageType(){return ST_FLOAT;};
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true) override;
+    void alarm(bool);
 
 
 protected:

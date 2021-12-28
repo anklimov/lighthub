@@ -970,7 +970,7 @@ bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
           cmd.itemArgType= subtype;
           if (optionsFlag & SEND_PARAMETERS) param.asInt32  =  item->getVal();
           //debugSerial<<F("Loaded :");
-          debugOut();
+          //debugOut();
           return true;
         }
  
