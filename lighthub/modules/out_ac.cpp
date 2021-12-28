@@ -216,7 +216,7 @@ inline unsigned char toHex( char ch ){
 int  out_AC::Setup()
 {
 abstractOut::Setup();    
-debugSerial.println("AC Init");
+debugSerial<<F("AC Init")<<endl;
 AC_Serial.begin(9600);
 driverStatus = CST_INITIALIZED;
 return 1;
@@ -224,7 +224,7 @@ return 1;
 
 int  out_AC::Stop()
 {
-debugSerial.println("AC De-Init");
+debugSerial<<F("AC De-Init")<<endl;
 
 driverStatus = CST_UNKNOWN;
 return 1;
@@ -248,7 +248,7 @@ if (cause!=POLLING_SLOW) return 0;
   //if (now - prevPolling > INTERVAL_AC_POLLING) {
   if (isTimeOver(prevPolling,millis(),INTERVAL_AC_POLLING)) {
     prevPolling = millisNZ();
-    debugSerial.println ("Polling");
+    debugSerial.println(F("Polling"));
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
 ///delay(100);
