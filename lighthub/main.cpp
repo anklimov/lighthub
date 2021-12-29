@@ -2573,7 +2573,7 @@ void thermoLoop(void) {
 
                 if (tStore.timestamp16) //Valid temperature
                    {        
-                        if (isTimeOver(tStore.timestamp16,millisNZ(8) & 0xFFFF,PERIOD_THERMOSTAT_FAILED,0xFFFF))
+                        if (isTimeOver(tStore.timestamp16,millisNZ(8) & 0xFFFF,PERIOD_THERMOSTAT_FAILED >> 8,0xFFFF))
                         {
                         errorSerial<<thermoItem->name<<F(" Alarm Expired\n");
                         mqttClient.publish("/alarm/snsr", thermoItem->name);

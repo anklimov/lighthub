@@ -119,6 +119,7 @@ class Item
   int Ctrl(char * payload,  char * subItem=NULL);
 
   int getArg(short n=0);
+  float getFloatArg(short n=0);
   short getArgCount();
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array

@@ -336,6 +336,28 @@ int Item::getArg(short n) //Return arg int or first array element if Arg is arra
     else return 0;//-2;
 }
 
+
+float Item::getFloatArg(short n) //Return arg float or first array element if Arg is array
+{
+    if (!itemArg) return 0;//-1;
+    if (!n)
+    { 
+    if (itemArg->type == aJson_Int) return itemArg->valueint; 
+    else  if (itemArg->type == aJson_Float) return itemArg->valuefloat; 
+          else return 0; 
+    }  
+    
+    if ((itemArg->type == aJson_Array) && ( n < aJson.getArraySize(itemArg))) 
+           {
+           aJsonObject * obj =  aJson.getArrayItem(itemArg, n);
+           if (obj->type == aJson_Int) return obj->valueint;
+           if (obj->type == aJson_Float) return obj->valuefloat;
+           return 0;
+           }
+
+    else return 0;//-2;
+}
+
 short Item::getArgCount()
 {
   if (!itemArg) return 0;

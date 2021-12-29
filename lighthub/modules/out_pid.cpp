@@ -30,24 +30,32 @@ bool out_pid::getConfig()
             }
    double outMin=0.;  //UNUSED
    double outMax=255.;//UNUSED
-   unsigned int   alarmTO=0;
+   float  dT=5.;
+   uint32_t   alarmTO=PERIOD_THERMOSTAT_FAILED;
 
    aJsonObject * param;         
    switch (aJson.getArraySize(kPIDObj))
-   { case 7: //kP,kI,kD, alarmTO, alarmVal, outMin, outMax
-       param = aJson.getArrayItem(kPIDObj, 6);
+   { case 8: //kP,kI,kD,dT, alarmTO, alarmVal, outMin, outMax
+       param = aJson.getArrayItem(kPIDObj, 7);
        if (param->type == aJson_Float) outMax=param->valuefloat;
        else if (param->type == aJson_Int) outMax=param->valueint;
 
-     case 6: //kP,kI,kD, alarmTO, alarmVal, outMin
-       param = aJson.getArrayItem(kPIDObj, 5);
+     case 7: //kP,kI,kD,dT alarmTO, alarmVal, outMin
+       param = aJson.getArrayItem(kPIDObj, 6);
        if (param->type == aJson_Float) outMin=param->valuefloat;
        else if (param->type == aJson_Int) outMin=param->valueint;    
 
-     case 5: //kP,kI,kD, alarmTO, alarmVal
-     case 4: //kP,kI,kD, alarmTO
+     case 6: //kP,kI,kD,dT, alarmTO, alarmVal
+     case 5: //kP,kI,kD,dT, alarmTO
+       param = aJson.getArrayItem(kPIDObj, 4);
+       if (param->type == aJson_Float) alarmTO=param->valuefloat;
+       else if (param->type == aJson_Int) alarmTO=param->valueint;         
+
+     case 4: //kP,kI,kD,dT
        param = aJson.getArrayItem(kPIDObj, 3);
-       if (param->type == aJson_Int) alarmTO=param->valueint; 
+       if (param->type == aJson_Float) dT=param->valuefloat;
+       else if (param->type == aJson_Int) dT=param->valueint; 
+
      case 3: //kP,kI,kD
        param = aJson.getArrayItem(kPIDObj, 2);
        if (param->type == aJson_Float) kD=param->valuefloat;
@@ -88,7 +96,7 @@ bool out_pid::getConfig()
       if (!store->pid) return false;
       store->pid->SetMode(AUTOMATIC);
       //store->pid->SetOutputLimits(outMin,outMax);
-      store->pid->SetSampleTime(5000); 
+      store->pid->SetSampleTime(dT*1000.0); 
       store->alarmTimer=millis();
       store->alarmArmed=false;
       store->alarmTimeout=alarmTO; //in sec
@@ -161,6 +169,8 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
       if (item->getCmd() != CMD_OFF)
       { 
       if(store->pid->Compute() && !store->alarmArmed)
+      {
+      debugSerial<<F("PID ")<<item->itemArr->name<<F("- set:")<<store->setpoint<<F(" in:")<<store->input<<(" out:") << store->output<<endl;
       if (abs(store->output-store->prevOut)>OUTPUT_TRESHOLD)
           { 
             aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
@@ -169,8 +179,8 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
             executeCommand(oCmd,-1,value);
             store->prevOut=store->output;
           }
-
-      if(!store->alarmArmed && isTimeOver(store->alarmTimer,millis(),store->alarmTimeout*1000) )
+      }
+      if(!store->alarmArmed && store->alarmTimeout && isTimeOver(store->alarmTimer,millis(),store->alarmTimeout*1000) )
         {
           store->alarmArmed=true;
           alarm(true);

@@ -13,6 +13,8 @@ static int driverStatus = CST_UNKNOWN;
 void out_relay::getConfig()
 {
   inverted=false;
+
+  if (!item) return;
   pin=item->getArg(0);
   if (pin<0)
             {
@@ -20,9 +22,11 @@ void out_relay::getConfig()
               inverted=true;
             }
   if(pin==0 || pin>=PINS_COUNT) pin=32;
-  period = item->getArg(1);
-
-  }
+  
+  period = item->getFloatArg(1)*1000.0; 
+  if (!period)   period = 5000UL;
+          
+}
 
 #define ACTIVE (inverted)?LOW:HIGH
 #define INACTIVE (inverted)?HIGH:LOW

@@ -423,6 +423,7 @@ int out_Modbus::getChanType()
 
 int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
 {
+  return 0;
 //int chActive = item->isActive();
 //bool toExecute = (chActive>0);
 //itemCmd st(ST_UINT32,CMD_VOID);
@@ -431,9 +432,9 @@ aJsonObject *templateParamObj = NULL;
 short mappedCmdVal = 0;
 
 // trying to find parameter in template with name == subItem (NB!! standard suffixes dint working here)
-if (subItem && strlen (subItem)) templateParamObj = aJson.getObjectItem(store->parameters, subItem);
+if (subItem && strlen (subItem) && store) templateParamObj = aJson.getObjectItem(store->parameters, subItem);
 
-if (!templateParamObj)
+if (!templateParamObj && store)
 {
   // Trying to find template parameter where id == suffixCode
  templateParamObj = store->parameters->child;
