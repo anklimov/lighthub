@@ -558,7 +558,12 @@ RebootFunc();
 
 bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo)
 {
-  uint32_t endTime=(timestamp + time) % modulo;
+  uint32_t endTime;
+  if (!time) return true;
+
+  if (modulo) endTime = (timestamp + time) % modulo;
+     else endTime = timestamp + time;   
+
   return   ((currTime>endTime) && (currTime <timestamp)) ||
               ((timestamp<endTime) && ((currTime>endTime) || (currTime <timestamp)));
 }

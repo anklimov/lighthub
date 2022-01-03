@@ -346,7 +346,7 @@ float Item::getFloatArg(short n) //Return arg float or first array element if Ar
     else  if (itemArg->type == aJson_Float) return itemArg->valuefloat; 
           else return 0; 
     }  
-    
+
     if ((itemArg->type == aJson_Array) && ( n < aJson.getArraySize(itemArg))) 
            {
            aJsonObject * obj =  aJson.getArrayItem(itemArg, n);
@@ -691,7 +691,8 @@ return false;
 
 //Main routine to control Item
 int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
-{
+{ 
+
   uint32_t time=millis();  
   int suffixCode = cmd.getSuffix();
   bool operation = isNotRetainingStatus();
@@ -721,7 +722,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
         }
     cmd.debugOut();
     //debugSerial<<endl; 
-
+    if (subItem && subItem[0] == '$') {debugSerial<<F("Skipped homie stuff")<<endl;return -4; }
     if (!itemArr) return -1;
     
     /// DELAYED COMMANDS processing
@@ -888,9 +889,9 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     {
     if (allowRecursion && itemArg->type == aJson_Array && operation) 
                 {
-                digGroup(itemArg,&cmd,subItem);
-                res=1;     
+                digGroup(itemArg,&cmd,subItem);   
                 }
+       res=1;            
 
       // Post-processing of group command - converting HALT,REST,XON,XOFF to conventional ON/OFF for status
       switch (cmd.getCmd()) {

@@ -406,7 +406,7 @@ else
         cmd_parse((char *)payload);
         return;// -4;
     }
-
+/*
     if (subItem = strchr(itemName, '/'))
       {
         *subItem = 0;
@@ -421,6 +421,12 @@ else
         //return 
         item.Ctrl((char *)payload,subItem);        
     } //valid item
+ */
+
+  if (itemName[0]=='$') return;// -6; //Skipping homie stuff
+  Item item(itemName);
+  if (item.isValid())  item.Ctrl((char *)payload);        
+
  return;// -7;   
 }
 
@@ -489,7 +495,7 @@ void setupSyslog()
    if (lanStatus<HAVE_IP_ADDRESS) return;
    if (!root) return;
 
-    udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
+//    udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
 
         udpSyslogArr = aJson.getObjectItem(root, "syslog");
       if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
@@ -498,6 +504,8 @@ void setupSyslog()
 
         _inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
         infoSerial<<F("Syslog params:")<<syslogServer<<":"<<syslogPort<<":"<<syslogDeviceHostname<<endl;
+
+        udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
         udpSyslog.server(syslogServer, syslogPort);
         udpSyslog.deviceHostname(syslogDeviceHostname);
 
@@ -547,7 +555,7 @@ lan_status lanLoop() {
                 mdnsName[8+4]='\0'; 
 
                 if (!MDNS.begin(mdnsName)) 
-                errorSerial<<("Error setting up MDNS responder!")<<endl;
+                errorSerial<<F("Error setting up MDNS responder!")<<endl;
                 else    infoSerial<<F("mDNS responder started: ")<<mdnsName<<F(".local")<<endl;
                 MDNS.addService("http", "tcp", OTA_PORT);
 
@@ -880,7 +888,9 @@ void ip_ready_config_loaded_connecting_to_broker() {
     infoSerial<<F("Device Name:")<<deviceName<<endl;
     
     #if defined  (MDNS_ENABLE) && ! defined (WIFI_ENABLE)             
-     mdns.setName(deviceName);
+     if (!mdns.setName(deviceName))
+                      errorSerial<<("Error updating MDNS name!")<<endl;
+                else    infoSerial<<F("mDNS name updated: ")<<deviceName<<F(".local")<<endl;
     #endif
 
 //debugSerial<<F("N:")<<n<<endl;
@@ -1059,6 +1069,7 @@ if (WiFi.status() == WL_CONNECTED) {
     } else {
         infoSerial<<F("Got IP address:");
         printIPAddress(Ethernet.localIP());
+        infoSerial<<endl;
         lanStatus = HAVE_IP_ADDRESS;
     }
   }//DHCP
@@ -1067,12 +1078,17 @@ if (WiFi.status() == WL_CONNECTED) {
         char mdnsName[32] = "LightHub";
         SetBytes(sysConf.mac+4,2,mdnsName+8);
 
-        mdns.begin(Ethernet.localIP(), mdnsName);         
+        if(!mdns.begin(Ethernet.localIP(), mdnsName))
+                        errorSerial<<F("Error setting up MDNS responder!")<<endl;
+                else    infoSerial<<F("mDNS responder started.")<<endl;     
+
         char txtRecord[32] = "\x10mac=";
         SetBytes(sysConf.mac,6,txtRecord+5);
        
         strncat(mdnsName,"._http",sizeof(mdnsName));
-        mdns.addServiceRecord(mdnsName, OTA_PORT, MDNSServiceTCP, txtRecord);                
+        if (!mdns.addServiceRecord(mdnsName, OTA_PORT, MDNSServiceTCP, txtRecord))  
+                        errorSerial<<("Error setting up service record!")<<endl;
+                else    infoSerial<<F("Service record: ")<<mdnsName<<F(".local")<<endl;             
         #endif
 
 #endif //Ethernet
@@ -1239,6 +1255,7 @@ setupSyslog();
                  if (artnetMaxCh>maxChannels) artnetMaxCh=maxChannels;
              } 
              infoSerial<<F("Artnet start. Channels:")<<artnetMinCh<<F("-")<<artnetMaxCh<<endl;
+             artnetSetup();
              artnetSetChans(artnetMinCh,artnetMaxCh);
              //artnetInitialized=true;
           }  
@@ -1348,6 +1365,14 @@ void printConfigSummary() {
 #ifdef _owire
     infoSerial<<F("\n1-wire ");
     printBool(owArr);
+#endif
+#ifdef SYSLOG_ENABLE
+    infoSerial<<F("\nSyslog ");
+    printBool(syslogInitialized);
+#endif
+#ifdef _artnet
+    infoSerial<<F("\nArtnet ");
+    printBool(artnet);
 #endif
 
     infoSerial << endl;
@@ -2003,9 +2028,9 @@ void setup_main() {
 
     mqttClient.setCallback(mqttCallback);
 
-#ifdef _artnet
-    artnetSetup();
-#endif
+//#ifdef _artnet
+//    artnetSetup();
+//#endif
 
 #if defined(WIFI_ENABLE) and not defined(WIFI_MANAGER_DISABLE)
 //    WiFiManager wifiManager;
@@ -2176,8 +2201,19 @@ infoSerial<<F("\n(+)MDNS");
 #else
 infoSerial<<F("\n(-)MDNS");
 #endif
-infoSerial<<endl;
 
+#ifndef RELAY_DISABLE
+infoSerial<<F("\n(+)PWM_RELAY");
+#else
+infoSerial<<F("\n(-)PWM_RELAY");
+#endif
+
+#ifndef MULTIVENT_DISABLE
+infoSerial<<F("\n(+)MULTIVENT");
+#else
+infoSerial<<F("\n(-)MULTIVENT");
+#endif
+infoSerial<<endl;
 //    WDT_Disable( WDT ) ;
 #if defined(__SAM3X8E__)
 

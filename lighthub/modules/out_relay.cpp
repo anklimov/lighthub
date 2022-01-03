@@ -22,7 +22,7 @@ void out_relay::getConfig()
               inverted=true;
             }
   if(pin==0 || pin>=PINS_COUNT) pin=32;
-  
+
   period = item->getFloatArg(1)*1000.0; 
   if (!period)   period = 5000UL;
           
@@ -37,13 +37,17 @@ int  out_relay::Setup()
 abstractOut::Setup();    
 
 debugSerial<<F("Relay-Out #")<<pin<<F(" init")<<endl;
-if (!item ) return 0;
+
 pinMode(pin, OUTPUT);
-item->setExt(0);
 digitalWrite(pin,INACTIVE);
+if (item) item->setExt(0);
 //if (item->getCmd()) item->setFlag(SEND_COMMAND);
 //if (item->itemVal)  item->setFlag(SEND_PARAMETERS);
 driverStatus = CST_INITIALIZED;
+if (!item->isActive()) 
+    {
+    item->setExt(millisNZ());
+    }
 return 1;
 }
 
@@ -60,7 +64,7 @@ int  out_relay::Status()
 return driverStatus;
 }
 
-const char action_P[] PROGMEM = "/action";
+const char action_P[] PROGMEM = "action";
 const char cooling_P[] PROGMEM = "cooling";
 const char heating_P[] PROGMEM = "heating";
 const char drying_P[] PROGMEM = "drying";
@@ -71,13 +75,13 @@ const char off_P[] PROGMEM = "off";
 
 void  out_relay::relay(bool state)
 {
-char subtopic[10];
+char subtopic[10]="/";
 char val[10];  
 digitalWrite(pin,(state)?ACTIVE:INACTIVE);
 if (period<1000) return;
 debugSerial<<F("Out ")<<pin<<F(" is ")<<(state)<<endl;
 
-strcpy_P(subtopic,action_P);
+strcat_P(subtopic,action_P);
 short cmd=item->getCmd();
 if (state) 
  switch(cmd)
@@ -103,21 +107,26 @@ if (state)
        if (cmd==CMD_OFF)  strcpy_P(val,off_P);
           else strcpy_P(val,idle_P);
 
-publishTopic(item->itemArr->name,val,subtopic);
+debugSerial << F("pub action ") << publishTopic(item->itemArr->name,val,subtopic)<<F(":")<<item->itemArr->name<<subtopic<<F("=>")<<val<<endl;
 }
 
+
 bool getPinVal(uint8_t pin)
-{return (0!=(*portOutputRegister( digitalPinToPort(pin) ) & digitalPinToBitMask(pin)));}
+{
+  return (0!=(*portOutputRegister( digitalPinToPort(pin) ) & digitalPinToBitMask(pin)));
+}
+
 
 int out_relay::Poll(short cause)
 {
   if (!item) return 0;
-
   itemCmd st;
   st.loadItem(item);
   int val = st.getPercents255();
 short cmd = st.getCmd();
 uint32_t timer = item->getExt(); 
+
+bool needToOff = isTimeOver(timer,millis(),period*val/255);
   
    if (timer && isTimeOver(timer,millis(),period))
     {
@@ -125,11 +134,14 @@ uint32_t timer = item->getExt();
       if (val && (getPinVal(pin) == INACTIVE)) relay(true);
     }   
 
-    else if (timer && (getPinVal(pin) == ACTIVE) && isTimeOver(timer,millis(),period*val/255))
+    else if (timer && (getPinVal(pin) == ACTIVE) && needToOff)
     {
       relay(false);
       if (!item->isActive()) item->setExt(0);
     }  
+
+    else if (timer && val && (getPinVal(pin) == INACTIVE) && !needToOff)
+      relay(true);
 
 
     return 0;
@@ -140,6 +152,7 @@ int out_relay::Ctrl(itemCmd cmd, char* subItem, bool toExecute)
 {
 debugSerial<<F("relayCtr: ");
 cmd.debugOut();
+if (! strcmp_P(subItem,action_P)) return 0;
 int suffixCode;
 if (cmd.isCommand()) suffixCode = S_CMD;
    else suffixCode = cmd.getSuffix();
@@ -157,7 +170,7 @@ case S_SET:
              if (!item->getExt()) 
                                     {
                                     item->setExt(millisNZ());
-                                    relay(true);
+                                    //relay(true);
                                     }
             }
           else        
@@ -180,7 +193,7 @@ case S_CMD:
              if (!item->getExt())  
                                       {
                                       item->setExt(millisNZ());
-                                      relay(true);
+                                      //relay(true);
                                       }
             return 1;
 
