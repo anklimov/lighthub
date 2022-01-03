@@ -1080,7 +1080,9 @@ if (WiFi.status() == WL_CONNECTED) {
 
         if(!mdns.begin(Ethernet.localIP(), mdnsName))
                         errorSerial<<F("Error setting up MDNS responder!")<<endl;
-                else    infoSerial<<F("mDNS responder started.")<<endl;     
+                else    infoSerial<<F("mDNS responder started.")<<endl;    
+
+        mdns.removeAllServiceRecords();
 
         char txtRecord[32] = "\x10mac=";
         SetBytes(sysConf.mac,6,txtRecord+5);
