@@ -422,9 +422,9 @@ String toString(const IPAddress& address){
 void printIPAddress(IPAddress ipAddress) {
     for (byte i = 0; i < 4; i++)
 #ifdef WITH_PRINTEX_LIB
-            (i < 3) ? debugSerial << (ipAddress[i]) << F(".") : infoSerial << (ipAddress[i])<<F(", ");
+            (i < 3) ? infoSerial << (ipAddress[i]) << F(".") : infoSerial << (ipAddress[i])<<F(", ");
 #else
-            (i < 3) ? debugSerial << _DEC(ipAddress[i]) << F(".") : infoSerial << _DEC(ipAddress[i]) << F(" ");
+            (i < 3) ? infoSerial << _DEC(ipAddress[i]) << F(".") : infoSerial << _DEC(ipAddress[i]) << F(" ");
 #endif
 }
 
