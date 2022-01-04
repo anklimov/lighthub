@@ -1346,6 +1346,8 @@ if (ethClient.connected())
                     ethClient.stop(); //Refresh MQTT connection
                     lanStatus=IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
                     }
+if (lanStatus == OPERATION_NO_MQTT) lanStatus=IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+
 configLocked--;
 }
 
@@ -1376,6 +1378,8 @@ void printConfigSummary() {
     infoSerial<<F("\nArtnet ");
     printBool(artnet);
 #endif
+    infoSerial<<F("\nMQTT ");
+    printBool(mqttArr);
 
     infoSerial << endl;
     infoSerial<<F("RAM=")<<freeRam()<<endl;

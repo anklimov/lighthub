@@ -52,8 +52,8 @@ volatile unsigned long D_checkT=0;
 #ifdef _artnet
 #include <Artnet.h>
 Artnet *artnet = NULL;
-uint8_t artnetMinCh=1;
-uint8_t artnetMaxCh=512;
+uint16_t artnetMinCh=1;
+uint16_t artnetMaxCh=512;
 #endif
 
 
@@ -337,9 +337,13 @@ void DMXOUT_propagate()
 void artnetSetup()
 {
 #ifdef _artnet
- if (!artnet)  artnet = new Artnet;
-    // this will be called for each packet received
-  if (artnet) artnet->setArtDmxCallback(onDmxFrame);
+ if (!artnet)  
+          {
+          artnet = new Artnet;
+          artnet->begin();
+         // this will be called for each packet received
+         if (artnet) artnet->setArtDmxCallback(onDmxFrame);
+          }
 #endif
 }
 
