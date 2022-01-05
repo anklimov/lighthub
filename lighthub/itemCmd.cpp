@@ -1052,7 +1052,7 @@ return false;
   int itemCmd::doReverseMapping (aJsonObject *mappingData)
 
   {
-  return 0; 
+  return 0;
   }
 
 int itemCmd::doMappingCmd(aJsonObject *mappingData)
@@ -1063,8 +1063,7 @@ int itemCmd::doMappingCmd(aJsonObject *mappingData)
   int itemCmd::doReverseMappingCmd (aJsonObject *mappingData)
 
   {
-  return 0;  
-
+  return 0;
   }
 
 char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, bool scale100 )
