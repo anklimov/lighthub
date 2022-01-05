@@ -1,5 +1,5 @@
-\hypertarget{out__modbus_8cpp}{}\doxysection{out\+\_\+modbus.\+cpp File Reference}
-\label{out__modbus_8cpp}\index{out\_modbus.cpp@{out\_modbus.cpp}}
+\hypertarget{out__modbus_8cpp}{}\doxysection{modules/out\+\_\+modbus.cpp File Reference}
+\label{out__modbus_8cpp}\index{modules/out\_modbus.cpp@{modules/out\_modbus.cpp}}
 {\ttfamily \#include \char`\"{}modules/out\+\_\+modbus.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}Arduino.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}options.\+h\char`\"{}}\newline
@@ -9,20 +9,10 @@
 {\ttfamily \#include $<$Modbus\+Master.\+h$>$}\newline
 {\ttfamily \#include \char`\"{}main.\+h\char`\"{}}\newline
 {\ttfamily \#include $<$Hardware\+Serial.\+h$>$}\newline
-Include dependency graph for out\+\_\+modbus.\+cpp\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{out__modbus_8cpp__incl}
-\end{center}
-\end{figure}
 \doxysubsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
 struct \mbox{\hyperlink{structreg__t}{reg\+\_\+t}}
-\item 
-struct \mbox{\hyperlink{structserial__t}{serial\+\_\+t}}
 \end{DoxyCompactItemize}
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
@@ -43,16 +33,14 @@ struct \mbox{\hyperlink{structserial__t}{serial\+\_\+t}}
 \item 
 \#define \mbox{\hyperlink{out__modbus_8cpp_a7c348cd2c30505b0afb1f00d47a3a804}{P\+A\+R\+\_\+\+U8L}}~8
 \item 
-\#define \mbox{\hyperlink{out__modbus_8cpp_a49c9c8a2424dd60fa4fefb6ee0188db6}{reg\+Size\+Num}}~sizeof(reg\+Size\+\_\+P)/sizeof(\mbox{\hyperlink{structreg__t}{reg\+\_\+t}})
+\#define \mbox{\hyperlink{out__modbus_8cpp_a3659681ecfe279d96e3bcd8eb482002c}{P\+A\+R\+\_\+\+T\+E\+NS}}~9
 \item 
-\#define \mbox{\hyperlink{out__modbus_8cpp_a4d3d61e309ead27e6e008e455d75ceb5}{serial\+Modes\+Num}}~sizeof(serial\+Modes\+\_\+P)/sizeof(\mbox{\hyperlink{structserial__t}{serial\+\_\+t}})
+\#define \mbox{\hyperlink{out__modbus_8cpp_a49c9c8a2424dd60fa4fefb6ee0188db6}{reg\+Size\+Num}}~sizeof(reg\+Size\+\_\+P)/sizeof(\mbox{\hyperlink{structreg__t}{reg\+\_\+t}})
 \end{DoxyCompactItemize}
 \doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
 void \mbox{\hyperlink{out__modbus_8cpp_aa557ba1fef085fb9865ffd399c738dbf}{modbus\+Idle}} (void)
-\item 
-uint16\+\_\+t \mbox{\hyperlink{out__modbus_8cpp_ae62352d2766976d85ca20006e681f254}{str2\+Serial\+Param}} (char $\ast$str)
 \item 
 int \mbox{\hyperlink{out__modbus_8cpp_a6b595bdd94e3d76226b079ba5d7d7239}{str2reg\+Size}} (char $\ast$str)
 \item 
@@ -67,7 +55,7 @@ Modbus\+Master \mbox{\hyperlink{out__modbus_8cpp_aed3ca48125de3e138d26fa4884c35c
 \item 
 short \mbox{\hyperlink{out__modbus_8cpp_a02d3e5fb154e56cf7fc169649e232078}{modbus\+Busy}}
 \item 
-const \mbox{\hyperlink{structreg__t}{reg\+\_\+t}} reg\+Size\+\_\+P\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{out__modbus_8cpp_a6c1a731dafc190e4be43884f9b8807ad}{P\+R\+O\+G\+M\+EM}}
+const \mbox{\hyperlink{structreg__t}{reg\+\_\+t}} reg\+Size\+\_\+P\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{out__modbus_8cpp_a4204fbb897e7e609752d99bb878ad7a6}{P\+R\+O\+G\+M\+EM}}
 \end{DoxyCompactItemize}
 
 
@@ -95,6 +83,12 @@ const \mbox{\hyperlink{structreg__t}{reg\+\_\+t}} reg\+Size\+\_\+P\mbox{[}$\,$\m
 \index{PAR\_I8L@{PAR\_I8L}!out\_modbus.cpp@{out\_modbus.cpp}}
 \doxysubsubsection{\texorpdfstring{PAR\_I8L}{PAR\_I8L}}
 {\footnotesize\ttfamily \#define P\+A\+R\+\_\+\+I8L~6}
+
+\mbox{\Hypertarget{out__modbus_8cpp_a3659681ecfe279d96e3bcd8eb482002c}\label{out__modbus_8cpp_a3659681ecfe279d96e3bcd8eb482002c}} 
+\index{out\_modbus.cpp@{out\_modbus.cpp}!PAR\_TENS@{PAR\_TENS}}
+\index{PAR\_TENS@{PAR\_TENS}!out\_modbus.cpp@{out\_modbus.cpp}}
+\doxysubsubsection{\texorpdfstring{PAR\_TENS}{PAR\_TENS}}
+{\footnotesize\ttfamily \#define P\+A\+R\+\_\+\+T\+E\+NS~9}
 
 \mbox{\Hypertarget{out__modbus_8cpp_ad2b89b560cb53fc21c8ee35087910b2e}\label{out__modbus_8cpp_ad2b89b560cb53fc21c8ee35087910b2e}} 
 \index{out\_modbus.cpp@{out\_modbus.cpp}!PAR\_U16@{PAR\_U16}}
@@ -126,12 +120,6 @@ const \mbox{\hyperlink{structreg__t}{reg\+\_\+t}} reg\+Size\+\_\+P\mbox{[}$\,$\m
 \doxysubsubsection{\texorpdfstring{regSizeNum}{regSizeNum}}
 {\footnotesize\ttfamily \#define reg\+Size\+Num~sizeof(reg\+Size\+\_\+P)/sizeof(\mbox{\hyperlink{structreg__t}{reg\+\_\+t}})}
 
-\mbox{\Hypertarget{out__modbus_8cpp_a4d3d61e309ead27e6e008e455d75ceb5}\label{out__modbus_8cpp_a4d3d61e309ead27e6e008e455d75ceb5}} 
-\index{out\_modbus.cpp@{out\_modbus.cpp}!serialModesNum@{serialModesNum}}
-\index{serialModesNum@{serialModesNum}!out\_modbus.cpp@{out\_modbus.cpp}}
-\doxysubsubsection{\texorpdfstring{serialModesNum}{serialModesNum}}
-{\footnotesize\ttfamily \#define serial\+Modes\+Num~sizeof(serial\+Modes\+\_\+P)/sizeof(\mbox{\hyperlink{structserial__t}{serial\+\_\+t}})}
-
 
 
 \doxysubsection{Function Documentation}
@@ -152,12 +140,6 @@ const \mbox{\hyperlink{structreg__t}{reg\+\_\+t}} reg\+Size\+\_\+P\mbox{[}$\,$\m
 \index{str2regSize@{str2regSize}!out\_modbus.cpp@{out\_modbus.cpp}}
 \doxysubsubsection{\texorpdfstring{str2regSize()}{str2regSize()}}
 {\footnotesize\ttfamily int str2reg\+Size (\begin{DoxyParamCaption}\item[{char $\ast$}]{str }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{out__modbus_8cpp_ae62352d2766976d85ca20006e681f254}\label{out__modbus_8cpp_ae62352d2766976d85ca20006e681f254}} 
-\index{out\_modbus.cpp@{out\_modbus.cpp}!str2SerialParam@{str2SerialParam}}
-\index{str2SerialParam@{str2SerialParam}!out\_modbus.cpp@{out\_modbus.cpp}}
-\doxysubsubsection{\texorpdfstring{str2SerialParam()}{str2SerialParam()}}
-{\footnotesize\ttfamily uint16\+\_\+t str2\+Serial\+Param (\begin{DoxyParamCaption}\item[{char $\ast$}]{str }\end{DoxyParamCaption})}
 
 
 
@@ -180,11 +162,11 @@ const \mbox{\hyperlink{structreg__t}{reg\+\_\+t}} reg\+Size\+\_\+P\mbox{[}$\,$\m
 \doxysubsubsection{\texorpdfstring{node}{node}}
 {\footnotesize\ttfamily Modbus\+Master node\hspace{0.3cm}{\ttfamily [extern]}}
 
-\mbox{\Hypertarget{out__modbus_8cpp_a6c1a731dafc190e4be43884f9b8807ad}\label{out__modbus_8cpp_a6c1a731dafc190e4be43884f9b8807ad}} 
+\mbox{\Hypertarget{out__modbus_8cpp_a4204fbb897e7e609752d99bb878ad7a6}\label{out__modbus_8cpp_a4204fbb897e7e609752d99bb878ad7a6}} 
 \index{out\_modbus.cpp@{out\_modbus.cpp}!PROGMEM@{PROGMEM}}
 \index{PROGMEM@{PROGMEM}!out\_modbus.cpp@{out\_modbus.cpp}}
 \doxysubsubsection{\texorpdfstring{PROGMEM}{PROGMEM}}
-{\footnotesize\ttfamily const \mbox{\hyperlink{structserial__t}{serial\+\_\+t}} serial\+Modes\+\_\+P \mbox{[}$\,$\mbox{]} P\+R\+O\+G\+M\+EM}
+{\footnotesize\ttfamily const \mbox{\hyperlink{structreg__t}{reg\+\_\+t}} reg\+Size\+\_\+P \mbox{[}$\,$\mbox{]} P\+R\+O\+G\+M\+EM}
 
 {\bfseries Initial value\+:}
 \begin{DoxyCode}{0}
@@ -197,7 +179,8 @@ const \mbox{\hyperlink{structreg__t}{reg\+\_\+t}} reg\+Size\+\_\+P\mbox{[}$\,$\m
 \DoxyCodeLine{  \{ \textcolor{stringliteral}{"{}i8h"{}}, (uint8\_t) \mbox{\hyperlink{out__modbus_8cpp_af19859d150babbb4691f7d1859f89813}{PAR\_I8H}} \},}
 \DoxyCodeLine{  \{ \textcolor{stringliteral}{"{}i8l"{}}, (uint8\_t) \mbox{\hyperlink{out__modbus_8cpp_ab0bcf5a51d08a4543375cefe31c00cc5}{PAR\_I8L}} \},}
 \DoxyCodeLine{  \{ \textcolor{stringliteral}{"{}u8h"{}}, (uint8\_t) \mbox{\hyperlink{out__modbus_8cpp_abd90249102cbda3365d3e86df523fc2d}{PAR\_U8H}} \},}
-\DoxyCodeLine{  \{ \textcolor{stringliteral}{"{}u8l"{}}, (uint8\_t) \mbox{\hyperlink{out__modbus_8cpp_a7c348cd2c30505b0afb1f00d47a3a804}{PAR\_U8L}} \}}
+\DoxyCodeLine{  \{ \textcolor{stringliteral}{"{}u8l"{}}, (uint8\_t) \mbox{\hyperlink{out__modbus_8cpp_a7c348cd2c30505b0afb1f00d47a3a804}{PAR\_U8L}} \},}
+\DoxyCodeLine{  \{ \textcolor{stringliteral}{"{}x10"{}}, (uint8\_t) \mbox{\hyperlink{out__modbus_8cpp_a3659681ecfe279d96e3bcd8eb482002c}{PAR\_TENS}} \}}
 \DoxyCodeLine{\}}
 
 \end{DoxyCode}

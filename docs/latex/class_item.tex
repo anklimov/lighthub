@@ -4,16 +4,6 @@
 
 {\ttfamily \#include $<$item.\+h$>$}
 
-
-
-Collaboration diagram for Item\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=209pt]{class_item__coll__graph}
-\end{center}
-\end{figure}
 \doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -29,11 +19,13 @@ boolean \mbox{\hyperlink{class_item_ae84f04e796546f4c34db79a060b0d443}{Setup}} (
 \item 
 void \mbox{\hyperlink{class_item_ac382f69ca11e6eebfec1f40133fddd42}{Stop}} ()
 \item 
-int \mbox{\hyperlink{class_item_a821048224e300ab4bb9eb047bf859b2c}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL)
+int \mbox{\hyperlink{class_item_ad81d39aec84f1a2071b5e81dafd96e27}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool allow\+Recursion=true)
 \item 
 int \mbox{\hyperlink{class_item_a51166376e10786d0daf684ea85988b75}{Ctrl}} (char $\ast$payload, char $\ast$sub\+Item=N\+U\+LL)
 \item 
 int \mbox{\hyperlink{class_item_a04c95e83741aa896498ddbc869061886}{get\+Arg}} (short n=0)
+\item 
+float \mbox{\hyperlink{class_item_a8fcee2e61e88909e3a53aaae3dc5d3e9}{get\+Float\+Arg}} (short n=0)
 \item 
 short \mbox{\hyperlink{class_item_a9469cc0bb8560eb5f669d54903186433}{get\+Arg\+Count}} ()
 \item 
@@ -61,11 +53,15 @@ void \mbox{\hyperlink{class_item_a60c43acb3bd16c858ca4c1fa6b12145b}{clear\+Flag}
 \item 
 void \mbox{\hyperlink{class_item_ad2a38c039f8b3cee14cb97c9526d9260}{set\+Val}} (long int par)
 \item 
+void \mbox{\hyperlink{class_item_a5b103354070ff53e7dfd66d43765a619}{set\+Float\+Val}} (float par)
+\item 
 void \mbox{\hyperlink{class_item_a47b261677ded48fb1c51088b9d956dcc}{set\+Subtype}} (uint8\+\_\+t par)
 \item 
 int \mbox{\hyperlink{class_item_aaa6500d9cdb58f9b20f6c2592da40739}{Poll}} (int cause)
 \item 
 int \mbox{\hyperlink{class_item_a525c4e3f723a85af5e818c1b5834e277}{Send\+Status}} (int send\+Flags)
+\item 
+int \mbox{\hyperlink{class_item_ad1a236a67b01bb3ae9d1aec9a18ed51d}{Send\+Status\+Immediate}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} st, int send\+Flags, char $\ast$sub\+Item=N\+U\+LL)
 \item 
 int \mbox{\hyperlink{class_item_a4db79caf8ace960c0bf74181c0bf5faa}{is\+Active}} ()
 \item 
@@ -103,7 +99,7 @@ int \mbox{\hyperlink{class_item_a6a8cdb4d647ba278a55560cd91bfc031}{modbus\+Dimme
 \item 
 int \mbox{\hyperlink{class_item_a77913c1f28d823b1a096369e69cc5072}{modbus\+Dimmer\+Set}} (int addr, uint16\+\_\+t \+\_\+reg, int \+\_\+reg\+Type, int \+\_\+mask, uint16\+\_\+t value)
 \item 
-void \mbox{\hyperlink{class_item_a389156098d07ebdc5649668f61d87343}{mb\+\_\+fail}} ()
+void \mbox{\hyperlink{class_item_a194ef40944a7a579ded380103ac1a081}{mb\+\_\+fail}} (int result=0)
 \item 
 void \mbox{\hyperlink{class_item_abbcfb98227918e624be294409d21be3d}{Parse}} ()
 \item 
@@ -111,13 +107,11 @@ int \mbox{\hyperlink{class_item_a899707e630b75eeb422fbc7ca3d829ce}{check\+Modbus
 \item 
 int \mbox{\hyperlink{class_item_a2d807aa2a634312bde779e174e28c4ce}{check\+Modbus\+Dimmer}} (int \mbox{\hyperlink{out__ac_8cpp_a336725b3b566264f2223495f6294c3c7}{data}})
 \item 
-boolean \mbox{\hyperlink{class_item_a4454719134cb94ff27943cc35207fd74}{check\+Modbus\+Retry}} ()
-\item 
-boolean \mbox{\hyperlink{class_item_a353e817a01d39e0341fdc12b00351169}{check\+V\+C\+Retry}} ()
-\item 
-boolean \mbox{\hyperlink{class_item_a9fa6f17268398679295a57f7506089b8}{check\+Heat\+Retry}} ()
+int \mbox{\hyperlink{class_item_aee7bbb1c5b9f54b7228cdc171f040bf4}{check\+Modbus\+Retry}} ()
 \item 
 void \mbox{\hyperlink{class_item_af767f604dcaed8a497438255c28129fd}{send\+Delayed\+Status}} ()
+\item 
+bool \mbox{\hyperlink{class_item_a1407f6e0854127b5cec31368400caf06}{resume\+Modbus}} ()
 \item 
 int \mbox{\hyperlink{class_item_aac323dbba691d2a1ffd0b760fdc2198d}{check\+FM}} ()
 \end{DoxyCompactItemize}
@@ -158,12 +152,6 @@ int \mbox{\hyperlink{class_item_a4ff75a860339d86b006960b750a593e6}{default\+Suff
 \doxysubsubsection{\texorpdfstring{checkFM()}{checkFM()}}
 {\footnotesize\ttfamily int Item\+::check\+FM (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
 
-\mbox{\Hypertarget{class_item_a9fa6f17268398679295a57f7506089b8}\label{class_item_a9fa6f17268398679295a57f7506089b8}} 
-\index{Item@{Item}!checkHeatRetry@{checkHeatRetry}}
-\index{checkHeatRetry@{checkHeatRetry}!Item@{Item}}
-\doxysubsubsection{\texorpdfstring{checkHeatRetry()}{checkHeatRetry()}}
-{\footnotesize\ttfamily boolean Item\+::check\+Heat\+Retry (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
-
 \mbox{\Hypertarget{class_item_a899707e630b75eeb422fbc7ca3d829ce}\label{class_item_a899707e630b75eeb422fbc7ca3d829ce}} 
 \index{Item@{Item}!checkModbusDimmer@{checkModbusDimmer}}
 \index{checkModbusDimmer@{checkModbusDimmer}!Item@{Item}}
@@ -176,17 +164,11 @@ int \mbox{\hyperlink{class_item_a4ff75a860339d86b006960b750a593e6}{default\+Suff
 \doxysubsubsection{\texorpdfstring{checkModbusDimmer()}{checkModbusDimmer()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily int Item\+::check\+Modbus\+Dimmer (\begin{DoxyParamCaption}\item[{int}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
 
-\mbox{\Hypertarget{class_item_a4454719134cb94ff27943cc35207fd74}\label{class_item_a4454719134cb94ff27943cc35207fd74}} 
+\mbox{\Hypertarget{class_item_aee7bbb1c5b9f54b7228cdc171f040bf4}\label{class_item_aee7bbb1c5b9f54b7228cdc171f040bf4}} 
 \index{Item@{Item}!checkModbusRetry@{checkModbusRetry}}
 \index{checkModbusRetry@{checkModbusRetry}!Item@{Item}}
 \doxysubsubsection{\texorpdfstring{checkModbusRetry()}{checkModbusRetry()}}
-{\footnotesize\ttfamily boolean Item\+::check\+Modbus\+Retry (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
-
-\mbox{\Hypertarget{class_item_a353e817a01d39e0341fdc12b00351169}\label{class_item_a353e817a01d39e0341fdc12b00351169}} 
-\index{Item@{Item}!checkVCRetry@{checkVCRetry}}
-\index{checkVCRetry@{checkVCRetry}!Item@{Item}}
-\doxysubsubsection{\texorpdfstring{checkVCRetry()}{checkVCRetry()}}
-{\footnotesize\ttfamily boolean Item\+::check\+V\+C\+Retry (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+{\footnotesize\ttfamily int Item\+::check\+Modbus\+Retry (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
 
 \mbox{\Hypertarget{class_item_a60c43acb3bd16c858ca4c1fa6b12145b}\label{class_item_a60c43acb3bd16c858ca4c1fa6b12145b}} 
 \index{Item@{Item}!clearFlag@{clearFlag}}
@@ -200,15 +182,21 @@ int \mbox{\hyperlink{class_item_a4ff75a860339d86b006960b750a593e6}{default\+Suff
 \doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily int Item\+::\+Ctrl (\begin{DoxyParamCaption}\item[{char $\ast$}]{payload,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL} }\end{DoxyParamCaption})}
 
-possible problem here with truncated default\mbox{\Hypertarget{class_item_a821048224e300ab4bb9eb047bf859b2c}\label{class_item_a821048224e300ab4bb9eb047bf859b2c}} 
+possible problem here with truncated default\mbox{\Hypertarget{class_item_ad81d39aec84f1a2071b5e81dafd96e27}\label{class_item_ad81d39aec84f1a2071b5e81dafd96e27}} 
 \index{Item@{Item}!Ctrl@{Ctrl}}
 \index{Ctrl@{Ctrl}!Item@{Item}}
 \doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
-{\footnotesize\ttfamily int Item\+::\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL} }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int Item\+::\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{allow\+Recursion = {\ttfamily true} }\end{DoxyParamCaption})}
 
 possible problem here with truncated default
 
-thermo\+Set(name,cmd,\+Par1); all activities done -\/ update temp \& cmd\mbox{\Hypertarget{class_item_a04c95e83741aa896498ddbc869061886}\label{class_item_a04c95e83741aa896498ddbc869061886}} 
+D\+E\+L\+A\+Y\+ED C\+O\+M\+M\+A\+N\+DS processing
+
+Common (G\+RP \& NO G\+RP) commands
+
+rest of Legacy monolite core code (to be refactored ) B\+E\+G\+IN ///
+
+rest of Legacy monolite core code (to be refactored ) E\+ND ///\mbox{\Hypertarget{class_item_a04c95e83741aa896498ddbc869061886}\label{class_item_a04c95e83741aa896498ddbc869061886}} 
 \index{Item@{Item}!getArg@{getArg}}
 \index{getArg@{getArg}!Item@{Item}}
 \doxysubsubsection{\texorpdfstring{getArg()}{getArg()}}
@@ -244,6 +232,12 @@ thermo\+Set(name,cmd,\+Par1); all activities done -\/ update temp \& cmd\mbox{\H
 \doxysubsubsection{\texorpdfstring{getFlag()}{getFlag()}}
 {\footnotesize\ttfamily short Item\+::get\+Flag (\begin{DoxyParamCaption}\item[{short}]{flag = {\ttfamily \mbox{\hyperlink{item_cmd_8h_a890221cb651a3f30f6d1bca0d9b0e13d}{F\+L\+A\+G\+\_\+\+M\+A\+SK}}} }\end{DoxyParamCaption})}
 
+\mbox{\Hypertarget{class_item_a8fcee2e61e88909e3a53aaae3dc5d3e9}\label{class_item_a8fcee2e61e88909e3a53aaae3dc5d3e9}} 
+\index{Item@{Item}!getFloatArg@{getFloatArg}}
+\index{getFloatArg@{getFloatArg}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{getFloatArg()}{getFloatArg()}}
+{\footnotesize\ttfamily float Item\+::get\+Float\+Arg (\begin{DoxyParamCaption}\item[{short}]{n = {\ttfamily 0} }\end{DoxyParamCaption})}
+
 \mbox{\Hypertarget{class_item_ad1c452e68967188402a96a687aba6af0}\label{class_item_ad1c452e68967188402a96a687aba6af0}} 
 \index{Item@{Item}!getPersistent@{getPersistent}}
 \index{getPersistent@{getPersistent}!Item@{Item}}
@@ -274,11 +268,11 @@ thermo\+Set(name,cmd,\+Par1); all activities done -\/ update temp \& cmd\mbox{\H
 \doxysubsubsection{\texorpdfstring{isValid()}{isValid()}}
 {\footnotesize\ttfamily boolean Item\+::is\+Valid (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{class_item_a389156098d07ebdc5649668f61d87343}\label{class_item_a389156098d07ebdc5649668f61d87343}} 
+\mbox{\Hypertarget{class_item_a194ef40944a7a579ded380103ac1a081}\label{class_item_a194ef40944a7a579ded380103ac1a081}} 
 \index{Item@{Item}!mb\_fail@{mb\_fail}}
 \index{mb\_fail@{mb\_fail}!Item@{Item}}
 \doxysubsubsection{\texorpdfstring{mb\_fail()}{mb\_fail()}}
-{\footnotesize\ttfamily void Item\+::mb\+\_\+fail (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+{\footnotesize\ttfamily void Item\+::mb\+\_\+fail (\begin{DoxyParamCaption}\item[{int}]{result = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
 
 \mbox{\Hypertarget{class_item_a77913c1f28d823b1a096369e69cc5072}\label{class_item_a77913c1f28d823b1a096369e69cc5072}} 
 \index{Item@{Item}!modbusDimmerSet@{modbusDimmerSet}}
@@ -316,6 +310,12 @@ thermo\+Set(name,cmd,\+Par1); all activities done -\/ update temp \& cmd\mbox{\H
 \doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
 {\footnotesize\ttfamily int Item\+::\+Poll (\begin{DoxyParamCaption}\item[{int}]{cause }\end{DoxyParamCaption})}
 
+\mbox{\Hypertarget{class_item_a1407f6e0854127b5cec31368400caf06}\label{class_item_a1407f6e0854127b5cec31368400caf06}} 
+\index{Item@{Item}!resumeModbus@{resumeModbus}}
+\index{resumeModbus@{resumeModbus}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{resumeModbus()}{resumeModbus()}}
+{\footnotesize\ttfamily bool Item\+::resume\+Modbus (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
 \mbox{\Hypertarget{class_item_af767f604dcaed8a497438255c28129fd}\label{class_item_af767f604dcaed8a497438255c28129fd}} 
 \index{Item@{Item}!sendDelayedStatus@{sendDelayedStatus}}
 \index{sendDelayedStatus@{sendDelayedStatus}!Item@{Item}}
@@ -327,6 +327,12 @@ thermo\+Set(name,cmd,\+Par1); all activities done -\/ update temp \& cmd\mbox{\H
 \index{SendStatus@{SendStatus}!Item@{Item}}
 \doxysubsubsection{\texorpdfstring{SendStatus()}{SendStatus()}}
 {\footnotesize\ttfamily int Item\+::\+Send\+Status (\begin{DoxyParamCaption}\item[{int}]{send\+Flags }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_ad1a236a67b01bb3ae9d1aec9a18ed51d}\label{class_item_ad1a236a67b01bb3ae9d1aec9a18ed51d}} 
+\index{Item@{Item}!SendStatusImmediate@{SendStatusImmediate}}
+\index{SendStatusImmediate@{SendStatusImmediate}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{SendStatusImmediate()}{SendStatusImmediate()}}
+{\footnotesize\ttfamily int Item\+::\+Send\+Status\+Immediate (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{st,  }\item[{int}]{send\+Flags,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL} }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{class_item_a188910459fc0ded60ca268664bf9b212}\label{class_item_a188910459fc0ded60ca268664bf9b212}} 
 \index{Item@{Item}!setCmd@{setCmd}}
@@ -345,6 +351,12 @@ thermo\+Set(name,cmd,\+Par1); all activities done -\/ update temp \& cmd\mbox{\H
 \index{setFlag@{setFlag}!Item@{Item}}
 \doxysubsubsection{\texorpdfstring{setFlag()}{setFlag()}}
 {\footnotesize\ttfamily void Item\+::set\+Flag (\begin{DoxyParamCaption}\item[{short}]{flag }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_item_a5b103354070ff53e7dfd66d43765a619}\label{class_item_a5b103354070ff53e7dfd66d43765a619}} 
+\index{Item@{Item}!setFloatVal@{setFloatVal}}
+\index{setFloatVal@{setFloatVal}!Item@{Item}}
+\doxysubsubsection{\texorpdfstring{setFloatVal()}{setFloatVal()}}
+{\footnotesize\ttfamily void Item\+::set\+Float\+Val (\begin{DoxyParamCaption}\item[{float}]{par }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{class_item_af023950bb9b9760b98c5de7287bc467d}\label{class_item_af023950bb9b9760b98c5de7287bc467d}} 
 \index{Item@{Item}!setPersistent@{setPersistent}}

@@ -1,0 +1,140 @@
+\hypertarget{classseekable_stream}{}\doxysection{seekable\+Stream Class Reference}
+\label{classseekable_stream}\index{seekableStream@{seekableStream}}
+
+
+{\ttfamily \#include $<$seekablestream.\+h$>$}
+
+Inheritance diagram for seekable\+Stream\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classseekable_stream}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classseekable_stream_a9a970bf7b1b0c9fe90274baaddbb6f00}{seekable\+Stream}} (unsigned int size)
+\item 
+virtual bool \mbox{\hyperlink{classseekable_stream_a3506febba145718c7497f6c33cde377d}{check\+Permissions}} (char mode)
+\item 
+unsigned int \mbox{\hyperlink{classseekable_stream_a49b5cc28add07df1634d815737aaf54d}{get\+Size}} ()
+\item 
+void \mbox{\hyperlink{classseekable_stream_a902f161daee83bec42bdb342b315d8a4}{set\+Size}} (unsigned int size)
+\item 
+virtual unsigned int \mbox{\hyperlink{classseekable_stream_a05b0e71f635a107188b57c29b445f3ea}{seek}} (unsigned int \+\_\+pos=0)=0
+\item 
+virtual int \mbox{\hyperlink{classseekable_stream_af28ec1377c94e4c8fa819163c699b402}{open}} (String \+\_\+filename, char mode)=0
+\item 
+virtual void \mbox{\hyperlink{classseekable_stream_a9a32b4330663e6e2407313d0dd0e255f}{close}} ()=0
+\item 
+virtual uint16\+\_\+t \mbox{\hyperlink{classseekable_stream_a1d58ac96f37ab0f76300118f3c8e8c9a}{get\+Content\+Type}} ()
+\item 
+virtual void \mbox{\hyperlink{classseekable_stream_a4520969c63f2be885fbc31a396d6f460}{put\+E\+OF}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+unsigned int \mbox{\hyperlink{classseekable_stream_a4e939db97f858ce94111f4a5001a15c2}{stream\+Size}}
+\item 
+bool \mbox{\hyperlink{classseekable_stream_a5fdc0bb9d037754e9ce710cf21f6c7e0}{text\+Mode}}
+\item 
+uint16\+\_\+t \mbox{\hyperlink{classseekable_stream_a4bb972919c0661a11d07e6c854da5ac0}{content\+Type}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classseekable_stream_a9a970bf7b1b0c9fe90274baaddbb6f00}\label{classseekable_stream_a9a970bf7b1b0c9fe90274baaddbb6f00}} 
+\index{seekableStream@{seekableStream}!seekableStream@{seekableStream}}
+\index{seekableStream@{seekableStream}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{seekableStream()}{seekableStream()}}
+{\footnotesize\ttfamily seekable\+Stream\+::seekable\+Stream (\begin{DoxyParamCaption}\item[{unsigned int}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classseekable_stream_a3506febba145718c7497f6c33cde377d}\label{classseekable_stream_a3506febba145718c7497f6c33cde377d}} 
+\index{seekableStream@{seekableStream}!checkPermissions@{checkPermissions}}
+\index{checkPermissions@{checkPermissions}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{checkPermissions()}{checkPermissions()}}
+{\footnotesize\ttfamily virtual bool seekable\+Stream\+::check\+Permissions (\begin{DoxyParamCaption}\item[{char}]{mode }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classseekable_stream_a9a32b4330663e6e2407313d0dd0e255f}\label{classseekable_stream_a9a32b4330663e6e2407313d0dd0e255f}} 
+\index{seekableStream@{seekableStream}!close@{close}}
+\index{close@{close}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{close()}{close()}}
+{\footnotesize\ttfamily virtual void seekable\+Stream\+::close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classflash_stream_a81da3f19ab4811aa93ce52ddd3bd188a}{flash\+Stream}}.
+
+\mbox{\Hypertarget{classseekable_stream_a1d58ac96f37ab0f76300118f3c8e8c9a}\label{classseekable_stream_a1d58ac96f37ab0f76300118f3c8e8c9a}} 
+\index{seekableStream@{seekableStream}!getContentType@{getContentType}}
+\index{getContentType@{getContentType}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{getContentType()}{getContentType()}}
+{\footnotesize\ttfamily virtual uint16\+\_\+t seekable\+Stream\+::get\+Content\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classseekable_stream_a49b5cc28add07df1634d815737aaf54d}\label{classseekable_stream_a49b5cc28add07df1634d815737aaf54d}} 
+\index{seekableStream@{seekableStream}!getSize@{getSize}}
+\index{getSize@{getSize}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{getSize()}{getSize()}}
+{\footnotesize\ttfamily unsigned int seekable\+Stream\+::get\+Size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classseekable_stream_af28ec1377c94e4c8fa819163c699b402}\label{classseekable_stream_af28ec1377c94e4c8fa819163c699b402}} 
+\index{seekableStream@{seekableStream}!open@{open}}
+\index{open@{open}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{open()}{open()}}
+{\footnotesize\ttfamily virtual int seekable\+Stream\+::open (\begin{DoxyParamCaption}\item[{String}]{\+\_\+filename,  }\item[{char}]{mode }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classflash_stream_aed80292a0950c246404f4a62d2fb40c7}{flash\+Stream}}.
+
+\mbox{\Hypertarget{classseekable_stream_a4520969c63f2be885fbc31a396d6f460}\label{classseekable_stream_a4520969c63f2be885fbc31a396d6f460}} 
+\index{seekableStream@{seekableStream}!putEOF@{putEOF}}
+\index{putEOF@{putEOF}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{putEOF()}{putEOF()}}
+{\footnotesize\ttfamily virtual void seekable\+Stream\+::put\+E\+OF (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classseekable_stream_a05b0e71f635a107188b57c29b445f3ea}\label{classseekable_stream_a05b0e71f635a107188b57c29b445f3ea}} 
+\index{seekableStream@{seekableStream}!seek@{seek}}
+\index{seek@{seek}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{seek()}{seek()}}
+{\footnotesize\ttfamily virtual unsigned int seekable\+Stream\+::seek (\begin{DoxyParamCaption}\item[{unsigned int}]{\+\_\+pos = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+
+
+Implemented in \mbox{\hyperlink{classflash_stream_a7a48d386946f8c123006dc060173f376}{flash\+Stream}}.
+
+\mbox{\Hypertarget{classseekable_stream_a902f161daee83bec42bdb342b315d8a4}\label{classseekable_stream_a902f161daee83bec42bdb342b315d8a4}} 
+\index{seekableStream@{seekableStream}!setSize@{setSize}}
+\index{setSize@{setSize}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{setSize()}{setSize()}}
+{\footnotesize\ttfamily void seekable\+Stream\+::set\+Size (\begin{DoxyParamCaption}\item[{unsigned int}]{size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classseekable_stream_a4bb972919c0661a11d07e6c854da5ac0}\label{classseekable_stream_a4bb972919c0661a11d07e6c854da5ac0}} 
+\index{seekableStream@{seekableStream}!contentType@{contentType}}
+\index{contentType@{contentType}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{contentType}{contentType}}
+{\footnotesize\ttfamily uint16\+\_\+t seekable\+Stream\+::content\+Type\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classseekable_stream_a4e939db97f858ce94111f4a5001a15c2}\label{classseekable_stream_a4e939db97f858ce94111f4a5001a15c2}} 
+\index{seekableStream@{seekableStream}!streamSize@{streamSize}}
+\index{streamSize@{streamSize}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{streamSize}{streamSize}}
+{\footnotesize\ttfamily unsigned int seekable\+Stream\+::stream\+Size\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classseekable_stream_a5fdc0bb9d037754e9ce710cf21f6c7e0}\label{classseekable_stream_a5fdc0bb9d037754e9ce710cf21f6c7e0}} 
+\index{seekableStream@{seekableStream}!textMode@{textMode}}
+\index{textMode@{textMode}!seekableStream@{seekableStream}}
+\doxysubsubsection{\texorpdfstring{textMode}{textMode}}
+{\footnotesize\ttfamily bool seekable\+Stream\+::text\+Mode\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{seekablestream_8h}{seekablestream.\+h}}\end{DoxyCompactItemize}

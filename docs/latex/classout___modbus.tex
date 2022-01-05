@@ -4,24 +4,10 @@
 
 {\ttfamily \#include $<$out\+\_\+modbus.\+h$>$}
 
-
-
-Inheritance diagram for out\+\_\+\+Modbus\+:
-\nopagebreak
-\begin{figure}[H]
+Inheritance diagram for out\+\_\+\+Modbus\+:\begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[width=150pt]{classout___modbus__inherit__graph}
-\end{center}
-\end{figure}
-
-
-Collaboration diagram for out\+\_\+\+Modbus\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=247pt]{classout___modbus__coll__graph}
+\includegraphics[height=3.000000cm]{classout___modbus}
 \end{center}
 \end{figure}
 \doxysubsection*{Public Member Functions}
@@ -30,25 +16,28 @@ Collaboration diagram for out\+\_\+\+Modbus\+:
 \mbox{\hyperlink{classout___modbus_ad5aff68ec31c500be860a4f56b095373}{out\+\_\+\+Modbus}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
 \item 
 int \mbox{\hyperlink{classout___modbus_acf5452aac576901614eca795ab4ca440}{Setup}} () override
-\item 
+\begin{DoxyCompactList}\small\item\em Remove?? Now get\+Chan\+Type used instead. \end{DoxyCompactList}\item 
 int \mbox{\hyperlink{classout___modbus_aec6803a6033403f8ac4038236cac5cd9}{Poll}} (short cause) override
 \item 
 int \mbox{\hyperlink{classout___modbus_a9cb4b395f5f8a6d15dcc429664a4174b}{Stop}} () override
 \item 
 int \mbox{\hyperlink{classout___modbus_acc0fc0ecdb6928cfc7906986b8139780}{Status}} () override
 \item 
-int \mbox{\hyperlink{classout___modbus_a6b94efbbbbea5a4ad3b489dba8f9b268}{is\+Active}} () override
-\item 
 int \mbox{\hyperlink{classout___modbus_a2752cf2376840f3763572963be8785db}{get\+Chan\+Type}} () override
 \item 
 int \mbox{\hyperlink{classout___modbus_a784be57c40d67b41488b9585fe792019}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true) override
+\begin{DoxyCompactList}\small\item\em Control unified Modbus item ~\newline
+ \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classout___modbus_a844c63be065d02f2f178399519b03245}{get\+Default\+Storage\+Type}} ()
 \end{DoxyCompactItemize}
 \doxysubsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 bool \mbox{\hyperlink{classout___modbus_aea16d64ad349120558951f92205d5249}{get\+Config}} ()
 \item 
-int \mbox{\hyperlink{classout___modbus_a026f3ad193b151565f70a72d1c8ca48b}{find\+Register}} (int register\+Num, int pos\+In\+Buffer)
+int \mbox{\hyperlink{classout___modbus_aa347eb3b465ef05c3430a0d2076c4d49}{find\+Register}} (int register\+Num, int pos\+In\+Buffer, int reg\+Type)
+\item 
+void \mbox{\hyperlink{classout___modbus_a7d1bd45dc65b511db41aaf5eadb4ab0e}{poll\+Modbus}} (a\+Json\+Object $\ast$reg, int reg\+Type)
 \end{DoxyCompactItemize}
 \doxysubsection*{Protected Attributes}
 \begin{DoxyCompactItemize}
@@ -75,13 +64,18 @@ int \mbox{\hyperlink{classout___modbus_a026f3ad193b151565f70a72d1c8ca48b}{find\+
 
 
 
+Control unified Modbus item ~\newline
+ 
+
+
+
 Implements \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}{abstract\+Out}}.
 
-\mbox{\Hypertarget{classout___modbus_a026f3ad193b151565f70a72d1c8ca48b}\label{classout___modbus_a026f3ad193b151565f70a72d1c8ca48b}} 
+\mbox{\Hypertarget{classout___modbus_aa347eb3b465ef05c3430a0d2076c4d49}\label{classout___modbus_aa347eb3b465ef05c3430a0d2076c4d49}} 
 \index{out\_Modbus@{out\_Modbus}!findRegister@{findRegister}}
 \index{findRegister@{findRegister}!out\_Modbus@{out\_Modbus}}
 \doxysubsubsection{\texorpdfstring{findRegister()}{findRegister()}}
-{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::find\+Register (\begin{DoxyParamCaption}\item[{int}]{register\+Num,  }\item[{int}]{pos\+In\+Buffer }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::find\+Register (\begin{DoxyParamCaption}\item[{int}]{register\+Num,  }\item[{int}]{pos\+In\+Buffer,  }\item[{int}]{reg\+Type }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
 
 \mbox{\Hypertarget{classout___modbus_a2752cf2376840f3763572963be8785db}\label{classout___modbus_a2752cf2376840f3763572963be8785db}} 
 \index{out\_Modbus@{out\_Modbus}!getChanType@{getChanType}}
@@ -99,15 +93,15 @@ Reimplemented from \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837e
 \doxysubsubsection{\texorpdfstring{getConfig()}{getConfig()}}
 {\footnotesize\ttfamily bool out\+\_\+\+Modbus\+::get\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
 
-\mbox{\Hypertarget{classout___modbus_a6b94efbbbbea5a4ad3b489dba8f9b268}\label{classout___modbus_a6b94efbbbbea5a4ad3b489dba8f9b268}} 
-\index{out\_Modbus@{out\_Modbus}!isActive@{isActive}}
-\index{isActive@{isActive}!out\_Modbus@{out\_Modbus}}
-\doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
-{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+\mbox{\Hypertarget{classout___modbus_a844c63be065d02f2f178399519b03245}\label{classout___modbus_a844c63be065d02f2f178399519b03245}} 
+\index{out\_Modbus@{out\_Modbus}!getDefaultStorageType@{getDefaultStorageType}}
+\index{getDefaultStorageType@{getDefaultStorageType}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{getDefaultStorageType()}{getDefaultStorageType()}}
+{\footnotesize\ttfamily int out\+\_\+\+Modbus\+::get\+Default\+Storage\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
 
 
 
-Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{abstract\+Out}}.
+Reimplemented from \mbox{\hyperlink{classabstract_out_a786157307bd9438b8fbff24421b95330}{abstract\+Out}}.
 
 \mbox{\Hypertarget{classout___modbus_aec6803a6033403f8ac4038236cac5cd9}\label{classout___modbus_aec6803a6033403f8ac4038236cac5cd9}} 
 \index{out\_Modbus@{out\_Modbus}!Poll@{Poll}}
@@ -119,6 +113,12 @@ Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51
 
 Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{abstract\+Ch}}.
 
+\mbox{\Hypertarget{classout___modbus_a7d1bd45dc65b511db41aaf5eadb4ab0e}\label{classout___modbus_a7d1bd45dc65b511db41aaf5eadb4ab0e}} 
+\index{out\_Modbus@{out\_Modbus}!pollModbus@{pollModbus}}
+\index{pollModbus@{pollModbus}!out\_Modbus@{out\_Modbus}}
+\doxysubsubsection{\texorpdfstring{pollModbus()}{pollModbus()}}
+{\footnotesize\ttfamily void out\+\_\+\+Modbus\+::poll\+Modbus (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{reg,  }\item[{int}]{reg\+Type }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
 \mbox{\Hypertarget{classout___modbus_acf5452aac576901614eca795ab4ca440}\label{classout___modbus_acf5452aac576901614eca795ab4ca440}} 
 \index{out\_Modbus@{out\_Modbus}!Setup@{Setup}}
 \index{Setup@{Setup}!out\_Modbus@{out\_Modbus}}
@@ -127,7 +127,11 @@ Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{
 
 
 
-Implements \mbox{\hyperlink{classabstract_ch_aeaf6346625245be1774a6d27d9cece4e}{abstract\+Ch}}.
+Remove?? Now get\+Chan\+Type used instead. 
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_ad84ffc96dafea9cbe5c91f35c90ffe3b}{abstract\+Out}}.
 
 \mbox{\Hypertarget{classout___modbus_acc0fc0ecdb6928cfc7906986b8139780}\label{classout___modbus_acc0fc0ecdb6928cfc7906986b8139780}} 
 \index{out\_Modbus@{out\_Modbus}!Status@{Status}}
@@ -162,5 +166,5 @@ Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac0806
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{out__modbus_8h}{out\+\_\+modbus.\+h}}\item 
-\mbox{\hyperlink{out__modbus_8cpp}{out\+\_\+modbus.\+cpp}}\end{DoxyCompactItemize}
+modules/\mbox{\hyperlink{out__modbus_8h}{out\+\_\+modbus.\+h}}\item 
+modules/\mbox{\hyperlink{out__modbus_8cpp}{out\+\_\+modbus.\+cpp}}\end{DoxyCompactItemize}

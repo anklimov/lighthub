@@ -1,24 +1,9 @@
 \hypertarget{streamlog_8h}{}\doxysection{streamlog.\+h File Reference}
 \label{streamlog_8h}\index{streamlog.h@{streamlog.h}}
 {\ttfamily \#include $<$Print.\+h$>$}\newline
+{\ttfamily \#include $<$Arduino.\+h$>$}\newline
 {\ttfamily \#include $<$Hardware\+Serial.\+h$>$}\newline
 {\ttfamily \#include $<$inttypes.\+h$>$}\newline
-Include dependency graph for streamlog.\+h\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=313pt]{streamlog_8h__incl}
-\end{center}
-\end{figure}
-This graph shows which files directly or indirectly include this file\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{streamlog_8h__dep__incl}
-\end{center}
-\end{figure}
 \doxysubsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
@@ -29,11 +14,20 @@ class \mbox{\hyperlink{class_streamlog}{Streamlog}}
 \item 
 \#define \mbox{\hyperlink{streamlog_8h_a2e75de3d470df65326791691c3039c70}{L\+O\+G\+B\+U\+F\+F\+E\+R\+\_\+\+S\+I\+ZE}}~80
 \item 
+\#define \mbox{\hyperlink{streamlog_8h_ace67e7b92ea9c2ca0cf0cc6c201ccbc2}{Serial\+Port\+Type}}~Hardware\+Serial
+\item 
 \#define \mbox{\hyperlink{streamlog_8h_a6ff63e8955665c4a58b1598f2b07c51a}{L\+O\+G\+\_\+\+D\+E\+B\+UG}}~7
 \item 
 \#define \mbox{\hyperlink{streamlog_8h_aeb4f36db01bd128c7afeac5889dac311}{L\+O\+G\+\_\+\+I\+N\+FO}}~6
 \item 
 \#define \mbox{\hyperlink{streamlog_8h_aced66975c154ea0e2a8ec3bc818b4e08}{L\+O\+G\+\_\+\+E\+R\+R\+OR}}~3
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{streamlog_8h_a28a478cd6130b2e1aa726dd789aaf309}{serial\+Debug\+Level}}
+\item 
+uint8\+\_\+t \mbox{\hyperlink{streamlog_8h_aef9fa4d03bb6207d9cd46e647f575cd2}{udp\+Debug\+Level}}
 \end{DoxyCompactItemize}
 
 
@@ -61,4 +55,25 @@ class \mbox{\hyperlink{class_streamlog}{Streamlog}}
 \index{LOGBUFFER\_SIZE@{LOGBUFFER\_SIZE}!streamlog.h@{streamlog.h}}
 \doxysubsubsection{\texorpdfstring{LOGBUFFER\_SIZE}{LOGBUFFER\_SIZE}}
 {\footnotesize\ttfamily \#define L\+O\+G\+B\+U\+F\+F\+E\+R\+\_\+\+S\+I\+ZE~80}
+
+\mbox{\Hypertarget{streamlog_8h_ace67e7b92ea9c2ca0cf0cc6c201ccbc2}\label{streamlog_8h_ace67e7b92ea9c2ca0cf0cc6c201ccbc2}} 
+\index{streamlog.h@{streamlog.h}!SerialPortType@{SerialPortType}}
+\index{SerialPortType@{SerialPortType}!streamlog.h@{streamlog.h}}
+\doxysubsubsection{\texorpdfstring{SerialPortType}{SerialPortType}}
+{\footnotesize\ttfamily \#define Serial\+Port\+Type~Hardware\+Serial}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{streamlog_8h_a28a478cd6130b2e1aa726dd789aaf309}\label{streamlog_8h_a28a478cd6130b2e1aa726dd789aaf309}} 
+\index{streamlog.h@{streamlog.h}!serialDebugLevel@{serialDebugLevel}}
+\index{serialDebugLevel@{serialDebugLevel}!streamlog.h@{streamlog.h}}
+\doxysubsubsection{\texorpdfstring{serialDebugLevel}{serialDebugLevel}}
+{\footnotesize\ttfamily uint8\+\_\+t serial\+Debug\+Level\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{streamlog_8h_aef9fa4d03bb6207d9cd46e647f575cd2}\label{streamlog_8h_aef9fa4d03bb6207d9cd46e647f575cd2}} 
+\index{streamlog.h@{streamlog.h}!udpDebugLevel@{udpDebugLevel}}
+\index{udpDebugLevel@{udpDebugLevel}!streamlog.h@{streamlog.h}}
+\doxysubsubsection{\texorpdfstring{udpDebugLevel}{udpDebugLevel}}
+{\footnotesize\ttfamily uint8\+\_\+t udp\+Debug\+Level\hspace{0.3cm}{\ttfamily [extern]}}
 

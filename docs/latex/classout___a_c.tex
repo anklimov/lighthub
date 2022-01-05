@@ -4,24 +4,10 @@
 
 {\ttfamily \#include $<$out\+\_\+ac.\+h$>$}
 
-
-
-Inheritance diagram for out\+\_\+\+AC\+:
-\nopagebreak
-\begin{figure}[H]
+Inheritance diagram for out\+\_\+\+AC\+:\begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[width=148pt]{classout___a_c__inherit__graph}
-\end{center}
-\end{figure}
-
-
-Collaboration diagram for out\+\_\+\+AC\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=195pt]{classout___a_c__coll__graph}
+\includegraphics[height=3.000000cm]{classout___a_c}
 \end{center}
 \end{figure}
 \doxysubsection*{Public Member Functions}
@@ -30,7 +16,7 @@ Collaboration diagram for out\+\_\+\+AC\+:
 \mbox{\hyperlink{classout___a_c_a68dc76d1632c64bcd4e9c19bea1a7443}{out\+\_\+\+AC}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
 \item 
 int \mbox{\hyperlink{classout___a_c_a3a7b5b20a7d66870551f3dd485e66de2}{Setup}} () override
-\item 
+\begin{DoxyCompactList}\small\item\em Remove?? Now get\+Chan\+Type used instead. \end{DoxyCompactList}\item 
 int \mbox{\hyperlink{classout___a_c_a40fd702a4d9d621c19bfa140c905e64b}{Poll}} (short cause) override
 \item 
 int \mbox{\hyperlink{classout___a_c_a763ace53db4e64692d061db48f396aba}{Stop}} () override
@@ -38,6 +24,8 @@ int \mbox{\hyperlink{classout___a_c_a763ace53db4e64692d061db48f396aba}{Stop}} ()
 int \mbox{\hyperlink{classout___a_c_aba0d1953f95f7d04a24582c40cd26196}{Status}} () override
 \item 
 int \mbox{\hyperlink{classout___a_c_ab2d5debf137c9cc91ce0b58a72da0766}{is\+Active}} () override
+\item 
+int \mbox{\hyperlink{classout___a_c_ab249f27bdd0d22a6f098190dc746cd8c}{get\+Default\+Storage\+Type}} ()
 \item 
 int \mbox{\hyperlink{classout___a_c_aeaf2ac4088b2b4b2fd4e1b83755c9964}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true) override
 \end{DoxyCompactItemize}
@@ -69,6 +57,16 @@ void \mbox{\hyperlink{classout___a_c_ae1fe864367b2837872ad28f8f94f6cf0}{Insert\+
 
 Implements \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}{abstract\+Out}}.
 
+\mbox{\Hypertarget{classout___a_c_ab249f27bdd0d22a6f098190dc746cd8c}\label{classout___a_c_ab249f27bdd0d22a6f098190dc746cd8c}} 
+\index{out\_AC@{out\_AC}!getDefaultStorageType@{getDefaultStorageType}}
+\index{getDefaultStorageType@{getDefaultStorageType}!out\_AC@{out\_AC}}
+\doxysubsubsection{\texorpdfstring{getDefaultStorageType()}{getDefaultStorageType()}}
+{\footnotesize\ttfamily int out\+\_\+\+A\+C\+::get\+Default\+Storage\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_a786157307bd9438b8fbff24421b95330}{abstract\+Out}}.
+
 \mbox{\Hypertarget{classout___a_c_ae1fe864367b2837872ad28f8f94f6cf0}\label{classout___a_c_ae1fe864367b2837872ad28f8f94f6cf0}} 
 \index{out\_AC@{out\_AC}!InsertData@{InsertData}}
 \index{InsertData@{InsertData}!out\_AC@{out\_AC}}
@@ -83,7 +81,7 @@ Implements \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}
 
 
 
-Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{abstract\+Out}}.
+Reimplemented from \mbox{\hyperlink{classabstract_out_af4d536357ee52043a4d338ce2106350e}{abstract\+Out}}.
 
 \mbox{\Hypertarget{classout___a_c_a40fd702a4d9d621c19bfa140c905e64b}\label{classout___a_c_a40fd702a4d9d621c19bfa140c905e64b}} 
 \index{out\_AC@{out\_AC}!Poll@{Poll}}
@@ -91,7 +89,7 @@ Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51
 \doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
 {\footnotesize\ttfamily int out\+\_\+\+A\+C\+::\+Poll (\begin{DoxyParamCaption}\item[{short}]{cause }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
 
-
+delay(100);
 
 Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{abstract\+Ch}}.
 
@@ -103,7 +101,11 @@ Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{
 
 
 
-Implements \mbox{\hyperlink{classabstract_ch_aeaf6346625245be1774a6d27d9cece4e}{abstract\+Ch}}.
+Remove?? Now get\+Chan\+Type used instead. 
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_ad84ffc96dafea9cbe5c91f35c90ffe3b}{abstract\+Out}}.
 
 \mbox{\Hypertarget{classout___a_c_aba0d1953f95f7d04a24582c40cd26196}\label{classout___a_c_aba0d1953f95f7d04a24582c40cd26196}} 
 \index{out\_AC@{out\_AC}!Status@{Status}}
@@ -129,5 +131,5 @@ Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac0806
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{out__ac_8h}{out\+\_\+ac.\+h}}\item 
-\mbox{\hyperlink{out__ac_8cpp}{out\+\_\+ac.\+cpp}}\end{DoxyCompactItemize}
+modules/\mbox{\hyperlink{out__ac_8h}{out\+\_\+ac.\+h}}\item 
+modules/\mbox{\hyperlink{out__ac_8cpp}{out\+\_\+ac.\+cpp}}\end{DoxyCompactItemize}

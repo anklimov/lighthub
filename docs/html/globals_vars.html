@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +53,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('globals_vars.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -72,10 +94,10 @@ $(function() {
 : <a class="el" href="main_8cpp.html#a235b23edd19d4c133a8d49bc1b09cedb">main.cpp</a>
 </li>
 <li>configLocked
-: <a class="el" href="utils_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">utils.cpp</a>
-, <a class="el" href="main_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">main.cpp</a>
+: <a class="el" href="inputs_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">inputs.cpp</a>
 , <a class="el" href="item_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">item.cpp</a>
-, <a class="el" href="inputs_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">inputs.cpp</a>
+, <a class="el" href="main_8cpp.html#a7716920e1f2332a8ca8c6b321a198223">main.cpp</a>
+, <a class="el" href="utils_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">utils.cpp</a>
 </li>
 <li>configOk
 : <a class="el" href="main_8cpp.html#a459dec3d2fac52eba9bf53c19d14bcc7">main.cpp</a>
@@ -85,10 +107,10 @@ $(function() {
 
 <h3><a id="index_d"></a>- d -</h3><ul>
 <li>D_checkT
-: <a class="el" href="dmx_8cpp.html#a2bdd5f5b1312117028586d6a9a11a02c">dmx.cpp</a>
+: <a class="el" href="dmx_8cpp.html#af14e25d8ec87aea0648534b21733da2c">dmx.cpp</a>
 </li>
 <li>D_State
-: <a class="el" href="dmx_8cpp.html#aa205b5f0812aa803bb5ebe6067ca7bc7">dmx.cpp</a>
+: <a class="el" href="dmx_8cpp.html#a9003509a566769d080ca60443bd042b2">dmx.cpp</a>
 </li>
 <li>data
 : <a class="el" href="out__ac_8cpp.html#a336725b3b566264f2223495f6294c3c7">out_ac.cpp</a>
@@ -99,27 +121,27 @@ $(function() {
 <li>debugSerialPort
 : <a class="el" href="main_8cpp.html#a525e5725911fc3939bb449849aa1b5ab">main.cpp</a>
 </li>
-<li>defval
-: <a class="el" href="item_8cpp.html#abcb640867546187e7cbe6229cc3ec872">item.cpp</a>
-</li>
 <li>deviceName
-: <a class="el" href="utils_8cpp.html#a5da66826e811349c98b2daf2bafb78c2">utils.cpp</a>
-, <a class="el" href="main_8cpp.html#a5da66826e811349c98b2daf2bafb78c2">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a5da66826e811349c98b2daf2bafb78c2">main.cpp</a>
+, <a class="el" href="utils_8cpp.html#a5da66826e811349c98b2daf2bafb78c2">utils.cpp</a>
 </li>
 <li>dmxArr
 : <a class="el" href="dmx_8h.html#a077dba54087a1a3694f810ba9fd06933">dmx.h</a>
-, <a class="el" href="dmx_8cpp.html#a077dba54087a1a3694f810ba9fd06933">dmx.cpp</a>
 , <a class="el" href="main_8cpp.html#a077dba54087a1a3694f810ba9fd06933">main.cpp</a>
+, <a class="el" href="dmx_8cpp.html#a077dba54087a1a3694f810ba9fd06933">dmx.cpp</a>
 </li>
 <li>DMXin
 : <a class="el" href="dmx_8cpp.html#adf18ba2ebc00417130f18dc9e34411c6">dmx.cpp</a>
+</li>
+<li>DMXinDoublecheck
+: <a class="el" href="dmx_8cpp.html#a34e99db3444f7cb39e58961283eb5ab9">dmx.cpp</a>
 </li>
 </ul>
 
 
 <h3><a id="index_e"></a>- e -</h3><ul>
 <li>EEPROM_signature
-: <a class="el" href="textconst_8h.html#a2412d8e03a08775ec69a8d80fbcc2f53">textconst.h</a>
+: <a class="el" href="systemconfigdata_8h.html#a2412d8e03a08775ec69a8d80fbcc2f53">systemconfigdata.h</a>
 </li>
 <li>errorSerial
 : <a class="el" href="main_8h.html#a49f4668352e76de3b6187103927915f5">main.h</a>
@@ -128,16 +150,19 @@ $(function() {
 : <a class="el" href="main_8cpp.html#a2a65545cb474469b22d80319e302a2f8">main.cpp</a>
 </li>
 <li>ethernetIdleCount
-: <a class="el" href="item_8cpp.html#a525d99b2753ef2f4055ea4475dbc10d7">item.cpp</a>
+: <a class="el" href="abstractch_8cpp.html#a525d99b2753ef2f4055ea4475dbc10d7">abstractch.cpp</a>
 , <a class="el" href="inputs_8cpp.html#a525d99b2753ef2f4055ea4475dbc10d7">inputs.cpp</a>
-, <a class="el" href="abstractch_8cpp.html#a525d99b2753ef2f4055ea4475dbc10d7">abstractch.cpp</a>
-, <a class="el" href="main_8cpp.html#a525d99b2753ef2f4055ea4475dbc10d7">main.cpp</a>
+, <a class="el" href="item_8cpp.html#a525d99b2753ef2f4055ea4475dbc10d7">item.cpp</a>
+, <a class="el" href="main_8cpp.html#a8127f6a562fba9d6f01db3cf5d1b4628">main.cpp</a>
 , <a class="el" href="utils_8cpp.html#a525d99b2753ef2f4055ea4475dbc10d7">utils.cpp</a>
 </li>
 </ul>
 
 
 <h3><a id="index_h"></a>- h -</h3><ul>
+<li>headerKeys
+: <a class="el" href="main_8cpp.html#aa826b5367cdfb09cbca4b8b7edb8d02f">main.cpp</a>
+</li>
 <li>HEXSTR
 : <a class="el" href="utils_8cpp.html#a0317be66119cccdb71b5276f914cef50">utils.cpp</a>
 </li>
@@ -158,9 +183,15 @@ $(function() {
 <li>initializedListeners
 : <a class="el" href="main_8cpp.html#ad40189c6dffdd91758f3686c80484ac7">main.cpp</a>
 </li>
+<li>inputLoopBusy
+: <a class="el" href="main_8cpp.html#ae9c1fd0a9ab1ac866a42d77efd4d8577">main.cpp</a>
+</li>
 <li>inputs
-: <a class="el" href="main_8cpp.html#a9e63aa63a6b8b667a41f94bec231d7aa">main.cpp</a>
-, <a class="el" href="inputs_8h.html#a9e63aa63a6b8b667a41f94bec231d7aa">inputs.h</a>
+: <a class="el" href="inputs_8h.html#a9e63aa63a6b8b667a41f94bec231d7aa">inputs.h</a>
+, <a class="el" href="main_8cpp.html#a9e63aa63a6b8b667a41f94bec231d7aa">main.cpp</a>
+</li>
+<li>isPendedModbusWrites
+: <a class="el" href="item_8cpp.html#ad3fdcf970f64cfc745ff5efdc3063f89">item.cpp</a>
 </li>
 <li>items
 : <a class="el" href="dmx_8cpp.html#a012787f09a43864616e2b44349b29352">dmx.cpp</a>
@@ -174,11 +205,9 @@ $(function() {
 <li>lanStatus
 : <a class="el" href="abstractch_8cpp.html#a7bbda7cf303a1bc3222e7a270f9040bd">abstractch.cpp</a>
 , <a class="el" href="abstractin_8cpp.html#a7bbda7cf303a1bc3222e7a270f9040bd">abstractin.cpp</a>
-, <a class="el" href="main_8cpp.html#a7bbda7cf303a1bc3222e7a270f9040bd">main.cpp</a>
 , <a class="el" href="item_8cpp.html#a7bbda7cf303a1bc3222e7a270f9040bd">item.cpp</a>
-</li>
-<li>LED
-: <a class="el" href="main_8cpp.html#a1c77e6f587043bdec86e0cabd956e2e2">main.cpp</a>
+, <a class="el" href="main_8cpp.html#a7bbda7cf303a1bc3222e7a270f9040bd">main.cpp</a>
+, <a class="el" href="main_8h.html#a7bbda7cf303a1bc3222e7a270f9040bd">main.h</a>
 </li>
 <li>lock
 : <a class="el" href="out__ac_8cpp.html#a8348487a31a8c5d8e2f94ea77c5e70a7">out_ac.cpp</a>
@@ -187,9 +216,6 @@ $(function() {
 
 
 <h3><a id="index_m"></a>- m -</h3><ul>
-<li>mac
-: <a class="el" href="main_8cpp.html#a775118f5b90a904c7e65066faabab1a2">main.cpp</a>
-</li>
 <li>modbusBusy
 : <a class="el" href="item_8cpp.html#a02d3e5fb154e56cf7fc169649e232078">item.cpp</a>
 , <a class="el" href="out__modbus_8cpp.html#a02d3e5fb154e56cf7fc169649e232078">out_modbus.cpp</a>
@@ -204,36 +230,21 @@ $(function() {
 <li>mqttClient
 : <a class="el" href="abstractch_8cpp.html#a86d63f481644da70f063c2593fcafe19">abstractch.cpp</a>
 , <a class="el" href="abstractin_8cpp.html#a86d63f481644da70f063c2593fcafe19">abstractin.cpp</a>
+, <a class="el" href="utils_8cpp.html#a86d63f481644da70f063c2593fcafe19">utils.cpp</a>
 , <a class="el" href="inputs_8cpp.html#a86d63f481644da70f063c2593fcafe19">inputs.cpp</a>
 , <a class="el" href="item_8cpp.html#a86d63f481644da70f063c2593fcafe19">item.cpp</a>
-, <a class="el" href="utils_8cpp.html#a86d63f481644da70f063c2593fcafe19">utils.cpp</a>
 </li>
 <li>mqttErrorRate
-: <a class="el" href="main_8cpp.html#ac2567a764f7c3bef5306a430ba615de9">main.cpp</a>
+: <a class="el" href="main_8cpp.html#ac25d2985632c9d38e93c5eeb60d0de5d">main.cpp</a>
 </li>
 </ul>
 
 
 <h3><a id="index_n"></a>- n -</h3><ul>
-<li>nextInputCheck
-: <a class="el" href="main_8cpp.html#ab97b60e63c8bfbdd8baaf7d1ad94501f">main.cpp</a>
-</li>
-<li>nextLanCheckTime
-: <a class="el" href="main_8cpp.html#a718a0d8e0b8df891d3f1e4ac55c786ca">main.cpp</a>
-</li>
-<li>nextPollingCheck
-: <a class="el" href="main_8cpp.html#a44ea85dd3be07c7cf3ad07d3565c8663">main.cpp</a>
-</li>
-<li>nextSensorCheck
-: <a class="el" href="main_8cpp.html#a1faa7904cff01b8c7c39eeedcc205325">main.cpp</a>
-</li>
-<li>nextThermostatCheck
-: <a class="el" href="main_8cpp.html#a8389528c25c33724774418d61bb3ac35">main.cpp</a>
-</li>
 <li>node
-: <a class="el" href="out__modbus_8cpp.html#aed3ca48125de3e138d26fa4884c35c93">out_modbus.cpp</a>
+: <a class="el" href="item_8cpp.html#aed3ca48125de3e138d26fa4884c35c93">item.cpp</a>
 , <a class="el" href="main_8cpp.html#aed3ca48125de3e138d26fa4884c35c93">main.cpp</a>
-, <a class="el" href="item_8cpp.html#aed3ca48125de3e138d26fa4884c35c93">item.cpp</a>
+, <a class="el" href="out__modbus_8cpp.html#aed3ca48125de3e138d26fa4884c35c93">out_modbus.cpp</a>
 </li>
 </ul>
 
@@ -246,8 +257,8 @@ $(function() {
 : <a class="el" href="out__ac_8cpp.html#a1fa5a75e467ea8c74cca76051f03a1d4">out_ac.cpp</a>
 </li>
 <li>oneWire
-: <a class="el" href="ow_term_8h.html#a385b7fa9c4553fcb57ee60a03932b60c">owTerm.h</a>
-, <a class="el" href="ow_term_8cpp.html#a385b7fa9c4553fcb57ee60a03932b60c">owTerm.cpp</a>
+: <a class="el" href="ow_term_8cpp.html#a385b7fa9c4553fcb57ee60a03932b60c">owTerm.cpp</a>
+, <a class="el" href="ow_term_8h.html#a385b7fa9c4553fcb57ee60a03932b60c">owTerm.h</a>
 </li>
 <li>owArr
 : <a class="el" href="main_8cpp.html#a564a174b067eee3b33b1162935884d55">main.cpp</a>
@@ -275,12 +286,16 @@ $(function() {
 : <a class="el" href="out__ac_8cpp.html#a4155acb94ab76d403c080731ac75dda9">out_ac.cpp</a>
 </li>
 <li>PROGMEM
-: <a class="el" href="out__modbus_8cpp.html#a6c1a731dafc190e4be43884f9b8807ad">out_modbus.cpp</a>
-, <a class="el" href="out__ac_8cpp.html#a98bd41348071f8af054dad33e25cb935">out_ac.cpp</a>
+: <a class="el" href="item_cmd_8h.html#a948e42c714310535a6faa06c9c652e82">itemCmd.h</a>
 , <a class="el" href="main_8cpp.html#adf233b4843635c473146d0fd1d2a8b46">main.cpp</a>
-, <a class="el" href="item_cmd_8h.html#a948e42c714310535a6faa06c9c652e82">itemCmd.h</a>
-, <a class="el" href="textconst_8h.html#a6cfd127aee797ba9080cec031590b508">textconst.h</a>
-, <a class="el" href="utils_8cpp.html#a3ec4211471d85792b3cb9f0fc8082b4c">utils.cpp</a>
+, <a class="el" href="out__ac_8cpp.html#a98bd41348071f8af054dad33e25cb935">out_ac.cpp</a>
+, <a class="el" href="out__modbus_8cpp.html#a4204fbb897e7e609752d99bb878ad7a6">out_modbus.cpp</a>
+, <a class="el" href="out__relay_8cpp.html#add3e5332139b9238dcceded11230ea26">out_relay.cpp</a>
+, <a class="el" href="textconst_8h.html#a141dde1b915f2768139c3386016558a7">textconst.h</a>
+, <a class="el" href="utils_8cpp.html#afc488f96490ec272cc7bf1df0a6371fc">utils.cpp</a>
+</li>
+<li>propagateBusy
+: <a class="el" href="dmx_8cpp.html#ac103409466e5765e514698ee20f901ce">dmx.cpp</a>
 </li>
 </ul>
 
@@ -297,8 +312,8 @@ $(function() {
 : <a class="el" href="ow_term_8h.html#a51d8312908b2e5f09ac8e40879c2f1a9">owTerm.h</a>
 </li>
 <li>root
-: <a class="el" href="main_8cpp.html#a2e223992d94c34788bec64fb05f780ba">main.cpp</a>
-, <a class="el" href="inputs_8cpp.html#a2e223992d94c34788bec64fb05f780ba">inputs.cpp</a>
+: <a class="el" href="inputs_8cpp.html#a2e223992d94c34788bec64fb05f780ba">inputs.cpp</a>
+, <a class="el" href="main_8cpp.html#a2e223992d94c34788bec64fb05f780ba">main.cpp</a>
 </li>
 </ul>
 
@@ -308,9 +323,19 @@ $(function() {
 : <a class="el" href="ow_term_8cpp.html#ab5e031d55a57a0dd79468e5a7cbb5e64">owTerm.cpp</a>
 , <a class="el" href="ow_term_8h.html#ab5e031d55a57a0dd79468e5a7cbb5e64">owTerm.h</a>
 </li>
+<li>serialDebugLevel
+: <a class="el" href="streamlog_8cpp.html#a28a478cd6130b2e1aa726dd789aaf309">streamlog.cpp</a>
+, <a class="el" href="streamlog_8h.html#a28a478cd6130b2e1aa726dd789aaf309">streamlog.h</a>
+</li>
 <li>si
 : <a class="el" href="ow_term_8cpp.html#ac37ce0c409c53b6a18aefbfc3ad46b4a">owTerm.cpp</a>
 , <a class="el" href="ow_term_8h.html#ac37ce0c409c53b6a18aefbfc3ad46b4a">owTerm.h</a>
+</li>
+<li>statusLED
+: <a class="el" href="main_8cpp.html#a1b23af1efb782b208cdcb77585f02b9b">main.cpp</a>
+</li>
+<li>sysConfStream
+: <a class="el" href="main_8cpp.html#a2ff0f601c86b9f35103ae9697e6a7f02">main.cpp</a>
 </li>
 </ul>
 
@@ -321,20 +346,53 @@ $(function() {
 , <a class="el" href="ow_term_8h.html#a4e9707ca4dbcd2ddd6d14657f2e12700">owTerm.h</a>
 </li>
 <li>term
-: <a class="el" href="ow_term_8h.html#ac8f950395764bcd345b63d2887dae1a0">owTerm.h</a>
-, <a class="el" href="ow_term_8cpp.html#ac8f950395764bcd345b63d2887dae1a0">owTerm.cpp</a>
+: <a class="el" href="ow_term_8cpp.html#ac8f950395764bcd345b63d2887dae1a0">owTerm.cpp</a>
+, <a class="el" href="ow_term_8h.html#ac8f950395764bcd345b63d2887dae1a0">owTerm.h</a>
+</li>
+<li>timer0_overflow_count
+: <a class="el" href="main_8cpp.html#a2db16d1b7084bab50ceba87ebc665f36">main.cpp</a>
+</li>
+<li>timerCount
+: <a class="el" href="main_8cpp.html#a0f31f83ba89e956afb5382b514ca433a">main.cpp</a>
+</li>
+<li>timerHandlerBusy
+: <a class="el" href="dmx_8cpp.html#a08eb17abd1014ae770f606b8c92a7b80">dmx.cpp</a>
+, <a class="el" href="main_8cpp.html#a0813c3a3b7a683f9111483626a53b773">main.cpp</a>
+</li>
+<li>timerInputCheck
+: <a class="el" href="main_8cpp.html#a8071fd2dc8f5b7fa928486cf79079c53">main.cpp</a>
+</li>
+<li>timerLanCheckTime
+: <a class="el" href="main_8cpp.html#a852f686cb9c77d7907d5b4dfa3f774c9">main.cpp</a>
+</li>
+<li>timerNumber
+: <a class="el" href="main_8cpp.html#a4e8a2221cec5f921ad0d4a1e961bcefb">main.cpp</a>
+</li>
+<li>timerPollingCheck
+: <a class="el" href="main_8cpp.html#aa0ac488d0f7d087f11ac2ab5d784f7aa">main.cpp</a>
+</li>
+<li>timerSensorCheck
+: <a class="el" href="main_8cpp.html#a4d06f94bcddebfe7cbfab5839b248911">main.cpp</a>
+</li>
+<li>timerThermostatCheck
+: <a class="el" href="main_8cpp.html#ad8fbb12d1af6c35cb548f0e7a37b3de5">main.cpp</a>
 </li>
 <li>topics
-: <a class="el" href="utils_8cpp.html#addabf1c5a7be47e4e89beb38a435cb51">utils.cpp</a>
-, <a class="el" href="main_8cpp.html#addabf1c5a7be47e4e89beb38a435cb51">main.cpp</a>
+: <a class="el" href="main_8cpp.html#addabf1c5a7be47e4e89beb38a435cb51">main.cpp</a>
+, <a class="el" href="utils_8cpp.html#addabf1c5a7be47e4e89beb38a435cb51">utils.cpp</a>
+</li>
+</ul>
+
+
+<h3><a id="index_u"></a>- u -</h3><ul>
+<li>udpDebugLevel
+: <a class="el" href="streamlog_8cpp.html#aef9fa4d03bb6207d9cd46e647f575cd2">streamlog.cpp</a>
+, <a class="el" href="streamlog_8h.html#aef9fa4d03bb6207d9cd46e647f575cd2">streamlog.h</a>
 </li>
 </ul>
 
 
 <h3><a id="index_w"></a>- w -</h3><ul>
-<li>WiFiAwaitingTime
-: <a class="el" href="main_8cpp.html#ae4b71bfb7d27827d7d6c40fc3b745510">main.cpp</a>
-</li>
 <li>wifiInitialized
 : <a class="el" href="main_8cpp.html#a6a547b8f65552a00acceaae5fb86fb0d">main.cpp</a>
 </li>
@@ -344,9 +402,12 @@ $(function() {
 </li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

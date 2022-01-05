@@ -1,22 +1,7 @@
 \hypertarget{item_cmd_8h}{}\doxysection{item\+Cmd.\+h File Reference}
 \label{item_cmd_8h}\index{itemCmd.h@{itemCmd.h}}
 {\ttfamily \#include \char`\"{}Arduino.\+h\char`\"{}}\newline
-Include dependency graph for item\+Cmd.\+h\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=145pt]{item_cmd_8h__incl}
-\end{center}
-\end{figure}
-This graph shows which files directly or indirectly include this file\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{item_cmd_8h__dep__incl}
-\end{center}
-\end{figure}
+{\ttfamily \#include \char`\"{}a\+J\+S\+O\+N.\+h\char`\"{}}\newline
 \doxysubsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
@@ -89,6 +74,8 @@ class \mbox{\hyperlink{classitem_cmd}{item\+Cmd}}
 \item 
 \#define \mbox{\hyperlink{item_cmd_8h_a8ebc7dfd9ad3fa1a7ea3f5c1c4df02ab}{C\+M\+D\+\_\+\+J\+S\+ON}}~-\/2
 \item 
+\#define \mbox{\hyperlink{item_cmd_8h_ac603ce9df277cd533484fbed4ae5237b}{S\+E\+N\+D\+\_\+\+I\+M\+M\+E\+D\+I\+A\+TE}}~0x1
+\item 
 \#define \mbox{\hyperlink{item_cmd_8h_aebe7823b286110926c2da2893b56a7da}{S\+E\+N\+D\+\_\+\+C\+O\+M\+M\+A\+ND}}~0x100
 \item 
 \#define \mbox{\hyperlink{item_cmd_8h_adba0eeb6b1a5678cea10f4a823829b24}{S\+E\+N\+D\+\_\+\+P\+A\+R\+A\+M\+E\+T\+E\+RS}}~0x200
@@ -97,39 +84,41 @@ class \mbox{\hyperlink{classitem_cmd}{item\+Cmd}}
 \item 
 \#define \mbox{\hyperlink{item_cmd_8h_a33ea54bfccbf6af4fc41fdd08b6d0e57}{S\+E\+N\+D\+\_\+\+D\+E\+F\+F\+E\+R\+ED}}~0x800
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a2bfeb847a3993b4da4f0a5811af7b995}{A\+C\+T\+I\+O\+N\+\_\+\+N\+E\+E\+D\+ED}}~0x1000
+\#define \mbox{\hyperlink{item_cmd_8h_a4db4e80f4491989ae378bb3eb8c4160b}{S\+E\+N\+D\+\_\+\+D\+E\+L\+A\+Y\+ED}}~0x1000
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a7c17785e1674783a1b4ba4274ae3fb44}{A\+C\+T\+I\+O\+N\+\_\+\+I\+N\+\_\+\+P\+R\+O\+C\+E\+SS}}~0x2000
+\#define \mbox{\hyperlink{item_cmd_8h_a2bfeb847a3993b4da4f0a5811af7b995}{A\+C\+T\+I\+O\+N\+\_\+\+N\+E\+E\+D\+ED}}~0x2000
+\item 
+\#define \mbox{\hyperlink{item_cmd_8h_a7c17785e1674783a1b4ba4274ae3fb44}{A\+C\+T\+I\+O\+N\+\_\+\+I\+N\+\_\+\+P\+R\+O\+C\+E\+SS}}~0x4000
 \item 
 \#define \mbox{\hyperlink{item_cmd_8h_a89b3fb099d3038f85ed3b573ba64d031}{S\+T\+\_\+\+V\+O\+ID}}~0
 \begin{DoxyCompactList}\small\item\em Definition of all possible types of argument, contained in class. \end{DoxyCompactList}\item 
-\#define \mbox{\hyperlink{item_cmd_8h_a0612f5b4f1bcd3a696c6a17b7e3e059e}{S\+T\+\_\+\+P\+E\+R\+C\+E\+N\+TS}}~1
+\#define \mbox{\hyperlink{item_cmd_8h_ad5b8ab06d61866259ae7bc34655701a8}{S\+T\+\_\+\+P\+E\+R\+C\+E\+N\+T\+S255}}~1
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a6291bb44d8bcbb4f371c010314f059cb}{S\+T\+\_\+\+T\+E\+NS}}~2
+\#define \mbox{\hyperlink{item_cmd_8h_af1ffdc01c9fc9cc648518fef4fde8a52}{S\+T\+\_\+\+H\+S\+V255}}~2
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a67ad81da37213da74d71033ecd62a00c}{S\+T\+\_\+\+H\+SV}}~3
+\#define \mbox{\hyperlink{item_cmd_8h_abac7e90eb597c98d2f5870c6528c09da}{S\+T\+\_\+\+HS}}~3
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_abac7e90eb597c98d2f5870c6528c09da}{S\+T\+\_\+\+HS}}~4
+\#define \mbox{\hyperlink{item_cmd_8h_a0cc85c763ceffc24cddfe74853f1d2ee}{S\+T\+\_\+\+R\+GB}}~4
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a644980a3323313ed2e620aebdd993537}{S\+T\+\_\+\+F\+L\+O\+A\+T\+\_\+\+C\+E\+L\+S\+I\+US}}~5
+\#define \mbox{\hyperlink{item_cmd_8h_a5f433ae9408b87addac620079cb92f1a}{S\+T\+\_\+\+R\+G\+BW}}~5
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a38685184c002f8c14fab409847cdd9a5}{S\+T\+\_\+\+F\+L\+O\+A\+T\+\_\+\+F\+A\+R\+E\+N\+H\+E\+IT}}~6
+\#define \mbox{\hyperlink{item_cmd_8h_a6291bb44d8bcbb4f371c010314f059cb}{S\+T\+\_\+\+T\+E\+NS}}~6
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a0cc85c763ceffc24cddfe74853f1d2ee}{S\+T\+\_\+\+R\+GB}}~7
+\#define \mbox{\hyperlink{item_cmd_8h_ad8579fb5b68f5adc9862a20aeb3d9913}{S\+T\+\_\+\+F\+L\+O\+AT}}~7
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a5f433ae9408b87addac620079cb92f1a}{S\+T\+\_\+\+R\+G\+BW}}~8
+\#define \mbox{\hyperlink{item_cmd_8h_a644980a3323313ed2e620aebdd993537}{S\+T\+\_\+\+F\+L\+O\+A\+T\+\_\+\+C\+E\+L\+S\+I\+US}}~8
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_ad5b8ab06d61866259ae7bc34655701a8}{S\+T\+\_\+\+P\+E\+R\+C\+E\+N\+T\+S255}}~9
+\#define \mbox{\hyperlink{item_cmd_8h_a38685184c002f8c14fab409847cdd9a5}{S\+T\+\_\+\+F\+L\+O\+A\+T\+\_\+\+F\+A\+R\+E\+N\+H\+E\+IT}}~9
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_af1ffdc01c9fc9cc648518fef4fde8a52}{S\+T\+\_\+\+H\+S\+V255}}~10
+\#define \mbox{\hyperlink{item_cmd_8h_a9bbd91c0ea3ac6af8f0deadcddce706c}{S\+T\+\_\+\+I\+N\+T32}}~10
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a9bbd91c0ea3ac6af8f0deadcddce706c}{S\+T\+\_\+\+I\+N\+T32}}~11
+\#define \mbox{\hyperlink{item_cmd_8h_a6af0c39035eaf94f9c436ab0260c1d94}{S\+T\+\_\+\+U\+I\+N\+T32}}~11
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a6af0c39035eaf94f9c436ab0260c1d94}{S\+T\+\_\+\+U\+I\+N\+T32}}~12
+\#define \mbox{\hyperlink{item_cmd_8h_a9eb365863cb3267d934a4f517c3d4aad}{S\+T\+\_\+\+S\+T\+R\+I\+NG}}~12
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_a9eb365863cb3267d934a4f517c3d4aad}{S\+T\+\_\+\+S\+T\+R\+I\+NG}}~13
+\#define \mbox{\hyperlink{item_cmd_8h_a3556d1687a98523bda1a30405c486c77}{M\+A\+P\+\_\+\+S\+C\+A\+LE}}~1
 \item 
-\#define \mbox{\hyperlink{item_cmd_8h_ad8579fb5b68f5adc9862a20aeb3d9913}{S\+T\+\_\+\+F\+L\+O\+AT}}~14
+\#define \mbox{\hyperlink{item_cmd_8h_a3f27dbe57b2e60c70c13d6c029504d3f}{M\+A\+P\+\_\+\+V\+A\+L\+\_\+\+C\+MD}}~2
 \end{DoxyCompactItemize}
 \doxysubsection*{Typedefs}
 \begin{DoxyCompactItemize}
@@ -153,13 +142,13 @@ const \mbox{\hyperlink{item_cmd_8h_ac49c4ac803caeb10fcfb19ecd93f0cea}{cmdstr}} c
 \index{itemCmd.h@{itemCmd.h}!ACTION\_IN\_PROCESS@{ACTION\_IN\_PROCESS}}
 \index{ACTION\_IN\_PROCESS@{ACTION\_IN\_PROCESS}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ACTION\_IN\_PROCESS}{ACTION\_IN\_PROCESS}}
-{\footnotesize\ttfamily \#define A\+C\+T\+I\+O\+N\+\_\+\+I\+N\+\_\+\+P\+R\+O\+C\+E\+SS~0x2000}
+{\footnotesize\ttfamily \#define A\+C\+T\+I\+O\+N\+\_\+\+I\+N\+\_\+\+P\+R\+O\+C\+E\+SS~0x4000}
 
 \mbox{\Hypertarget{item_cmd_8h_a2bfeb847a3993b4da4f0a5811af7b995}\label{item_cmd_8h_a2bfeb847a3993b4da4f0a5811af7b995}} 
 \index{itemCmd.h@{itemCmd.h}!ACTION\_NEEDED@{ACTION\_NEEDED}}
 \index{ACTION\_NEEDED@{ACTION\_NEEDED}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ACTION\_NEEDED}{ACTION\_NEEDED}}
-{\footnotesize\ttfamily \#define A\+C\+T\+I\+O\+N\+\_\+\+N\+E\+E\+D\+ED~0x1000}
+{\footnotesize\ttfamily \#define A\+C\+T\+I\+O\+N\+\_\+\+N\+E\+E\+D\+ED~0x2000}
 
 \mbox{\Hypertarget{item_cmd_8h_ac6314f47e3a245eec13c6b5b0fa1c7db}\label{item_cmd_8h_ac6314f47e3a245eec13c6b5b0fa1c7db}} 
 \index{itemCmd.h@{itemCmd.h}!CMD\_AUTO@{CMD\_AUTO}}
@@ -345,6 +334,18 @@ Definition of Commands.
 \doxysubsubsection{\texorpdfstring{FLAG\_MASK}{FLAG\_MASK}}
 {\footnotesize\ttfamily \#define F\+L\+A\+G\+\_\+\+M\+A\+SK~0xff00}
 
+\mbox{\Hypertarget{item_cmd_8h_a3556d1687a98523bda1a30405c486c77}\label{item_cmd_8h_a3556d1687a98523bda1a30405c486c77}} 
+\index{itemCmd.h@{itemCmd.h}!MAP\_SCALE@{MAP\_SCALE}}
+\index{MAP\_SCALE@{MAP\_SCALE}!itemCmd.h@{itemCmd.h}}
+\doxysubsubsection{\texorpdfstring{MAP\_SCALE}{MAP\_SCALE}}
+{\footnotesize\ttfamily \#define M\+A\+P\+\_\+\+S\+C\+A\+LE~1}
+
+\mbox{\Hypertarget{item_cmd_8h_a3f27dbe57b2e60c70c13d6c029504d3f}\label{item_cmd_8h_a3f27dbe57b2e60c70c13d6c029504d3f}} 
+\index{itemCmd.h@{itemCmd.h}!MAP\_VAL\_CMD@{MAP\_VAL\_CMD}}
+\index{MAP\_VAL\_CMD@{MAP\_VAL\_CMD}!itemCmd.h@{itemCmd.h}}
+\doxysubsubsection{\texorpdfstring{MAP\_VAL\_CMD}{MAP\_VAL\_CMD}}
+{\footnotesize\ttfamily \#define M\+A\+P\+\_\+\+V\+A\+L\+\_\+\+C\+MD~2}
+
 \mbox{\Hypertarget{item_cmd_8h_aebe7823b286110926c2da2893b56a7da}\label{item_cmd_8h_aebe7823b286110926c2da2893b56a7da}} 
 \index{itemCmd.h@{itemCmd.h}!SEND\_COMMAND@{SEND\_COMMAND}}
 \index{SEND\_COMMAND@{SEND\_COMMAND}!itemCmd.h@{itemCmd.h}}
@@ -356,6 +357,18 @@ Definition of Commands.
 \index{SEND\_DEFFERED@{SEND\_DEFFERED}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{SEND\_DEFFERED}{SEND\_DEFFERED}}
 {\footnotesize\ttfamily \#define S\+E\+N\+D\+\_\+\+D\+E\+F\+F\+E\+R\+ED~0x800}
+
+\mbox{\Hypertarget{item_cmd_8h_a4db4e80f4491989ae378bb3eb8c4160b}\label{item_cmd_8h_a4db4e80f4491989ae378bb3eb8c4160b}} 
+\index{itemCmd.h@{itemCmd.h}!SEND\_DELAYED@{SEND\_DELAYED}}
+\index{SEND\_DELAYED@{SEND\_DELAYED}!itemCmd.h@{itemCmd.h}}
+\doxysubsubsection{\texorpdfstring{SEND\_DELAYED}{SEND\_DELAYED}}
+{\footnotesize\ttfamily \#define S\+E\+N\+D\+\_\+\+D\+E\+L\+A\+Y\+ED~0x1000}
+
+\mbox{\Hypertarget{item_cmd_8h_ac603ce9df277cd533484fbed4ae5237b}\label{item_cmd_8h_ac603ce9df277cd533484fbed4ae5237b}} 
+\index{itemCmd.h@{itemCmd.h}!SEND\_IMMEDIATE@{SEND\_IMMEDIATE}}
+\index{SEND\_IMMEDIATE@{SEND\_IMMEDIATE}!itemCmd.h@{itemCmd.h}}
+\doxysubsubsection{\texorpdfstring{SEND\_IMMEDIATE}{SEND\_IMMEDIATE}}
+{\footnotesize\ttfamily \#define S\+E\+N\+D\+\_\+\+I\+M\+M\+E\+D\+I\+A\+TE~0x1}
 
 \mbox{\Hypertarget{item_cmd_8h_adba0eeb6b1a5678cea10f4a823829b24}\label{item_cmd_8h_adba0eeb6b1a5678cea10f4a823829b24}} 
 \index{itemCmd.h@{itemCmd.h}!SEND\_PARAMETERS@{SEND\_PARAMETERS}}
@@ -373,85 +386,73 @@ Definition of Commands.
 \index{itemCmd.h@{itemCmd.h}!ST\_FLOAT@{ST\_FLOAT}}
 \index{ST\_FLOAT@{ST\_FLOAT}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_FLOAT}{ST\_FLOAT}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+F\+L\+O\+AT~14}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+F\+L\+O\+AT~7}
 
 \mbox{\Hypertarget{item_cmd_8h_a644980a3323313ed2e620aebdd993537}\label{item_cmd_8h_a644980a3323313ed2e620aebdd993537}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_FLOAT\_CELSIUS@{ST\_FLOAT\_CELSIUS}}
 \index{ST\_FLOAT\_CELSIUS@{ST\_FLOAT\_CELSIUS}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_FLOAT\_CELSIUS}{ST\_FLOAT\_CELSIUS}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+F\+L\+O\+A\+T\+\_\+\+C\+E\+L\+S\+I\+US~5}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+F\+L\+O\+A\+T\+\_\+\+C\+E\+L\+S\+I\+US~8}
 
 \mbox{\Hypertarget{item_cmd_8h_a38685184c002f8c14fab409847cdd9a5}\label{item_cmd_8h_a38685184c002f8c14fab409847cdd9a5}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_FLOAT\_FARENHEIT@{ST\_FLOAT\_FARENHEIT}}
 \index{ST\_FLOAT\_FARENHEIT@{ST\_FLOAT\_FARENHEIT}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_FLOAT\_FARENHEIT}{ST\_FLOAT\_FARENHEIT}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+F\+L\+O\+A\+T\+\_\+\+F\+A\+R\+E\+N\+H\+E\+IT~6}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+F\+L\+O\+A\+T\+\_\+\+F\+A\+R\+E\+N\+H\+E\+IT~9}
 
 \mbox{\Hypertarget{item_cmd_8h_abac7e90eb597c98d2f5870c6528c09da}\label{item_cmd_8h_abac7e90eb597c98d2f5870c6528c09da}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_HS@{ST\_HS}}
 \index{ST\_HS@{ST\_HS}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_HS}{ST\_HS}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+HS~4}
-
-\mbox{\Hypertarget{item_cmd_8h_a67ad81da37213da74d71033ecd62a00c}\label{item_cmd_8h_a67ad81da37213da74d71033ecd62a00c}} 
-\index{itemCmd.h@{itemCmd.h}!ST\_HSV@{ST\_HSV}}
-\index{ST\_HSV@{ST\_HSV}!itemCmd.h@{itemCmd.h}}
-\doxysubsubsection{\texorpdfstring{ST\_HSV}{ST\_HSV}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+H\+SV~3}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+HS~3}
 
 \mbox{\Hypertarget{item_cmd_8h_af1ffdc01c9fc9cc648518fef4fde8a52}\label{item_cmd_8h_af1ffdc01c9fc9cc648518fef4fde8a52}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_HSV255@{ST\_HSV255}}
 \index{ST\_HSV255@{ST\_HSV255}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_HSV255}{ST\_HSV255}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+H\+S\+V255~10}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+H\+S\+V255~2}
 
 \mbox{\Hypertarget{item_cmd_8h_a9bbd91c0ea3ac6af8f0deadcddce706c}\label{item_cmd_8h_a9bbd91c0ea3ac6af8f0deadcddce706c}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_INT32@{ST\_INT32}}
 \index{ST\_INT32@{ST\_INT32}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_INT32}{ST\_INT32}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+I\+N\+T32~11}
-
-\mbox{\Hypertarget{item_cmd_8h_a0612f5b4f1bcd3a696c6a17b7e3e059e}\label{item_cmd_8h_a0612f5b4f1bcd3a696c6a17b7e3e059e}} 
-\index{itemCmd.h@{itemCmd.h}!ST\_PERCENTS@{ST\_PERCENTS}}
-\index{ST\_PERCENTS@{ST\_PERCENTS}!itemCmd.h@{itemCmd.h}}
-\doxysubsubsection{\texorpdfstring{ST\_PERCENTS}{ST\_PERCENTS}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+P\+E\+R\+C\+E\+N\+TS~1}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+I\+N\+T32~10}
 
 \mbox{\Hypertarget{item_cmd_8h_ad5b8ab06d61866259ae7bc34655701a8}\label{item_cmd_8h_ad5b8ab06d61866259ae7bc34655701a8}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_PERCENTS255@{ST\_PERCENTS255}}
 \index{ST\_PERCENTS255@{ST\_PERCENTS255}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_PERCENTS255}{ST\_PERCENTS255}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+P\+E\+R\+C\+E\+N\+T\+S255~9}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+P\+E\+R\+C\+E\+N\+T\+S255~1}
 
 \mbox{\Hypertarget{item_cmd_8h_a0cc85c763ceffc24cddfe74853f1d2ee}\label{item_cmd_8h_a0cc85c763ceffc24cddfe74853f1d2ee}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_RGB@{ST\_RGB}}
 \index{ST\_RGB@{ST\_RGB}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_RGB}{ST\_RGB}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+R\+GB~7}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+R\+GB~4}
 
 \mbox{\Hypertarget{item_cmd_8h_a5f433ae9408b87addac620079cb92f1a}\label{item_cmd_8h_a5f433ae9408b87addac620079cb92f1a}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_RGBW@{ST\_RGBW}}
 \index{ST\_RGBW@{ST\_RGBW}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_RGBW}{ST\_RGBW}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+R\+G\+BW~8}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+R\+G\+BW~5}
 
 \mbox{\Hypertarget{item_cmd_8h_a9eb365863cb3267d934a4f517c3d4aad}\label{item_cmd_8h_a9eb365863cb3267d934a4f517c3d4aad}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_STRING@{ST\_STRING}}
 \index{ST\_STRING@{ST\_STRING}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_STRING}{ST\_STRING}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+S\+T\+R\+I\+NG~13}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+S\+T\+R\+I\+NG~12}
 
 \mbox{\Hypertarget{item_cmd_8h_a6291bb44d8bcbb4f371c010314f059cb}\label{item_cmd_8h_a6291bb44d8bcbb4f371c010314f059cb}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_TENS@{ST\_TENS}}
 \index{ST\_TENS@{ST\_TENS}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_TENS}{ST\_TENS}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+T\+E\+NS~2}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+T\+E\+NS~6}
 
 \mbox{\Hypertarget{item_cmd_8h_a6af0c39035eaf94f9c436ab0260c1d94}\label{item_cmd_8h_a6af0c39035eaf94f9c436ab0260c1d94}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_UINT32@{ST\_UINT32}}
 \index{ST\_UINT32@{ST\_UINT32}!itemCmd.h@{itemCmd.h}}
 \doxysubsubsection{\texorpdfstring{ST\_UINT32}{ST\_UINT32}}
-{\footnotesize\ttfamily \#define S\+T\+\_\+\+U\+I\+N\+T32~12}
+{\footnotesize\ttfamily \#define S\+T\+\_\+\+U\+I\+N\+T32~11}
 
 \mbox{\Hypertarget{item_cmd_8h_a89b3fb099d3038f85ed3b573ba64d031}\label{item_cmd_8h_a89b3fb099d3038f85ed3b573ba64d031}} 
 \index{itemCmd.h@{itemCmd.h}!ST\_VOID@{ST\_VOID}}

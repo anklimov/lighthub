@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +53,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('globals_c.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -77,6 +99,9 @@ $(function() {
 <li>CH_DIMMER
 : <a class="el" href="item_8h.html#ae8deebae2223cc41b707c0ccc12110f7">item.h</a>
 </li>
+<li>CH_ELEVATOR
+: <a class="el" href="item_8h.html#af2b3bf5403144a89639d308fb4a664ae">item.h</a>
+</li>
 <li>CH_GROUP
 : <a class="el" href="item_8h.html#a8013a9895a9e2fa6afc8b411f2ee4d77">item.h</a>
 </li>
@@ -89,11 +114,20 @@ $(function() {
 <li>CH_MOTOR
 : <a class="el" href="item_8h.html#a7fc4d0ba1b07d30d6276ebda33dd6987">item.h</a>
 </li>
+<li>CH_MULTIVENT
+: <a class="el" href="item_8h.html#a22f3bb82d8ee61b70a646fc2be9e05a7">item.h</a>
+</li>
+<li>CH_PID
+: <a class="el" href="item_8h.html#a0010c9654bde12284bc5570a78582552">item.h</a>
+</li>
 <li>CH_PWM
 : <a class="el" href="item_8h.html#a2daad851379261136f0c22f056663fc2">item.h</a>
 </li>
 <li>CH_RELAY
 : <a class="el" href="item_8h.html#ac9f09e5e652cb6797b7a05e93133d20f">item.h</a>
+</li>
+<li>CH_RELAYX
+: <a class="el" href="item_8h.html#a9501af70226e5a2333c42385c282a098">item.h</a>
 </li>
 <li>CH_RGB
 : <a class="el" href="item_8h.html#abbb5a64a224fe607fbf2fc5ac29e31cb">item.h</a>
@@ -101,11 +135,17 @@ $(function() {
 <li>CH_RGBW
 : <a class="el" href="item_8h.html#abdcc93b4a9164bb10e473766c4083d8b">item.h</a>
 </li>
+<li>CH_RGBWW
+: <a class="el" href="item_8h.html#a0e8384b176c365d477b66999b8e4b995">item.h</a>
+</li>
 <li>CH_SPILED
 : <a class="el" href="item_8h.html#ab43c8cc9fb5c1667a5956e48017826ff">item.h</a>
 </li>
 <li>CH_THERMO
 : <a class="el" href="item_8h.html#a3f68dec7d0ed1ba592fa281ee427a72a">item.h</a>
+</li>
+<li>CH_UARTBRIDGE
+: <a class="el" href="item_8h.html#a99606b60730d718dcb8528f1045bba1e">item.h</a>
 </li>
 <li>CH_VC
 : <a class="el" href="item_8h.html#a762566fb96b5a377eada6a32639c4e37">item.h</a>
@@ -223,44 +263,47 @@ $(function() {
 : <a class="el" href="item_cmd_8h.html#a3871f1b01413297e1c23e1e484016a21">itemCmd.h</a>
 </li>
 <li>cmdFunctionClearEEPROM()
-: <a class="el" href="main_8cpp.html#ab2e128aecd2d6a7c32257adb25b6bc0d">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a6ec4bc9bc5a74e8333b7736054155e0b">main.cpp</a>
 </li>
 <li>cmdFunctionGet()
-: <a class="el" href="main_8cpp.html#a84a345181b5379a4dc0eec58f348deb7">main.cpp</a>
-, <a class="el" href="main_8h.html#a84a345181b5379a4dc0eec58f348deb7">main.h</a>
+: <a class="el" href="main_8h.html#a7e56dec64c5e7e657ec7ed5016e9aa90">main.h</a>
+, <a class="el" href="main_8cpp.html#a7e56dec64c5e7e657ec7ed5016e9aa90">main.cpp</a>
 </li>
 <li>cmdFunctionHelp()
-: <a class="el" href="main_8cpp.html#a21fea6de1fe7b59684f3d18e3f4764d7">main.cpp</a>
-, <a class="el" href="main_8h.html#a21fea6de1fe7b59684f3d18e3f4764d7">main.h</a>
+: <a class="el" href="main_8cpp.html#a741e85280176117a466e887e8ea3ae9f">main.cpp</a>
+, <a class="el" href="main_8h.html#a741e85280176117a466e887e8ea3ae9f">main.h</a>
 </li>
 <li>cmdFunctionIp()
-: <a class="el" href="main_8cpp.html#a5c6faf75e381fd57cf83b6efb002ceb4">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a5a1d3e2c54732d731c21c9f98fa295ed">main.cpp</a>
 </li>
 <li>cmdFunctionKill()
-: <a class="el" href="main_8h.html#ab854d947e87c345f801a07f196e50a67">main.h</a>
-, <a class="el" href="main_8cpp.html#ab854d947e87c345f801a07f196e50a67">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a78fac18f243ffbb9a7bdef1c6126673d">main.cpp</a>
+, <a class="el" href="main_8h.html#a78fac18f243ffbb9a7bdef1c6126673d">main.h</a>
 </li>
 <li>cmdFunctionLoad()
-: <a class="el" href="main_8h.html#a3e35733dfdfb0fc4a3c55ab4bfc34fc1">main.h</a>
-, <a class="el" href="main_8cpp.html#a3e35733dfdfb0fc4a3c55ab4bfc34fc1">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a386d89c44510281499c427aae77e472e">main.cpp</a>
+, <a class="el" href="main_8h.html#a386d89c44510281499c427aae77e472e">main.h</a>
+</li>
+<li>cmdFunctionLoglevel()
+: <a class="el" href="main_8h.html#a01f9a34aa5ce566aa991b139ad1d1f87">main.h</a>
+, <a class="el" href="main_8cpp.html#a01f9a34aa5ce566aa991b139ad1d1f87">main.cpp</a>
+</li>
+<li>cmdFunctionOTAPwd()
+: <a class="el" href="main_8cpp.html#a1c255c64e075ec9b91aff20614a68324">main.cpp</a>
 </li>
 <li>cmdFunctionPwd()
-: <a class="el" href="main_8cpp.html#a46b3fce70062889d311e18a31d1dac28">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a5552b98c30d243f85e492725884465be">main.cpp</a>
 </li>
 <li>cmdFunctionReboot()
-: <a class="el" href="main_8cpp.html#a1f823c0616ac50cfe9d6d262c313b416">main.cpp</a>
-</li>
-<li>cmdFunctionReq()
-: <a class="el" href="main_8h.html#a1ebb3f04dc34df941a4bf974f7ad9443">main.h</a>
-, <a class="el" href="main_8cpp.html#a1ebb3f04dc34df941a4bf974f7ad9443">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a6cb10f1cb0302c01d692e88300e5adea">main.cpp</a>
 </li>
 <li>cmdFunctionSave()
-: <a class="el" href="main_8cpp.html#a66af021e24df0f8f82d9550cdb6bf865">main.cpp</a>
-, <a class="el" href="main_8h.html#a66af021e24df0f8f82d9550cdb6bf865">main.h</a>
+: <a class="el" href="main_8cpp.html#ad7bd0a89bd5d2f06c5ff12da3c4a0578">main.cpp</a>
+, <a class="el" href="main_8h.html#ad7bd0a89bd5d2f06c5ff12da3c4a0578">main.h</a>
 </li>
 <li>cmdFunctionSetMac()
-: <a class="el" href="main_8h.html#aea9177f835f6f4ad83d8f71dc0a4db77">main.h</a>
-, <a class="el" href="main_8cpp.html#aea9177f835f6f4ad83d8f71dc0a4db77">main.cpp</a>
+: <a class="el" href="main_8h.html#adcda04094ce227e4f3b9eecc7eb565c6">main.h</a>
+, <a class="el" href="main_8cpp.html#adcda04094ce227e4f3b9eecc7eb565c6">main.cpp</a>
 </li>
 <li>cmdstr
 : <a class="el" href="item_cmd_8h.html#ac49c4ac803caeb10fcfb19ecd93f0cea">itemCmd.h</a>
@@ -278,10 +321,10 @@ $(function() {
 : <a class="el" href="main_8cpp.html#a235b23edd19d4c133a8d49bc1b09cedb">main.cpp</a>
 </li>
 <li>configLocked
-: <a class="el" href="main_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">main.cpp</a>
-, <a class="el" href="item_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">item.cpp</a>
-, <a class="el" href="inputs_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">inputs.cpp</a>
+: <a class="el" href="inputs_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">inputs.cpp</a>
+, <a class="el" href="main_8cpp.html#a7716920e1f2332a8ca8c6b321a198223">main.cpp</a>
 , <a class="el" href="utils_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">utils.cpp</a>
+, <a class="el" href="item_8cpp.html#a58655351bd1d5333e5eb92d4c29f4263">item.cpp</a>
 </li>
 <li>configOk
 : <a class="el" href="main_8cpp.html#a459dec3d2fac52eba9bf53c19d14bcc7">main.cpp</a>
@@ -300,9 +343,12 @@ $(function() {
 </li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

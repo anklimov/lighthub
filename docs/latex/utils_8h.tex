@@ -6,22 +6,6 @@
 {\ttfamily \#include \char`\"{}options.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}item.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}Streaming.\+h\char`\"{}}\newline
-Include dependency graph for utils.\+h\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{utils_8h__incl}
-\end{center}
-\end{figure}
-This graph shows which files directly or indirectly include this file\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{utils_8h__dep__incl}
-\end{center}
-\end{figure}
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
@@ -34,6 +18,8 @@ This graph shows which files directly or indirectly include this file\+:
 \#define \mbox{\hyperlink{utils_8h_ad705dc78222473228fa826e42eca95f1}{V\+A\+L\+UE}}(x)~\mbox{\hyperlink{utils_8h_ad15c9a08925b1c0365fb1bd9ac826670}{V\+A\+L\+U\+E\+\_\+\+T\+O\+\_\+\+S\+T\+R\+I\+NG}}(x)
 \item 
 \#define \mbox{\hyperlink{utils_8h_a9a89328d94ddd2cdd4b39db22da01f79}{V\+A\+R\+\_\+\+N\+A\+M\+E\+\_\+\+V\+A\+L\+UE}}(var)~\#var \char`\"{}=\char`\"{}  \mbox{\hyperlink{utils_8h_ad705dc78222473228fa826e42eca95f1}{V\+A\+L\+UE}}(var)
+\item 
+\#define \mbox{\hyperlink{utils_8h_af725dabbb9d86c575157b3bbc24d6d55}{serial\+Param\+Type}}~uint16\+\_\+t
 \end{DoxyCompactItemize}
 \doxysubsection*{Enumerations}
 \begin{DoxyCompactItemize}
@@ -56,6 +42,8 @@ uint8\+\_\+t \mbox{\hyperlink{utils_8h_a215fd13be95cb1c21fe50b3693b85557}{H\+E\+
 \item 
 int \mbox{\hyperlink{utils_8h_a6037cfc7913c0856e93dbf8fc2133aac}{get\+Int}} (char $\ast$$\ast$chan)
 \item 
+\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{utils_8h_af97ce3611cbf9e3f12566a1d2a6c965b}{get\+Number}} (char $\ast$$\ast$chan)
+\item 
 unsigned long \mbox{\hyperlink{utils_8h_a3c97971726a07a7d14fb701f4a4638f0}{free\+Ram}} ()
 \item 
 void \mbox{\hyperlink{utils_8h_a1938abf1ef99f35bd2578e3db1bcf7b8}{parse\+Bytes}} (const char $\ast$str, char separator, byte $\ast$bytes, int max\+Bytes, int base)
@@ -66,9 +54,9 @@ void \mbox{\hyperlink{utils_8h_a6c16341dd45c4e557f951818d8d09810}{print\+Float\+
 \item 
 void \mbox{\hyperlink{utils_8h_a1380fbc9c2170180770dd1bdcc5ac647}{Read\+Unique\+ID}} (uint32\+\_\+t $\ast$pdw\+Unique\+ID)
 \item 
-int \mbox{\hyperlink{utils_8h_a2abeec32a0c7fe0b4aa02a8807ed9cee}{inet\+\_\+aton}} (const char $\ast$a\+I\+P\+Addr\+String, I\+P\+Address \&a\+Result)
+int \mbox{\hyperlink{utils_8h_ad620f6746f5f0d6b62a801dd26c8ed53}{\+\_\+inet\+\_\+aton}} (const char $\ast$a\+I\+P\+Addr\+String, I\+P\+Address \&a\+Result)
 \item 
-char $\ast$ \mbox{\hyperlink{utils_8h_a5f3cdb518da692b8859ae48ed58196fc}{inet\+\_\+ntoa\+\_\+r}} (I\+P\+Address addr, char $\ast$buf, int buflen)
+char $\ast$ \mbox{\hyperlink{utils_8h_a62c963f0eca4136cc72f0f882c13e7af}{\+\_\+inet\+\_\+ntoa\+\_\+r}} (I\+P\+Address addr, char $\ast$buf, int buflen)
 \item 
 void \mbox{\hyperlink{utils_8h_af0df006a5ae8d0d730134afdaf1c64dd}{print\+I\+P\+Address}} (I\+P\+Address ip\+Address)
 \item 
@@ -80,13 +68,19 @@ void \mbox{\hyperlink{utils_8h_af585ed9b15b9980b72fbec6d9c9dba67}{scan\+\_\+i2c\
 \item 
 void \mbox{\hyperlink{utils_8h_a7facb8f2c84692ab65024785eb64b541}{soft\+Reboot\+Func}} ()
 \item 
-bool \mbox{\hyperlink{utils_8h_acd6072104e482c3f61e5bfad35a58ac0}{is\+Time\+Over}} (uint32\+\_\+t timestamp, uint32\+\_\+t curr\+Time, uint32\+\_\+t time, uint32\+\_\+t modulo=0x\+F\+F\+F\+F\+F\+F\+FF)
+bool \mbox{\hyperlink{utils_8h_ac1da7fe353a40e62dd3a8a0761d12b22}{is\+Time\+Over}} (uint32\+\_\+t timestamp, uint32\+\_\+t curr\+Time, uint32\+\_\+t time, uint32\+\_\+t modulo=0)
 \item 
 bool \mbox{\hyperlink{utils_8h_a9843f57c765644bc93e675922da82beb}{execute\+Command}} (a\+Json\+Object $\ast$cmd, int8\+\_\+t toggle=-\/1)
 \item 
-bool \mbox{\hyperlink{utils_8h_a2cd15a22b2799d0378a27850c96c6300}{execute\+Command}} (a\+Json\+Object $\ast$cmd, int8\+\_\+t toggle, \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \+\_\+item\+Cmd)
+bool \mbox{\hyperlink{utils_8h_abb40f2502eb474ec60da7058025ce541}{execute\+Command}} (a\+Json\+Object $\ast$cmd, int8\+\_\+t toggle, \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \+\_\+item\+Cmd, a\+Json\+Object $\ast$default\+Item=N\+U\+LL, a\+Json\+Object $\ast$default\+Emit=N\+U\+LL)
 \item 
 \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{utils_8h_ace8fa23ff29c3feb89c5d500ef87b914}{map\+Int}} (int32\+\_\+t arg, a\+Json\+Object $\ast$map)
+\item 
+unsigned long \mbox{\hyperlink{utils_8h_a2b226ab4fb09687005316a874e2627d0}{millis\+NZ}} (uint8\+\_\+t shift=0)
+\item 
+\mbox{\hyperlink{utils_8h_af725dabbb9d86c575157b3bbc24d6d55}{serial\+Param\+Type}} \mbox{\hyperlink{utils_8h_a7a7f700c0c11e53e4fde708443be96ff}{str2\+Serial\+Param}} (char $\ast$str)
+\item 
+String \mbox{\hyperlink{utils_8h_a19f2c10a5d113a7b031d5bb3387ea27c}{to\+String}} (const I\+P\+Address \&address)
 \end{DoxyCompactItemize}
 
 
@@ -102,6 +96,12 @@ bool \mbox{\hyperlink{utils_8h_a2cd15a22b2799d0378a27850c96c6300}{execute\+Comma
 \index{QUOTE@{QUOTE}!utils.h@{utils.h}}
 \doxysubsubsection{\texorpdfstring{QUOTE}{QUOTE}}
 {\footnotesize\ttfamily \#define Q\+U\+O\+TE(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~\mbox{\hyperlink{utils_8h_a2a280bfe12bc6e732a7c4d3d62443a14}{Q}}(x)}
+
+\mbox{\Hypertarget{utils_8h_af725dabbb9d86c575157b3bbc24d6d55}\label{utils_8h_af725dabbb9d86c575157b3bbc24d6d55}} 
+\index{utils.h@{utils.h}!serialParamType@{serialParamType}}
+\index{serialParamType@{serialParamType}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{serialParamType}{serialParamType}}
+{\footnotesize\ttfamily \#define serial\+Param\+Type~uint16\+\_\+t}
 
 \mbox{\Hypertarget{utils_8h_ad705dc78222473228fa826e42eca95f1}\label{utils_8h_ad705dc78222473228fa826e42eca95f1}} 
 \index{utils.h@{utils.h}!VALUE@{VALUE}}
@@ -147,11 +147,37 @@ T\+\_\+\+O\+UT&\\
 
 
 \doxysubsection{Function Documentation}
-\mbox{\Hypertarget{utils_8h_a2cd15a22b2799d0378a27850c96c6300}\label{utils_8h_a2cd15a22b2799d0378a27850c96c6300}} 
+\mbox{\Hypertarget{utils_8h_ad620f6746f5f0d6b62a801dd26c8ed53}\label{utils_8h_ad620f6746f5f0d6b62a801dd26c8ed53}} 
+\index{utils.h@{utils.h}!\_inet\_aton@{\_inet\_aton}}
+\index{\_inet\_aton@{\_inet\_aton}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{\_inet\_aton()}{\_inet\_aton()}}
+{\footnotesize\ttfamily int \+\_\+inet\+\_\+aton (\begin{DoxyParamCaption}\item[{const char $\ast$}]{a\+I\+P\+Addr\+String,  }\item[{I\+P\+Address \&}]{a\+Result }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a62c963f0eca4136cc72f0f882c13e7af}\label{utils_8h_a62c963f0eca4136cc72f0f882c13e7af}} 
+\index{utils.h@{utils.h}!\_inet\_ntoa\_r@{\_inet\_ntoa\_r}}
+\index{\_inet\_ntoa\_r@{\_inet\_ntoa\_r}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{\_inet\_ntoa\_r()}{\_inet\_ntoa\_r()}}
+{\footnotesize\ttfamily char$\ast$ \+\_\+inet\+\_\+ntoa\+\_\+r (\begin{DoxyParamCaption}\item[{I\+P\+Address}]{addr,  }\item[{char $\ast$}]{buf,  }\item[{int}]{buflen }\end{DoxyParamCaption})}
+
+Same as ipaddr\+\_\+ntoa, but reentrant since a user-\/supplied buffer is used.
+
+
+\begin{DoxyParams}{Parameters}
+{\em addr} & ip address in network order to convert \\
+\hline
+{\em buf} & target buffer where the string is stored \\
+\hline
+{\em buflen} & length of buf \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+either pointer to buf which now holds the A\+S\+C\+II representation of addr or N\+U\+LL if buf was too small 
+\end{DoxyReturn}
+\mbox{\Hypertarget{utils_8h_abb40f2502eb474ec60da7058025ce541}\label{utils_8h_abb40f2502eb474ec60da7058025ce541}} 
 \index{utils.h@{utils.h}!executeCommand@{executeCommand}}
 \index{executeCommand@{executeCommand}!utils.h@{utils.h}}
 \doxysubsubsection{\texorpdfstring{executeCommand()}{executeCommand()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
-{\footnotesize\ttfamily bool execute\+Command (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{cmd,  }\item[{int8\+\_\+t}]{toggle,  }\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{\+\_\+item\+Cmd }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily bool execute\+Command (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{cmd,  }\item[{int8\+\_\+t}]{toggle,  }\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{\+\_\+item\+Cmd,  }\item[{a\+Json\+Object $\ast$}]{default\+Item = {\ttfamily NULL},  }\item[{a\+Json\+Object $\ast$}]{default\+Emit = {\ttfamily NULL} }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{utils_8h_a9843f57c765644bc93e675922da82beb}\label{utils_8h_a9843f57c765644bc93e675922da82beb}} 
 \index{utils.h@{utils.h}!executeCommand@{executeCommand}}
@@ -171,43 +197,23 @@ T\+\_\+\+O\+UT&\\
 \doxysubsubsection{\texorpdfstring{getInt()}{getInt()}}
 {\footnotesize\ttfamily int get\+Int (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{chan }\end{DoxyParamCaption})}
 
+\mbox{\Hypertarget{utils_8h_af97ce3611cbf9e3f12566a1d2a6c965b}\label{utils_8h_af97ce3611cbf9e3f12566a1d2a6c965b}} 
+\index{utils.h@{utils.h}!getNumber@{getNumber}}
+\index{getNumber@{getNumber}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{getNumber()}{getNumber()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} get\+Number (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{chan }\end{DoxyParamCaption})}
+
 \mbox{\Hypertarget{utils_8h_a215fd13be95cb1c21fe50b3693b85557}\label{utils_8h_a215fd13be95cb1c21fe50b3693b85557}} 
 \index{utils.h@{utils.h}!HEX2DEC@{HEX2DEC}}
 \index{HEX2DEC@{HEX2DEC}!utils.h@{utils.h}}
 \doxysubsubsection{\texorpdfstring{HEX2DEC()}{HEX2DEC()}}
 {\footnotesize\ttfamily uint8\+\_\+t H\+E\+X2\+D\+EC (\begin{DoxyParamCaption}\item[{char}]{i }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{utils_8h_a2abeec32a0c7fe0b4aa02a8807ed9cee}\label{utils_8h_a2abeec32a0c7fe0b4aa02a8807ed9cee}} 
-\index{utils.h@{utils.h}!inet\_aton@{inet\_aton}}
-\index{inet\_aton@{inet\_aton}!utils.h@{utils.h}}
-\doxysubsubsection{\texorpdfstring{inet\_aton()}{inet\_aton()}}
-{\footnotesize\ttfamily int inet\+\_\+aton (\begin{DoxyParamCaption}\item[{const char $\ast$}]{a\+I\+P\+Addr\+String,  }\item[{I\+P\+Address \&}]{a\+Result }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{utils_8h_a5f3cdb518da692b8859ae48ed58196fc}\label{utils_8h_a5f3cdb518da692b8859ae48ed58196fc}} 
-\index{utils.h@{utils.h}!inet\_ntoa\_r@{inet\_ntoa\_r}}
-\index{inet\_ntoa\_r@{inet\_ntoa\_r}!utils.h@{utils.h}}
-\doxysubsubsection{\texorpdfstring{inet\_ntoa\_r()}{inet\_ntoa\_r()}}
-{\footnotesize\ttfamily char$\ast$ inet\+\_\+ntoa\+\_\+r (\begin{DoxyParamCaption}\item[{I\+P\+Address}]{addr,  }\item[{char $\ast$}]{buf,  }\item[{int}]{buflen }\end{DoxyParamCaption})}
-
-Same as ipaddr\+\_\+ntoa, but reentrant since a user-\/supplied buffer is used.
-
-
-\begin{DoxyParams}{Parameters}
-{\em addr} & ip address in network order to convert \\
-\hline
-{\em buf} & target buffer where the string is stored \\
-\hline
-{\em buflen} & length of buf \\
-\hline
-\end{DoxyParams}
-\begin{DoxyReturn}{Returns}
-either pointer to buf which now holds the A\+S\+C\+II representation of addr or N\+U\+LL if buf was too small 
-\end{DoxyReturn}
-\mbox{\Hypertarget{utils_8h_acd6072104e482c3f61e5bfad35a58ac0}\label{utils_8h_acd6072104e482c3f61e5bfad35a58ac0}} 
+\mbox{\Hypertarget{utils_8h_ac1da7fe353a40e62dd3a8a0761d12b22}\label{utils_8h_ac1da7fe353a40e62dd3a8a0761d12b22}} 
 \index{utils.h@{utils.h}!isTimeOver@{isTimeOver}}
 \index{isTimeOver@{isTimeOver}!utils.h@{utils.h}}
 \doxysubsubsection{\texorpdfstring{isTimeOver()}{isTimeOver()}}
-{\footnotesize\ttfamily bool is\+Time\+Over (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{timestamp,  }\item[{uint32\+\_\+t}]{curr\+Time,  }\item[{uint32\+\_\+t}]{time,  }\item[{uint32\+\_\+t}]{modulo = {\ttfamily 0xFFFFFFFF} }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily bool is\+Time\+Over (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{timestamp,  }\item[{uint32\+\_\+t}]{curr\+Time,  }\item[{uint32\+\_\+t}]{time,  }\item[{uint32\+\_\+t}]{modulo = {\ttfamily 0} }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{utils_8h_aadf1050416e46077ad59157173438dad}\label{utils_8h_aadf1050416e46077ad59157173438dad}} 
 \index{utils.h@{utils.h}!log@{log}}
@@ -220,6 +226,12 @@ either pointer to buf which now holds the A\+S\+C\+II representation of addr or 
 \index{mapInt@{mapInt}!utils.h@{utils.h}}
 \doxysubsubsection{\texorpdfstring{mapInt()}{mapInt()}}
 {\footnotesize\ttfamily \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} map\+Int (\begin{DoxyParamCaption}\item[{int32\+\_\+t}]{arg,  }\item[{a\+Json\+Object $\ast$}]{map }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a2b226ab4fb09687005316a874e2627d0}\label{utils_8h_a2b226ab4fb09687005316a874e2627d0}} 
+\index{utils.h@{utils.h}!millisNZ@{millisNZ}}
+\index{millisNZ@{millisNZ}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{millisNZ()}{millisNZ()}}
+{\footnotesize\ttfamily unsigned long millis\+NZ (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{shift = {\ttfamily 0} }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{utils_8h_a1938abf1ef99f35bd2578e3db1bcf7b8}\label{utils_8h_a1938abf1ef99f35bd2578e3db1bcf7b8}} 
 \index{utils.h@{utils.h}!parseBytes@{parseBytes}}
@@ -286,4 +298,16 @@ either pointer to buf which now holds the A\+S\+C\+II representation of addr or 
 \index{softRebootFunc@{softRebootFunc}!utils.h@{utils.h}}
 \doxysubsubsection{\texorpdfstring{softRebootFunc()}{softRebootFunc()}}
 {\footnotesize\ttfamily void soft\+Reboot\+Func (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a7a7f700c0c11e53e4fde708443be96ff}\label{utils_8h_a7a7f700c0c11e53e4fde708443be96ff}} 
+\index{utils.h@{utils.h}!str2SerialParam@{str2SerialParam}}
+\index{str2SerialParam@{str2SerialParam}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{str2SerialParam()}{str2SerialParam()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{utils_8h_af725dabbb9d86c575157b3bbc24d6d55}{serial\+Param\+Type}} str2\+Serial\+Param (\begin{DoxyParamCaption}\item[{char $\ast$}]{str }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8h_a19f2c10a5d113a7b031d5bb3387ea27c}\label{utils_8h_a19f2c10a5d113a7b031d5bb3387ea27c}} 
+\index{utils.h@{utils.h}!toString@{toString}}
+\index{toString@{toString}!utils.h@{utils.h}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily String to\+String (\begin{DoxyParamCaption}\item[{const I\+P\+Address \&}]{address }\end{DoxyParamCaption})}
 

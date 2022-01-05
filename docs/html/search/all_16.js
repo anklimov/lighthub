@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['_7eabstractch_723',['~abstractCh',['../classabstract_ch.html#a58f34f5341674622c30f5c005ceadead',1,'abstractCh']]],
-  ['_7eitem_724',['~Item',['../class_item.html#a11663c84075b78c3ae5e30fdfcd7c458',1,'Item']]]
+  ['zero_892',['zero',['../ow_term_8cpp.html#aed7bd38aee8162da720a817873b249fc',1,'owTerm.cpp']]]
 ];

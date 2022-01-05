@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +53,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('globals_d.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -66,13 +88,13 @@ $(function() {
 
 <h3><a id="index_d"></a>- d -</h3><ul>
 <li>D_checkT
-: <a class="el" href="dmx_8cpp.html#a2bdd5f5b1312117028586d6a9a11a02c">dmx.cpp</a>
+: <a class="el" href="dmx_8cpp.html#af14e25d8ec87aea0648534b21733da2c">dmx.cpp</a>
 </li>
 <li>D_CHECKT
 : <a class="el" href="dmx_8h.html#a14052474033fc0b01cc36a5f52cfb575">dmx.h</a>
 </li>
 <li>D_State
-: <a class="el" href="dmx_8cpp.html#aa205b5f0812aa803bb5ebe6067ca7bc7">dmx.cpp</a>
+: <a class="el" href="dmx_8cpp.html#a9003509a566769d080ca60443bd042b2">dmx.cpp</a>
 </li>
 <li>D_UPDATED1
 : <a class="el" href="dmx_8h.html#aa2d5ab73cfb3c82efe053ca1c3ba2b9a">dmx.h</a>
@@ -99,24 +121,25 @@ $(function() {
 : <a class="el" href="options_8h.html#ac24cce505133ea92266546bf33a6d713">options.h</a>
 , <a class="el" href="main_8cpp.html#a525e5725911fc3939bb449849aa1b5ab">main.cpp</a>
 </li>
+<li>DEFAULT_FILESIZE_LIMIT
+: <a class="el" href="options_8h.html#af4f544a4c0d38690a34f515131d59337">options.h</a>
+</li>
 <li>DEFAULT_FIRMWARE_MAC
 : <a class="el" href="options_8h.html#abe0b358ba1d45a2a0aff0771182d4cb9">options.h</a>
 </li>
 <li>DEFAULT_INC_STEP
 : <a class="el" href="options_8h.html#ad04a0305cd8c165e0c8ae2aba5cf9f22">options.h</a>
 </li>
-<li>defval
-: <a class="el" href="item_8cpp.html#abcb640867546187e7cbe6229cc3ec872">item.cpp</a>
-</li>
 <li>deviceName
 : <a class="el" href="main_8cpp.html#a5da66826e811349c98b2daf2bafb78c2">main.cpp</a>
 , <a class="el" href="utils_8cpp.html#a5da66826e811349c98b2daf2bafb78c2">utils.cpp</a>
 </li>
-<li>DHCP_RETRY_INTERVAL
-: <a class="el" href="main_8h.html#a71a294b57014bc72835215290f1735fe">main.h</a>
-</li>
 <li>DHT_POLL_DELAY_DEFAULT
 : <a class="el" href="options_8h.html#a1c0469867d0a25f440986acb7861fc7a">options.h</a>
+</li>
+<li>digGroup()
+: <a class="el" href="item_8cpp.html#a963219cc65f7345f98d334090edf7353">item.cpp</a>
+, <a class="el" href="item_8h.html#a0c7a6d989a102f18547abb0712df8c89">item.h</a>
 </li>
 <li>dimPar
 : <a class="el" href="options_8h.html#a704a7ddbb1bdbf424a389aaa9210c931">options.h</a>
@@ -133,8 +156,8 @@ $(function() {
 , <a class="el" href="main_8cpp.html#a077dba54087a1a3694f810ba9fd06933">main.cpp</a>
 </li>
 <li>DMXCheck()
-: <a class="el" href="dmx_8h.html#a0d740c517b312806bd34e2ac3155c3a5">dmx.h</a>
-, <a class="el" href="dmx_8cpp.html#a0d740c517b312806bd34e2ac3155c3a5">dmx.cpp</a>
+: <a class="el" href="dmx_8cpp.html#a0d740c517b312806bd34e2ac3155c3a5">dmx.cpp</a>
+, <a class="el" href="dmx_8h.html#a0d740c517b312806bd34e2ac3155c3a5">dmx.h</a>
 </li>
 <li>DMXImmediateUpdate()
 : <a class="el" href="dmx_8cpp.html#a5e41f4011e2b2e2d400e4ac43a6541b1">dmx.cpp</a>
@@ -142,9 +165,12 @@ $(function() {
 <li>DMXin
 : <a class="el" href="dmx_8cpp.html#adf18ba2ebc00417130f18dc9e34411c6">dmx.cpp</a>
 </li>
+<li>DMXinDoublecheck
+: <a class="el" href="dmx_8cpp.html#a34e99db3444f7cb39e58961283eb5ab9">dmx.cpp</a>
+</li>
 <li>DMXinSetup()
-: <a class="el" href="dmx_8h.html#a45b57fab4ca3a3f7d3491506945c6326">dmx.h</a>
-, <a class="el" href="dmx_8cpp.html#a45b57fab4ca3a3f7d3491506945c6326">dmx.cpp</a>
+: <a class="el" href="dmx_8cpp.html#a45b57fab4ca3a3f7d3491506945c6326">dmx.cpp</a>
+, <a class="el" href="dmx_8h.html#a45b57fab4ca3a3f7d3491506945c6326">dmx.h</a>
 </li>
 <li>DMXOUT_propagate()
 : <a class="el" href="dmx_8cpp.html#a7c166d810404d3d15f663706271de37f">dmx.cpp</a>
@@ -155,8 +181,8 @@ $(function() {
 , <a class="el" href="dmx_8h.html#af5aeb81882ff7b4fe7cccb66a12539df">dmx.h</a>
 </li>
 <li>DMXput()
-: <a class="el" href="dmx_8cpp.html#a9f36c84bdc0b4926f7d7b28bbe47cdc0">dmx.cpp</a>
-, <a class="el" href="dmx_8h.html#a9f36c84bdc0b4926f7d7b28bbe47cdc0">dmx.h</a>
+: <a class="el" href="dmx_8h.html#a9f36c84bdc0b4926f7d7b28bbe47cdc0">dmx.h</a>
+, <a class="el" href="dmx_8cpp.html#a9f36c84bdc0b4926f7d7b28bbe47cdc0">dmx.cpp</a>
 </li>
 <li>DMXSemiImmediateUpdate()
 : <a class="el" href="dmx_8cpp.html#ac68a7598c52a61fd8e6300149f466b97">dmx.cpp</a>
@@ -171,6 +197,9 @@ $(function() {
 <li>DO_NOTHING
 : <a class="el" href="main_8h.html#a98b39d850b041da059cf5de62463a473aa3c06bc7e4d652a970cab72026c6fed1">main.h</a>
 </li>
+<li>DO_READ_RE_CONFIG
+: <a class="el" href="main_8h.html#a98b39d850b041da059cf5de62463a473adea5bef32cb35e55b1c64edb787e24ec">main.h</a>
+</li>
 <li>DO_RECONNECT
 : <a class="el" href="main_8h.html#a98b39d850b041da059cf5de62463a473a9ea9900a7508394e36b0a3024397c285">main.h</a>
 </li>
@@ -182,9 +211,12 @@ $(function() {
 </li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

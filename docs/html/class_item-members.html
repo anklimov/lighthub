@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -46,6 +52,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('class_item.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,7 +83,6 @@ $(function() {
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="headertitle">
 <div class="title">Item Member List</div>  </div>
@@ -70,13 +92,11 @@ $(function() {
 <p>This is the complete list of members for <a class="el" href="class_item.html">Item</a>, including all inherited members.</p>
 <table class="directory">
   <tr class="even"><td class="entry"><a class="el" href="class_item.html#aac323dbba691d2a1ffd0b760fdc2198d">checkFM</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#a9fa6f17268398679295a57f7506089b8">checkHeatRetry</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a899707e630b75eeb422fbc7ca3d829ce">checkModbusDimmer</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#a2d807aa2a634312bde779e174e28c4ce">checkModbusDimmer</a>(int data)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a4454719134cb94ff27943cc35207fd74">checkModbusRetry</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#a353e817a01d39e0341fdc12b00351169">checkVCRetry</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#a899707e630b75eeb422fbc7ca3d829ce">checkModbusDimmer</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a2d807aa2a634312bde779e174e28c4ce">checkModbusDimmer</a>(int data)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#aee7bbb1c5b9f54b7228cdc171f040bf4">checkModbusRetry</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_item.html#a60c43acb3bd16c858ca4c1fa6b12145b">clearFlag</a>(short flag)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#a821048224e300ab4bb9eb047bf859b2c">Ctrl</a>(itemCmd cmd, char *subItem=NULL)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#ad81d39aec84f1a2071b5e81dafd96e27">Ctrl</a>(itemCmd cmd, char *subItem=NULL, bool allowRecursion=true)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_item.html#a51166376e10786d0daf684ea85988b75">Ctrl</a>(char *payload, char *subItem=NULL)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="class_item.html#a21371d449e5e6669b3f0eb0e080a7132">defaultSubItem</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_item.html#a4ff75a860339d86b006960b750a593e6">defaultSuffixCode</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
@@ -87,30 +107,34 @@ $(function() {
   <tr><td class="entry"><a class="el" href="class_item.html#a25cddf040ae48d36375e54eb7fb31cf1">getCmd</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_item.html#ab27cd47af857151cb695f7a4b4000424">getExt</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="class_item.html#a15e9623fffd070c01c3dd87b1cc09ab3">getFlag</a>(short flag=FLAG_MASK)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#ad1c452e68967188402a96a687aba6af0">getPersistent</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#ad00923c702189ad97c6af2c3c20150fa">getSubtype</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#aba81303d678129315e393e11319b5ec5">getVal</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#a4db79caf8ace960c0bf74181c0bf5faa">isActive</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a3bbd12527ff3638189cae5291e578a96">isValid</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#ac6f9ffe686b184cd30fb9ff023af9d35">Item</a>(char *name)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a8df555ab7f99a4bc363204c10d946934">Item</a>(aJsonObject *obj)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#ab831f5a6f56b59761a8ee5dbf38c0999">itemArg</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a4332fe989485f159b4fefa871cc213b9">itemArr</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#a39291138106342bc0d49ccfb125f7a95">itemExt</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#ae0bac41fded34ffbd1e3634e15772039">itemType</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#aabf1180ef4ab072817a28020814bce48">itemVal</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a389156098d07ebdc5649668f61d87343">mb_fail</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#a6a8cdb4d647ba278a55560cd91bfc031">modbusDimmerSet</a>(itemCmd st)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a77913c1f28d823b1a096369e69cc5072">modbusDimmerSet</a>(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#a7cc492ae708197b9426c45b15eda714d">Off</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#ac6a08d4c2352fa1284c4039441e380c5">On</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#abbcfb98227918e624be294409d21be3d">Parse</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#aaa6500d9cdb58f9b20f6c2592da40739">Poll</a>(int cause)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a8fcee2e61e88909e3a53aaae3dc5d3e9">getFloatArg</a>(short n=0)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#ad1c452e68967188402a96a687aba6af0">getPersistent</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#ad00923c702189ad97c6af2c3c20150fa">getSubtype</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#aba81303d678129315e393e11319b5ec5">getVal</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a4db79caf8ace960c0bf74181c0bf5faa">isActive</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#a3bbd12527ff3638189cae5291e578a96">isValid</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#ac6f9ffe686b184cd30fb9ff023af9d35">Item</a>(char *name)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#a8df555ab7f99a4bc363204c10d946934">Item</a>(aJsonObject *obj)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#ab831f5a6f56b59761a8ee5dbf38c0999">itemArg</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#a4332fe989485f159b4fefa871cc213b9">itemArr</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a39291138106342bc0d49ccfb125f7a95">itemExt</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#ae0bac41fded34ffbd1e3634e15772039">itemType</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#aabf1180ef4ab072817a28020814bce48">itemVal</a></td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#a194ef40944a7a579ded380103ac1a081">mb_fail</a>(int result=0)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a6a8cdb4d647ba278a55560cd91bfc031">modbusDimmerSet</a>(itemCmd st)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#a77913c1f28d823b1a096369e69cc5072">modbusDimmerSet</a>(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a7cc492ae708197b9426c45b15eda714d">Off</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#ac6a08d4c2352fa1284c4039441e380c5">On</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#abbcfb98227918e624be294409d21be3d">Parse</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#aaa6500d9cdb58f9b20f6c2592da40739">Poll</a>(int cause)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a1407f6e0854127b5cec31368400caf06">resumeModbus</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
   <tr><td class="entry"><a class="el" href="class_item.html#af767f604dcaed8a497438255c28129fd">sendDelayedStatus</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_item.html#a525c4e3f723a85af5e818c1b5834e277">SendStatus</a>(int sendFlags)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#a188910459fc0ded60ca268664bf9b212">setCmd</a>(uint8_t cmdValue)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_item.html#ad4e62aba1f62917a8df4c47c2894a3ad">setExt</a>(long int par)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="class_item.html#abd22bfa75e71849cc0fadcee9eef330d">setFlag</a>(short flag)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#ad1a236a67b01bb3ae9d1aec9a18ed51d">SendStatusImmediate</a>(itemCmd st, int sendFlags, char *subItem=NULL)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#a188910459fc0ded60ca268664bf9b212">setCmd</a>(uint8_t cmdValue)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#ad4e62aba1f62917a8df4c47c2894a3ad">setExt</a>(long int par)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_item.html#abd22bfa75e71849cc0fadcee9eef330d">setFlag</a>(short flag)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="class_item.html#a5b103354070ff53e7dfd66d43765a619">setFloatVal</a>(float par)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_item.html#af023950bb9b9760b98c5de7287bc467d">setPersistent</a>(chPersistent *par)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="class_item.html#a47b261677ded48fb1c51088b9d956dcc">setSubtype</a>(uint8_t par)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_item.html#ae84f04e796546f4c34db79a060b0d443">Setup</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
@@ -121,9 +145,12 @@ $(function() {
   <tr><td class="entry"><a class="el" href="class_item.html#aa0f1f997dd794068562d43eb4a3911a6">VacomSetHeat</a>(itemCmd st)</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"><span class="mlabel">protected</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_item.html#a11663c84075b78c3ae5e30fdfcd7c458">~Item</a>()</td><td class="entry"><a class="el" href="class_item.html">Item</a></td><td class="entry"></td></tr>
 </table></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

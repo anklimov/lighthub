@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -46,6 +52,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('options_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,11 +83,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_82d7c1f210290ade9e0671f857ad27e3.html">lighthub</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#define-members">Macros</a>  </div>
@@ -72,68 +90,48 @@ $(function() {
 <div class="title">options.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><div class="dynheader">
-This graph shows which files directly or indirectly include this file:</div>
-<div class="dyncontent">
-<div class="center"><img src="options_8h__dep__incl.png" border="0" usemap="#aoptions_8hdep" alt=""/></div>
-<map name="options_8hdep" id="aoptions_8hdep">
-<area shape="rect" title=" " alt="" coords="918,5,993,32"/>
-<area shape="rect" href="colorchannel_8cpp.html" title=" " alt="" coords="787,304,907,331"/>
-<area shape="rect" href="colorchannel_8h.html" title=" " alt="" coords="643,155,750,181"/>
-<area shape="rect" href="out__dmx_8h.html" title=" " alt="" coords="390,229,473,256"/>
-<area shape="rect" href="item_8cpp.html" title=" " alt="" coords="691,304,763,331"/>
-<area shape="rect" href="out__dmx_8cpp.html" title=" " alt="" coords="5,304,103,331"/>
-<area shape="rect" href="out__pwm_8h.html" title=" " alt="" coords="548,229,635,256"/>
-<area shape="rect" href="out__pwm_8cpp.html" title=" " alt="" coords="460,304,560,331"/>
-<area shape="rect" href="out__spiled_8h.html" title=" " alt="" coords="761,229,853,256"/>
-<area shape="rect" href="out__spiled_8cpp.html" title=" " alt="" coords="931,304,1038,331"/>
-<area shape="rect" href="dmx_8cpp.html" title=" " alt="" coords="193,229,265,256"/>
-<area shape="rect" href="dmx_8h.html" title=" " alt="" coords="105,155,163,181"/>
-<area shape="rect" href="main_8h.html" title=" " alt="" coords="1547,229,1609,256"/>
-<area shape="rect" href="in__ccs811__hdc1080_8cpp.html" title=" " alt="" coords="1315,304,1478,331"/>
-<area shape="rect" href="out__ac_8cpp.html" title=" " alt="" coords="2112,304,2199,331"/>
-<area shape="rect" href="out__modbus_8cpp.html" title=" " alt="" coords="1969,304,2088,331"/>
-<area shape="rect" href="out__motor_8cpp.html" title=" " alt="" coords="1062,304,1166,331"/>
-<area shape="rect" href="ow_term_8cpp.html" title=" " alt="" coords="2318,304,2411,331"/>
-<area shape="rect" href="utils_8cpp.html" title=" " alt="" coords="2223,304,2293,331"/>
-<area shape="rect" href="item_8h.html" title=" " alt="" coords="1151,80,1210,107"/>
-<area shape="rect" href="out__modbus_8h.html" title=" " alt="" coords="1497,155,1601,181"/>
-<area shape="rect" href="out__motor_8h.html" title=" " alt="" coords="977,155,1067,181"/>
-<area shape="rect" href="utils_8h.html" title=" " alt="" coords="1777,155,1835,181"/>
-<area shape="rect" href="abstractch_8cpp.html" title=" " alt="" coords="1708,304,1816,331"/>
-<area shape="rect" href="abstractin_8cpp.html" title=" " alt="" coords="1841,304,1945,331"/>
-<area shape="rect" href="inputs_8cpp.html" title=" " alt="" coords="1601,304,1683,331"/>
-<area shape="rect" href="item_cmd_8cpp.html" title=" " alt="" coords="1191,304,1291,331"/>
-<area shape="rect" href="main_8cpp.html" title=" " alt="" coords="1502,304,1577,331"/>
-</map>
-</div>
+<div class="textblock"><code>#include &lt;Arduino.h&gt;</code><br />
 </div>
 <p><a href="options_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
+<tr class="memitem:af4f544a4c0d38690a34f515131d59337"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#af4f544a4c0d38690a34f515131d59337">DEFAULT_FILESIZE_LIMIT</a>&#160;&#160;&#160;65535</td></tr>
+<tr class="separator:af4f544a4c0d38690a34f515131d59337"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac748f1d4519e4f4c2958d0dc34e6239c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#ac748f1d4519e4f4c2958d0dc34e6239c">MAX_JSON_CONF_SIZE</a>&#160;&#160;&#160;32000</td></tr>
+<tr class="separator:ac748f1d4519e4f4c2958d0dc34e6239c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ea96e90902d4db4f9db6d5f5e3298dd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a2ea96e90902d4db4f9db6d5f5e3298dd">SYSLOG_LOCAL_SOCKET</a>&#160;&#160;&#160;514</td></tr>
 <tr class="separator:a2ea96e90902d4db4f9db6d5f5e3298dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af11b4d79bf515d3ee37f8e8b1528886d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#af11b4d79bf515d3ee37f8e8b1528886d">MODBUS_UART_RX_PIN</a>&#160;&#160;&#160;-1</td></tr>
+<tr class="separator:af11b4d79bf515d3ee37f8e8b1528886d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb9b324a815025b416191b749140be2b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#acb9b324a815025b416191b749140be2b">MODBUS_UART_TX_PIN</a>&#160;&#160;&#160;-1</td></tr>
+<tr class="separator:acb9b324a815025b416191b749140be2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26b65d67289c43289cc3758c517c55ba"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a26b65d67289c43289cc3758c517c55ba">ADAFRUIT_LED</a></td></tr>
 <tr class="separator:a26b65d67289c43289cc3758c517c55ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6fa0e88c2f73f4e656831351dfdbf6e5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a6fa0e88c2f73f4e656831351dfdbf6e5">CONTROLLER</a>&#160;&#160;&#160;TM1809</td></tr>
 <tr class="separator:a6fa0e88c2f73f4e656831351dfdbf6e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bb48d5657055ecdc9b3dc0229a795ae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a6bb48d5657055ecdc9b3dc0229a795ae">SCALE_VOLUME_100</a>&#160;&#160;&#160;false</td></tr>
+<tr class="separator:a6bb48d5657055ecdc9b3dc0229a795ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adad67fe595ea440c8f8247ec2cddf070"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a>&#160;&#160;&#160;4</td></tr>
 <tr class="separator:adad67fe595ea440c8f8247ec2cddf070"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a826715579f0649bd271fb6702a175dbc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a826715579f0649bd271fb6702a175dbc">ORDER</a>&#160;&#160;&#160;BRG</td></tr>
 <tr class="separator:a826715579f0649bd271fb6702a175dbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab992e9e25bfa08a3572b6a2c4826a0dc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#ab992e9e25bfa08a3572b6a2c4826a0dc">TXEnablePin</a>&#160;&#160;&#160;13</td></tr>
 <tr class="separator:ab992e9e25bfa08a3572b6a2c4826a0dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b3cf2242175107b05c2f2b43c55a44c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a5b3cf2242175107b05c2f2b43c55a44c">ESP_EEPROM_SIZE</a>&#160;&#160;&#160;2048</td></tr>
-<tr class="separator:a5b3cf2242175107b05c2f2b43c55a44c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abb18d4c1c4db26508cb496f6467feb54"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#abb18d4c1c4db26508cb496f6467feb54">AVR_DMXOUT_PIN</a>&#160;&#160;&#160;18</td></tr>
 <tr class="separator:abb18d4c1c4db26508cb496f6467feb54"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a65f02746daae5d420afda0cada7b78"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a6a65f02746daae5d420afda0cada7b78">T_ATTEMPTS</a>&#160;&#160;&#160;200</td></tr>
-<tr class="separator:a6a65f02746daae5d420afda0cada7b78"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afae9befc056895af99a4ee18cd5abc8c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#afae9befc056895af99a4ee18cd5abc8c">IET_TEMP</a>&#160;&#160;&#160;0</td></tr>
-<tr class="separator:afae9befc056895af99a4ee18cd5abc8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a826349834da27a108e00c318c756710d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a826349834da27a108e00c318c756710d">IET_ATTEMPTS</a>&#160;&#160;&#160;1</td></tr>
-<tr class="separator:a826349834da27a108e00c318c756710d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac39e7144fabb2ba47a75f88640a1bb4b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#ac39e7144fabb2ba47a75f88640a1bb4b">WIFI_TIMEOUT</a>&#160;&#160;&#160;60000UL</td></tr>
+<tr class="separator:ac39e7144fabb2ba47a75f88640a1bb4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78b69a3256123af837e36987d372c490"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a78b69a3256123af837e36987d372c490">TIMEOUT_RECONNECT</a>&#160;&#160;&#160;10000UL</td></tr>
+<tr class="separator:a78b69a3256123af837e36987d372c490"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76ff03bcf550304b213709c0efbcea95"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a76ff03bcf550304b213709c0efbcea95">TIMEOUT_REINIT</a>&#160;&#160;&#160;5000UL</td></tr>
+<tr class="separator:a76ff03bcf550304b213709c0efbcea95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ad8ea68e341c4dd98b906180b44f2ce"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a2ad8ea68e341c4dd98b906180b44f2ce">TIMEOUT_RETAIN</a>&#160;&#160;&#160;8000UL</td></tr>
+<tr class="separator:a2ad8ea68e341c4dd98b906180b44f2ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fbbb9b80cb1b0f878f3bcc5cfff15c5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a1fbbb9b80cb1b0f878f3bcc5cfff15c5">INTERVAL_1W</a>&#160;&#160;&#160;5000UL</td></tr>
+<tr class="separator:a1fbbb9b80cb1b0f878f3bcc5cfff15c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace3ee9368233b44672115617afbab5ce"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#ace3ee9368233b44672115617afbab5ce">PERIOD_THERMOSTAT_FAILED</a>&#160;&#160;&#160;(600 * 1000UL)</td></tr>
+<tr class="separator:ace3ee9368233b44672115617afbab5ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af589ab4b091beec656a4529510d63937"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#af589ab4b091beec656a4529510d63937">THERMO_GIST_CELSIUS</a>&#160;&#160;&#160;1.</td></tr>
 <tr class="separator:af589ab4b091beec656a4529510d63937"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af512e1ccc2f2a4fd372d0816603e961c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#af512e1ccc2f2a4fd372d0816603e961c">THERMO_OVERHEAT_CELSIUS</a>&#160;&#160;&#160;38.</td></tr>
@@ -144,44 +142,14 @@ Macros</h2></td></tr>
 <tr class="separator:aaec32701bf16879bd71fdddc223959c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10a53e1555887eda29a06279883b5407"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a10a53e1555887eda29a06279883b5407">INIT_VOLUME</a>&#160;&#160;&#160;40</td></tr>
 <tr class="separator:a10a53e1555887eda29a06279883b5407"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62d02da8c36fd3ab5519e373620382d1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a62d02da8c36fd3ab5519e373620382d1">MAXFLASHSTR</a>&#160;&#160;&#160;32</td></tr>
-<tr class="separator:a62d02da8c36fd3ab5519e373620382d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83c7af577ab2df562e66ffcdc81fc1c0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a83c7af577ab2df562e66ffcdc81fc1c0">PWDFLASHSTR</a>&#160;&#160;&#160;16</td></tr>
-<tr class="separator:a83c7af577ab2df562e66ffcdc81fc1c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a084dba44a01332b67ab1ba8a599cde26"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a084dba44a01332b67ab1ba8a599cde26">EEPROM_SIGNATURE</a>&#160;&#160;&#160;&quot;LHCF&quot;</td></tr>
-<tr class="separator:a084dba44a01332b67ab1ba8a599cde26"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9fe94e22a13344d105a17cf07a5842cd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a9fe94e22a13344d105a17cf07a5842cd">EEPROM_SIGNATURE_LENGTH</a>&#160;&#160;&#160;4</td></tr>
-<tr class="separator:a9fe94e22a13344d105a17cf07a5842cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaae016d9ffd26640306394acbf5ca7c9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#aaae016d9ffd26640306394acbf5ca7c9">OFFSET_MAC</a>&#160;&#160;&#160;0</td></tr>
-<tr class="separator:aaae016d9ffd26640306394acbf5ca7c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bbde19ac58d0524f2ade893b617c004"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a9bbde19ac58d0524f2ade893b617c004">OFFSET_IP</a>&#160;&#160;&#160;<a class="el" href="options_8h.html#aaae016d9ffd26640306394acbf5ca7c9">OFFSET_MAC</a>+6</td></tr>
-<tr class="separator:a9bbde19ac58d0524f2ade893b617c004"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbd439473b680ddc08bba5e1d980ed0f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#adbd439473b680ddc08bba5e1d980ed0f">OFFSET_DNS</a>&#160;&#160;&#160;<a class="el" href="options_8h.html#a9bbde19ac58d0524f2ade893b617c004">OFFSET_IP</a>+4</td></tr>
-<tr class="separator:adbd439473b680ddc08bba5e1d980ed0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac025812b72523a2fb2cdaabaa8f589f3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#ac025812b72523a2fb2cdaabaa8f589f3">OFFSET_GW</a>&#160;&#160;&#160;<a class="el" href="options_8h.html#adbd439473b680ddc08bba5e1d980ed0f">OFFSET_DNS</a>+4</td></tr>
-<tr class="separator:ac025812b72523a2fb2cdaabaa8f589f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d6fc23740ab9f37272a3299949d3c11"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a9d6fc23740ab9f37272a3299949d3c11">OFFSET_MASK</a>&#160;&#160;&#160;<a class="el" href="options_8h.html#ac025812b72523a2fb2cdaabaa8f589f3">OFFSET_GW</a>+4</td></tr>
-<tr class="separator:a9d6fc23740ab9f37272a3299949d3c11"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3dc28242a8c02f3f2e94730b5ecbfc0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#ab3dc28242a8c02f3f2e94730b5ecbfc0">OFFSET_CONFIGSERVER</a>&#160;&#160;&#160;<a class="el" href="options_8h.html#a9d6fc23740ab9f37272a3299949d3c11">OFFSET_MASK</a>+4</td></tr>
-<tr class="separator:ab3dc28242a8c02f3f2e94730b5ecbfc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd247d3da250a7b87a77f24d0f6ca472"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#abd247d3da250a7b87a77f24d0f6ca472">OFFSET_MQTT_PWD</a>&#160;&#160;&#160;<a class="el" href="options_8h.html#ab3dc28242a8c02f3f2e94730b5ecbfc0">OFFSET_CONFIGSERVER</a>+<a class="el" href="options_8h.html#a62d02da8c36fd3ab5519e373620382d1">MAXFLASHSTR</a></td></tr>
-<tr class="separator:abd247d3da250a7b87a77f24d0f6ca472"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d2901cf398ca7e59223684da79da151"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a0d2901cf398ca7e59223684da79da151">OFFSET_SIGNATURE</a>&#160;&#160;&#160;<a class="el" href="options_8h.html#abd247d3da250a7b87a77f24d0f6ca472">OFFSET_MQTT_PWD</a>+<a class="el" href="options_8h.html#a83c7af577ab2df562e66ffcdc81fc1c0">PWDFLASHSTR</a></td></tr>
-<tr class="separator:a0d2901cf398ca7e59223684da79da151"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a003b1faba137828f090984d6ebc4817e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a003b1faba137828f090984d6ebc4817e">EEPROM_offset_NotAlligned</a>&#160;&#160;&#160;<a class="el" href="options_8h.html#a0d2901cf398ca7e59223684da79da151">OFFSET_SIGNATURE</a>+<a class="el" href="options_8h.html#a9fe94e22a13344d105a17cf07a5842cd">EEPROM_SIGNATURE_LENGTH</a></td></tr>
-<tr class="separator:a003b1faba137828f090984d6ebc4817e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d3ef55d19773db32ebd9956edcc8b8d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a5d3ef55d19773db32ebd9956edcc8b8d">EEPROM_offsetJSON</a>&#160;&#160;&#160;<a class="el" href="options_8h.html#a003b1faba137828f090984d6ebc4817e">EEPROM_offset_NotAlligned</a> + (4 -(<a class="el" href="options_8h.html#a003b1faba137828f090984d6ebc4817e">EEPROM_offset_NotAlligned</a> &amp; 3))</td></tr>
-<tr class="separator:a5d3ef55d19773db32ebd9956edcc8b8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff59a0ac9e9d04f17868c674c13fbfdf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#aff59a0ac9e9d04f17868c674c13fbfdf">EEPROM_FIX_PART_LEN</a>&#160;&#160;&#160;<a class="el" href="options_8h.html#a5d3ef55d19773db32ebd9956edcc8b8d">EEPROM_offsetJSON</a>-<a class="el" href="options_8h.html#aaae016d9ffd26640306394acbf5ca7c9">OFFSET_MAC</a></td></tr>
-<tr class="separator:aff59a0ac9e9d04f17868c674c13fbfdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67828bcb6f0269a0e14ccb7b3dd8bc36"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a67828bcb6f0269a0e14ccb7b3dd8bc36">INTERVAL_CHECK_INPUT</a>&#160;&#160;&#160;15</td></tr>
+<tr class="memitem:a67828bcb6f0269a0e14ccb7b3dd8bc36"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a67828bcb6f0269a0e14ccb7b3dd8bc36">INTERVAL_CHECK_INPUT</a>&#160;&#160;&#160;11</td></tr>
 <tr class="separator:a67828bcb6f0269a0e14ccb7b3dd8bc36"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf47a61ecca7f6e2976ab2e86de82221"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#abf47a61ecca7f6e2976ab2e86de82221">TIMER_CHECK_INPUT</a>&#160;&#160;&#160;15</td></tr>
+<tr class="separator:abf47a61ecca7f6e2976ab2e86de82221"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acfa30965b93565c71cdeb70b86d08560"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#acfa30965b93565c71cdeb70b86d08560">INTERVAL_CHECK_SENSOR</a>&#160;&#160;&#160;5000</td></tr>
 <tr class="separator:acfa30965b93565c71cdeb70b86d08560"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad122bb80520d348463d54eebac2ba4a5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#ad122bb80520d348463d54eebac2ba4a5">INTERVAL_CHECK_MODBUS</a>&#160;&#160;&#160;2000</td></tr>
-<tr class="separator:ad122bb80520d348463d54eebac2ba4a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad644e892aeb35da4ec2d602aa2fffb59"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#ad644e892aeb35da4ec2d602aa2fffb59">INTERVAL_POLLING</a>&#160;&#160;&#160;100</td></tr>
-<tr class="separator:ad644e892aeb35da4ec2d602aa2fffb59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe28226923de94bda367a61740b94c91"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#abe28226923de94bda367a61740b94c91">INTERVAL_SLOW_POLLING</a>&#160;&#160;&#160;1000</td></tr>
+<tr class="separator:abe28226923de94bda367a61740b94c91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a265b8a391d46da3dd31693f510d02ad6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a265b8a391d46da3dd31693f510d02ad6">THERMOSTAT_CHECK_PERIOD</a>&#160;&#160;&#160;30000</td></tr>
 <tr class="separator:a265b8a391d46da3dd31693f510d02ad6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2993ae74a7ab13c7de09ffcc8b35e4fc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="options_8h.html#a2993ae74a7ab13c7de09ffcc8b35e4fc">OW_UPDATE_INTERVAL</a>&#160;&#160;&#160;5000</td></tr>
@@ -390,6 +358,20 @@ Macros</h2></td></tr>
 
 </div>
 </div>
+<a id="af4f544a4c0d38690a34f515131d59337"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4f544a4c0d38690a34f515131d59337">&#9670;&nbsp;</a></span>DEFAULT_FILESIZE_LIMIT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DEFAULT_FILESIZE_LIMIT&#160;&#160;&#160;65535</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="abe0b358ba1d45a2a0aff0771182d4cb9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abe0b358ba1d45a2a0aff0771182d4cb9">&#9670;&nbsp;</a></span>DEFAULT_FIRMWARE_MAC</h2>
 
@@ -460,90 +442,6 @@ Macros</h2></td></tr>
 
 </div>
 </div>
-<a id="aff59a0ac9e9d04f17868c674c13fbfdf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aff59a0ac9e9d04f17868c674c13fbfdf">&#9670;&nbsp;</a></span>EEPROM_FIX_PART_LEN</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define EEPROM_FIX_PART_LEN&#160;&#160;&#160;<a class="el" href="options_8h.html#a5d3ef55d19773db32ebd9956edcc8b8d">EEPROM_offsetJSON</a>-<a class="el" href="options_8h.html#aaae016d9ffd26640306394acbf5ca7c9">OFFSET_MAC</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a003b1faba137828f090984d6ebc4817e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a003b1faba137828f090984d6ebc4817e">&#9670;&nbsp;</a></span>EEPROM_offset_NotAlligned</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define EEPROM_offset_NotAlligned&#160;&#160;&#160;<a class="el" href="options_8h.html#a0d2901cf398ca7e59223684da79da151">OFFSET_SIGNATURE</a>+<a class="el" href="options_8h.html#a9fe94e22a13344d105a17cf07a5842cd">EEPROM_SIGNATURE_LENGTH</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a5d3ef55d19773db32ebd9956edcc8b8d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5d3ef55d19773db32ebd9956edcc8b8d">&#9670;&nbsp;</a></span>EEPROM_offsetJSON</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define EEPROM_offsetJSON&#160;&#160;&#160;<a class="el" href="options_8h.html#a003b1faba137828f090984d6ebc4817e">EEPROM_offset_NotAlligned</a> + (4 -(<a class="el" href="options_8h.html#a003b1faba137828f090984d6ebc4817e">EEPROM_offset_NotAlligned</a> &amp; 3))</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a084dba44a01332b67ab1ba8a599cde26"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a084dba44a01332b67ab1ba8a599cde26">&#9670;&nbsp;</a></span>EEPROM_SIGNATURE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define EEPROM_SIGNATURE&#160;&#160;&#160;&quot;LHCF&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a9fe94e22a13344d105a17cf07a5842cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9fe94e22a13344d105a17cf07a5842cd">&#9670;&nbsp;</a></span>EEPROM_SIGNATURE_LENGTH</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define EEPROM_SIGNATURE_LENGTH&#160;&#160;&#160;4</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a5b3cf2242175107b05c2f2b43c55a44c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5b3cf2242175107b05c2f2b43c55a44c">&#9670;&nbsp;</a></span>ESP_EEPROM_SIZE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define ESP_EEPROM_SIZE&#160;&#160;&#160;2048</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a9532a64e88b10a5317afd57397f99d3c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9532a64e88b10a5317afd57397f99d3c">&#9670;&nbsp;</a></span>FM_OVERHEAT_CELSIUS</h2>
 
@@ -586,34 +484,6 @@ Macros</h2></td></tr>
 
 </div>
 </div>
-<a id="a826349834da27a108e00c318c756710d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a826349834da27a108e00c318c756710d">&#9670;&nbsp;</a></span>IET_ATTEMPTS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define IET_ATTEMPTS&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="afae9befc056895af99a4ee18cd5abc8c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afae9befc056895af99a4ee18cd5abc8c">&#9670;&nbsp;</a></span>IET_TEMP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define IET_TEMP&#160;&#160;&#160;0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a10a53e1555887eda29a06279883b5407"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a10a53e1555887eda29a06279883b5407">&#9670;&nbsp;</a></span>INIT_VOLUME</h2>
 
@@ -628,6 +498,20 @@ Macros</h2></td></tr>
 
 </div>
 </div>
+<a id="a1fbbb9b80cb1b0f878f3bcc5cfff15c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fbbb9b80cb1b0f878f3bcc5cfff15c5">&#9670;&nbsp;</a></span>INTERVAL_1W</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define INTERVAL_1W&#160;&#160;&#160;5000UL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a67828bcb6f0269a0e14ccb7b3dd8bc36"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a67828bcb6f0269a0e14ccb7b3dd8bc36">&#9670;&nbsp;</a></span>INTERVAL_CHECK_INPUT</h2>
 
@@ -635,21 +519,7 @@ Macros</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define INTERVAL_CHECK_INPUT&#160;&#160;&#160;15</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ad122bb80520d348463d54eebac2ba4a5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad122bb80520d348463d54eebac2ba4a5">&#9670;&nbsp;</a></span>INTERVAL_CHECK_MODBUS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define INTERVAL_CHECK_MODBUS&#160;&#160;&#160;2000</td>
+          <td class="memname">#define INTERVAL_CHECK_INPUT&#160;&#160;&#160;11</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -670,14 +540,14 @@ Macros</h2></td></tr>
 
 </div>
 </div>
-<a id="ad644e892aeb35da4ec2d602aa2fffb59"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad644e892aeb35da4ec2d602aa2fffb59">&#9670;&nbsp;</a></span>INTERVAL_POLLING</h2>
+<a id="abe28226923de94bda367a61740b94c91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe28226923de94bda367a61740b94c91">&#9670;&nbsp;</a></span>INTERVAL_SLOW_POLLING</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define INTERVAL_POLLING&#160;&#160;&#160;100</td>
+          <td class="memname">#define INTERVAL_SLOW_POLLING&#160;&#160;&#160;1000</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -712,14 +582,14 @@ Macros</h2></td></tr>
 
 </div>
 </div>
-<a id="a62d02da8c36fd3ab5519e373620382d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a62d02da8c36fd3ab5519e373620382d1">&#9670;&nbsp;</a></span>MAXFLASHSTR</h2>
+<a id="ac748f1d4519e4f4c2958d0dc34e6239c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac748f1d4519e4f4c2958d0dc34e6239c">&#9670;&nbsp;</a></span>MAX_JSON_CONF_SIZE</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define MAXFLASHSTR&#160;&#160;&#160;32</td>
+          <td class="memname">#define MAX_JSON_CONF_SIZE&#160;&#160;&#160;32000</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -768,6 +638,34 @@ Macros</h2></td></tr>
 
 </div>
 </div>
+<a id="af11b4d79bf515d3ee37f8e8b1528886d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af11b4d79bf515d3ee37f8e8b1528886d">&#9670;&nbsp;</a></span>MODBUS_UART_RX_PIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MODBUS_UART_RX_PIN&#160;&#160;&#160;-1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acb9b324a815025b416191b749140be2b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb9b324a815025b416191b749140be2b">&#9670;&nbsp;</a></span>MODBUS_UART_TX_PIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MODBUS_UART_TX_PIN&#160;&#160;&#160;-1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a86d2121e2224195f5d97811335df6cae"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a86d2121e2224195f5d97811335df6cae">&#9670;&nbsp;</a></span>MQTT_SUBJECT_LENGTH</h2>
 
@@ -790,118 +688,6 @@ Macros</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define MQTT_TOPIC_LENGTH&#160;&#160;&#160;64</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ab3dc28242a8c02f3f2e94730b5ecbfc0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3dc28242a8c02f3f2e94730b5ecbfc0">&#9670;&nbsp;</a></span>OFFSET_CONFIGSERVER</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OFFSET_CONFIGSERVER&#160;&#160;&#160;<a class="el" href="options_8h.html#a9d6fc23740ab9f37272a3299949d3c11">OFFSET_MASK</a>+4</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="adbd439473b680ddc08bba5e1d980ed0f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adbd439473b680ddc08bba5e1d980ed0f">&#9670;&nbsp;</a></span>OFFSET_DNS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OFFSET_DNS&#160;&#160;&#160;<a class="el" href="options_8h.html#a9bbde19ac58d0524f2ade893b617c004">OFFSET_IP</a>+4</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ac025812b72523a2fb2cdaabaa8f589f3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac025812b72523a2fb2cdaabaa8f589f3">&#9670;&nbsp;</a></span>OFFSET_GW</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OFFSET_GW&#160;&#160;&#160;<a class="el" href="options_8h.html#adbd439473b680ddc08bba5e1d980ed0f">OFFSET_DNS</a>+4</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a9bbde19ac58d0524f2ade893b617c004"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9bbde19ac58d0524f2ade893b617c004">&#9670;&nbsp;</a></span>OFFSET_IP</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OFFSET_IP&#160;&#160;&#160;<a class="el" href="options_8h.html#aaae016d9ffd26640306394acbf5ca7c9">OFFSET_MAC</a>+6</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aaae016d9ffd26640306394acbf5ca7c9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaae016d9ffd26640306394acbf5ca7c9">&#9670;&nbsp;</a></span>OFFSET_MAC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OFFSET_MAC&#160;&#160;&#160;0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a9d6fc23740ab9f37272a3299949d3c11"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9d6fc23740ab9f37272a3299949d3c11">&#9670;&nbsp;</a></span>OFFSET_MASK</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OFFSET_MASK&#160;&#160;&#160;<a class="el" href="options_8h.html#ac025812b72523a2fb2cdaabaa8f589f3">OFFSET_GW</a>+4</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="abd247d3da250a7b87a77f24d0f6ca472"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abd247d3da250a7b87a77f24d0f6ca472">&#9670;&nbsp;</a></span>OFFSET_MQTT_PWD</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OFFSET_MQTT_PWD&#160;&#160;&#160;<a class="el" href="options_8h.html#ab3dc28242a8c02f3f2e94730b5ecbfc0">OFFSET_CONFIGSERVER</a>+<a class="el" href="options_8h.html#a62d02da8c36fd3ab5519e373620382d1">MAXFLASHSTR</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a0d2901cf398ca7e59223684da79da151"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d2901cf398ca7e59223684da79da151">&#9670;&nbsp;</a></span>OFFSET_SIGNATURE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OFFSET_SIGNATURE&#160;&#160;&#160;<a class="el" href="options_8h.html#abd247d3da250a7b87a77f24d0f6ca472">OFFSET_MQTT_PWD</a>+<a class="el" href="options_8h.html#a83c7af577ab2df562e66ffcdc81fc1c0">PWDFLASHSTR</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -950,14 +736,28 @@ Macros</h2></td></tr>
 
 </div>
 </div>
-<a id="a83c7af577ab2df562e66ffcdc81fc1c0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83c7af577ab2df562e66ffcdc81fc1c0">&#9670;&nbsp;</a></span>PWDFLASHSTR</h2>
+<a id="ace3ee9368233b44672115617afbab5ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace3ee9368233b44672115617afbab5ce">&#9670;&nbsp;</a></span>PERIOD_THERMOSTAT_FAILED</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define PWDFLASHSTR&#160;&#160;&#160;16</td>
+          <td class="memname">#define PERIOD_THERMOSTAT_FAILED&#160;&#160;&#160;(600 * 1000UL)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6bb48d5657055ecdc9b3dc0229a795ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6bb48d5657055ecdc9b3dc0229a795ae">&#9670;&nbsp;</a></span>SCALE_VOLUME_100</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SCALE_VOLUME_100&#160;&#160;&#160;false</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -986,20 +786,6 @@ Macros</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define SYSLOG_LOCAL_SOCKET&#160;&#160;&#160;514</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a6a65f02746daae5d420afda0cada7b78"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6a65f02746daae5d420afda0cada7b78">&#9670;&nbsp;</a></span>T_ATTEMPTS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define T_ATTEMPTS&#160;&#160;&#160;200</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -1048,6 +834,62 @@ Macros</h2></td></tr>
 
 </div>
 </div>
+<a id="a78b69a3256123af837e36987d372c490"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78b69a3256123af837e36987d372c490">&#9670;&nbsp;</a></span>TIMEOUT_RECONNECT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TIMEOUT_RECONNECT&#160;&#160;&#160;10000UL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a76ff03bcf550304b213709c0efbcea95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a76ff03bcf550304b213709c0efbcea95">&#9670;&nbsp;</a></span>TIMEOUT_REINIT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TIMEOUT_REINIT&#160;&#160;&#160;5000UL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2ad8ea68e341c4dd98b906180b44f2ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ad8ea68e341c4dd98b906180b44f2ce">&#9670;&nbsp;</a></span>TIMEOUT_RETAIN</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TIMEOUT_RETAIN&#160;&#160;&#160;8000UL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abf47a61ecca7f6e2976ab2e86de82221"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf47a61ecca7f6e2976ab2e86de82221">&#9670;&nbsp;</a></span>TIMER_CHECK_INPUT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define TIMER_CHECK_INPUT&#160;&#160;&#160;15</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ab992e9e25bfa08a3572b6a2c4826a0dc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab992e9e25bfa08a3572b6a2c4826a0dc">&#9670;&nbsp;</a></span>TXEnablePin</h2>
 
@@ -1090,10 +932,28 @@ Macros</h2></td></tr>
 
 </div>
 </div>
+<a id="ac39e7144fabb2ba47a75f88640a1bb4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac39e7144fabb2ba47a75f88640a1bb4b">&#9670;&nbsp;</a></span>WIFI_TIMEOUT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define WIFI_TIMEOUT&#160;&#160;&#160;60000UL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="options_8h.html">options.h</a></li>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

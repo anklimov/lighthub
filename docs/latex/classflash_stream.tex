@@ -1,0 +1,149 @@
+\hypertarget{classflash_stream}{}\doxysection{flash\+Stream Class Reference}
+\label{classflash_stream}\index{flashStream@{flashStream}}
+
+
+{\ttfamily \#include $<$flashstream.\+h$>$}
+
+Inheritance diagram for flash\+Stream\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classflash_stream}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classflash_stream_a91d1442264307a40fced2b3da43dc71b}{flash\+Stream}} ()
+\item 
+void \mbox{\hyperlink{classflash_stream_aebb3e951c8e23ee484360b2a6f3b2118}{set\+Size}} (unsigned int \+\_\+size)
+\item 
+int \mbox{\hyperlink{classflash_stream_ad7559cbc1bd2ac30c8af112d05a06983}{open}} (short file\+Num, char mode=\textquotesingle{}\textbackslash{}0\textquotesingle{})
+\item 
+virtual int \mbox{\hyperlink{classflash_stream_aed80292a0950c246404f4a62d2fb40c7}{open}} (String \+\_\+filename, char mode=\textquotesingle{}\textbackslash{}0\textquotesingle{}) override
+\item 
+virtual unsigned int \mbox{\hyperlink{classflash_stream_a7a48d386946f8c123006dc060173f376}{seek}} (unsigned int \+\_\+pos=0)
+\item 
+virtual int \mbox{\hyperlink{classflash_stream_a09dd933c7d1f99d92ac72592534a4a3f}{available}} () override
+\item 
+virtual int \mbox{\hyperlink{classflash_stream_aa10c03136ba69758eb4be13388ddcca6}{read}} ()
+\item 
+virtual int \mbox{\hyperlink{classflash_stream_a7dfc6f9b9b756f48e22c095fa4e0c733}{peek}} ()
+\item 
+virtual void \mbox{\hyperlink{classflash_stream_ac2f24c97114b369509d775e6781efbbe}{flush}} ()
+\item 
+virtual size\+\_\+t \mbox{\hyperlink{classflash_stream_a98eab8bc043c5a8a0a62324bd14c3f98}{write}} (uint8\+\_\+t ch)
+\item 
+virtual void \mbox{\hyperlink{classflash_stream_a81da3f19ab4811aa93ce52ddd3bd188a}{close}} () override
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+unsigned int \mbox{\hyperlink{classflash_stream_a3ffa5b66266b0d21898c714b77d24ae6}{pos}}
+\item 
+unsigned int \mbox{\hyperlink{classflash_stream_a554cc9688c9a9d8c17fac68d5b54f01b}{start\+Pos}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classflash_stream_a91d1442264307a40fced2b3da43dc71b}\label{classflash_stream_a91d1442264307a40fced2b3da43dc71b}} 
+\index{flashStream@{flashStream}!flashStream@{flashStream}}
+\index{flashStream@{flashStream}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{flashStream()}{flashStream()}}
+{\footnotesize\ttfamily flash\+Stream\+::flash\+Stream (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classflash_stream_a09dd933c7d1f99d92ac72592534a4a3f}\label{classflash_stream_a09dd933c7d1f99d92ac72592534a4a3f}} 
+\index{flashStream@{flashStream}!available@{available}}
+\index{available@{available}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{available()}{available()}}
+{\footnotesize\ttfamily int flash\+Stream\+::available (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classflash_stream_a81da3f19ab4811aa93ce52ddd3bd188a}\label{classflash_stream_a81da3f19ab4811aa93ce52ddd3bd188a}} 
+\index{flashStream@{flashStream}!close@{close}}
+\index{close@{close}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{close()}{close()}}
+{\footnotesize\ttfamily void flash\+Stream\+::close (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classseekable_stream_a9a32b4330663e6e2407313d0dd0e255f}{seekable\+Stream}}.
+
+\mbox{\Hypertarget{classflash_stream_ac2f24c97114b369509d775e6781efbbe}\label{classflash_stream_ac2f24c97114b369509d775e6781efbbe}} 
+\index{flashStream@{flashStream}!flush@{flush}}
+\index{flush@{flush}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{flush()}{flush()}}
+{\footnotesize\ttfamily void flash\+Stream\+::flush (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classflash_stream_ad7559cbc1bd2ac30c8af112d05a06983}\label{classflash_stream_ad7559cbc1bd2ac30c8af112d05a06983}} 
+\index{flashStream@{flashStream}!open@{open}}
+\index{open@{open}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{open()}{open()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily int flash\+Stream\+::open (\begin{DoxyParamCaption}\item[{short}]{file\+Num,  }\item[{char}]{mode = {\ttfamily \textquotesingle{}\textbackslash{}0\textquotesingle{}} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classflash_stream_aed80292a0950c246404f4a62d2fb40c7}\label{classflash_stream_aed80292a0950c246404f4a62d2fb40c7}} 
+\index{flashStream@{flashStream}!open@{open}}
+\index{open@{open}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{open()}{open()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily int flash\+Stream\+::open (\begin{DoxyParamCaption}\item[{String}]{\+\_\+filename,  }\item[{char}]{mode = {\ttfamily \textquotesingle{}\textbackslash{}0\textquotesingle{}} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classseekable_stream_af28ec1377c94e4c8fa819163c699b402}{seekable\+Stream}}.
+
+\mbox{\Hypertarget{classflash_stream_a7dfc6f9b9b756f48e22c095fa4e0c733}\label{classflash_stream_a7dfc6f9b9b756f48e22c095fa4e0c733}} 
+\index{flashStream@{flashStream}!peek@{peek}}
+\index{peek@{peek}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{peek()}{peek()}}
+{\footnotesize\ttfamily int flash\+Stream\+::peek (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classflash_stream_aa10c03136ba69758eb4be13388ddcca6}\label{classflash_stream_aa10c03136ba69758eb4be13388ddcca6}} 
+\index{flashStream@{flashStream}!read@{read}}
+\index{read@{read}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{read()}{read()}}
+{\footnotesize\ttfamily int flash\+Stream\+::read (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+\mbox{\Hypertarget{classflash_stream_a7a48d386946f8c123006dc060173f376}\label{classflash_stream_a7a48d386946f8c123006dc060173f376}} 
+\index{flashStream@{flashStream}!seek@{seek}}
+\index{seek@{seek}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{seek()}{seek()}}
+{\footnotesize\ttfamily unsigned int flash\+Stream\+::seek (\begin{DoxyParamCaption}\item[{unsigned int}]{\+\_\+pos = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classseekable_stream_a05b0e71f635a107188b57c29b445f3ea}{seekable\+Stream}}.
+
+\mbox{\Hypertarget{classflash_stream_aebb3e951c8e23ee484360b2a6f3b2118}\label{classflash_stream_aebb3e951c8e23ee484360b2a6f3b2118}} 
+\index{flashStream@{flashStream}!setSize@{setSize}}
+\index{setSize@{setSize}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{setSize()}{setSize()}}
+{\footnotesize\ttfamily void flash\+Stream\+::set\+Size (\begin{DoxyParamCaption}\item[{unsigned int}]{\+\_\+size }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classflash_stream_a98eab8bc043c5a8a0a62324bd14c3f98}\label{classflash_stream_a98eab8bc043c5a8a0a62324bd14c3f98}} 
+\index{flashStream@{flashStream}!write@{write}}
+\index{write@{write}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{write()}{write()}}
+{\footnotesize\ttfamily size\+\_\+t flash\+Stream\+::write (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{ch }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classflash_stream_a3ffa5b66266b0d21898c714b77d24ae6}\label{classflash_stream_a3ffa5b66266b0d21898c714b77d24ae6}} 
+\index{flashStream@{flashStream}!pos@{pos}}
+\index{pos@{pos}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{pos}{pos}}
+{\footnotesize\ttfamily unsigned int flash\+Stream\+::pos\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classflash_stream_a554cc9688c9a9d8c17fac68d5b54f01b}\label{classflash_stream_a554cc9688c9a9d8c17fac68d5b54f01b}} 
+\index{flashStream@{flashStream}!startPos@{startPos}}
+\index{startPos@{startPos}!flashStream@{flashStream}}
+\doxysubsubsection{\texorpdfstring{startPos}{startPos}}
+{\footnotesize\ttfamily unsigned int flash\+Stream\+::start\+Pos\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{flashstream_8h}{flashstream.\+h}}\item 
+\mbox{\hyperlink{flashstream_8cpp}{flashstream.\+cpp}}\end{DoxyCompactItemize}

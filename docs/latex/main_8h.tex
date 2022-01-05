@@ -18,31 +18,10 @@
 {\ttfamily \#include \char`\"{}stdarg.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}item.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}inputs.\+h\char`\"{}}\newline
-Include dependency graph for main.\+h\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{main_8h__incl}
-\end{center}
-\end{figure}
-This graph shows which files directly or indirectly include this file\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{main_8h__dep__incl}
-\end{center}
-\end{figure}
 \doxysubsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
 union \mbox{\hyperlink{union_u_i_d}{U\+ID}}
-\end{DoxyCompactItemize}
-\doxysubsection*{Macros}
-\begin{DoxyCompactItemize}
-\item 
-\#define \mbox{\hyperlink{main_8h_a71a294b57014bc72835215290f1735fe}{D\+H\+C\+P\+\_\+\+R\+E\+T\+R\+Y\+\_\+\+I\+N\+T\+E\+R\+V\+AL}}~60000
 \end{DoxyCompactItemize}
 \doxysubsection*{Enumerations}
 \begin{DoxyCompactItemize}
@@ -56,13 +35,15 @@ enum \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status
 \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473a3313433a81a25d16c72bb69503429b2d}{I\+P\+\_\+\+R\+E\+A\+D\+Y\+\_\+\+C\+O\+N\+F\+I\+G\+\_\+\+L\+O\+A\+D\+E\+D\+\_\+\+C\+O\+N\+N\+E\+C\+T\+I\+N\+G\+\_\+\+T\+O\+\_\+\+B\+R\+O\+K\+ER}} = 4, 
 \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473ade482451d4b1a70137e1590d5d9e0fe8}{R\+E\+T\+A\+I\+N\+I\+N\+G\+\_\+\+C\+O\+L\+L\+E\+C\+T\+I\+NG}} = 5, 
 \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473ae6c7d41b255eff353251fbec6fe839e4}{O\+P\+E\+R\+A\+T\+I\+ON}} = 6, 
-\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473a7b6874c83593674f516620bb883fff8b}{D\+O\+\_\+\+R\+E\+I\+N\+IT}} = -\/10, 
+\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473aad60268337bbdcb63477afd184fe2128}{O\+P\+E\+R\+A\+T\+I\+O\+N\+\_\+\+N\+O\+\_\+\+M\+Q\+TT}} = 7, 
 \newline
+\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473a7b6874c83593674f516620bb883fff8b}{D\+O\+\_\+\+R\+E\+I\+N\+IT}} = -\/10, 
 \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473a8d100cff0932a4777f300647958ca8ba}{R\+E\+I\+N\+IT}} = -\/ 11, 
 \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473a9ea9900a7508394e36b0a3024397c285}{D\+O\+\_\+\+R\+E\+C\+O\+N\+N\+E\+CT}} = 12, 
 \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473af0a5833d071a9c74f91cd1ef5063d2dc}{R\+E\+C\+O\+N\+N\+E\+CT}} = 13, 
-\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473af3d074e791c337efc66c7e5bd378e946}{R\+E\+A\+D\+\_\+\+R\+E\+\_\+\+C\+O\+N\+F\+IG}} = 14, 
 \newline
+\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473af3d074e791c337efc66c7e5bd378e946}{R\+E\+A\+D\+\_\+\+R\+E\+\_\+\+C\+O\+N\+F\+IG}} = 14, 
+\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473adea5bef32cb35e55b1c64edb787e24ec}{D\+O\+\_\+\+R\+E\+A\+D\+\_\+\+R\+E\+\_\+\+C\+O\+N\+F\+IG}} = 15, 
 \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473aa3c06bc7e4d652a970cab72026c6fed1}{D\+O\+\_\+\+N\+O\+T\+H\+I\+NG}} = -\/15
  \}
 \end{DoxyCompactItemize}
@@ -81,39 +62,27 @@ void \mbox{\hyperlink{main_8h_abbcbfa3bc0f5d93f1f1d84c3fdc23608}{Changed}} (int 
 \item 
 void \mbox{\hyperlink{main_8h_aa557ba1fef085fb9865ffd399c738dbf}{modbus\+Idle}} (void)
 \item 
-void \mbox{\hyperlink{main_8h_a21fea6de1fe7b59684f3d18e3f4764d7}{cmd\+Function\+Help}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+int \mbox{\hyperlink{main_8h_a741e85280176117a466e887e8ea3ae9f}{cmd\+Function\+Help}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
 \item 
-void \mbox{\hyperlink{main_8h_ab854d947e87c345f801a07f196e50a67}{cmd\+Function\+Kill}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+int \mbox{\hyperlink{main_8h_a78fac18f243ffbb9a7bdef1c6126673d}{cmd\+Function\+Kill}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
 \item 
 void \mbox{\hyperlink{main_8h_a82529a2f0678bfb6b0808935865ba42d}{apply\+Config}} ()
 \item 
-void \mbox{\hyperlink{main_8h_a3e35733dfdfb0fc4a3c55ab4bfc34fc1}{cmd\+Function\+Load}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+int \mbox{\hyperlink{main_8h_a386d89c44510281499c427aae77e472e}{cmd\+Function\+Load}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
 \item 
 int \mbox{\hyperlink{main_8h_a92e24c034fb886c8155d50831bae5823}{load\+Config\+From\+E\+E\+P\+R\+OM}} ()
 \item 
-void \mbox{\hyperlink{main_8h_a1ebb3f04dc34df941a4bf974f7ad9443}{cmd\+Function\+Req}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+int \mbox{\hyperlink{main_8h_ad7bd0a89bd5d2f06c5ff12da3c4a0578}{cmd\+Function\+Save}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
 \item 
-int \mbox{\hyperlink{main_8h_aec955c97b23e5875d0fdb3c00e789903}{mqtt\+Config\+Request}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+int \mbox{\hyperlink{main_8h_adcda04094ce227e4f3b9eecc7eb565c6}{cmd\+Function\+Set\+Mac}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
 \item 
-int \mbox{\hyperlink{main_8h_ad60a48a0c509facdc6dc61df64d49fae}{mqtt\+Config\+Resp}} (char $\ast$as)
+int \mbox{\hyperlink{main_8h_a7e56dec64c5e7e657ec7ed5016e9aa90}{cmd\+Function\+Get}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
 \item 
-void \mbox{\hyperlink{main_8h_a66af021e24df0f8f82d9550cdb6bf865}{cmd\+Function\+Save}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
-\item 
-void \mbox{\hyperlink{main_8h_aea9177f835f6f4ad83d8f71dc0a4db77}{cmd\+Function\+Set\+Mac}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
-\item 
-void \mbox{\hyperlink{main_8h_a84a345181b5379a4dc0eec58f348deb7}{cmd\+Function\+Get}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
+int \mbox{\hyperlink{main_8h_a01f9a34aa5ce566aa991b139ad1d1f87}{cmd\+Function\+Loglevel}} (int arg\+\_\+cnt, char $\ast$$\ast$args)
 \item 
 void \mbox{\hyperlink{main_8h_a2d4b5aa8fbc197c31397235607aeba13}{print\+Bool}} (bool arg)
 \item 
-void \mbox{\hyperlink{main_8h_a3d9b2a443a58bf0d3e28c174d2c43b8f}{save\+Flash}} (short n, char $\ast$str)
-\item 
-int \mbox{\hyperlink{main_8h_a7f53de7620c6cfb1462d7c94b5f9814c}{load\+Flash}} (short n, char $\ast$str, short l=\mbox{\hyperlink{options_8h_a62d02da8c36fd3ab5519e373620382d1}{M\+A\+X\+F\+L\+A\+S\+H\+S\+TR}})
-\item 
-void \mbox{\hyperlink{main_8h_a881f36fdc5bf71038ea93823437e7751}{save\+Flash}} (short n, I\+P\+Address \&ip)
-\item 
-int \mbox{\hyperlink{main_8h_a4ae13d2288d58c3ea8b731270fa798d3}{ip\+Load\+From\+Flash}} (short n, I\+P\+Address \&ip)
-\item 
-\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} \mbox{\hyperlink{main_8h_a1369dd2c9e03f46af35b247a5e8548df}{load\+Config\+From\+Http}} (int arg\+\_\+cnt=0, char $\ast$$\ast$args=N\+U\+LL)
+int \mbox{\hyperlink{main_8h_a80630fe7fd8aa1d0e6929a5a7c848c54}{load\+Config\+From\+Http}} ()
 \item 
 void \mbox{\hyperlink{main_8h_a1c43d8a4afead0d0df29635242290377}{pre\+Transmission}} ()
 \item 
@@ -125,7 +94,7 @@ void \mbox{\hyperlink{main_8h_a840f282fdf876a88d5ff634fd74f10be}{loop\+\_\+main}
 \item 
 void \mbox{\hyperlink{main_8h_a58e08cc15112818913fe96d75642265e}{ow\+Idle}} (void)
 \item 
-void \mbox{\hyperlink{main_8h_ad146ac5b8d70c1a9a590ba4029c3548e}{input\+Loop}} (void)
+void \mbox{\hyperlink{main_8h_a9de6380e1d961d11c0b6d01171646d34}{input\+Loop}} (short)
 \item 
 void \mbox{\hyperlink{main_8h_a312b53e977f386af72ed576bca617fef}{input\+Setup}} (void)
 \item 
@@ -163,16 +132,9 @@ void \mbox{\hyperlink{main_8h_ab6cb5750ee8902ca29b51dd013bb74b9}{print\+Curent\+
 \mbox{\hyperlink{class_streamlog}{Streamlog}} \mbox{\hyperlink{main_8h_a962d0234b6d650699159b02bbb1ba659}{info\+Serial}}
 \item 
 \mbox{\hyperlink{class_streamlog}{Streamlog}} \mbox{\hyperlink{main_8h_a49f4668352e76de3b6187103927915f5}{error\+Serial}}
+\item 
+\mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} \mbox{\hyperlink{main_8h_a7bbda7cf303a1bc3222e7a270f9040bd}{lan\+Status}}
 \end{DoxyCompactItemize}
-
-
-\doxysubsection{Macro Definition Documentation}
-\mbox{\Hypertarget{main_8h_a71a294b57014bc72835215290f1735fe}\label{main_8h_a71a294b57014bc72835215290f1735fe}} 
-\index{main.h@{main.h}!DHCP\_RETRY\_INTERVAL@{DHCP\_RETRY\_INTERVAL}}
-\index{DHCP\_RETRY\_INTERVAL@{DHCP\_RETRY\_INTERVAL}!main.h@{main.h}}
-\doxysubsubsection{\texorpdfstring{DHCP\_RETRY\_INTERVAL}{DHCP\_RETRY\_INTERVAL}}
-{\footnotesize\ttfamily \#define D\+H\+C\+P\+\_\+\+R\+E\+T\+R\+Y\+\_\+\+I\+N\+T\+E\+R\+V\+AL~60000}
-
 
 
 \doxysubsection{Enumeration Type Documentation}
@@ -211,6 +173,10 @@ R\+E\+T\+A\+I\+N\+I\+N\+G\+\_\+\+C\+O\+L\+L\+E\+C\+T\+I\+NG&\\
 O\+P\+E\+R\+A\+T\+I\+ON&\\
 \hline
 
+\raisebox{\heightof{T}}[0pt][0pt]{\index{OPERATION\_NO\_MQTT@{OPERATION\_NO\_MQTT}!main.h@{main.h}}\index{main.h@{main.h}!OPERATION\_NO\_MQTT@{OPERATION\_NO\_MQTT}}}\mbox{\Hypertarget{main_8h_a98b39d850b041da059cf5de62463a473aad60268337bbdcb63477afd184fe2128}\label{main_8h_a98b39d850b041da059cf5de62463a473aad60268337bbdcb63477afd184fe2128}} 
+O\+P\+E\+R\+A\+T\+I\+O\+N\+\_\+\+N\+O\+\_\+\+M\+Q\+TT&\\
+\hline
+
 \raisebox{\heightof{T}}[0pt][0pt]{\index{DO\_REINIT@{DO\_REINIT}!main.h@{main.h}}\index{main.h@{main.h}!DO\_REINIT@{DO\_REINIT}}}\mbox{\Hypertarget{main_8h_a98b39d850b041da059cf5de62463a473a7b6874c83593674f516620bb883fff8b}\label{main_8h_a98b39d850b041da059cf5de62463a473a7b6874c83593674f516620bb883fff8b}} 
 D\+O\+\_\+\+R\+E\+I\+N\+IT&\\
 \hline
@@ -229,6 +195,10 @@ R\+E\+C\+O\+N\+N\+E\+CT&\\
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{READ\_RE\_CONFIG@{READ\_RE\_CONFIG}!main.h@{main.h}}\index{main.h@{main.h}!READ\_RE\_CONFIG@{READ\_RE\_CONFIG}}}\mbox{\Hypertarget{main_8h_a98b39d850b041da059cf5de62463a473af3d074e791c337efc66c7e5bd378e946}\label{main_8h_a98b39d850b041da059cf5de62463a473af3d074e791c337efc66c7e5bd378e946}} 
 R\+E\+A\+D\+\_\+\+R\+E\+\_\+\+C\+O\+N\+F\+IG&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{DO\_READ\_RE\_CONFIG@{DO\_READ\_RE\_CONFIG}!main.h@{main.h}}\index{main.h@{main.h}!DO\_READ\_RE\_CONFIG@{DO\_READ\_RE\_CONFIG}}}\mbox{\Hypertarget{main_8h_a98b39d850b041da059cf5de62463a473adea5bef32cb35e55b1c64edb787e24ec}\label{main_8h_a98b39d850b041da059cf5de62463a473adea5bef32cb35e55b1c64edb787e24ec}} 
+D\+O\+\_\+\+R\+E\+A\+D\+\_\+\+R\+E\+\_\+\+C\+O\+N\+F\+IG&\\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{DO\_NOTHING@{DO\_NOTHING}!main.h@{main.h}}\index{main.h@{main.h}!DO\_NOTHING@{DO\_NOTHING}}}\mbox{\Hypertarget{main_8h_a98b39d850b041da059cf5de62463a473aa3c06bc7e4d652a970cab72026c6fed1}\label{main_8h_a98b39d850b041da059cf5de62463a473aa3c06bc7e4d652a970cab72026c6fed1}} 
@@ -251,47 +221,47 @@ D\+O\+\_\+\+N\+O\+T\+H\+I\+NG&\\
 \doxysubsubsection{\texorpdfstring{Changed()}{Changed()}}
 {\footnotesize\ttfamily void Changed (\begin{DoxyParamCaption}\item[{int}]{i,  }\item[{Device\+Address}]{addr,  }\item[{float}]{current\+Temp }\end{DoxyParamCaption})}
 
-T\+O\+DO\+: Refactore using Items interface\mbox{\Hypertarget{main_8h_a84a345181b5379a4dc0eec58f348deb7}\label{main_8h_a84a345181b5379a4dc0eec58f348deb7}} 
+\mbox{\Hypertarget{main_8h_a7e56dec64c5e7e657ec7ed5016e9aa90}\label{main_8h_a7e56dec64c5e7e657ec7ed5016e9aa90}} 
 \index{main.h@{main.h}!cmdFunctionGet@{cmdFunctionGet}}
 \index{cmdFunctionGet@{cmdFunctionGet}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{cmdFunctionGet()}{cmdFunctionGet()}}
-{\footnotesize\ttfamily void cmd\+Function\+Get (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int cmd\+Function\+Get (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{main_8h_a21fea6de1fe7b59684f3d18e3f4764d7}\label{main_8h_a21fea6de1fe7b59684f3d18e3f4764d7}} 
+\mbox{\Hypertarget{main_8h_a741e85280176117a466e887e8ea3ae9f}\label{main_8h_a741e85280176117a466e887e8ea3ae9f}} 
 \index{main.h@{main.h}!cmdFunctionHelp@{cmdFunctionHelp}}
 \index{cmdFunctionHelp@{cmdFunctionHelp}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{cmdFunctionHelp()}{cmdFunctionHelp()}}
-{\footnotesize\ttfamily void cmd\+Function\+Help (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int cmd\+Function\+Help (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{main_8h_ab854d947e87c345f801a07f196e50a67}\label{main_8h_ab854d947e87c345f801a07f196e50a67}} 
+\mbox{\Hypertarget{main_8h_a78fac18f243ffbb9a7bdef1c6126673d}\label{main_8h_a78fac18f243ffbb9a7bdef1c6126673d}} 
 \index{main.h@{main.h}!cmdFunctionKill@{cmdFunctionKill}}
 \index{cmdFunctionKill@{cmdFunctionKill}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{cmdFunctionKill()}{cmdFunctionKill()}}
-{\footnotesize\ttfamily void cmd\+Function\+Kill (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int cmd\+Function\+Kill (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{main_8h_a3e35733dfdfb0fc4a3c55ab4bfc34fc1}\label{main_8h_a3e35733dfdfb0fc4a3c55ab4bfc34fc1}} 
+\mbox{\Hypertarget{main_8h_a386d89c44510281499c427aae77e472e}\label{main_8h_a386d89c44510281499c427aae77e472e}} 
 \index{main.h@{main.h}!cmdFunctionLoad@{cmdFunctionLoad}}
 \index{cmdFunctionLoad@{cmdFunctionLoad}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{cmdFunctionLoad()}{cmdFunctionLoad()}}
-{\footnotesize\ttfamily void cmd\+Function\+Load (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int cmd\+Function\+Load (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{main_8h_a1ebb3f04dc34df941a4bf974f7ad9443}\label{main_8h_a1ebb3f04dc34df941a4bf974f7ad9443}} 
-\index{main.h@{main.h}!cmdFunctionReq@{cmdFunctionReq}}
-\index{cmdFunctionReq@{cmdFunctionReq}!main.h@{main.h}}
-\doxysubsubsection{\texorpdfstring{cmdFunctionReq()}{cmdFunctionReq()}}
-{\footnotesize\ttfamily void cmd\+Function\+Req (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+\mbox{\Hypertarget{main_8h_a01f9a34aa5ce566aa991b139ad1d1f87}\label{main_8h_a01f9a34aa5ce566aa991b139ad1d1f87}} 
+\index{main.h@{main.h}!cmdFunctionLoglevel@{cmdFunctionLoglevel}}
+\index{cmdFunctionLoglevel@{cmdFunctionLoglevel}!main.h@{main.h}}
+\doxysubsubsection{\texorpdfstring{cmdFunctionLoglevel()}{cmdFunctionLoglevel()}}
+{\footnotesize\ttfamily int cmd\+Function\+Loglevel (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{main_8h_a66af021e24df0f8f82d9550cdb6bf865}\label{main_8h_a66af021e24df0f8f82d9550cdb6bf865}} 
+\mbox{\Hypertarget{main_8h_ad7bd0a89bd5d2f06c5ff12da3c4a0578}\label{main_8h_ad7bd0a89bd5d2f06c5ff12da3c4a0578}} 
 \index{main.h@{main.h}!cmdFunctionSave@{cmdFunctionSave}}
 \index{cmdFunctionSave@{cmdFunctionSave}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{cmdFunctionSave()}{cmdFunctionSave()}}
-{\footnotesize\ttfamily void cmd\+Function\+Save (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int cmd\+Function\+Save (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{main_8h_aea9177f835f6f4ad83d8f71dc0a4db77}\label{main_8h_aea9177f835f6f4ad83d8f71dc0a4db77}} 
+\mbox{\Hypertarget{main_8h_adcda04094ce227e4f3b9eecc7eb565c6}\label{main_8h_adcda04094ce227e4f3b9eecc7eb565c6}} 
 \index{main.h@{main.h}!cmdFunctionSetMac@{cmdFunctionSetMac}}
 \index{cmdFunctionSetMac@{cmdFunctionSetMac}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{cmdFunctionSetMac()}{cmdFunctionSetMac()}}
-{\footnotesize\ttfamily void cmd\+Function\+Set\+Mac (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int cmd\+Function\+Set\+Mac (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{main_8h_a4d31c49c58edcc310db78d660c434995}\label{main_8h_a4d31c49c58edcc310db78d660c434995}} 
 \index{main.h@{main.h}!disabledDisconnected@{disabledDisconnected}}
@@ -299,11 +269,11 @@ T\+O\+DO\+: Refactore using Items interface\mbox{\Hypertarget{main_8h_a84a345181
 \doxysubsubsection{\texorpdfstring{disabledDisconnected()}{disabledDisconnected()}}
 {\footnotesize\ttfamily bool disabled\+Disconnected (\begin{DoxyParamCaption}\item[{const a\+Json\+Object $\ast$}]{thermo\+Extension\+Array,  }\item[{int}]{thermo\+Latest\+Command }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{main_8h_ad146ac5b8d70c1a9a590ba4029c3548e}\label{main_8h_ad146ac5b8d70c1a9a590ba4029c3548e}} 
+\mbox{\Hypertarget{main_8h_a9de6380e1d961d11c0b6d01171646d34}\label{main_8h_a9de6380e1d961d11c0b6d01171646d34}} 
 \index{main.h@{main.h}!inputLoop@{inputLoop}}
 \index{inputLoop@{inputLoop}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{inputLoop()}{inputLoop()}}
-{\footnotesize\ttfamily void input\+Loop (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void input\+Loop (\begin{DoxyParamCaption}\item[{short}]{ }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{main_8h_a312b53e977f386af72ed576bca617fef}\label{main_8h_a312b53e977f386af72ed576bca617fef}} 
 \index{main.h@{main.h}!inputSetup@{inputSetup}}
@@ -316,12 +286,6 @@ T\+O\+DO\+: Refactore using Items interface\mbox{\Hypertarget{main_8h_a84a345181
 \index{ip\_ready\_config\_loaded\_connecting\_to\_broker@{ip\_ready\_config\_loaded\_connecting\_to\_broker}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{ip\_ready\_config\_loaded\_connecting\_to\_broker()}{ip\_ready\_config\_loaded\_connecting\_to\_broker()}}
 {\footnotesize\ttfamily void ip\+\_\+ready\+\_\+config\+\_\+loaded\+\_\+connecting\+\_\+to\+\_\+broker (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{main_8h_a4ae13d2288d58c3ea8b731270fa798d3}\label{main_8h_a4ae13d2288d58c3ea8b731270fa798d3}} 
-\index{main.h@{main.h}!ipLoadFromFlash@{ipLoadFromFlash}}
-\index{ipLoadFromFlash@{ipLoadFromFlash}!main.h@{main.h}}
-\doxysubsubsection{\texorpdfstring{ipLoadFromFlash()}{ipLoadFromFlash()}}
-{\footnotesize\ttfamily int ip\+Load\+From\+Flash (\begin{DoxyParamCaption}\item[{short}]{n,  }\item[{I\+P\+Address \&}]{ip }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{main_8h_a9b73380a4525361ce5634b890e83c8d2}\label{main_8h_a9b73380a4525361ce5634b890e83c8d2}} 
 \index{main.h@{main.h}!isNotRetainingStatus@{isNotRetainingStatus}}
@@ -347,17 +311,11 @@ T\+O\+DO\+: Refactore using Items interface\mbox{\Hypertarget{main_8h_a84a345181
 \doxysubsubsection{\texorpdfstring{loadConfigFromEEPROM()}{loadConfigFromEEPROM()}}
 {\footnotesize\ttfamily int load\+Config\+From\+E\+E\+P\+R\+OM (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{main_8h_a1369dd2c9e03f46af35b247a5e8548df}\label{main_8h_a1369dd2c9e03f46af35b247a5e8548df}} 
+\mbox{\Hypertarget{main_8h_a80630fe7fd8aa1d0e6929a5a7c848c54}\label{main_8h_a80630fe7fd8aa1d0e6929a5a7c848c54}} 
 \index{main.h@{main.h}!loadConfigFromHttp@{loadConfigFromHttp}}
 \index{loadConfigFromHttp@{loadConfigFromHttp}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{loadConfigFromHttp()}{loadConfigFromHttp()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} load\+Config\+From\+Http (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt = {\ttfamily 0},  }\item[{char $\ast$$\ast$}]{args = {\ttfamily NULL} }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{main_8h_a7f53de7620c6cfb1462d7c94b5f9814c}\label{main_8h_a7f53de7620c6cfb1462d7c94b5f9814c}} 
-\index{main.h@{main.h}!loadFlash@{loadFlash}}
-\index{loadFlash@{loadFlash}!main.h@{main.h}}
-\doxysubsubsection{\texorpdfstring{loadFlash()}{loadFlash()}}
-{\footnotesize\ttfamily int load\+Flash (\begin{DoxyParamCaption}\item[{short}]{n,  }\item[{char $\ast$}]{str,  }\item[{short}]{l = {\ttfamily \mbox{\hyperlink{options_8h_a62d02da8c36fd3ab5519e373620382d1}{M\+A\+X\+F\+L\+A\+S\+H\+S\+TR}}} }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int load\+Config\+From\+Http (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{main_8h_a840f282fdf876a88d5ff634fd74f10be}\label{main_8h_a840f282fdf876a88d5ff634fd74f10be}} 
 \index{main.h@{main.h}!loop\_main@{loop\_main}}
@@ -376,18 +334,6 @@ T\+O\+DO\+: Refactore using Items interface\mbox{\Hypertarget{main_8h_a84a345181
 \index{mqttCallback@{mqttCallback}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{mqttCallback()}{mqttCallback()}}
 {\footnotesize\ttfamily void mqtt\+Callback (\begin{DoxyParamCaption}\item[{char $\ast$}]{topic,  }\item[{byte $\ast$}]{payload,  }\item[{unsigned int}]{length }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{main_8h_aec955c97b23e5875d0fdb3c00e789903}\label{main_8h_aec955c97b23e5875d0fdb3c00e789903}} 
-\index{main.h@{main.h}!mqttConfigRequest@{mqttConfigRequest}}
-\index{mqttConfigRequest@{mqttConfigRequest}!main.h@{main.h}}
-\doxysubsubsection{\texorpdfstring{mqttConfigRequest()}{mqttConfigRequest()}}
-{\footnotesize\ttfamily int mqtt\+Config\+Request (\begin{DoxyParamCaption}\item[{int}]{arg\+\_\+cnt,  }\item[{char $\ast$$\ast$}]{args }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{main_8h_ad60a48a0c509facdc6dc61df64d49fae}\label{main_8h_ad60a48a0c509facdc6dc61df64d49fae}} 
-\index{main.h@{main.h}!mqttConfigResp@{mqttConfigResp}}
-\index{mqttConfigResp@{mqttConfigResp}!main.h@{main.h}}
-\doxysubsubsection{\texorpdfstring{mqttConfigResp()}{mqttConfigResp()}}
-{\footnotesize\ttfamily int mqtt\+Config\+Resp (\begin{DoxyParamCaption}\item[{char $\ast$}]{as }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{main_8h_ae886a24c554e48191a1ea668c43d2287}\label{main_8h_ae886a24c554e48191a1ea668c43d2287}} 
 \index{main.h@{main.h}!onInitialStateInitLAN@{onInitialStateInitLAN}}
@@ -455,18 +401,6 @@ T\+O\+DO\+: Refactore using Items interface\mbox{\Hypertarget{main_8h_a84a345181
 \doxysubsubsection{\texorpdfstring{resetHard()}{resetHard()}}
 {\footnotesize\ttfamily void reset\+Hard (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{main_8h_a3d9b2a443a58bf0d3e28c174d2c43b8f}\label{main_8h_a3d9b2a443a58bf0d3e28c174d2c43b8f}} 
-\index{main.h@{main.h}!saveFlash@{saveFlash}}
-\index{saveFlash@{saveFlash}!main.h@{main.h}}
-\doxysubsubsection{\texorpdfstring{saveFlash()}{saveFlash()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
-{\footnotesize\ttfamily void save\+Flash (\begin{DoxyParamCaption}\item[{short}]{n,  }\item[{char $\ast$}]{str }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{main_8h_a881f36fdc5bf71038ea93823437e7751}\label{main_8h_a881f36fdc5bf71038ea93823437e7751}} 
-\index{main.h@{main.h}!saveFlash@{saveFlash}}
-\index{saveFlash@{saveFlash}!main.h@{main.h}}
-\doxysubsubsection{\texorpdfstring{saveFlash()}{saveFlash()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
-{\footnotesize\ttfamily void save\+Flash (\begin{DoxyParamCaption}\item[{short}]{n,  }\item[{I\+P\+Address \&}]{ip }\end{DoxyParamCaption})}
-
 \mbox{\Hypertarget{main_8h_aa34675c2dc6eb3d0744844d8e67e3af8}\label{main_8h_aa34675c2dc6eb3d0744844d8e67e3af8}} 
 \index{main.h@{main.h}!setup\_main@{setup\_main}}
 \index{setup\_main@{setup\_main}!main.h@{main.h}}
@@ -517,4 +451,10 @@ T\+O\+DO\+: Refactore using Items interface\mbox{\Hypertarget{main_8h_a84a345181
 \index{infoSerial@{infoSerial}!main.h@{main.h}}
 \doxysubsubsection{\texorpdfstring{infoSerial}{infoSerial}}
 {\footnotesize\ttfamily \mbox{\hyperlink{class_streamlog}{Streamlog}} info\+Serial\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{main_8h_a7bbda7cf303a1bc3222e7a270f9040bd}\label{main_8h_a7bbda7cf303a1bc3222e7a270f9040bd}} 
+\index{main.h@{main.h}!lanStatus@{lanStatus}}
+\index{lanStatus@{lanStatus}!main.h@{main.h}}
+\doxysubsubsection{\texorpdfstring{lanStatus}{lanStatus}}
+{\footnotesize\ttfamily \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} lan\+Status\hspace{0.3cm}{\ttfamily [extern]}}
 

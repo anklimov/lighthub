@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +53,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('globals_s.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -71,8 +93,8 @@ $(function() {
 <li>S_CMD
 : <a class="el" href="item_8h.html#a7fc4fdff41f72de35ff7f31a88d2ef17">item.h</a>
 </li>
-<li>S_ESET
-: <a class="el" href="item_8h.html#ab23525babba311d25e08a390ecf0d72b">item.h</a>
+<li>S_DELAYED
+: <a class="el" href="item_8h.html#afa8045f9b08cddbfc9c5f4255646a2f0">item.h</a>
 </li>
 <li>S_FAN
 : <a class="el" href="item_8h.html#ad3cdbaefd6a2dfcd2a87bdc60f6874d4">item.h</a>
@@ -96,7 +118,7 @@ $(function() {
 : <a class="el" href="out__ac_8h.html#ac0d28426799e4da770644952ec858461">out_ac.h</a>
 </li>
 <li>S_RAW
-: <a class="el" href="out__ac_8h.html#ab7b18454392c93599b25faad65d6a370">out_ac.h</a>
+: <a class="el" href="item_8h.html#ab7b18454392c93599b25faad65d6a370">item.h</a>
 </li>
 <li>S_RGB
 : <a class="el" href="item_8h.html#a110d6e77da40715a6d53921bab49b3f3">item.h</a>
@@ -113,12 +135,14 @@ $(function() {
 <li>S_TEMP
 : <a class="el" href="item_8h.html#a9073478a392efbb9bf25be0f83f8654e">item.h</a>
 </li>
+<li>S_VAL
+: <a class="el" href="item_8h.html#ae03294e93bac1c7b9cf91281a95cdee0">item.h</a>
+</li>
 <li>SAME_STATE_ATTEMPTS
 : <a class="el" href="inputs_8h.html#ac274440d36c9abe1f71f18596c4dfea4">inputs.h</a>
 </li>
-<li>saveFlash()
-: <a class="el" href="main_8cpp.html#a3d9b2a443a58bf0d3e28c174d2c43b8f">main.cpp</a>
-, <a class="el" href="main_8h.html#a3d9b2a443a58bf0d3e28c174d2c43b8f">main.h</a>
+<li>SCALE_VOLUME_100
+: <a class="el" href="options_8h.html#a6bb48d5657055ecdc9b3dc0229a795ae">options.h</a>
 </li>
 <li>scan_i2c_bus()
 : <a class="el" href="utils_8cpp.html#af585ed9b15b9980b72fbec6d9c9dba67">utils.cpp</a>
@@ -129,6 +153,12 @@ $(function() {
 </li>
 <li>SEND_DEFFERED
 : <a class="el" href="item_cmd_8h.html#a33ea54bfccbf6af4fc41fdd08b6d0e57">itemCmd.h</a>
+</li>
+<li>SEND_DELAYED
+: <a class="el" href="item_cmd_8h.html#a4db4e80f4491989ae378bb3eb8c4160b">itemCmd.h</a>
+</li>
+<li>SEND_IMMEDIATE
+: <a class="el" href="item_cmd_8h.html#ac603ce9df277cd533484fbed4ae5237b">itemCmd.h</a>
 </li>
 <li>SEND_PARAMETERS
 : <a class="el" href="item_cmd_8h.html#adba0eeb6b1a5678cea10f4a823829b24">itemCmd.h</a>
@@ -149,8 +179,18 @@ $(function() {
 <li>SERIAL_BAUD
 : <a class="el" href="options_8h.html#a94df10e7efe7613d074c105099c7fd0e">options.h</a>
 </li>
+<li>serialDebugLevel
+: <a class="el" href="streamlog_8cpp.html#a28a478cd6130b2e1aa726dd789aaf309">streamlog.cpp</a>
+, <a class="el" href="streamlog_8h.html#a28a478cd6130b2e1aa726dd789aaf309">streamlog.h</a>
+</li>
 <li>serialModesNum
-: <a class="el" href="out__modbus_8cpp.html#a4d3d61e309ead27e6e008e455d75ceb5">out_modbus.cpp</a>
+: <a class="el" href="utils_8cpp.html#a4d3d61e309ead27e6e008e455d75ceb5">utils.cpp</a>
+</li>
+<li>serialParamType
+: <a class="el" href="utils_8h.html#af725dabbb9d86c575157b3bbc24d6d55">utils.h</a>
+</li>
+<li>SerialPortType
+: <a class="el" href="streamlog_8h.html#ace67e7b92ea9c2ca0cf0cc6c201ccbc2">streamlog.h</a>
 </li>
 <li>SetAddr()
 : <a class="el" href="utils_8cpp.html#a4dd6705cb24a3eab32d9abc8393844b3">utils.cpp</a>
@@ -187,8 +227,8 @@ $(function() {
 : <a class="el" href="main_8cpp.html#afa048a9d2e392a67cb5af8ab00b3ec0f">main.cpp</a>
 </li>
 <li>si
-: <a class="el" href="ow_term_8cpp.html#ac37ce0c409c53b6a18aefbfc3ad46b4a">owTerm.cpp</a>
-, <a class="el" href="ow_term_8h.html#ac37ce0c409c53b6a18aefbfc3ad46b4a">owTerm.h</a>
+: <a class="el" href="ow_term_8h.html#ac37ce0c409c53b6a18aefbfc3ad46b4a">owTerm.h</a>
+, <a class="el" href="ow_term_8cpp.html#ac37ce0c409c53b6a18aefbfc3ad46b4a">owTerm.cpp</a>
 </li>
 <li>softRebootFunc()
 : <a class="el" href="utils_8h.html#a7facb8f2c84692ab65024785eb64b541">utils.h</a>
@@ -205,17 +245,11 @@ $(function() {
 <li>ST_HS
 : <a class="el" href="item_cmd_8h.html#abac7e90eb597c98d2f5870c6528c09da">itemCmd.h</a>
 </li>
-<li>ST_HSV
-: <a class="el" href="item_cmd_8h.html#a67ad81da37213da74d71033ecd62a00c">itemCmd.h</a>
-</li>
 <li>ST_HSV255
 : <a class="el" href="item_cmd_8h.html#af1ffdc01c9fc9cc648518fef4fde8a52">itemCmd.h</a>
 </li>
 <li>ST_INT32
 : <a class="el" href="item_cmd_8h.html#a9bbd91c0ea3ac6af8f0deadcddce706c">itemCmd.h</a>
-</li>
-<li>ST_PERCENTS
-: <a class="el" href="item_cmd_8h.html#a0612f5b4f1bcd3a696c6a17b7e3e059e">itemCmd.h</a>
 </li>
 <li>ST_PERCENTS255
 : <a class="el" href="item_cmd_8h.html#ad5b8ab06d61866259ae7bc34655701a8">itemCmd.h</a>
@@ -238,11 +272,15 @@ $(function() {
 <li>ST_VOID
 : <a class="el" href="item_cmd_8h.html#a89b3fb099d3038f85ed3b573ba64d031">itemCmd.h</a>
 </li>
+<li>statusLED
+: <a class="el" href="main_8cpp.html#a1b23af1efb782b208cdcb77585f02b9b">main.cpp</a>
+</li>
 <li>str2regSize()
 : <a class="el" href="out__modbus_8cpp.html#a6b595bdd94e3d76226b079ba5d7d7239">out_modbus.cpp</a>
 </li>
 <li>str2SerialParam()
-: <a class="el" href="out__modbus_8cpp.html#ae62352d2766976d85ca20006e681f254">out_modbus.cpp</a>
+: <a class="el" href="utils_8cpp.html#a7a7f700c0c11e53e4fde708443be96ff">utils.cpp</a>
+, <a class="el" href="utils_8h.html#a7a7f700c0c11e53e4fde708443be96ff">utils.h</a>
 </li>
 <li>subitem2cmd()
 : <a class="el" href="item_8cpp.html#a44da304670c8b0446f674b318ebc9294">item.cpp</a>
@@ -301,14 +339,26 @@ $(function() {
 <li>SW_STAT1
 : <a class="el" href="ow_term_8h.html#a00243602c461da89cd31481290e64459">owTerm.h</a>
 </li>
+<li>SYSCONF_OFFSET
+: <a class="el" href="systemconfigdata_8h.html#a17db2f5f27050c93ce00712c46d2e810">systemconfigdata.h</a>
+</li>
+<li>SYSCONF_SIZE
+: <a class="el" href="systemconfigdata_8h.html#af5cce3d115609a6843723ebca1d742cd">systemconfigdata.h</a>
+</li>
+<li>sysConfStream
+: <a class="el" href="main_8cpp.html#a2ff0f601c86b9f35103ae9697e6a7f02">main.cpp</a>
+</li>
 <li>SYSLOG_LOCAL_SOCKET
 : <a class="el" href="options_8h.html#a2ea96e90902d4db4f9db6d5f5e3298dd">options.h</a>
 </li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

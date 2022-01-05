@@ -1,0 +1,158 @@
+\hypertarget{classout__relay}{}\doxysection{out\+\_\+relay Class Reference}
+\label{classout__relay}\index{out\_relay@{out\_relay}}
+
+
+{\ttfamily \#include $<$out\+\_\+relay.\+h$>$}
+
+Inheritance diagram for out\+\_\+relay\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classout__relay}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classout__relay_adc3baa184c4a143d6d3c55702ed8b463}{out\+\_\+relay}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
+\item 
+void \mbox{\hyperlink{classout__relay_aca59314615d3f914d9e23fafd329a1fb}{get\+Config}} ()
+\item 
+void \mbox{\hyperlink{classout__relay_aeaa81ef4002c0424854fd727881b0bcf}{relay}} (bool state)
+\item 
+int \mbox{\hyperlink{classout__relay_a1858489a8c68a95fa242f9d2ca24ee0d}{Setup}} () override
+\begin{DoxyCompactList}\small\item\em Remove?? Now get\+Chan\+Type used instead. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classout__relay_abb1d16519dbc187768911922362bafab}{Poll}} (short cause) override
+\item 
+int \mbox{\hyperlink{classout__relay_af6955f7fa76586a910643c294dd6877a}{Stop}} () override
+\item 
+int \mbox{\hyperlink{classout__relay_ac0b56fd7922f7c77ef17d859d89c0fd6}{Status}} () override
+\item 
+int \mbox{\hyperlink{classout__relay_a94d578704853aaacf7f7f1877de91b62}{get\+Chan\+Type}} () override
+\item 
+int \mbox{\hyperlink{classout__relay_ac3d7157d14d016e0136b3e4a9aac4aac}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+short \mbox{\hyperlink{classout__relay_a84fcc07f2a36b2e351f4fe049d485415}{pin}}
+\item 
+bool \mbox{\hyperlink{classout__relay_a43794a8da3ff44a425262580edb38ba6}{inverted}}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{classout__relay_a689f8626640402d691d7d5a00f7fa9a5}{period}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classout__relay_adc3baa184c4a143d6d3c55702ed8b463}\label{classout__relay_adc3baa184c4a143d6d3c55702ed8b463}} 
+\index{out\_relay@{out\_relay}!out\_relay@{out\_relay}}
+\index{out\_relay@{out\_relay}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{out\_relay()}{out\_relay()}}
+{\footnotesize\ttfamily out\+\_\+relay\+::out\+\_\+relay (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_item}{Item}} $\ast$}]{\+\_\+item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classout__relay_ac3d7157d14d016e0136b3e4a9aac4aac}\label{classout__relay_ac3d7157d14d016e0136b3e4a9aac4aac}} 
+\index{out\_relay@{out\_relay}!Ctrl@{Ctrl}}
+\index{Ctrl@{Ctrl}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}}
+{\footnotesize\ttfamily int out\+\_\+relay\+::\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{to\+Execute = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout__relay_a94d578704853aaacf7f7f1877de91b62}\label{classout__relay_a94d578704853aaacf7f7f1877de91b62}} 
+\index{out\_relay@{out\_relay}!getChanType@{getChanType}}
+\index{getChanType@{getChanType}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{getChanType()}{getChanType()}}
+{\footnotesize\ttfamily int out\+\_\+relay\+::get\+Chan\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout__relay_aca59314615d3f914d9e23fafd329a1fb}\label{classout__relay_aca59314615d3f914d9e23fafd329a1fb}} 
+\index{out\_relay@{out\_relay}!getConfig@{getConfig}}
+\index{getConfig@{getConfig}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{getConfig()}{getConfig()}}
+{\footnotesize\ttfamily void out\+\_\+relay\+::get\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classout__relay_abb1d16519dbc187768911922362bafab}\label{classout__relay_abb1d16519dbc187768911922362bafab}} 
+\index{out\_relay@{out\_relay}!Poll@{Poll}}
+\index{Poll@{Poll}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
+{\footnotesize\ttfamily int out\+\_\+relay\+::\+Poll (\begin{DoxyParamCaption}\item[{short}]{cause }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout__relay_aeaa81ef4002c0424854fd727881b0bcf}\label{classout__relay_aeaa81ef4002c0424854fd727881b0bcf}} 
+\index{out\_relay@{out\_relay}!relay@{relay}}
+\index{relay@{relay}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{relay()}{relay()}}
+{\footnotesize\ttfamily void out\+\_\+relay\+::relay (\begin{DoxyParamCaption}\item[{bool}]{state }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classout__relay_a1858489a8c68a95fa242f9d2ca24ee0d}\label{classout__relay_a1858489a8c68a95fa242f9d2ca24ee0d}} 
+\index{out\_relay@{out\_relay}!Setup@{Setup}}
+\index{Setup@{Setup}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily int out\+\_\+relay\+::\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Remove?? Now get\+Chan\+Type used instead. 
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_ad84ffc96dafea9cbe5c91f35c90ffe3b}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout__relay_ac0b56fd7922f7c77ef17d859d89c0fd6}\label{classout__relay_ac0b56fd7922f7c77ef17d859d89c0fd6}} 
+\index{out\_relay@{out\_relay}!Status@{Status}}
+\index{Status@{Status}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{Status()}{Status()}}
+{\footnotesize\ttfamily int out\+\_\+relay\+::\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_aefb8821172a2e66f49ea0da9b7c205a5}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout__relay_af6955f7fa76586a910643c294dd6877a}\label{classout__relay_af6955f7fa76586a910643c294dd6877a}} 
+\index{out\_relay@{out\_relay}!Stop@{Stop}}
+\index{Stop@{Stop}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{Stop()}{Stop()}}
+{\footnotesize\ttfamily int out\+\_\+relay\+::\+Stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac08061e5ae0}{abstract\+Ch}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classout__relay_a43794a8da3ff44a425262580edb38ba6}\label{classout__relay_a43794a8da3ff44a425262580edb38ba6}} 
+\index{out\_relay@{out\_relay}!inverted@{inverted}}
+\index{inverted@{inverted}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{inverted}{inverted}}
+{\footnotesize\ttfamily bool out\+\_\+relay\+::inverted\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classout__relay_a689f8626640402d691d7d5a00f7fa9a5}\label{classout__relay_a689f8626640402d691d7d5a00f7fa9a5}} 
+\index{out\_relay@{out\_relay}!period@{period}}
+\index{period@{period}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{period}{period}}
+{\footnotesize\ttfamily uint32\+\_\+t out\+\_\+relay\+::period\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classout__relay_a84fcc07f2a36b2e351f4fe049d485415}\label{classout__relay_a84fcc07f2a36b2e351f4fe049d485415}} 
+\index{out\_relay@{out\_relay}!pin@{pin}}
+\index{pin@{pin}!out\_relay@{out\_relay}}
+\doxysubsubsection{\texorpdfstring{pin}{pin}}
+{\footnotesize\ttfamily short out\+\_\+relay\+::pin\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+modules/\mbox{\hyperlink{out__relay_8h}{out\+\_\+relay.\+h}}\item 
+modules/\mbox{\hyperlink{out__relay_8cpp}{out\+\_\+relay.\+cpp}}\end{DoxyCompactItemize}

@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -46,6 +52,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('ow_term_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,11 +83,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_82d7c1f210290ade9e0671f857ad27e3.html">lighthub</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle">
 <div class="title">owTerm.h</div>  </div>
@@ -120,72 +138,81 @@ $(function() {
 <div class="line"><a name="l00048"></a><span class="lineno"><a class="line" href="ow_term_8h.html#ab8f08116296551612d3ccdad9e14e23a">   48</a></span>&#160;<span class="preprocessor">#define recheck_interval 5</span></div>
 <div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="ow_term_8h.html#a9db1df6249649d3fca671805ace0ed82">   49</a></span>&#160;<span class="preprocessor">#define check_circle 2000/t_count</span></div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
-<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="ow_term_8h.html#a9382f08ab82ba07c710f5b2e9e6ec0f3">   51</a></span>&#160;<span class="preprocessor">#define t_max 20 //Maximum number of 1w devices</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="ow_term_8h.html#a41a331314b46059bd942e76ffc60cf4a">   52</a></span>&#160;<span class="preprocessor">#define TEMPERATURE_PRECISION 12 //9</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor">#ifndef OWIRE_DISABLE</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#include &lt;DallasTemperature.h&gt;</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="preprocessor">#include &quot;aJSON.h&quot;</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#if not defined (OW_DEVICES_LIMIT)</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor">#define t_max 20 //Maximum number of 1w devices</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="ow_term_8h.html#a9382f08ab82ba07c710f5b2e9e6ec0f3">   54</a></span>&#160;<span class="preprocessor">#define t_max OW_DEVICES_LIMIT</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
+<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="ow_term_8h.html#a41a331314b46059bd942e76ffc60cf4a">   57</a></span>&#160;<span class="preprocessor">#define TEMPERATURE_PRECISION 12 //9</span></div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="keyword">extern</span> aJsonObject *<a class="code" href="ow_term_8h.html#a564a174b067eee3b33b1162935884d55">owArr</a>;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#ifndef OWIRE_DISABLE</span></div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="ow_term_8h.html#a9312b7daea28d63649c1548f056f75e6">   61</a></span>&#160;<span class="keyword">typedef</span>   void (*<a class="code" href="ow_term_8h.html#a9312b7daea28d63649c1548f056f75e6">owChangedType</a>) (int , DeviceAddress, float) ;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#ifndef USE_1W_PIN</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno"><a class="line" href="ow_term_8h.html#a92c17810a48118ba0c75809050dd6bbe">   64</a></span>&#160;<span class="preprocessor">#define DS2482_100_I2C_TO_1W_BRIDGE // HW driver</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor">#include &lt;Wire.h&gt;</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">  #ifndef ARDUINO_ARCH_STM32F1</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor">  #include &lt;DS2482_OneWire.h&gt;</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">  #endif</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="preprocessor">#else</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#include &lt;OneWire.h&gt;</span> <span class="comment">//Software driver</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#define wireReset reset</span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="preprocessor">#define wireSearch search</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="keyword">extern</span> OneWire *<a class="code" href="ow_term_8h.html#a385b7fa9c4553fcb57ee60a03932b60c">oneWire</a>;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="keyword">extern</span> DallasTemperature *<a class="code" href="ow_term_8h.html#ab5e031d55a57a0dd79468e5a7cbb5e64">sensors</a>;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="keyword">extern</span> DeviceAddress *<a class="code" href="ow_term_8h.html#ac8f950395764bcd345b63d2887dae1a0">term</a> ;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">int</span>           *<a class="code" href="ow_term_8h.html#a51d8312908b2e5f09ac8e40879c2f1a9">regs</a> ;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="keyword">extern</span> uint16_t       *<a class="code" href="ow_term_8h.html#a31e8c0d5ba0869a2bfbf32fd8caaac57">wstat</a>;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">int</span>            <a class="code" href="ow_term_8h.html#a4e9707ca4dbcd2ddd6d14657f2e12700">t_count</a>;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">short</span>          <a class="code" href="ow_term_8h.html#ac37ce0c409c53b6a18aefbfc3ad46b4a">si</a>;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="keyword">extern</span> <a class="code" href="ow_term_8h.html#a9312b7daea28d63649c1548f056f75e6">owChangedType</a>  <a class="code" href="ow_term_8h.html#ac7999c9efd1309081d54939dc27687ba">owChanged</a>;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="keywordtype">int</span>  <a class="code" href="ow_term_8h.html#aff3811570b1dd6182d7f45bd573afcfd">owUpdate</a>();</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="keywordtype">int</span>  <a class="code" href="ow_term_8h.html#ac78e14aeb04a12acf45919b64fe0d280">owSetup</a>(<a class="code" href="ow_term_8h.html#a9312b7daea28d63649c1548f056f75e6">owChangedType</a> owCh);</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="keywordtype">void</span> <a class="code" href="ow_term_8h.html#a3d8b76952ce1af677267e10c981e6dd5">owLoop</a>();</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="keywordtype">void</span> <a class="code" href="ow_term_8h.html#acbf132b42d0828077bbd21e2b205c5fc">setupOwIdle</a>(<span class="keywordtype">void</span> (*)()) ;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="keywordtype">int</span> <a class="code" href="ow_term_8h.html#a38798dcd7c98c38975db6e3f19de63a3">owFind</a>(DeviceAddress addr);</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="keywordtype">void</span> <a class="code" href="ow_term_8h.html#ac9fd793efbaca8922408effe06e71650">owAdd</a> (DeviceAddress addr);</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor">#include &lt;DallasTemperature.h&gt;</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="preprocessor">#include &quot;aJSON.h&quot;</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="keyword">extern</span> aJsonObject *<a class="code" href="ow_term_8h.html#a564a174b067eee3b33b1162935884d55">owArr</a>;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00066"></a><span class="lineno"><a class="line" href="ow_term_8h.html#a9312b7daea28d63649c1548f056f75e6">   66</a></span>&#160;<span class="keyword">typedef</span>   void (*<a class="code" href="ow_term_8h.html#a9312b7daea28d63649c1548f056f75e6">owChangedType</a>) (int , DeviceAddress, float) ;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#ifndef USE_1W_PIN</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="ow_term_8h.html#a92c17810a48118ba0c75809050dd6bbe">   69</a></span>&#160;<span class="preprocessor">#define DS2482_100_I2C_TO_1W_BRIDGE // HW driver</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#include &lt;Wire.h&gt;</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">  #ifndef ARDUINO_ARCH_STM32F1</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="preprocessor">  #include &lt;DS2482_OneWire.h&gt;</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">  #endif</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#include &lt;OneWire.h&gt;</span> <span class="comment">//Software driver</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor">#define wireReset reset</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="preprocessor">#define wireSearch search</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="keyword">extern</span> OneWire *<a class="code" href="ow_term_8h.html#a385b7fa9c4553fcb57ee60a03932b60c">oneWire</a>;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="keyword">extern</span> DallasTemperature *<a class="code" href="ow_term_8h.html#ab5e031d55a57a0dd79468e5a7cbb5e64">sensors</a>;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="keyword">extern</span> DeviceAddress *<a class="code" href="ow_term_8h.html#ac8f950395764bcd345b63d2887dae1a0">term</a> ;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">int</span>           *<a class="code" href="ow_term_8h.html#a51d8312908b2e5f09ac8e40879c2f1a9">regs</a> ;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="keyword">extern</span> uint16_t       *<a class="code" href="ow_term_8h.html#a31e8c0d5ba0869a2bfbf32fd8caaac57">wstat</a>;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">int</span>            <a class="code" href="ow_term_8h.html#a4e9707ca4dbcd2ddd6d14657f2e12700">t_count</a>;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="keyword">extern</span> <span class="keywordtype">short</span>          <a class="code" href="ow_term_8h.html#ac37ce0c409c53b6a18aefbfc3ad46b4a">si</a>;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="keyword">extern</span> <a class="code" href="ow_term_8h.html#a9312b7daea28d63649c1548f056f75e6">owChangedType</a>  <a class="code" href="ow_term_8h.html#ac7999c9efd1309081d54939dc27687ba">owChanged</a>;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="keywordtype">int</span>  <a class="code" href="ow_term_8h.html#aff3811570b1dd6182d7f45bd573afcfd">owUpdate</a>();</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="keywordtype">int</span>  <a class="code" href="ow_term_8h.html#ac78e14aeb04a12acf45919b64fe0d280">owSetup</a>(<a class="code" href="ow_term_8h.html#a9312b7daea28d63649c1548f056f75e6">owChangedType</a> owCh);</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="keywordtype">void</span> <a class="code" href="ow_term_8h.html#a3d8b76952ce1af677267e10c981e6dd5">owLoop</a>();</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="keywordtype">void</span> <a class="code" href="ow_term_8h.html#acbf132b42d0828077bbd21e2b205c5fc">setupOwIdle</a>(<span class="keywordtype">void</span> (*)()) ;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="keywordtype">int</span> <a class="code" href="ow_term_8h.html#a38798dcd7c98c38975db6e3f19de63a3">owFind</a>(DeviceAddress addr);</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="keywordtype">void</span> <a class="code" href="ow_term_8h.html#ac9fd793efbaca8922408effe06e71650">owAdd</a> (DeviceAddress addr);</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="aow_term_8h_html_acbf132b42d0828077bbd21e2b205c5fc"><div class="ttname"><a href="ow_term_8h.html#acbf132b42d0828077bbd21e2b205c5fc">setupOwIdle</a></div><div class="ttdeci">void setupOwIdle(void(*)())</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:218</div></div>
-<div class="ttc" id="aow_term_8h_html_a38798dcd7c98c38975db6e3f19de63a3"><div class="ttname"><a href="ow_term_8h.html#a38798dcd7c98c38975db6e3f19de63a3">owFind</a></div><div class="ttdeci">int owFind(DeviceAddress addr)</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:195</div></div>
-<div class="ttc" id="aow_term_8h_html_aff3811570b1dd6182d7f45bd573afcfd"><div class="ttname"><a href="ow_term_8h.html#aff3811570b1dd6182d7f45bd573afcfd">owUpdate</a></div><div class="ttdeci">int owUpdate()</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:43</div></div>
-<div class="ttc" id="aow_term_8h_html_ac78e14aeb04a12acf45919b64fe0d280"><div class="ttname"><a href="ow_term_8h.html#ac78e14aeb04a12acf45919b64fe0d280">owSetup</a></div><div class="ttdeci">int owSetup(owChangedType owCh)</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:92</div></div>
+</div><!-- doc-content -->
+<div class="ttc" id="aow_term_8h_html_acbf132b42d0828077bbd21e2b205c5fc"><div class="ttname"><a href="ow_term_8h.html#acbf132b42d0828077bbd21e2b205c5fc">setupOwIdle</a></div><div class="ttdeci">void setupOwIdle(void(*)())</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:250</div></div>
+<div class="ttc" id="aow_term_8h_html_a38798dcd7c98c38975db6e3f19de63a3"><div class="ttname"><a href="ow_term_8h.html#a38798dcd7c98c38975db6e3f19de63a3">owFind</a></div><div class="ttdeci">int owFind(DeviceAddress addr)</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:223</div></div>
+<div class="ttc" id="aow_term_8h_html_aff3811570b1dd6182d7f45bd573afcfd"><div class="ttname"><a href="ow_term_8h.html#aff3811570b1dd6182d7f45bd573afcfd">owUpdate</a></div><div class="ttdeci">int owUpdate()</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:50</div></div>
+<div class="ttc" id="aow_term_8h_html_ac78e14aeb04a12acf45919b64fe0d280"><div class="ttname"><a href="ow_term_8h.html#ac78e14aeb04a12acf45919b64fe0d280">owSetup</a></div><div class="ttdeci">int owSetup(owChangedType owCh)</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:101</div></div>
 <div class="ttc" id="aow_term_8h_html_ac7999c9efd1309081d54939dc27687ba"><div class="ttname"><a href="ow_term_8h.html#ac7999c9efd1309081d54939dc27687ba">owChanged</a></div><div class="ttdeci">owChangedType owChanged</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:41</div></div>
-<div class="ttc" id="aow_term_8h_html_a564a174b067eee3b33b1162935884d55"><div class="ttname"><a href="ow_term_8h.html#a564a174b067eee3b33b1162935884d55">owArr</a></div><div class="ttdeci">aJsonObject * owArr</div><div class="ttdef"><b>Definition:</b> main.cpp:148</div></div>
+<div class="ttc" id="aow_term_8h_html_a564a174b067eee3b33b1162935884d55"><div class="ttname"><a href="ow_term_8h.html#a564a174b067eee3b33b1162935884d55">owArr</a></div><div class="ttdeci">aJsonObject * owArr</div><div class="ttdef"><b>Definition:</b> main.cpp:100</div></div>
 <div class="ttc" id="aow_term_8h_html_ac37ce0c409c53b6a18aefbfc3ad46b4a"><div class="ttname"><a href="ow_term_8h.html#ac37ce0c409c53b6a18aefbfc3ad46b4a">si</a></div><div class="ttdeci">short si</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:37</div></div>
 <div class="ttc" id="aow_term_8h_html_a4e9707ca4dbcd2ddd6d14657f2e12700"><div class="ttname"><a href="ow_term_8h.html#a4e9707ca4dbcd2ddd6d14657f2e12700">t_count</a></div><div class="ttdeci">int t_count</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:38</div></div>
 <div class="ttc" id="aow_term_8h_html_a31e8c0d5ba0869a2bfbf32fd8caaac57"><div class="ttname"><a href="ow_term_8h.html#a31e8c0d5ba0869a2bfbf32fd8caaac57">wstat</a></div><div class="ttdeci">uint16_t * wstat</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:34</div></div>
 <div class="ttc" id="aow_term_8h_html_a385b7fa9c4553fcb57ee60a03932b60c"><div class="ttname"><a href="ow_term_8h.html#a385b7fa9c4553fcb57ee60a03932b60c">oneWire</a></div><div class="ttdeci">OneWire * oneWire</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:30</div></div>
-<div class="ttc" id="aow_term_8h_html_a9312b7daea28d63649c1548f056f75e6"><div class="ttname"><a href="ow_term_8h.html#a9312b7daea28d63649c1548f056f75e6">owChangedType</a></div><div class="ttdeci">void(* owChangedType)(int, DeviceAddress, float)</div><div class="ttdef"><b>Definition:</b> owTerm.h:61</div></div>
-<div class="ttc" id="aow_term_8h_html_ac9fd793efbaca8922408effe06e71650"><div class="ttname"><a href="ow_term_8h.html#ac9fd793efbaca8922408effe06e71650">owAdd</a></div><div class="ttdeci">void owAdd(DeviceAddress addr)</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:200</div></div>
+<div class="ttc" id="aow_term_8h_html_a9312b7daea28d63649c1548f056f75e6"><div class="ttname"><a href="ow_term_8h.html#a9312b7daea28d63649c1548f056f75e6">owChangedType</a></div><div class="ttdeci">void(* owChangedType)(int, DeviceAddress, float)</div><div class="ttdef"><b>Definition:</b> owTerm.h:66</div></div>
+<div class="ttc" id="aow_term_8h_html_ac9fd793efbaca8922408effe06e71650"><div class="ttname"><a href="ow_term_8h.html#ac9fd793efbaca8922408effe06e71650">owAdd</a></div><div class="ttdeci">void owAdd(DeviceAddress addr)</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:228</div></div>
 <div class="ttc" id="aow_term_8h_html_ac8f950395764bcd345b63d2887dae1a0"><div class="ttname"><a href="ow_term_8h.html#ac8f950395764bcd345b63d2887dae1a0">term</a></div><div class="ttdeci">DeviceAddress * term</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:32</div></div>
-<div class="ttc" id="aow_term_8h_html_a3d8b76952ce1af677267e10c981e6dd5"><div class="ttname"><a href="ow_term_8h.html#a3d8b76952ce1af677267e10c981e6dd5">owLoop</a></div><div class="ttdeci">void owLoop()</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:190</div></div>
+<div class="ttc" id="aow_term_8h_html_a3d8b76952ce1af677267e10c981e6dd5"><div class="ttname"><a href="ow_term_8h.html#a3d8b76952ce1af677267e10c981e6dd5">owLoop</a></div><div class="ttdeci">void owLoop()</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:213</div></div>
 <div class="ttc" id="aow_term_8h_html_ab5e031d55a57a0dd79468e5a7cbb5e64"><div class="ttname"><a href="ow_term_8h.html#ab5e031d55a57a0dd79468e5a7cbb5e64">sensors</a></div><div class="ttdeci">DallasTemperature * sensors</div><div class="ttdef"><b>Definition:</b> owTerm.cpp:35</div></div>
 <div class="ttc" id="aow_term_8h_html_a51d8312908b2e5f09ac8e40879c2f1a9"><div class="ttname"><a href="ow_term_8h.html#a51d8312908b2e5f09ac8e40879c2f1a9">regs</a></div><div class="ttdeci">int * regs</div></div>
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="ow_term_8h.html">owTerm.h</a></li>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

@@ -18,16 +18,20 @@
 {\ttfamily \#include \char`\"{}modules/out\+\_\+modbus.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}modules/out\+\_\+dmx.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}modules/out\+\_\+pwm.\+h\char`\"{}}\newline
-Include dependency graph for item.\+cpp\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{item_8cpp__incl}
-\end{center}
-\end{figure}
+{\ttfamily \#include \char`\"{}modules/out\+\_\+pid.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}modules/out\+\_\+multivent.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}modules/out\+\_\+uartbridge.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}modules/out\+\_\+relay.\+h\char`\"{}}\newline
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{item_8cpp_a1b4d2d6a1cd821c4d0786a9bb187bcb5}{M\+\_\+\+S\+U\+C\+C\+E\+SS}}~1
+\item 
+\#define \mbox{\hyperlink{item_8cpp_a369b7dc8b8caa3663ab974e2cb516d1e}{M\+\_\+\+F\+A\+I\+L\+ED}}~0
+\item 
+\#define \mbox{\hyperlink{item_8cpp_ae1c06288becc5f1b6ea8b5f8f1b71796}{M\+\_\+\+B\+U\+SY}}~-\/1
+\item 
+\#define \mbox{\hyperlink{item_8cpp_ae0b3354a51086c3c57117e3a9d3ba93b}{M\+\_\+\+C\+L\+E\+AN}}~2
 \item 
 \#define \mbox{\hyperlink{item_8cpp_a8d3c3518d793541417a4845125da1ae1}{a}}~0.\+1842f
 \item 
@@ -41,11 +45,17 @@ int \mbox{\hyperlink{item_8cpp_a4aef78280fd80bcca6d297030691f57b}{retrieve\+Code
 int \mbox{\hyperlink{item_8cpp_a44da304670c8b0446f674b318ebc9294}{subitem2cmd}} (char $\ast$payload)
 \item 
 int \mbox{\hyperlink{item_8cpp_ac002f1e83a05b79e27bda8f93184bcee}{txt2sub\+Item}} (char $\ast$payload)
+\item 
+bool \mbox{\hyperlink{item_8cpp_a963219cc65f7345f98d334090edf7353}{dig\+Group}} (a\+Json\+Object $\ast$item\+Arr, \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} $\ast$cmd, char $\ast$sub\+Item)
+\item 
+void \mbox{\hyperlink{item_8cpp_af9d9949a0fdfd7de95999113e1523de2}{print\+Active\+Status}} (bool active)
 \end{DoxyCompactItemize}
 \doxysubsection*{Variables}
 \begin{DoxyCompactItemize}
 \item 
 short \mbox{\hyperlink{item_8cpp_a02d3e5fb154e56cf7fc169649e232078}{modbus\+Busy}} = 0
+\item 
+bool \mbox{\hyperlink{item_8cpp_ad3fdcf970f64cfc745ff5efdc3063f89}{is\+Pended\+Modbus\+Writes}} = false
 \item 
 a\+Json\+Object $\ast$ \mbox{\hyperlink{item_8cpp_aa8f2c895949680c2aadc4843bb350347}{polling\+Item}}
 \item 
@@ -56,8 +66,6 @@ int8\+\_\+t \mbox{\hyperlink{item_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}{ethern
 int8\+\_\+t \mbox{\hyperlink{item_8cpp_a58655351bd1d5333e5eb92d4c29f4263}{config\+Locked}}
 \item 
 \mbox{\hyperlink{main_8h_a98b39d850b041da059cf5de62463a473}{lan\+\_\+status}} \mbox{\hyperlink{item_8cpp_a7bbda7cf303a1bc3222e7a270f9040bd}{lan\+Status}}
-\item 
-const short \mbox{\hyperlink{item_8cpp_abcb640867546187e7cbe6229cc3ec872}{defval}} \mbox{[}4\mbox{]} = \{0, 0, 0, 0\}
 \item 
 Modbus\+Master \mbox{\hyperlink{item_8cpp_aed3ca48125de3e138d26fa4884c35c93}{node}}
 \end{DoxyCompactItemize}
@@ -76,9 +84,45 @@ Modbus\+Master \mbox{\hyperlink{item_8cpp_aed3ca48125de3e138d26fa4884c35c93}{nod
 \doxysubsubsection{\texorpdfstring{b}{b}}
 {\footnotesize\ttfamily \#define b~-\/36.\+68f}
 
+\mbox{\Hypertarget{item_8cpp_ae1c06288becc5f1b6ea8b5f8f1b71796}\label{item_8cpp_ae1c06288becc5f1b6ea8b5f8f1b71796}} 
+\index{item.cpp@{item.cpp}!M\_BUSY@{M\_BUSY}}
+\index{M\_BUSY@{M\_BUSY}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{M\_BUSY}{M\_BUSY}}
+{\footnotesize\ttfamily \#define M\+\_\+\+B\+U\+SY~-\/1}
+
+\mbox{\Hypertarget{item_8cpp_ae0b3354a51086c3c57117e3a9d3ba93b}\label{item_8cpp_ae0b3354a51086c3c57117e3a9d3ba93b}} 
+\index{item.cpp@{item.cpp}!M\_CLEAN@{M\_CLEAN}}
+\index{M\_CLEAN@{M\_CLEAN}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{M\_CLEAN}{M\_CLEAN}}
+{\footnotesize\ttfamily \#define M\+\_\+\+C\+L\+E\+AN~2}
+
+\mbox{\Hypertarget{item_8cpp_a369b7dc8b8caa3663ab974e2cb516d1e}\label{item_8cpp_a369b7dc8b8caa3663ab974e2cb516d1e}} 
+\index{item.cpp@{item.cpp}!M\_FAILED@{M\_FAILED}}
+\index{M\_FAILED@{M\_FAILED}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{M\_FAILED}{M\_FAILED}}
+{\footnotesize\ttfamily \#define M\+\_\+\+F\+A\+I\+L\+ED~0}
+
+\mbox{\Hypertarget{item_8cpp_a1b4d2d6a1cd821c4d0786a9bb187bcb5}\label{item_8cpp_a1b4d2d6a1cd821c4d0786a9bb187bcb5}} 
+\index{item.cpp@{item.cpp}!M\_SUCCESS@{M\_SUCCESS}}
+\index{M\_SUCCESS@{M\_SUCCESS}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{M\_SUCCESS}{M\_SUCCESS}}
+{\footnotesize\ttfamily \#define M\+\_\+\+S\+U\+C\+C\+E\+SS~1}
+
 
 
 \doxysubsection{Function Documentation}
+\mbox{\Hypertarget{item_8cpp_a963219cc65f7345f98d334090edf7353}\label{item_8cpp_a963219cc65f7345f98d334090edf7353}} 
+\index{item.cpp@{item.cpp}!digGroup@{digGroup}}
+\index{digGroup@{digGroup}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{digGroup()}{digGroup()}}
+{\footnotesize\ttfamily bool dig\+Group (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{item\+Arr,  }\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} $\ast$}]{cmd,  }\item[{char $\ast$}]{sub\+Item }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{item_8cpp_af9d9949a0fdfd7de95999113e1523de2}\label{item_8cpp_af9d9949a0fdfd7de95999113e1523de2}} 
+\index{item.cpp@{item.cpp}!printActiveStatus@{printActiveStatus}}
+\index{printActiveStatus@{printActiveStatus}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{printActiveStatus()}{printActiveStatus()}}
+{\footnotesize\ttfamily void print\+Active\+Status (\begin{DoxyParamCaption}\item[{bool}]{active }\end{DoxyParamCaption})}
+
 \mbox{\Hypertarget{item_8cpp_a4aef78280fd80bcca6d297030691f57b}\label{item_8cpp_a4aef78280fd80bcca6d297030691f57b}} 
 \index{item.cpp@{item.cpp}!retrieveCode@{retrieveCode}}
 \index{retrieveCode@{retrieveCode}!item.cpp@{item.cpp}}
@@ -106,17 +150,17 @@ Modbus\+Master \mbox{\hyperlink{item_8cpp_aed3ca48125de3e138d26fa4884c35c93}{nod
 \doxysubsubsection{\texorpdfstring{configLocked}{configLocked}}
 {\footnotesize\ttfamily int8\+\_\+t config\+Locked\hspace{0.3cm}{\ttfamily [extern]}}
 
-\mbox{\Hypertarget{item_8cpp_abcb640867546187e7cbe6229cc3ec872}\label{item_8cpp_abcb640867546187e7cbe6229cc3ec872}} 
-\index{item.cpp@{item.cpp}!defval@{defval}}
-\index{defval@{defval}!item.cpp@{item.cpp}}
-\doxysubsubsection{\texorpdfstring{defval}{defval}}
-{\footnotesize\ttfamily const short defval\mbox{[}4\mbox{]} = \{0, 0, 0, 0\}}
-
 \mbox{\Hypertarget{item_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}\label{item_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}} 
 \index{item.cpp@{item.cpp}!ethernetIdleCount@{ethernetIdleCount}}
 \index{ethernetIdleCount@{ethernetIdleCount}!item.cpp@{item.cpp}}
 \doxysubsubsection{\texorpdfstring{ethernetIdleCount}{ethernetIdleCount}}
 {\footnotesize\ttfamily int8\+\_\+t ethernet\+Idle\+Count\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{item_8cpp_ad3fdcf970f64cfc745ff5efdc3063f89}\label{item_8cpp_ad3fdcf970f64cfc745ff5efdc3063f89}} 
+\index{item.cpp@{item.cpp}!isPendedModbusWrites@{isPendedModbusWrites}}
+\index{isPendedModbusWrites@{isPendedModbusWrites}!item.cpp@{item.cpp}}
+\doxysubsubsection{\texorpdfstring{isPendedModbusWrites}{isPendedModbusWrites}}
+{\footnotesize\ttfamily bool is\+Pended\+Modbus\+Writes = false}
 
 \mbox{\Hypertarget{item_8cpp_a7bbda7cf303a1bc3222e7a270f9040bd}\label{item_8cpp_a7bbda7cf303a1bc3222e7a270f9040bd}} 
 \index{item.cpp@{item.cpp}!lanStatus@{lanStatus}}

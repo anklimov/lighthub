@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -46,6 +52,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('class_item.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,7 +83,6 @@ $(function() {
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -74,16 +96,6 @@ $(function() {
 <div class="contents">
 
 <p><code>#include &lt;<a class="el" href="item_8h_source.html">item.h</a>&gt;</code></p>
-<div class="dynheader">
-Collaboration diagram for Item:</div>
-<div class="dyncontent">
-<div class="center"><img src="class_item__coll__graph.png" border="0" usemap="#a_item_coll__map" alt="Collaboration graph"/></div>
-<map name="_item_coll__map" id="a_item_coll__map">
-<area shape="rect" title=" " alt="" coords="5,5,53,32"/>
-<area shape="rect" href="classabstract_out.html" title=" " alt="" coords="31,95,121,121"/>
-<area shape="rect" href="classabstract_ch.html" title=" " alt="" coords="90,5,177,32"/>
-</map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -99,12 +111,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae84f04e796546f4c34db79a060b0d443"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac382f69ca11e6eebfec1f40133fddd42"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#ac382f69ca11e6eebfec1f40133fddd42">Stop</a> ()</td></tr>
 <tr class="separator:ac382f69ca11e6eebfec1f40133fddd42"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a821048224e300ab4bb9eb047bf859b2c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a821048224e300ab4bb9eb047bf859b2c">Ctrl</a> (<a class="el" href="classitem_cmd.html">itemCmd</a> cmd, char *subItem=NULL)</td></tr>
-<tr class="separator:a821048224e300ab4bb9eb047bf859b2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad81d39aec84f1a2071b5e81dafd96e27"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#ad81d39aec84f1a2071b5e81dafd96e27">Ctrl</a> (<a class="el" href="classitem_cmd.html">itemCmd</a> cmd, char *subItem=NULL, bool allowRecursion=true)</td></tr>
+<tr class="separator:ad81d39aec84f1a2071b5e81dafd96e27"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a51166376e10786d0daf684ea85988b75"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a51166376e10786d0daf684ea85988b75">Ctrl</a> (char *payload, char *subItem=NULL)</td></tr>
 <tr class="separator:a51166376e10786d0daf684ea85988b75"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04c95e83741aa896498ddbc869061886"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a04c95e83741aa896498ddbc869061886">getArg</a> (short n=0)</td></tr>
 <tr class="separator:a04c95e83741aa896498ddbc869061886"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fcee2e61e88909e3a53aaae3dc5d3e9"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a8fcee2e61e88909e3a53aaae3dc5d3e9">getFloatArg</a> (short n=0)</td></tr>
+<tr class="separator:a8fcee2e61e88909e3a53aaae3dc5d3e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9469cc0bb8560eb5f669d54903186433"><td class="memItemLeft" align="right" valign="top">short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a9469cc0bb8560eb5f669d54903186433">getArgCount</a> ()</td></tr>
 <tr class="separator:a9469cc0bb8560eb5f669d54903186433"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba81303d678129315e393e11319b5ec5"><td class="memItemLeft" align="right" valign="top">long int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#aba81303d678129315e393e11319b5ec5">getVal</a> ()</td></tr>
@@ -131,12 +145,16 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a60c43acb3bd16c858ca4c1fa6b12145b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2a38c039f8b3cee14cb97c9526d9260"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#ad2a38c039f8b3cee14cb97c9526d9260">setVal</a> (long int par)</td></tr>
 <tr class="separator:ad2a38c039f8b3cee14cb97c9526d9260"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b103354070ff53e7dfd66d43765a619"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a5b103354070ff53e7dfd66d43765a619">setFloatVal</a> (float par)</td></tr>
+<tr class="separator:a5b103354070ff53e7dfd66d43765a619"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47b261677ded48fb1c51088b9d956dcc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a47b261677ded48fb1c51088b9d956dcc">setSubtype</a> (uint8_t par)</td></tr>
 <tr class="separator:a47b261677ded48fb1c51088b9d956dcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaa6500d9cdb58f9b20f6c2592da40739"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#aaa6500d9cdb58f9b20f6c2592da40739">Poll</a> (int cause)</td></tr>
 <tr class="separator:aaa6500d9cdb58f9b20f6c2592da40739"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a525c4e3f723a85af5e818c1b5834e277"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a525c4e3f723a85af5e818c1b5834e277">SendStatus</a> (int sendFlags)</td></tr>
 <tr class="separator:a525c4e3f723a85af5e818c1b5834e277"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1a236a67b01bb3ae9d1aec9a18ed51d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#ad1a236a67b01bb3ae9d1aec9a18ed51d">SendStatusImmediate</a> (<a class="el" href="classitem_cmd.html">itemCmd</a> st, int sendFlags, char *subItem=NULL)</td></tr>
+<tr class="separator:ad1a236a67b01bb3ae9d1aec9a18ed51d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4db79caf8ace960c0bf74181c0bf5faa"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a4db79caf8ace960c0bf74181c0bf5faa">isActive</a> ()</td></tr>
 <tr class="separator:a4db79caf8ace960c0bf74181c0bf5faa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af1a89a9947e7759ce74f17d614346f46"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#af1a89a9947e7759ce74f17d614346f46">getChanType</a> ()</td></tr>
@@ -174,22 +192,20 @@ Protected Member Functions</h2></td></tr>
 <tr class="separator:a6a8cdb4d647ba278a55560cd91bfc031"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a77913c1f28d823b1a096369e69cc5072"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a77913c1f28d823b1a096369e69cc5072">modbusDimmerSet</a> (int addr, uint16_t _reg, int _regType, int _mask, uint16_t value)</td></tr>
 <tr class="separator:a77913c1f28d823b1a096369e69cc5072"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a389156098d07ebdc5649668f61d87343"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a389156098d07ebdc5649668f61d87343">mb_fail</a> ()</td></tr>
-<tr class="separator:a389156098d07ebdc5649668f61d87343"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a194ef40944a7a579ded380103ac1a081"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a194ef40944a7a579ded380103ac1a081">mb_fail</a> (int result=0)</td></tr>
+<tr class="separator:a194ef40944a7a579ded380103ac1a081"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abbcfb98227918e624be294409d21be3d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#abbcfb98227918e624be294409d21be3d">Parse</a> ()</td></tr>
 <tr class="separator:abbcfb98227918e624be294409d21be3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a899707e630b75eeb422fbc7ca3d829ce"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a899707e630b75eeb422fbc7ca3d829ce">checkModbusDimmer</a> ()</td></tr>
 <tr class="separator:a899707e630b75eeb422fbc7ca3d829ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d807aa2a634312bde779e174e28c4ce"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a2d807aa2a634312bde779e174e28c4ce">checkModbusDimmer</a> (int <a class="el" href="out__ac_8cpp.html#a336725b3b566264f2223495f6294c3c7">data</a>)</td></tr>
 <tr class="separator:a2d807aa2a634312bde779e174e28c4ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4454719134cb94ff27943cc35207fd74"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a4454719134cb94ff27943cc35207fd74">checkModbusRetry</a> ()</td></tr>
-<tr class="separator:a4454719134cb94ff27943cc35207fd74"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a353e817a01d39e0341fdc12b00351169"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a353e817a01d39e0341fdc12b00351169">checkVCRetry</a> ()</td></tr>
-<tr class="separator:a353e817a01d39e0341fdc12b00351169"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9fa6f17268398679295a57f7506089b8"><td class="memItemLeft" align="right" valign="top">boolean&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a9fa6f17268398679295a57f7506089b8">checkHeatRetry</a> ()</td></tr>
-<tr class="separator:a9fa6f17268398679295a57f7506089b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee7bbb1c5b9f54b7228cdc171f040bf4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#aee7bbb1c5b9f54b7228cdc171f040bf4">checkModbusRetry</a> ()</td></tr>
+<tr class="separator:aee7bbb1c5b9f54b7228cdc171f040bf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af767f604dcaed8a497438255c28129fd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#af767f604dcaed8a497438255c28129fd">sendDelayedStatus</a> ()</td></tr>
 <tr class="separator:af767f604dcaed8a497438255c28129fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1407f6e0854127b5cec31368400caf06"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#a1407f6e0854127b5cec31368400caf06">resumeModbus</a> ()</td></tr>
+<tr class="separator:a1407f6e0854127b5cec31368400caf06"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac323dbba691d2a1ffd0b760fdc2198d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_item.html#aac323dbba691d2a1ffd0b760fdc2198d">checkFM</a> ()</td></tr>
 <tr class="separator:aac323dbba691d2a1ffd0b760fdc2198d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -280,31 +296,6 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a9fa6f17268398679295a57f7506089b8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9fa6f17268398679295a57f7506089b8">&#9670;&nbsp;</a></span>checkHeatRetry()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">boolean Item::checkHeatRetry </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a899707e630b75eeb422fbc7ca3d829ce"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a899707e630b75eeb422fbc7ca3d829ce">&#9670;&nbsp;</a></span>checkModbusDimmer() <span class="overload">[1/2]</span></h2>
 
@@ -356,8 +347,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a4454719134cb94ff27943cc35207fd74"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4454719134cb94ff27943cc35207fd74">&#9670;&nbsp;</a></span>checkModbusRetry()</h2>
+<a id="aee7bbb1c5b9f54b7228cdc171f040bf4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee7bbb1c5b9f54b7228cdc171f040bf4">&#9670;&nbsp;</a></span>checkModbusRetry()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -366,32 +357,7 @@ Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">boolean Item::checkModbusRetry </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a353e817a01d39e0341fdc12b00351169"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a353e817a01d39e0341fdc12b00351169">&#9670;&nbsp;</a></span>checkVCRetry()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">boolean Item::checkVCRetry </td>
+          <td class="memname">int Item::checkModbusRetry </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -453,8 +419,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a821048224e300ab4bb9eb047bf859b2c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a821048224e300ab4bb9eb047bf859b2c">&#9670;&nbsp;</a></span>Ctrl() <span class="overload">[2/2]</span></h2>
+<a id="ad81d39aec84f1a2071b5e81dafd96e27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad81d39aec84f1a2071b5e81dafd96e27">&#9670;&nbsp;</a></span>Ctrl() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -469,7 +435,13 @@ Protected Attributes</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>subItem</em> = <code>NULL</code>&#160;</td>
+          <td class="paramname"><em>subItem</em> = <code>NULL</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>allowRecursion</em> = <code>true</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -479,7 +451,10 @@ Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>possible problem here with truncated default</p>
-<p>thermoSet(name,cmd,Par1); all activities done - update temp &amp; cmd</p>
+<p>DELAYED COMMANDS processing</p>
+<p>Common (GRP &amp; NO GRP) commands</p>
+<p>rest of Legacy monolite core code (to be refactored ) BEGIN ///</p>
+<p>rest of Legacy monolite core code (to be refactored ) END ///</p>
 
 </div>
 </div>
@@ -587,6 +562,24 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a8fcee2e61e88909e3a53aaae3dc5d3e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fcee2e61e88909e3a53aaae3dc5d3e9">&#9670;&nbsp;</a></span>getFloatArg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float Item::getFloatArg </td>
+          <td>(</td>
+          <td class="paramtype">short&#160;</td>
+          <td class="paramname"><em>n</em> = <code>0</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ad1c452e68967188402a96a687aba6af0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad1c452e68967188402a96a687aba6af0">&#9670;&nbsp;</a></span>getPersistent()</h2>
 
@@ -672,8 +665,8 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a389156098d07ebdc5649668f61d87343"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a389156098d07ebdc5649668f61d87343">&#9670;&nbsp;</a></span>mb_fail()</h2>
+<a id="a194ef40944a7a579ded380103ac1a081"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a194ef40944a7a579ded380103ac1a081">&#9670;&nbsp;</a></span>mb_fail()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -684,7 +677,8 @@ Protected Attributes</h2></td></tr>
         <tr>
           <td class="memname">void Item::mb_fail </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>result</em> = <code>0</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -870,6 +864,31 @@ Protected Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a1407f6e0854127b5cec31368400caf06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1407f6e0854127b5cec31368400caf06">&#9670;&nbsp;</a></span>resumeModbus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Item::resumeModbus </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="af767f604dcaed8a497438255c28129fd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af767f604dcaed8a497438255c28129fd">&#9670;&nbsp;</a></span>sendDelayedStatus()</h2>
 
@@ -907,6 +926,40 @@ Protected Attributes</h2></td></tr>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>sendFlags</em></td><td>)</td>
           <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad1a236a67b01bb3ae9d1aec9a18ed51d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1a236a67b01bb3ae9d1aec9a18ed51d">&#9670;&nbsp;</a></span>SendStatusImmediate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Item::SendStatusImmediate </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classitem_cmd.html">itemCmd</a>&#160;</td>
+          <td class="paramname"><em>st</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>sendFlags</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>subItem</em> = <code>NULL</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -960,6 +1013,24 @@ Protected Attributes</h2></td></tr>
           <td>(</td>
           <td class="paramtype">short&#160;</td>
           <td class="paramname"><em>flag</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5b103354070ff53e7dfd66d43765a619"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b103354070ff53e7dfd66d43765a619">&#9670;&nbsp;</a></span>setFloatVal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Item::setFloatVal </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>par</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -1268,9 +1339,13 @@ Protected Attributes</h2></td></tr>
 <li><a class="el" href="item_8cpp.html">item.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="class_item.html">Item</a></li>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

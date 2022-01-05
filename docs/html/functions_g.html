@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +53,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('functions_g.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,6 +90,9 @@ $(function() {
 <li>g
 : <a class="el" href="unionitem_arg_store.html#a37e8d18c09633f02fe99f16d9b995822">itemArgStore</a>
 </li>
+<li>gatesObj
+: <a class="el" href="classout___multivent.html#a3d4199b0bf35ede53859468120604106">out_Multivent</a>
+</li>
 <li>getArg()
 : <a class="el" href="class_item.html#a04c95e83741aa896498ddbc869061886">Item</a>
 </li>
@@ -86,7 +111,10 @@ $(function() {
 , <a class="el" href="classout__dmx.html#a575351786cdc191555757cd39b4382f5">out_dmx</a>
 , <a class="el" href="classout___modbus.html#a2752cf2376840f3763572963be8785db">out_Modbus</a>
 , <a class="el" href="classout___motor.html#afd67d9b6e08f14074a236d5222809226">out_Motor</a>
+, <a class="el" href="classout___multivent.html#ad5815eb1cb9b4ecf68da3d0bae8b4ce4">out_Multivent</a>
+, <a class="el" href="classout__pid.html#abbc665d20d2adf34bece05b8761aca31">out_pid</a>
 , <a class="el" href="classout__pwm.html#a54bea9682560aa628f85a532a363d57a">out_pwm</a>
+, <a class="el" href="classout__relay.html#a94d578704853aaacf7f7f1877de91b62">out_relay</a>
 , <a class="el" href="classout___s_p_i_led.html#aac304bcdc354a3667ec99d4c06513b72">out_SPILed</a>
 </li>
 <li>getCmd()
@@ -97,21 +125,54 @@ $(function() {
 : <a class="el" href="classitem_cmd.html#a96d4c944d09209825c3a5f770ff9b662">itemCmd</a>
 </li>
 <li>getColorTemp()
-: <a class="el" href="classitem_cmd.html#a578cd9bf477cad51f2c3904b04656222">itemCmd</a>
+: <a class="el" href="classitem_cmd.html#a5f22f27bdeff6ba2904d1fec03d9619e">itemCmd</a>
 </li>
 <li>getConfig()
 : <a class="el" href="classout___modbus.html#aea16d64ad349120558951f92205d5249">out_Modbus</a>
 , <a class="el" href="classout___motor.html#a7ba2681d317e29a412e44741ae1ff5e4">out_Motor</a>
+, <a class="el" href="classout___multivent.html#a00e53cb32ef2c9a01ff4b25e483ab6d9">out_Multivent</a>
+, <a class="el" href="classout__pid.html#a2a5740074f5380b9a6122d65eca02f3e">out_pid</a>
+, <a class="el" href="classout__relay.html#aca59314615d3f914d9e23fafd329a1fb">out_relay</a>
 , <a class="el" href="classout___s_p_i_led.html#a6bcd6f13a335b380dfa655d5de4cbe75">out_SPILed</a>
 </li>
+<li>getConfigFlags()
+: <a class="el" href="classsystem_config.html#a2f582273dd1154da974c43b7dceb82d8">systemConfig</a>
+</li>
+<li>getContentType()
+: <a class="el" href="classseekable_stream.html#a1d58ac96f37ab0f76300118f3c8e8c9a">seekableStream</a>
+</li>
 <li>getDefaultOnVal()
-: <a class="el" href="classabstract_out.html#aedf98f968abc36332dcddb7eab00fe13">abstractOut</a>
+: <a class="el" href="classabstract_out.html#ade514d6b6152e87a70d66932c74e1656">abstractOut</a>
+</li>
+<li>getDefaultStorageType()
+: <a class="el" href="classabstract_out.html#a786157307bd9438b8fbff24421b95330">abstractOut</a>
+, <a class="el" href="classcolor_channel.html#a52d7b6241409b4e00574b389d3436e1f">colorChannel</a>
+, <a class="el" href="classout___a_c.html#ab249f27bdd0d22a6f098190dc746cd8c">out_AC</a>
+, <a class="el" href="classout___modbus.html#a844c63be065d02f2f178399519b03245">out_Modbus</a>
+, <a class="el" href="classout___motor.html#ab1892d3477647b06ed2212dd8e0baaf3">out_Motor</a>
+, <a class="el" href="classout___multivent.html#ac02fd9c36c2a3cb5ad7132e2c1df6f61">out_Multivent</a>
+, <a class="el" href="classout__pid.html#a6555b3173f184d3768e34339d59daa87">out_pid</a>
+</li>
+<li>getDNS()
+: <a class="el" href="classsystem_config.html#a9979a5601a889759f79cb53ed3385237">systemConfig</a>
+</li>
+<li>getETAG()
+: <a class="el" href="classsystem_config.html#afca9ba172804f55bce5b65e95737de21">systemConfig</a>
 </li>
 <li>getExt()
 : <a class="el" href="class_item.html#ab27cd47af857151cb695f7a4b4000424">Item</a>
 </li>
 <li>getFlag()
 : <a class="el" href="class_item.html#a15e9623fffd070c01c3dd87b1cc09ab3">Item</a>
+</li>
+<li>getFloat()
+: <a class="el" href="classitem_cmd.html#a66ffe8a47358dcf7d5f6ed419c888740">itemCmd</a>
+</li>
+<li>getFloatArg()
+: <a class="el" href="class_item.html#a8fcee2e61e88909e3a53aaae3dc5d3e9">Item</a>
+</li>
+<li>getGW()
+: <a class="el" href="classsystem_config.html#afd36dc85ae181ef2df38d7293c195409">systemConfig</a>
 </li>
 <li>getH()
 : <a class="el" href="classitem_cmd.html#ad694475a5854b6fc65de797814bf6c34">itemCmd</a>
@@ -121,6 +182,27 @@ $(function() {
 </li>
 <li>getInt()
 : <a class="el" href="classitem_cmd.html#accd4361f950ca4929aaa9fd09aa82dd7">itemCmd</a>
+</li>
+<li>getIP()
+: <a class="el" href="classsystem_config.html#a5b739e59ebdff5e2e8f408403734f206">systemConfig</a>
+</li>
+<li>getLoadHTTPConfig()
+: <a class="el" href="classsystem_config.html#afb03631d679e1efe2b5619df60eeb202">systemConfig</a>
+</li>
+<li>getMAC()
+: <a class="el" href="classsystem_config.html#a4c960ec06d3a1b8cc496cd7b107bbfc0">systemConfig</a>
+</li>
+<li>getMACString()
+: <a class="el" href="classsystem_config.html#ab80479e13d4bd99cebe6607991c046cf">systemConfig</a>
+</li>
+<li>getMask()
+: <a class="el" href="classsystem_config.html#a586c20af37f03b4b89d1e9f276f5aa75">systemConfig</a>
+</li>
+<li>getMQTTpwd()
+: <a class="el" href="classsystem_config.html#ad2264e10627c9b15bf8f263bedfbee24">systemConfig</a>
+</li>
+<li>getOTApwd()
+: <a class="el" href="classsystem_config.html#a05fbbe32858072e7169c1f6aaaa90357">systemConfig</a>
 </li>
 <li>getPercents()
 : <a class="el" href="classitem_cmd.html#a7e931f05bd5160906078edc9b69f2a81">itemCmd</a>
@@ -134,20 +216,50 @@ $(function() {
 <li>getS()
 : <a class="el" href="classitem_cmd.html#ae583a6f85cc8e8f8c9fbca9e74874629">itemCmd</a>
 </li>
+<li>getSaveSuccedConfig()
+: <a class="el" href="classsystem_config.html#ab14c4521e8d6d6520ad853794272be0b">systemConfig</a>
+</li>
+<li>getSerialDebuglevel()
+: <a class="el" href="classsystem_config.html#a5cd48cc8db70cdf575113106be58ac41">systemConfig</a>
+</li>
+<li>getServer()
+: <a class="el" href="classsystem_config.html#a9cfc64d4c8b391170ad63e94dfd71d43">systemConfig</a>
+</li>
+<li>getSingleInt()
+: <a class="el" href="classitem_cmd.html#af156fecd23bd0798beb3414bcca95bf4">itemCmd</a>
+</li>
+<li>getSize()
+: <a class="el" href="classseekable_stream.html#a49b5cc28add07df1634d815737aaf54d">seekableStream</a>
+</li>
+<li>getStoragetypeByChanType()
+: <a class="el" href="classitem_cmd.html#ae82c0f63c30bab7b0ac557687c2244d0">itemCmd</a>
+</li>
+<li>getString()
+: <a class="el" href="classitem_cmd.html#a346c10d5ed47b19083e2c9e50d3965f3">itemCmd</a>
+</li>
 <li>getSubtype()
 : <a class="el" href="class_item.html#ad00923c702189ad97c6af2c3c20150fa">Item</a>
 </li>
 <li>getSuffix()
 : <a class="el" href="classitem_cmd.html#ac79ae89527f223885ef02db1c46ef20c">itemCmd</a>
 </li>
+<li>getUdpDebuglevel()
+: <a class="el" href="classsystem_config.html#a70ec86287c9658ebfbbf2d1da6c040fb">systemConfig</a>
+</li>
 <li>getVal()
 : <a class="el" href="class_item.html#aba81303d678129315e393e11319b5ec5">Item</a>
 </li>
+<li>gw
+: <a class="el" href="structsystem_config_data.html#a8d6908bd4e04ac205e8156c06cd5c992">systemConfigData</a>
+</li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

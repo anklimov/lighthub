@@ -1,0 +1,148 @@
+\hypertarget{classout___multivent}{}\doxysection{out\+\_\+\+Multivent Class Reference}
+\label{classout___multivent}\index{out\_Multivent@{out\_Multivent}}
+
+
+{\ttfamily \#include $<$out\+\_\+multivent.\+h$>$}
+
+Inheritance diagram for out\+\_\+\+Multivent\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classout___multivent}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classout___multivent_a32543be95e11401d7c6e1fdd040d04d7}{out\+\_\+\+Multivent}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
+\item 
+int \mbox{\hyperlink{classout___multivent_a568241c423d7172f2a4b061f88e48341}{Setup}} () override
+\begin{DoxyCompactList}\small\item\em Remove?? Now get\+Chan\+Type used instead. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classout___multivent_a8e61908c390573d27806394fcaccf570}{Poll}} (short cause) override
+\item 
+int \mbox{\hyperlink{classout___multivent_aadcc821f72c52c6810fd8181b7fbed16}{Stop}} () override
+\item 
+int \mbox{\hyperlink{classout___multivent_afde85452eec6afbd8a06c1755a7bfb4d}{Status}} () override
+\item 
+int \mbox{\hyperlink{classout___multivent_ad5815eb1cb9b4ecf68da3d0bae8b4ce4}{get\+Chan\+Type}} () override
+\item 
+int \mbox{\hyperlink{classout___multivent_ac02fd9c36c2a3cb5ad7132e2c1df6f61}{get\+Default\+Storage\+Type}} ()
+\item 
+int \mbox{\hyperlink{classout___multivent_abb99e44bd16433c7fed965197ecde5dd}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classout___multivent_a00e53cb32ef2c9a01ff4b25e483ab6d9}{get\+Config}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+a\+Json\+Object $\ast$ \mbox{\hyperlink{classout___multivent_a3d4199b0bf35ede53859468120604106}{gates\+Obj}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classout___multivent_a32543be95e11401d7c6e1fdd040d04d7}\label{classout___multivent_a32543be95e11401d7c6e1fdd040d04d7}} 
+\index{out\_Multivent@{out\_Multivent}!out\_Multivent@{out\_Multivent}}
+\index{out\_Multivent@{out\_Multivent}!out\_Multivent@{out\_Multivent}}
+\doxysubsubsection{\texorpdfstring{out\_Multivent()}{out\_Multivent()}}
+{\footnotesize\ttfamily out\+\_\+\+Multivent\+::out\+\_\+\+Multivent (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_item}{Item}} $\ast$}]{\+\_\+item }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classout___multivent_abb99e44bd16433c7fed965197ecde5dd}\label{classout___multivent_abb99e44bd16433c7fed965197ecde5dd}} 
+\index{out\_Multivent@{out\_Multivent}!Ctrl@{Ctrl}}
+\index{Ctrl@{Ctrl}!out\_Multivent@{out\_Multivent}}
+\doxysubsubsection{\texorpdfstring{Ctrl()}{Ctrl()}}
+{\footnotesize\ttfamily int out\+\_\+\+Multivent\+::\+Ctrl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{cmd,  }\item[{char $\ast$}]{sub\+Item = {\ttfamily NULL},  }\item[{bool}]{to\+Execute = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___multivent_ad5815eb1cb9b4ecf68da3d0bae8b4ce4}\label{classout___multivent_ad5815eb1cb9b4ecf68da3d0bae8b4ce4}} 
+\index{out\_Multivent@{out\_Multivent}!getChanType@{getChanType}}
+\index{getChanType@{getChanType}!out\_Multivent@{out\_Multivent}}
+\doxysubsubsection{\texorpdfstring{getChanType()}{getChanType()}}
+{\footnotesize\ttfamily int out\+\_\+\+Multivent\+::get\+Chan\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___multivent_a00e53cb32ef2c9a01ff4b25e483ab6d9}\label{classout___multivent_a00e53cb32ef2c9a01ff4b25e483ab6d9}} 
+\index{out\_Multivent@{out\_Multivent}!getConfig@{getConfig}}
+\index{getConfig@{getConfig}!out\_Multivent@{out\_Multivent}}
+\doxysubsubsection{\texorpdfstring{getConfig()}{getConfig()}}
+{\footnotesize\ttfamily void out\+\_\+\+Multivent\+::get\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classout___multivent_ac02fd9c36c2a3cb5ad7132e2c1df6f61}\label{classout___multivent_ac02fd9c36c2a3cb5ad7132e2c1df6f61}} 
+\index{out\_Multivent@{out\_Multivent}!getDefaultStorageType@{getDefaultStorageType}}
+\index{getDefaultStorageType@{getDefaultStorageType}!out\_Multivent@{out\_Multivent}}
+\doxysubsubsection{\texorpdfstring{getDefaultStorageType()}{getDefaultStorageType()}}
+{\footnotesize\ttfamily int out\+\_\+\+Multivent\+::get\+Default\+Storage\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_a786157307bd9438b8fbff24421b95330}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___multivent_a8e61908c390573d27806394fcaccf570}\label{classout___multivent_a8e61908c390573d27806394fcaccf570}} 
+\index{out\_Multivent@{out\_Multivent}!Poll@{Poll}}
+\index{Poll@{Poll}!out\_Multivent@{out\_Multivent}}
+\doxysubsubsection{\texorpdfstring{Poll()}{Poll()}}
+{\footnotesize\ttfamily int out\+\_\+\+Multivent\+::\+Poll (\begin{DoxyParamCaption}\item[{short}]{cause }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___multivent_a568241c423d7172f2a4b061f88e48341}\label{classout___multivent_a568241c423d7172f2a4b061f88e48341}} 
+\index{out\_Multivent@{out\_Multivent}!Setup@{Setup}}
+\index{Setup@{Setup}!out\_Multivent@{out\_Multivent}}
+\doxysubsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily int out\+\_\+\+Multivent\+::\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Remove?? Now get\+Chan\+Type used instead. 
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_ad84ffc96dafea9cbe5c91f35c90ffe3b}{abstract\+Out}}.
+
+\mbox{\Hypertarget{classout___multivent_afde85452eec6afbd8a06c1755a7bfb4d}\label{classout___multivent_afde85452eec6afbd8a06c1755a7bfb4d}} 
+\index{out\_Multivent@{out\_Multivent}!Status@{Status}}
+\index{Status@{Status}!out\_Multivent@{out\_Multivent}}
+\doxysubsubsection{\texorpdfstring{Status()}{Status()}}
+{\footnotesize\ttfamily int out\+\_\+\+Multivent\+::\+Status (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_aefb8821172a2e66f49ea0da9b7c205a5}{abstract\+Ch}}.
+
+\mbox{\Hypertarget{classout___multivent_aadcc821f72c52c6810fd8181b7fbed16}\label{classout___multivent_aadcc821f72c52c6810fd8181b7fbed16}} 
+\index{out\_Multivent@{out\_Multivent}!Stop@{Stop}}
+\index{Stop@{Stop}!out\_Multivent@{out\_Multivent}}
+\doxysubsubsection{\texorpdfstring{Stop()}{Stop()}}
+{\footnotesize\ttfamily int out\+\_\+\+Multivent\+::\+Stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac08061e5ae0}{abstract\+Ch}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classout___multivent_a3d4199b0bf35ede53859468120604106}\label{classout___multivent_a3d4199b0bf35ede53859468120604106}} 
+\index{out\_Multivent@{out\_Multivent}!gatesObj@{gatesObj}}
+\index{gatesObj@{gatesObj}!out\_Multivent@{out\_Multivent}}
+\doxysubsubsection{\texorpdfstring{gatesObj}{gatesObj}}
+{\footnotesize\ttfamily a\+Json\+Object$\ast$ out\+\_\+\+Multivent\+::gates\+Obj\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+modules/\mbox{\hyperlink{out__multivent_8h}{out\+\_\+multivent.\+h}}\item 
+modules/\mbox{\hyperlink{out__multivent_8cpp}{out\+\_\+multivent.\+cpp}}\end{DoxyCompactItemize}

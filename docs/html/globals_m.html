@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +53,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('globals_m.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -65,18 +87,46 @@ $(function() {
 <div class="textblock">Here is a list of all file members with links to the files they belong to:</div>
 
 <h3><a id="index_m"></a>- m -</h3><ul>
-<li>mac
-: <a class="el" href="main_8cpp.html#a775118f5b90a904c7e65066faabab1a2">main.cpp</a>
+<li>M_BUSY
+: <a class="el" href="item_8cpp.html#ae1c06288becc5f1b6ea8b5f8f1b71796">item.cpp</a>
+</li>
+<li>M_CLEAN
+: <a class="el" href="item_8cpp.html#ae0b3354a51086c3c57117e3a9d3ba93b">item.cpp</a>
+</li>
+<li>M_FAILED
+: <a class="el" href="item_8cpp.html#a369b7dc8b8caa3663ab974e2cb516d1e">item.cpp</a>
+</li>
+<li>M_SUCCESS
+: <a class="el" href="item_8cpp.html#a1b4d2d6a1cd821c4d0786a9bb187bcb5">item.cpp</a>
+</li>
+<li>macAddress
+: <a class="el" href="systemconfigdata_8h.html#a514f72de8f2436e3c2952d52302585a3">systemconfigdata.h</a>
+</li>
+<li>MAP_SCALE
+: <a class="el" href="item_cmd_8h.html#a3556d1687a98523bda1a30405c486c77">itemCmd.h</a>
+</li>
+<li>MAP_VAL_CMD
+: <a class="el" href="item_cmd_8h.html#a3f27dbe57b2e60c70c13d6c029504d3f">itemCmd.h</a>
 </li>
 <li>mapInt()
 : <a class="el" href="utils_8cpp.html#ace8fa23ff29c3feb89c5d500ef87b914">utils.cpp</a>
 , <a class="el" href="utils_8h.html#ace8fa23ff29c3feb89c5d500ef87b914">utils.h</a>
 </li>
-<li>MAX_CHANNELS
-: <a class="el" href="dmx_8h.html#ac69ee46f4a51ed14f0d68628c2dec71d">dmx.h</a>
+<li>MAX_JSON_CONF_SIZE
+: <a class="el" href="options_8h.html#ac748f1d4519e4f4c2958d0dc34e6239c">options.h</a>
+</li>
+<li>MAX_STREAM_SIZE
+: <a class="el" href="flashstream_8h.html#afa4887a806013bbde748beddca08a9a3">flashstream.h</a>
 </li>
 <li>MAXFLASHSTR
-: <a class="el" href="options_8h.html#a62d02da8c36fd3ab5519e373620382d1">options.h</a>
+: <a class="el" href="systemconfigdata_8h.html#a62d02da8c36fd3ab5519e373620382d1">systemconfigdata.h</a>
+</li>
+<li>millisNZ()
+: <a class="el" href="utils_8cpp.html#a236651574b3fd313ff91f1d01f5bc573">utils.cpp</a>
+, <a class="el" href="utils_8h.html#a2b226ab4fb09687005316a874e2627d0">utils.h</a>
+</li>
+<li>MIN_PWM
+: <a class="el" href="out__motor_8h.html#a8507f3c11d3addead8ca0fbd55616c62">out_motor.h</a>
 </li>
 <li>MIN_VOLUME
 : <a class="el" href="options_8h.html#aaec32701bf16879bd71fdddc223959c6">options.h</a>
@@ -114,9 +164,15 @@ $(function() {
 <li>MODBUS_SERIAL_BAUD
 : <a class="el" href="options_8h.html#a0c85c2202ae5366e8a3b07c2cd90998d">options.h</a>
 </li>
+<li>MODBUS_UART_RX_PIN
+: <a class="el" href="options_8h.html#af11b4d79bf515d3ee37f8e8b1528886d">options.h</a>
+</li>
+<li>MODBUS_UART_TX_PIN
+: <a class="el" href="options_8h.html#acb9b324a815025b416191b749140be2b">options.h</a>
+</li>
 <li>modbusBusy
-: <a class="el" href="item_8cpp.html#a02d3e5fb154e56cf7fc169649e232078">item.cpp</a>
-, <a class="el" href="out__modbus_8cpp.html#a02d3e5fb154e56cf7fc169649e232078">out_modbus.cpp</a>
+: <a class="el" href="out__modbus_8cpp.html#a02d3e5fb154e56cf7fc169649e232078">out_modbus.cpp</a>
+, <a class="el" href="item_8cpp.html#a02d3e5fb154e56cf7fc169649e232078">item.cpp</a>
 </li>
 <li>modbusIdle()
 : <a class="el" href="main_8cpp.html#aa557ba1fef085fb9865ffd399c738dbf">main.cpp</a>
@@ -141,33 +197,28 @@ $(function() {
 : <a class="el" href="main_8cpp.html#a5a49c3c9f18e1b12e3706522c19c62c3">main.cpp</a>
 </li>
 <li>mqttCallback()
-: <a class="el" href="main_8cpp.html#a6f06b273defaebb581fdf1adc8969f40">main.cpp</a>
-, <a class="el" href="main_8h.html#a6f06b273defaebb581fdf1adc8969f40">main.h</a>
+: <a class="el" href="main_8h.html#a6f06b273defaebb581fdf1adc8969f40">main.h</a>
+, <a class="el" href="main_8cpp.html#a6f06b273defaebb581fdf1adc8969f40">main.cpp</a>
 </li>
 <li>mqttClient
-: <a class="el" href="inputs_8cpp.html#a86d63f481644da70f063c2593fcafe19">inputs.cpp</a>
-, <a class="el" href="abstractin_8cpp.html#a86d63f481644da70f063c2593fcafe19">abstractin.cpp</a>
-, <a class="el" href="abstractch_8cpp.html#a86d63f481644da70f063c2593fcafe19">abstractch.cpp</a>
-, <a class="el" href="main_8cpp.html#a18e15522dd78764c518fd5526cc2d446">main.cpp</a>
-, <a class="el" href="item_8cpp.html#a86d63f481644da70f063c2593fcafe19">item.cpp</a>
+: <a class="el" href="abstractch_8cpp.html#a86d63f481644da70f063c2593fcafe19">abstractch.cpp</a>
 , <a class="el" href="utils_8cpp.html#a86d63f481644da70f063c2593fcafe19">utils.cpp</a>
-</li>
-<li>mqttConfigRequest()
-: <a class="el" href="main_8h.html#aec955c97b23e5875d0fdb3c00e789903">main.h</a>
-, <a class="el" href="main_8cpp.html#aec955c97b23e5875d0fdb3c00e789903">main.cpp</a>
-</li>
-<li>mqttConfigResp()
-: <a class="el" href="main_8cpp.html#ad60a48a0c509facdc6dc61df64d49fae">main.cpp</a>
-, <a class="el" href="main_8h.html#ad60a48a0c509facdc6dc61df64d49fae">main.h</a>
+, <a class="el" href="main_8cpp.html#a18e15522dd78764c518fd5526cc2d446">main.cpp</a>
+, <a class="el" href="inputs_8cpp.html#a86d63f481644da70f063c2593fcafe19">inputs.cpp</a>
+, <a class="el" href="abstractin_8cpp.html#a86d63f481644da70f063c2593fcafe19">abstractin.cpp</a>
+, <a class="el" href="item_8cpp.html#a86d63f481644da70f063c2593fcafe19">item.cpp</a>
 </li>
 <li>mqttErrorRate
-: <a class="el" href="main_8cpp.html#ac2567a764f7c3bef5306a430ba615de9">main.cpp</a>
+: <a class="el" href="main_8cpp.html#ac25d2985632c9d38e93c5eeb60d0de5d">main.cpp</a>
 </li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

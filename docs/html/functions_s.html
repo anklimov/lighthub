@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +53,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('functions_s.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,8 +90,21 @@ $(function() {
 <li>s
 : <a class="el" href="unionitem_arg_store.html#ad2a54b2adf7e42caf0a022839b06d949">itemArgStore</a>
 </li>
+<li>saveETAG()
+: <a class="el" href="classsystem_config.html#aea8ebc807800ad41555747b70f39fa2e">systemConfig</a>
+</li>
 <li>saveItem()
-: <a class="el" href="classitem_cmd.html#ab1b5e501888d0944b6c1215d58b524cf">itemCmd</a>
+: <a class="el" href="classitem_cmd.html#a14e796f916312356d317bffb9380cbd0">itemCmd</a>
+</li>
+<li>scale100()
+: <a class="el" href="classitem_cmd.html#aad86a0327c21537818b47a47eef19d6f">itemCmd</a>
+</li>
+<li>seek()
+: <a class="el" href="classflash_stream.html#a7a48d386946f8c123006dc060173f376">flashStream</a>
+, <a class="el" href="classseekable_stream.html#a05b0e71f635a107188b57c29b445f3ea">seekableStream</a>
+</li>
+<li>seekableStream()
+: <a class="el" href="classseekable_stream.html#a9a970bf7b1b0c9fe90274baaddbb6f00">seekableStream</a>
 </li>
 <li>sendDelayedStatus()
 : <a class="el" href="class_item.html#af767f604dcaed8a497438255c28129fd">Item</a>
@@ -77,11 +112,17 @@ $(function() {
 <li>SendStatus()
 : <a class="el" href="class_item.html#a525c4e3f723a85af5e818c1b5834e277">Item</a>
 </li>
+<li>SendStatusImmediate()
+: <a class="el" href="class_item.html#ad1a236a67b01bb3ae9d1aec9a18ed51d">Item</a>
+</li>
+<li>serialDebugLevel
+: <a class="el" href="unionsystem_config_flags.html#a0bff527823ec6e8b1673a10390bc31c2">systemConfigFlags</a>
+</li>
 <li>serialParam
-: <a class="el" href="classmb_persistent.html#a3c94371c87997c1b90d04fce1e076f24">mbPersistent</a>
+: <a class="el" href="classmb_persistent.html#a7d4fff056fda57b52bc227cb03c68bfa">mbPersistent</a>
 </li>
 <li>set()
-: <a class="el" href="classstatus_l_e_d.html#a3e1eff776b7ffdac123d76b7419c89e6">statusLED</a>
+: <a class="el" href="class_status_l_e_d.html#a115462c3b2fc7e18e267c28e89f25990">StatusLED</a>
 </li>
 <li>setArgType()
 : <a class="el" href="classitem_cmd.html#a599d3dda4601b317d4bc8c5d28309553">itemCmd</a>
@@ -93,10 +134,19 @@ $(function() {
 : <a class="el" href="class_item.html#a188910459fc0ded60ca268664bf9b212">Item</a>
 </li>
 <li>setColorTemp()
-: <a class="el" href="classitem_cmd.html#ae669d13e77a20f9472424b9b4c73aac0">itemCmd</a>
+: <a class="el" href="classitem_cmd.html#a4d6dc0bb34f2151dae61c886c43570d9">itemCmd</a>
+</li>
+<li>setConfigFlags()
+: <a class="el" href="classsystem_config.html#a57ffd9a7d8fa1d72b0c860e30e618375">systemConfig</a>
 </li>
 <li>setDefault()
 : <a class="el" href="classitem_cmd.html#acd8e47506003ffd28db64d6a6c443300">itemCmd</a>
+</li>
+<li>setDNS()
+: <a class="el" href="classsystem_config.html#aa2bdb0a22efb82709dfbfecde28031af">systemConfig</a>
+</li>
+<li>setETAG()
+: <a class="el" href="classsystem_config.html#ae72f3f76206fdf5d6969c836aa8b0cbf">systemConfig</a>
 </li>
 <li>setExt()
 : <a class="el" href="class_item.html#ad4e62aba1f62917a8df4c47c2894a3ad">Item</a>
@@ -104,17 +154,60 @@ $(function() {
 <li>setFlag()
 : <a class="el" href="class_item.html#abd22bfa75e71849cc0fadcee9eef330d">Item</a>
 </li>
+<li>setFloatVal()
+: <a class="el" href="class_item.html#a5b103354070ff53e7dfd66d43765a619">Item</a>
+</li>
+<li>setGW()
+: <a class="el" href="classsystem_config.html#a959580d497f3ca976032d6ece59318e6">systemConfig</a>
+</li>
 <li>setH()
 : <a class="el" href="classitem_cmd.html#a80e4577e896d7d015402709153cc66cd">itemCmd</a>
+</li>
+<li>setIP()
+: <a class="el" href="classsystem_config.html#adfc32a9291df04431e48f4a29622f2f8">systemConfig</a>
+</li>
+<li>setLoadHTTPConfig()
+: <a class="el" href="classsystem_config.html#a1fef3609567a267002833b35114b57fb">systemConfig</a>
+</li>
+<li>setMAC()
+: <a class="el" href="classsystem_config.html#afb681d4490820e322f5e509c2bc03432">systemConfig</a>
+</li>
+<li>setMask()
+: <a class="el" href="classsystem_config.html#ab053c69fd613a0b458d11f42af58b560">systemConfig</a>
+</li>
+<li>setMQTTpwd()
+: <a class="el" href="classsystem_config.html#a51d3938395608f36a85be28bb6b2d708">systemConfig</a>
 </li>
 <li>setNextPollTime()
 : <a class="el" href="class_input.html#a8efca39cb91c24dc80a62d660fd9ea2a">Input</a>
 </li>
+<li>setOTApwd()
+: <a class="el" href="classsystem_config.html#a5f28d822366f9194344bb13db53e0b43">systemConfig</a>
+</li>
+<li>setPercents()
+: <a class="el" href="classitem_cmd.html#adf2d3027926291a79bec09a8022abf54">itemCmd</a>
+</li>
 <li>setPersistent()
 : <a class="el" href="class_item.html#af023950bb9b9760b98c5de7287bc467d">Item</a>
 </li>
+<li>setpoint
+: <a class="el" href="classpid_persistent.html#aa46c941188a27912663fcd96cf38bf3f">pidPersistent</a>
+</li>
 <li>setS()
 : <a class="el" href="classitem_cmd.html#aed6c891043edd0083ea036494956da93">itemCmd</a>
+</li>
+<li>setSaveSuccedConfig()
+: <a class="el" href="classsystem_config.html#aeb7c0b487a5cc34efd4e4f34f46c28e9">systemConfig</a>
+</li>
+<li>setSerialDebuglevel()
+: <a class="el" href="classsystem_config.html#ad130cc84cd54223d03cf9255298bfb68">systemConfig</a>
+</li>
+<li>setServer()
+: <a class="el" href="classsystem_config.html#afda81c9cf59f8cbdcf8a2baafbc1ecb3">systemConfig</a>
+</li>
+<li>setSize()
+: <a class="el" href="classflash_stream.html#aebb3e951c8e23ee484360b2a6f3b2118">flashStream</a>
+, <a class="el" href="classseekable_stream.html#a902f161daee83bec42bdb342b315d8a4">seekableStream</a>
 </li>
 <li>setSubtype()
 : <a class="el" href="class_item.html#a47b261677ded48fb1c51088b9d956dcc">Item</a>
@@ -122,8 +215,12 @@ $(function() {
 <li>setSuffix()
 : <a class="el" href="classitem_cmd.html#ab0c9dd09c598686d46dec923550d2e47">itemCmd</a>
 </li>
+<li>setUdpDebuglevel()
+: <a class="el" href="classsystem_config.html#a119d26794423fd6da965f11e3966d05c">systemConfig</a>
+</li>
 <li>Setup()
 : <a class="el" href="classabstract_ch.html#aeaf6346625245be1774a6d27d9cece4e">abstractCh</a>
+, <a class="el" href="classabstract_out.html#ad84ffc96dafea9cbe5c91f35c90ffe3b">abstractOut</a>
 , <a class="el" href="classin__ccs811.html#adc24e341d0df945dc9db85051fe03e48">in_ccs811</a>
 , <a class="el" href="classin__hdc1080.html#ae8e077105f9b80dcf682cdc2bd4a95e3">in_hdc1080</a>
 </li>
@@ -136,14 +233,20 @@ $(function() {
 , <a class="el" href="classout__dmx.html#a7bf52f6c7ce630f879de60596b82dd87">out_dmx</a>
 , <a class="el" href="classout___modbus.html#acf5452aac576901614eca795ab4ca440">out_Modbus</a>
 , <a class="el" href="classout___motor.html#ab9f2b433a4fedd6fec5b9cb504b934f4">out_Motor</a>
+, <a class="el" href="classout___multivent.html#a568241c423d7172f2a4b061f88e48341">out_Multivent</a>
+, <a class="el" href="classout__pid.html#af67c5acd4858a8b694b5083f5c5f97cb">out_pid</a>
 , <a class="el" href="classout__pwm.html#a0ba3173e9df1cb61b74a705c270ef7b6">out_pwm</a>
+, <a class="el" href="classout__relay.html#a1858489a8c68a95fa242f9d2ca24ee0d">out_relay</a>
 , <a class="el" href="classout___s_p_i_led.html#adbe9d6b9a2a5e515e9a372a4c4675b15">out_SPILed</a>
 </li>
 <li>setVal()
 : <a class="el" href="class_item.html#ad2a38c039f8b3cee14cb97c9526d9260">Item</a>
 </li>
 <li>show()
-: <a class="el" href="classstatus_l_e_d.html#a611fa4b90edb00fa5b42923ea091cd9c">statusLED</a>
+: <a class="el" href="class_status_l_e_d.html#a41b59458f9f6650ed5cc3a5de3c5b3ef">StatusLED</a>
+</li>
+<li>signature
+: <a class="el" href="structsystem_config_data.html#a0b7666779468e4e4d35087ec941640b8">systemConfigData</a>
 </li>
 <li>signed_colorTemp
 : <a class="el" href="unionitem_arg_store.html#a5b454ee59d0a9b5d4b2c52b3fa40d846">itemArgStore</a>
@@ -157,6 +260,15 @@ $(function() {
 <li>signed_v
 : <a class="el" href="unionitem_arg_store.html#a3d1cdc762efb0d385441d14e92d95829">itemArgStore</a>
 </li>
+<li>spare
+: <a class="el" href="structsystem_config_data.html#a6ae7d30d8f04967f152320f1bd5a049e">systemConfigData</a>
+</li>
+<li>spare2
+: <a class="el" href="unionsystem_config_flags.html#a0a31f60118e4ad38906f0cc0b015dd2f">systemConfigFlags</a>
+</li>
+<li>startPos
+: <a class="el" href="classflash_stream.html#a554cc9688c9a9d8c17fac68d5b54f01b">flashStream</a>
+</li>
 <li>state
 : <a class="el" href="unionin_store.html#a5db18504795773dee8dd1cca020994f7">inStore</a>
 </li>
@@ -166,11 +278,14 @@ $(function() {
 , <a class="el" href="classout__dmx.html#aa5f2590101b1951f4cf5eb57449d8365">out_dmx</a>
 , <a class="el" href="classout___modbus.html#acc0fc0ecdb6928cfc7906986b8139780">out_Modbus</a>
 , <a class="el" href="classout___motor.html#a47de22f0ce071787ac14a19897337cea">out_Motor</a>
+, <a class="el" href="classout___multivent.html#afde85452eec6afbd8a06c1755a7bfb4d">out_Multivent</a>
+, <a class="el" href="classout__pid.html#aae4f4f1dde85b72a187a29bb25b95f32">out_pid</a>
 , <a class="el" href="classout__pwm.html#a01edf9d010b717601898bf3fddecbc3f">out_pwm</a>
+, <a class="el" href="classout__relay.html#ac0b56fd7922f7c77ef17d859d89c0fd6">out_relay</a>
 , <a class="el" href="classout___s_p_i_led.html#a9486de18e156758a12fa257f68314e20">out_SPILed</a>
 </li>
-<li>statusLED()
-: <a class="el" href="classstatus_l_e_d.html#ae9a8652af566b29edf336fff51e239e1">statusLED</a>
+<li>StatusLED()
+: <a class="el" href="class_status_l_e_d.html#a36991d2474108cf36a05a3c715c3c19c">StatusLED</a>
 </li>
 <li>Stop()
 : <a class="el" href="classabstract_ch.html#afb7b6f4586412a13f8f6ac08061e5ae0">abstractCh</a>
@@ -179,24 +294,43 @@ $(function() {
 , <a class="el" href="classout__dmx.html#a0b9383e7fe30707142915cbc3d0ec772">out_dmx</a>
 , <a class="el" href="classout___modbus.html#a9cb4b395f5f8a6d15dcc429664a4174b">out_Modbus</a>
 , <a class="el" href="classout___motor.html#aafdbaaaf47776dd8c0c5d6bfa32bb3c2">out_Motor</a>
+, <a class="el" href="classout___multivent.html#aadcc821f72c52c6810fd8181b7fbed16">out_Multivent</a>
+, <a class="el" href="classout__pid.html#a580d905413d92f34ff5248cb0c1854a0">out_pid</a>
 , <a class="el" href="classout__pwm.html#a9f3fc73a1fff6ecf991d42564a7b8273">out_pwm</a>
+, <a class="el" href="classout__relay.html#af6955f7fa76586a910643c294dd6877a">out_relay</a>
 , <a class="el" href="classout___s_p_i_led.html#a4e24b8a490f8353452b8594dffff8396">out_SPILed</a>
 </li>
 <li>store
 : <a class="el" href="class_input.html#a2c8307bf192b3e07bbc7cd605efeeb81">Input</a>
 , <a class="el" href="classout___modbus.html#a78e591ac7d7de9e7a3ab0a6d96263c2b">out_Modbus</a>
+, <a class="el" href="classout__pid.html#a4a0ac1daa45fc724f1008d0c35530307">out_pid</a>
+</li>
+<li>Str()
+: <a class="el" href="classitem_cmd.html#adc2d4b8e99adc5d232bab2a6adc1ad5d">itemCmd</a>
 </li>
 <li>Streamlog()
-: <a class="el" href="class_streamlog.html#a51cd1bbe03b32ad2d4235b4ef7945d37">Streamlog</a>
+: <a class="el" href="class_streamlog.html#aa3d6de674a30268eeb1c3fcc45e9bd47">Streamlog</a>
+</li>
+<li>streamSize
+: <a class="el" href="classseekable_stream.html#a4e939db97f858ce94111f4a5001a15c2">seekableStream</a>
 </li>
 <li>suffixCode
 : <a class="el" href="unionitem_cmd_store.html#a60ffaa3ef4ac448d5b31a519dd2d8ba9">itemCmdStore</a>
 </li>
+<li>sysConfigHash
+: <a class="el" href="unionsystem_config_flags.html#a11f1ea74cd3b06ec2f703ac0e478dbec">systemConfigFlags</a>
+</li>
+<li>systemConfig()
+: <a class="el" href="classsystem_config.html#a10939a4cdd0bc9e387c4bf65004ab817">systemConfig</a>
+</li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

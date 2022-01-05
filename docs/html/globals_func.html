@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +53,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('globals_func.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,6 +90,14 @@ $(function() {
 <li>__attribute__()
 : <a class="el" href="utils_8cpp.html#abf2ee9f926c45315d1a91ae9d4bdba26">utils.cpp</a>
 </li>
+<li>_inet_aton()
+: <a class="el" href="utils_8cpp.html#ad620f6746f5f0d6b62a801dd26c8ed53">utils.cpp</a>
+, <a class="el" href="utils_8h.html#ad620f6746f5f0d6b62a801dd26c8ed53">utils.h</a>
+</li>
+<li>_inet_ntoa_r()
+: <a class="el" href="utils_8cpp.html#a62c963f0eca4136cc72f0f882c13e7af">utils.cpp</a>
+, <a class="el" href="utils_8h.html#a62c963f0eca4136cc72f0f882c13e7af">utils.h</a>
+</li>
 </ul>
 
 
@@ -76,9 +106,13 @@ $(function() {
 : <a class="el" href="main_8cpp.html#a82529a2f0678bfb6b0808935865ba42d">main.cpp</a>
 , <a class="el" href="main_8h.html#a82529a2f0678bfb6b0808935865ba42d">main.h</a>
 </li>
-<li>ArtnetSetup()
-: <a class="el" href="dmx_8cpp.html#af7ba5611c2c7485938cbf745ed65741f">dmx.cpp</a>
-, <a class="el" href="dmx_8h.html#af7ba5611c2c7485938cbf745ed65741f">dmx.h</a>
+<li>artnetSetChans()
+: <a class="el" href="dmx_8h.html#abdd33064131de0ec44f40f22ae979397">dmx.h</a>
+, <a class="el" href="dmx_8cpp.html#abdd33064131de0ec44f40f22ae979397">dmx.cpp</a>
+</li>
+<li>artnetSetup()
+: <a class="el" href="dmx_8h.html#a384f51a65164f2d53600a2e2d62145b5">dmx.h</a>
+, <a class="el" href="dmx_8cpp.html#a384f51a65164f2d53600a2e2d62145b5">dmx.cpp</a>
 </li>
 </ul>
 
@@ -95,49 +129,56 @@ $(function() {
 : <a class="el" href="inputs_8cpp.html#a4d0d8ca9d09c3caf99fbaec688ebef2a">inputs.cpp</a>
 </li>
 <li>cmdFunctionClearEEPROM()
-: <a class="el" href="main_8cpp.html#ab2e128aecd2d6a7c32257adb25b6bc0d">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a6ec4bc9bc5a74e8333b7736054155e0b">main.cpp</a>
 </li>
 <li>cmdFunctionGet()
-: <a class="el" href="main_8cpp.html#a84a345181b5379a4dc0eec58f348deb7">main.cpp</a>
-, <a class="el" href="main_8h.html#a84a345181b5379a4dc0eec58f348deb7">main.h</a>
+: <a class="el" href="main_8cpp.html#a7e56dec64c5e7e657ec7ed5016e9aa90">main.cpp</a>
+, <a class="el" href="main_8h.html#a7e56dec64c5e7e657ec7ed5016e9aa90">main.h</a>
 </li>
 <li>cmdFunctionHelp()
-: <a class="el" href="main_8cpp.html#a21fea6de1fe7b59684f3d18e3f4764d7">main.cpp</a>
-, <a class="el" href="main_8h.html#a21fea6de1fe7b59684f3d18e3f4764d7">main.h</a>
+: <a class="el" href="main_8cpp.html#a741e85280176117a466e887e8ea3ae9f">main.cpp</a>
+, <a class="el" href="main_8h.html#a741e85280176117a466e887e8ea3ae9f">main.h</a>
 </li>
 <li>cmdFunctionIp()
-: <a class="el" href="main_8cpp.html#a5c6faf75e381fd57cf83b6efb002ceb4">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a5a1d3e2c54732d731c21c9f98fa295ed">main.cpp</a>
 </li>
 <li>cmdFunctionKill()
-: <a class="el" href="main_8cpp.html#ab854d947e87c345f801a07f196e50a67">main.cpp</a>
-, <a class="el" href="main_8h.html#ab854d947e87c345f801a07f196e50a67">main.h</a>
+: <a class="el" href="main_8cpp.html#a78fac18f243ffbb9a7bdef1c6126673d">main.cpp</a>
+, <a class="el" href="main_8h.html#a78fac18f243ffbb9a7bdef1c6126673d">main.h</a>
 </li>
 <li>cmdFunctionLoad()
-: <a class="el" href="main_8cpp.html#a3e35733dfdfb0fc4a3c55ab4bfc34fc1">main.cpp</a>
-, <a class="el" href="main_8h.html#a3e35733dfdfb0fc4a3c55ab4bfc34fc1">main.h</a>
+: <a class="el" href="main_8cpp.html#a386d89c44510281499c427aae77e472e">main.cpp</a>
+, <a class="el" href="main_8h.html#a386d89c44510281499c427aae77e472e">main.h</a>
+</li>
+<li>cmdFunctionLoglevel()
+: <a class="el" href="main_8h.html#a01f9a34aa5ce566aa991b139ad1d1f87">main.h</a>
+, <a class="el" href="main_8cpp.html#a01f9a34aa5ce566aa991b139ad1d1f87">main.cpp</a>
+</li>
+<li>cmdFunctionOTAPwd()
+: <a class="el" href="main_8cpp.html#a1c255c64e075ec9b91aff20614a68324">main.cpp</a>
 </li>
 <li>cmdFunctionPwd()
-: <a class="el" href="main_8cpp.html#a46b3fce70062889d311e18a31d1dac28">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a5552b98c30d243f85e492725884465be">main.cpp</a>
 </li>
 <li>cmdFunctionReboot()
-: <a class="el" href="main_8cpp.html#a1f823c0616ac50cfe9d6d262c313b416">main.cpp</a>
-</li>
-<li>cmdFunctionReq()
-: <a class="el" href="main_8cpp.html#a1ebb3f04dc34df941a4bf974f7ad9443">main.cpp</a>
-, <a class="el" href="main_8h.html#a1ebb3f04dc34df941a4bf974f7ad9443">main.h</a>
+: <a class="el" href="main_8cpp.html#a6cb10f1cb0302c01d692e88300e5adea">main.cpp</a>
 </li>
 <li>cmdFunctionSave()
-: <a class="el" href="main_8cpp.html#a66af021e24df0f8f82d9550cdb6bf865">main.cpp</a>
-, <a class="el" href="main_8h.html#a66af021e24df0f8f82d9550cdb6bf865">main.h</a>
+: <a class="el" href="main_8h.html#ad7bd0a89bd5d2f06c5ff12da3c4a0578">main.h</a>
+, <a class="el" href="main_8cpp.html#ad7bd0a89bd5d2f06c5ff12da3c4a0578">main.cpp</a>
 </li>
 <li>cmdFunctionSetMac()
-: <a class="el" href="main_8cpp.html#aea9177f835f6f4ad83d8f71dc0a4db77">main.cpp</a>
-, <a class="el" href="main_8h.html#aea9177f835f6f4ad83d8f71dc0a4db77">main.h</a>
+: <a class="el" href="main_8cpp.html#adcda04094ce227e4f3b9eecc7eb565c6">main.cpp</a>
+, <a class="el" href="main_8h.html#adcda04094ce227e4f3b9eecc7eb565c6">main.h</a>
 </li>
 </ul>
 
 
 <h3><a id="index_d"></a>- d -</h3><ul>
+<li>digGroup()
+: <a class="el" href="item_8cpp.html#a963219cc65f7345f98d334090edf7353">item.cpp</a>
+, <a class="el" href="item_8h.html#a0c7a6d989a102f18547abb0712df8c89">item.h</a>
+</li>
 <li>disabledDisconnected()
 : <a class="el" href="main_8h.html#a4d31c49c58edcc310db78d660c434995">main.h</a>
 </li>
@@ -149,8 +190,8 @@ $(function() {
 : <a class="el" href="dmx_8cpp.html#a5e41f4011e2b2e2d400e4ac43a6541b1">dmx.cpp</a>
 </li>
 <li>DMXinSetup()
-: <a class="el" href="dmx_8cpp.html#a45b57fab4ca3a3f7d3491506945c6326">dmx.cpp</a>
-, <a class="el" href="dmx_8h.html#a45b57fab4ca3a3f7d3491506945c6326">dmx.h</a>
+: <a class="el" href="dmx_8h.html#a45b57fab4ca3a3f7d3491506945c6326">dmx.h</a>
+, <a class="el" href="dmx_8cpp.html#a45b57fab4ca3a3f7d3491506945c6326">dmx.cpp</a>
 </li>
 <li>DMXOUT_propagate()
 : <a class="el" href="dmx_8cpp.html#a7c166d810404d3d15f663706271de37f">dmx.cpp</a>
@@ -182,8 +223,8 @@ $(function() {
 : <a class="el" href="main_8cpp.html#ae161ded98969a4b68b902b79633edc3b">main.cpp</a>
 </li>
 <li>executeCommand()
-: <a class="el" href="utils_8cpp.html#a132faa838403a6db82d1e7e65d4c4ff2">utils.cpp</a>
-, <a class="el" href="utils_8h.html#a9843f57c765644bc93e675922da82beb">utils.h</a>
+: <a class="el" href="utils_8h.html#abb40f2502eb474ec60da7058025ce541">utils.h</a>
+, <a class="el" href="utils_8cpp.html#a61e700b2973e8349a18c36fcc93e7272">utils.cpp</a>
 </li>
 </ul>
 
@@ -196,13 +237,9 @@ $(function() {
 
 
 <h3><a id="index_g"></a>- g -</h3><ul>
-<li>getBright()
-: <a class="el" href="bright_8cpp.html#a773d31bb10e0abdf91e078da4326b7b0">bright.cpp</a>
-, <a class="el" href="bright_8h.html#a773d31bb10e0abdf91e078da4326b7b0">bright.h</a>
-</li>
 <li>getBright255()
-: <a class="el" href="bright_8cpp.html#a1707bc1c6aa92f67ef5a4456cbbec0c3">bright.cpp</a>
-, <a class="el" href="bright_8h.html#a1707bc1c6aa92f67ef5a4456cbbec0c3">bright.h</a>
+: <a class="el" href="bright_8cpp.html#af368f01aa3a372ff701bcc6a69308c7e">bright.cpp</a>
+, <a class="el" href="bright_8h.html#af368f01aa3a372ff701bcc6a69308c7e">bright.h</a>
 </li>
 <li>getCRC()
 : <a class="el" href="out__ac_8cpp.html#afe1602b340d5fab3a7047498810fed25">out_ac.cpp</a>
@@ -211,16 +248,29 @@ $(function() {
 : <a class="el" href="utils_8cpp.html#a6037cfc7913c0856e93dbf8fc2133aac">utils.cpp</a>
 , <a class="el" href="utils_8h.html#a6037cfc7913c0856e93dbf8fc2133aac">utils.h</a>
 </li>
+<li>getNumber()
+: <a class="el" href="utils_8h.html#af97ce3611cbf9e3f12566a1d2a6c965b">utils.h</a>
+, <a class="el" href="utils_8cpp.html#af97ce3611cbf9e3f12566a1d2a6c965b">utils.cpp</a>
+</li>
+<li>getPinVal()
+: <a class="el" href="out__relay_8cpp.html#acd5af14dd5e8500c2e8a72342e109d76">out_relay.cpp</a>
+</li>
 <li>getStringFromConfig()
-: <a class="el" href="main_8cpp.html#a900f9d7a9963ef64b642248a76175af7">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a7d5e0e0612ab235c45bea4406faa5f76">main.cpp</a>
 </li>
 </ul>
 
 
 <h3><a id="index_h"></a>- h -</h3><ul>
+<li>headerHandlerProc()
+: <a class="el" href="main_8cpp.html#afd455bc7e96601a4fd56eb61acc049a6">main.cpp</a>
+</li>
 <li>HEX2DEC()
 : <a class="el" href="utils_8cpp.html#a4cafbb82e446669dd50a2a386c1531fd">utils.cpp</a>
 , <a class="el" href="utils_8h.html#a215fd13be95cb1c21fe50b3693b85557">utils.h</a>
+</li>
+<li>httpHandler()
+: <a class="el" href="main_8cpp.html#a0be73e190c0f09e71bb6d1331f938bc2">main.cpp</a>
 </li>
 </ul>
 
@@ -229,29 +279,20 @@ $(function() {
 <li>i2cReset()
 : <a class="el" href="in__ccs811__hdc1080_8cpp.html#afb6d390da3bb3ce4bb8208512a7b6cdb">in_ccs811_hdc1080.cpp</a>
 </li>
-<li>inet_aton()
-: <a class="el" href="utils_8cpp.html#a2abeec32a0c7fe0b4aa02a8807ed9cee">utils.cpp</a>
-, <a class="el" href="utils_8h.html#a2abeec32a0c7fe0b4aa02a8807ed9cee">utils.h</a>
-</li>
-<li>inet_ntoa_r()
-: <a class="el" href="utils_8cpp.html#a5f3cdb518da692b8859ae48ed58196fc">utils.cpp</a>
-, <a class="el" href="utils_8h.html#a5f3cdb518da692b8859ae48ed58196fc">utils.h</a>
-</li>
 <li>inputLoop()
-: <a class="el" href="main_8cpp.html#ad146ac5b8d70c1a9a590ba4029c3548e">main.cpp</a>
-, <a class="el" href="main_8h.html#ad146ac5b8d70c1a9a590ba4029c3548e">main.h</a>
+: <a class="el" href="main_8cpp.html#a60ca3fb50f13d9dca20f04e28045c185">main.cpp</a>
+, <a class="el" href="main_8h.html#a9de6380e1d961d11c0b6d01171646d34">main.h</a>
 </li>
 <li>inputSetup()
 : <a class="el" href="main_8cpp.html#a312b53e977f386af72ed576bca617fef">main.cpp</a>
 , <a class="el" href="main_8h.html#a312b53e977f386af72ed576bca617fef">main.h</a>
 </li>
-<li>ip_ready_config_loaded_connecting_to_broker()
-: <a class="el" href="main_8cpp.html#aed1aedfd8ec1c64e58ca24e5de9470b2">main.cpp</a>
-, <a class="el" href="main_8h.html#aed1aedfd8ec1c64e58ca24e5de9470b2">main.h</a>
+<li>inTopic()
+: <a class="el" href="main_8cpp.html#aedb369b00c0ff023b804c838c691734a">main.cpp</a>
 </li>
-<li>ipLoadFromFlash()
-: <a class="el" href="main_8cpp.html#a4ae13d2288d58c3ea8b731270fa798d3">main.cpp</a>
-, <a class="el" href="main_8h.html#a4ae13d2288d58c3ea8b731270fa798d3">main.h</a>
+<li>ip_ready_config_loaded_connecting_to_broker()
+: <a class="el" href="main_8h.html#aed1aedfd8ec1c64e58ca24e5de9470b2">main.h</a>
+, <a class="el" href="main_8cpp.html#aed1aedfd8ec1c64e58ca24e5de9470b2">main.cpp</a>
 </li>
 <li>isNotRetainingStatus()
 : <a class="el" href="main_8cpp.html#a9b73380a4525361ce5634b890e83c8d2">main.cpp</a>
@@ -260,12 +301,9 @@ $(function() {
 <li>IsThermostat()
 : <a class="el" href="main_8h.html#a31ee3eed42c2bdf317dca09913f89b27">main.h</a>
 </li>
-<li>isThermostatWithMinArraySize()
-: <a class="el" href="main_8cpp.html#a5976046ebb500523e75d64f9c858d73d">main.cpp</a>
-</li>
 <li>isTimeOver()
-: <a class="el" href="utils_8cpp.html#a1c013af2ccb8a6dd130f0ab706b1abc4">utils.cpp</a>
-, <a class="el" href="utils_8h.html#acd6072104e482c3f61e5bfad35a58ac0">utils.h</a>
+: <a class="el" href="utils_8h.html#ac1da7fe353a40e62dd3a8a0761d12b22">utils.h</a>
+, <a class="el" href="utils_8cpp.html#a1c013af2ccb8a6dd130f0ab706b1abc4">utils.cpp</a>
 </li>
 <li>itemCtrl2()
 : <a class="el" href="dmx_8cpp.html#abbcd6bfbf8b1c05b00ba38459d41ff4d">dmx.cpp</a>
@@ -280,24 +318,20 @@ $(function() {
 , <a class="el" href="main_8h.html#ac90757e5d1212e1b230bb4db8924d310">main.h</a>
 </li>
 <li>loadConfigFromEEPROM()
-: <a class="el" href="main_8cpp.html#a92e24c034fb886c8155d50831bae5823">main.cpp</a>
-, <a class="el" href="main_8h.html#a92e24c034fb886c8155d50831bae5823">main.h</a>
+: <a class="el" href="main_8h.html#a92e24c034fb886c8155d50831bae5823">main.h</a>
+, <a class="el" href="main_8cpp.html#a92e24c034fb886c8155d50831bae5823">main.cpp</a>
 </li>
 <li>loadConfigFromHttp()
-: <a class="el" href="main_8cpp.html#aa6db506a9d019ba9decab546c15eb819">main.cpp</a>
-, <a class="el" href="main_8h.html#a1369dd2c9e03f46af35b247a5e8548df">main.h</a>
-</li>
-<li>loadFlash()
-: <a class="el" href="main_8cpp.html#aff5e7d5d674ed8a8fedcde644c725f68">main.cpp</a>
-, <a class="el" href="main_8h.html#a7f53de7620c6cfb1462d7c94b5f9814c">main.h</a>
+: <a class="el" href="main_8cpp.html#a80630fe7fd8aa1d0e6929a5a7c848c54">main.cpp</a>
+, <a class="el" href="main_8h.html#a80630fe7fd8aa1d0e6929a5a7c848c54">main.h</a>
 </li>
 <li>log()
 : <a class="el" href="utils_8cpp.html#aadf1050416e46077ad59157173438dad">utils.cpp</a>
 , <a class="el" href="utils_8h.html#aadf1050416e46077ad59157173438dad">utils.h</a>
 </li>
 <li>loop_main()
-: <a class="el" href="main_8cpp.html#a840f282fdf876a88d5ff634fd74f10be">main.cpp</a>
-, <a class="el" href="main_8h.html#a840f282fdf876a88d5ff634fd74f10be">main.h</a>
+: <a class="el" href="main_8h.html#a840f282fdf876a88d5ff634fd74f10be">main.h</a>
+, <a class="el" href="main_8cpp.html#a840f282fdf876a88d5ff634fd74f10be">main.cpp</a>
 </li>
 </ul>
 
@@ -307,26 +341,22 @@ $(function() {
 : <a class="el" href="utils_8cpp.html#ace8fa23ff29c3feb89c5d500ef87b914">utils.cpp</a>
 , <a class="el" href="utils_8h.html#ace8fa23ff29c3feb89c5d500ef87b914">utils.h</a>
 </li>
+<li>millisNZ()
+: <a class="el" href="utils_8h.html#a2b226ab4fb09687005316a874e2627d0">utils.h</a>
+, <a class="el" href="utils_8cpp.html#a236651574b3fd313ff91f1d01f5bc573">utils.cpp</a>
+</li>
 <li>modbusIdle()
-: <a class="el" href="main_8h.html#aa557ba1fef085fb9865ffd399c738dbf">main.h</a>
+: <a class="el" href="out__modbus_8cpp.html#aa557ba1fef085fb9865ffd399c738dbf">out_modbus.cpp</a>
 , <a class="el" href="out__ac_8h.html#aa557ba1fef085fb9865ffd399c738dbf">out_ac.h</a>
 , <a class="el" href="main_8cpp.html#aa557ba1fef085fb9865ffd399c738dbf">main.cpp</a>
-, <a class="el" href="out__modbus_8cpp.html#aa557ba1fef085fb9865ffd399c738dbf">out_modbus.cpp</a>
+, <a class="el" href="main_8h.html#aa557ba1fef085fb9865ffd399c738dbf">main.h</a>
 </li>
 <li>mqttCallback()
-: <a class="el" href="main_8cpp.html#a6f06b273defaebb581fdf1adc8969f40">main.cpp</a>
-, <a class="el" href="main_8h.html#a6f06b273defaebb581fdf1adc8969f40">main.h</a>
+: <a class="el" href="main_8h.html#a6f06b273defaebb581fdf1adc8969f40">main.h</a>
+, <a class="el" href="main_8cpp.html#a6f06b273defaebb581fdf1adc8969f40">main.cpp</a>
 </li>
 <li>mqttClient()
 : <a class="el" href="main_8cpp.html#a18e15522dd78764c518fd5526cc2d446">main.cpp</a>
-</li>
-<li>mqttConfigRequest()
-: <a class="el" href="main_8cpp.html#aec955c97b23e5875d0fdb3c00e789903">main.cpp</a>
-, <a class="el" href="main_8h.html#aec955c97b23e5875d0fdb3c00e789903">main.h</a>
-</li>
-<li>mqttConfigResp()
-: <a class="el" href="main_8cpp.html#ad60a48a0c509facdc6dc61df64d49fae">main.cpp</a>
-, <a class="el" href="main_8h.html#ad60a48a0c509facdc6dc61df64d49fae">main.h</a>
 </li>
 </ul>
 
@@ -347,8 +377,8 @@ $(function() {
 , <a class="el" href="ow_term_8h.html#ac9fd793efbaca8922408effe06e71650">owTerm.h</a>
 </li>
 <li>owFind()
-: <a class="el" href="ow_term_8cpp.html#a38798dcd7c98c38975db6e3f19de63a3">owTerm.cpp</a>
-, <a class="el" href="ow_term_8h.html#a38798dcd7c98c38975db6e3f19de63a3">owTerm.h</a>
+: <a class="el" href="ow_term_8h.html#a38798dcd7c98c38975db6e3f19de63a3">owTerm.h</a>
+, <a class="el" href="ow_term_8cpp.html#a38798dcd7c98c38975db6e3f19de63a3">owTerm.cpp</a>
 </li>
 <li>owIdle()
 : <a class="el" href="main_8cpp.html#a58e08cc15112818913fe96d75642265e">main.cpp</a>
@@ -363,8 +393,8 @@ $(function() {
 , <a class="el" href="ow_term_8h.html#ac78e14aeb04a12acf45919b64fe0d280">owTerm.h</a>
 </li>
 <li>owUpdate()
-: <a class="el" href="ow_term_8cpp.html#aff3811570b1dd6182d7f45bd573afcfd">owTerm.cpp</a>
-, <a class="el" href="ow_term_8h.html#aff3811570b1dd6182d7f45bd573afcfd">owTerm.h</a>
+: <a class="el" href="ow_term_8h.html#aff3811570b1dd6182d7f45bd573afcfd">owTerm.h</a>
+, <a class="el" href="ow_term_8cpp.html#aff3811570b1dd6182d7f45bd573afcfd">owTerm.cpp</a>
 </li>
 </ul>
 
@@ -375,16 +405,19 @@ $(function() {
 , <a class="el" href="utils_8h.html#a1938abf1ef99f35bd2578e3db1bcf7b8">utils.h</a>
 </li>
 <li>pollingLoop()
-: <a class="el" href="main_8cpp.html#aec2ff7b5df24b3ae0cfe8d556088fd7c">main.cpp</a>
-, <a class="el" href="main_8h.html#aec2ff7b5df24b3ae0cfe8d556088fd7c">main.h</a>
+: <a class="el" href="main_8h.html#aec2ff7b5df24b3ae0cfe8d556088fd7c">main.h</a>
+, <a class="el" href="main_8cpp.html#aec2ff7b5df24b3ae0cfe8d556088fd7c">main.cpp</a>
 </li>
 <li>postTransmission()
 : <a class="el" href="main_8cpp.html#a33b535e84f654e423bb627b25b7b3759">main.cpp</a>
 , <a class="el" href="main_8h.html#a33b535e84f654e423bb627b25b7b3759">main.h</a>
 </li>
 <li>preTransmission()
-: <a class="el" href="main_8cpp.html#a1c43d8a4afead0d0df29635242290377">main.cpp</a>
-, <a class="el" href="main_8h.html#a1c43d8a4afead0d0df29635242290377">main.h</a>
+: <a class="el" href="main_8h.html#a1c43d8a4afead0d0df29635242290377">main.h</a>
+, <a class="el" href="main_8cpp.html#a1c43d8a4afead0d0df29635242290377">main.cpp</a>
+</li>
+<li>printActiveStatus()
+: <a class="el" href="item_8cpp.html#af9d9949a0fdfd7de95999113e1523de2">item.cpp</a>
 </li>
 <li>printBool()
 : <a class="el" href="main_8cpp.html#a2d4b5aa8fbc197c31397235607aeba13">main.cpp</a>
@@ -403,20 +436,20 @@ $(function() {
 , <a class="el" href="main_8h.html#ab6cb5750ee8902ca29b51dd013bb74b9">main.h</a>
 </li>
 <li>printFirmwareVersionAndBuildOptions()
-: <a class="el" href="main_8cpp.html#a1cff64c0263246441c972f03e6893714">main.cpp</a>
-, <a class="el" href="main_8h.html#a1cff64c0263246441c972f03e6893714">main.h</a>
+: <a class="el" href="main_8h.html#a1cff64c0263246441c972f03e6893714">main.h</a>
+, <a class="el" href="main_8cpp.html#a1cff64c0263246441c972f03e6893714">main.cpp</a>
 </li>
 <li>printFloatValueToStr()
-: <a class="el" href="utils_8cpp.html#a6c16341dd45c4e557f951818d8d09810">utils.cpp</a>
-, <a class="el" href="utils_8h.html#a6c16341dd45c4e557f951818d8d09810">utils.h</a>
+: <a class="el" href="utils_8h.html#a6c16341dd45c4e557f951818d8d09810">utils.h</a>
+, <a class="el" href="utils_8cpp.html#a6c16341dd45c4e557f951818d8d09810">utils.cpp</a>
 </li>
 <li>printIPAddress()
 : <a class="el" href="utils_8cpp.html#af0df006a5ae8d0d730134afdaf1c64dd">utils.cpp</a>
 , <a class="el" href="utils_8h.html#af0df006a5ae8d0d730134afdaf1c64dd">utils.h</a>
 </li>
 <li>printMACAddress()
-: <a class="el" href="main_8cpp.html#ad04c200b33c848aace1315bdf676201e">main.cpp</a>
-, <a class="el" href="main_8h.html#ad04c200b33c848aace1315bdf676201e">main.h</a>
+: <a class="el" href="main_8h.html#ad04c200b33c848aace1315bdf676201e">main.h</a>
+, <a class="el" href="main_8cpp.html#ad04c200b33c848aace1315bdf676201e">main.cpp</a>
 </li>
 <li>printUlongValueToStr()
 : <a class="el" href="utils_8cpp.html#afb183532261be04b86e9e535010db6a9">utils.cpp</a>
@@ -436,8 +469,8 @@ $(function() {
 : <a class="el" href="utils_8h.html#a1380fbc9c2170180770dd1bdcc5ac647">utils.h</a>
 </li>
 <li>resetHard()
-: <a class="el" href="main_8cpp.html#a8a8de594b1a60fc6867b639d1c50a34b">main.cpp</a>
-, <a class="el" href="main_8h.html#a8a8de594b1a60fc6867b639d1c50a34b">main.h</a>
+: <a class="el" href="main_8h.html#a8a8de594b1a60fc6867b639d1c50a34b">main.h</a>
+, <a class="el" href="main_8cpp.html#a8a8de594b1a60fc6867b639d1c50a34b">main.cpp</a>
 </li>
 <li>retrieveCode()
 : <a class="el" href="item_8cpp.html#a4aef78280fd80bcca6d297030691f57b">item.cpp</a>
@@ -446,10 +479,6 @@ $(function() {
 
 
 <h3><a id="index_s"></a>- s -</h3><ul>
-<li>saveFlash()
-: <a class="el" href="main_8cpp.html#a3d9b2a443a58bf0d3e28c174d2c43b8f">main.cpp</a>
-, <a class="el" href="main_8h.html#a3d9b2a443a58bf0d3e28c174d2c43b8f">main.h</a>
-</li>
 <li>scan_i2c_bus()
 : <a class="el" href="utils_8cpp.html#af585ed9b15b9980b72fbec6d9c9dba67">utils.cpp</a>
 , <a class="el" href="utils_8h.html#af585ed9b15b9980b72fbec6d9c9dba67">utils.h</a>
@@ -465,8 +494,8 @@ $(function() {
 , <a class="el" href="utils_8h.html#a4dd6705cb24a3eab32d9abc8393844b3">utils.h</a>
 </li>
 <li>SetBytes()
-: <a class="el" href="utils_8cpp.html#a85a33f14fc0eefef02be4c6bacf5c8f0">utils.cpp</a>
-, <a class="el" href="utils_8h.html#a85a33f14fc0eefef02be4c6bacf5c8f0">utils.h</a>
+: <a class="el" href="utils_8h.html#a85a33f14fc0eefef02be4c6bacf5c8f0">utils.h</a>
+, <a class="el" href="utils_8cpp.html#a85a33f14fc0eefef02be4c6bacf5c8f0">utils.cpp</a>
 </li>
 <li>setTopic()
 : <a class="el" href="utils_8cpp.html#ab33cdb70ba57128d05b7efe3317b5a82">utils.cpp</a>
@@ -481,8 +510,8 @@ $(function() {
 , <a class="el" href="main_8h.html#abec54b31996557c73a31054ce068c8fa">main.h</a>
 </li>
 <li>setupMacAddress()
-: <a class="el" href="main_8cpp.html#a2186513a50a77b9bd9bb453d4584c5f8">main.cpp</a>
-, <a class="el" href="main_8h.html#a2186513a50a77b9bd9bb453d4584c5f8">main.h</a>
+: <a class="el" href="main_8h.html#a2186513a50a77b9bd9bb453d4584c5f8">main.h</a>
+, <a class="el" href="main_8cpp.html#a2186513a50a77b9bd9bb453d4584c5f8">main.cpp</a>
 </li>
 <li>setupOTA()
 : <a class="el" href="main_8cpp.html#acfca2f2b3c22e56799e7fd1f66952729">main.cpp</a>
@@ -501,7 +530,8 @@ $(function() {
 : <a class="el" href="out__modbus_8cpp.html#a6b595bdd94e3d76226b079ba5d7d7239">out_modbus.cpp</a>
 </li>
 <li>str2SerialParam()
-: <a class="el" href="out__modbus_8cpp.html#ae62352d2766976d85ca20006e681f254">out_modbus.cpp</a>
+: <a class="el" href="utils_8cpp.html#a7a7f700c0c11e53e4fde708443be96ff">utils.cpp</a>
+, <a class="el" href="utils_8h.html#a7a7f700c0c11e53e4fde708443be96ff">utils.h</a>
 </li>
 <li>subitem2cmd()
 : <a class="el" href="item_8cpp.html#a44da304670c8b0446f674b318ebc9294">item.cpp</a>
@@ -510,34 +540,50 @@ $(function() {
 
 
 <h3><a id="index_t"></a>- t -</h3><ul>
-<li>thermoDisabledOrDisconnected()
-: <a class="el" href="main_8cpp.html#a35f5a9d31c8cb726a3c7e77e7ad9c4b2">main.cpp</a>
-</li>
 <li>thermoLoop()
 : <a class="el" href="main_8cpp.html#a2d1cd6009a6e25d3605fee3e54065577">main.cpp</a>
 , <a class="el" href="main_8h.html#a2d1cd6009a6e25d3605fee3e54065577">main.h</a>
 </li>
+<li>thermoRelay()
+: <a class="el" href="main_8cpp.html#a1687374e5aea6c47e7378e71db976d0a">main.cpp</a>
+</li>
 <li>thermoSetCurTemp()
 : <a class="el" href="item_8h.html#a73643474e211698e96d2a6ac69264b46">item.h</a>
-, <a class="el" href="main_8cpp.html#a73643474e211698e96d2a6ac69264b46">main.cpp</a>
 , <a class="el" href="main_8h.html#a73643474e211698e96d2a6ac69264b46">main.h</a>
+</li>
+<li>TimerHandler()
+: <a class="el" href="main_8cpp.html#a1cc80cae574fa278891c134b8b01a8f7">main.cpp</a>
 </li>
 <li>toHex()
 : <a class="el" href="out__ac_8cpp.html#a609d8aade61dfe61ef1100ddca6c3799">out_ac.cpp</a>
 </li>
+<li>toString()
+: <a class="el" href="utils_8cpp.html#a19f2c10a5d113a7b031d5bb3387ea27c">utils.cpp</a>
+, <a class="el" href="utils_8h.html#a19f2c10a5d113a7b031d5bb3387ea27c">utils.h</a>
+</li>
 <li>txt2cmd()
-: <a class="el" href="item_8h.html#a354a79f09dd98fcf6c171dd5c8de21b6">item.h</a>
-, <a class="el" href="item_cmd_8cpp.html#a354a79f09dd98fcf6c171dd5c8de21b6">itemCmd.cpp</a>
+: <a class="el" href="item_cmd_8cpp.html#a354a79f09dd98fcf6c171dd5c8de21b6">itemCmd.cpp</a>
+, <a class="el" href="item_8h.html#a354a79f09dd98fcf6c171dd5c8de21b6">item.h</a>
 , <a class="el" href="item_cmd_8h.html#a354a79f09dd98fcf6c171dd5c8de21b6">itemCmd.h</a>
 </li>
 <li>txt2subItem()
 : <a class="el" href="item_8cpp.html#ac002f1e83a05b79e27bda8f93184bcee">item.cpp</a>
 </li>
 </ul>
+
+
+<h3><a id="index_z"></a>- z -</h3><ul>
+<li>zero()
+: <a class="el" href="ow_term_8cpp.html#aed7bd38aee8162da720a817873b249fc">owTerm.cpp</a>
+</li>
+</ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

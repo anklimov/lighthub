@@ -4,24 +4,10 @@
 
 {\ttfamily \#include $<$abstractout.\+h$>$}
 
-
-
-Inheritance diagram for abstract\+Out\+:
-\nopagebreak
-\begin{figure}[H]
+Inheritance diagram for abstract\+Out\+:\begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[width=350pt]{classabstract_out__inherit__graph}
-\end{center}
-\end{figure}
-
-
-Collaboration diagram for abstract\+Out\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=148pt]{classabstract_out__coll__graph}
+\includegraphics[height=2.916667cm]{classabstract_out}
 \end{center}
 \end{figure}
 \doxysubsection*{Public Member Functions}
@@ -31,12 +17,16 @@ Collaboration diagram for abstract\+Out\+:
 \item 
 virtual int \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true)=0
 \item 
-virtual int \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{is\+Active}} ()
+virtual int \mbox{\hyperlink{classabstract_out_af4d536357ee52043a4d338ce2106350e}{is\+Active}} ()
 \item 
-virtual int \mbox{\hyperlink{classabstract_out_aedf98f968abc36332dcddb7eab00fe13}{get\+Default\+On\+Val}} ()
+virtual \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{classabstract_out_ade514d6b6152e87a70d66932c74e1656}{get\+Default\+On\+Val}} ()
 \item 
 virtual int \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}{get\+Chan\+Type}} ()
-\end{DoxyCompactItemize}
+\item 
+virtual int \mbox{\hyperlink{classabstract_out_a786157307bd9438b8fbff24421b95330}{get\+Default\+Storage\+Type}} ()
+\item 
+int \mbox{\hyperlink{classabstract_out_ad84ffc96dafea9cbe5c91f35c90ffe3b}{Setup}} () override
+\begin{DoxyCompactList}\small\item\em Remove?? Now get\+Chan\+Type used instead. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsection*{Protected Attributes}
 \begin{DoxyCompactItemize}
 \item 
@@ -63,7 +53,7 @@ virtual int \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2
 
 
 
-Implemented in \mbox{\hyperlink{classout___motor_aa731e4d1848e07ac7dc4a99a0ddad942}{out\+\_\+\+Motor}}, \mbox{\hyperlink{classout___modbus_a784be57c40d67b41488b9585fe792019}{out\+\_\+\+Modbus}}, \mbox{\hyperlink{classout___a_c_aeaf2ac4088b2b4b2fd4e1b83755c9964}{out\+\_\+\+AC}}, and \mbox{\hyperlink{classcolor_channel_a9d7354cc266c98067b7b43cbf8707feb}{color\+Channel}}.
+Implemented in \mbox{\hyperlink{classout__relay_ac3d7157d14d016e0136b3e4a9aac4aac}{out\+\_\+relay}}, \mbox{\hyperlink{classout__pid_a9347f14882001bff3d73ca52c1adc700}{out\+\_\+pid}}, \mbox{\hyperlink{classout___multivent_abb99e44bd16433c7fed965197ecde5dd}{out\+\_\+\+Multivent}}, \mbox{\hyperlink{classout___motor_aa731e4d1848e07ac7dc4a99a0ddad942}{out\+\_\+\+Motor}}, \mbox{\hyperlink{classout___modbus_a784be57c40d67b41488b9585fe792019}{out\+\_\+\+Modbus}}, \mbox{\hyperlink{classout___a_c_aeaf2ac4088b2b4b2fd4e1b83755c9964}{out\+\_\+\+AC}}, and \mbox{\hyperlink{classcolor_channel_a9d7354cc266c98067b7b43cbf8707feb}{color\+Channel}}.
 
 \mbox{\Hypertarget{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}\label{classabstract_out_a3f7033b9cda791ad810c4837ed5909f2}} 
 \index{abstractOut@{abstractOut}!getChanType@{getChanType}}
@@ -73,23 +63,51 @@ Implemented in \mbox{\hyperlink{classout___motor_aa731e4d1848e07ac7dc4a99a0ddad9
 
 
 
-Reimplemented in \mbox{\hyperlink{classout___s_p_i_led_aac304bcdc354a3667ec99d4c06513b72}{out\+\_\+\+S\+P\+I\+Led}}, \mbox{\hyperlink{classout__pwm_a54bea9682560aa628f85a532a363d57a}{out\+\_\+pwm}}, \mbox{\hyperlink{classout___motor_afd67d9b6e08f14074a236d5222809226}{out\+\_\+\+Motor}}, \mbox{\hyperlink{classout___modbus_a2752cf2376840f3763572963be8785db}{out\+\_\+\+Modbus}}, and \mbox{\hyperlink{classout__dmx_a575351786cdc191555757cd39b4382f5}{out\+\_\+dmx}}.
+Reimplemented in \mbox{\hyperlink{classout___s_p_i_led_aac304bcdc354a3667ec99d4c06513b72}{out\+\_\+\+S\+P\+I\+Led}}, \mbox{\hyperlink{classout__relay_a94d578704853aaacf7f7f1877de91b62}{out\+\_\+relay}}, \mbox{\hyperlink{classout__pwm_a54bea9682560aa628f85a532a363d57a}{out\+\_\+pwm}}, \mbox{\hyperlink{classout__pid_abbc665d20d2adf34bece05b8761aca31}{out\+\_\+pid}}, \mbox{\hyperlink{classout___multivent_ad5815eb1cb9b4ecf68da3d0bae8b4ce4}{out\+\_\+\+Multivent}}, \mbox{\hyperlink{classout___motor_afd67d9b6e08f14074a236d5222809226}{out\+\_\+\+Motor}}, \mbox{\hyperlink{classout___modbus_a2752cf2376840f3763572963be8785db}{out\+\_\+\+Modbus}}, and \mbox{\hyperlink{classout__dmx_a575351786cdc191555757cd39b4382f5}{out\+\_\+dmx}}.
 
-\mbox{\Hypertarget{classabstract_out_aedf98f968abc36332dcddb7eab00fe13}\label{classabstract_out_aedf98f968abc36332dcddb7eab00fe13}} 
+\mbox{\Hypertarget{classabstract_out_ade514d6b6152e87a70d66932c74e1656}\label{classabstract_out_ade514d6b6152e87a70d66932c74e1656}} 
 \index{abstractOut@{abstractOut}!getDefaultOnVal@{getDefaultOnVal}}
 \index{getDefaultOnVal@{getDefaultOnVal}!abstractOut@{abstractOut}}
 \doxysubsubsection{\texorpdfstring{getDefaultOnVal()}{getDefaultOnVal()}}
-{\footnotesize\ttfamily virtual int abstract\+Out\+::get\+Default\+On\+Val (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} abstract\+Out\+::get\+Default\+On\+Val (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
 
-\mbox{\Hypertarget{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}\label{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}} 
+\mbox{\Hypertarget{classabstract_out_a786157307bd9438b8fbff24421b95330}\label{classabstract_out_a786157307bd9438b8fbff24421b95330}} 
+\index{abstractOut@{abstractOut}!getDefaultStorageType@{getDefaultStorageType}}
+\index{getDefaultStorageType@{getDefaultStorageType}!abstractOut@{abstractOut}}
+\doxysubsubsection{\texorpdfstring{getDefaultStorageType()}{getDefaultStorageType()}}
+{\footnotesize\ttfamily virtual int abstract\+Out\+::get\+Default\+Storage\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classcolor_channel_a52d7b6241409b4e00574b389d3436e1f}{color\+Channel}}, \mbox{\hyperlink{classout__pid_a6555b3173f184d3768e34339d59daa87}{out\+\_\+pid}}, \mbox{\hyperlink{classout___multivent_ac02fd9c36c2a3cb5ad7132e2c1df6f61}{out\+\_\+\+Multivent}}, \mbox{\hyperlink{classout___motor_ab1892d3477647b06ed2212dd8e0baaf3}{out\+\_\+\+Motor}}, \mbox{\hyperlink{classout___modbus_a844c63be065d02f2f178399519b03245}{out\+\_\+\+Modbus}}, and \mbox{\hyperlink{classout___a_c_ab249f27bdd0d22a6f098190dc746cd8c}{out\+\_\+\+AC}}.
+
+\mbox{\Hypertarget{classabstract_out_af4d536357ee52043a4d338ce2106350e}\label{classabstract_out_af4d536357ee52043a4d338ce2106350e}} 
 \index{abstractOut@{abstractOut}!isActive@{isActive}}
 \index{isActive@{isActive}!abstractOut@{abstractOut}}
 \doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
-{\footnotesize\ttfamily virtual int abstract\+Out\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+{\footnotesize\ttfamily int abstract\+Out\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
 
 
 
-Reimplemented in \mbox{\hyperlink{classout___s_p_i_led_ae87041b49ca8c6484a72c3c29955fbfb}{out\+\_\+\+S\+P\+I\+Led}}, \mbox{\hyperlink{classout__pwm_a18f9c90ab80a5bf00049e25c2c4657a5}{out\+\_\+pwm}}, \mbox{\hyperlink{classout___motor_ac2a224d74421c1a28d34a83779a45bdc}{out\+\_\+\+Motor}}, \mbox{\hyperlink{classout___modbus_a6b94efbbbbea5a4ad3b489dba8f9b268}{out\+\_\+\+Modbus}}, \mbox{\hyperlink{classout__dmx_a691d16146df96df12df763a90cdc6d92}{out\+\_\+dmx}}, and \mbox{\hyperlink{classout___a_c_ab2d5debf137c9cc91ce0b58a72da0766}{out\+\_\+\+AC}}.
+Reimplemented in \mbox{\hyperlink{classout__pid_aca01ec18698d8406bbe6964322f8ba2d}{out\+\_\+pid}}, and \mbox{\hyperlink{classout___a_c_ab2d5debf137c9cc91ce0b58a72da0766}{out\+\_\+\+AC}}.
+
+\mbox{\Hypertarget{classabstract_out_ad84ffc96dafea9cbe5c91f35c90ffe3b}\label{classabstract_out_ad84ffc96dafea9cbe5c91f35c90ffe3b}} 
+\index{abstractOut@{abstractOut}!Setup@{Setup}}
+\index{Setup@{Setup}!abstractOut@{abstractOut}}
+\doxysubsubsection{\texorpdfstring{Setup()}{Setup()}}
+{\footnotesize\ttfamily int abstract\+Out\+::\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Remove?? Now get\+Chan\+Type used instead. 
+
+
+
+Implements \mbox{\hyperlink{classabstract_ch_aeaf6346625245be1774a6d27d9cece4e}{abstract\+Ch}}.
+
+
+
+Reimplemented in \mbox{\hyperlink{classout___s_p_i_led_adbe9d6b9a2a5e515e9a372a4c4675b15}{out\+\_\+\+S\+P\+I\+Led}}, \mbox{\hyperlink{classout__relay_a1858489a8c68a95fa242f9d2ca24ee0d}{out\+\_\+relay}}, \mbox{\hyperlink{classout__pwm_a0ba3173e9df1cb61b74a705c270ef7b6}{out\+\_\+pwm}}, \mbox{\hyperlink{classout__pid_af67c5acd4858a8b694b5083f5c5f97cb}{out\+\_\+pid}}, \mbox{\hyperlink{classout___multivent_a568241c423d7172f2a4b061f88e48341}{out\+\_\+\+Multivent}}, \mbox{\hyperlink{classout___motor_ab9f2b433a4fedd6fec5b9cb504b934f4}{out\+\_\+\+Motor}}, \mbox{\hyperlink{classout___modbus_acf5452aac576901614eca795ab4ca440}{out\+\_\+\+Modbus}}, \mbox{\hyperlink{classout__dmx_a7bf52f6c7ce630f879de60596b82dd87}{out\+\_\+dmx}}, and \mbox{\hyperlink{classout___a_c_a3a7b5b20a7d66870551f3dd485e66de2}{out\+\_\+\+AC}}.
 
 
 
@@ -102,6 +120,7 @@ Reimplemented in \mbox{\hyperlink{classout___s_p_i_led_ae87041b49ca8c6484a72c3c2
 
 
 
-The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{abstractout_8h}{abstractout.\+h}}\end{DoxyCompactItemize}
+\mbox{\hyperlink{abstractout_8h}{abstractout.\+h}}\item 
+\mbox{\hyperlink{abstractout_8cpp}{abstractout.\+cpp}}\end{DoxyCompactItemize}

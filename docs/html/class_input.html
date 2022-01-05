@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -46,6 +52,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('class_input.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,7 +83,6 @@ $(function() {
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -74,15 +96,6 @@ $(function() {
 <div class="contents">
 
 <p><code>#include &lt;<a class="el" href="inputs_8h_source.html">inputs.h</a>&gt;</code></p>
-<div class="dynheader">
-Collaboration diagram for Input:</div>
-<div class="dyncontent">
-<div class="center"><img src="class_input__coll__graph.png" border="0" usemap="#a_input_coll__map" alt="Collaboration graph"/></div>
-<map name="_input_coll__map" id="a_input_coll__map">
-<area shape="rect" title=" " alt="" coords="11,95,62,121"/>
-<area shape="rect" href="unionin_store.html" title=" " alt="" coords="5,5,68,32"/>
-</map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -94,8 +107,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2e60007024a65b9529d8db1873bf8696"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e0c2008fce8f2730ef3126ff1d8893e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_input.html#a2e0c2008fce8f2730ef3126ff1d8893e">onContactChanged</a> (int newValue)</td></tr>
 <tr class="separator:a2e0c2008fce8f2730ef3126ff1d8893e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a121247eaf2f413135f0340df17015492"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_input.html#a121247eaf2f413135f0340df17015492">onAnalogChanged</a> (float newValue)</td></tr>
-<tr class="separator:a121247eaf2f413135f0340df17015492"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ca225a34da21e406cdc9fdc05382451"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_input.html#a7ca225a34da21e406cdc9fdc05382451">onAnalogChanged</a> (<a class="el" href="classitem_cmd.html">itemCmd</a> newValue)</td></tr>
+<tr class="separator:a7ca225a34da21e406cdc9fdc05382451"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34b0da23df4e0c2be07e5358a974f6b3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_input.html#a34b0da23df4e0c2be07e5358a974f6b3">Poll</a> (short cause)</td></tr>
 <tr class="separator:a34b0da23df4e0c2be07e5358a974f6b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af875dd162373e90e21f8213f928f8032"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_input.html#af875dd162373e90e21f8213f928f8032">setup</a> ()</td></tr>
@@ -445,8 +458,8 @@ Protected Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a121247eaf2f413135f0340df17015492"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a121247eaf2f413135f0340df17015492">&#9670;&nbsp;</a></span>onAnalogChanged()</h2>
+<a id="a7ca225a34da21e406cdc9fdc05382451"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ca225a34da21e406cdc9fdc05382451">&#9670;&nbsp;</a></span>onAnalogChanged()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -454,7 +467,7 @@ Protected Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void Input::onAnalogChanged </td>
           <td>(</td>
-          <td class="paramtype">float&#160;</td>
+          <td class="paramtype"><a class="el" href="classitem_cmd.html">itemCmd</a>&#160;</td>
           <td class="paramname"><em>newValue</em></td><td>)</td>
           <td></td>
         </tr>
@@ -879,9 +892,13 @@ Protected Member Functions</h2></td></tr>
 <li><a class="el" href="inputs_8cpp.html">inputs.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="class_input.html">Input</a></li>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

@@ -7,18 +7,18 @@
 {\ttfamily \#include \char`\"{}main.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}item.\+h\char`\"{}}\newline
 {\ttfamily \#include $<$Pub\+Sub\+Client.\+h$>$}\newline
-Include dependency graph for utils.\+cpp\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{utils_8cpp__incl}
-\end{center}
-\end{figure}
+{\ttfamily \#include $<$Hardware\+Serial.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structserial__st}{serial\+\_\+st}}
+\end{DoxyCompactItemize}
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
 \#define \mbox{\hyperlink{utils_8cpp_ab124609cb16e44db8bf5c1ac5932044f}{A\+R\+D\+B\+U\+F\+F\+ER}}~16
+\item 
+\#define \mbox{\hyperlink{utils_8cpp_a4d3d61e309ead27e6e008e455d75ceb5}{serial\+Modes\+Num}}~sizeof(serial\+Modes\+\_\+P)/sizeof(\mbox{\hyperlink{structserial__st}{serial\+\_\+st}})
 \end{DoxyCompactItemize}
 \doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
@@ -33,6 +33,8 @@ void \mbox{\hyperlink{utils_8cpp_a4dd6705cb24a3eab32d9abc8393844b3}{Set\+Addr}} 
 \item 
 int \mbox{\hyperlink{utils_8cpp_a6037cfc7913c0856e93dbf8fc2133aac}{get\+Int}} (char $\ast$$\ast$chan)
 \item 
+\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{utils_8cpp_af97ce3611cbf9e3f12566a1d2a6c965b}{get\+Number}} (char $\ast$$\ast$chan)
+\item 
 void \mbox{\hyperlink{utils_8cpp_a1938abf1ef99f35bd2578e3db1bcf7b8}{parse\+Bytes}} (const char $\ast$str, char separator, byte $\ast$bytes, int max\+Bytes, int base)
 \item 
 void \mbox{\hyperlink{utils_8cpp_a6c16341dd45c4e557f951818d8d09810}{print\+Float\+Value\+To\+Str}} (float value, char $\ast$valstr)
@@ -41,9 +43,11 @@ int \mbox{\hyperlink{utils_8cpp_aadf1050416e46077ad59157173438dad}{log}} (const 
 \item 
 \mbox{\hyperlink{utils_8cpp_abf2ee9f926c45315d1a91ae9d4bdba26}{\+\_\+\+\_\+attribute\+\_\+\+\_\+}} ((section(\char`\"{}.ramfunc\char`\"{}))) void \mbox{\hyperlink{utils_8h_a1380fbc9c2170180770dd1bdcc5ac647}{Read\+Unique\+ID}}(uint32\+\_\+t $\ast$pdw\+Unique\+ID)
 \item 
-int \mbox{\hyperlink{utils_8cpp_a2abeec32a0c7fe0b4aa02a8807ed9cee}{inet\+\_\+aton}} (const char $\ast$a\+I\+P\+Addr\+String, I\+P\+Address \&a\+Result)
+int \mbox{\hyperlink{utils_8cpp_ad620f6746f5f0d6b62a801dd26c8ed53}{\+\_\+inet\+\_\+aton}} (const char $\ast$a\+I\+P\+Addr\+String, I\+P\+Address \&a\+Result)
 \item 
-char $\ast$ \mbox{\hyperlink{utils_8cpp_a5f3cdb518da692b8859ae48ed58196fc}{inet\+\_\+ntoa\+\_\+r}} (I\+P\+Address addr, char $\ast$buf, int buflen)
+char $\ast$ \mbox{\hyperlink{utils_8cpp_a62c963f0eca4136cc72f0f882c13e7af}{\+\_\+inet\+\_\+ntoa\+\_\+r}} (I\+P\+Address addr, char $\ast$buf, int buflen)
+\item 
+String \mbox{\hyperlink{utils_8cpp_a19f2c10a5d113a7b031d5bb3387ea27c}{to\+String}} (const I\+P\+Address \&address)
 \item 
 void \mbox{\hyperlink{utils_8cpp_af0df006a5ae8d0d730134afdaf1c64dd}{print\+I\+P\+Address}} (I\+P\+Address ip\+Address)
 \item 
@@ -57,9 +61,13 @@ bool \mbox{\hyperlink{utils_8cpp_a1c013af2ccb8a6dd130f0ab706b1abc4}{is\+Time\+Ov
 \item 
 bool \mbox{\hyperlink{utils_8cpp_a132faa838403a6db82d1e7e65d4c4ff2}{execute\+Command}} (a\+Json\+Object $\ast$cmd, int8\+\_\+t toggle)
 \item 
-bool \mbox{\hyperlink{utils_8cpp_a2cd15a22b2799d0378a27850c96c6300}{execute\+Command}} (a\+Json\+Object $\ast$cmd, int8\+\_\+t toggle, \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \+\_\+item\+Cmd)
+bool \mbox{\hyperlink{utils_8cpp_a61e700b2973e8349a18c36fcc93e7272}{execute\+Command}} (a\+Json\+Object $\ast$cmd, int8\+\_\+t toggle, \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \+\_\+item\+Cmd, a\+Json\+Object $\ast$default\+Item, a\+Json\+Object $\ast$default\+Emit)
 \item 
 \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} \mbox{\hyperlink{utils_8cpp_ace8fa23ff29c3feb89c5d500ef87b914}{map\+Int}} (int32\+\_\+t arg, a\+Json\+Object $\ast$map)
+\item 
+unsigned long \mbox{\hyperlink{utils_8cpp_a236651574b3fd313ff91f1d01f5bc573}{millis\+NZ}} (uint8\+\_\+t shift)
+\item 
+\mbox{\hyperlink{utils_8h_af725dabbb9d86c575157b3bbc24d6d55}{serial\+Param\+Type}} \mbox{\hyperlink{utils_8cpp_a7a7f700c0c11e53e4fde708443be96ff}{str2\+Serial\+Param}} (char $\ast$str)
 \end{DoxyCompactItemize}
 \doxysubsection*{Variables}
 \begin{DoxyCompactItemize}
@@ -70,7 +78,7 @@ int8\+\_\+t \mbox{\hyperlink{utils_8cpp_a525d99b2753ef2f4055ea4475dbc10d7}{ether
 \item 
 Pub\+Sub\+Client \mbox{\hyperlink{utils_8cpp_a86d63f481644da70f063c2593fcafe19}{mqtt\+Client}}
 \item 
-const char out\+Topic\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{utils_8cpp_a3ec4211471d85792b3cb9f0fc8082b4c}{P\+R\+O\+G\+M\+EM}} = \mbox{\hyperlink{options_8h_ad41dc04ab9a3863ee0d70153e844c92a}{O\+U\+T\+T\+O\+P\+IC}}
+const char out\+Topic\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{utils_8cpp_afc488f96490ec272cc7bf1df0a6371fc}{P\+R\+O\+G\+M\+EM}} = \mbox{\hyperlink{options_8h_ad41dc04ab9a3863ee0d70153e844c92a}{O\+U\+T\+T\+O\+P\+IC}}
 \item 
 char $\ast$ \mbox{\hyperlink{utils_8cpp_a5da66826e811349c98b2daf2bafb78c2}{device\+Name}}
 \item 
@@ -87,6 +95,12 @@ const char \mbox{\hyperlink{utils_8cpp_a0317be66119cccdb71b5276f914cef50}{H\+E\+
 \doxysubsubsection{\texorpdfstring{ARDBUFFER}{ARDBUFFER}}
 {\footnotesize\ttfamily \#define A\+R\+D\+B\+U\+F\+F\+ER~16}
 
+\mbox{\Hypertarget{utils_8cpp_a4d3d61e309ead27e6e008e455d75ceb5}\label{utils_8cpp_a4d3d61e309ead27e6e008e455d75ceb5}} 
+\index{utils.cpp@{utils.cpp}!serialModesNum@{serialModesNum}}
+\index{serialModesNum@{serialModesNum}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{serialModesNum}{serialModesNum}}
+{\footnotesize\ttfamily \#define serial\+Modes\+Num~sizeof(serial\+Modes\+\_\+P)/sizeof(\mbox{\hyperlink{structserial__st}{serial\+\_\+st}})}
+
 
 
 \doxysubsection{Function Documentation}
@@ -96,41 +110,17 @@ const char \mbox{\hyperlink{utils_8cpp_a0317be66119cccdb71b5276f914cef50}{H\+E\+
 \doxysubsubsection{\texorpdfstring{\_\_attribute\_\_()}{\_\_attribute\_\_()}}
 {\footnotesize\ttfamily \+\_\+\+\_\+attribute\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{(section(\char`\"{}.ramfunc\char`\"{}))}]{ }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{utils_8cpp_a132faa838403a6db82d1e7e65d4c4ff2}\label{utils_8cpp_a132faa838403a6db82d1e7e65d4c4ff2}} 
-\index{utils.cpp@{utils.cpp}!executeCommand@{executeCommand}}
-\index{executeCommand@{executeCommand}!utils.cpp@{utils.cpp}}
-\doxysubsubsection{\texorpdfstring{executeCommand()}{executeCommand()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
-{\footnotesize\ttfamily bool execute\+Command (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{cmd,  }\item[{int8\+\_\+t}]{toggle }\end{DoxyParamCaption})}
+\mbox{\Hypertarget{utils_8cpp_ad620f6746f5f0d6b62a801dd26c8ed53}\label{utils_8cpp_ad620f6746f5f0d6b62a801dd26c8ed53}} 
+\index{utils.cpp@{utils.cpp}!\_inet\_aton@{\_inet\_aton}}
+\index{\_inet\_aton@{\_inet\_aton}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{\_inet\_aton()}{\_inet\_aton()}}
+{\footnotesize\ttfamily int \+\_\+inet\+\_\+aton (\begin{DoxyParamCaption}\item[{const char $\ast$}]{a\+I\+P\+Addr\+String,  }\item[{I\+P\+Address \&}]{a\+Result }\end{DoxyParamCaption})}
 
-\mbox{\Hypertarget{utils_8cpp_a2cd15a22b2799d0378a27850c96c6300}\label{utils_8cpp_a2cd15a22b2799d0378a27850c96c6300}} 
-\index{utils.cpp@{utils.cpp}!executeCommand@{executeCommand}}
-\index{executeCommand@{executeCommand}!utils.cpp@{utils.cpp}}
-\doxysubsubsection{\texorpdfstring{executeCommand()}{executeCommand()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
-{\footnotesize\ttfamily bool execute\+Command (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{cmd,  }\item[{int8\+\_\+t}]{toggle,  }\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{\+\_\+item\+Cmd }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{utils_8cpp_a6037cfc7913c0856e93dbf8fc2133aac}\label{utils_8cpp_a6037cfc7913c0856e93dbf8fc2133aac}} 
-\index{utils.cpp@{utils.cpp}!getInt@{getInt}}
-\index{getInt@{getInt}!utils.cpp@{utils.cpp}}
-\doxysubsubsection{\texorpdfstring{getInt()}{getInt()}}
-{\footnotesize\ttfamily int get\+Int (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{chan }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{utils_8cpp_a4cafbb82e446669dd50a2a386c1531fd}\label{utils_8cpp_a4cafbb82e446669dd50a2a386c1531fd}} 
-\index{utils.cpp@{utils.cpp}!HEX2DEC@{HEX2DEC}}
-\index{HEX2DEC@{HEX2DEC}!utils.cpp@{utils.cpp}}
-\doxysubsubsection{\texorpdfstring{HEX2DEC()}{HEX2DEC()}}
-{\footnotesize\ttfamily byte H\+E\+X2\+D\+EC (\begin{DoxyParamCaption}\item[{char}]{i }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{utils_8cpp_a2abeec32a0c7fe0b4aa02a8807ed9cee}\label{utils_8cpp_a2abeec32a0c7fe0b4aa02a8807ed9cee}} 
-\index{utils.cpp@{utils.cpp}!inet\_aton@{inet\_aton}}
-\index{inet\_aton@{inet\_aton}!utils.cpp@{utils.cpp}}
-\doxysubsubsection{\texorpdfstring{inet\_aton()}{inet\_aton()}}
-{\footnotesize\ttfamily int inet\+\_\+aton (\begin{DoxyParamCaption}\item[{const char $\ast$}]{a\+I\+P\+Addr\+String,  }\item[{I\+P\+Address \&}]{a\+Result }\end{DoxyParamCaption})}
-
-\mbox{\Hypertarget{utils_8cpp_a5f3cdb518da692b8859ae48ed58196fc}\label{utils_8cpp_a5f3cdb518da692b8859ae48ed58196fc}} 
-\index{utils.cpp@{utils.cpp}!inet\_ntoa\_r@{inet\_ntoa\_r}}
-\index{inet\_ntoa\_r@{inet\_ntoa\_r}!utils.cpp@{utils.cpp}}
-\doxysubsubsection{\texorpdfstring{inet\_ntoa\_r()}{inet\_ntoa\_r()}}
-{\footnotesize\ttfamily char$\ast$ inet\+\_\+ntoa\+\_\+r (\begin{DoxyParamCaption}\item[{I\+P\+Address}]{addr,  }\item[{char $\ast$}]{buf,  }\item[{int}]{buflen }\end{DoxyParamCaption})}
+\mbox{\Hypertarget{utils_8cpp_a62c963f0eca4136cc72f0f882c13e7af}\label{utils_8cpp_a62c963f0eca4136cc72f0f882c13e7af}} 
+\index{utils.cpp@{utils.cpp}!\_inet\_ntoa\_r@{\_inet\_ntoa\_r}}
+\index{\_inet\_ntoa\_r@{\_inet\_ntoa\_r}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{\_inet\_ntoa\_r()}{\_inet\_ntoa\_r()}}
+{\footnotesize\ttfamily char$\ast$ \+\_\+inet\+\_\+ntoa\+\_\+r (\begin{DoxyParamCaption}\item[{I\+P\+Address}]{addr,  }\item[{char $\ast$}]{buf,  }\item[{int}]{buflen }\end{DoxyParamCaption})}
 
 Same as ipaddr\+\_\+ntoa, but reentrant since a user-\/supplied buffer is used.
 
@@ -146,6 +136,36 @@ Same as ipaddr\+\_\+ntoa, but reentrant since a user-\/supplied buffer is used.
 \begin{DoxyReturn}{Returns}
 either pointer to buf which now holds the A\+S\+C\+II representation of addr or N\+U\+LL if buf was too small 
 \end{DoxyReturn}
+\mbox{\Hypertarget{utils_8cpp_a132faa838403a6db82d1e7e65d4c4ff2}\label{utils_8cpp_a132faa838403a6db82d1e7e65d4c4ff2}} 
+\index{utils.cpp@{utils.cpp}!executeCommand@{executeCommand}}
+\index{executeCommand@{executeCommand}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{executeCommand()}{executeCommand()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily bool execute\+Command (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{cmd,  }\item[{int8\+\_\+t}]{toggle }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a61e700b2973e8349a18c36fcc93e7272}\label{utils_8cpp_a61e700b2973e8349a18c36fcc93e7272}} 
+\index{utils.cpp@{utils.cpp}!executeCommand@{executeCommand}}
+\index{executeCommand@{executeCommand}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{executeCommand()}{executeCommand()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily bool execute\+Command (\begin{DoxyParamCaption}\item[{a\+Json\+Object $\ast$}]{cmd,  }\item[{int8\+\_\+t}]{toggle,  }\item[{\mbox{\hyperlink{classitem_cmd}{item\+Cmd}}}]{\+\_\+item\+Cmd,  }\item[{a\+Json\+Object $\ast$}]{default\+Item,  }\item[{a\+Json\+Object $\ast$}]{default\+Emit }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a6037cfc7913c0856e93dbf8fc2133aac}\label{utils_8cpp_a6037cfc7913c0856e93dbf8fc2133aac}} 
+\index{utils.cpp@{utils.cpp}!getInt@{getInt}}
+\index{getInt@{getInt}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{getInt()}{getInt()}}
+{\footnotesize\ttfamily int get\+Int (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{chan }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_af97ce3611cbf9e3f12566a1d2a6c965b}\label{utils_8cpp_af97ce3611cbf9e3f12566a1d2a6c965b}} 
+\index{utils.cpp@{utils.cpp}!getNumber@{getNumber}}
+\index{getNumber@{getNumber}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{getNumber()}{getNumber()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} get\+Number (\begin{DoxyParamCaption}\item[{char $\ast$$\ast$}]{chan }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a4cafbb82e446669dd50a2a386c1531fd}\label{utils_8cpp_a4cafbb82e446669dd50a2a386c1531fd}} 
+\index{utils.cpp@{utils.cpp}!HEX2DEC@{HEX2DEC}}
+\index{HEX2DEC@{HEX2DEC}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{HEX2DEC()}{HEX2DEC()}}
+{\footnotesize\ttfamily byte H\+E\+X2\+D\+EC (\begin{DoxyParamCaption}\item[{char}]{i }\end{DoxyParamCaption})}
+
 \mbox{\Hypertarget{utils_8cpp_a1c013af2ccb8a6dd130f0ab706b1abc4}\label{utils_8cpp_a1c013af2ccb8a6dd130f0ab706b1abc4}} 
 \index{utils.cpp@{utils.cpp}!isTimeOver@{isTimeOver}}
 \index{isTimeOver@{isTimeOver}!utils.cpp@{utils.cpp}}
@@ -163,6 +183,12 @@ either pointer to buf which now holds the A\+S\+C\+II representation of addr or 
 \index{mapInt@{mapInt}!utils.cpp@{utils.cpp}}
 \doxysubsubsection{\texorpdfstring{mapInt()}{mapInt()}}
 {\footnotesize\ttfamily \mbox{\hyperlink{classitem_cmd}{item\+Cmd}} map\+Int (\begin{DoxyParamCaption}\item[{int32\+\_\+t}]{arg,  }\item[{a\+Json\+Object $\ast$}]{map }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a236651574b3fd313ff91f1d01f5bc573}\label{utils_8cpp_a236651574b3fd313ff91f1d01f5bc573}} 
+\index{utils.cpp@{utils.cpp}!millisNZ@{millisNZ}}
+\index{millisNZ@{millisNZ}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{millisNZ()}{millisNZ()}}
+{\footnotesize\ttfamily unsigned long millis\+NZ (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{shift }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{utils_8cpp_a1938abf1ef99f35bd2578e3db1bcf7b8}\label{utils_8cpp_a1938abf1ef99f35bd2578e3db1bcf7b8}} 
 \index{utils.cpp@{utils.cpp}!parseBytes@{parseBytes}}
@@ -218,6 +244,18 @@ either pointer to buf which now holds the A\+S\+C\+II representation of addr or 
 \doxysubsubsection{\texorpdfstring{setTopic()}{setTopic()}}
 {\footnotesize\ttfamily char$\ast$ set\+Topic (\begin{DoxyParamCaption}\item[{char $\ast$}]{buf,  }\item[{int8\+\_\+t}]{buflen,  }\item[{\mbox{\hyperlink{utils_8h_a2598bacb04e8f77e8b41cee61ef359fc}{topic\+Type}}}]{tt,  }\item[{const char $\ast$}]{suffix }\end{DoxyParamCaption})}
 
+\mbox{\Hypertarget{utils_8cpp_a7a7f700c0c11e53e4fde708443be96ff}\label{utils_8cpp_a7a7f700c0c11e53e4fde708443be96ff}} 
+\index{utils.cpp@{utils.cpp}!str2SerialParam@{str2SerialParam}}
+\index{str2SerialParam@{str2SerialParam}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{str2SerialParam()}{str2SerialParam()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{utils_8h_af725dabbb9d86c575157b3bbc24d6d55}{serial\+Param\+Type}} str2\+Serial\+Param (\begin{DoxyParamCaption}\item[{char $\ast$}]{str }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{utils_8cpp_a19f2c10a5d113a7b031d5bb3387ea27c}\label{utils_8cpp_a19f2c10a5d113a7b031d5bb3387ea27c}} 
+\index{utils.cpp@{utils.cpp}!toString@{toString}}
+\index{toString@{toString}!utils.cpp@{utils.cpp}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily String to\+String (\begin{DoxyParamCaption}\item[{const I\+P\+Address \&}]{address }\end{DoxyParamCaption})}
+
 
 
 \doxysubsection{Variable Documentation}
@@ -251,11 +289,11 @@ either pointer to buf which now holds the A\+S\+C\+II representation of addr or 
 \doxysubsubsection{\texorpdfstring{mqttClient}{mqttClient}}
 {\footnotesize\ttfamily Pub\+Sub\+Client mqtt\+Client\hspace{0.3cm}{\ttfamily [extern]}}
 
-\mbox{\Hypertarget{utils_8cpp_a3ec4211471d85792b3cb9f0fc8082b4c}\label{utils_8cpp_a3ec4211471d85792b3cb9f0fc8082b4c}} 
+\mbox{\Hypertarget{utils_8cpp_afc488f96490ec272cc7bf1df0a6371fc}\label{utils_8cpp_afc488f96490ec272cc7bf1df0a6371fc}} 
 \index{utils.cpp@{utils.cpp}!PROGMEM@{PROGMEM}}
 \index{PROGMEM@{PROGMEM}!utils.cpp@{utils.cpp}}
 \doxysubsubsection{\texorpdfstring{PROGMEM}{PROGMEM}}
-{\footnotesize\ttfamily const char home\+Topic \mbox{[}$\,$\mbox{]} P\+R\+O\+G\+M\+EM = \mbox{\hyperlink{options_8h_ad41dc04ab9a3863ee0d70153e844c92a}{O\+U\+T\+T\+O\+P\+IC}}}
+{\footnotesize\ttfamily const \mbox{\hyperlink{structserial__st}{serial\+\_\+st}} serial\+Modes\+\_\+P \mbox{[}$\,$\mbox{]} P\+R\+O\+G\+M\+EM = \mbox{\hyperlink{options_8h_ad41dc04ab9a3863ee0d70153e844c92a}{O\+U\+T\+T\+O\+P\+IC}}}
 
 \mbox{\Hypertarget{utils_8cpp_addabf1c5a7be47e4e89beb38a435cb51}\label{utils_8cpp_addabf1c5a7be47e4e89beb38a435cb51}} 
 \index{utils.cpp@{utils.cpp}!topics@{topics}}

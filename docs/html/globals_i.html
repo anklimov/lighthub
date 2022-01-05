@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -47,6 +53,22 @@ $(function() {
 /* @license-end */</script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('globals_i.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -77,17 +99,14 @@ $(function() {
 <li>I_EXT
 : <a class="el" href="item_8h.html#acb5cc75c544a0305caec81705c5342d5">item.h</a>
 </li>
+<li>I_TIMESTAMP
+: <a class="el" href="item_8h.html#a1c49eba9e8a13ad9b7553c57a51816db">item.h</a>
+</li>
 <li>I_TYPE
 : <a class="el" href="item_8h.html#a685813f758ad8fb6fad67c0084c5ca09">item.h</a>
 </li>
 <li>I_VAL
 : <a class="el" href="item_8h.html#a0b4d13f8b65a71a667a459ebad8e589b">item.h</a>
-</li>
-<li>IET_ATTEMPTS
-: <a class="el" href="options_8h.html#a826349834da27a108e00c318c756710d">options.h</a>
-</li>
-<li>IET_TEMP
-: <a class="el" href="options_8h.html#afae9befc056895af99a4ee18cd5abc8c">options.h</a>
 </li>
 <li>IN_ACTIVE_HIGH
 : <a class="el" href="inputs_8h.html#aba343c99487259d92ad5bd6fbd3e01a0">inputs.h</a>
@@ -122,20 +141,16 @@ $(function() {
 <li>IN_UPTIME
 : <a class="el" href="inputs_8h.html#a1b200efddb3fee0da5f4c0d38769b7ff">inputs.h</a>
 </li>
+<li>INACTIVE
+: <a class="el" href="out__motor_8cpp.html#a0326727285db27a444321f9d3b0895fb">out_motor.cpp</a>
+, <a class="el" href="out__relay_8cpp.html#a0326727285db27a444321f9d3b0895fb">out_relay.cpp</a>
+</li>
 <li>inCache
 : <a class="el" href="inputs_8cpp.html#a550fbf41418f36b963b995f7de144eea">inputs.cpp</a>
 , <a class="el" href="inputs_8h.html#a550fbf41418f36b963b995f7de144eea">inputs.h</a>
 </li>
 <li>inCheck
 : <a class="el" href="out__ac_8cpp.html#a82e58a1f3257f9121902c3edfc841445">out_ac.cpp</a>
-</li>
-<li>inet_aton()
-: <a class="el" href="utils_8cpp.html#a2abeec32a0c7fe0b4aa02a8807ed9cee">utils.cpp</a>
-, <a class="el" href="utils_8h.html#a2abeec32a0c7fe0b4aa02a8807ed9cee">utils.h</a>
-</li>
-<li>inet_ntoa_r()
-: <a class="el" href="utils_8cpp.html#a5f3cdb518da692b8859ae48ed58196fc">utils.cpp</a>
-, <a class="el" href="utils_8h.html#a5f3cdb518da692b8859ae48ed58196fc">utils.h</a>
 </li>
 <li>infoSerial
 : <a class="el" href="main_8h.html#a962d0234b6d650699159b02bbb1ba659">main.h</a>
@@ -150,16 +165,22 @@ $(function() {
 : <a class="el" href="main_8cpp.html#ad40189c6dffdd91758f3686c80484ac7">main.cpp</a>
 </li>
 <li>inputLoop()
-: <a class="el" href="main_8h.html#ad146ac5b8d70c1a9a590ba4029c3548e">main.h</a>
-, <a class="el" href="main_8cpp.html#ad146ac5b8d70c1a9a590ba4029c3548e">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a60ca3fb50f13d9dca20f04e28045c185">main.cpp</a>
+, <a class="el" href="main_8h.html#a9de6380e1d961d11c0b6d01171646d34">main.h</a>
+</li>
+<li>inputLoopBusy
+: <a class="el" href="main_8cpp.html#ae9c1fd0a9ab1ac866a42d77efd4d8577">main.cpp</a>
 </li>
 <li>inputs
-: <a class="el" href="inputs_8h.html#a9e63aa63a6b8b667a41f94bec231d7aa">inputs.h</a>
-, <a class="el" href="main_8cpp.html#a9e63aa63a6b8b667a41f94bec231d7aa">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a9e63aa63a6b8b667a41f94bec231d7aa">main.cpp</a>
+, <a class="el" href="inputs_8h.html#a9e63aa63a6b8b667a41f94bec231d7aa">inputs.h</a>
 </li>
 <li>inputSetup()
 : <a class="el" href="main_8cpp.html#a312b53e977f386af72ed576bca617fef">main.cpp</a>
 , <a class="el" href="main_8h.html#a312b53e977f386af72ed576bca617fef">main.h</a>
+</li>
+<li>INTERVAL_1W
+: <a class="el" href="options_8h.html#a1fbbb9b80cb1b0f878f3bcc5cfff15c5">options.h</a>
 </li>
 <li>INTERVAL_AC_POLLING
 : <a class="el" href="out__ac_8cpp.html#a4862ba1039c5c7ce3b51609c733cc091">out_ac.cpp</a>
@@ -167,28 +188,26 @@ $(function() {
 <li>INTERVAL_CHECK_INPUT
 : <a class="el" href="options_8h.html#a67828bcb6f0269a0e14ccb7b3dd8bc36">options.h</a>
 </li>
-<li>INTERVAL_CHECK_MODBUS
-: <a class="el" href="options_8h.html#ad122bb80520d348463d54eebac2ba4a5">options.h</a>
-</li>
 <li>INTERVAL_CHECK_SENSOR
 : <a class="el" href="options_8h.html#acfa30965b93565c71cdeb70b86d08560">options.h</a>
 </li>
-<li>INTERVAL_POLLING
-: <a class="el" href="options_8h.html#ad644e892aeb35da4ec2d602aa2fffb59">options.h</a>
+<li>INTERVAL_SLOW_POLLING
+: <a class="el" href="options_8h.html#abe28226923de94bda367a61740b94c91">options.h</a>
 </li>
 <li>INTOPIC
 : <a class="el" href="options_8h.html#a05897083928b56e953ae17a19bf42ecc">options.h</a>
 </li>
+<li>inTopic()
+: <a class="el" href="main_8cpp.html#aedb369b00c0ff023b804c838c691734a">main.cpp</a>
+</li>
 <li>ip_ready_config_loaded_connecting_to_broker()
 : <a class="el" href="main_8cpp.html#aed1aedfd8ec1c64e58ca24e5de9470b2">main.cpp</a>
-, <a class="el" href="main_8h.html#aed1aedfd8ec1c64e58ca24e5de9470b2">main.h</a>
 </li>
 <li>IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER
 : <a class="el" href="main_8h.html#a98b39d850b041da059cf5de62463a473a3313433a81a25d16c72bb69503429b2d">main.h</a>
 </li>
-<li>ipLoadFromFlash()
-: <a class="el" href="main_8cpp.html#a4ae13d2288d58c3ea8b731270fa798d3">main.cpp</a>
-, <a class="el" href="main_8h.html#a4ae13d2288d58c3ea8b731270fa798d3">main.h</a>
+<li>ip_ready_config_loaded_connecting_to_broker()
+: <a class="el" href="main_8h.html#aed1aedfd8ec1c64e58ca24e5de9470b2">main.h</a>
 </li>
 <li>IS_IDLE
 : <a class="el" href="inputs_8h.html#a507029f213f840df9f2fe96dcc7073b6">inputs.h</a>
@@ -236,22 +255,22 @@ $(function() {
 : <a class="el" href="inputs_8h.html#aa4d3605f66fe7dd02a6dcd8da2e61fce">inputs.h</a>
 </li>
 <li>isNotRetainingStatus()
-: <a class="el" href="main_8h.html#a9b73380a4525361ce5634b890e83c8d2">main.h</a>
-, <a class="el" href="main_8cpp.html#a9b73380a4525361ce5634b890e83c8d2">main.cpp</a>
+: <a class="el" href="main_8cpp.html#a9b73380a4525361ce5634b890e83c8d2">main.cpp</a>
+, <a class="el" href="main_8h.html#a9b73380a4525361ce5634b890e83c8d2">main.h</a>
+</li>
+<li>isPendedModbusWrites
+: <a class="el" href="item_8cpp.html#ad3fdcf970f64cfc745ff5efdc3063f89">item.cpp</a>
 </li>
 <li>IsThermostat()
 : <a class="el" href="main_8h.html#a31ee3eed42c2bdf317dca09913f89b27">main.h</a>
 </li>
-<li>isThermostatWithMinArraySize()
-: <a class="el" href="main_8cpp.html#a5976046ebb500523e75d64f9c858d73d">main.cpp</a>
-</li>
 <li>isTimeOver()
-: <a class="el" href="utils_8h.html#acd6072104e482c3f61e5bfad35a58ac0">utils.h</a>
-, <a class="el" href="utils_8cpp.html#a1c013af2ccb8a6dd130f0ab706b1abc4">utils.cpp</a>
+: <a class="el" href="utils_8cpp.html#a1c013af2ccb8a6dd130f0ab706b1abc4">utils.cpp</a>
+, <a class="el" href="utils_8h.html#ac1da7fe353a40e62dd3a8a0761d12b22">utils.h</a>
 </li>
 <li>itemCtrl2()
-: <a class="el" href="dmx_8cpp.html#abbcd6bfbf8b1c05b00ba38459d41ff4d">dmx.cpp</a>
-, <a class="el" href="dmx_8h.html#abbcd6bfbf8b1c05b00ba38459d41ff4d">dmx.h</a>
+: <a class="el" href="dmx_8h.html#abbcd6bfbf8b1c05b00ba38459d41ff4d">dmx.h</a>
+, <a class="el" href="dmx_8cpp.html#abbcd6bfbf8b1c05b00ba38459d41ff4d">dmx.cpp</a>
 </li>
 <li>items
 : <a class="el" href="main_8cpp.html#a012787f09a43864616e2b44349b29352">main.cpp</a>
@@ -260,9 +279,12 @@ $(function() {
 </li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

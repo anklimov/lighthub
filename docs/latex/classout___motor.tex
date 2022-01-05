@@ -4,24 +4,10 @@
 
 {\ttfamily \#include $<$out\+\_\+motor.\+h$>$}
 
-
-
-Inheritance diagram for out\+\_\+\+Motor\+:
-\nopagebreak
-\begin{figure}[H]
+Inheritance diagram for out\+\_\+\+Motor\+:\begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[width=148pt]{classout___motor__inherit__graph}
-\end{center}
-\end{figure}
-
-
-Collaboration diagram for out\+\_\+\+Motor\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=203pt]{classout___motor__coll__graph}
+\includegraphics[height=3.000000cm]{classout___motor}
 \end{center}
 \end{figure}
 \doxysubsection*{Public Member Functions}
@@ -30,16 +16,16 @@ Collaboration diagram for out\+\_\+\+Motor\+:
 \mbox{\hyperlink{classout___motor_a7698763731e54149861a9bdcc18e6344}{out\+\_\+\+Motor}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
 \item 
 int \mbox{\hyperlink{classout___motor_ab9f2b433a4fedd6fec5b9cb504b934f4}{Setup}} () override
-\item 
+\begin{DoxyCompactList}\small\item\em Remove?? Now get\+Chan\+Type used instead. \end{DoxyCompactList}\item 
 int \mbox{\hyperlink{classout___motor_a7a98c58b6c32cc20b7b05ad07a07c231}{Poll}} (short cause) override
 \item 
 int \mbox{\hyperlink{classout___motor_aafdbaaaf47776dd8c0c5d6bfa32bb3c2}{Stop}} () override
 \item 
 int \mbox{\hyperlink{classout___motor_a47de22f0ce071787ac14a19897337cea}{Status}} () override
 \item 
-int \mbox{\hyperlink{classout___motor_ac2a224d74421c1a28d34a83779a45bdc}{is\+Active}} () override
-\item 
 int \mbox{\hyperlink{classout___motor_afd67d9b6e08f14074a236d5222809226}{get\+Chan\+Type}} () override
+\item 
+int \mbox{\hyperlink{classout___motor_ab1892d3477647b06ed2212dd8e0baaf3}{get\+Default\+Storage\+Type}} ()
 \item 
 int \mbox{\hyperlink{classout___motor_aa731e4d1848e07ac7dc4a99a0ddad942}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true) override
 \end{DoxyCompactItemize}
@@ -57,6 +43,8 @@ int16\+\_\+t \mbox{\hyperlink{classout___motor_a58e72bff70d2915b7b508d0605a082e8
 uint16\+\_\+t \mbox{\hyperlink{classout___motor_aa002cd716f47ee74a72dcd4e335b80ae}{feedback\+Open}}
 \item 
 uint16\+\_\+t \mbox{\hyperlink{classout___motor_ad8179a6054b692c3f00c5fa350f59e3f}{feedback\+Closed}}
+\item 
+bool \mbox{\hyperlink{classout___motor_a82c7a5bbda926b6c47f89d6718523ab3}{inverted}}
 \end{DoxyCompactItemize}
 \doxysubsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
@@ -102,15 +90,15 @@ Reimplemented from \mbox{\hyperlink{classabstract_out_a3f7033b9cda791ad810c4837e
 \doxysubsubsection{\texorpdfstring{getConfig()}{getConfig()}}
 {\footnotesize\ttfamily void out\+\_\+\+Motor\+::get\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
 
-\mbox{\Hypertarget{classout___motor_ac2a224d74421c1a28d34a83779a45bdc}\label{classout___motor_ac2a224d74421c1a28d34a83779a45bdc}} 
-\index{out\_Motor@{out\_Motor}!isActive@{isActive}}
-\index{isActive@{isActive}!out\_Motor@{out\_Motor}}
-\doxysubsubsection{\texorpdfstring{isActive()}{isActive()}}
-{\footnotesize\ttfamily int out\+\_\+\+Motor\+::is\+Active (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+\mbox{\Hypertarget{classout___motor_ab1892d3477647b06ed2212dd8e0baaf3}\label{classout___motor_ab1892d3477647b06ed2212dd8e0baaf3}} 
+\index{out\_Motor@{out\_Motor}!getDefaultStorageType@{getDefaultStorageType}}
+\index{getDefaultStorageType@{getDefaultStorageType}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{getDefaultStorageType()}{getDefaultStorageType()}}
+{\footnotesize\ttfamily int out\+\_\+\+Motor\+::get\+Default\+Storage\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
 
 
 
-Reimplemented from \mbox{\hyperlink{classabstract_out_aec9af01cfc42f385cdf36ce51c8f3387}{abstract\+Out}}.
+Reimplemented from \mbox{\hyperlink{classabstract_out_a786157307bd9438b8fbff24421b95330}{abstract\+Out}}.
 
 \mbox{\Hypertarget{classout___motor_a7a98c58b6c32cc20b7b05ad07a07c231}\label{classout___motor_a7a98c58b6c32cc20b7b05ad07a07c231}} 
 \index{out\_Motor@{out\_Motor}!Poll@{Poll}}
@@ -130,7 +118,11 @@ Implements \mbox{\hyperlink{classabstract_ch_a044156a4dc4ca38d3e731b7df23d058a}{
 
 
 
-Implements \mbox{\hyperlink{classabstract_ch_aeaf6346625245be1774a6d27d9cece4e}{abstract\+Ch}}.
+Remove?? Now get\+Chan\+Type used instead. 
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_ad84ffc96dafea9cbe5c91f35c90ffe3b}{abstract\+Out}}.
 
 \mbox{\Hypertarget{classout___motor_a47de22f0ce071787ac14a19897337cea}\label{classout___motor_a47de22f0ce071787ac14a19897337cea}} 
 \index{out\_Motor@{out\_Motor}!Status@{Status}}
@@ -167,6 +159,12 @@ Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac0806
 \doxysubsubsection{\texorpdfstring{feedbackOpen}{feedbackOpen}}
 {\footnotesize\ttfamily uint16\+\_\+t out\+\_\+\+Motor\+::feedback\+Open}
 
+\mbox{\Hypertarget{classout___motor_a82c7a5bbda926b6c47f89d6718523ab3}\label{classout___motor_a82c7a5bbda926b6c47f89d6718523ab3}} 
+\index{out\_Motor@{out\_Motor}!inverted@{inverted}}
+\index{inverted@{inverted}!out\_Motor@{out\_Motor}}
+\doxysubsubsection{\texorpdfstring{inverted}{inverted}}
+{\footnotesize\ttfamily bool out\+\_\+\+Motor\+::inverted}
+
 \mbox{\Hypertarget{classout___motor_a58e72bff70d2915b7b508d0605a082e8}\label{classout___motor_a58e72bff70d2915b7b508d0605a082e8}} 
 \index{out\_Motor@{out\_Motor}!maxOnTime@{maxOnTime}}
 \index{maxOnTime@{maxOnTime}!out\_Motor@{out\_Motor}}
@@ -195,5 +193,5 @@ Reimplemented from \mbox{\hyperlink{classabstract_ch_afb7b6f4586412a13f8f6ac0806
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{out__motor_8h}{out\+\_\+motor.\+h}}\item 
-\mbox{\hyperlink{out__motor_8cpp}{out\+\_\+motor.\+cpp}}\end{DoxyCompactItemize}
+modules/\mbox{\hyperlink{out__motor_8h}{out\+\_\+motor.\+h}}\item 
+modules/\mbox{\hyperlink{out__motor_8cpp}{out\+\_\+motor.\+cpp}}\end{DoxyCompactItemize}

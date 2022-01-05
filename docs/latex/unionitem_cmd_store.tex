@@ -17,13 +17,9 @@ uint32\+\_\+t \mbox{\hyperlink{unionitem_cmd_store_a1b35e73d4496147f882278f73cfe
 xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
 struct \{\\
 \>uint8\_t \mbox{\hyperlink{unionitem_cmd_store_a84ce7db09b0fbd48c7266caf48636a61}{cmdCode}}\\
-\>union \{\\
-\>\>uint8\_t \mbox{\hyperlink{unionitem_cmd_store_adc701d54e85ec503281a9ffcde0eabe2}{cmdFlag}}\\
-\>\} \\
-\>struct \{\\
-\>\>uint8\_t \mbox{\hyperlink{unionitem_cmd_store_a60ffaa3ef4ac448d5b31a519dd2d8ba9}{suffixCode}}:4\\
-\>\>uint8\_t \mbox{\hyperlink{unionitem_cmd_store_ad0bc30321304871f89b2ed223d739421}{itemArgType}}:4\\
-\>\} \\
+\>uint8\_t \mbox{\hyperlink{unionitem_cmd_store_a60ffaa3ef4ac448d5b31a519dd2d8ba9}{suffixCode}}:4\\
+\>uint8\_t \mbox{\hyperlink{unionitem_cmd_store_ad0bc30321304871f89b2ed223d739421}{itemArgType}}:4\\
+\>uint8\_t \mbox{\hyperlink{unionitem_cmd_store_a66cecd23d476df14831b091671d2871b}{cmdEffect}}\\
 \>uint8\_t \mbox{\hyperlink{unionitem_cmd_store_a9177b4303781a900b2f6dace2e06980b}{cmdParam}}\\
 \}; \\
 
@@ -59,11 +55,11 @@ struct \{\\
 \doxysubsubsection{\texorpdfstring{cmdCode}{cmdCode}}
 {\footnotesize\ttfamily uint8\+\_\+t item\+Cmd\+Store\+::cmd\+Code}
 
-\mbox{\Hypertarget{unionitem_cmd_store_adc701d54e85ec503281a9ffcde0eabe2}\label{unionitem_cmd_store_adc701d54e85ec503281a9ffcde0eabe2}} 
-\index{itemCmdStore@{itemCmdStore}!cmdFlag@{cmdFlag}}
-\index{cmdFlag@{cmdFlag}!itemCmdStore@{itemCmdStore}}
-\doxysubsubsection{\texorpdfstring{cmdFlag}{cmdFlag}}
-{\footnotesize\ttfamily uint8\+\_\+t item\+Cmd\+Store\+::cmd\+Flag}
+\mbox{\Hypertarget{unionitem_cmd_store_a66cecd23d476df14831b091671d2871b}\label{unionitem_cmd_store_a66cecd23d476df14831b091671d2871b}} 
+\index{itemCmdStore@{itemCmdStore}!cmdEffect@{cmdEffect}}
+\index{cmdEffect@{cmdEffect}!itemCmdStore@{itemCmdStore}}
+\doxysubsubsection{\texorpdfstring{cmdEffect}{cmdEffect}}
+{\footnotesize\ttfamily uint8\+\_\+t item\+Cmd\+Store\+::cmd\+Effect}
 
 \mbox{\Hypertarget{unionitem_cmd_store_a9177b4303781a900b2f6dace2e06980b}\label{unionitem_cmd_store_a9177b4303781a900b2f6dace2e06980b}} 
 \index{itemCmdStore@{itemCmdStore}!cmdParam@{cmdParam}}

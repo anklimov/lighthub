@@ -3,14 +3,7 @@
 {\ttfamily \#include \char`\"{}dmx.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}options.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}item.\+h\char`\"{}}\newline
-Include dependency graph for dmx.\+cpp\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{dmx_8cpp__incl}
-\end{center}
-\end{figure}
+{\ttfamily \#include \char`\"{}main.\+h\char`\"{}}\newline
 \doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -34,7 +27,9 @@ void \mbox{\hyperlink{dmx_8cpp_af5aeb81882ff7b4fe7cccb66a12539df}{D\+M\+Xout\+Se
 \item 
 void \mbox{\hyperlink{dmx_8cpp_a7c166d810404d3d15f663706271de37f}{D\+M\+X\+O\+U\+T\+\_\+propagate}} ()
 \item 
-void \mbox{\hyperlink{dmx_8cpp_af7ba5611c2c7485938cbf745ed65741f}{Artnet\+Setup}} ()
+void \mbox{\hyperlink{dmx_8cpp_a384f51a65164f2d53600a2e2d62145b5}{artnet\+Setup}} ()
+\item 
+void \mbox{\hyperlink{dmx_8cpp_abdd33064131de0ec44f40f22ae979397}{artnet\+Set\+Chans}} (uint8\+\_\+t min\+Ch, uint8\+\_\+t max\+Ch)
 \item 
 void \mbox{\hyperlink{dmx_8cpp_a3faac041a7441faf18a1ad72021be077}{Dmx\+Write\+Buf}} (uint16\+\_\+t chan, uint8\+\_\+t val)
 \end{DoxyCompactItemize}
@@ -43,22 +38,34 @@ void \mbox{\hyperlink{dmx_8cpp_a3faac041a7441faf18a1ad72021be077}{Dmx\+Write\+Bu
 \item 
 uint8\+\_\+t $\ast$ \mbox{\hyperlink{dmx_8cpp_adf18ba2ebc00417130f18dc9e34411c6}{D\+M\+Xin}} = N\+U\+LL
 \item 
-int \mbox{\hyperlink{dmx_8cpp_aa205b5f0812aa803bb5ebe6067ca7bc7}{D\+\_\+\+State}} =0
+volatile uint32\+\_\+t \mbox{\hyperlink{dmx_8cpp_a9003509a566769d080ca60443bd042b2}{D\+\_\+\+State}} =0
 \item 
-unsigned long \mbox{\hyperlink{dmx_8cpp_a2bdd5f5b1312117028586d6a9a11a02c}{D\+\_\+checkT}} =0
+volatile unsigned long \mbox{\hyperlink{dmx_8cpp_af14e25d8ec87aea0648534b21733da2c}{D\+\_\+checkT}} =0
 \item 
 a\+Json\+Object $\ast$ \mbox{\hyperlink{dmx_8cpp_a012787f09a43864616e2b44349b29352}{items}}
 \item 
 a\+Json\+Object $\ast$ \mbox{\hyperlink{dmx_8cpp_a077dba54087a1a3694f810ba9fd06933}{dmx\+Arr}}
+\item 
+volatile uint8\+\_\+t \mbox{\hyperlink{dmx_8cpp_a08eb17abd1014ae770f606b8c92a7b80}{timer\+Handler\+Busy}}
+\item 
+volatile int \mbox{\hyperlink{dmx_8cpp_a34e99db3444f7cb39e58961283eb5ab9}{D\+M\+Xin\+Doublecheck}} =0
+\item 
+volatile int8\+\_\+t \mbox{\hyperlink{dmx_8cpp_ac103409466e5765e514698ee20f901ce}{propagate\+Busy}} = 0
 \end{DoxyCompactItemize}
 
 
 \doxysubsection{Function Documentation}
-\mbox{\Hypertarget{dmx_8cpp_af7ba5611c2c7485938cbf745ed65741f}\label{dmx_8cpp_af7ba5611c2c7485938cbf745ed65741f}} 
-\index{dmx.cpp@{dmx.cpp}!ArtnetSetup@{ArtnetSetup}}
-\index{ArtnetSetup@{ArtnetSetup}!dmx.cpp@{dmx.cpp}}
-\doxysubsubsection{\texorpdfstring{ArtnetSetup()}{ArtnetSetup()}}
-{\footnotesize\ttfamily void Artnet\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+\mbox{\Hypertarget{dmx_8cpp_abdd33064131de0ec44f40f22ae979397}\label{dmx_8cpp_abdd33064131de0ec44f40f22ae979397}} 
+\index{dmx.cpp@{dmx.cpp}!artnetSetChans@{artnetSetChans}}
+\index{artnetSetChans@{artnetSetChans}!dmx.cpp@{dmx.cpp}}
+\doxysubsubsection{\texorpdfstring{artnetSetChans()}{artnetSetChans()}}
+{\footnotesize\ttfamily void artnet\+Set\+Chans (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{min\+Ch,  }\item[{uint8\+\_\+t}]{max\+Ch }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{dmx_8cpp_a384f51a65164f2d53600a2e2d62145b5}\label{dmx_8cpp_a384f51a65164f2d53600a2e2d62145b5}} 
+\index{dmx.cpp@{dmx.cpp}!artnetSetup@{artnetSetup}}
+\index{artnetSetup@{artnetSetup}!dmx.cpp@{dmx.cpp}}
+\doxysubsubsection{\texorpdfstring{artnetSetup()}{artnetSetup()}}
+{\footnotesize\ttfamily void artnet\+Setup (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{dmx_8cpp_a0d740c517b312806bd34e2ac3155c3a5}\label{dmx_8cpp_a0d740c517b312806bd34e2ac3155c3a5}} 
 \index{dmx.cpp@{dmx.cpp}!DMXCheck@{DMXCheck}}
@@ -129,17 +136,17 @@ To\+Do\+: re-\/init\mbox{\Hypertarget{dmx_8cpp_a7c166d810404d3d15f663706271de37f
 
 
 \doxysubsection{Variable Documentation}
-\mbox{\Hypertarget{dmx_8cpp_a2bdd5f5b1312117028586d6a9a11a02c}\label{dmx_8cpp_a2bdd5f5b1312117028586d6a9a11a02c}} 
+\mbox{\Hypertarget{dmx_8cpp_af14e25d8ec87aea0648534b21733da2c}\label{dmx_8cpp_af14e25d8ec87aea0648534b21733da2c}} 
 \index{dmx.cpp@{dmx.cpp}!D\_checkT@{D\_checkT}}
 \index{D\_checkT@{D\_checkT}!dmx.cpp@{dmx.cpp}}
 \doxysubsubsection{\texorpdfstring{D\_checkT}{D\_checkT}}
-{\footnotesize\ttfamily unsigned long D\+\_\+checkT =0}
+{\footnotesize\ttfamily volatile unsigned long D\+\_\+checkT =0}
 
-\mbox{\Hypertarget{dmx_8cpp_aa205b5f0812aa803bb5ebe6067ca7bc7}\label{dmx_8cpp_aa205b5f0812aa803bb5ebe6067ca7bc7}} 
+\mbox{\Hypertarget{dmx_8cpp_a9003509a566769d080ca60443bd042b2}\label{dmx_8cpp_a9003509a566769d080ca60443bd042b2}} 
 \index{dmx.cpp@{dmx.cpp}!D\_State@{D\_State}}
 \index{D\_State@{D\_State}!dmx.cpp@{dmx.cpp}}
 \doxysubsubsection{\texorpdfstring{D\_State}{D\_State}}
-{\footnotesize\ttfamily int D\+\_\+\+State =0}
+{\footnotesize\ttfamily volatile uint32\+\_\+t D\+\_\+\+State =0}
 
 \mbox{\Hypertarget{dmx_8cpp_a077dba54087a1a3694f810ba9fd06933}\label{dmx_8cpp_a077dba54087a1a3694f810ba9fd06933}} 
 \index{dmx.cpp@{dmx.cpp}!dmxArr@{dmxArr}}
@@ -153,9 +160,27 @@ To\+Do\+: re-\/init\mbox{\Hypertarget{dmx_8cpp_a7c166d810404d3d15f663706271de37f
 \doxysubsubsection{\texorpdfstring{DMXin}{DMXin}}
 {\footnotesize\ttfamily uint8\+\_\+t$\ast$ D\+M\+Xin = N\+U\+LL}
 
+\mbox{\Hypertarget{dmx_8cpp_a34e99db3444f7cb39e58961283eb5ab9}\label{dmx_8cpp_a34e99db3444f7cb39e58961283eb5ab9}} 
+\index{dmx.cpp@{dmx.cpp}!DMXinDoublecheck@{DMXinDoublecheck}}
+\index{DMXinDoublecheck@{DMXinDoublecheck}!dmx.cpp@{dmx.cpp}}
+\doxysubsubsection{\texorpdfstring{DMXinDoublecheck}{DMXinDoublecheck}}
+{\footnotesize\ttfamily volatile int D\+M\+Xin\+Doublecheck =0}
+
 \mbox{\Hypertarget{dmx_8cpp_a012787f09a43864616e2b44349b29352}\label{dmx_8cpp_a012787f09a43864616e2b44349b29352}} 
 \index{dmx.cpp@{dmx.cpp}!items@{items}}
 \index{items@{items}!dmx.cpp@{dmx.cpp}}
 \doxysubsubsection{\texorpdfstring{items}{items}}
 {\footnotesize\ttfamily a\+Json\+Object$\ast$ items\hspace{0.3cm}{\ttfamily [extern]}}
+
+\mbox{\Hypertarget{dmx_8cpp_ac103409466e5765e514698ee20f901ce}\label{dmx_8cpp_ac103409466e5765e514698ee20f901ce}} 
+\index{dmx.cpp@{dmx.cpp}!propagateBusy@{propagateBusy}}
+\index{propagateBusy@{propagateBusy}!dmx.cpp@{dmx.cpp}}
+\doxysubsubsection{\texorpdfstring{propagateBusy}{propagateBusy}}
+{\footnotesize\ttfamily volatile int8\+\_\+t propagate\+Busy = 0}
+
+\mbox{\Hypertarget{dmx_8cpp_a08eb17abd1014ae770f606b8c92a7b80}\label{dmx_8cpp_a08eb17abd1014ae770f606b8c92a7b80}} 
+\index{dmx.cpp@{dmx.cpp}!timerHandlerBusy@{timerHandlerBusy}}
+\index{timerHandlerBusy@{timerHandlerBusy}!dmx.cpp@{dmx.cpp}}
+\doxysubsubsection{\texorpdfstring{timerHandlerBusy}{timerHandlerBusy}}
+{\footnotesize\ttfamily volatile uint8\+\_\+t timer\+Handler\+Busy\hspace{0.3cm}{\ttfamily [extern]}}
 

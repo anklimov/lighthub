@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -46,6 +52,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('utils_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,13 +83,9 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_82d7c1f210290ade9e0671f857ad27e3.html">lighthub</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
@@ -81,52 +100,19 @@ $(function() {
 <code>#include &quot;<a class="el" href="main_8h_source.html">main.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="item_8h_source.html">item.h</a>&quot;</code><br />
 <code>#include &lt;PubSubClient.h&gt;</code><br />
-</div><div class="textblock"><div class="dynheader">
-Include dependency graph for utils.cpp:</div>
-<div class="dyncontent">
-<div class="center"><img src="utils_8cpp__incl.png" border="0" usemap="#autils_8cpp" alt=""/></div>
-<map name="utils_8cpp" id="autils_8cpp">
-<area shape="rect" title=" " alt="" coords="290,5,361,32"/>
-<area shape="rect" href="utils_8h.html" title=" " alt="" coords="158,155,215,181"/>
-<area shape="rect" href="options_8h.html" title=" " alt="" coords="239,304,313,331"/>
-<area shape="rect" href="item_8h.html" title=" " alt="" coords="320,229,379,256"/>
-<area shape="rect" title=" " alt="" coords="291,155,360,181"/>
-<area shape="rect" title=" " alt="" coords="1230,304,1290,331"/>
-<area shape="rect" href="main_8h.html" title=" " alt="" coords="792,80,853,107"/>
-<area shape="rect" title=" " alt="" coords="1615,155,1729,181"/>
-<area shape="rect" title=" " alt="" coords="481,453,559,480"/>
-<area shape="rect" title=" " alt="" coords="37,229,129,256"/>
-<area shape="rect" title=" " alt="" coords="511,304,587,331"/>
-<area shape="rect" title=" " alt="" coords="153,229,245,256"/>
-<area shape="rect" href="abstractout_8h.html" title=" " alt="" coords="388,304,487,331"/>
-<area shape="rect" href="item_cmd_8h.html" title=" " alt="" coords="353,379,439,405"/>
-<area shape="rect" href="abstractch_8h.html" title=" " alt="" coords="515,379,610,405"/>
-<area shape="rect" href="streamlog_8h.html" title=" " alt="" coords="1084,155,1175,181"/>
-<area shape="rect" title=" " alt="" coords="587,229,730,256"/>
-<area shape="rect" title=" " alt="" coords="638,155,757,181"/>
-<area shape="rect" href="ow_term_8h.html" title=" " alt="" coords="889,155,967,181"/>
-<area shape="rect" href="dmx_8h.html" title=" " alt="" coords="403,229,461,256"/>
-<area shape="rect" title=" " alt="" coords="781,155,864,181"/>
-<area shape="rect" href="textconst_8h.html" title=" " alt="" coords="1199,155,1286,181"/>
-<area shape="rect" title=" " alt="" coords="1310,155,1365,181"/>
-<area shape="rect" title=" " alt="" coords="1389,155,1454,181"/>
-<area shape="rect" title=" " alt="" coords="1479,155,1540,181"/>
-<area shape="rect" href="inputs_8h.html" title=" " alt="" coords="991,155,1059,181"/>
-<area shape="rect" title=" " alt="" coords="1399,229,1459,256"/>
-<area shape="rect" title=" " alt="" coords="1484,229,1607,256"/>
-<area shape="rect" title=" " alt="" coords="1297,229,1375,256"/>
-<area shape="rect" title=" " alt="" coords="805,229,944,256"/>
-<area shape="rect" href="in__ccs811__hdc1080_8h.html" title=" " alt="" coords="1019,229,1221,256"/>
-<area shape="rect" href="abstractin_8h.html" title=" " alt="" coords="848,304,939,331"/>
-<area shape="rect" title=" " alt="" coords="1035,304,1205,331"/>
-<area shape="rect" title=" " alt="" coords="685,304,824,331"/>
-</map>
-</div>
+<code>#include &lt;HardwareSerial.h&gt;</code><br />
 </div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structserial__st.html">serial_st</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:ab124609cb16e44db8bf5c1ac5932044f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#ab124609cb16e44db8bf5c1ac5932044f">ARDBUFFER</a>&#160;&#160;&#160;16</td></tr>
 <tr class="separator:ab124609cb16e44db8bf5c1ac5932044f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d3d61e309ead27e6e008e455d75ceb5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a4d3d61e309ead27e6e008e455d75ceb5">serialModesNum</a>&#160;&#160;&#160;sizeof(serialModes_P)/sizeof(<a class="el" href="structserial__st.html">serial_st</a>)</td></tr>
+<tr class="separator:a4d3d61e309ead27e6e008e455d75ceb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -140,6 +126,8 @@ Functions</h2></td></tr>
 <tr class="separator:a4dd6705cb24a3eab32d9abc8393844b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6037cfc7913c0856e93dbf8fc2133aac"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a6037cfc7913c0856e93dbf8fc2133aac">getInt</a> (char **chan)</td></tr>
 <tr class="separator:a6037cfc7913c0856e93dbf8fc2133aac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af97ce3611cbf9e3f12566a1d2a6c965b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classitem_cmd.html">itemCmd</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#af97ce3611cbf9e3f12566a1d2a6c965b">getNumber</a> (char **chan)</td></tr>
+<tr class="separator:af97ce3611cbf9e3f12566a1d2a6c965b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1938abf1ef99f35bd2578e3db1bcf7b8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a1938abf1ef99f35bd2578e3db1bcf7b8">parseBytes</a> (const char *str, char separator, byte *bytes, int maxBytes, int base)</td></tr>
 <tr class="separator:a1938abf1ef99f35bd2578e3db1bcf7b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c16341dd45c4e557f951818d8d09810"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a6c16341dd45c4e557f951818d8d09810">printFloatValueToStr</a> (float value, char *valstr)</td></tr>
@@ -148,10 +136,12 @@ Functions</h2></td></tr>
 <tr class="separator:aadf1050416e46077ad59157173438dad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf2ee9f926c45315d1a91ae9d4bdba26"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#abf2ee9f926c45315d1a91ae9d4bdba26">__attribute__</a> ((section(&quot;.ramfunc&quot;))) void <a class="el" href="utils_8h.html#a1380fbc9c2170180770dd1bdcc5ac647">ReadUniqueID</a>(uint32_t *pdwUniqueID)</td></tr>
 <tr class="separator:abf2ee9f926c45315d1a91ae9d4bdba26"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2abeec32a0c7fe0b4aa02a8807ed9cee"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a2abeec32a0c7fe0b4aa02a8807ed9cee">inet_aton</a> (const char *aIPAddrString, IPAddress &amp;aResult)</td></tr>
-<tr class="separator:a2abeec32a0c7fe0b4aa02a8807ed9cee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f3cdb518da692b8859ae48ed58196fc"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a5f3cdb518da692b8859ae48ed58196fc">inet_ntoa_r</a> (IPAddress addr, char *buf, int buflen)</td></tr>
-<tr class="separator:a5f3cdb518da692b8859ae48ed58196fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad620f6746f5f0d6b62a801dd26c8ed53"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#ad620f6746f5f0d6b62a801dd26c8ed53">_inet_aton</a> (const char *aIPAddrString, IPAddress &amp;aResult)</td></tr>
+<tr class="separator:ad620f6746f5f0d6b62a801dd26c8ed53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62c963f0eca4136cc72f0f882c13e7af"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a62c963f0eca4136cc72f0f882c13e7af">_inet_ntoa_r</a> (IPAddress addr, char *buf, int buflen)</td></tr>
+<tr class="separator:a62c963f0eca4136cc72f0f882c13e7af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19f2c10a5d113a7b031d5bb3387ea27c"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a19f2c10a5d113a7b031d5bb3387ea27c">toString</a> (const IPAddress &amp;address)</td></tr>
+<tr class="separator:a19f2c10a5d113a7b031d5bb3387ea27c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0df006a5ae8d0d730134afdaf1c64dd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#af0df006a5ae8d0d730134afdaf1c64dd">printIPAddress</a> (IPAddress ipAddress)</td></tr>
 <tr class="separator:af0df006a5ae8d0d730134afdaf1c64dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab33cdb70ba57128d05b7efe3317b5a82"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#ab33cdb70ba57128d05b7efe3317b5a82">setTopic</a> (char *buf, int8_t buflen, <a class="el" href="utils_8h.html#a2598bacb04e8f77e8b41cee61ef359fc">topicType</a> tt, const char *suffix)</td></tr>
@@ -164,10 +154,14 @@ Functions</h2></td></tr>
 <tr class="separator:a1c013af2ccb8a6dd130f0ab706b1abc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a132faa838403a6db82d1e7e65d4c4ff2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a132faa838403a6db82d1e7e65d4c4ff2">executeCommand</a> (aJsonObject *cmd, int8_t toggle)</td></tr>
 <tr class="separator:a132faa838403a6db82d1e7e65d4c4ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2cd15a22b2799d0378a27850c96c6300"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a2cd15a22b2799d0378a27850c96c6300">executeCommand</a> (aJsonObject *cmd, int8_t toggle, <a class="el" href="classitem_cmd.html">itemCmd</a> _itemCmd)</td></tr>
-<tr class="separator:a2cd15a22b2799d0378a27850c96c6300"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61e700b2973e8349a18c36fcc93e7272"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a61e700b2973e8349a18c36fcc93e7272">executeCommand</a> (aJsonObject *cmd, int8_t toggle, <a class="el" href="classitem_cmd.html">itemCmd</a> _itemCmd, aJsonObject *defaultItem, aJsonObject *defaultEmit)</td></tr>
+<tr class="separator:a61e700b2973e8349a18c36fcc93e7272"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace8fa23ff29c3feb89c5d500ef87b914"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classitem_cmd.html">itemCmd</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#ace8fa23ff29c3feb89c5d500ef87b914">mapInt</a> (int32_t arg, aJsonObject *map)</td></tr>
 <tr class="separator:ace8fa23ff29c3feb89c5d500ef87b914"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a236651574b3fd313ff91f1d01f5bc573"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a236651574b3fd313ff91f1d01f5bc573">millisNZ</a> (uint8_t shift)</td></tr>
+<tr class="separator:a236651574b3fd313ff91f1d01f5bc573"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a7f700c0c11e53e4fde708443be96ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#af725dabbb9d86c575157b3bbc24d6d55">serialParamType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a7a7f700c0c11e53e4fde708443be96ff">str2SerialParam</a> (char *str)</td></tr>
+<tr class="separator:a7a7f700c0c11e53e4fde708443be96ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -177,8 +171,8 @@ Variables</h2></td></tr>
 <tr class="separator:a525d99b2753ef2f4055ea4475dbc10d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a86d63f481644da70f063c2593fcafe19"><td class="memItemLeft" align="right" valign="top">PubSubClient&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a86d63f481644da70f063c2593fcafe19">mqttClient</a></td></tr>
 <tr class="separator:a86d63f481644da70f063c2593fcafe19"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ec4211471d85792b3cb9f0fc8082b4c"><td class="memItemLeft" align="right" valign="top">const char outTopic[]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a3ec4211471d85792b3cb9f0fc8082b4c">PROGMEM</a> = <a class="el" href="options_8h.html#ad41dc04ab9a3863ee0d70153e844c92a">OUTTOPIC</a></td></tr>
-<tr class="separator:a3ec4211471d85792b3cb9f0fc8082b4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc488f96490ec272cc7bf1df0a6371fc"><td class="memItemLeft" align="right" valign="top">const char outTopic[]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#afc488f96490ec272cc7bf1df0a6371fc">PROGMEM</a> = <a class="el" href="options_8h.html#ad41dc04ab9a3863ee0d70153e844c92a">OUTTOPIC</a></td></tr>
+<tr class="separator:afc488f96490ec272cc7bf1df0a6371fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5da66826e811349c98b2daf2bafb78c2"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#a5da66826e811349c98b2daf2bafb78c2">deviceName</a></td></tr>
 <tr class="separator:a5da66826e811349c98b2daf2bafb78c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addabf1c5a7be47e4e89beb38a435cb51"><td class="memItemLeft" align="right" valign="top">aJsonObject *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8cpp.html#addabf1c5a7be47e4e89beb38a435cb51">topics</a></td></tr>
@@ -195,6 +189,20 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">#define ARDBUFFER&#160;&#160;&#160;16</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4d3d61e309ead27e6e008e455d75ceb5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d3d61e309ead27e6e008e455d75ceb5">&#9670;&nbsp;</a></span>serialModesNum</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define serialModesNum&#160;&#160;&#160;sizeof(serialModes_P)/sizeof(<a class="el" href="structserial__st.html">serial_st</a>)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -220,112 +228,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a132faa838403a6db82d1e7e65d4c4ff2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a132faa838403a6db82d1e7e65d4c4ff2">&#9670;&nbsp;</a></span>executeCommand() <span class="overload">[1/2]</span></h2>
+<a id="ad620f6746f5f0d6b62a801dd26c8ed53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad620f6746f5f0d6b62a801dd26c8ed53">&#9670;&nbsp;</a></span>_inet_aton()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool executeCommand </td>
-          <td>(</td>
-          <td class="paramtype">aJsonObject *&#160;</td>
-          <td class="paramname"><em>cmd</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>toggle</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a2cd15a22b2799d0378a27850c96c6300"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2cd15a22b2799d0378a27850c96c6300">&#9670;&nbsp;</a></span>executeCommand() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool executeCommand </td>
-          <td>(</td>
-          <td class="paramtype">aJsonObject *&#160;</td>
-          <td class="paramname"><em>cmd</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>toggle</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classitem_cmd.html">itemCmd</a>&#160;</td>
-          <td class="paramname"><em>_itemCmd</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a6037cfc7913c0856e93dbf8fc2133aac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6037cfc7913c0856e93dbf8fc2133aac">&#9670;&nbsp;</a></span>getInt()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int getInt </td>
-          <td>(</td>
-          <td class="paramtype">char **&#160;</td>
-          <td class="paramname"><em>chan</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a4cafbb82e446669dd50a2a386c1531fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4cafbb82e446669dd50a2a386c1531fd">&#9670;&nbsp;</a></span>HEX2DEC()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">byte HEX2DEC </td>
-          <td>(</td>
-          <td class="paramtype">char&#160;</td>
-          <td class="paramname"><em>i</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a2abeec32a0c7fe0b4aa02a8807ed9cee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2abeec32a0c7fe0b4aa02a8807ed9cee">&#9670;&nbsp;</a></span>inet_aton()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int inet_aton </td>
+          <td class="memname">int _inet_aton </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>aIPAddrString</em>, </td>
@@ -346,14 +256,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a5f3cdb518da692b8859ae48ed58196fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f3cdb518da692b8859ae48ed58196fc">&#9670;&nbsp;</a></span>inet_ntoa_r()</h2>
+<a id="a62c963f0eca4136cc72f0f882c13e7af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62c963f0eca4136cc72f0f882c13e7af">&#9670;&nbsp;</a></span>_inet_ntoa_r()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char* inet_ntoa_r </td>
+          <td class="memname">char* _inet_ntoa_r </td>
           <td>(</td>
           <td class="paramtype">IPAddress&#160;</td>
           <td class="paramname"><em>addr</em>, </td>
@@ -387,6 +297,134 @@ Variables</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>either pointer to buf which now holds the ASCII representation of addr or NULL if buf was too small </dd></dl>
+
+</div>
+</div>
+<a id="a132faa838403a6db82d1e7e65d4c4ff2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a132faa838403a6db82d1e7e65d4c4ff2">&#9670;&nbsp;</a></span>executeCommand() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool executeCommand </td>
+          <td>(</td>
+          <td class="paramtype">aJsonObject *&#160;</td>
+          <td class="paramname"><em>cmd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int8_t&#160;</td>
+          <td class="paramname"><em>toggle</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a61e700b2973e8349a18c36fcc93e7272"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61e700b2973e8349a18c36fcc93e7272">&#9670;&nbsp;</a></span>executeCommand() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool executeCommand </td>
+          <td>(</td>
+          <td class="paramtype">aJsonObject *&#160;</td>
+          <td class="paramname"><em>cmd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int8_t&#160;</td>
+          <td class="paramname"><em>toggle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classitem_cmd.html">itemCmd</a>&#160;</td>
+          <td class="paramname"><em>_itemCmd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">aJsonObject *&#160;</td>
+          <td class="paramname"><em>defaultItem</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">aJsonObject *&#160;</td>
+          <td class="paramname"><em>defaultEmit</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6037cfc7913c0856e93dbf8fc2133aac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6037cfc7913c0856e93dbf8fc2133aac">&#9670;&nbsp;</a></span>getInt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int getInt </td>
+          <td>(</td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>chan</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af97ce3611cbf9e3f12566a1d2a6c965b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af97ce3611cbf9e3f12566a1d2a6c965b">&#9670;&nbsp;</a></span>getNumber()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classitem_cmd.html">itemCmd</a> getNumber </td>
+          <td>(</td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>chan</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4cafbb82e446669dd50a2a386c1531fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4cafbb82e446669dd50a2a386c1531fd">&#9670;&nbsp;</a></span>HEX2DEC()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">byte HEX2DEC </td>
+          <td>(</td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>i</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -480,6 +518,24 @@ Variables</h2></td></tr>
           <td></td>
           <td>)</td>
           <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a236651574b3fd313ff91f1d01f5bc573"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a236651574b3fd313ff91f1d01f5bc573">&#9670;&nbsp;</a></span>millisNZ()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned long millisNZ </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>shift</em></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -759,6 +815,42 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="a7a7f700c0c11e53e4fde708443be96ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a7f700c0c11e53e4fde708443be96ff">&#9670;&nbsp;</a></span>str2SerialParam()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="utils_8h.html#af725dabbb9d86c575157b3bbc24d6d55">serialParamType</a> str2SerialParam </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>str</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a19f2c10a5d113a7b031d5bb3387ea27c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19f2c10a5d113a7b031d5bb3387ea27c">&#9670;&nbsp;</a></span>toString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">String toString </td>
+          <td>(</td>
+          <td class="paramtype">const IPAddress &amp;&#160;</td>
+          <td class="paramname"><em>address</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Variable Documentation</h2>
 <a id="a58655351bd1d5333e5eb92d4c29f4263"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a58655351bd1d5333e5eb92d4c29f4263">&#9670;&nbsp;</a></span>configLocked</h2>
@@ -862,14 +954,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a3ec4211471d85792b3cb9f0fc8082b4c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ec4211471d85792b3cb9f0fc8082b4c">&#9670;&nbsp;</a></span>PROGMEM</h2>
+<a id="afc488f96490ec272cc7bf1df0a6371fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc488f96490ec272cc7bf1df0a6371fc">&#9670;&nbsp;</a></span>PROGMEM</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const char homeTopic [] PROGMEM = <a class="el" href="options_8h.html#ad41dc04ab9a3863ee0d70153e844c92a">OUTTOPIC</a></td>
+          <td class="memname">const <a class="el" href="structserial__st.html">serial_st</a> serialModes_P [] PROGMEM = <a class="el" href="options_8h.html#ad41dc04ab9a3863ee0d70153e844c92a">OUTTOPIC</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -899,9 +991,13 @@ Variables</h2></td></tr>
 </div>
 </div>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="utils_8cpp.html">utils.cpp</a></li>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

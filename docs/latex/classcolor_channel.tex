@@ -4,24 +4,10 @@
 
 {\ttfamily \#include $<$colorchannel.\+h$>$}
 
-
-
-Inheritance diagram for color\+Channel\+:
-\nopagebreak
-\begin{figure}[H]
+Inheritance diagram for color\+Channel\+:\begin{figure}[H]
 \begin{center}
 \leavevmode
-\includegraphics[width=294pt]{classcolor_channel__inherit__graph}
-\end{center}
-\end{figure}
-
-
-Collaboration diagram for color\+Channel\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=213pt]{classcolor_channel__coll__graph}
+\includegraphics[height=4.000000cm]{classcolor_channel}
 \end{center}
 \end{figure}
 \doxysubsection*{Public Member Functions}
@@ -30,6 +16,8 @@ Collaboration diagram for color\+Channel\+:
 \mbox{\hyperlink{classcolor_channel_af5d8c0be99104c65484560a5a1c2cfd2}{color\+Channel}} (\mbox{\hyperlink{class_item}{Item}} $\ast$\+\_\+item)
 \item 
 int \mbox{\hyperlink{classcolor_channel_a9d7354cc266c98067b7b43cbf8707feb}{Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool to\+Execute=true) override
+\item 
+int \mbox{\hyperlink{classcolor_channel_a52d7b6241409b4e00574b389d3436e1f}{get\+Default\+Storage\+Type}} () override
 \item 
 virtual int \mbox{\hyperlink{classcolor_channel_a6c835d00ee8af04679f03465617c2873}{Pixel\+Ctrl}} (\mbox{\hyperlink{classitem_cmd}{item\+Cmd}} cmd, char $\ast$sub\+Item=N\+U\+LL, bool show=true)=0
 \item 
@@ -70,6 +58,16 @@ Implements \mbox{\hyperlink{classabstract_out_aacaa5ef80fdc683ef96a4dc80d24692a}
 \index{getChannelAddr@{getChannelAddr}!colorChannel@{colorChannel}}
 \doxysubsubsection{\texorpdfstring{getChannelAddr()}{getChannelAddr()}}
 {\footnotesize\ttfamily short color\+Channel\+::get\+Channel\+Addr (\begin{DoxyParamCaption}\item[{short}]{n = {\ttfamily 0} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classcolor_channel_a52d7b6241409b4e00574b389d3436e1f}\label{classcolor_channel_a52d7b6241409b4e00574b389d3436e1f}} 
+\index{colorChannel@{colorChannel}!getDefaultStorageType@{getDefaultStorageType}}
+\index{getDefaultStorageType@{getDefaultStorageType}!colorChannel@{colorChannel}}
+\doxysubsubsection{\texorpdfstring{getDefaultStorageType()}{getDefaultStorageType()}}
+{\footnotesize\ttfamily int color\+Channel\+::get\+Default\+Storage\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented from \mbox{\hyperlink{classabstract_out_a786157307bd9438b8fbff24421b95330}{abstract\+Out}}.
 
 \mbox{\Hypertarget{classcolor_channel_a6c835d00ee8af04679f03465617c2873}\label{classcolor_channel_a6c835d00ee8af04679f03465617c2873}} 
 \index{colorChannel@{colorChannel}!PixelCtrl@{PixelCtrl}}

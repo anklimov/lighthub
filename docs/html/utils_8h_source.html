@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -46,6 +52,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('utils_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,11 +83,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_82d7c1f210290ade9e0671f857ad27e3.html">lighthub</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle">
 <div class="title">utils.h</div>  </div>
@@ -115,59 +133,78 @@ $(function() {
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <a class="code" href="utils_8h.html#a2598bacb04e8f77e8b41cee61ef359fca27b2310c69298d62ed18dd416476a44d">T_OUT</a> = 3</div>
 <div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="utils_8h.html#a2598bacb04e8f77e8b41cee61ef359fca27b2310c69298d62ed18dd416476a44d">   44</a></span>&#160;  };</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#ab5fb614b925280fc7c8d0e5314dd3b7a">PrintBytes</a>(uint8_t* addr, uint8_t count, <span class="keywordtype">bool</span> newline);</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a85a33f14fc0eefef02be4c6bacf5c8f0">SetBytes</a>(uint8_t* addr, uint8_t count, <span class="keywordtype">char</span> * out);</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a4dd6705cb24a3eab32d9abc8393844b3">SetAddr</a>(<span class="keywordtype">char</span> * out,  uint8_t* addr);</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;uint8_t <a class="code" href="utils_8h.html#a215fd13be95cb1c21fe50b3693b85557">HEX2DEC</a>(<span class="keywordtype">char</span> i);</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="keywordtype">int</span> <a class="code" href="utils_8h.html#a6037cfc7913c0856e93dbf8fc2133aac">getInt</a>(<span class="keywordtype">char</span> ** chan);</div>
-<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="utils_8h.html#a3c97971726a07a7d14fb701f4a4638f0">   51</a></span>&#160;<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <a class="code" href="utils_8h.html#a3c97971726a07a7d14fb701f4a4638f0">freeRam</a> ();</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a1938abf1ef99f35bd2578e3db1bcf7b8">parseBytes</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* str, <span class="keywordtype">char</span> separator, <span class="keywordtype">byte</span>* bytes, <span class="keywordtype">int</span> maxBytes, <span class="keywordtype">int</span> base);</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="keywordtype">int</span> <a class="code" href="utils_8h.html#aadf1050416e46077ad59157173438dad">log</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *str, ...);</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a6c16341dd45c4e557f951818d8d09810">printFloatValueToStr</a>(<span class="keywordtype">float</span> value, <span class="keywordtype">char</span> *valstr);</div>
-<div class="line"><a name="l00055"></a><span class="lineno"><a class="line" href="utils_8h.html#a1380fbc9c2170180770dd1bdcc5ac647">   55</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a1380fbc9c2170180770dd1bdcc5ac647">ReadUniqueID</a>( uint32_t * pdwUniqueID );</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="keywordtype">int</span> <a class="code" href="utils_8h.html#a2abeec32a0c7fe0b4aa02a8807ed9cee">inet_aton</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* aIPAddrString, IPAddress&amp; aResult);</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="keywordtype">char</span> *<a class="code" href="utils_8h.html#a5f3cdb518da692b8859ae48ed58196fc">inet_ntoa_r</a>(IPAddress addr, <span class="keywordtype">char</span> *buf, <span class="keywordtype">int</span> buflen);</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#af0df006a5ae8d0d730134afdaf1c64dd">printIPAddress</a>(IPAddress ipAddress);</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="keywordtype">char</span>* <a class="code" href="utils_8h.html#aa0045f41bb76629662ed1ee7952f856e">setTopic</a>(<span class="keywordtype">char</span>* buf, int8_t buflen, <a class="code" href="utils_8h.html#a2598bacb04e8f77e8b41cee61ef359fc">topicType</a> tt, <span class="keyword">const</span> <span class="keywordtype">char</span>* suffix = NULL);</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#afb183532261be04b86e9e535010db6a9">printUlongValueToStr</a>(<span class="keywordtype">char</span> *valstr, <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> value);</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#af585ed9b15b9980b72fbec6d9c9dba67">scan_i2c_bus</a>();</div>
-<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="utils_8h.html#a7facb8f2c84692ab65024785eb64b541">   62</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a7facb8f2c84692ab65024785eb64b541">softRebootFunc</a>();</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="utils_8h.html#acd6072104e482c3f61e5bfad35a58ac0">isTimeOver</a>(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo = 0xFFFFFFFF);</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">//bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="utils_8h.html#a9843f57c765644bc93e675922da82beb">executeCommand</a>(aJsonObject* cmd, int8_t toggle = -1);</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="utils_8h.html#a9843f57c765644bc93e675922da82beb">executeCommand</a>(aJsonObject* cmd, int8_t toggle, <a class="code" href="classitem_cmd.html">itemCmd</a> _itemCmd);</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<a class="code" href="classitem_cmd.html">itemCmd</a> <a class="code" href="utils_8h.html#ace8fa23ff29c3feb89c5d500ef87b914">mapInt</a>(int32_t arg, aJsonObject* map);</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="preprocessor">#if defined(ESP32)</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="preprocessor">#define serialParamType uint32_t</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="utils_8h.html#af725dabbb9d86c575157b3bbc24d6d55">   49</a></span>&#160;<span class="preprocessor">#define serialParamType uint16_t</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#ab5fb614b925280fc7c8d0e5314dd3b7a">PrintBytes</a>(uint8_t* addr, uint8_t count, <span class="keywordtype">bool</span> newline);</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a85a33f14fc0eefef02be4c6bacf5c8f0">SetBytes</a>(uint8_t* addr, uint8_t count, <span class="keywordtype">char</span> * out);</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a4dd6705cb24a3eab32d9abc8393844b3">SetAddr</a>(<span class="keywordtype">char</span> * out,  uint8_t* addr);</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;uint8_t <a class="code" href="utils_8h.html#a215fd13be95cb1c21fe50b3693b85557">HEX2DEC</a>(<span class="keywordtype">char</span> i);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="keywordtype">int</span> <a class="code" href="utils_8h.html#a6037cfc7913c0856e93dbf8fc2133aac">getInt</a>(<span class="keywordtype">char</span> ** chan);</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<a class="code" href="classitem_cmd.html">itemCmd</a> <a class="code" href="utils_8h.html#af97ce3611cbf9e3f12566a1d2a6c965b">getNumber</a>(<span class="keywordtype">char</span> ** chan);</div>
+<div class="line"><a name="l00058"></a><span class="lineno"><a class="line" href="utils_8h.html#a3c97971726a07a7d14fb701f4a4638f0">   58</a></span>&#160;<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <a class="code" href="utils_8h.html#a3c97971726a07a7d14fb701f4a4638f0">freeRam</a> ();</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a1938abf1ef99f35bd2578e3db1bcf7b8">parseBytes</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* str, <span class="keywordtype">char</span> separator, <span class="keywordtype">byte</span>* bytes, <span class="keywordtype">int</span> maxBytes, <span class="keywordtype">int</span> base);</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keywordtype">int</span> <a class="code" href="utils_8h.html#aadf1050416e46077ad59157173438dad">log</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *str, ...);</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a6c16341dd45c4e557f951818d8d09810">printFloatValueToStr</a>(<span class="keywordtype">float</span> value, <span class="keywordtype">char</span> *valstr);</div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="utils_8h.html#a1380fbc9c2170180770dd1bdcc5ac647">   62</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a1380fbc9c2170180770dd1bdcc5ac647">ReadUniqueID</a>( uint32_t * pdwUniqueID );</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="keywordtype">int</span> <a class="code" href="utils_8h.html#ad620f6746f5f0d6b62a801dd26c8ed53">_inet_aton</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* aIPAddrString, IPAddress&amp; aResult);</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="keywordtype">char</span> *<a class="code" href="utils_8h.html#a62c963f0eca4136cc72f0f882c13e7af">_inet_ntoa_r</a>(IPAddress addr, <span class="keywordtype">char</span> *buf, <span class="keywordtype">int</span> buflen);</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#af0df006a5ae8d0d730134afdaf1c64dd">printIPAddress</a>(IPAddress ipAddress);</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="keywordtype">char</span>* <a class="code" href="utils_8h.html#aa0045f41bb76629662ed1ee7952f856e">setTopic</a>(<span class="keywordtype">char</span>* buf, int8_t buflen, <a class="code" href="utils_8h.html#a2598bacb04e8f77e8b41cee61ef359fc">topicType</a> tt, <span class="keyword">const</span> <span class="keywordtype">char</span>* suffix = NULL);</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#afb183532261be04b86e9e535010db6a9">printUlongValueToStr</a>(<span class="keywordtype">char</span> *valstr, <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> value);</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#af585ed9b15b9980b72fbec6d9c9dba67">scan_i2c_bus</a>();</div>
+<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="utils_8h.html#a7facb8f2c84692ab65024785eb64b541">   69</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="utils_8h.html#a7facb8f2c84692ab65024785eb64b541">softRebootFunc</a>();</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="utils_8h.html#ac1da7fe353a40e62dd3a8a0761d12b22">isTimeOver</a>(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo = 0);</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="comment">//bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="utils_8h.html#a9843f57c765644bc93e675922da82beb">executeCommand</a>(aJsonObject* cmd, int8_t toggle = -1);</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="keywordtype">bool</span> <a class="code" href="utils_8h.html#a9843f57c765644bc93e675922da82beb">executeCommand</a>(aJsonObject* cmd, int8_t toggle, <a class="code" href="classitem_cmd.html">itemCmd</a> _itemCmd, aJsonObject* defaultItem=NULL, aJsonObject* defaultEmit=NULL);</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<a class="code" href="classitem_cmd.html">itemCmd</a> <a class="code" href="utils_8h.html#ace8fa23ff29c3feb89c5d500ef87b914">mapInt</a>(int32_t arg, aJsonObject* map);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <a class="code" href="utils_8h.html#a2b226ab4fb09687005316a874e2627d0">millisNZ</a>(uint8_t shift=0);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<a class="code" href="utils_8h.html#af725dabbb9d86c575157b3bbc24d6d55">serialParamType</a>  <a class="code" href="utils_8h.html#a7a7f700c0c11e53e4fde708443be96ff">str2SerialParam</a>(<span class="keywordtype">char</span> * str);</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;String <a class="code" href="utils_8h.html#a19f2c10a5d113a7b031d5bb3387ea27c">toString</a>(<span class="keyword">const</span> IPAddress&amp; address);</div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <div class="ttc" id="autils_8h_html_a1380fbc9c2170180770dd1bdcc5ac647"><div class="ttname"><a href="utils_8h.html#a1380fbc9c2170180770dd1bdcc5ac647">ReadUniqueID</a></div><div class="ttdeci">void ReadUniqueID(uint32_t *pdwUniqueID)</div></div>
-<div class="ttc" id="autils_8h_html_a9843f57c765644bc93e675922da82beb"><div class="ttname"><a href="utils_8h.html#a9843f57c765644bc93e675922da82beb">executeCommand</a></div><div class="ttdeci">bool executeCommand(aJsonObject *cmd, int8_t toggle=-1)</div><div class="ttdef"><b>Definition:</b> utils.cpp:526</div></div>
-<div class="ttc" id="aclassitem_cmd_html"><div class="ttname"><a href="classitem_cmd.html">itemCmd</a></div><div class="ttdef"><b>Definition:</b> itemCmd.h:173</div></div>
+<div class="ttc" id="autils_8h_html_a9843f57c765644bc93e675922da82beb"><div class="ttname"><a href="utils_8h.html#a9843f57c765644bc93e675922da82beb">executeCommand</a></div><div class="ttdeci">bool executeCommand(aJsonObject *cmd, int8_t toggle=-1)</div><div class="ttdef"><b>Definition:</b> utils.cpp:574</div></div>
+<div class="ttc" id="aclassitem_cmd_html"><div class="ttname"><a href="classitem_cmd.html">itemCmd</a></div><div class="ttdef"><b>Definition:</b> itemCmd.h:153</div></div>
 <div class="ttc" id="autils_8h_html_a3c97971726a07a7d14fb701f4a4638f0"><div class="ttname"><a href="utils_8h.html#a3c97971726a07a7d14fb701f4a4638f0">freeRam</a></div><div class="ttdeci">unsigned long freeRam()</div></div>
-<div class="ttc" id="autils_8h_html_acd6072104e482c3f61e5bfad35a58ac0"><div class="ttname"><a href="utils_8h.html#acd6072104e482c3f61e5bfad35a58ac0">isTimeOver</a></div><div class="ttdeci">bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo=0xFFFFFFFF)</div><div class="ttdef"><b>Definition:</b> utils.cpp:516</div></div>
-<div class="ttc" id="autils_8h_html_a215fd13be95cb1c21fe50b3693b85557"><div class="ttname"><a href="utils_8h.html#a215fd13be95cb1c21fe50b3693b85557">HEX2DEC</a></div><div class="ttdeci">uint8_t HEX2DEC(char i)</div><div class="ttdef"><b>Definition:</b> utils.cpp:74</div></div>
-<div class="ttc" id="autils_8h_html_af585ed9b15b9980b72fbec6d9c9dba67"><div class="ttname"><a href="utils_8h.html#af585ed9b15b9980b72fbec6d9c9dba67">scan_i2c_bus</a></div><div class="ttdeci">void scan_i2c_bus()</div><div class="ttdef"><b>Definition:</b> utils.cpp:450</div></div>
+<div class="ttc" id="autils_8h_html_a215fd13be95cb1c21fe50b3693b85557"><div class="ttname"><a href="utils_8h.html#a215fd13be95cb1c21fe50b3693b85557">HEX2DEC</a></div><div class="ttdeci">uint8_t HEX2DEC(char i)</div><div class="ttdef"><b>Definition:</b> utils.cpp:80</div></div>
+<div class="ttc" id="autils_8h_html_a19f2c10a5d113a7b031d5bb3387ea27c"><div class="ttname"><a href="utils_8h.html#a19f2c10a5d113a7b031d5bb3387ea27c">toString</a></div><div class="ttdeci">String toString(const IPAddress &amp;address)</div><div class="ttdef"><b>Definition:</b> utils.cpp:418</div></div>
+<div class="ttc" id="autils_8h_html_af585ed9b15b9980b72fbec6d9c9dba67"><div class="ttname"><a href="utils_8h.html#af585ed9b15b9980b72fbec6d9c9dba67">scan_i2c_bus</a></div><div class="ttdeci">void scan_i2c_bus()</div><div class="ttdef"><b>Definition:</b> utils.cpp:493</div></div>
+<div class="ttc" id="autils_8h_html_a62c963f0eca4136cc72f0f882c13e7af"><div class="ttname"><a href="utils_8h.html#a62c963f0eca4136cc72f0f882c13e7af">_inet_ntoa_r</a></div><div class="ttdeci">char * _inet_ntoa_r(IPAddress addr, char *buf, int buflen)</div><div class="ttdef"><b>Definition:</b> utils.cpp:402</div></div>
 <div class="ttc" id="autils_8h_html_a2598bacb04e8f77e8b41cee61ef359fca26fa2da957fe6c55420ed0e1a7dd7a15"><div class="ttname"><a href="utils_8h.html#a2598bacb04e8f77e8b41cee61ef359fca26fa2da957fe6c55420ed0e1a7dd7a15">T_BCST</a></div><div class="ttdeci">@ T_BCST</div><div class="ttdef"><b>Definition:</b> utils.h:42</div></div>
-<div class="ttc" id="autils_8h_html_a4dd6705cb24a3eab32d9abc8393844b3"><div class="ttname"><a href="utils_8h.html#a4dd6705cb24a3eab32d9abc8393844b3">SetAddr</a></div><div class="ttdeci">void SetAddr(char *out, uint8_t *addr)</div><div class="ttdef"><b>Definition:</b> utils.cpp:82</div></div>
+<div class="ttc" id="autils_8h_html_a4dd6705cb24a3eab32d9abc8393844b3"><div class="ttname"><a href="utils_8h.html#a4dd6705cb24a3eab32d9abc8393844b3">SetAddr</a></div><div class="ttdeci">void SetAddr(char *out, uint8_t *addr)</div><div class="ttdef"><b>Definition:</b> utils.cpp:88</div></div>
+<div class="ttc" id="autils_8h_html_af725dabbb9d86c575157b3bbc24d6d55"><div class="ttname"><a href="utils_8h.html#af725dabbb9d86c575157b3bbc24d6d55">serialParamType</a></div><div class="ttdeci">#define serialParamType</div><div class="ttdef"><b>Definition:</b> utils.h:49</div></div>
 <div class="ttc" id="aoptions_8h_html"><div class="ttname"><a href="options_8h.html">options.h</a></div></div>
+<div class="ttc" id="autils_8h_html_a2b226ab4fb09687005316a874e2627d0"><div class="ttname"><a href="utils_8h.html#a2b226ab4fb09687005316a874e2627d0">millisNZ</a></div><div class="ttdeci">unsigned long millisNZ(uint8_t shift=0)</div><div class="ttdef"><b>Definition:</b> utils.cpp:710</div></div>
 <div class="ttc" id="autils_8h_html_a2598bacb04e8f77e8b41cee61ef359fca27b2310c69298d62ed18dd416476a44d"><div class="ttname"><a href="utils_8h.html#a2598bacb04e8f77e8b41cee61ef359fca27b2310c69298d62ed18dd416476a44d">T_OUT</a></div><div class="ttdeci">@ T_OUT</div><div class="ttdef"><b>Definition:</b> utils.h:43</div></div>
-<div class="ttc" id="autils_8h_html_a85a33f14fc0eefef02be4c6bacf5c8f0"><div class="ttname"><a href="utils_8h.html#a85a33f14fc0eefef02be4c6bacf5c8f0">SetBytes</a></div><div class="ttdeci">void SetBytes(uint8_t *addr, uint8_t count, char *out)</div><div class="ttdef"><b>Definition:</b> utils.cpp:63</div></div>
+<div class="ttc" id="autils_8h_html_a85a33f14fc0eefef02be4c6bacf5c8f0"><div class="ttname"><a href="utils_8h.html#a85a33f14fc0eefef02be4c6bacf5c8f0">SetBytes</a></div><div class="ttdeci">void SetBytes(uint8_t *addr, uint8_t count, char *out)</div><div class="ttdef"><b>Definition:</b> utils.cpp:69</div></div>
 <div class="ttc" id="autils_8h_html_a2598bacb04e8f77e8b41cee61ef359fca3fa22e2ae357981afc104dc67d764c85"><div class="ttname"><a href="utils_8h.html#a2598bacb04e8f77e8b41cee61ef359fca3fa22e2ae357981afc104dc67d764c85">T_DEV</a></div><div class="ttdeci">@ T_DEV</div><div class="ttdef"><b>Definition:</b> utils.h:41</div></div>
-<div class="ttc" id="autils_8h_html_ace8fa23ff29c3feb89c5d500ef87b914"><div class="ttname"><a href="utils_8h.html#ace8fa23ff29c3feb89c5d500ef87b914">mapInt</a></div><div class="ttdeci">itemCmd mapInt(int32_t arg, aJsonObject *map)</div><div class="ttdef"><b>Definition:</b> utils.cpp:626</div></div>
+<div class="ttc" id="autils_8h_html_ace8fa23ff29c3feb89c5d500ef87b914"><div class="ttname"><a href="utils_8h.html#ace8fa23ff29c3feb89c5d500ef87b914">mapInt</a></div><div class="ttdeci">itemCmd mapInt(int32_t arg, aJsonObject *map)</div><div class="ttdef"><b>Definition:</b> utils.cpp:704</div></div>
 <div class="ttc" id="autils_8h_html_a2598bacb04e8f77e8b41cee61ef359fc"><div class="ttname"><a href="utils_8h.html#a2598bacb04e8f77e8b41cee61ef359fc">topicType</a></div><div class="ttdeci">topicType</div><div class="ttdef"><b>Definition:</b> utils.h:40</div></div>
-<div class="ttc" id="autils_8h_html_a1938abf1ef99f35bd2578e3db1bcf7b8"><div class="ttname"><a href="utils_8h.html#a1938abf1ef99f35bd2578e3db1bcf7b8">parseBytes</a></div><div class="ttdeci">void parseBytes(const char *str, char separator, byte *bytes, int maxBytes, int base)</div><div class="ttdef"><b>Definition:</b> utils.cpp:170</div></div>
-<div class="ttc" id="autils_8h_html_a6037cfc7913c0856e93dbf8fc2133aac"><div class="ttname"><a href="utils_8h.html#a6037cfc7913c0856e93dbf8fc2133aac">getInt</a></div><div class="ttdeci">int getInt(char **chan)</div><div class="ttdef"><b>Definition:</b> utils.cpp:92</div></div>
-<div class="ttc" id="autils_8h_html_aadf1050416e46077ad59157173438dad"><div class="ttname"><a href="utils_8h.html#aadf1050416e46077ad59157173438dad">log</a></div><div class="ttdeci">int log(const char *str,...)</div><div class="ttdef"><b>Definition:</b> utils.cpp:201</div></div>
-<div class="ttc" id="autils_8h_html_a5f3cdb518da692b8859ae48ed58196fc"><div class="ttname"><a href="utils_8h.html#a5f3cdb518da692b8859ae48ed58196fc">inet_ntoa_r</a></div><div class="ttdeci">char * inet_ntoa_r(IPAddress addr, char *buf, int buflen)</div><div class="ttdef"><b>Definition:</b> utils.cpp:362</div></div>
-<div class="ttc" id="autils_8h_html_a2abeec32a0c7fe0b4aa02a8807ed9cee"><div class="ttname"><a href="utils_8h.html#a2abeec32a0c7fe0b4aa02a8807ed9cee">inet_aton</a></div><div class="ttdeci">int inet_aton(const char *aIPAddrString, IPAddress &amp;aResult)</div><div class="ttdef"><b>Definition:</b> utils.cpp:292</div></div>
-<div class="ttc" id="autils_8h_html_a6c16341dd45c4e557f951818d8d09810"><div class="ttname"><a href="utils_8h.html#a6c16341dd45c4e557f951818d8d09810">printFloatValueToStr</a></div><div class="ttdeci">void printFloatValueToStr(float value, char *valstr)</div><div class="ttdef"><b>Definition:</b> utils.cpp:182</div></div>
-<div class="ttc" id="autils_8h_html_afb183532261be04b86e9e535010db6a9"><div class="ttname"><a href="utils_8h.html#afb183532261be04b86e9e535010db6a9">printUlongValueToStr</a></div><div class="ttdeci">void printUlongValueToStr(char *valstr, unsigned long value)</div><div class="ttdef"><b>Definition:</b> utils.cpp:434</div></div>
-<div class="ttc" id="autils_8h_html_af0df006a5ae8d0d730134afdaf1c64dd"><div class="ttname"><a href="utils_8h.html#af0df006a5ae8d0d730134afdaf1c64dd">printIPAddress</a></div><div class="ttdeci">void printIPAddress(IPAddress ipAddress)</div><div class="ttdef"><b>Definition:</b> utils.cpp:379</div></div>
+<div class="ttc" id="autils_8h_html_a1938abf1ef99f35bd2578e3db1bcf7b8"><div class="ttname"><a href="utils_8h.html#a1938abf1ef99f35bd2578e3db1bcf7b8">parseBytes</a></div><div class="ttdeci">void parseBytes(const char *str, char separator, byte *bytes, int maxBytes, int base)</div><div class="ttdef"><b>Definition:</b> utils.cpp:210</div></div>
+<div class="ttc" id="autils_8h_html_a6037cfc7913c0856e93dbf8fc2133aac"><div class="ttname"><a href="utils_8h.html#a6037cfc7913c0856e93dbf8fc2133aac">getInt</a></div><div class="ttdeci">int getInt(char **chan)</div><div class="ttdef"><b>Definition:</b> utils.cpp:98</div></div>
+<div class="ttc" id="autils_8h_html_aadf1050416e46077ad59157173438dad"><div class="ttname"><a href="utils_8h.html#aadf1050416e46077ad59157173438dad">log</a></div><div class="ttdeci">int log(const char *str,...)</div><div class="ttdef"><b>Definition:</b> utils.cpp:241</div></div>
+<div class="ttc" id="autils_8h_html_ac1da7fe353a40e62dd3a8a0761d12b22"><div class="ttname"><a href="utils_8h.html#ac1da7fe353a40e62dd3a8a0761d12b22">isTimeOver</a></div><div class="ttdeci">bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo=0)</div><div class="ttdef"><b>Definition:</b> utils.cpp:559</div></div>
+<div class="ttc" id="autils_8h_html_ad620f6746f5f0d6b62a801dd26c8ed53"><div class="ttname"><a href="utils_8h.html#ad620f6746f5f0d6b62a801dd26c8ed53">_inet_aton</a></div><div class="ttdeci">int _inet_aton(const char *aIPAddrString, IPAddress &amp;aResult)</div><div class="ttdef"><b>Definition:</b> utils.cpp:332</div></div>
+<div class="ttc" id="autils_8h_html_a6c16341dd45c4e557f951818d8d09810"><div class="ttname"><a href="utils_8h.html#a6c16341dd45c4e557f951818d8d09810">printFloatValueToStr</a></div><div class="ttdeci">void printFloatValueToStr(float value, char *valstr)</div><div class="ttdef"><b>Definition:</b> utils.cpp:222</div></div>
+<div class="ttc" id="autils_8h_html_afb183532261be04b86e9e535010db6a9"><div class="ttname"><a href="utils_8h.html#afb183532261be04b86e9e535010db6a9">printUlongValueToStr</a></div><div class="ttdeci">void printUlongValueToStr(char *valstr, unsigned long value)</div><div class="ttdef"><b>Definition:</b> utils.cpp:477</div></div>
+<div class="ttc" id="autils_8h_html_af97ce3611cbf9e3f12566a1d2a6c965b"><div class="ttname"><a href="utils_8h.html#af97ce3611cbf9e3f12566a1d2a6c965b">getNumber</a></div><div class="ttdeci">itemCmd getNumber(char **chan)</div><div class="ttdef"><b>Definition:</b> utils.cpp:117</div></div>
+<div class="ttc" id="autils_8h_html_a7a7f700c0c11e53e4fde708443be96ff"><div class="ttname"><a href="utils_8h.html#a7a7f700c0c11e53e4fde708443be96ff">str2SerialParam</a></div><div class="ttdeci">serialParamType str2SerialParam(char *str)</div><div class="ttdef"><b>Definition:</b> utils.cpp:748</div></div>
+<div class="ttc" id="autils_8h_html_af0df006a5ae8d0d730134afdaf1c64dd"><div class="ttname"><a href="utils_8h.html#af0df006a5ae8d0d730134afdaf1c64dd">printIPAddress</a></div><div class="ttdeci">void printIPAddress(IPAddress ipAddress)</div><div class="ttdef"><b>Definition:</b> utils.cpp:422</div></div>
 <div class="ttc" id="autils_8h_html_a7facb8f2c84692ab65024785eb64b541"><div class="ttname"><a href="utils_8h.html#a7facb8f2c84692ab65024785eb64b541">softRebootFunc</a></div><div class="ttdeci">void softRebootFunc()</div></div>
-<div class="ttc" id="autils_8h_html_ab5fb614b925280fc7c8d0e5314dd3b7a"><div class="ttname"><a href="utils_8h.html#ab5fb614b925280fc7c8d0e5314dd3b7a">PrintBytes</a></div><div class="ttdeci">void PrintBytes(uint8_t *addr, uint8_t count, bool newline)</div><div class="ttdef"><b>Definition:</b> utils.cpp:52</div></div>
+<div class="ttc" id="autils_8h_html_ab5fb614b925280fc7c8d0e5314dd3b7a"><div class="ttname"><a href="utils_8h.html#ab5fb614b925280fc7c8d0e5314dd3b7a">PrintBytes</a></div><div class="ttdeci">void PrintBytes(uint8_t *addr, uint8_t count, bool newline)</div><div class="ttdef"><b>Definition:</b> utils.cpp:58</div></div>
 <div class="ttc" id="aitem_8h_html"><div class="ttname"><a href="item_8h.html">item.h</a></div></div>
-<div class="ttc" id="autils_8h_html_aa0045f41bb76629662ed1ee7952f856e"><div class="ttname"><a href="utils_8h.html#aa0045f41bb76629662ed1ee7952f856e">setTopic</a></div><div class="ttdeci">char * setTopic(char *buf, int8_t buflen, topicType tt, const char *suffix=NULL)</div><div class="ttdef"><b>Definition:</b> utils.cpp:389</div></div>
+<div class="ttc" id="autils_8h_html_aa0045f41bb76629662ed1ee7952f856e"><div class="ttname"><a href="utils_8h.html#aa0045f41bb76629662ed1ee7952f856e">setTopic</a></div><div class="ttdeci">char * setTopic(char *buf, int8_t buflen, topicType tt, const char *suffix=NULL)</div><div class="ttdef"><b>Definition:</b> utils.cpp:432</div></div>
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="utils_8h.html">utils.h</a></li>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -46,6 +52,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('utils_8h.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,11 +83,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_82d7c1f210290ade9e0671f857ad27e3.html">lighthub</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#define-members">Macros</a> &#124;
@@ -80,48 +98,6 @@ $(function() {
 <code>#include &quot;<a class="el" href="options_8h_source.html">options.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="item_8h_source.html">item.h</a>&quot;</code><br />
 <code>#include &quot;Streaming.h&quot;</code><br />
-</div><div class="textblock"><div class="dynheader">
-Include dependency graph for utils.h:</div>
-<div class="dyncontent">
-<div class="center"><img src="utils_8h__incl.png" border="0" usemap="#autils_8h" alt=""/></div>
-<map name="utils_8h" id="autils_8h">
-<area shape="rect" title=" " alt="" coords="261,5,318,32"/>
-<area shape="rect" title=" " alt="" coords="84,304,161,331"/>
-<area shape="rect" title=" " alt="" coords="353,80,445,107"/>
-<area shape="rect" title=" " alt="" coords="226,155,302,181"/>
-<area shape="rect" href="options_8h.html" title=" " alt="" coords="327,155,401,181"/>
-<area shape="rect" href="item_8h.html" title=" " alt="" coords="168,80,227,107"/>
-<area shape="rect" title=" " alt="" coords="469,80,561,107"/>
-<area shape="rect" href="abstractout_8h.html" title=" " alt="" coords="103,155,201,181"/>
-<area shape="rect" href="item_cmd_8h.html" title=" " alt="" coords="22,229,109,256"/>
-<area shape="rect" href="abstractch_8h.html" title=" " alt="" coords="133,229,227,256"/>
-</map>
-</div>
-</div><div class="textblock"><div class="dynheader">
-This graph shows which files directly or indirectly include this file:</div>
-<div class="dyncontent">
-<div class="center"><img src="utils_8h__dep__incl.png" border="0" usemap="#autils_8hdep" alt=""/></div>
-<map name="utils_8hdep" id="autils_8hdep">
-<area shape="rect" title=" " alt="" coords="779,5,836,32"/>
-<area shape="rect" href="abstractch_8cpp.html" title=" " alt="" coords="5,155,113,181"/>
-<area shape="rect" href="abstractin_8cpp.html" title=" " alt="" coords="138,155,242,181"/>
-<area shape="rect" href="inputs_8cpp.html" title=" " alt="" coords="266,155,349,181"/>
-<area shape="rect" href="item_8cpp.html" title=" " alt="" coords="373,155,445,181"/>
-<area shape="rect" href="main_8h.html" title=" " alt="" coords="910,80,971,107"/>
-<area shape="rect" href="out__modbus_8cpp.html" title=" " alt="" coords="1641,155,1760,181"/>
-<area shape="rect" href="ow_term_8cpp.html" title=" " alt="" coords="1785,155,1878,181"/>
-<area shape="rect" href="utils_8cpp.html" title=" " alt="" coords="1903,155,1973,181"/>
-<area shape="rect" href="colorchannel_8cpp.html" title=" " alt="" coords="1273,155,1393,181"/>
-<area shape="rect" href="item_cmd_8cpp.html" title=" " alt="" coords="1417,155,1517,181"/>
-<area shape="rect" href="main_8cpp.html" title=" " alt="" coords="1542,155,1617,181"/>
-<area shape="rect" href="in__ccs811__hdc1080_8cpp.html" title=" " alt="" coords="469,155,631,181"/>
-<area shape="rect" href="out__ac_8cpp.html" title=" " alt="" coords="656,155,743,181"/>
-<area shape="rect" href="out__dmx_8cpp.html" title=" " alt="" coords="767,155,864,181"/>
-<area shape="rect" href="out__motor_8cpp.html" title=" " alt="" coords="889,155,993,181"/>
-<area shape="rect" href="out__pwm_8cpp.html" title=" " alt="" coords="1017,155,1117,181"/>
-<area shape="rect" href="out__spiled_8cpp.html" title=" " alt="" coords="1142,155,1249,181"/>
-</map>
-</div>
 </div>
 <p><a href="utils_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -137,6 +113,8 @@ Macros</h2></td></tr>
 <tr class="separator:ad705dc78222473228fa826e42eca95f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a89328d94ddd2cdd4b39db22da01f79"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a9a89328d94ddd2cdd4b39db22da01f79">VAR_NAME_VALUE</a>(var)&#160;&#160;&#160;#var &quot;=&quot;  <a class="el" href="utils_8h.html#ad705dc78222473228fa826e42eca95f1">VALUE</a>(var)</td></tr>
 <tr class="separator:a9a89328d94ddd2cdd4b39db22da01f79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af725dabbb9d86c575157b3bbc24d6d55"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#af725dabbb9d86c575157b3bbc24d6d55">serialParamType</a>&#160;&#160;&#160;uint16_t</td></tr>
+<tr class="separator:af725dabbb9d86c575157b3bbc24d6d55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -158,6 +136,8 @@ Functions</h2></td></tr>
 <tr class="separator:a215fd13be95cb1c21fe50b3693b85557"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6037cfc7913c0856e93dbf8fc2133aac"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a6037cfc7913c0856e93dbf8fc2133aac">getInt</a> (char **chan)</td></tr>
 <tr class="separator:a6037cfc7913c0856e93dbf8fc2133aac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af97ce3611cbf9e3f12566a1d2a6c965b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classitem_cmd.html">itemCmd</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#af97ce3611cbf9e3f12566a1d2a6c965b">getNumber</a> (char **chan)</td></tr>
+<tr class="separator:af97ce3611cbf9e3f12566a1d2a6c965b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c97971726a07a7d14fb701f4a4638f0"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a3c97971726a07a7d14fb701f4a4638f0">freeRam</a> ()</td></tr>
 <tr class="separator:a3c97971726a07a7d14fb701f4a4638f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1938abf1ef99f35bd2578e3db1bcf7b8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a1938abf1ef99f35bd2578e3db1bcf7b8">parseBytes</a> (const char *str, char separator, byte *bytes, int maxBytes, int base)</td></tr>
@@ -168,10 +148,10 @@ Functions</h2></td></tr>
 <tr class="separator:a6c16341dd45c4e557f951818d8d09810"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1380fbc9c2170180770dd1bdcc5ac647"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a1380fbc9c2170180770dd1bdcc5ac647">ReadUniqueID</a> (uint32_t *pdwUniqueID)</td></tr>
 <tr class="separator:a1380fbc9c2170180770dd1bdcc5ac647"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2abeec32a0c7fe0b4aa02a8807ed9cee"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a2abeec32a0c7fe0b4aa02a8807ed9cee">inet_aton</a> (const char *aIPAddrString, IPAddress &amp;aResult)</td></tr>
-<tr class="separator:a2abeec32a0c7fe0b4aa02a8807ed9cee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f3cdb518da692b8859ae48ed58196fc"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a5f3cdb518da692b8859ae48ed58196fc">inet_ntoa_r</a> (IPAddress addr, char *buf, int buflen)</td></tr>
-<tr class="separator:a5f3cdb518da692b8859ae48ed58196fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad620f6746f5f0d6b62a801dd26c8ed53"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#ad620f6746f5f0d6b62a801dd26c8ed53">_inet_aton</a> (const char *aIPAddrString, IPAddress &amp;aResult)</td></tr>
+<tr class="separator:ad620f6746f5f0d6b62a801dd26c8ed53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62c963f0eca4136cc72f0f882c13e7af"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a62c963f0eca4136cc72f0f882c13e7af">_inet_ntoa_r</a> (IPAddress addr, char *buf, int buflen)</td></tr>
+<tr class="separator:a62c963f0eca4136cc72f0f882c13e7af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0df006a5ae8d0d730134afdaf1c64dd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#af0df006a5ae8d0d730134afdaf1c64dd">printIPAddress</a> (IPAddress ipAddress)</td></tr>
 <tr class="separator:af0df006a5ae8d0d730134afdaf1c64dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0045f41bb76629662ed1ee7952f856e"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#aa0045f41bb76629662ed1ee7952f856e">setTopic</a> (char *buf, int8_t buflen, <a class="el" href="utils_8h.html#a2598bacb04e8f77e8b41cee61ef359fc">topicType</a> tt, const char *suffix=NULL)</td></tr>
@@ -182,14 +162,20 @@ Functions</h2></td></tr>
 <tr class="separator:af585ed9b15b9980b72fbec6d9c9dba67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7facb8f2c84692ab65024785eb64b541"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a7facb8f2c84692ab65024785eb64b541">softRebootFunc</a> ()</td></tr>
 <tr class="separator:a7facb8f2c84692ab65024785eb64b541"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd6072104e482c3f61e5bfad35a58ac0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#acd6072104e482c3f61e5bfad35a58ac0">isTimeOver</a> (uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo=0xFFFFFFFF)</td></tr>
-<tr class="separator:acd6072104e482c3f61e5bfad35a58ac0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1da7fe353a40e62dd3a8a0761d12b22"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#ac1da7fe353a40e62dd3a8a0761d12b22">isTimeOver</a> (uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo=0)</td></tr>
+<tr class="separator:ac1da7fe353a40e62dd3a8a0761d12b22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9843f57c765644bc93e675922da82beb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a9843f57c765644bc93e675922da82beb">executeCommand</a> (aJsonObject *cmd, int8_t toggle=-1)</td></tr>
 <tr class="separator:a9843f57c765644bc93e675922da82beb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2cd15a22b2799d0378a27850c96c6300"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a2cd15a22b2799d0378a27850c96c6300">executeCommand</a> (aJsonObject *cmd, int8_t toggle, <a class="el" href="classitem_cmd.html">itemCmd</a> _itemCmd)</td></tr>
-<tr class="separator:a2cd15a22b2799d0378a27850c96c6300"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb40f2502eb474ec60da7058025ce541"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#abb40f2502eb474ec60da7058025ce541">executeCommand</a> (aJsonObject *cmd, int8_t toggle, <a class="el" href="classitem_cmd.html">itemCmd</a> _itemCmd, aJsonObject *defaultItem=NULL, aJsonObject *defaultEmit=NULL)</td></tr>
+<tr class="separator:abb40f2502eb474ec60da7058025ce541"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace8fa23ff29c3feb89c5d500ef87b914"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classitem_cmd.html">itemCmd</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#ace8fa23ff29c3feb89c5d500ef87b914">mapInt</a> (int32_t arg, aJsonObject *map)</td></tr>
 <tr class="separator:ace8fa23ff29c3feb89c5d500ef87b914"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b226ab4fb09687005316a874e2627d0"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a2b226ab4fb09687005316a874e2627d0">millisNZ</a> (uint8_t shift=0)</td></tr>
+<tr class="separator:a2b226ab4fb09687005316a874e2627d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a7f700c0c11e53e4fde708443be96ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="utils_8h.html#af725dabbb9d86c575157b3bbc24d6d55">serialParamType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a7a7f700c0c11e53e4fde708443be96ff">str2SerialParam</a> (char *str)</td></tr>
+<tr class="separator:a7a7f700c0c11e53e4fde708443be96ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19f2c10a5d113a7b031d5bb3387ea27c"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="utils_8h.html#a19f2c10a5d113a7b031d5bb3387ea27c">toString</a> (const IPAddress &amp;address)</td></tr>
+<tr class="separator:a19f2c10a5d113a7b031d5bb3387ea27c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a2a280bfe12bc6e732a7c4d3d62443a14"></a>
@@ -222,6 +208,20 @@ Functions</h2></td></tr>
           <td class="paramtype">&#160;</td>
           <td class="paramname">x</td><td>)</td>
           <td>&#160;&#160;&#160;<a class="el" href="utils_8h.html#a2a280bfe12bc6e732a7c4d3d62443a14">Q</a>(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af725dabbb9d86c575157b3bbc24d6d55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af725dabbb9d86c575157b3bbc24d6d55">&#9670;&nbsp;</a></span>serialParamType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define serialParamType&#160;&#160;&#160;uint16_t</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -303,8 +303,80 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a2cd15a22b2799d0378a27850c96c6300"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2cd15a22b2799d0378a27850c96c6300">&#9670;&nbsp;</a></span>executeCommand() <span class="overload">[1/2]</span></h2>
+<a id="ad620f6746f5f0d6b62a801dd26c8ed53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad620f6746f5f0d6b62a801dd26c8ed53">&#9670;&nbsp;</a></span>_inet_aton()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int _inet_aton </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>aIPAddrString</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IPAddress &amp;&#160;</td>
+          <td class="paramname"><em>aResult</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a62c963f0eca4136cc72f0f882c13e7af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62c963f0eca4136cc72f0f882c13e7af">&#9670;&nbsp;</a></span>_inet_ntoa_r()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* _inet_ntoa_r </td>
+          <td>(</td>
+          <td class="paramtype">IPAddress&#160;</td>
+          <td class="paramname"><em>addr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>buflen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Same as ipaddr_ntoa, but reentrant since a user-supplied buffer is used.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">addr</td><td>ip address in network order to convert </td></tr>
+    <tr><td class="paramname">buf</td><td>target buffer where the string is stored </td></tr>
+    <tr><td class="paramname">buflen</td><td>length of buf </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>either pointer to buf which now holds the ASCII representation of addr or NULL if buf was too small </dd></dl>
+
+</div>
+</div>
+<a id="abb40f2502eb474ec60da7058025ce541"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb40f2502eb474ec60da7058025ce541">&#9670;&nbsp;</a></span>executeCommand() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -325,7 +397,19 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classitem_cmd.html">itemCmd</a>&#160;</td>
-          <td class="paramname"><em>_itemCmd</em>&#160;</td>
+          <td class="paramname"><em>_itemCmd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">aJsonObject *&#160;</td>
+          <td class="paramname"><em>defaultItem</em> = <code>NULL</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">aJsonObject *&#160;</td>
+          <td class="paramname"><em>defaultEmit</em> = <code>NULL</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -400,6 +484,24 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="af97ce3611cbf9e3f12566a1d2a6c965b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af97ce3611cbf9e3f12566a1d2a6c965b">&#9670;&nbsp;</a></span>getNumber()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classitem_cmd.html">itemCmd</a> getNumber </td>
+          <td>(</td>
+          <td class="paramtype">char **&#160;</td>
+          <td class="paramname"><em>chan</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a215fd13be95cb1c21fe50b3693b85557"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a215fd13be95cb1c21fe50b3693b85557">&#9670;&nbsp;</a></span>HEX2DEC()</h2>
 
@@ -418,80 +520,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a2abeec32a0c7fe0b4aa02a8807ed9cee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2abeec32a0c7fe0b4aa02a8807ed9cee">&#9670;&nbsp;</a></span>inet_aton()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int inet_aton </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>aIPAddrString</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IPAddress &amp;&#160;</td>
-          <td class="paramname"><em>aResult</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a5f3cdb518da692b8859ae48ed58196fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f3cdb518da692b8859ae48ed58196fc">&#9670;&nbsp;</a></span>inet_ntoa_r()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">char* inet_ntoa_r </td>
-          <td>(</td>
-          <td class="paramtype">IPAddress&#160;</td>
-          <td class="paramname"><em>addr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>buf</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>buflen</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Same as ipaddr_ntoa, but reentrant since a user-supplied buffer is used.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">addr</td><td>ip address in network order to convert </td></tr>
-    <tr><td class="paramname">buf</td><td>target buffer where the string is stored </td></tr>
-    <tr><td class="paramname">buflen</td><td>length of buf </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>either pointer to buf which now holds the ASCII representation of addr or NULL if buf was too small </dd></dl>
-
-</div>
-</div>
-<a id="acd6072104e482c3f61e5bfad35a58ac0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acd6072104e482c3f61e5bfad35a58ac0">&#9670;&nbsp;</a></span>isTimeOver()</h2>
+<a id="ac1da7fe353a40e62dd3a8a0761d12b22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1da7fe353a40e62dd3a8a0761d12b22">&#9670;&nbsp;</a></span>isTimeOver()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -518,7 +548,7 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>modulo</em> = <code>0xFFFFFFFF</code>&#160;</td>
+          <td class="paramname"><em>modulo</em> = <code>0</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -580,6 +610,24 @@ Functions</h2></td></tr>
           <td></td>
           <td>)</td>
           <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2b226ab4fb09687005316a874e2627d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b226ab4fb09687005316a874e2627d0">&#9670;&nbsp;</a></span>millisNZ()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned long millisNZ </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>shift</em> = <code>0</code></td><td>)</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -894,10 +942,50 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a7a7f700c0c11e53e4fde708443be96ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a7f700c0c11e53e4fde708443be96ff">&#9670;&nbsp;</a></span>str2SerialParam()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="utils_8h.html#af725dabbb9d86c575157b3bbc24d6d55">serialParamType</a> str2SerialParam </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>str</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a19f2c10a5d113a7b031d5bb3387ea27c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19f2c10a5d113a7b031d5bb3387ea27c">&#9670;&nbsp;</a></span>toString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">String toString </td>
+          <td>(</td>
+          <td class="paramtype">const IPAddress &amp;&#160;</td>
+          <td class="paramname"><em>address</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="utils_8h.html">utils.h</a></li>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

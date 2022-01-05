@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -46,6 +52,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('dmx_8cpp.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,11 +83,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_82d7c1f210290ade9e0671f857ad27e3.html">lighthub</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#func-members">Functions</a> &#124;
@@ -76,22 +94,7 @@ $(function() {
 <div class="textblock"><code>#include &quot;<a class="el" href="dmx_8h_source.html">dmx.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="options_8h_source.html">options.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="item_8h_source.html">item.h</a>&quot;</code><br />
-</div><div class="textblock"><div class="dynheader">
-Include dependency graph for dmx.cpp:</div>
-<div class="dyncontent">
-<div class="center"><img src="dmx_8cpp__incl.png" border="0" usemap="#admx_8cpp" alt=""/></div>
-<map name="dmx_8cpp" id="admx_8cpp">
-<area shape="rect" title=" " alt="" coords="73,5,145,32"/>
-<area shape="rect" href="dmx_8h.html" title=" " alt="" coords="80,80,139,107"/>
-<area shape="rect" href="options_8h.html" title=" " alt="" coords="5,155,80,181"/>
-<area shape="rect" href="item_8h.html" title=" " alt="" coords="163,80,221,107"/>
-<area shape="rect" title=" " alt="" coords="105,155,181,181"/>
-<area shape="rect" href="abstractout_8h.html" title=" " alt="" coords="205,155,304,181"/>
-<area shape="rect" href="item_cmd_8h.html" title=" " alt="" coords="295,229,382,256"/>
-<area shape="rect" title=" " alt="" coords="219,304,296,331"/>
-<area shape="rect" href="abstractch_8h.html" title=" " alt="" coords="125,229,219,256"/>
-</map>
-</div>
+<code>#include &quot;<a class="el" href="main_8h_source.html">main.h</a>&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -115,8 +118,10 @@ Functions</h2></td></tr>
 <tr class="separator:af5aeb81882ff7b4fe7cccb66a12539df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c166d810404d3d15f663706271de37f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#a7c166d810404d3d15f663706271de37f">DMXOUT_propagate</a> ()</td></tr>
 <tr class="separator:a7c166d810404d3d15f663706271de37f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af7ba5611c2c7485938cbf745ed65741f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#af7ba5611c2c7485938cbf745ed65741f">ArtnetSetup</a> ()</td></tr>
-<tr class="separator:af7ba5611c2c7485938cbf745ed65741f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a384f51a65164f2d53600a2e2d62145b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#a384f51a65164f2d53600a2e2d62145b5">artnetSetup</a> ()</td></tr>
+<tr class="separator:a384f51a65164f2d53600a2e2d62145b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdd33064131de0ec44f40f22ae979397"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#abdd33064131de0ec44f40f22ae979397">artnetSetChans</a> (uint8_t minCh, uint8_t maxCh)</td></tr>
+<tr class="separator:abdd33064131de0ec44f40f22ae979397"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3faac041a7441faf18a1ad72021be077"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#a3faac041a7441faf18a1ad72021be077">DmxWriteBuf</a> (uint16_t chan, uint8_t val)</td></tr>
 <tr class="separator:a3faac041a7441faf18a1ad72021be077"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -124,24 +129,58 @@ Functions</h2></td></tr>
 Variables</h2></td></tr>
 <tr class="memitem:adf18ba2ebc00417130f18dc9e34411c6"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#adf18ba2ebc00417130f18dc9e34411c6">DMXin</a> = NULL</td></tr>
 <tr class="separator:adf18ba2ebc00417130f18dc9e34411c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa205b5f0812aa803bb5ebe6067ca7bc7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#aa205b5f0812aa803bb5ebe6067ca7bc7">D_State</a> =0</td></tr>
-<tr class="separator:aa205b5f0812aa803bb5ebe6067ca7bc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2bdd5f5b1312117028586d6a9a11a02c"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#a2bdd5f5b1312117028586d6a9a11a02c">D_checkT</a> =0</td></tr>
-<tr class="separator:a2bdd5f5b1312117028586d6a9a11a02c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9003509a566769d080ca60443bd042b2"><td class="memItemLeft" align="right" valign="top">volatile uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#a9003509a566769d080ca60443bd042b2">D_State</a> =0</td></tr>
+<tr class="separator:a9003509a566769d080ca60443bd042b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af14e25d8ec87aea0648534b21733da2c"><td class="memItemLeft" align="right" valign="top">volatile unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#af14e25d8ec87aea0648534b21733da2c">D_checkT</a> =0</td></tr>
+<tr class="separator:af14e25d8ec87aea0648534b21733da2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a012787f09a43864616e2b44349b29352"><td class="memItemLeft" align="right" valign="top">aJsonObject *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#a012787f09a43864616e2b44349b29352">items</a></td></tr>
 <tr class="separator:a012787f09a43864616e2b44349b29352"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a077dba54087a1a3694f810ba9fd06933"><td class="memItemLeft" align="right" valign="top">aJsonObject *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#a077dba54087a1a3694f810ba9fd06933">dmxArr</a></td></tr>
 <tr class="separator:a077dba54087a1a3694f810ba9fd06933"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08eb17abd1014ae770f606b8c92a7b80"><td class="memItemLeft" align="right" valign="top">volatile uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#a08eb17abd1014ae770f606b8c92a7b80">timerHandlerBusy</a></td></tr>
+<tr class="separator:a08eb17abd1014ae770f606b8c92a7b80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34e99db3444f7cb39e58961283eb5ab9"><td class="memItemLeft" align="right" valign="top">volatile int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#a34e99db3444f7cb39e58961283eb5ab9">DMXinDoublecheck</a> =0</td></tr>
+<tr class="separator:a34e99db3444f7cb39e58961283eb5ab9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac103409466e5765e514698ee20f901ce"><td class="memItemLeft" align="right" valign="top">volatile int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dmx_8cpp.html#ac103409466e5765e514698ee20f901ce">propagateBusy</a> = 0</td></tr>
+<tr class="separator:ac103409466e5765e514698ee20f901ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="af7ba5611c2c7485938cbf745ed65741f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af7ba5611c2c7485938cbf745ed65741f">&#9670;&nbsp;</a></span>ArtnetSetup()</h2>
+<a id="abdd33064131de0ec44f40f22ae979397"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdd33064131de0ec44f40f22ae979397">&#9670;&nbsp;</a></span>artnetSetChans()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void ArtnetSetup </td>
+          <td class="memname">void artnetSetChans </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>minCh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>maxCh</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a384f51a65164f2d53600a2e2d62145b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a384f51a65164f2d53600a2e2d62145b5">&#9670;&nbsp;</a></span>artnetSetup()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void artnetSetup </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -460,28 +499,28 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
-<a id="a2bdd5f5b1312117028586d6a9a11a02c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2bdd5f5b1312117028586d6a9a11a02c">&#9670;&nbsp;</a></span>D_checkT</h2>
+<a id="af14e25d8ec87aea0648534b21733da2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af14e25d8ec87aea0648534b21733da2c">&#9670;&nbsp;</a></span>D_checkT</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">unsigned long D_checkT =0</td>
+          <td class="memname">volatile unsigned long D_checkT =0</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="aa205b5f0812aa803bb5ebe6067ca7bc7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa205b5f0812aa803bb5ebe6067ca7bc7">&#9670;&nbsp;</a></span>D_State</h2>
+<a id="a9003509a566769d080ca60443bd042b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9003509a566769d080ca60443bd042b2">&#9670;&nbsp;</a></span>D_State</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int D_State =0</td>
+          <td class="memname">volatile uint32_t D_State =0</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -524,6 +563,20 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="a34e99db3444f7cb39e58961283eb5ab9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34e99db3444f7cb39e58961283eb5ab9">&#9670;&nbsp;</a></span>DMXinDoublecheck</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">volatile int DMXinDoublecheck =0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a012787f09a43864616e2b44349b29352"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a012787f09a43864616e2b44349b29352">&#9670;&nbsp;</a></span>items</h2>
 
@@ -546,10 +599,50 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="ac103409466e5765e514698ee20f901ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac103409466e5765e514698ee20f901ce">&#9670;&nbsp;</a></span>propagateBusy</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">volatile int8_t propagateBusy = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a08eb17abd1014ae770f606b8c92a7b80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08eb17abd1014ae770f606b8c92a7b80">&#9670;&nbsp;</a></span>timerHandlerBusy</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">volatile uint8_t timerHandlerBusy</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">extern</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dmx_8cpp.html">dmx.cpp</a></li>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

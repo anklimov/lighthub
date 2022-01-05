@@ -1,0 +1,315 @@
+\hypertarget{classsystem_config}{}\doxysection{system\+Config Class Reference}
+\label{classsystem_config}\index{systemConfig@{systemConfig}}
+
+
+{\ttfamily \#include $<$config.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classsystem_config_ac232727ce378ff812d07e2f7c14c85f7}{system\+Config}} ()
+\item 
+\mbox{\hyperlink{classsystem_config_a10939a4cdd0bc9e387c4bf65004ab817}{system\+Config}} (\mbox{\hyperlink{classflash_stream}{flash\+Stream}} $\ast$fs)
+\item 
+bool \mbox{\hyperlink{classsystem_config_af9c601c8d4c2a5adb02456af193107e6}{is\+Valid\+Sys\+Conf}} ()
+\item 
+bool \mbox{\hyperlink{classsystem_config_a4c960ec06d3a1b8cc496cd7b107bbfc0}{get\+M\+AC}} ()
+\item 
+String \mbox{\hyperlink{classsystem_config_ab80479e13d4bd99cebe6607991c046cf}{get\+M\+A\+C\+String}} ()
+\item 
+bool \mbox{\hyperlink{classsystem_config_afb681d4490820e322f5e509c2bc03432}{set\+M\+AC}} (\mbox{\hyperlink{systemconfigdata_8h_a514f72de8f2436e3c2952d52302585a3}{mac\+Address}} \&\mbox{\hyperlink{classsystem_config_a4439e4027f2cbb6b4e1498e1e7558d9f}{mac}})
+\item 
+char $\ast$ \mbox{\hyperlink{classsystem_config_ad2264e10627c9b15bf8f263bedfbee24}{get\+M\+Q\+T\+Tpwd}} (char $\ast$buffer, uint16\+\_\+t buf\+Len)
+\item 
+bool \mbox{\hyperlink{classsystem_config_a51d3938395608f36a85be28bb6b2d708}{set\+M\+Q\+T\+Tpwd}} (char $\ast$pwd=N\+U\+LL)
+\item 
+char $\ast$ \mbox{\hyperlink{classsystem_config_a05fbbe32858072e7169c1f6aaaa90357}{get\+O\+T\+Apwd}} (char $\ast$buffer, uint16\+\_\+t buf\+Len)
+\item 
+bool \mbox{\hyperlink{classsystem_config_a5f28d822366f9194344bb13db53e0b43}{set\+O\+T\+Apwd}} (char $\ast$pwd=N\+U\+LL)
+\item 
+bool \mbox{\hyperlink{classsystem_config_afda81c9cf59f8cbdcf8a2baafbc1ecb3}{set\+Server}} (char $\ast$url)
+\item 
+char $\ast$ \mbox{\hyperlink{classsystem_config_a9cfc64d4c8b391170ad63e94dfd71d43}{get\+Server}} (char $\ast$buffer, uint16\+\_\+t buf\+Len)
+\item 
+bool \mbox{\hyperlink{classsystem_config_a5b739e59ebdff5e2e8f408403734f206}{get\+IP}} (I\+P\+Address \&ip)
+\item 
+bool \mbox{\hyperlink{classsystem_config_a586c20af37f03b4b89d1e9f276f5aa75}{get\+Mask}} (I\+P\+Address \&mask)
+\item 
+bool \mbox{\hyperlink{classsystem_config_a9979a5601a889759f79cb53ed3385237}{get\+D\+NS}} (I\+P\+Address \&dns)
+\item 
+bool \mbox{\hyperlink{classsystem_config_afd36dc85ae181ef2df38d7293c195409}{get\+GW}} (I\+P\+Address \&gw)
+\item 
+bool \mbox{\hyperlink{classsystem_config_adfc32a9291df04431e48f4a29622f2f8}{set\+IP}} (I\+P\+Address \&ip)
+\item 
+bool \mbox{\hyperlink{classsystem_config_ab053c69fd613a0b458d11f42af58b560}{set\+Mask}} (I\+P\+Address \&mask)
+\item 
+bool \mbox{\hyperlink{classsystem_config_aa2bdb0a22efb82709dfbfecde28031af}{set\+D\+NS}} (I\+P\+Address \&dns)
+\item 
+bool \mbox{\hyperlink{classsystem_config_a959580d497f3ca976032d6ece59318e6}{set\+GW}} (I\+P\+Address \&gw)
+\item 
+bool \mbox{\hyperlink{classsystem_config_ad130cc84cd54223d03cf9255298bfb68}{set\+Serial\+Debuglevel}} (short)
+\item 
+bool \mbox{\hyperlink{classsystem_config_a119d26794423fd6da965f11e3966d05c}{set\+Udp\+Debuglevel}} (short)
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classsystem_config_a5cd48cc8db70cdf575113106be58ac41}{get\+Serial\+Debuglevel}} ()
+\item 
+uint8\+\_\+t \mbox{\hyperlink{classsystem_config_a70ec86287c9658ebfbbf2d1da6c040fb}{get\+Udp\+Debuglevel}} ()
+\item 
+bool \mbox{\hyperlink{classsystem_config_a549d208daec0998caf5c2039b58d9b96}{clear}} ()
+\item 
+bool \mbox{\hyperlink{classsystem_config_ab14c4521e8d6d6520ad853794272be0b}{get\+Save\+Succed\+Config}} ()
+\item 
+bool \mbox{\hyperlink{classsystem_config_aeb7c0b487a5cc34efd4e4f34f46c28e9}{set\+Save\+Succed\+Config}} (bool)
+\item 
+bool \mbox{\hyperlink{classsystem_config_afb03631d679e1efe2b5619df60eeb202}{get\+Load\+H\+T\+T\+P\+Config}} ()
+\item 
+bool \mbox{\hyperlink{classsystem_config_a1fef3609567a267002833b35114b57fb}{set\+Load\+H\+T\+T\+P\+Config}} (bool)
+\item 
+String \mbox{\hyperlink{classsystem_config_afca9ba172804f55bce5b65e95737de21}{get\+E\+T\+AG}} ()
+\item 
+bool \mbox{\hyperlink{classsystem_config_ae72f3f76206fdf5d6969c836aa8b0cbf}{set\+E\+T\+AG}} (String etag)
+\item 
+bool \mbox{\hyperlink{classsystem_config_aea8ebc807800ad41555747b70f39fa2e}{save\+E\+T\+AG}} ()
+\item 
+bool \mbox{\hyperlink{classsystem_config_ac71d3ac12ae5491a6c928b3b21021b72}{load\+E\+T\+AG}} ()
+\item 
+\mbox{\hyperlink{unionsystem_config_flags}{system\+Config\+Flags}} \mbox{\hyperlink{classsystem_config_a2f582273dd1154da974c43b7dceb82d8}{get\+Config\+Flags}} ()
+\item 
+bool \mbox{\hyperlink{classsystem_config_a57ffd9a7d8fa1d72b0c860e30e618375}{set\+Config\+Flags}} (\mbox{\hyperlink{unionsystem_config_flags}{system\+Config\+Flags}} flags)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{systemconfigdata_8h_a514f72de8f2436e3c2952d52302585a3}{mac\+Address}} \mbox{\hyperlink{classsystem_config_a4439e4027f2cbb6b4e1498e1e7558d9f}{mac}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classsystem_config_ac232727ce378ff812d07e2f7c14c85f7}\label{classsystem_config_ac232727ce378ff812d07e2f7c14c85f7}} 
+\index{systemConfig@{systemConfig}!systemConfig@{systemConfig}}
+\index{systemConfig@{systemConfig}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{systemConfig()}{systemConfig()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily system\+Config\+::system\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\mbox{\Hypertarget{classsystem_config_a10939a4cdd0bc9e387c4bf65004ab817}\label{classsystem_config_a10939a4cdd0bc9e387c4bf65004ab817}} 
+\index{systemConfig@{systemConfig}!systemConfig@{systemConfig}}
+\index{systemConfig@{systemConfig}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{systemConfig()}{systemConfig()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily system\+Config\+::system\+Config (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classflash_stream}{flash\+Stream}} $\ast$}]{fs }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classsystem_config_a549d208daec0998caf5c2039b58d9b96}\label{classsystem_config_a549d208daec0998caf5c2039b58d9b96}} 
+\index{systemConfig@{systemConfig}!clear@{clear}}
+\index{clear@{clear}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{clear()}{clear()}}
+{\footnotesize\ttfamily bool system\+Config\+::clear (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a2f582273dd1154da974c43b7dceb82d8}\label{classsystem_config_a2f582273dd1154da974c43b7dceb82d8}} 
+\index{systemConfig@{systemConfig}!getConfigFlags@{getConfigFlags}}
+\index{getConfigFlags@{getConfigFlags}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getConfigFlags()}{getConfigFlags()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{unionsystem_config_flags}{system\+Config\+Flags}} system\+Config\+::get\+Config\+Flags (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a9979a5601a889759f79cb53ed3385237}\label{classsystem_config_a9979a5601a889759f79cb53ed3385237}} 
+\index{systemConfig@{systemConfig}!getDNS@{getDNS}}
+\index{getDNS@{getDNS}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getDNS()}{getDNS()}}
+{\footnotesize\ttfamily bool system\+Config\+::get\+D\+NS (\begin{DoxyParamCaption}\item[{I\+P\+Address \&}]{dns }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_afca9ba172804f55bce5b65e95737de21}\label{classsystem_config_afca9ba172804f55bce5b65e95737de21}} 
+\index{systemConfig@{systemConfig}!getETAG@{getETAG}}
+\index{getETAG@{getETAG}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getETAG()}{getETAG()}}
+{\footnotesize\ttfamily String system\+Config\+::get\+E\+T\+AG (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_afd36dc85ae181ef2df38d7293c195409}\label{classsystem_config_afd36dc85ae181ef2df38d7293c195409}} 
+\index{systemConfig@{systemConfig}!getGW@{getGW}}
+\index{getGW@{getGW}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getGW()}{getGW()}}
+{\footnotesize\ttfamily bool system\+Config\+::get\+GW (\begin{DoxyParamCaption}\item[{I\+P\+Address \&}]{gw }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a5b739e59ebdff5e2e8f408403734f206}\label{classsystem_config_a5b739e59ebdff5e2e8f408403734f206}} 
+\index{systemConfig@{systemConfig}!getIP@{getIP}}
+\index{getIP@{getIP}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getIP()}{getIP()}}
+{\footnotesize\ttfamily bool system\+Config\+::get\+IP (\begin{DoxyParamCaption}\item[{I\+P\+Address \&}]{ip }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_afb03631d679e1efe2b5619df60eeb202}\label{classsystem_config_afb03631d679e1efe2b5619df60eeb202}} 
+\index{systemConfig@{systemConfig}!getLoadHTTPConfig@{getLoadHTTPConfig}}
+\index{getLoadHTTPConfig@{getLoadHTTPConfig}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getLoadHTTPConfig()}{getLoadHTTPConfig()}}
+{\footnotesize\ttfamily bool system\+Config\+::get\+Load\+H\+T\+T\+P\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a4c960ec06d3a1b8cc496cd7b107bbfc0}\label{classsystem_config_a4c960ec06d3a1b8cc496cd7b107bbfc0}} 
+\index{systemConfig@{systemConfig}!getMAC@{getMAC}}
+\index{getMAC@{getMAC}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getMAC()}{getMAC()}}
+{\footnotesize\ttfamily bool system\+Config\+::get\+M\+AC (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_ab80479e13d4bd99cebe6607991c046cf}\label{classsystem_config_ab80479e13d4bd99cebe6607991c046cf}} 
+\index{systemConfig@{systemConfig}!getMACString@{getMACString}}
+\index{getMACString@{getMACString}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getMACString()}{getMACString()}}
+{\footnotesize\ttfamily String system\+Config\+::get\+M\+A\+C\+String (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a586c20af37f03b4b89d1e9f276f5aa75}\label{classsystem_config_a586c20af37f03b4b89d1e9f276f5aa75}} 
+\index{systemConfig@{systemConfig}!getMask@{getMask}}
+\index{getMask@{getMask}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getMask()}{getMask()}}
+{\footnotesize\ttfamily bool system\+Config\+::get\+Mask (\begin{DoxyParamCaption}\item[{I\+P\+Address \&}]{mask }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_ad2264e10627c9b15bf8f263bedfbee24}\label{classsystem_config_ad2264e10627c9b15bf8f263bedfbee24}} 
+\index{systemConfig@{systemConfig}!getMQTTpwd@{getMQTTpwd}}
+\index{getMQTTpwd@{getMQTTpwd}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getMQTTpwd()}{getMQTTpwd()}}
+{\footnotesize\ttfamily char $\ast$ system\+Config\+::get\+M\+Q\+T\+Tpwd (\begin{DoxyParamCaption}\item[{char $\ast$}]{buffer,  }\item[{uint16\+\_\+t}]{buf\+Len }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a05fbbe32858072e7169c1f6aaaa90357}\label{classsystem_config_a05fbbe32858072e7169c1f6aaaa90357}} 
+\index{systemConfig@{systemConfig}!getOTApwd@{getOTApwd}}
+\index{getOTApwd@{getOTApwd}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getOTApwd()}{getOTApwd()}}
+{\footnotesize\ttfamily char $\ast$ system\+Config\+::get\+O\+T\+Apwd (\begin{DoxyParamCaption}\item[{char $\ast$}]{buffer,  }\item[{uint16\+\_\+t}]{buf\+Len }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_ab14c4521e8d6d6520ad853794272be0b}\label{classsystem_config_ab14c4521e8d6d6520ad853794272be0b}} 
+\index{systemConfig@{systemConfig}!getSaveSuccedConfig@{getSaveSuccedConfig}}
+\index{getSaveSuccedConfig@{getSaveSuccedConfig}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getSaveSuccedConfig()}{getSaveSuccedConfig()}}
+{\footnotesize\ttfamily bool system\+Config\+::get\+Save\+Succed\+Config (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a5cd48cc8db70cdf575113106be58ac41}\label{classsystem_config_a5cd48cc8db70cdf575113106be58ac41}} 
+\index{systemConfig@{systemConfig}!getSerialDebuglevel@{getSerialDebuglevel}}
+\index{getSerialDebuglevel@{getSerialDebuglevel}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getSerialDebuglevel()}{getSerialDebuglevel()}}
+{\footnotesize\ttfamily uint8\+\_\+t system\+Config\+::get\+Serial\+Debuglevel (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a9cfc64d4c8b391170ad63e94dfd71d43}\label{classsystem_config_a9cfc64d4c8b391170ad63e94dfd71d43}} 
+\index{systemConfig@{systemConfig}!getServer@{getServer}}
+\index{getServer@{getServer}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getServer()}{getServer()}}
+{\footnotesize\ttfamily char $\ast$ system\+Config\+::get\+Server (\begin{DoxyParamCaption}\item[{char $\ast$}]{buffer,  }\item[{uint16\+\_\+t}]{buf\+Len }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a70ec86287c9658ebfbbf2d1da6c040fb}\label{classsystem_config_a70ec86287c9658ebfbbf2d1da6c040fb}} 
+\index{systemConfig@{systemConfig}!getUdpDebuglevel@{getUdpDebuglevel}}
+\index{getUdpDebuglevel@{getUdpDebuglevel}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{getUdpDebuglevel()}{getUdpDebuglevel()}}
+{\footnotesize\ttfamily uint8\+\_\+t system\+Config\+::get\+Udp\+Debuglevel (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_af9c601c8d4c2a5adb02456af193107e6}\label{classsystem_config_af9c601c8d4c2a5adb02456af193107e6}} 
+\index{systemConfig@{systemConfig}!isValidSysConf@{isValidSysConf}}
+\index{isValidSysConf@{isValidSysConf}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{isValidSysConf()}{isValidSysConf()}}
+{\footnotesize\ttfamily bool system\+Config\+::is\+Valid\+Sys\+Conf (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_ac71d3ac12ae5491a6c928b3b21021b72}\label{classsystem_config_ac71d3ac12ae5491a6c928b3b21021b72}} 
+\index{systemConfig@{systemConfig}!loadETAG@{loadETAG}}
+\index{loadETAG@{loadETAG}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{loadETAG()}{loadETAG()}}
+{\footnotesize\ttfamily bool system\+Config\+::load\+E\+T\+AG (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_aea8ebc807800ad41555747b70f39fa2e}\label{classsystem_config_aea8ebc807800ad41555747b70f39fa2e}} 
+\index{systemConfig@{systemConfig}!saveETAG@{saveETAG}}
+\index{saveETAG@{saveETAG}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{saveETAG()}{saveETAG()}}
+{\footnotesize\ttfamily bool system\+Config\+::save\+E\+T\+AG (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a57ffd9a7d8fa1d72b0c860e30e618375}\label{classsystem_config_a57ffd9a7d8fa1d72b0c860e30e618375}} 
+\index{systemConfig@{systemConfig}!setConfigFlags@{setConfigFlags}}
+\index{setConfigFlags@{setConfigFlags}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setConfigFlags()}{setConfigFlags()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+Config\+Flags (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{unionsystem_config_flags}{system\+Config\+Flags}}}]{flags }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_aa2bdb0a22efb82709dfbfecde28031af}\label{classsystem_config_aa2bdb0a22efb82709dfbfecde28031af}} 
+\index{systemConfig@{systemConfig}!setDNS@{setDNS}}
+\index{setDNS@{setDNS}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setDNS()}{setDNS()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+D\+NS (\begin{DoxyParamCaption}\item[{I\+P\+Address \&}]{dns }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_ae72f3f76206fdf5d6969c836aa8b0cbf}\label{classsystem_config_ae72f3f76206fdf5d6969c836aa8b0cbf}} 
+\index{systemConfig@{systemConfig}!setETAG@{setETAG}}
+\index{setETAG@{setETAG}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setETAG()}{setETAG()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+E\+T\+AG (\begin{DoxyParamCaption}\item[{String}]{etag }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a959580d497f3ca976032d6ece59318e6}\label{classsystem_config_a959580d497f3ca976032d6ece59318e6}} 
+\index{systemConfig@{systemConfig}!setGW@{setGW}}
+\index{setGW@{setGW}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setGW()}{setGW()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+GW (\begin{DoxyParamCaption}\item[{I\+P\+Address \&}]{gw }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_adfc32a9291df04431e48f4a29622f2f8}\label{classsystem_config_adfc32a9291df04431e48f4a29622f2f8}} 
+\index{systemConfig@{systemConfig}!setIP@{setIP}}
+\index{setIP@{setIP}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setIP()}{setIP()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+IP (\begin{DoxyParamCaption}\item[{I\+P\+Address \&}]{ip }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a1fef3609567a267002833b35114b57fb}\label{classsystem_config_a1fef3609567a267002833b35114b57fb}} 
+\index{systemConfig@{systemConfig}!setLoadHTTPConfig@{setLoadHTTPConfig}}
+\index{setLoadHTTPConfig@{setLoadHTTPConfig}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setLoadHTTPConfig()}{setLoadHTTPConfig()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+Load\+H\+T\+T\+P\+Config (\begin{DoxyParamCaption}\item[{bool}]{load }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_afb681d4490820e322f5e509c2bc03432}\label{classsystem_config_afb681d4490820e322f5e509c2bc03432}} 
+\index{systemConfig@{systemConfig}!setMAC@{setMAC}}
+\index{setMAC@{setMAC}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setMAC()}{setMAC()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+M\+AC (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{systemconfigdata_8h_a514f72de8f2436e3c2952d52302585a3}{mac\+Address}} \&}]{mac }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_ab053c69fd613a0b458d11f42af58b560}\label{classsystem_config_ab053c69fd613a0b458d11f42af58b560}} 
+\index{systemConfig@{systemConfig}!setMask@{setMask}}
+\index{setMask@{setMask}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setMask()}{setMask()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+Mask (\begin{DoxyParamCaption}\item[{I\+P\+Address \&}]{mask }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a51d3938395608f36a85be28bb6b2d708}\label{classsystem_config_a51d3938395608f36a85be28bb6b2d708}} 
+\index{systemConfig@{systemConfig}!setMQTTpwd@{setMQTTpwd}}
+\index{setMQTTpwd@{setMQTTpwd}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setMQTTpwd()}{setMQTTpwd()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+M\+Q\+T\+Tpwd (\begin{DoxyParamCaption}\item[{char $\ast$}]{pwd = {\ttfamily NULL} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a5f28d822366f9194344bb13db53e0b43}\label{classsystem_config_a5f28d822366f9194344bb13db53e0b43}} 
+\index{systemConfig@{systemConfig}!setOTApwd@{setOTApwd}}
+\index{setOTApwd@{setOTApwd}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setOTApwd()}{setOTApwd()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+O\+T\+Apwd (\begin{DoxyParamCaption}\item[{char $\ast$}]{pwd = {\ttfamily NULL} }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_aeb7c0b487a5cc34efd4e4f34f46c28e9}\label{classsystem_config_aeb7c0b487a5cc34efd4e4f34f46c28e9}} 
+\index{systemConfig@{systemConfig}!setSaveSuccedConfig@{setSaveSuccedConfig}}
+\index{setSaveSuccedConfig@{setSaveSuccedConfig}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setSaveSuccedConfig()}{setSaveSuccedConfig()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+Save\+Succed\+Config (\begin{DoxyParamCaption}\item[{bool}]{flag }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_ad130cc84cd54223d03cf9255298bfb68}\label{classsystem_config_ad130cc84cd54223d03cf9255298bfb68}} 
+\index{systemConfig@{systemConfig}!setSerialDebuglevel@{setSerialDebuglevel}}
+\index{setSerialDebuglevel@{setSerialDebuglevel}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setSerialDebuglevel()}{setSerialDebuglevel()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+Serial\+Debuglevel (\begin{DoxyParamCaption}\item[{short}]{level }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_afda81c9cf59f8cbdcf8a2baafbc1ecb3}\label{classsystem_config_afda81c9cf59f8cbdcf8a2baafbc1ecb3}} 
+\index{systemConfig@{systemConfig}!setServer@{setServer}}
+\index{setServer@{setServer}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setServer()}{setServer()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+Server (\begin{DoxyParamCaption}\item[{char $\ast$}]{url }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classsystem_config_a119d26794423fd6da965f11e3966d05c}\label{classsystem_config_a119d26794423fd6da965f11e3966d05c}} 
+\index{systemConfig@{systemConfig}!setUdpDebuglevel@{setUdpDebuglevel}}
+\index{setUdpDebuglevel@{setUdpDebuglevel}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{setUdpDebuglevel()}{setUdpDebuglevel()}}
+{\footnotesize\ttfamily bool system\+Config\+::set\+Udp\+Debuglevel (\begin{DoxyParamCaption}\item[{short}]{level }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classsystem_config_a4439e4027f2cbb6b4e1498e1e7558d9f}\label{classsystem_config_a4439e4027f2cbb6b4e1498e1e7558d9f}} 
+\index{systemConfig@{systemConfig}!mac@{mac}}
+\index{mac@{mac}!systemConfig@{systemConfig}}
+\doxysubsubsection{\texorpdfstring{mac}{mac}}
+{\footnotesize\ttfamily \mbox{\hyperlink{systemconfigdata_8h_a514f72de8f2436e3c2952d52302585a3}{mac\+Address}} system\+Config\+::mac}
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{config_8h}{config.\+h}}\item 
+\mbox{\hyperlink{config_8cpp}{config.\+cpp}}\end{DoxyCompactItemize}

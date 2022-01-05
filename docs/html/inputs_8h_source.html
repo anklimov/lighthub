@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -23,7 +27,9 @@
   <td id="projectlogo"><img alt="Logo" src="lh.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">LightHub
+   &#160;<span id="projectnumber">v4.0.0</span>
    </div>
+   <div id="projectbrief">Smarthome controller firmware</div>
   </td>
  </tr>
  </tbody>
@@ -46,6 +52,23 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('inputs_8h_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -60,11 +83,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_82d7c1f210290ade9e0671f857ad27e3.html">lighthub</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle">
 <div class="title">inputs.h</div>  </div>
@@ -92,246 +110,253 @@ $(function() {
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#include &lt;aJSON.h&gt;</span></div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="in__ccs811__hdc1080_8h.html">modules/in_ccs811_hdc1080.h</a>&quot;</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="inputs_8h.html#aba343c99487259d92ad5bd6fbd3e01a0">   24</a></span>&#160;<span class="preprocessor">#define IN_ACTIVE_HIGH   2      // High level = PUSHED/ CLOSED/ ON othervise :Low Level. Use INPUT mode instead of INPUT_PULLUP for digital pin</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="inputs_8h.html#ae5e104b6991479f7964dcc6ed21bd974">   25</a></span>&#160;<span class="preprocessor">#define IN_ANALOG        64     // Analog input</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="inputs_8h.html#ad4e2a819b46d5e31f5f1cacd885a7679">   26</a></span>&#160;<span class="preprocessor">#define IN_RE            32     // Rotary Encoder (for further use)</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="inputs_8h.html#ac34df8e2157eb91e5674ec0c445bbc8a">   27</a></span>&#160;<span class="preprocessor">#define IN_I2C           128    // MCP23017</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="inputs_8h.html#a2ce550d73403239bdf30482a6882d2dd">   29</a></span>&#160;<span class="preprocessor">#define IN_PUSH_ON       0      // PUSH - ON, Release - OFF (ovverrided by pcmd/rcmd) - DEFAULT</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno"><a class="line" href="inputs_8h.html#acc7e62f775448aa89e2b13df0019c993">   30</a></span>&#160;<span class="preprocessor">#define IN_PUSH_TOGGLE   1      // Used for push buttons. Every physicall push toggle logical switch  on/off. Toggle on leading edge</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
-<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="inputs_8h.html#a099689609ba9908f787941e40c15b434">   32</a></span>&#160;<span class="preprocessor">#define IN_DHT22         4</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno"><a class="line" href="inputs_8h.html#a59e48c8bcc2a86b2173aeb7667134c2c">   33</a></span>&#160;<span class="preprocessor">#define IN_CCS811        5</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="inputs_8h.html#a1e44d68ca398ab8d851125089790f0f1">   34</a></span>&#160;<span class="preprocessor">#define IN_HDC1080       6</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
-<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="inputs_8h.html#a7da1147e75fa22d9662c9294344168ba">   36</a></span>&#160;<span class="preprocessor">#define IN_COUNTER       8</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="inputs_8h.html#a1b200efddb3fee0da5f4c0d38769b7ff">   37</a></span>&#160;<span class="preprocessor">#define IN_UPTIME       16</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
-<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="inputs_8h.html#a507029f213f840df9f2fe96dcc7073b6">   39</a></span>&#160;<span class="preprocessor">#define IS_IDLE 0</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="inputs_8h.html#a60858d59aa9fd54683018c3023970db5">   40</a></span>&#160;<span class="preprocessor">#define IS_PRESSED 1</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="inputs_8h.html#a48d052eb1ddf55fa433b502a04c9f039">   41</a></span>&#160;<span class="preprocessor">#define IS_RELEASED 2</span></div>
-<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="inputs_8h.html#a85528d0ffe9c9bda0ee24df255b3b4e8">   42</a></span>&#160;<span class="preprocessor">#define IS_LONG 3</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno"><a class="line" href="inputs_8h.html#ab3d60474188c792fa7bd73c7784cf20c">   43</a></span>&#160;<span class="preprocessor">#define IS_REPEAT 4</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="inputs_8h.html#acf0965f44337b7a1204e76f274397aa9">   44</a></span>&#160;<span class="preprocessor">#define IS_WAITPRESS 5</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="inputs_8h.html#a8ff81a2547cf3c73928f178421c138cd">   45</a></span>&#160;<span class="preprocessor">#define IS_PRESSED2 6</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno"><a class="line" href="inputs_8h.html#acc1208e582a1855b46186e8cbb2382cd">   46</a></span>&#160;<span class="preprocessor">#define IS_RELEASED2 7</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="inputs_8h.html#a70196afd205ccebf16e0d21e28085463">   47</a></span>&#160;<span class="preprocessor">#define IS_LONG2 8u</span></div>
-<div class="line"><a name="l00048"></a><span class="lineno"><a class="line" href="inputs_8h.html#affb5fbff8a836cebd5a45aee2887421e">   48</a></span>&#160;<span class="preprocessor">#define IS_REPEAT2 9u</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="inputs_8h.html#aa39f578ac73d4da04627db6fd5113560">   49</a></span>&#160;<span class="preprocessor">#define IS_PRESSED3 10u</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="inputs_8h.html#a7f49a84bcfd2ed0db0ef8286b2938ed3">   50</a></span>&#160;<span class="preprocessor">#define IS_LONG3 11u</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="inputs_8h.html#ab28e4094346017851f2af764b25caeea">   51</a></span>&#160;<span class="preprocessor">#define IS_REPEAT3 12u</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="inputs_8h.html#aa4d3605f66fe7dd02a6dcd8da2e61fce">   52</a></span>&#160;<span class="preprocessor">#define IS_WAITRELEASE 13u</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="inputs_8h.html#aa55e3a1001f7520b5623aaf68fa400ef">   53</a></span>&#160;<span class="preprocessor">#define IS_REQSTATE 0xFF</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="item_cmd_8h.html">itemCmd.h</a>&quot;</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160; </div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="inputs_8h.html#aba343c99487259d92ad5bd6fbd3e01a0">   25</a></span>&#160;<span class="preprocessor">#define IN_ACTIVE_HIGH   2      // High level = PUSHED/ CLOSED/ ON othervise :Low Level. Use INPUT mode instead of INPUT_PULLUP for digital pin</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="inputs_8h.html#ae5e104b6991479f7964dcc6ed21bd974">   26</a></span>&#160;<span class="preprocessor">#define IN_ANALOG        64     // Analog input</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="inputs_8h.html#ad4e2a819b46d5e31f5f1cacd885a7679">   27</a></span>&#160;<span class="preprocessor">#define IN_RE            32     // Rotary Encoder (for further use)</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="inputs_8h.html#ac34df8e2157eb91e5674ec0c445bbc8a">   28</a></span>&#160;<span class="preprocessor">#define IN_I2C           128    // MCP23017</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno"><a class="line" href="inputs_8h.html#a2ce550d73403239bdf30482a6882d2dd">   30</a></span>&#160;<span class="preprocessor">#define IN_PUSH_ON       0      // PUSH - ON, Release - OFF (ovverrided by pcmd/rcmd) - DEFAULT</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="inputs_8h.html#acc7e62f775448aa89e2b13df0019c993">   31</a></span>&#160;<span class="preprocessor">#define IN_PUSH_TOGGLE   1      // Used for push buttons. Every physicall push toggle logical switch  on/off. Toggle on leading edge</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
+<div class="line"><a name="l00033"></a><span class="lineno"><a class="line" href="inputs_8h.html#a099689609ba9908f787941e40c15b434">   33</a></span>&#160;<span class="preprocessor">#define IN_DHT22         4</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="inputs_8h.html#a59e48c8bcc2a86b2173aeb7667134c2c">   34</a></span>&#160;<span class="preprocessor">#define IN_CCS811        5</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="inputs_8h.html#a1e44d68ca398ab8d851125089790f0f1">   35</a></span>&#160;<span class="preprocessor">#define IN_HDC1080       6</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
+<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="inputs_8h.html#a7da1147e75fa22d9662c9294344168ba">   37</a></span>&#160;<span class="preprocessor">#define IN_COUNTER       8</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="inputs_8h.html#a1b200efddb3fee0da5f4c0d38769b7ff">   38</a></span>&#160;<span class="preprocessor">#define IN_UPTIME       16</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="inputs_8h.html#a507029f213f840df9f2fe96dcc7073b6">   40</a></span>&#160;<span class="preprocessor">#define IS_IDLE 0</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="inputs_8h.html#a60858d59aa9fd54683018c3023970db5">   41</a></span>&#160;<span class="preprocessor">#define IS_PRESSED 1</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="inputs_8h.html#a48d052eb1ddf55fa433b502a04c9f039">   42</a></span>&#160;<span class="preprocessor">#define IS_RELEASED 2</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno"><a class="line" href="inputs_8h.html#a85528d0ffe9c9bda0ee24df255b3b4e8">   43</a></span>&#160;<span class="preprocessor">#define IS_LONG 3</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="inputs_8h.html#ab3d60474188c792fa7bd73c7784cf20c">   44</a></span>&#160;<span class="preprocessor">#define IS_REPEAT 4</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="inputs_8h.html#acf0965f44337b7a1204e76f274397aa9">   45</a></span>&#160;<span class="preprocessor">#define IS_WAITPRESS 5</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno"><a class="line" href="inputs_8h.html#a8ff81a2547cf3c73928f178421c138cd">   46</a></span>&#160;<span class="preprocessor">#define IS_PRESSED2 6</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="inputs_8h.html#acc1208e582a1855b46186e8cbb2382cd">   47</a></span>&#160;<span class="preprocessor">#define IS_RELEASED2 7</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno"><a class="line" href="inputs_8h.html#a70196afd205ccebf16e0d21e28085463">   48</a></span>&#160;<span class="preprocessor">#define IS_LONG2 8u</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="inputs_8h.html#affb5fbff8a836cebd5a45aee2887421e">   49</a></span>&#160;<span class="preprocessor">#define IS_REPEAT2 9u</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="inputs_8h.html#aa39f578ac73d4da04627db6fd5113560">   50</a></span>&#160;<span class="preprocessor">#define IS_PRESSED3 10u</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="inputs_8h.html#a7f49a84bcfd2ed0db0ef8286b2938ed3">   51</a></span>&#160;<span class="preprocessor">#define IS_LONG3 11u</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="inputs_8h.html#ab28e4094346017851f2af764b25caeea">   52</a></span>&#160;<span class="preprocessor">#define IS_REPEAT3 12u</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="inputs_8h.html#aa4d3605f66fe7dd02a6dcd8da2e61fce">   53</a></span>&#160;<span class="preprocessor">#define IS_WAITRELEASE 13u</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="inputs_8h.html#aa55e3a1001f7520b5623aaf68fa400ef">   54</a></span>&#160;<span class="preprocessor">#define IS_REQSTATE 0xFF</span></div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="inputs_8h.html#ac274440d36c9abe1f71f18596c4dfea4">   57</a></span>&#160;<span class="preprocessor">#define SAME_STATE_ATTEMPTS 3</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno"><a class="line" href="inputs_8h.html#a7c48e9a4c306cc8cfea4e4162d0249e8">   58</a></span>&#160;<span class="preprocessor">#define ANALOG_STATE_ATTEMPTS 6</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="inputs_8h.html#a0e590b44f2e40d50c90c35a3deac7251">   59</a></span>&#160;<span class="preprocessor">#define ANALOG_NOIZE 1</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="inputs_8h.html#a3e39b572f12612cbe5e7259fa57441e4">   61</a></span>&#160;<span class="preprocessor">#define CHECK_SENSOR 1</span></div>
-<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="inputs_8h.html#a1a4fde3dbdd8e8f920a325f551fcfd94">   62</a></span>&#160;<span class="preprocessor">#define CHECK_INPUT  2</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno"><a class="line" href="inputs_8h.html#a98a52bad4b628c2b09416a9819010e81">   63</a></span>&#160;<span class="preprocessor">#define CHECK_INTERRUPT 3</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno"><a class="line" href="inputs_8h.html#ac274440d36c9abe1f71f18596c4dfea4">   58</a></span>&#160;<span class="preprocessor">#define SAME_STATE_ATTEMPTS 2</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="inputs_8h.html#a7c48e9a4c306cc8cfea4e4162d0249e8">   59</a></span>&#160;<span class="preprocessor">#define ANALOG_STATE_ATTEMPTS 6</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="inputs_8h.html#a0e590b44f2e40d50c90c35a3deac7251">   60</a></span>&#160;<span class="preprocessor">#define ANALOG_NOIZE 1</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="inputs_8h.html#a3e39b572f12612cbe5e7259fa57441e4">   62</a></span>&#160;<span class="preprocessor">#define CHECK_SENSOR 1</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno"><a class="line" href="inputs_8h.html#a1a4fde3dbdd8e8f920a325f551fcfd94">   63</a></span>&#160;<span class="preprocessor">#define CHECK_INPUT  2</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno"><a class="line" href="inputs_8h.html#a98a52bad4b628c2b09416a9819010e81">   64</a></span>&#160;<span class="preprocessor">#define CHECK_INTERRUPT 3</span></div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
-<div class="line"><a name="l00066"></a><span class="lineno"><a class="line" href="inputs_8h.html#a2d9ac9f51c75bdb21cf9dfd1412fa194">   66</a></span>&#160;<span class="preprocessor">#define T_LONG 1000</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="inputs_8h.html#a8a75f24034739896ac50bba24d242d32">   67</a></span>&#160;<span class="preprocessor">#define T_IDLE 600</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="inputs_8h.html#a7182ef2ce51e276fb3b26cd8565eb954">   68</a></span>&#160;<span class="preprocessor">#define T_RPT 300</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="inputs_8h.html#a9fe7bdf99e30a49fd5aff60200a90172">   69</a></span>&#160;<span class="preprocessor">#define T_RPT_PULSE 150</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="inputs_8h.html#a2d9ac9f51c75bdb21cf9dfd1412fa194">   67</a></span>&#160;<span class="preprocessor">#define T_LONG 1000</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="inputs_8h.html#a8a75f24034739896ac50bba24d242d32">   68</a></span>&#160;<span class="preprocessor">#define T_IDLE 600</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno"><a class="line" href="inputs_8h.html#a7182ef2ce51e276fb3b26cd8565eb954">   69</a></span>&#160;<span class="preprocessor">#define T_RPT 300</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno"><a class="line" href="inputs_8h.html#a9fe7bdf99e30a49fd5aff60200a90172">   70</a></span>&#160;<span class="preprocessor">#define T_RPT_PULSE 150</span></div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment">// in syntaxis</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="comment">// &quot;pin&quot;: { &quot;T&quot;:&quot;N&quot;, &quot;emit&quot;:&quot;out_emit&quot;, item:&quot;out_item&quot;, &quot;scmd&quot;: &quot;ON,OFF,TOGGLE,INCREASE,DECREASE&quot;, &quot;rcmd&quot;: &quot;ON,OFF,TOGGLE,INCREASE,DECREASE&quot;, &quot;rcmd&quot;:&quot;repeat_command&quot; }</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">//</span></div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment">//Switch/Restore all</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment">//&quot;pin&quot;: { &quot;T&quot;:&quot;1&quot;, &quot;emit&quot;:&quot;/all&quot;, item:&quot;local_all&quot;, &quot;scmd&quot;: &quot;OFF&quot;, &quot;rcmd&quot;: &quot;RESTORE&quot;}</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment">//</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment">//Normal (not button) Switch (toggled mode)</span></div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">//&quot;pin&quot;: { &quot;T&quot;:&quot;0&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;, &quot;scmd&quot;: &quot;TOGGLE&quot;, &quot;rcmd&quot;: &quot;TOGGLE&quot;}</span></div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">// or</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">// &quot;pin&quot;: { &quot;T&quot;:&quot;xx&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;}</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment">//Use Button</span></div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">//&quot;pin&quot;: { &quot;T&quot;:&quot;1&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;, &quot;scmd&quot;: &quot;ON&quot;, &quot;rcmd&quot;: &quot;OFF&quot;}</span></div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment">// or</span></div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="comment">// &quot;pin&quot;: { &quot;T&quot;:&quot;1&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;}</span></div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="comment">//or</span></div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="comment">// &quot;pin&quot;: { &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;}</span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="comment">//1-Button dimmer</span></div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment">//&quot;pin&quot;: { &quot;T&quot;:&quot;1&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;, &quot;scmd&quot;: &quot;ON&quot;, srcmd:&quot;INCREASE&quot;,rrcmd:&quot;DECREASE&quot;,  &quot;rcmd&quot;: &quot;OFF&quot;}</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="comment">// or</span></div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="comment">// &quot;pin&quot;: { &quot;T&quot;:&quot;xx&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;}</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="comment">//2-Buttons dimmer</span></div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="comment">//&quot;pin1&quot;: { &quot;T&quot;:&quot;0&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;, &quot;scmd&quot;: &quot;ON&quot;, repcmd:&quot;INCREASE&quot;}</span></div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="comment">//&quot;pin2&quot;: { &quot;T&quot;:&quot;0&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;, &quot;scmd&quot;: &quot;OFF&quot;, repcmd:&quot;INCREASE&quot;}</span></div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="comment">// in syntaxis</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="comment">// &quot;pin&quot;: { &quot;T&quot;:&quot;N&quot;, &quot;emit&quot;:&quot;out_emit&quot;, item:&quot;out_item&quot;, &quot;scmd&quot;: &quot;ON,OFF,TOGGLE,INCREASE,DECREASE&quot;, &quot;rcmd&quot;: &quot;ON,OFF,TOGGLE,INCREASE,DECREASE&quot;, &quot;rcmd&quot;:&quot;repeat_command&quot; }</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment">//Switch/Restore all</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment">//&quot;pin&quot;: { &quot;T&quot;:&quot;1&quot;, &quot;emit&quot;:&quot;/all&quot;, item:&quot;local_all&quot;, &quot;scmd&quot;: &quot;OFF&quot;, &quot;rcmd&quot;: &quot;RESTORE&quot;}</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">//Normal (not button) Switch (toggled mode)</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">//&quot;pin&quot;: { &quot;T&quot;:&quot;0&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;, &quot;scmd&quot;: &quot;TOGGLE&quot;, &quot;rcmd&quot;: &quot;TOGGLE&quot;}</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">// or</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment">// &quot;pin&quot;: { &quot;T&quot;:&quot;xx&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;}</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">//Use Button</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment">//&quot;pin&quot;: { &quot;T&quot;:&quot;1&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;, &quot;scmd&quot;: &quot;ON&quot;, &quot;rcmd&quot;: &quot;OFF&quot;}</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="comment">// or</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="comment">// &quot;pin&quot;: { &quot;T&quot;:&quot;1&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;}</span></div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="comment">//or</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="comment">// &quot;pin&quot;: { &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;}</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment">//1-Button dimmer</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="comment">//&quot;pin&quot;: { &quot;T&quot;:&quot;1&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;, &quot;scmd&quot;: &quot;ON&quot;, srcmd:&quot;INCREASE&quot;,rrcmd:&quot;DECREASE&quot;,  &quot;rcmd&quot;: &quot;OFF&quot;}</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="comment">// or</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="comment">// &quot;pin&quot;: { &quot;T&quot;:&quot;xx&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;}</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="comment">//2-Buttons dimmer</span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="comment">//&quot;pin1&quot;: { &quot;T&quot;:&quot;0&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;, &quot;scmd&quot;: &quot;ON&quot;, repcmd:&quot;INCREASE&quot;}</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="comment">//&quot;pin2&quot;: { &quot;T&quot;:&quot;0&quot;, &quot;emit&quot;:&quot;/light1&quot;, item:&quot;light1&quot;, &quot;scmd&quot;: &quot;OFF&quot;, repcmd:&quot;INCREASE&quot;}</span></div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="keyword">extern</span> aJsonObject *<a class="code" href="inputs_8h.html#a9e63aa63a6b8b667a41f94bec231d7aa">inputs</a>;</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="keyword">extern</span> aJsonObject *<a class="code" href="inputs_8h.html#a9e63aa63a6b8b667a41f94bec231d7aa">inputs</a>;</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
-<div class="line"><a name="l00106"></a><span class="lineno"><a class="line" href="unionin_store.html">  106</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">union </span>{</div>
-<div class="line"><a name="l00107"></a><span class="lineno"><a class="line" href="unionin_store.html#a16a83a9f8fd433154711d7dbd5cdc98a">  107</a></span>&#160;    <span class="keywordtype">long</span> <span class="keywordtype">int</span> <a class="code" href="unionin_store.html#a16a83a9f8fd433154711d7dbd5cdc98a">aslong</a>;</div>
-<div class="line"><a name="l00108"></a><span class="lineno"><a class="line" href="unionin_store.html#a4bddf64e5bea1ba4101346caf0df2852">  108</a></span>&#160;    uint32_t <a class="code" href="unionin_store.html#a4bddf64e5bea1ba4101346caf0df2852">timestamp</a>;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    <span class="comment">// Analog input structure</span></div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <span class="keyword">struct </span>{</div>
-<div class="line"><a name="l00111"></a><span class="lineno"><a class="line" href="unionin_store.html#a80c2c10e46083179d86fa7c4511d671d">  111</a></span>&#160;        uint8_t <a class="code" href="unionin_store.html#a80c2c10e46083179d86fa7c4511d671d">reserved</a>;</div>
-<div class="line"><a name="l00112"></a><span class="lineno"><a class="line" href="unionin_store.html#a44af41c00bfa555c4a9f7c7d5e2cfbc7">  112</a></span>&#160;        uint8_t <a class="code" href="unionin_store.html#a44af41c00bfa555c4a9f7c7d5e2cfbc7">logicState</a>;</div>
-<div class="line"><a name="l00113"></a><span class="lineno"><a class="line" href="unionin_store.html#ab588498a30cd9248c4b98b939d6a3bd1">  113</a></span>&#160;        int16_t <a class="code" href="unionin_store.html#ab588498a30cd9248c4b98b939d6a3bd1">currentValue</a>;</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    };</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    <span class="comment">// Digital input structure</span></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <span class="keyword">struct </span>{</div>
-<div class="line"><a name="l00117"></a><span class="lineno"><a class="line" href="unionin_store.html#a5e5cdaeda80c6eed6a55554a0780a128">  117</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a5e5cdaeda80c6eed6a55554a0780a128">toggle1</a>:1;</div>
-<div class="line"><a name="l00118"></a><span class="lineno"><a class="line" href="unionin_store.html#a8f5f08b35e330945b3b0df11eacdae72">  118</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a8f5f08b35e330945b3b0df11eacdae72">toggle2</a>:1;</div>
-<div class="line"><a name="l00119"></a><span class="lineno"><a class="line" href="unionin_store.html#a4e4a1f17bcdd01c934df232175195a46">  119</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a4e4a1f17bcdd01c934df232175195a46">toggle3</a>:1;</div>
-<div class="line"><a name="l00120"></a><span class="lineno"><a class="line" href="unionin_store.html#accec7f5bdcfc35e9cc86a66c301348e2">  120</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#accec7f5bdcfc35e9cc86a66c301348e2">lastValue</a>:1;</div>
-<div class="line"><a name="l00121"></a><span class="lineno"><a class="line" href="unionin_store.html#a719ff985b81bbfbd4905735ea5cee1a9">  121</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a719ff985b81bbfbd4905735ea5cee1a9">delayedState</a>:1;</div>
-<div class="line"><a name="l00122"></a><span class="lineno"><a class="line" href="unionin_store.html#a0458b3c28da62ec08dfbe9c28546c939">  122</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a0458b3c28da62ec08dfbe9c28546c939">bounce</a>:3;</div>
-<div class="line"><a name="l00123"></a><span class="lineno"><a class="line" href="unionin_store.html#a5db18504795773dee8dd1cca020994f7">  123</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a5db18504795773dee8dd1cca020994f7">state</a>:4;</div>
-<div class="line"><a name="l00124"></a><span class="lineno"><a class="line" href="unionin_store.html#a1c67a8ed876e1320206c1b1b9651fd10">  124</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a1c67a8ed876e1320206c1b1b9651fd10">reqState</a>:4;</div>
-<div class="line"><a name="l00125"></a><span class="lineno"><a class="line" href="unionin_store.html#a53f6cadfd77d4bd024d6e6c395ae5364">  125</a></span>&#160;        uint16_t <a class="code" href="unionin_store.html#a53f6cadfd77d4bd024d6e6c395ae5364">timestamp16</a>;</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160; </div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    };</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160; </div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;} <a class="code" href="unionin_store.html">inStore</a>;</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160; </div>
-<div class="line"><a name="l00131"></a><span class="lineno"><a class="line" href="class_input.html">  131</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_input.html">Input</a> {</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00133"></a><span class="lineno"><a class="line" href="class_input.html#a4dbfdd3e7da95a3d4873286da07733f2">  133</a></span>&#160;    aJsonObject *<a class="code" href="class_input.html#a4dbfdd3e7da95a3d4873286da07733f2">inputObj</a>;</div>
-<div class="line"><a name="l00134"></a><span class="lineno"><a class="line" href="class_input.html#a0354094b474b7b9fa305bfc3500d3cee">  134</a></span>&#160;    uint8_t <a class="code" href="class_input.html#a0354094b474b7b9fa305bfc3500d3cee">inType</a>;</div>
-<div class="line"><a name="l00135"></a><span class="lineno"><a class="line" href="class_input.html#a910d1942c02b2d155dbaa3c8a41876f5">  135</a></span>&#160;    uint8_t <a class="code" href="class_input.html#a910d1942c02b2d155dbaa3c8a41876f5">pin</a>;</div>
-<div class="line"><a name="l00136"></a><span class="lineno"><a class="line" href="class_input.html#a2c8307bf192b3e07bbc7cd605efeeb81">  136</a></span>&#160;    <a class="code" href="unionin_store.html">inStore</a> *<a class="code" href="class_input.html#a2c8307bf192b3e07bbc7cd605efeeb81">store</a>;</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    <a class="code" href="class_input.html#a52d1d1d4eb7890e186fa0faa11636b82">Input</a>(aJsonObject *obj, aJsonObject * configObj = NULL);</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    <a class="code" href="class_input.html#a52d1d1d4eb7890e186fa0faa11636b82">Input</a>(<span class="keywordtype">char</span> *name);</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160; </div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;    <span class="keywordtype">boolean</span> <a class="code" href="class_input.html#a2e60007024a65b9529d8db1873bf8696">isValid</a>();</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160; </div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a2e0c2008fce8f2730ef3126ff1d8893e">onContactChanged</a>(<span class="keywordtype">int</span> newValue);</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a121247eaf2f413135f0340df17015492">onAnalogChanged</a>(<span class="keywordtype">float</span> newValue);</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160; </div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    <span class="keywordtype">int</span> <a class="code" href="class_input.html#a34b0da23df4e0c2be07e5358a974f6b3">Poll</a>(<span class="keywordtype">short</span> cause);</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#af875dd162373e90e21f8213f928f8032">setup</a>();</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code" href="class_input.html#a2b60992464aa56f75c9d02b8b2084f8e">onCounterChanged</a>(<span class="keywordtype">int</span> i);</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#a85c108932af16f55722b8ccec2b72fb5">onCounterChanged0</a>();</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#a36b4ed46c94a5194e74c2106bb29deaa">onCounterChanged1</a>();</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#a8def9079b3f0774a05860a17a4b51b29">onCounterChanged2</a>();</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#adc8477b21452dd8b1f4bf1f3de35ecc4">onCounterChanged3</a>();</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#a6fcea89328a3bcf97dad383b7b615a5a">onCounterChanged4</a>();</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#a5611409d1de5bff2e6e59b9395809ecd">onCounterChanged5</a>();</div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160; </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
+<div class="line"><a name="l00107"></a><span class="lineno"><a class="line" href="unionin_store.html">  107</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">union </span>{</div>
+<div class="line"><a name="l00108"></a><span class="lineno"><a class="line" href="unionin_store.html#a16a83a9f8fd433154711d7dbd5cdc98a">  108</a></span>&#160;    <span class="keywordtype">long</span> <span class="keywordtype">int</span> <a class="code" href="unionin_store.html#a16a83a9f8fd433154711d7dbd5cdc98a">aslong</a>;</div>
+<div class="line"><a name="l00109"></a><span class="lineno"><a class="line" href="unionin_store.html#a4bddf64e5bea1ba4101346caf0df2852">  109</a></span>&#160;    uint32_t <a class="code" href="unionin_store.html#a4bddf64e5bea1ba4101346caf0df2852">timestamp</a>;</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <span class="comment">// Analog input structure</span></div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    <span class="keyword">struct </span>{</div>
+<div class="line"><a name="l00112"></a><span class="lineno"><a class="line" href="unionin_store.html#a80c2c10e46083179d86fa7c4511d671d">  112</a></span>&#160;        uint8_t <a class="code" href="unionin_store.html#a80c2c10e46083179d86fa7c4511d671d">reserved</a>;</div>
+<div class="line"><a name="l00113"></a><span class="lineno"><a class="line" href="unionin_store.html#a44af41c00bfa555c4a9f7c7d5e2cfbc7">  113</a></span>&#160;        uint8_t <a class="code" href="unionin_store.html#a44af41c00bfa555c4a9f7c7d5e2cfbc7">logicState</a>;</div>
+<div class="line"><a name="l00114"></a><span class="lineno"><a class="line" href="unionin_store.html#ab588498a30cd9248c4b98b939d6a3bd1">  114</a></span>&#160;        int16_t <a class="code" href="unionin_store.html#ab588498a30cd9248c4b98b939d6a3bd1">currentValue</a>;</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    };</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <span class="comment">// Digital input structure</span></div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="keyword">struct </span>{</div>
+<div class="line"><a name="l00118"></a><span class="lineno"><a class="line" href="unionin_store.html#a5e5cdaeda80c6eed6a55554a0780a128">  118</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a5e5cdaeda80c6eed6a55554a0780a128">toggle1</a>:1;</div>
+<div class="line"><a name="l00119"></a><span class="lineno"><a class="line" href="unionin_store.html#a8f5f08b35e330945b3b0df11eacdae72">  119</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a8f5f08b35e330945b3b0df11eacdae72">toggle2</a>:1;</div>
+<div class="line"><a name="l00120"></a><span class="lineno"><a class="line" href="unionin_store.html#a4e4a1f17bcdd01c934df232175195a46">  120</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a4e4a1f17bcdd01c934df232175195a46">toggle3</a>:1;</div>
+<div class="line"><a name="l00121"></a><span class="lineno"><a class="line" href="unionin_store.html#accec7f5bdcfc35e9cc86a66c301348e2">  121</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#accec7f5bdcfc35e9cc86a66c301348e2">lastValue</a>:1;</div>
+<div class="line"><a name="l00122"></a><span class="lineno"><a class="line" href="unionin_store.html#a719ff985b81bbfbd4905735ea5cee1a9">  122</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a719ff985b81bbfbd4905735ea5cee1a9">delayedState</a>:1;</div>
+<div class="line"><a name="l00123"></a><span class="lineno"><a class="line" href="unionin_store.html#a0458b3c28da62ec08dfbe9c28546c939">  123</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a0458b3c28da62ec08dfbe9c28546c939">bounce</a>:3;</div>
+<div class="line"><a name="l00124"></a><span class="lineno"><a class="line" href="unionin_store.html#a5db18504795773dee8dd1cca020994f7">  124</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a5db18504795773dee8dd1cca020994f7">state</a>:4;</div>
+<div class="line"><a name="l00125"></a><span class="lineno"><a class="line" href="unionin_store.html#a1c67a8ed876e1320206c1b1b9651fd10">  125</a></span>&#160;        uint8_t  <a class="code" href="unionin_store.html#a1c67a8ed876e1320206c1b1b9651fd10">reqState</a>:4;</div>
+<div class="line"><a name="l00126"></a><span class="lineno"><a class="line" href="unionin_store.html#a53f6cadfd77d4bd024d6e6c395ae5364">  126</a></span>&#160;        uint16_t <a class="code" href="unionin_store.html#a53f6cadfd77d4bd024d6e6c395ae5364">timestamp16</a>;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160; </div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    };</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160; </div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;} <a class="code" href="unionin_store.html">inStore</a>;</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160; </div>
+<div class="line"><a name="l00132"></a><span class="lineno"><a class="line" href="class_input.html">  132</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_input.html">Input</a> {</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00134"></a><span class="lineno"><a class="line" href="class_input.html#a4dbfdd3e7da95a3d4873286da07733f2">  134</a></span>&#160;    aJsonObject *<a class="code" href="class_input.html#a4dbfdd3e7da95a3d4873286da07733f2">inputObj</a>;</div>
+<div class="line"><a name="l00135"></a><span class="lineno"><a class="line" href="class_input.html#a0354094b474b7b9fa305bfc3500d3cee">  135</a></span>&#160;    uint8_t <a class="code" href="class_input.html#a0354094b474b7b9fa305bfc3500d3cee">inType</a>;</div>
+<div class="line"><a name="l00136"></a><span class="lineno"><a class="line" href="class_input.html#a910d1942c02b2d155dbaa3c8a41876f5">  136</a></span>&#160;    uint8_t <a class="code" href="class_input.html#a910d1942c02b2d155dbaa3c8a41876f5">pin</a>;</div>
+<div class="line"><a name="l00137"></a><span class="lineno"><a class="line" href="class_input.html#a2c8307bf192b3e07bbc7cd605efeeb81">  137</a></span>&#160;    <a class="code" href="unionin_store.html">inStore</a> *<a class="code" href="class_input.html#a2c8307bf192b3e07bbc7cd605efeeb81">store</a>;</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160; </div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    <a class="code" href="class_input.html#a52d1d1d4eb7890e186fa0faa11636b82">Input</a>(aJsonObject *obj, aJsonObject * configObj = NULL);</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    <a class="code" href="class_input.html#a52d1d1d4eb7890e186fa0faa11636b82">Input</a>(<span class="keywordtype">char</span> *name);</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160; </div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;    <span class="keywordtype">boolean</span> <a class="code" href="class_input.html#a2e60007024a65b9529d8db1873bf8696">isValid</a>();</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160; </div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a2e0c2008fce8f2730ef3126ff1d8893e">onContactChanged</a>(<span class="keywordtype">int</span> newValue);</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a7ca225a34da21e406cdc9fdc05382451">onAnalogChanged</a>(<a class="code" href="classitem_cmd.html">itemCmd</a> newValue);</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160; </div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    <span class="keywordtype">int</span> <a class="code" href="class_input.html#a34b0da23df4e0c2be07e5358a974f6b3">Poll</a>(<span class="keywordtype">short</span> cause);</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#af875dd162373e90e21f8213f928f8032">setup</a>();</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160; </div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code" href="class_input.html#a2b60992464aa56f75c9d02b8b2084f8e">onCounterChanged</a>(<span class="keywordtype">int</span> i);</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#a85c108932af16f55722b8ccec2b72fb5">onCounterChanged0</a>();</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#a36b4ed46c94a5194e74c2106bb29deaa">onCounterChanged1</a>();</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#a8def9079b3f0774a05860a17a4b51b29">onCounterChanged2</a>();</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#adc8477b21452dd8b1f4bf1f3de35ecc4">onCounterChanged3</a>();</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#a6fcea89328a3bcf97dad383b7b615a5a">onCounterChanged4</a>();</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="class_input.html#a5611409d1de5bff2e6e59b9395809ecd">onCounterChanged5</a>();</div>
 <div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160; </div>
 <div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160; </div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#aad974cff366f73924458d105b88130d4">Parse</a>(aJsonObject * configObj = NULL);</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160; </div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a48dfeb886a0927b60d3200bbdea5765a">contactPoll</a>(<span class="keywordtype">short</span> cause);</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#acb26235ba50553fa073a95096ebbbc69">analogPoll</a>(<span class="keywordtype">short</span> cause);</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160; </div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a70568f40b1008c2f5fdf378ada26a5c4">dht22Poll</a>();</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160; </div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160; </div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#aad974cff366f73924458d105b88130d4">Parse</a>(aJsonObject * configObj = NULL);</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160; </div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a48dfeb886a0927b60d3200bbdea5765a">contactPoll</a>(<span class="keywordtype">short</span> cause);</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#acb26235ba50553fa073a95096ebbbc69">analogPoll</a>(<span class="keywordtype">short</span> cause);</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160; </div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a70568f40b1008c2f5fdf378ada26a5c4">dht22Poll</a>();</div>
 <div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160; </div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a347f052d5de6b996d7e6cf4ac83485d9">counterPoll</a>();</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160; </div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#ab272ddf677bc7ebaa20c0a8677b49b80">attachInterruptPinIrq</a>(<span class="keywordtype">int</span> realPin, <span class="keywordtype">int</span> irq);</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160; </div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <a class="code" href="class_input.html#ad7e0d37e4f0cca8117a1fad077e4d4a7">nextPollTime</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a8efca39cb91c24dc80a62d660fd9ea2a">setNextPollTime</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> pollTime);</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160; </div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160; </div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a347f052d5de6b996d7e6cf4ac83485d9">counterPoll</a>();</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160; </div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#ab272ddf677bc7ebaa20c0a8677b49b80">attachInterruptPinIrq</a>(<span class="keywordtype">int</span> realPin, <span class="keywordtype">int</span> irq);</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160; </div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <a class="code" href="class_input.html#ad7e0d37e4f0cca8117a1fad077e4d4a7">nextPollTime</a>() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a8efca39cb91c24dc80a62d660fd9ea2a">setNextPollTime</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> pollTime);</div>
 <div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160; </div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a3d224f0fd4da038390abaa8f84478d5c">uptimePoll</a>();</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160; </div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_input.html#ab48ae5515b6a332b518a06e5bb10926a">publishDataToDomoticz</a>(<span class="keywordtype">int</span> , aJsonObject *, <span class="keyword">const</span> <span class="keywordtype">char</span> *format, ...);</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160; </div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <span class="keywordtype">char</span>* <a class="code" href="class_input.html#a0697613f4b723bdb63e8c5510f85b9c6">getIdxField</a>();</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_input.html#a08323a44c2d4ca714e4e6a14ae73fc4f">changeState</a>(uint8_t newState, <span class="keywordtype">short</span> cause);</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    <span class="comment">//bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);</span></div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;};</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160; </div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160; </div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_input.html#a3d224f0fd4da038390abaa8f84478d5c">uptimePoll</a>();</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160; </div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_input.html#ab48ae5515b6a332b518a06e5bb10926a">publishDataToDomoticz</a>(<span class="keywordtype">int</span> , aJsonObject *, <span class="keyword">const</span> <span class="keywordtype">char</span> *format, ...);</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160; </div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    <span class="keywordtype">char</span>* <a class="code" href="class_input.html#a0697613f4b723bdb63e8c5510f85b9c6">getIdxField</a>();</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_input.html#a08323a44c2d4ca714e4e6a14ae73fc4f">changeState</a>(uint8_t newState, <span class="keywordtype">short</span> cause);</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    <span class="comment">//bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;};</div>
 <div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160; </div>
 <div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160; </div>
-<div class="line"><a name="l00187"></a><span class="lineno"><a class="line" href="classread_cache.html">  187</a></span>&#160;<span class="keyword">class </span><a class="code" href="classread_cache.html">readCache</a> {</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  <a class="code" href="classread_cache.html#ab40001f6ce6d9c8e183751c4a0cd57c9">readCache</a>();</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  uint16_t <a class="code" href="classread_cache.html#aa6e9ec22513d70ee0d77b6ab7304d140">analogReadCached</a> (uint8_t pin);</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  uint8_t  <a class="code" href="classread_cache.html#a6fd0d58f3d2a4a027a80a2455999d9ae">digitalReadCached</a>(uint8_t pin);</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;<span class="preprocessor">  #ifdef MCP23017</span></div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;  uint8_t  I2CReadBit(uint8_t <a class="code" href="classread_cache.html#a76353391e6c92fdb6381e0d6b120fde5">type</a>, uint8_t <a class="code" href="classread_cache.html#acc32e1362354c4374519167c5dc5ea21">addr</a>, uint8_t pin);</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;<span class="preprocessor">  #endif</span></div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="classread_cache.html#a7ecad823239b195a10fddb527b122dc7">invalidateInputCache</a>();</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00197"></a><span class="lineno"><a class="line" href="classread_cache.html#acc32e1362354c4374519167c5dc5ea21">  197</a></span>&#160;  uint8_t   <a class="code" href="classread_cache.html#acc32e1362354c4374519167c5dc5ea21">addr</a>;</div>
-<div class="line"><a name="l00198"></a><span class="lineno"><a class="line" href="classread_cache.html#a76353391e6c92fdb6381e0d6b120fde5">  198</a></span>&#160;  uint8_t   <a class="code" href="classread_cache.html#a76353391e6c92fdb6381e0d6b120fde5">type</a>;</div>
-<div class="line"><a name="l00199"></a><span class="lineno"><a class="line" href="classread_cache.html#a0040f14299d3ddf8373b9251f0a69831">  199</a></span>&#160;  uint16_t  <a class="code" href="classread_cache.html#a0040f14299d3ddf8373b9251f0a69831">cached_data</a>;</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;};</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160; </div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;<span class="keyword">extern</span> <a class="code" href="classread_cache.html">readCache</a> <a class="code" href="inputs_8h.html#a550fbf41418f36b963b995f7de144eea">inCache</a>;</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160; </div>
+<div class="line"><a name="l00188"></a><span class="lineno"><a class="line" href="classread_cache.html">  188</a></span>&#160;<span class="keyword">class </span><a class="code" href="classread_cache.html">readCache</a> {</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;  <a class="code" href="classread_cache.html#ab40001f6ce6d9c8e183751c4a0cd57c9">readCache</a>();</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  uint16_t <a class="code" href="classread_cache.html#aa6e9ec22513d70ee0d77b6ab7304d140">analogReadCached</a> (uint8_t pin);</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;  uint8_t  <a class="code" href="classread_cache.html#a6fd0d58f3d2a4a027a80a2455999d9ae">digitalReadCached</a>(uint8_t pin);</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="preprocessor">  #ifdef MCP23017</span></div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;  uint8_t  I2CReadBit(uint8_t <a class="code" href="classread_cache.html#a76353391e6c92fdb6381e0d6b120fde5">type</a>, uint8_t <a class="code" href="classread_cache.html#acc32e1362354c4374519167c5dc5ea21">addr</a>, uint8_t pin);</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;<span class="preprocessor">  #endif</span></div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="classread_cache.html#a7ecad823239b195a10fddb527b122dc7">invalidateInputCache</a>();</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00198"></a><span class="lineno"><a class="line" href="classread_cache.html#acc32e1362354c4374519167c5dc5ea21">  198</a></span>&#160;  uint8_t   <a class="code" href="classread_cache.html#acc32e1362354c4374519167c5dc5ea21">addr</a>;</div>
+<div class="line"><a name="l00199"></a><span class="lineno"><a class="line" href="classread_cache.html#a76353391e6c92fdb6381e0d6b120fde5">  199</a></span>&#160;  uint8_t   <a class="code" href="classread_cache.html#a76353391e6c92fdb6381e0d6b120fde5">type</a>;</div>
+<div class="line"><a name="l00200"></a><span class="lineno"><a class="line" href="classread_cache.html#a0040f14299d3ddf8373b9251f0a69831">  200</a></span>&#160;  uint16_t  <a class="code" href="classread_cache.html#a0040f14299d3ddf8373b9251f0a69831">cached_data</a>;</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;};</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160; </div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;<span class="keyword">extern</span> <a class="code" href="classread_cache.html">readCache</a> <a class="code" href="inputs_8h.html#a550fbf41418f36b963b995f7de144eea">inCache</a>;</div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <div class="ttc" id="aclass_input_html_a34b0da23df4e0c2be07e5358a974f6b3"><div class="ttname"><a href="class_input.html#a34b0da23df4e0c2be07e5358a974f6b3">Input::Poll</a></div><div class="ttdeci">int Poll(short cause)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:224</div></div>
-<div class="ttc" id="aclass_input_html_a5611409d1de5bff2e6e59b9395809ecd"><div class="ttname"><a href="class_input.html#a5611409d1de5bff2e6e59b9395809ecd">Input::onCounterChanged5</a></div><div class="ttdeci">static void onCounterChanged5()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:422</div></div>
-<div class="ttc" id="aunionin_store_html_a5e5cdaeda80c6eed6a55554a0780a128"><div class="ttname"><a href="unionin_store.html#a5e5cdaeda80c6eed6a55554a0780a128">inStore::toggle1</a></div><div class="ttdeci">uint8_t toggle1</div><div class="ttdef"><b>Definition:</b> inputs.h:117</div></div>
-<div class="ttc" id="aclass_input_html_a70568f40b1008c2f5fdf378ada26a5c4"><div class="ttname"><a href="class_input.html#a70568f40b1008c2f5fdf378ada26a5c4">Input::dht22Poll</a></div><div class="ttdeci">void dht22Poll()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:458</div></div>
-<div class="ttc" id="aclassread_cache_html_a0040f14299d3ddf8373b9251f0a69831"><div class="ttname"><a href="classread_cache.html#a0040f14299d3ddf8373b9251f0a69831">readCache::cached_data</a></div><div class="ttdeci">uint16_t cached_data</div><div class="ttdef"><b>Definition:</b> inputs.h:199</div></div>
-<div class="ttc" id="aunionin_store_html_a4bddf64e5bea1ba4101346caf0df2852"><div class="ttname"><a href="unionin_store.html#a4bddf64e5bea1ba4101346caf0df2852">inStore::timestamp</a></div><div class="ttdeci">uint32_t timestamp</div><div class="ttdef"><b>Definition:</b> inputs.h:108</div></div>
-<div class="ttc" id="aclass_input_html_a2b60992464aa56f75c9d02b8b2084f8e"><div class="ttname"><a href="class_input.html#a2b60992464aa56f75c9d02b8b2084f8e">Input::onCounterChanged</a></div><div class="ttdeci">static void onCounterChanged(int i)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:397</div></div>
-<div class="ttc" id="aclass_input_html_ab48ae5515b6a332b518a06e5bb10926a"><div class="ttname"><a href="class_input.html#ab48ae5515b6a332b518a06e5bb10926a">Input::publishDataToDomoticz</a></div><div class="ttdeci">bool publishDataToDomoticz(int, aJsonObject *, const char *format,...)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1063</div></div>
-<div class="ttc" id="aunionin_store_html_a0458b3c28da62ec08dfbe9c28546c939"><div class="ttname"><a href="unionin_store.html#a0458b3c28da62ec08dfbe9c28546c939">inStore::bounce</a></div><div class="ttdeci">uint8_t bounce</div><div class="ttdef"><b>Definition:</b> inputs.h:122</div></div>
-<div class="ttc" id="aclass_input_html_a121247eaf2f413135f0340df17015492"><div class="ttname"><a href="class_input.html#a121247eaf2f413135f0340df17015492">Input::onAnalogChanged</a></div><div class="ttdeci">void onAnalogChanged(float newValue)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1028</div></div>
-<div class="ttc" id="aunionin_store_html_a1c67a8ed876e1320206c1b1b9651fd10"><div class="ttname"><a href="unionin_store.html#a1c67a8ed876e1320206c1b1b9651fd10">inStore::reqState</a></div><div class="ttdeci">uint8_t reqState</div><div class="ttdef"><b>Definition:</b> inputs.h:124</div></div>
+<div class="ttc" id="aitem_cmd_8h_html"><div class="ttname"><a href="item_cmd_8h.html">itemCmd.h</a></div></div>
+<div class="ttc" id="aclassitem_cmd_html"><div class="ttname"><a href="classitem_cmd.html">itemCmd</a></div><div class="ttdef"><b>Definition:</b> itemCmd.h:153</div></div>
+<div class="ttc" id="aclass_input_html_a5611409d1de5bff2e6e59b9395809ecd"><div class="ttname"><a href="class_input.html#a5611409d1de5bff2e6e59b9395809ecd">Input::onCounterChanged5</a></div><div class="ttdeci">static void onCounterChanged5()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:424</div></div>
+<div class="ttc" id="aunionin_store_html_a5e5cdaeda80c6eed6a55554a0780a128"><div class="ttname"><a href="unionin_store.html#a5e5cdaeda80c6eed6a55554a0780a128">inStore::toggle1</a></div><div class="ttdeci">uint8_t toggle1</div><div class="ttdef"><b>Definition:</b> inputs.h:118</div></div>
+<div class="ttc" id="aclass_input_html_a70568f40b1008c2f5fdf378ada26a5c4"><div class="ttname"><a href="class_input.html#a70568f40b1008c2f5fdf378ada26a5c4">Input::dht22Poll</a></div><div class="ttdeci">void dht22Poll()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:460</div></div>
+<div class="ttc" id="aclassread_cache_html_a0040f14299d3ddf8373b9251f0a69831"><div class="ttname"><a href="classread_cache.html#a0040f14299d3ddf8373b9251f0a69831">readCache::cached_data</a></div><div class="ttdeci">uint16_t cached_data</div><div class="ttdef"><b>Definition:</b> inputs.h:200</div></div>
+<div class="ttc" id="aunionin_store_html_a4bddf64e5bea1ba4101346caf0df2852"><div class="ttname"><a href="unionin_store.html#a4bddf64e5bea1ba4101346caf0df2852">inStore::timestamp</a></div><div class="ttdeci">uint32_t timestamp</div><div class="ttdef"><b>Definition:</b> inputs.h:109</div></div>
+<div class="ttc" id="aclass_input_html_a2b60992464aa56f75c9d02b8b2084f8e"><div class="ttname"><a href="class_input.html#a2b60992464aa56f75c9d02b8b2084f8e">Input::onCounterChanged</a></div><div class="ttdeci">static void onCounterChanged(int i)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:399</div></div>
+<div class="ttc" id="aclass_input_html_ab48ae5515b6a332b518a06e5bb10926a"><div class="ttname"><a href="class_input.html#ab48ae5515b6a332b518a06e5bb10926a">Input::publishDataToDomoticz</a></div><div class="ttdeci">bool publishDataToDomoticz(int, aJsonObject *, const char *format,...)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1037</div></div>
+<div class="ttc" id="aunionin_store_html_a0458b3c28da62ec08dfbe9c28546c939"><div class="ttname"><a href="unionin_store.html#a0458b3c28da62ec08dfbe9c28546c939">inStore::bounce</a></div><div class="ttdeci">uint8_t bounce</div><div class="ttdef"><b>Definition:</b> inputs.h:123</div></div>
+<div class="ttc" id="aunionin_store_html_a1c67a8ed876e1320206c1b1b9651fd10"><div class="ttname"><a href="unionin_store.html#a1c67a8ed876e1320206c1b1b9651fd10">inStore::reqState</a></div><div class="ttdeci">uint8_t reqState</div><div class="ttdef"><b>Definition:</b> inputs.h:125</div></div>
 <div class="ttc" id="aclass_input_html_a347f052d5de6b996d7e6cf4ac83485d9"><div class="ttname"><a href="class_input.html#a347f052d5de6b996d7e6cf4ac83485d9">Input::counterPoll</a></div><div class="ttdeci">void counterPoll()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:291</div></div>
-<div class="ttc" id="aclassread_cache_html_ab40001f6ce6d9c8e183751c4a0cd57c9"><div class="ttname"><a href="classread_cache.html#ab40001f6ce6d9c8e183751c4a0cd57c9">readCache::readCache</a></div><div class="ttdeci">readCache()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1095</div></div>
-<div class="ttc" id="aclass_input_html_acb26235ba50553fa073a95096ebbbc69"><div class="ttname"><a href="class_input.html#acb26235ba50553fa073a95096ebbbc69">Input::analogPoll</a></div><div class="ttdeci">void analogPoll(short cause)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:897</div></div>
-<div class="ttc" id="aclass_input_html_a48dfeb886a0927b60d3200bbdea5765a"><div class="ttname"><a href="class_input.html#a48dfeb886a0927b60d3200bbdea5765a">Input::contactPoll</a></div><div class="ttdeci">void contactPoll(short cause)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:706</div></div>
-<div class="ttc" id="aclassread_cache_html_a76353391e6c92fdb6381e0d6b120fde5"><div class="ttname"><a href="classread_cache.html#a76353391e6c92fdb6381e0d6b120fde5">readCache::type</a></div><div class="ttdeci">uint8_t type</div><div class="ttdef"><b>Definition:</b> inputs.h:198</div></div>
-<div class="ttc" id="aclass_input_html_a08323a44c2d4ca714e4e6a14ae73fc4f"><div class="ttname"><a href="class_input.html#a08323a44c2d4ca714e4e6a14ae73fc4f">Input::changeState</a></div><div class="ttdeci">bool changeState(uint8_t newState, short cause)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:591</div></div>
-<div class="ttc" id="aclass_input_html_a2c8307bf192b3e07bbc7cd605efeeb81"><div class="ttname"><a href="class_input.html#a2c8307bf192b3e07bbc7cd605efeeb81">Input::store</a></div><div class="ttdeci">inStore * store</div><div class="ttdef"><b>Definition:</b> inputs.h:136</div></div>
-<div class="ttc" id="aunionin_store_html_a4e4a1f17bcdd01c934df232175195a46"><div class="ttname"><a href="unionin_store.html#a4e4a1f17bcdd01c934df232175195a46">inStore::toggle3</a></div><div class="ttdeci">uint8_t toggle3</div><div class="ttdef"><b>Definition:</b> inputs.h:119</div></div>
-<div class="ttc" id="aclass_input_html_a85c108932af16f55722b8ccec2b72fb5"><div class="ttname"><a href="class_input.html#a85c108932af16f55722b8ccec2b72fb5">Input::onCounterChanged0</a></div><div class="ttdeci">static void onCounterChanged0()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:407</div></div>
-<div class="ttc" id="aclassread_cache_html_acc32e1362354c4374519167c5dc5ea21"><div class="ttname"><a href="classread_cache.html#acc32e1362354c4374519167c5dc5ea21">readCache::addr</a></div><div class="ttdeci">uint8_t addr</div><div class="ttdef"><b>Definition:</b> inputs.h:197</div></div>
-<div class="ttc" id="ainputs_8h_html_a9e63aa63a6b8b667a41f94bec231d7aa"><div class="ttname"><a href="inputs_8h.html#a9e63aa63a6b8b667a41f94bec231d7aa">inputs</a></div><div class="ttdeci">aJsonObject * inputs</div><div class="ttdef"><b>Definition:</b> main.cpp:141</div></div>
+<div class="ttc" id="aclassread_cache_html_ab40001f6ce6d9c8e183751c4a0cd57c9"><div class="ttname"><a href="classread_cache.html#ab40001f6ce6d9c8e183751c4a0cd57c9">readCache::readCache</a></div><div class="ttdeci">readCache()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1069</div></div>
+<div class="ttc" id="aclass_input_html_acb26235ba50553fa073a95096ebbbc69"><div class="ttname"><a href="class_input.html#acb26235ba50553fa073a95096ebbbc69">Input::analogPoll</a></div><div class="ttdeci">void analogPoll(short cause)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:867</div></div>
+<div class="ttc" id="aclass_input_html_a48dfeb886a0927b60d3200bbdea5765a"><div class="ttname"><a href="class_input.html#a48dfeb886a0927b60d3200bbdea5765a">Input::contactPoll</a></div><div class="ttdeci">void contactPoll(short cause)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:656</div></div>
+<div class="ttc" id="aclassread_cache_html_a76353391e6c92fdb6381e0d6b120fde5"><div class="ttname"><a href="classread_cache.html#a76353391e6c92fdb6381e0d6b120fde5">readCache::type</a></div><div class="ttdeci">uint8_t type</div><div class="ttdef"><b>Definition:</b> inputs.h:199</div></div>
+<div class="ttc" id="aclass_input_html_a08323a44c2d4ca714e4e6a14ae73fc4f"><div class="ttname"><a href="class_input.html#a08323a44c2d4ca714e4e6a14ae73fc4f">Input::changeState</a></div><div class="ttdeci">bool changeState(uint8_t newState, short cause)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:520</div></div>
+<div class="ttc" id="aclass_input_html_a2c8307bf192b3e07bbc7cd605efeeb81"><div class="ttname"><a href="class_input.html#a2c8307bf192b3e07bbc7cd605efeeb81">Input::store</a></div><div class="ttdeci">inStore * store</div><div class="ttdef"><b>Definition:</b> inputs.h:137</div></div>
+<div class="ttc" id="aunionin_store_html_a4e4a1f17bcdd01c934df232175195a46"><div class="ttname"><a href="unionin_store.html#a4e4a1f17bcdd01c934df232175195a46">inStore::toggle3</a></div><div class="ttdeci">uint8_t toggle3</div><div class="ttdef"><b>Definition:</b> inputs.h:120</div></div>
+<div class="ttc" id="aclass_input_html_a85c108932af16f55722b8ccec2b72fb5"><div class="ttname"><a href="class_input.html#a85c108932af16f55722b8ccec2b72fb5">Input::onCounterChanged0</a></div><div class="ttdeci">static void onCounterChanged0()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:409</div></div>
+<div class="ttc" id="aclassread_cache_html_acc32e1362354c4374519167c5dc5ea21"><div class="ttname"><a href="classread_cache.html#acc32e1362354c4374519167c5dc5ea21">readCache::addr</a></div><div class="ttdeci">uint8_t addr</div><div class="ttdef"><b>Definition:</b> inputs.h:198</div></div>
+<div class="ttc" id="ainputs_8h_html_a9e63aa63a6b8b667a41f94bec231d7aa"><div class="ttname"><a href="inputs_8h.html#a9e63aa63a6b8b667a41f94bec231d7aa">inputs</a></div><div class="ttdeci">aJsonObject * inputs</div><div class="ttdef"><b>Definition:</b> main.cpp:93</div></div>
 <div class="ttc" id="aclass_input_html_aad974cff366f73924458d105b88130d4"><div class="ttname"><a href="class_input.html#aad974cff366f73924458d105b88130d4">Input::Parse</a></div><div class="ttdeci">void Parse(aJsonObject *configObj=NULL)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:96</div></div>
-<div class="ttc" id="aclass_input_html_a0354094b474b7b9fa305bfc3500d3cee"><div class="ttname"><a href="class_input.html#a0354094b474b7b9fa305bfc3500d3cee">Input::inType</a></div><div class="ttdeci">uint8_t inType</div><div class="ttdef"><b>Definition:</b> inputs.h:134</div></div>
-<div class="ttc" id="aclass_input_html_a0697613f4b723bdb63e8c5510f85b9c6"><div class="ttname"><a href="class_input.html#a0697613f4b723bdb63e8c5510f85b9c6">Input::getIdxField</a></div><div class="ttdeci">char * getIdxField()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1086</div></div>
-<div class="ttc" id="aclass_input_html_a8efca39cb91c24dc80a62d660fd9ea2a"><div class="ttname"><a href="class_input.html#a8efca39cb91c24dc80a62d660fd9ea2a">Input::setNextPollTime</a></div><div class="ttdeci">void setNextPollTime(unsigned long pollTime)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:442</div></div>
-<div class="ttc" id="aclass_input_html_ad7e0d37e4f0cca8117a1fad077e4d4a7"><div class="ttname"><a href="class_input.html#ad7e0d37e4f0cca8117a1fad077e4d4a7">Input::nextPollTime</a></div><div class="ttdeci">unsigned long nextPollTime() const</div><div class="ttdef"><b>Definition:</b> inputs.cpp:429</div></div>
+<div class="ttc" id="aclass_input_html_a0354094b474b7b9fa305bfc3500d3cee"><div class="ttname"><a href="class_input.html#a0354094b474b7b9fa305bfc3500d3cee">Input::inType</a></div><div class="ttdeci">uint8_t inType</div><div class="ttdef"><b>Definition:</b> inputs.h:135</div></div>
+<div class="ttc" id="aclass_input_html_a0697613f4b723bdb63e8c5510f85b9c6"><div class="ttname"><a href="class_input.html#a0697613f4b723bdb63e8c5510f85b9c6">Input::getIdxField</a></div><div class="ttdeci">char * getIdxField()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1060</div></div>
+<div class="ttc" id="aclass_input_html_a8efca39cb91c24dc80a62d660fd9ea2a"><div class="ttname"><a href="class_input.html#a8efca39cb91c24dc80a62d660fd9ea2a">Input::setNextPollTime</a></div><div class="ttdeci">void setNextPollTime(unsigned long pollTime)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:444</div></div>
+<div class="ttc" id="aclass_input_html_ad7e0d37e4f0cca8117a1fad077e4d4a7"><div class="ttname"><a href="class_input.html#ad7e0d37e4f0cca8117a1fad077e4d4a7">Input::nextPollTime</a></div><div class="ttdeci">unsigned long nextPollTime() const</div><div class="ttdef"><b>Definition:</b> inputs.cpp:431</div></div>
 <div class="ttc" id="aclass_input_html_af875dd162373e90e21f8213f928f8032"><div class="ttname"><a href="class_input.html#af875dd162373e90e21f8213f928f8032">Input::setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:154</div></div>
-<div class="ttc" id="aunionin_store_html_a5db18504795773dee8dd1cca020994f7"><div class="ttname"><a href="unionin_store.html#a5db18504795773dee8dd1cca020994f7">inStore::state</a></div><div class="ttdeci">uint8_t state</div><div class="ttdef"><b>Definition:</b> inputs.h:123</div></div>
+<div class="ttc" id="aunionin_store_html_a5db18504795773dee8dd1cca020994f7"><div class="ttname"><a href="unionin_store.html#a5db18504795773dee8dd1cca020994f7">inStore::state</a></div><div class="ttdeci">uint8_t state</div><div class="ttdef"><b>Definition:</b> inputs.h:124</div></div>
 <div class="ttc" id="aclass_input_html_a52d1d1d4eb7890e186fa0faa11636b82"><div class="ttname"><a href="class_input.html#a52d1d1d4eb7890e186fa0faa11636b82">Input::Input</a></div><div class="ttdeci">Input(aJsonObject *obj, aJsonObject *configObj=NULL)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:83</div></div>
 <div class="ttc" id="aclass_input_html_a2e60007024a65b9529d8db1873bf8696"><div class="ttname"><a href="class_input.html#a2e60007024a65b9529d8db1873bf8696">Input::isValid</a></div><div class="ttdeci">boolean isValid()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:90</div></div>
-<div class="ttc" id="aclass_input_html_a2e0c2008fce8f2730ef3126ff1d8893e"><div class="ttname"><a href="class_input.html#a2e0c2008fce8f2730ef3126ff1d8893e">Input::onContactChanged</a></div><div class="ttdeci">void onContactChanged(int newValue)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:976</div></div>
-<div class="ttc" id="aclass_input_html"><div class="ttname"><a href="class_input.html">Input</a></div><div class="ttdef"><b>Definition:</b> inputs.h:131</div></div>
-<div class="ttc" id="aunionin_store_html_a53f6cadfd77d4bd024d6e6c395ae5364"><div class="ttname"><a href="unionin_store.html#a53f6cadfd77d4bd024d6e6c395ae5364">inStore::timestamp16</a></div><div class="ttdeci">uint16_t timestamp16</div><div class="ttdef"><b>Definition:</b> inputs.h:125</div></div>
-<div class="ttc" id="aunionin_store_html"><div class="ttname"><a href="unionin_store.html">inStore</a></div><div class="ttdef"><b>Definition:</b> inputs.h:106</div></div>
-<div class="ttc" id="aunionin_store_html_ab588498a30cd9248c4b98b939d6a3bd1"><div class="ttname"><a href="unionin_store.html#ab588498a30cd9248c4b98b939d6a3bd1">inStore::currentValue</a></div><div class="ttdeci">int16_t currentValue</div><div class="ttdef"><b>Definition:</b> inputs.h:113</div></div>
-<div class="ttc" id="aclass_input_html_adc8477b21452dd8b1f4bf1f3de35ecc4"><div class="ttname"><a href="class_input.html#adc8477b21452dd8b1f4bf1f3de35ecc4">Input::onCounterChanged3</a></div><div class="ttdeci">static void onCounterChanged3()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:416</div></div>
-<div class="ttc" id="aunionin_store_html_a80c2c10e46083179d86fa7c4511d671d"><div class="ttname"><a href="unionin_store.html#a80c2c10e46083179d86fa7c4511d671d">inStore::reserved</a></div><div class="ttdeci">uint8_t reserved</div><div class="ttdef"><b>Definition:</b> inputs.h:111</div></div>
-<div class="ttc" id="aclassread_cache_html"><div class="ttname"><a href="classread_cache.html">readCache</a></div><div class="ttdef"><b>Definition:</b> inputs.h:187</div></div>
+<div class="ttc" id="aclass_input_html_a2e0c2008fce8f2730ef3126ff1d8893e"><div class="ttname"><a href="class_input.html#a2e0c2008fce8f2730ef3126ff1d8893e">Input::onContactChanged</a></div><div class="ttdeci">void onContactChanged(int newValue)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:947</div></div>
+<div class="ttc" id="aclass_input_html"><div class="ttname"><a href="class_input.html">Input</a></div><div class="ttdef"><b>Definition:</b> inputs.h:132</div></div>
+<div class="ttc" id="aunionin_store_html_a53f6cadfd77d4bd024d6e6c395ae5364"><div class="ttname"><a href="unionin_store.html#a53f6cadfd77d4bd024d6e6c395ae5364">inStore::timestamp16</a></div><div class="ttdeci">uint16_t timestamp16</div><div class="ttdef"><b>Definition:</b> inputs.h:126</div></div>
+<div class="ttc" id="aunionin_store_html"><div class="ttname"><a href="unionin_store.html">inStore</a></div><div class="ttdef"><b>Definition:</b> inputs.h:107</div></div>
+<div class="ttc" id="aunionin_store_html_ab588498a30cd9248c4b98b939d6a3bd1"><div class="ttname"><a href="unionin_store.html#ab588498a30cd9248c4b98b939d6a3bd1">inStore::currentValue</a></div><div class="ttdeci">int16_t currentValue</div><div class="ttdef"><b>Definition:</b> inputs.h:114</div></div>
+<div class="ttc" id="aclass_input_html_adc8477b21452dd8b1f4bf1f3de35ecc4"><div class="ttname"><a href="class_input.html#adc8477b21452dd8b1f4bf1f3de35ecc4">Input::onCounterChanged3</a></div><div class="ttdeci">static void onCounterChanged3()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:418</div></div>
+<div class="ttc" id="aunionin_store_html_a80c2c10e46083179d86fa7c4511d671d"><div class="ttname"><a href="unionin_store.html#a80c2c10e46083179d86fa7c4511d671d">inStore::reserved</a></div><div class="ttdeci">uint8_t reserved</div><div class="ttdef"><b>Definition:</b> inputs.h:112</div></div>
+<div class="ttc" id="aclassread_cache_html"><div class="ttname"><a href="classread_cache.html">readCache</a></div><div class="ttdef"><b>Definition:</b> inputs.h:188</div></div>
 <div class="ttc" id="ain__ccs811__hdc1080_8h_html"><div class="ttname"><a href="in__ccs811__hdc1080_8h.html">in_ccs811_hdc1080.h</a></div></div>
-<div class="ttc" id="aunionin_store_html_a44af41c00bfa555c4a9f7c7d5e2cfbc7"><div class="ttname"><a href="unionin_store.html#a44af41c00bfa555c4a9f7c7d5e2cfbc7">inStore::logicState</a></div><div class="ttdeci">uint8_t logicState</div><div class="ttdef"><b>Definition:</b> inputs.h:112</div></div>
-<div class="ttc" id="aclass_input_html_a3d224f0fd4da038390abaa8f84478d5c"><div class="ttname"><a href="class_input.html#a3d224f0fd4da038390abaa8f84478d5c">Input::uptimePoll</a></div><div class="ttdeci">void uptimePoll()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:376</div></div>
-<div class="ttc" id="aunionin_store_html_a719ff985b81bbfbd4905735ea5cee1a9"><div class="ttname"><a href="unionin_store.html#a719ff985b81bbfbd4905735ea5cee1a9">inStore::delayedState</a></div><div class="ttdeci">uint8_t delayedState</div><div class="ttdef"><b>Definition:</b> inputs.h:121</div></div>
-<div class="ttc" id="aclassread_cache_html_aa6e9ec22513d70ee0d77b6ab7304d140"><div class="ttname"><a href="classread_cache.html#aa6e9ec22513d70ee0d77b6ab7304d140">readCache::analogReadCached</a></div><div class="ttdeci">uint16_t analogReadCached(uint8_t pin)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1101</div></div>
-<div class="ttc" id="aclass_input_html_a910d1942c02b2d155dbaa3c8a41876f5"><div class="ttname"><a href="class_input.html#a910d1942c02b2d155dbaa3c8a41876f5">Input::pin</a></div><div class="ttdeci">uint8_t pin</div><div class="ttdef"><b>Definition:</b> inputs.h:135</div></div>
-<div class="ttc" id="aclass_input_html_ab272ddf677bc7ebaa20c0a8677b49b80"><div class="ttname"><a href="class_input.html#ab272ddf677bc7ebaa20c0a8677b49b80">Input::attachInterruptPinIrq</a></div><div class="ttdeci">void attachInterruptPinIrq(int realPin, int irq)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:338</div></div>
-<div class="ttc" id="aclass_input_html_a36b4ed46c94a5194e74c2106bb29deaa"><div class="ttname"><a href="class_input.html#a36b4ed46c94a5194e74c2106bb29deaa">Input::onCounterChanged1</a></div><div class="ttdeci">static void onCounterChanged1()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:410</div></div>
-<div class="ttc" id="aclass_input_html_a8def9079b3f0774a05860a17a4b51b29"><div class="ttname"><a href="class_input.html#a8def9079b3f0774a05860a17a4b51b29">Input::onCounterChanged2</a></div><div class="ttdeci">static void onCounterChanged2()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:413</div></div>
+<div class="ttc" id="aclass_input_html_a7ca225a34da21e406cdc9fdc05382451"><div class="ttname"><a href="class_input.html#a7ca225a34da21e406cdc9fdc05382451">Input::onAnalogChanged</a></div><div class="ttdeci">void onAnalogChanged(itemCmd newValue)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1000</div></div>
+<div class="ttc" id="aunionin_store_html_a44af41c00bfa555c4a9f7c7d5e2cfbc7"><div class="ttname"><a href="unionin_store.html#a44af41c00bfa555c4a9f7c7d5e2cfbc7">inStore::logicState</a></div><div class="ttdeci">uint8_t logicState</div><div class="ttdef"><b>Definition:</b> inputs.h:113</div></div>
+<div class="ttc" id="aclass_input_html_a3d224f0fd4da038390abaa8f84478d5c"><div class="ttname"><a href="class_input.html#a3d224f0fd4da038390abaa8f84478d5c">Input::uptimePoll</a></div><div class="ttdeci">void uptimePoll()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:377</div></div>
+<div class="ttc" id="aunionin_store_html_a719ff985b81bbfbd4905735ea5cee1a9"><div class="ttname"><a href="unionin_store.html#a719ff985b81bbfbd4905735ea5cee1a9">inStore::delayedState</a></div><div class="ttdeci">uint8_t delayedState</div><div class="ttdef"><b>Definition:</b> inputs.h:122</div></div>
+<div class="ttc" id="aclassread_cache_html_aa6e9ec22513d70ee0d77b6ab7304d140"><div class="ttname"><a href="classread_cache.html#aa6e9ec22513d70ee0d77b6ab7304d140">readCache::analogReadCached</a></div><div class="ttdeci">uint16_t analogReadCached(uint8_t pin)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1075</div></div>
+<div class="ttc" id="aclass_input_html_a910d1942c02b2d155dbaa3c8a41876f5"><div class="ttname"><a href="class_input.html#a910d1942c02b2d155dbaa3c8a41876f5">Input::pin</a></div><div class="ttdeci">uint8_t pin</div><div class="ttdef"><b>Definition:</b> inputs.h:136</div></div>
+<div class="ttc" id="aclass_input_html_ab272ddf677bc7ebaa20c0a8677b49b80"><div class="ttname"><a href="class_input.html#ab272ddf677bc7ebaa20c0a8677b49b80">Input::attachInterruptPinIrq</a></div><div class="ttdeci">void attachInterruptPinIrq(int realPin, int irq)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:339</div></div>
+<div class="ttc" id="aclass_input_html_a36b4ed46c94a5194e74c2106bb29deaa"><div class="ttname"><a href="class_input.html#a36b4ed46c94a5194e74c2106bb29deaa">Input::onCounterChanged1</a></div><div class="ttdeci">static void onCounterChanged1()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:412</div></div>
+<div class="ttc" id="aclass_input_html_a8def9079b3f0774a05860a17a4b51b29"><div class="ttname"><a href="class_input.html#a8def9079b3f0774a05860a17a4b51b29">Input::onCounterChanged2</a></div><div class="ttdeci">static void onCounterChanged2()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:415</div></div>
 <div class="ttc" id="ainputs_8h_html_a550fbf41418f36b963b995f7de144eea"><div class="ttname"><a href="inputs_8h.html#a550fbf41418f36b963b995f7de144eea">inCache</a></div><div class="ttdeci">readCache inCache</div><div class="ttdef"><b>Definition:</b> inputs.cpp:71</div></div>
-<div class="ttc" id="aclass_input_html_a4dbfdd3e7da95a3d4873286da07733f2"><div class="ttname"><a href="class_input.html#a4dbfdd3e7da95a3d4873286da07733f2">Input::inputObj</a></div><div class="ttdeci">aJsonObject * inputObj</div><div class="ttdef"><b>Definition:</b> inputs.h:133</div></div>
-<div class="ttc" id="aunionin_store_html_accec7f5bdcfc35e9cc86a66c301348e2"><div class="ttname"><a href="unionin_store.html#accec7f5bdcfc35e9cc86a66c301348e2">inStore::lastValue</a></div><div class="ttdeci">uint8_t lastValue</div><div class="ttdef"><b>Definition:</b> inputs.h:120</div></div>
-<div class="ttc" id="aunionin_store_html_a8f5f08b35e330945b3b0df11eacdae72"><div class="ttname"><a href="unionin_store.html#a8f5f08b35e330945b3b0df11eacdae72">inStore::toggle2</a></div><div class="ttdeci">uint8_t toggle2</div><div class="ttdef"><b>Definition:</b> inputs.h:118</div></div>
-<div class="ttc" id="aunionin_store_html_a16a83a9f8fd433154711d7dbd5cdc98a"><div class="ttname"><a href="unionin_store.html#a16a83a9f8fd433154711d7dbd5cdc98a">inStore::aslong</a></div><div class="ttdeci">long int aslong</div><div class="ttdef"><b>Definition:</b> inputs.h:107</div></div>
-<div class="ttc" id="aclassread_cache_html_a6fd0d58f3d2a4a027a80a2455999d9ae"><div class="ttname"><a href="classread_cache.html#a6fd0d58f3d2a4a027a80a2455999d9ae">readCache::digitalReadCached</a></div><div class="ttdeci">uint8_t digitalReadCached(uint8_t pin)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1110</div></div>
-<div class="ttc" id="aclassread_cache_html_a7ecad823239b195a10fddb527b122dc7"><div class="ttname"><a href="classread_cache.html#a7ecad823239b195a10fddb527b122dc7">readCache::invalidateInputCache</a></div><div class="ttdeci">void invalidateInputCache()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1128</div></div>
-<div class="ttc" id="aclass_input_html_a6fcea89328a3bcf97dad383b7b615a5a"><div class="ttname"><a href="class_input.html#a6fcea89328a3bcf97dad383b7b615a5a">Input::onCounterChanged4</a></div><div class="ttdeci">static void onCounterChanged4()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:419</div></div>
+<div class="ttc" id="aclass_input_html_a4dbfdd3e7da95a3d4873286da07733f2"><div class="ttname"><a href="class_input.html#a4dbfdd3e7da95a3d4873286da07733f2">Input::inputObj</a></div><div class="ttdeci">aJsonObject * inputObj</div><div class="ttdef"><b>Definition:</b> inputs.h:134</div></div>
+<div class="ttc" id="aunionin_store_html_accec7f5bdcfc35e9cc86a66c301348e2"><div class="ttname"><a href="unionin_store.html#accec7f5bdcfc35e9cc86a66c301348e2">inStore::lastValue</a></div><div class="ttdeci">uint8_t lastValue</div><div class="ttdef"><b>Definition:</b> inputs.h:121</div></div>
+<div class="ttc" id="aunionin_store_html_a8f5f08b35e330945b3b0df11eacdae72"><div class="ttname"><a href="unionin_store.html#a8f5f08b35e330945b3b0df11eacdae72">inStore::toggle2</a></div><div class="ttdeci">uint8_t toggle2</div><div class="ttdef"><b>Definition:</b> inputs.h:119</div></div>
+<div class="ttc" id="aunionin_store_html_a16a83a9f8fd433154711d7dbd5cdc98a"><div class="ttname"><a href="unionin_store.html#a16a83a9f8fd433154711d7dbd5cdc98a">inStore::aslong</a></div><div class="ttdeci">long int aslong</div><div class="ttdef"><b>Definition:</b> inputs.h:108</div></div>
+<div class="ttc" id="aclassread_cache_html_a6fd0d58f3d2a4a027a80a2455999d9ae"><div class="ttname"><a href="classread_cache.html#a6fd0d58f3d2a4a027a80a2455999d9ae">readCache::digitalReadCached</a></div><div class="ttdeci">uint8_t digitalReadCached(uint8_t pin)</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1084</div></div>
+<div class="ttc" id="aclassread_cache_html_a7ecad823239b195a10fddb527b122dc7"><div class="ttname"><a href="classread_cache.html#a7ecad823239b195a10fddb527b122dc7">readCache::invalidateInputCache</a></div><div class="ttdeci">void invalidateInputCache()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:1103</div></div>
+<div class="ttc" id="aclass_input_html_a6fcea89328a3bcf97dad383b7b615a5a"><div class="ttname"><a href="class_input.html#a6fcea89328a3bcf97dad383b7b615a5a">Input::onCounterChanged4</a></div><div class="ttdeci">static void onCounterChanged4()</div><div class="ttdef"><b>Definition:</b> inputs.cpp:421</div></div>
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="inputs_8h.html">inputs.h</a></li>
+    <li class="footer">Generated by <a href="http://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.8.20 </li>
+  </ul>
+</div>
 </body>
 </html>

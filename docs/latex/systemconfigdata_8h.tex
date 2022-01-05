@@ -1,0 +1,131 @@
+\hypertarget{systemconfigdata_8h}{}\doxysection{systemconfigdata.\+h File Reference}
+\label{systemconfigdata_8h}\index{systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+union \mbox{\hyperlink{unionsystem_config_flags}{system\+Config\+Flags}}
+\item 
+struct \mbox{\hyperlink{structsystem_config_data}{system\+Config\+Data}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{systemconfigdata_8h_a17db2f5f27050c93ce00712c46d2e810}{S\+Y\+S\+C\+O\+N\+F\+\_\+\+O\+F\+F\+S\+ET}}~0
+\item 
+\#define \mbox{\hyperlink{systemconfigdata_8h_a003b1faba137828f090984d6ebc4817e}{E\+E\+P\+R\+O\+M\+\_\+offset\+\_\+\+Not\+Alligned}}~\mbox{\hyperlink{systemconfigdata_8h_a17db2f5f27050c93ce00712c46d2e810}{S\+Y\+S\+C\+O\+N\+F\+\_\+\+O\+F\+F\+S\+ET}}+sizeof(\mbox{\hyperlink{structsystem_config_data}{system\+Config\+Data}})
+\item 
+\#define \mbox{\hyperlink{systemconfigdata_8h_af5cce3d115609a6843723ebca1d742cd}{S\+Y\+S\+C\+O\+N\+F\+\_\+\+S\+I\+ZE}}~\mbox{\hyperlink{systemconfigdata_8h_a5d3ef55d19773db32ebd9956edcc8b8d}{E\+E\+P\+R\+O\+M\+\_\+offset\+J\+S\+ON}}
+\item 
+\#define \mbox{\hyperlink{systemconfigdata_8h_a5d3ef55d19773db32ebd9956edcc8b8d}{E\+E\+P\+R\+O\+M\+\_\+offset\+J\+S\+ON}}~\mbox{\hyperlink{systemconfigdata_8h_a003b1faba137828f090984d6ebc4817e}{E\+E\+P\+R\+O\+M\+\_\+offset\+\_\+\+Not\+Alligned}} + (4 -\/(\mbox{\hyperlink{systemconfigdata_8h_a003b1faba137828f090984d6ebc4817e}{E\+E\+P\+R\+O\+M\+\_\+offset\+\_\+\+Not\+Alligned}} \& 3))
+\item 
+\#define \mbox{\hyperlink{systemconfigdata_8h_a62d02da8c36fd3ab5519e373620382d1}{M\+A\+X\+F\+L\+A\+S\+H\+S\+TR}}~32
+\item 
+\#define \mbox{\hyperlink{systemconfigdata_8h_a83c7af577ab2df562e66ffcdc81fc1c0}{P\+W\+D\+F\+L\+A\+S\+H\+S\+TR}}~16
+\item 
+\#define \mbox{\hyperlink{systemconfigdata_8h_a084dba44a01332b67ab1ba8a599cde26}{E\+E\+P\+R\+O\+M\+\_\+\+S\+I\+G\+N\+A\+T\+U\+RE}}~\char`\"{}L\+H\+C1\char`\"{}
+\item 
+\#define \mbox{\hyperlink{systemconfigdata_8h_a9fe94e22a13344d105a17cf07a5842cd}{E\+E\+P\+R\+O\+M\+\_\+\+S\+I\+G\+N\+A\+T\+U\+R\+E\+\_\+\+L\+E\+N\+G\+TH}}~4
+\item 
+\#define \mbox{\hyperlink{systemconfigdata_8h_aff59a0ac9e9d04f17868c674c13fbfdf}{E\+E\+P\+R\+O\+M\+\_\+\+F\+I\+X\+\_\+\+P\+A\+R\+T\+\_\+\+L\+EN}}~\mbox{\hyperlink{systemconfigdata_8h_a5d3ef55d19773db32ebd9956edcc8b8d}{E\+E\+P\+R\+O\+M\+\_\+offset\+J\+S\+ON}}-\/\mbox{\hyperlink{systemconfigdata_8h_a17db2f5f27050c93ce00712c46d2e810}{S\+Y\+S\+C\+O\+N\+F\+\_\+\+O\+F\+F\+S\+ET}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef char \mbox{\hyperlink{systemconfigdata_8h_a04251d83183255f204d1ff002c721929}{flashstr}}\mbox{[}\mbox{\hyperlink{systemconfigdata_8h_a62d02da8c36fd3ab5519e373620382d1}{M\+A\+X\+F\+L\+A\+S\+H\+S\+TR}}\mbox{]}
+\item 
+typedef char \mbox{\hyperlink{systemconfigdata_8h_abde7f87d924c4c8d14c7a7aa8901de2b}{flashpwd}}\mbox{[}\mbox{\hyperlink{systemconfigdata_8h_a83c7af577ab2df562e66ffcdc81fc1c0}{P\+W\+D\+F\+L\+A\+S\+H\+S\+TR}}\mbox{]}
+\item 
+typedef uint8\+\_\+t \mbox{\hyperlink{systemconfigdata_8h_a514f72de8f2436e3c2952d52302585a3}{mac\+Address}}\mbox{[}6\mbox{]}
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const char \mbox{\hyperlink{systemconfigdata_8h_a2412d8e03a08775ec69a8d80fbcc2f53}{E\+E\+P\+R\+O\+M\+\_\+signature}} \mbox{[}$\,$\mbox{]} = \mbox{\hyperlink{systemconfigdata_8h_a084dba44a01332b67ab1ba8a599cde26}{E\+E\+P\+R\+O\+M\+\_\+\+S\+I\+G\+N\+A\+T\+U\+RE}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{systemconfigdata_8h_aff59a0ac9e9d04f17868c674c13fbfdf}\label{systemconfigdata_8h_aff59a0ac9e9d04f17868c674c13fbfdf}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!EEPROM\_FIX\_PART\_LEN@{EEPROM\_FIX\_PART\_LEN}}
+\index{EEPROM\_FIX\_PART\_LEN@{EEPROM\_FIX\_PART\_LEN}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{EEPROM\_FIX\_PART\_LEN}{EEPROM\_FIX\_PART\_LEN}}
+{\footnotesize\ttfamily \#define E\+E\+P\+R\+O\+M\+\_\+\+F\+I\+X\+\_\+\+P\+A\+R\+T\+\_\+\+L\+EN~\mbox{\hyperlink{systemconfigdata_8h_a5d3ef55d19773db32ebd9956edcc8b8d}{E\+E\+P\+R\+O\+M\+\_\+offset\+J\+S\+ON}}-\/\mbox{\hyperlink{systemconfigdata_8h_a17db2f5f27050c93ce00712c46d2e810}{S\+Y\+S\+C\+O\+N\+F\+\_\+\+O\+F\+F\+S\+ET}}}
+
+\mbox{\Hypertarget{systemconfigdata_8h_a003b1faba137828f090984d6ebc4817e}\label{systemconfigdata_8h_a003b1faba137828f090984d6ebc4817e}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!EEPROM\_offset\_NotAlligned@{EEPROM\_offset\_NotAlligned}}
+\index{EEPROM\_offset\_NotAlligned@{EEPROM\_offset\_NotAlligned}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{EEPROM\_offset\_NotAlligned}{EEPROM\_offset\_NotAlligned}}
+{\footnotesize\ttfamily \#define E\+E\+P\+R\+O\+M\+\_\+offset\+\_\+\+Not\+Alligned~\mbox{\hyperlink{systemconfigdata_8h_a17db2f5f27050c93ce00712c46d2e810}{S\+Y\+S\+C\+O\+N\+F\+\_\+\+O\+F\+F\+S\+ET}}+sizeof(\mbox{\hyperlink{structsystem_config_data}{system\+Config\+Data}})}
+
+\mbox{\Hypertarget{systemconfigdata_8h_a5d3ef55d19773db32ebd9956edcc8b8d}\label{systemconfigdata_8h_a5d3ef55d19773db32ebd9956edcc8b8d}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!EEPROM\_offsetJSON@{EEPROM\_offsetJSON}}
+\index{EEPROM\_offsetJSON@{EEPROM\_offsetJSON}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{EEPROM\_offsetJSON}{EEPROM\_offsetJSON}}
+{\footnotesize\ttfamily \#define E\+E\+P\+R\+O\+M\+\_\+offset\+J\+S\+ON~\mbox{\hyperlink{systemconfigdata_8h_a003b1faba137828f090984d6ebc4817e}{E\+E\+P\+R\+O\+M\+\_\+offset\+\_\+\+Not\+Alligned}} + (4 -\/(\mbox{\hyperlink{systemconfigdata_8h_a003b1faba137828f090984d6ebc4817e}{E\+E\+P\+R\+O\+M\+\_\+offset\+\_\+\+Not\+Alligned}} \& 3))}
+
+\mbox{\Hypertarget{systemconfigdata_8h_a084dba44a01332b67ab1ba8a599cde26}\label{systemconfigdata_8h_a084dba44a01332b67ab1ba8a599cde26}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!EEPROM\_SIGNATURE@{EEPROM\_SIGNATURE}}
+\index{EEPROM\_SIGNATURE@{EEPROM\_SIGNATURE}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{EEPROM\_SIGNATURE}{EEPROM\_SIGNATURE}}
+{\footnotesize\ttfamily \#define E\+E\+P\+R\+O\+M\+\_\+\+S\+I\+G\+N\+A\+T\+U\+RE~\char`\"{}L\+H\+C1\char`\"{}}
+
+\mbox{\Hypertarget{systemconfigdata_8h_a9fe94e22a13344d105a17cf07a5842cd}\label{systemconfigdata_8h_a9fe94e22a13344d105a17cf07a5842cd}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!EEPROM\_SIGNATURE\_LENGTH@{EEPROM\_SIGNATURE\_LENGTH}}
+\index{EEPROM\_SIGNATURE\_LENGTH@{EEPROM\_SIGNATURE\_LENGTH}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{EEPROM\_SIGNATURE\_LENGTH}{EEPROM\_SIGNATURE\_LENGTH}}
+{\footnotesize\ttfamily \#define E\+E\+P\+R\+O\+M\+\_\+\+S\+I\+G\+N\+A\+T\+U\+R\+E\+\_\+\+L\+E\+N\+G\+TH~4}
+
+\mbox{\Hypertarget{systemconfigdata_8h_a62d02da8c36fd3ab5519e373620382d1}\label{systemconfigdata_8h_a62d02da8c36fd3ab5519e373620382d1}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!MAXFLASHSTR@{MAXFLASHSTR}}
+\index{MAXFLASHSTR@{MAXFLASHSTR}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{MAXFLASHSTR}{MAXFLASHSTR}}
+{\footnotesize\ttfamily \#define M\+A\+X\+F\+L\+A\+S\+H\+S\+TR~32}
+
+\mbox{\Hypertarget{systemconfigdata_8h_a83c7af577ab2df562e66ffcdc81fc1c0}\label{systemconfigdata_8h_a83c7af577ab2df562e66ffcdc81fc1c0}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!PWDFLASHSTR@{PWDFLASHSTR}}
+\index{PWDFLASHSTR@{PWDFLASHSTR}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{PWDFLASHSTR}{PWDFLASHSTR}}
+{\footnotesize\ttfamily \#define P\+W\+D\+F\+L\+A\+S\+H\+S\+TR~16}
+
+\mbox{\Hypertarget{systemconfigdata_8h_a17db2f5f27050c93ce00712c46d2e810}\label{systemconfigdata_8h_a17db2f5f27050c93ce00712c46d2e810}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!SYSCONF\_OFFSET@{SYSCONF\_OFFSET}}
+\index{SYSCONF\_OFFSET@{SYSCONF\_OFFSET}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{SYSCONF\_OFFSET}{SYSCONF\_OFFSET}}
+{\footnotesize\ttfamily \#define S\+Y\+S\+C\+O\+N\+F\+\_\+\+O\+F\+F\+S\+ET~0}
+
+\mbox{\Hypertarget{systemconfigdata_8h_af5cce3d115609a6843723ebca1d742cd}\label{systemconfigdata_8h_af5cce3d115609a6843723ebca1d742cd}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!SYSCONF\_SIZE@{SYSCONF\_SIZE}}
+\index{SYSCONF\_SIZE@{SYSCONF\_SIZE}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{SYSCONF\_SIZE}{SYSCONF\_SIZE}}
+{\footnotesize\ttfamily \#define S\+Y\+S\+C\+O\+N\+F\+\_\+\+S\+I\+ZE~\mbox{\hyperlink{systemconfigdata_8h_a5d3ef55d19773db32ebd9956edcc8b8d}{E\+E\+P\+R\+O\+M\+\_\+offset\+J\+S\+ON}}}
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{systemconfigdata_8h_abde7f87d924c4c8d14c7a7aa8901de2b}\label{systemconfigdata_8h_abde7f87d924c4c8d14c7a7aa8901de2b}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!flashpwd@{flashpwd}}
+\index{flashpwd@{flashpwd}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{flashpwd}{flashpwd}}
+{\footnotesize\ttfamily typedef char flashpwd\mbox{[}\mbox{\hyperlink{systemconfigdata_8h_a83c7af577ab2df562e66ffcdc81fc1c0}{P\+W\+D\+F\+L\+A\+S\+H\+S\+TR}}\mbox{]}}
+
+\mbox{\Hypertarget{systemconfigdata_8h_a04251d83183255f204d1ff002c721929}\label{systemconfigdata_8h_a04251d83183255f204d1ff002c721929}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!flashstr@{flashstr}}
+\index{flashstr@{flashstr}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{flashstr}{flashstr}}
+{\footnotesize\ttfamily typedef char flashstr\mbox{[}\mbox{\hyperlink{systemconfigdata_8h_a62d02da8c36fd3ab5519e373620382d1}{M\+A\+X\+F\+L\+A\+S\+H\+S\+TR}}\mbox{]}}
+
+\mbox{\Hypertarget{systemconfigdata_8h_a514f72de8f2436e3c2952d52302585a3}\label{systemconfigdata_8h_a514f72de8f2436e3c2952d52302585a3}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!macAddress@{macAddress}}
+\index{macAddress@{macAddress}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{macAddress}{macAddress}}
+{\footnotesize\ttfamily typedef uint8\+\_\+t mac\+Address\mbox{[}6\mbox{]}}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{systemconfigdata_8h_a2412d8e03a08775ec69a8d80fbcc2f53}\label{systemconfigdata_8h_a2412d8e03a08775ec69a8d80fbcc2f53}} 
+\index{systemconfigdata.h@{systemconfigdata.h}!EEPROM\_signature@{EEPROM\_signature}}
+\index{EEPROM\_signature@{EEPROM\_signature}!systemconfigdata.h@{systemconfigdata.h}}
+\doxysubsubsection{\texorpdfstring{EEPROM\_signature}{EEPROM\_signature}}
+{\footnotesize\ttfamily const char E\+E\+P\+R\+O\+M\+\_\+signature\mbox{[}$\,$\mbox{]} = \mbox{\hyperlink{systemconfigdata_8h_a084dba44a01332b67ab1ba8a599cde26}{E\+E\+P\+R\+O\+M\+\_\+\+S\+I\+G\+N\+A\+T\+U\+RE}}}
+
