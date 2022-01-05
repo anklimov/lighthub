@@ -1378,8 +1378,6 @@ void printConfigSummary() {
     infoSerial<<F("\nArtnet ");
     printBool(artnet);
 #endif
-    infoSerial<<F("\nMQTT ");
-    printBool(mqttArr);
 
     infoSerial << endl;
     infoSerial<<F("RAM=")<<freeRam()<<endl;
@@ -2063,6 +2061,13 @@ void setup_main() {
 
 void printFirmwareVersionAndBuildOptions() {
     infoSerial<<F("\nLazyhome.ru LightHub controller ")<<F(QUOTE(PIO_SRC_REV))<<F(" C++ version:")<<F(QUOTE(__cplusplus))<<endl;
+
+infoSerial<<F("\nConfig server:")<<F(CONFIG_SERVER);
+
+#ifdef CUSTOM_FIRMWARE_MAC
+infoSerial<<F("\nFirmware MAC Address " QUOTE(CUSTOM_FIRMWARE_MAC));
+#endif
+
 #ifdef CONTROLLINO
     infoSerial<<F("\n(+)CONTROLLINO");
 #endif
@@ -2071,17 +2076,10 @@ void printFirmwareVersionAndBuildOptions() {
 #else
     infoSerial<<F("\n(-)WATCHDOG");
 #endif
-    infoSerial<<F("\nConfig server:")<<F(CONFIG_SERVER)<<F("\nFirmware MAC Address ")<<F(QUOTE(CUSTOM_FIRMWARE_MAC));
 #ifdef DISABLE_FREERAM_PRINT
     infoSerial<<F("\n(-)FreeRam printing");
 #else
     infoSerial<<F("\n(+)FreeRam printing");
-#endif
-
-#ifdef USE_1W_PIN
-    infoSerial<<F("\n(-)DS2482-100 USE_1W_PIN=")<<QUOTE(USE_1W_PIN);
-#else
-    infoSerial<<F("\n(+)DS2482-100");
 #endif
 
 #ifdef WIFI_ENABLE
@@ -2106,13 +2104,18 @@ void printFirmwareVersionAndBuildOptions() {
 #endif
 
 #ifdef _modbus
-    infoSerial<<F("\n(+)MODBUS");
+    infoSerial<<F("\n(+)MODBUS " QUOTE(MODBUS_DIMMER_PARAM) " at " QUOTE(modbusSerial) " speed:"  QUOTE(MODBUS_SERIAL_BAUD));
 #else
     infoSerial<<F("\n(-)MODBUS");
 #endif
 
 #ifndef OWIRE_DISABLE
     infoSerial<<F("\n(+)OWIRE");
+        #ifdef USE_1W_PIN
+        infoSerial<<F("\n(-)DS2482-100 USE_1W_PIN=")<<QUOTE(USE_1W_PIN);
+        #else
+        infoSerial<<F("\n(+)DS2482-100");
+        #endif
 #else
     infoSerial<<F("\n(-)OWIRE");
 #endif
@@ -2151,7 +2154,7 @@ void printFirmwareVersionAndBuildOptions() {
     infoSerial<<F("\n(-)CCS811 & HDC1080");
 #endif
 #ifndef AC_DISABLE
-    infoSerial<<F("\n(+)AC HAIER");
+    infoSerial<<F("\n(+)AC HAIER on " QUOTE(AC_Serial));
 #else
     infoSerial<<F("\n(-)AC HAIER");
 #endif
@@ -2197,7 +2200,7 @@ infoSerial<<F("\n(-)SYSLOG");
 #endif
 
 #ifdef UARTBRIDGE_ENABLE
-infoSerial<<F("\n(+)UARTBRIDGE");
+infoSerial<<F("\n(+)UARTBRIDGE " QUOTE(MODULE_UATRBRIDGE_UARTA) "<=>" QUOTE(MODULE_UATRBRIDGE_UARTB));
 #else
 infoSerial<<F("\n(-)UARTBRIDGE");
 #endif
