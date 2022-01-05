@@ -1,0 +1,53 @@
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+function post_cmd(endpoint, param) {
+	var username = $("input#login").val();
+	var password = $("input#password").val();
+        var surl = $("input#url").val();
+
+        var settings = {
+        "url": surl+endpoint,
+//"http://192.168.11.234:65280"+endpoint,
+        "method": "POST",
+        beforeSend: function (xhr) {
+      xhr.setRequestHeader ("Authorization", "Basic " + btoa(username + ":" + password));
+      xhr.setRequestHeader ("Pragma", "no-cache");
+      //xhr.withCredentials = true;
+  },
+    "timeout": 20000,
+    "headers": {
+      "Content-Type": "text/plain"
+    },
+    "data": param+"\n",
+  };
+
+  $.ajax(settings).done(function (response) {
+     document.getElementById("resp").innerHTML = response;
+  });
+
+}
+</script>
+<h1>LazyHome PWA </h1>
+<form name="cookieform" id="loginform">
+<table>
+<tr>
+<td>URL:<td><input type="text" name="url" id="url" value="" class="text"/>    
+<tr>
+<td>Login:        <td><input type="text" name="login" id="login" value="arduino" class="text"/>
+<td>Password:  <td>    <input type="text" name="password" id="password" value="password" class="text"/>
+</tr>
+</table>
+</form>
+<table>
+<tr>
+<td><button onclick='post_cmd("/item/relays/cmd","toggle")'>Toggle</button>
+<td><button onclick='post_cmd("/command/save","")'>Save</button>
+<td><button onclick='post_cmd("/command/reboot","")'>Reboot</button>
+<td><button onclick='post_cmd("/command/get,"")'>Get</button>
+<td><button onclick='post_cmd("/command/load","")'>Load</button>
+<tr>
+<td>item:<td><input type="text" name="item" id="item" value="" class="text"/> 
+<td>command:<td><input type="text" name="command" id="command" value="toggle" class="text"/> 
+<td><button onclick='post_cmd("/item/"+$("input#item").val(),$("input#command").val())'>Exec</button>
+</table>
+<p id="resp"></p>

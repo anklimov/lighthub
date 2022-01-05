@@ -19,6 +19,6 @@ int  abstractOut::isActive()
 
 int abstractOut::Setup() 
 {  
-    if (item) item->setCmd(CMD_OFF);
+    if (item && (item->getCmd()==-1)) item->setCmd(CMD_OFF);
     return 1;
   }     

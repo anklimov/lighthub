@@ -34,8 +34,8 @@ e-mail    anklimov@gmail.com
 #endif
 
 #ifdef MCP23017
-#include "Adafruit_MCP23017.h"
-Adafruit_MCP23017 mcp;
+#include "Adafruit_MCP23X17.h"
+Adafruit_MCP23X17 mcp;
 #endif
 
 extern PubSubClient mqttClient;
@@ -181,10 +181,10 @@ switch (inType)
   case IN_I2C | IN_PUSH_ON     | IN_ACTIVE_HIGH:
   case IN_I2C | IN_PUSH_TOGGLE | IN_ACTIVE_HIGH:
 
-  mcp.begin(); //TBD - multiple chip
-  mcp.pinMode(pin, INPUT);
-  if (inputPinMode == INPUT_PULLUP) mcp.pullUp(0, HIGH);  // turn on a 100K pullup internally
-
+  mcp.begin_I2C(); //TBD - multiple chip
+  // CHECK! mcp.pinMode(pin, INPUT);
+  // CHECK! if (inputPinMode == INPUT_PULLUP) mcp.pullUp(0, HIGH);  // turn on a 100K pullup internally
+  mcp.pinMode(pin,inputPinMode);
   store->state=IS_IDLE;
   break;
   #endif
@@ -300,9 +300,9 @@ void Input::counterPoll() {
             short real_pin = mega_interrupt_array[interrupt_number];
             attachInterruptPinIrq(real_pin,interrupt_number);
         } else {
-            Serial.print(F("IRQ:"));
-            Serial.print(pin);
-            Serial.print(F(" Counter type. INCORRECT Interrupt number!!!"));
+            debugSerial.print(F("IRQ:"));
+            debugSerial.print(pin);
+            debugSerial.print(F(" Counter type. INCORRECT Interrupt number!!!"));
             return;
         }
 #endif
@@ -339,9 +339,9 @@ void Input::counterPoll() {
 void Input::attachInterruptPinIrq(int realPin, int irq) {
     pinMode(realPin, INPUT);
     int real_irq;
-#if defined(ARDUINO_ARCH_AVR)
+//#if defined(ARDUINO_ARCH_AVR)
     real_irq = irq;
-#endif
+//#endif
 #if defined(__SAM3X8E__)
     real_irq = realPin;
 #endif
@@ -365,7 +365,7 @@ void Input::attachInterruptPinIrq(int realPin, int irq) {
                 attachInterrupt(real_irq, onCounterChanged5, RISING);
                 break;
         default:
-            Serial.print(F("Incorrect irq:"));Serial.println(irq);
+            debugSerial.print(F("Incorrect irq:"));debugSerial.println(irq);
             break;
         }
 }
@@ -526,16 +526,22 @@ if (newState == IS_REQSTATE)
     {
       // Requested delayed change State and safe moment
       newState=store->reqState; //Retrieve requested state
-      debugSerial<<F("Pended state retrieved:")<<newState;
-
+      debugSerial<<F("Pended: #")<<pin<<F(" ")<<store->state<<F("->") <<newState<<endl;
+      if (store->state == newState) 
+                                {
+                                store->delayedState = false;    
+                                return false;
+                                }
     }
   else return true;   // No pended State
 else if (store->delayedState)
             return false; //State changing is postponed already (( giving up
 
 aJsonObject *cmd = NULL;
+itemCmd defCmd;
+
 int8_t toggle=0;
-if (newState!=store->state) debugSerial<<F("#")<<pin<<F(" ")<<store->state<<F("->") <<newState<<endl;
+if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<F(" ")<<store->state<<F("->") <<newState<<endl;
   switch (newState)
   {
     case IS_IDLE:
@@ -564,6 +570,7 @@ if (newState!=store->state) debugSerial<<F("#")<<pin<<F(" ")<<store->state<<F("-
         cmd = aJson.getObjectItem(inputObj, "scmd");
         toggle=store->toggle1;
         store->toggle1 = !store->toggle1;
+        if (!cmd) defCmd.Cmd(CMD_ON);
         break;
     case IS_PRESSED2: //scmd2
         cmd = aJson.getObjectItem(inputObj, "scmd2");
@@ -580,6 +587,7 @@ if (newState!=store->state) debugSerial<<F("#")<<pin<<F(" ")<<store->state<<F("-
     case IS_WAITPRESS:
     case IS_RELEASED2:
         cmd = aJson.getObjectItem(inputObj, "rcmd");
+        if (!cmd) defCmd.Cmd(CMD_OFF);
   //      toggle=state->toggle1;
 
         break;
@@ -609,32 +617,46 @@ if (newState!=store->state) debugSerial<<F("#")<<pin<<F(" ")<<store->state<<F("-
         break;
 
   }
-  if (!cmd)
+  
+  aJsonObject *defaultItem = aJson.getObjectItem(inputObj, "item");
+  aJsonObject *defaultEmit = aJson.getObjectItem(inputObj, "emit");  
+
+  if (!defaultEmit && !defaultItem) defCmd.Cmd(CMD_VOID);
+
+  if (!cmd && !defCmd.isCommand())
   {
   store->state=newState;
+  store->delayedState=false;
   return true; //nothing to do
   }
+
+
   if (cause != CHECK_INTERRUPT)
   {
     store->state=newState;
-    executeCommand(cmd,toggle);
-    //Executed
     store->delayedState=false;
+    executeCommand(cmd,toggle,defCmd,defaultItem,defaultEmit);
     return true;
   }
   else
   {
     //Postpone actual execution
-    store->reqState=store->state;
-    store->delayedState=true;
+    if (newState != store->state)
+            {
+            store->reqState=newState;
+            store->delayedState=true;
+            }
     return true;
   }
 
 }
 
+static volatile uint8_t contactPollBusy = 0;
+
 void Input::contactPoll(short cause) {
     boolean currentInputState;
-    if (!store) return;
+    if (!store /*|| contactPollBusy*/) return;
+    contactPollBusy++;
 
     changeState(IS_REQSTATE,cause); //Check for postponed states transitions
 
@@ -658,7 +680,8 @@ else
         else  currentInputState = false;
       }
     else currentInputState = (digitalRead(pin) == inputOnLevel);
-switch (store->state) //Timer based transitions
+
+if (cause != CHECK_INTERRUPT) switch (store->state) //Timer based transitions
 {
   case IS_PRESSED:
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
@@ -749,19 +772,21 @@ switch (store->state) //Timer based transitions
     {
         if (store->bounce) store->bounce = store->bounce - 1;
         else //confirmed change
-        {
+        {  
+           //if (cause == CHECK_INTERRUPT) return; 
            store->timestamp16 = millis() & 0xFFFF; //Saving timestamp of changing
 
+/*
             if (inType & IN_PUSH_TOGGLE) { //To refactore
                 if (currentInputState) { //react on leading edge only (change from 0 to 1)
                     //store->logicState = !store->logicState;
                     store->lastValue = currentInputState;
-                    onContactChanged(store->toggle1);
+                     onContactChanged(store->toggle1);
                 }
-            } else
+            } else */
 
             {
-                onContactChanged(currentInputState); //Legacy input - to remove later
+           //     onContactChanged(currentInputState); //Legacy input - to remove later
 
           bool res = true;
           if (currentInputState)  //Button pressed state transitions
@@ -775,7 +800,15 @@ switch (store->state) //Timer based transitions
 
                   case IS_RELEASED:
                   case IS_WAITPRESS:
-                       res = changeState(IS_PRESSED2, cause);
+                if ( //No future
+                    !aJson.getObjectItem(inputObj, "scmd2") && 
+                    !aJson.getObjectItem(inputObj, "lcmd2") && 
+                    !aJson.getObjectItem(inputObj, "rpcmd2") &&
+                    !aJson.getObjectItem(inputObj, "dclick")
+                    )
+                       res = changeState(IS_PRESSED, cause);
+
+                  else res = changeState(IS_PRESSED2, cause);
 
                        break;
 
@@ -790,6 +823,7 @@ switch (store->state) //Timer based transitions
                 case IS_PRESSED:
 
                 res = changeState(IS_RELEASED, cause);
+
                 break;
 
                 case IS_LONG:
@@ -799,7 +833,13 @@ switch (store->state) //Timer based transitions
                 break;
 
                 case IS_PRESSED2:
-                res = changeState(IS_RELEASED2, cause);
+                 if ( //No future
+                    !aJson.getObjectItem(inputObj, "scmd2") && 
+                    !aJson.getObjectItem(inputObj, "lcmd2") && 
+                    !aJson.getObjectItem(inputObj, "rpcmd2") &&
+                    !aJson.getObjectItem(inputObj, "dclick")
+                    ) res = changeState(IS_IDLE, cause);
+                  else res = changeState(IS_RELEASED2, cause);
                 break;
 
                 case IS_LONG2:
@@ -819,6 +859,7 @@ switch (store->state) //Timer based transitions
         }
     } else // no change
         store->bounce = SAME_STATE_ATTEMPTS;
+contactPollBusy--;        
 }
 
 
@@ -826,6 +867,7 @@ switch (store->state) //Timer based transitions
 void Input::analogPoll(short cause) {
     int16_t   inputVal;
     int32_t   mappedInputVal; // 10x inputVal
+    if (cause == CHECK_INTERRUPT) return;
     aJsonObject *inputMap = aJson.getObjectItem(inputObj, "map");
     int16_t Noize = ANALOG_NOIZE;
     short simple = 0;
@@ -879,7 +921,7 @@ void Input::analogPoll(short cause) {
     if (simple) {
        if (mappedInputVal != store->currentValue)
        {
-           onContactChanged(mappedInputVal);
+            onContactChanged(mappedInputVal);
            store->currentValue = mappedInputVal;
        }}
     else
@@ -892,7 +934,7 @@ void Input::analogPoll(short cause) {
 
     if ((store->bounce<ANALOG_STATE_ATTEMPTS-1 || mappedInputVal == min || mappedInputVal ==max )&& (inputVal != store->currentValue))//confirmed change
         {
-            onAnalogChanged(itemCmd().Tens(mappedInputVal));
+           onAnalogChanged(itemCmd().Tens(mappedInputVal));
       //      store->currentValue = mappedInputVal;
             store->currentValue = inputVal;
         }
@@ -953,6 +995,7 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
         }
     }
 }
+
 
 void Input::onAnalogChanged(itemCmd newValue) {
     debugSerial << F("IN:") << (pin) << F("=");  newValue.debugOut();

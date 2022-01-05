@@ -5,10 +5,12 @@
 #include "item.h"
 #include "bright.h"
 
+#ifndef HSV_DISABLE
 #ifdef ADAFRUIT_LED
 #include <Adafruit_NeoPixel.h>
 #else
 #include "FastLED.h"
+#endif
 #endif
 
 //#include "hsv2rgb.h"
@@ -81,6 +83,7 @@ itemCmd::itemCmd(Item *item)
 itemCmd itemCmd::setChanType(short chanType)
 {
   cmd.itemArgType=getStoragetypeByChanType(chanType);
+  debugSerial<<F("Chan type:")<<chanType<<F(" -> AT:")<<cmd.itemArgType<<endl;
   return *this;
 }
 
@@ -91,6 +94,7 @@ uint8_t itemCmd::getStoragetypeByChanType(short chanType)
   {
     case CH_RGB:
     case CH_RGBW:
+    case CH_RGBWW:
     case CH_SPILED:
     return ST_HSV255;
     break;
@@ -105,6 +109,7 @@ uint8_t itemCmd::getStoragetypeByChanType(short chanType)
     case CH_RELAY:
     case CH_VC:
     case CH_MODBUS:
+    //case CH_GROUP:
     return ST_PERCENTS255;
     break;
     default:
@@ -177,6 +182,11 @@ bool itemCmd::setS(uint8_t s)
 //! Internally  1 - cold, 101 - warm light
 bool itemCmd::setColorTemp(int t)
 {
+  if (!t)
+  {
+  param.colorTemp=0;  
+  return true;  
+  }
   int par=map(t,153,500,0,100);
   switch (cmd.itemArgType)
   {
@@ -197,7 +207,7 @@ bool itemCmd::setColorTemp(int t)
   return true;
 }
 
-//! Setup color tempetature parameter from HSV or HSV255 types. return 0..100 value in success.
+//! Return color tempetature parameter from HSV or HSV255 types. return 153..500 value in success.
 //! -1 - if no value stored
 int itemCmd::getColorTemp()
 {
@@ -319,7 +329,9 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
               setColorTemp(t);
               }
   cmd.suffixCode=from.cmd.suffixCode;
-  
+  cmd.cmdCode=from.cmd.cmdCode;
+  //cmd.cmdFlag
+  //cmd.cmdParam  
   
   switch (cmd.itemArgType){ //Destination
         case ST_HSV255:
@@ -355,6 +367,12 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                    break;
               case ST_FLOAT:
                           param.v=constrain(from.param.asfloat,0.,255.);
+                  break;   
+              case ST_VOID:
+                  break; 
+              case ST_STRING:
+                   cmd.itemArgType=from.cmd.itemArgType;
+                   param.asString=from.param.asString;
                   break;    
               default:
                        debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
@@ -362,6 +380,8 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
              break;
         case ST_VOID:
              cmd.itemArgType=from.cmd.itemArgType;
+             param=from.param;
+        break;     
 
         case ST_INT32:
         case ST_UINT32:
@@ -373,12 +393,17 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
               param.h=from.param.h;
               param.s=from.param.s; 
               cmd.itemArgType=ST_HSV255;  
+            break;  
+            case ST_STRING:
+                  cmd.itemArgType=from.cmd.itemArgType;
+                  param.asString=from.param.asString;
+            break;               
            default:
               param.asInt32=from.param.asInt32;
               cmd.itemArgType=from.cmd.itemArgType;
            }
            break;
-        case ST_HS:
+        case ST_HS: //ToDo - string ?
            param.v=from.getPercents255();
            cmd.itemArgType=ST_HSV255; 
            break;     
@@ -388,6 +413,11 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
         case ST_FLOAT_CELSIUS:
            switch (from.cmd.itemArgType)
            {
+             case ST_STRING:
+              cmd.itemArgType=from.cmd.itemArgType;
+              param.asString=from.param.asString;
+             break; 
+
              case ST_TENS:
               param.asfloat=from.param.asInt32/10.;
              break;
@@ -421,7 +451,9 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                    param.h=from.param.h;
                    param.s=from.param.s; 
                    cmd.itemArgType=ST_HSV255;
-              break;     
+              break;                
+              case ST_VOID:
+              break; 
            default:
                      debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
            }
@@ -433,6 +465,10 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
         case ST_RGB:
         switch (from.cmd.itemArgType)
           {
+            case ST_STRING:
+                  cmd.itemArgType=from.cmd.itemArgType;
+                  param.asString=from.param.asString;
+            break; 
             case ST_RGBW:
                  // RGBW_flag=true;
             case ST_RGB:
@@ -542,7 +578,7 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                               } 
                           }                
 
-                  
+                  #ifndef HSV_DISABLE
                   #ifdef ADAFRUIT_LED
                     Adafruit_NeoPixel strip(0, 0, 0);
                     uint32_t rgb = strip.ColorHSV(map(from.param.h, 0, 365, 0, 65535), rgbSaturation, rgbValue);
@@ -555,10 +591,15 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                     param.g=rgb.g;
                     param.b=rgb.b;
                   #endif
+                  #else
+                  debugSerial<<F("HSV disabled")<<endl;
+                  #endif
                   debugSerial<<F("RGBx: ");
                   debugOut();
                   break;
                 }
+            case ST_VOID:
+                  break;    
             default:
                     debugSerial<<F("Wrong Assignment ")<<from.cmd.itemArgType<<F("->")<<cmd.itemArgType<<endl;
          } //Translation to RGB_XX
@@ -613,6 +654,17 @@ long int itemCmd::getInt()
  
     default:
     return 0;
+  }
+}
+
+char*  itemCmd::getString()
+{
+  switch (cmd.itemArgType) {
+
+    case ST_STRING:
+      return param.asString;
+    default:
+    return NULL;
   }
 }
 
@@ -674,7 +726,8 @@ short itemCmd::getPercents(bool inverse)
     case ST_TENS:
            if (inverse) return constrain (100-param.asInt32/10,0,100);
             else return constrain(param.asInt32/10,0,100);
-
+    case ST_VOID:
+          return 0;
 
     default:
     return -1;
@@ -721,7 +774,9 @@ short itemCmd::getPercents255(bool inverse)
 
     case ST_TENS:
       if (inverse) return 255-constrain(param.asInt32/10,0,255); else return constrain(param.asInt32/10,0,255); 
-
+    
+    case ST_VOID:
+      return 0;
     default:
     return -1;
   }
@@ -875,7 +930,12 @@ itemCmd itemCmd::RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
   return *this;
 }
 
-
+itemCmd itemCmd::Str(char * str)
+{
+ cmd.itemArgType=ST_STRING;
+ param.asString = str;
+ return *this;  
+}
 
 
 itemCmd itemCmd::Cmd(uint8_t i)
@@ -896,42 +956,86 @@ itemCmd itemCmd::setSuffix(uint8_t suffix)
   return *this;
 }
 
-bool itemCmd::loadItem(Item * item, bool includeCommand)
+bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
 {
+   bool res = false;
+
   if (item && item->isValid())
   {
   short subtype =item->getSubtype();
+  if (optionsFlag & SEND_COMMAND)    cmd.cmdCode    =  item->getCmd();
+
   if (subtype)
         {
-          param.asInt32=item->getVal();
           cmd.itemArgType= subtype;
-          if (includeCommand) cmd.cmdCode=item->getCmd();
+          if (optionsFlag & SEND_PARAMETERS) param.asInt32  =  item->getVal();
           //debugSerial<<F("Loaded :");
           //debugOut();
-          return 1;
+          return true;
         }
-  switch (item->itemVal->type)
-    {
-      case aJson_Int:
-      Int((int32_t)item->itemVal->valueint);
-      return true;
-      
-      case aJson_Float:
-      Float(item->itemVal->valueint);
-      return true;
-    }
+ 
+        if (optionsFlag & SEND_PARAMETERS) 
+          switch (item->itemVal->type)
+          {
+            case aJson_Int:
+
+            Int((int32_t)item->itemVal->valueint);
+               //debugSerial<<F("Loaded Int:");
+               //debugOut();
+            return true;
+            
+            case aJson_Float:
+            Float(item->itemVal->valuefloat);
+               //debugSerial<<F("Loaded Float:");
+               //debugOut();
+            return true;
+          }
 
   }
 return false;
 }
 
-bool itemCmd::saveItem(Item * item, bool includeCommand)
+
+bool itemCmd::loadItemDef(Item * item, uint16_t optionsFlag)
+{
+           //Restrieve previous channel state to "stored"
+           //if no values - set default values, save and put to MQTT
+           if (!loadItem(item,optionsFlag))
+                                    {
+                                    debugSerial<<F("No stored values - default: ");
+                                    setChanType(item->getChanType());
+                                    setDefault();
+                                    saveItem(item);
+                                    debugOut();
+                                    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                                    return false;
+                                    }
+return true;                                    
+}
+
+bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
 {
   if (item && item->isValid())
   {
-  item->setVal(param.asInt32);
-  item->setSubtype(cmd.itemArgType);
-  if (includeCommand) item->setCmd(cmd.cmdCode);
+  if (optionsFlag & SEND_COMMAND)    item->setCmd(cmd.cmdCode);
+  if (optionsFlag & SEND_PARAMETERS) 
+                                    switch (cmd.itemArgType)
+                                    {
+                                     case ST_FLOAT:
+                                     case ST_FLOAT_CELSIUS:
+                                     item->setFloatVal(param.asfloat);
+                                     //
+                                     break;
+
+                                     case ST_INT32:
+                                     case ST_UINT32:
+                                     item->setVal(param.asInt32);
+                                     break;
+
+                                     default: 
+                                     item->setSubtype(cmd.itemArgType); 
+                                     item->setVal(param.asInt32);
+                                    }
   debugSerial<<F("Saved:");
   debugOut();
   return true;

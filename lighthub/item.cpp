@@ -48,8 +48,17 @@ e-mail    anklimov@gmail.com
 #include "modules/out_dmx.h"
 #include "modules/out_pwm.h"
 #include "modules/out_pid.h"
+#include "modules/out_multivent.h"
+#include "modules/out_uartbridge.h"
+#include "modules/out_relay.h"
+
+#ifdef ELEVATOR_ENABLE
+#include "modules/out_elevator.h"
+#endif
 
 short modbusBusy = 0;
+bool isPendedModbusWrites = false;
+
 extern aJsonObject *pollingItem;
 extern PubSubClient mqttClient;
 extern int8_t ethernetIdleCount;
@@ -99,7 +108,8 @@ int txt2subItem(char *payload) {
     else if (strcmp_P(payload, SAT_P) == 0) cmd = S_SAT;
     else if (strcmp_P(payload, TEMP_P) == 0) cmd = S_TEMP;
     else if (strcmp_P(payload, VAL_P) == 0) cmd = S_VAL;
-  
+    else if (strcmp_P(payload, DEL_P) == 0) cmd = S_DELAYED;
+    else if (strcmp_P(payload, _RAW_P) == 0) cmd = S_RAW;
     return cmd;
 }
 
@@ -118,7 +128,7 @@ void Item::Parse() {
     if (isValid()) {
         // Todo - avoid static enlarge for every types
         for (int i = aJson.getArraySize(itemArr); i < 4; i++)
-            aJson.addItemToArray(itemArr, aJson.createItem( (long int) 0));
+            aJson.addItemToArray(itemArr, aJson.createNull());//( (long int) 0));
                    // int(defval[i]) )); //Enlarge item to 4 elements. VAL=int if no other definition in conf
         itemType = aJson.getArrayItem(itemArr, I_TYPE)->valueint;
         itemArg = aJson.getArrayItem(itemArr, I_ARG);
@@ -126,49 +136,73 @@ void Item::Parse() {
         itemExt = aJson.getArrayItem(itemArr, I_EXT);
         switch (itemType)
         {
+#ifndef  PWM_DISABLE            
           case CH_PWM:
           driver = new out_pwm (this);
           break;
+#endif          
 
 #ifndef   DMX_DISABLE
             case CH_RGBW:
             case CH_RGB:
             case CH_DIMMER:
+            case CH_RGBWW:
             driver = new out_dmx (this);
-  //          debugSerial<<F("DMX driver created")<<endl;
             break;
 #endif
 #ifndef   SPILED_DISABLE
           case CH_SPILED:
           driver = new out_SPILed (this);
-//          debugSerial<<F("SPILED driver created")<<endl;
           break;
 #endif
 
 #ifndef   AC_DISABLE
           case CH_AC:
           driver = new out_AC (this);
-//          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
 
 #ifndef   MOTOR_DISABLE
           case CH_MOTOR:
           driver = new out_Motor (this);
-//          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
 
 #ifndef   MBUS_DISABLE
           case CH_MBUS:
           driver = new out_Modbus (this);
-//          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
 
 #ifndef   PID_DISABLE
           case CH_PID:
           driver = new out_pid (this);
+          break;
+#endif
+
+
+#ifndef   RELAY_DISABLE
+          case CH_RELAYX:
+          driver = new out_relay (this);
+          break;
+#endif
+
+#ifndef   MULTIVENT_DISABLE
+          case CH_MULTIVENT:
+          driver = new out_Multivent (this);
+          break;
+#endif
+
+#ifdef   UARTBRIDGE_ENABLE
+          case CH_UARTBRIDGE:
+          driver = new out_UARTbridge (this);
+//          debugSerial<<F("AC driver created")<<endl;
+          break;
+#endif
+
+#ifdef ELEVATOR_ENABLE
+          case CH_ELEVATOR:
+          driver = new out_elevator (this);
 //          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
@@ -184,7 +218,11 @@ boolean Item::Setup()
 if (driver)
        {
         if (driver->Status()) driver->Stop();
-        driver->Setup();
+        if (driver->Setup())
+                {
+                         if (getCmd()) setFlag(SEND_COMMAND);
+                         if (itemVal)  setFlag(SEND_PARAMETERS);
+                }
         return true;
        }
 else return false;
@@ -204,7 +242,6 @@ Item::~Item()
   if (driver)
               {
               delete driver;
-//              debugSerial<<F("Driver destroyed")<<endl;
               }
 }
 
@@ -248,8 +285,9 @@ uint8_t Item::getCmd() {
 
 void Item::setCmd(uint8_t cmdValue) {
     aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
-    if (itemCmd)
-    {
+    if (itemCmd && (itemCmd->type == aJson_Int || itemCmd->type == aJson_NULL))
+    {   
+        itemCmd->type = aJson_Int;
         itemCmd->valueint = cmdValue & CMD_MASK | itemCmd->valueint & FLAG_MASK;   // Preserve special bits
         debugSerial<<F("SetCmd:")<<cmdValue<<endl;
       }
@@ -258,7 +296,7 @@ void Item::setCmd(uint8_t cmdValue) {
 short Item::getFlag   (short flag)
 {
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
-  if (itemCmd)
+  if (itemCmd && (itemCmd->type == aJson_Int))
   {
       return itemCmd->valueint & flag & FLAG_MASK;
     }
@@ -268,10 +306,11 @@ return 0;
 void Item::setFlag   (short flag)
 {
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
-  if (itemCmd)
-  {
+  if (itemCmd && (itemCmd->type == aJson_Int || itemCmd->type == aJson_NULL))
+  {   
+      itemCmd->type = aJson_Int;
       itemCmd->valueint |= flag & FLAG_MASK;   // Preserve CMD bits
-      debugSerial<<F("SetFlag:")<<flag<<endl;
+    //  debugSerial<<F("SetFlag:")<<flag<<endl;
     }
 
 }
@@ -279,10 +318,10 @@ void Item::setFlag   (short flag)
 void Item::clearFlag (short flag)
 {
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
-  if (itemCmd)
+  if (itemCmd && (itemCmd->type == aJson_Int || itemCmd->type == aJson_NULL))
   {
       itemCmd->valueint &= CMD_MASK | ~(flag & FLAG_MASK);    // Preserve CMD bits
-      debugSerial<<F("ClrFlag:")<<flag<<endl;
+    //  debugSerial<<F("ClrFlag:")<<flag<<endl;
     }
 }
 
@@ -294,6 +333,28 @@ int Item::getArg(short n) //Return arg int or first array element if Arg is arra
         if (!n) return itemArg->valueint; else return 0;//-1;
     }
     if ((itemArg->type == aJson_Array) && ( n < aJson.getArraySize(itemArg))) return aJson.getArrayItem(itemArg, n)->valueint;
+    else return 0;//-2;
+}
+
+
+float Item::getFloatArg(short n) //Return arg float or first array element if Arg is array
+{
+    if (!itemArg) return 0;//-1;
+    if (!n)
+    { 
+    if (itemArg->type == aJson_Int) return itemArg->valueint; 
+    else  if (itemArg->type == aJson_Float) return itemArg->valuefloat; 
+          else return 0; 
+    }  
+
+    if ((itemArg->type == aJson_Array) && ( n < aJson.getArraySize(itemArg))) 
+           {
+           aJsonObject * obj =  aJson.getArrayItem(itemArg, n);
+           if (obj->type == aJson_Int) return obj->valueint;
+           if (obj->type == aJson_Float) return obj->valuefloat;
+           return 0;
+           }
+
     else return 0;//-2;
 }
 
@@ -331,7 +392,7 @@ long int Item::getVal() //Return Val if val is int or first elem of Value array
 uint8_t Item::getSubtype()
 {
   if (!itemVal) return 0;//-1;
-  if (itemVal->type == aJson_Int || itemVal->type == aJson_Float) return itemVal->subtype;
+  if (itemVal->type == aJson_Int || itemVal->type == aJson_Float || itemVal->type == aJson_NULL) return itemVal->subtype;
   else if (itemVal->type == aJson_Array) {
       aJsonObject *t = aJson.getArrayItem(itemVal, 0);
       if (t) return t->subtype;
@@ -352,15 +413,23 @@ void Item::setVal(short n, int par)  // Only store  if VAL is array defined in c
 
 void Item::setVal(long int par)  // Only store if VAL is int (autogenerated or config-defined)
 {
-    if (!itemVal || (itemVal->type != aJson_Int && itemVal->type != aJson_Float)) return;
+    if (!itemVal || (itemVal->type != aJson_Int && itemVal->type != aJson_Float && itemVal->type != aJson_NULL)) return;
     //debugSerial<<F(" Store ")<<F(" Val=")<<par<<endl;
     itemVal->valueint = par;
     itemVal->type = aJson_Int;
 }
 
+void Item::setFloatVal(float par)  // Only store if VAL is int (autogenerated or config-defined)
+{
+    if (!itemVal || (itemVal->type != aJson_Int && itemVal->type != aJson_Float && itemVal->type != aJson_NULL)) return;
+    //debugSerial<<F(" Store ")<<F(" Val=")<<par<<endl;
+    itemVal->valuefloat = par;
+    itemVal->type = aJson_Float;
+}
+
 void Item::setSubtype(uint8_t par)  // Only store if VAL is int (autogenerated or config-defined)
 {
-    if (!itemVal || (itemVal->type != aJson_Int && itemVal->type != aJson_Float)) return;
+    if (!itemVal || (itemVal->type != aJson_Int && itemVal->type != aJson_Float && itemVal->type != aJson_NULL)) return;
     //debugSerial<<F(" Store ")<<F(" Val=")<<par<<endl;
     itemVal->subtype = par & 0xF;
 }
@@ -380,12 +449,13 @@ void Item::setExt(long int par)  // Only store if VAL is int (autogenerated or c
 {
     if (!itemExt)
     {
-    for (int i = aJson.getArraySize(itemArr); i <= 4; i++)
-        aJson.addItemToArray(itemArr, itemExt=aJson.createItem((long int)0));
+    for (int i = aJson.getArraySize(itemArr); i <= I_EXT; i++)
+        aJson.addItemToArray(itemArr, itemExt=aJson.createNull());// Item((long int)0));
     //itemExt = aJson.getArrayItem(itemArr, I_EXT);
       };
-
-    if(!itemExt || itemExt->type != aJson_Int) return;
+    if(!itemExt ) return;
+    if(itemExt->type == aJson_NULL) itemExt->type=aJson_Int;
+       else if(itemExt->type != aJson_Int ) return;
     itemExt->valueint = par;
     debugSerial<<F("Stored EXT:")<<par<<endl;
 }
@@ -403,11 +473,14 @@ chPersistent * Item::setPersistent(chPersistent * par)
     if (!itemExt)
     {
     for (int i = aJson.getArraySize(itemArr); i <= 4; i++)
-        aJson.addItemToArray(itemArr, itemExt = aJson.createItem((long int)0));
+        aJson.addItemToArray(itemArr, itemExt = aJson.createNull());//Item((long int)0));
     //itemExt = aJson.getArrayItem(itemArr, I_EXT);
       };
 
-    if(!itemExt || (itemExt->type != aJson_Int)) return NULL;
+    if(!itemExt ) return NULL;
+    if(itemExt->type == aJson_NULL) itemExt->type=aJson_Int;
+       else if(itemExt->type != aJson_Int ) return NULL;
+    itemExt->valueint = 0;
     itemExt->child = (aJsonObject *) par;
   //  debugSerial<<F("Persisted.")<<endl;
     return par;
@@ -451,8 +524,6 @@ else
 return suffixCode;
 }
 
-//#define MAXCTRLPAR 3
-
 // myhome/dev/item/subItem
 int Item::Ctrl(char * payload, char * subItem)
 {
@@ -470,12 +541,18 @@ if (subItem && strlen(subItem))
 if (!suffixCode && defaultSuffixCode)
         suffixCode = defaultSuffixCode;
 
+if (suffixCode == S_RAW)
+{   itemCmd ic;
+    ic.Str(payload);
+    ic.setSuffix(suffixCode);
+    return   Ctrl(ic,subItem);
+}
 
 int i=0;
 while (payload[i]) {payload[i]=toupper(payload[i]);i++;};
 
 int cmd = txt2cmd(payload);
-debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
+//debugSerial<<F("Txt2Cmd:")<<cmd<<endl;
 
 itemCmd st(ST_VOID,cmd);
 
@@ -490,11 +567,6 @@ switch (suffixCode) {
 st.setSuffix(suffixCode);
 
   switch (cmd) {
-      case CMD_UP:
-      case CMD_DN:
-          st.Int((int32_t)getInt((char **) &payload));
-          return   Ctrl(st,subItem);
-      break;
       case CMD_HSV: 
           st.Cmd(0);
       case CMD_VOID:
@@ -540,7 +612,7 @@ st.setSuffix(suffixCode);
               }
  
           return   Ctrl(st,subItem);
-      }
+        } //Void command
           break;
 
       case CMD_UNKNOWN: //Not known command
@@ -566,8 +638,11 @@ st.setSuffix(suffixCode);
          return   Ctrl(st,subItem);
       }
       default: //some known command
+      {
+      int32_t intParam = getInt((char **) &payload);
+      if (intParam) st.Int(intParam);
       return Ctrl(st, subItem);
-
+      }
   } //ctrl
 return 0;
 }
@@ -613,51 +688,23 @@ bool digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem)
                 configLocked--;
 return false;
 }
-/*  LOCKS LEAK - maintenance critical fix
 
-bool digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem)
-{    if (!itemArr || itemArr->type!=aJson_Array) return false; 
-     // Iterate across array of names
-      aJsonObject *i = itemArr->child;                                        
-                configLocked++;
-                while (i) {
-                    if (i->type == aJson_String)
-                    {   //debugSerial<< i->valuestring<<endl;
-                        aJsonObject *nextItem = aJson.getObjectItem(items, i->valuestring);
-                        if (nextItem && nextItem->type == aJson_Array) //nextItem is correct item
-                               {    
-                                Item it(nextItem);  
-                                if (cmd && it.isValid()) it.Ctrl(*cmd,subItem,false); //Execute (non recursive)
-                                //Retrieve itemType    
-                                aJsonObject * itemtype = aJson.getArrayItem(nextItem,0);
-                                if (itemtype && itemtype->type == aJson_Int  && itemtype->valueint == CH_GROUP) 
-                                    { //is Group
-                                    aJsonObject * itemSubArray = aJson.getArrayItem(nextItem,1);
-                                    short res = digGroup(itemSubArray,cmd,subItem);
-                                    if (!cmd && res) return true; //Not execution, just activity check. If any channel is active - return true
-                                    }
-                                else // Normal channel
-                                if (!cmd && it.isValid() && it.isActive()) return true; //Not execution, just activity check. If any channel is active - return true
-                               } 
-                    }    
-                    i = i->next;
-                } //while
-                configLocked--;
-return false;
-}
-*/
-
+//Main routine to control Item
 int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
-{
-  //char stringBuffer[16];
-  int suffixCode = cmd.getSuffix();
-  bool operation = isNotRetainingStatus() ;
+{ 
 
+  uint32_t time=millis();  
+  int suffixCode = cmd.getSuffix();
+  bool operation = isNotRetainingStatus();
+  
     if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
         subItem = defaultSubItem;  /// possible problem here with truncated default
 
     if (!suffixCode && subItem && strlen(subItem))
+        {    
         suffixCode = retrieveCode(&subItem);
+        if (!cmd.getSuffix()) cmd.setSuffix(suffixCode);
+        }
 
     if (!suffixCode && defaultSuffixCode)
         {
@@ -667,286 +714,387 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     
     int fr = freeRam();
     
-   
-    debugSerial<<F("RAM=")<<fr<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd=")<<F("; ");
-     if (fr < 200) {
+    debugSerial<<F("RAM=")<<fr<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd:");
+     if (fr < 200) 
+        {
         errorSerial<<F("OutOfMemory!\n")<<endl;
         return -1;
-    }
+        }
     cmd.debugOut();
+    //debugSerial<<endl; 
+    if (subItem && subItem[0] == '$') {debugSerial<<F("Skipped homie stuff")<<endl;return -4; }
     if (!itemArr) return -1;
-   
     
-
-    bool    chActive  = (isActive()>0);
-    bool    toExecute = chActive; // execute if channel is active now
-    bool    scale100  = false;
-    debugSerial<<endl;
-    
-          if (itemType != CH_GROUP )
-          {
-          //Check if subitem is some sort of command
-          int subitemCmd = subitem2cmd(subItem);
-          short prevCmd  = getCmd();
-          if (!prevCmd && chActive>0) prevCmd=CMD_ON;
-
-          if (subitemCmd && subitemCmd != prevCmd)
-              {
-                debugSerial<<F("Ignored, channel cmd=")<<prevCmd<<endl;
-                return -1;
-              }
-          }
-
-          itemCmd st(ST_VOID,CMD_VOID);
-
-           //Restore previous channel state to "st"
-           //if no values - set default values, save and put to MQTT
-           if (!st.loadItem(this))
-                                    {
-                                    debugSerial<<F("No stored values - default: ");
-                                    st.setChanType(getChanType());
-                                    st.setDefault();
-                                    st.saveItem(this);
-                                    st.debugOut();
-                                    SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
-                                    }
-
-          //threating Toggle, Restore, XOFF (special conditional commands)/ convert to ON, OFF and SET values
-          switch (cmd.getCmd()) {
-              int t;
-              case CMD_TOGGLE:
-                  toExecute=true;
-                  if (chActive) st.Cmd(CMD_OFF);
-                      else st.Cmd(CMD_ON);
-                  cmd.Cmd(st.getCmd()); // For GROUP control
-                  break;
-
-              case CMD_RESTORE:
-                  if (itemType != CH_GROUP) //individual threating of channels. Ignore restore command for groups
-                      switch (t = getCmd()) {
-                          case CMD_HALT: //previous command was HALT ?
-                              debugSerial << F("Restored from:") << t << endl;
-                              toExecute=true;
-                              if (itemType == CH_THERMO) st.Cmd(CMD_AUTO); ////
-                                  else st.Cmd(CMD_ON);    //turning on
-                              break;
-                          default:
-                              return -3;
-                      }
-
-                  break;
-              case CMD_XOFF:
-                  if (itemType != CH_GROUP) //individual threating of channels. Ignore restore command for groups
-                      switch (t = getCmd()) {
-                          case CMD_XON: //previous command was CMD_XON ?
-                              debugSerial << F("Turned off from:") << t << endl;
-                              toExecute=true;
-                              st.Cmd(CMD_OFF);    //turning Off
-                              break;
-                          default:
-                              debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
-                            return -3;
-
+    /// DELAYED COMMANDS processing
+     if (suffixCode == S_DELAYED)
+        {
+                for (int i = aJson.getArraySize(itemArr); i <= I_TIMESTAMP; i++)
+                            aJson.addItemToArray(itemArr, aJson.createNull());
+            
+                aJsonObject *timestampObj = aJson.getArrayItem(itemArr, I_TIMESTAMP);
+                if (timestampObj && cmd.getCmd()<=0xf)
+                { 
+                   if ((cmd.getInt()>0) && (timestampObj->type == aJson_Int || timestampObj->type == aJson_NULL))       
+                    {
+                        timestampObj->valueint = millis()+cmd.getInt();
+                        timestampObj->type = aJson_Int;
+                        timestampObj->subtype=cmd.getCmd();
+                        debugSerial<<F( "Armed for ")<< cmd.getInt() << F(" ms :")<<timestampObj->valueint<<endl;
                     }
-                    break;
-              case CMD_DN:
-              case CMD_UP:
-                {
-   
-                st.Cmd(CMD_VOID); // Converting to SET value command
-                short step=0;
-                if (cmd.isValue()) step=cmd.getInt();
-                if (!step) step=DEFAULT_INC_STEP;
-                if (cmd.getCmd() == CMD_DN) step=-step;
+                    else
+                    {
+                        timestampObj->subtype=0;
+                        debugSerial<<F( " Disarmed")<<endl;
+                    }         
+                return 1;
+                }        
+         return 0;              
+        }
+    /// 
+    int8_t  chActive  = -1;
+    bool    toExecute = false;
+    bool    scale100  = false;
+    bool    invalidArgument = false;
+    int     res       = -1;
+    uint16_t status2Send = 0;
+    uint8_t  command2Set = 0;
 
-                      switch (suffixCode)
-                      {
-                        case S_NOTFOUND:
-                             toExecute=true;
-                        case S_SET:
-  
-                             if (st.incrementPercents(step))
-                             {  
-                               st.saveItem(this);
-                               SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
-                             }
-                        break;
-                      
-                        case S_HUE:
-                             //if (cmd.isColor()) st.convertTo(ST_HSV255);//Extend storage for color channel
-                             if (st.incrementH(step))
-                             {
-                             st.setSuffix(S_SET);      
-                             st.saveItem(this);
-                             SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
-                             }
-                             break;
-                        case S_SAT:
-                             //if (cmd.isColor()) st.convertTo(ST_HSV255);//Extend storage for color channel
-                             if (st.incrementS(step))
-                             {
-                             st.setSuffix(S_SET);      
-                             st.saveItem(this);
-                             SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
-                            
-                             }
-                      } //switch suffix
-
-             } //Case UP/DOWN
-             break;
-             case CMD_VOID: // No commands, just set value
-
+    /// Common (GRP & NO GRP) commands
+    switch (cmd.getCmd()) 
+    {
+            case CMD_VOID: // No commands, just set value
+                         {   
+                         itemCmd stored;
                          if (!cmd.isValue()) break;
                                switch (suffixCode)
                                {
                                      case S_NOTFOUND: //For empty (universal) OPENHAB suffix - turn ON/OFF automatically
                                      toExecute=true;
                                      scale100=true;  //openHab topic format
-                                     if (chActive>0 && !cmd.getInt()) st.Cmd(CMD_OFF);
-                                     if (chActive==0 && cmd.getInt()) st.Cmd(CMD_ON);
-                                     setCmd(st.getCmd());
-                                     SendStatus(SEND_COMMAND | SEND_DEFFERED);
-
+                                     chActive=(isActive()>0);
+                                        debugSerial<<chActive<<" "<<cmd.getInt()<<endl;
+                                     if (chActive>0 && !cmd.getInt()) {cmd.Cmd(CMD_OFF);status2Send |= SEND_COMMAND | SEND_IMMEDIATE;}
+                                     if (chActive==0 && cmd.getInt()) {cmd.Cmd(CMD_ON);status2Send |= SEND_COMMAND | SEND_IMMEDIATE;}
+            
                                      // continue processing as SET
                                      case S_SET:
+                                     stored.loadItemDef(this);
                                      // if previous color was in RGB notation but new value is HSV - discard previous val and change type;   
-                                     if ((st.getArgType() == ST_RGB || st.getArgType() == ST_RGBW) &&
+                                     if ((stored.getArgType() == ST_RGB || stored.getArgType() == ST_RGBW) &&
                                         (cmd.getArgType() == ST_HSV255)) 
-                                                                st.setArgType(cmd.getArgType());
+                                                                stored.setArgType(cmd.getArgType());
 
-                                     if (itemType == CH_GROUP && cmd.isColor()) st.setArgType(ST_HSV255);//Extend storage for group channel
+                                     if (itemType == CH_GROUP && cmd.isColor()) stored.setArgType(ST_HSV255);//Extend storage for group channel
                                      
                                       //Convert value to most approptiate type for channel
-                                     st.assignFrom(cmd,getChanType());
-                                     if (scale100 || SCALE_VOLUME_100) st.scale100();
-                                     st.saveItem(this);
-                                     SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                                     stored.assignFrom(cmd,getChanType());
+                                     stored.debugOut();
+
+                                     if ((scale100 || SCALE_VOLUME_100) && (cmd.getArgType()==ST_HSV255 || cmd.getArgType()==ST_PERCENTS255 || cmd.getArgType()==ST_INT32 || cmd.getArgType()==ST_UINT32)) 
+                                            stored.scale100();
+                                     cmd=stored;
+                                     status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
 
                                      break;
                                      case S_VAL:
-                                     st=cmd;
                                      break;
 
                                      case S_SAT:
-                                     //if (cmd.isColor()) st.convertTo(ST_HSV255);//Extend storage for color channel
-                                     if (st.setS(cmd.getS()))
+                                     stored.loadItemDef(this);
+                                     if (stored.setS(cmd.getS()))
                                         { 
-                                          st.setSuffix(S_SET);  
-                                          st.saveItem(this);
-                                          SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
-                                        }
+                                          cmd=stored;
+                                          cmd.setSuffix(S_SET);  
+                                          status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
+                                        } else invalidArgument=true;
                                      break;
 
                                      case S_HUE:
-                                     //if (cmd.isColor()) st.convertTo(ST_HSV255);//Extend storage for color channel
-                                     if (st.setH(cmd.getH()))
+                                     stored.loadItemDef(this);
+                                     if (stored.setH(cmd.getH()))
                                         {
-                                          st.setSuffix(S_SET);    
-                                          st.saveItem(this);
-                                          SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
-                                        }
+                                          cmd=stored;  
+                                          cmd.setSuffix(S_SET);   
+                                          status2Send |= SEND_PARAMETERS | SEND_DEFFERED;    
+                                        } else invalidArgument=true;
                                     break;
                                     case S_TEMP:
-                                    //st.setSuffix(suffixCode);  
-                                    st.setColorTemp(cmd.getColorTemp());
-                                    st.saveItem(this);
-                                    SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                                    stored.loadItemDef(this);
+                                    stored.setColorTemp(cmd.getColorTemp());
+                                    cmd=stored;
+                                    status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
                                    }
 
-                                  break;
+                        }   
+                        break;
+              case CMD_TOGGLE:
+                  chActive=(isActive()>0);
+                  toExecute=true;
 
-          default:
-                st.Cmd(cmd.getCmd());
-                st.setSuffix(suffixCode);
-                toExecute=true;
-          } //Switch commands
+                  if (chActive) cmd.Cmd(CMD_OFF);
+                      else 
+                            { 
+                             // cmd.loadItemDef(this);  ///
+                              cmd.Cmd(CMD_ON);
+                            }   
+                  status2Send |=SEND_COMMAND | SEND_IMMEDIATE;    
+                break;
 
-if (driver) //New style modular code
+
+              case CMD_DN:
+              case CMD_UP:
+                {
+                itemCmd fallbackCmd=cmd;    
+                short step=0;    
+                if (cmd.isValue()) step=cmd.getInt();
+                if (!step) step=DEFAULT_INC_STEP;
+                if (cmd.getCmd() == CMD_DN) step=-step;    
+
+                cmd.loadItemDef(this); 
+
+                cmd.Cmd(CMD_VOID); // Converting to SET value command
+                
+                      switch (suffixCode)
+                      {
+                        case S_NOTFOUND:
+                             toExecute=true;
+                        case S_SET:
+  
+                             if (cmd.incrementPercents(step))
+                             {  
+                               status2Send |= SEND_PARAMETERS | SEND_DEFFERED;    
+                             } else {cmd=fallbackCmd;invalidArgument=true;}
+                        break;
+                      
+                        case S_HUE:
+                             if (cmd.incrementH(step))
+                             {
+                               status2Send |= SEND_PARAMETERS | SEND_DEFFERED;     
+                               cmd.setSuffix(S_SET);      
+                             } else {cmd=fallbackCmd;invalidArgument=true;}
+                             break;
+                        case S_SAT:
+                             if (cmd.incrementS(step))
+                             {
+                               status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
+                               cmd.setSuffix(S_SET);  
+                             } else {cmd=fallbackCmd;invalidArgument=true;}
+                      } //switch suffix
+
+             } //Case UP/DOWN
+             break;   
+    // 
+    }
+    if (itemType==CH_GROUP) 
+    {
+    if (allowRecursion && itemArg->type == aJson_Array && operation) 
+                {
+                digGroup(itemArg,&cmd,subItem);   
+                }
+       res=1;            
+
+      // Post-processing of group command - converting HALT,REST,XON,XOFF to conventional ON/OFF for status
+      switch (cmd.getCmd()) {
+              int t;
+              case CMD_RESTORE:  // individual for group members
+                      switch (t = getCmd()) {
+                          case CMD_HALT: //previous command was HALT ?
+                              debugSerial << F("Restored from:") << t << endl;
+                              cmd.loadItemDef(this);
+                              cmd.Cmd(CMD_ON);    //turning on
+                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                              break;
+                          default:
+                              return -3;
+                      }
+                  status2Send |= SEND_COMMAND;     
+                  break;
+              case CMD_XOFF:    // individual for group members
+                      switch (t = getCmd()) {
+                          case CMD_XON: //previous command was CMD_XON ?
+                              debugSerial << F("Turned off from:") << t << endl;
+                              cmd.Cmd(CMD_OFF);    //turning Off
+                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                              break;
+                          default:
+                              debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
+                            return -3;
+                    }
+                    break;
+          
+            case CMD_XON:
+            chActive=(isActive()>0);
+            if (!chActive)  //if channel was'nt active before CMD_XON
+                  {
+                    cmd.loadItemDef(this);
+                    cmd.Cmd(CMD_ON);
+                    command2Set=CMD_XON;
+                    status2Send |= SEND_COMMAND | SEND_IMMEDIATE;  
+                  }
+              else
+              { 
+                debugSerial<<F("XON:Already Active\n");
+                return -3;
+              }
+            break;
+            case CMD_HALT:
+            chActive=(isActive()>0);
+            if (chActive)  //if channel was active before CMD_HALT
+                  {
+                    cmd.Cmd(CMD_OFF);  
+                    command2Set=CMD_HALT;
+                    status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                  }
+            else    
+                  {
+                    debugSerial<<F("HALT:Already Inactive\n");
+                    return -3;
+                  }
+            break;
+      }
+
+     status2Send |= SEND_IMMEDIATE;  
+     if (cmd.isCommand()) status2Send |= SEND_COMMAND;       
+     if (cmd.isValue() || cmd.loadItem(this,SEND_PARAMETERS)) status2Send |= SEND_PARAMETERS; ;
+    } // end GROUP
+    
+    else
+    {  // NON GROUP part
+        if (chActive<0) chActive  = (isActive()>0);
+        toExecute=chActive || toExecute; // Execute if active 
+        debugSerial<<F("Active:")<<chActive<<F( " Exec:")<<toExecute<<endl;
+        if (subItem) 
         {
-          int res = -1;
-          switch (cmd.getCmd())
-          {
+        //Check if subitem is some sort of command    
+        int subitemCmd = subitem2cmd(subItem);
+        short prevCmd  = getCmd();
+        if (!prevCmd && chActive) prevCmd=CMD_ON;
+
+            if (subitemCmd) //Find some COMMAND in subitem
+                {           
+                if (subitemCmd != prevCmd)
+                    {
+                        debugSerial<<F("Ignored, channel cmd=")<<prevCmd<<endl;
+                        return -1;
+                    }
+                subItem=NULL;   
+                }
+            else // Fast track for commands to subitems
+            {   
+                if (driver) return driver->Ctrl(cmd,subItem,toExecute);
+                return 0;
+            }
+        }
+
+        // Commands for NON GROUP
+        //threating Restore, XOFF (special conditional commands)/ convert to ON, OFF and SET values
+          switch (cmd.getCmd()) {
+              int t;
+              case CMD_RESTORE:  // individual for group members
+                      switch (t = getCmd()) {
+                          case CMD_HALT: //previous command was HALT ?
+                              debugSerial << F("Restored from:") << t << endl;
+                              cmd.loadItemDef(this);
+                              toExecute=true;
+                              if (itemType == CH_THERMO) cmd.Cmd(CMD_AUTO); ////
+                                  else cmd.Cmd(CMD_ON);    //turning on
+                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE;     
+                              break;
+                          default:
+                              return -3;
+                      }
+                  status2Send |= SEND_COMMAND;     
+                  break;
+              case CMD_XOFF:    // individual for group members
+                      switch (t = getCmd()) {
+                          case CMD_XON: //previous command was CMD_XON ?
+                              debugSerial << F("Turned off from:") << t << endl;
+                              toExecute=true;
+                              cmd.Cmd(CMD_OFF);    //turning Off
+                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                              break;
+                          default:
+                              debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
+                            return -3;
+                    }
+                    break;
+          
             case CMD_XON:
             if (!chActive)  //if channel was'nt active before CMD_XON
                   {
-                    debugSerial<<F("Turning XON\n");
-                    res = driver->Ctrl(st.Cmd(CMD_ON), subItem);
-                    setCmd(CMD_XON);
-                    SendStatus(SEND_COMMAND);
+                    cmd.loadItemDef(this);
+                    cmd.Cmd(CMD_ON);
+                    command2Set=CMD_XON;
+                    status2Send |= SEND_COMMAND | SEND_IMMEDIATE;  
+                    toExecute=true;
                   }
               else
-              {  //cmd = CMD_ON;
-                debugSerial<<F("Already Active\n");
+              { 
+                debugSerial<<F("XON:Already Active\n");
                 return -3;
               }
             break;
             case CMD_HALT:
             if (chActive)  //if channel was active before CMD_HALT
                   {
-                    res = driver->Ctrl(st.Cmd(CMD_OFF), subItem);
-                    setCmd(CMD_HALT);
-                    SendStatus(SEND_COMMAND);
-                    return res;
+                    cmd.Cmd(CMD_OFF);  
+                    command2Set=CMD_HALT;
+                    status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                    toExecute=true;
                   }
             else    
                   {
-                    debugSerial<<F("Already Inactive\n");
+                    debugSerial<<F("HALT:Already Inactive\n");
                     return -3;
                   }
-            break;
-            case CMD_OFF:
-            if (getCmd() != CMD_HALT) //Halted, ignore OFF
-                 {
-                   res = driver->Ctrl(st.Cmd(CMD_OFF), subItem);
-                   setCmd(CMD_OFF);
-                   SendStatus(SEND_COMMAND);
-                 }
-            else
-                  {
-                    debugSerial<<F("Already Halted\n");
-                    return -3;
-                  }
-            break;
-
-            case CMD_VOID:
-            case CMD_DN:
-            case CMD_UP:
-            res = driver->Ctrl(st, subItem, toExecute);
-
             break;
             
-            case CMD_ON:
-            if (chActive) break;
+            case CMD_OFF:
+            if (getCmd() == CMD_HALT) return -3; //Halted, ignore OFF
+            status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+            toExecute=true;
+            break;
 
-            default: //another command
-            res = driver->Ctrl(st, subItem);
-            if (st.isCommand())
-                        {
-                        setCmd(st.getCmd());
-                        SendStatus(SEND_COMMAND);
-                        }
-          }
-          debugSerial<<F("Driver Res:")<<res<<endl;
-          return res;
-        }
-else //Driver not found
-//==================
+            case CMD_ON:
+            if (chActive) 
+                {
+                        debugSerial<<F("ON:Already Active\n");
+                        return -3;
+                }
+            if (!cmd.isValue()) cmd.loadItemDef(this); // if no_suffix - both, command ON and value provided
+            status2Send |= SEND_COMMAND | SEND_PARAMETERS | SEND_IMMEDIATE; 
+            toExecute=true; 
+            break;
+          case CMD_VOID:
+          case CMD_TOGGLE:
+          case CMD_DN:
+          case CMD_UP:
+            break;   
+
+          default:
+            if (cmd.isCommand()) status2Send |= SEND_COMMAND;
+            if (cmd.isValue())   status2Send |= SEND_PARAMETERS; 
+            toExecute=true;
+          } //Switch commands
+} // NO GROUP
+if (invalidArgument) return -4;
+// UPDATE internal variables 
+if (status2Send) cmd.saveItem(this,status2Send);
+//debugSerial<<F("sts:")<<status2Send<<endl;
+
+if (driver) //New style modular code
+          {
+          res = driver->Ctrl(cmd, subItem, toExecute);   
+          //if (res==-1) status2Send=0;  ///////not working
+          }     
+else 
 {
 switch (itemType) {
-                case CH_GROUP:
-    
-                    if (allowRecursion && itemArg->type == aJson_Array && operation) 
-                        digGroup(itemArg,&cmd,subItem);
-
-               break;
-
-
-
 /// rest of Legacy monolite core code (to be refactored ) BEGIN ///
               case CH_RELAY:
               {
                  short iaddr=getArg();
-                 short icmd =st.getCmd();
+                 short icmd =cmd.getCmd();
 
                  if (iaddr)
                  {
@@ -962,10 +1110,12 @@ switch (itemType) {
                       pinMode(iaddr, OUTPUT);
 
                       if (inverse)
-                          digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_XON) ? LOW : HIGH));
+                          digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_AUTO) ? LOW : HIGH));
                       else
-                          digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_XON) ? HIGH : LOW));
+                          digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_AUTO) ? HIGH : LOW));
                       debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
+                      status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                      res=1;
                       }
                 }
                    break;
@@ -980,65 +1130,70 @@ switch (itemType) {
                       thermostatStore tStore;
                       tStore.asint=getExt();
                       if (!tStore.timestamp16) mqttClient.publish("/alarmoff/snsr", itemArr->name);
-                      tStore.tempX100=st.getFloat()*100.;         //Save measurement
+                      tStore.tempX100=cmd.getFloat()*100.;         //Save measurement
                       tStore.timestamp16=millisNZ(8) & 0xFFFF;    //And timestamp
                       debugSerial<<F(" T:")<<tStore.tempX100<<F(" TS:")<<tStore.timestamp16<<endl;
                       setExt(tStore.asint);
+                      res=1;
                       }
                       break;
                       case S_SET:
-                      st.saveItem(this);
+                      status2Send |= SEND_PARAMETERS | SEND_IMMEDIATE; 
+                      res=1;
+                      //st.saveItem(this);
                       break;
+                      case S_CMD:
+                      status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                      res=1;
                      }
                    break;
 
 
       #ifndef MODBUS_DISABLE
               case CH_MODBUS:
-                  if (toExecute) modbusDimmerSet(st);
+                if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue()))
+                {
+                int vol;    
+                if (!chActive && cmd.getCmd()== CMD_ON && (vol=cmd.getPercents())<MIN_VOLUME && vol>=0) 
+                        {
+                        cmd.setPercents(INIT_VOLUME);
+                        status2Send |= SEND_PARAMETERS | SEND_IMMEDIATE; 
+                        };
+
+                  res=modbusDimmerSet(cmd);
+                }
                   break;
               case CH_VC:
-                  if (toExecute) VacomSetFan(st);
+                  if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue())) res=VacomSetFan(cmd);
                   break;
               case CH_VCTEMP:
-                  if (toExecute) VacomSetHeat(st);
+                  if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue())) res=VacomSetHeat(cmd);
                   break;
      #endif
 /// rest of Legacy monolite core code (to be refactored ) END ///
 
   } //switch
-  if (st.isCommand())
-              {
-              if (cmd.getCmd() == CMD_HALT)
-              {
-               if (chActive>0)  //if channel was active before CMD_HALT
-                  {
-                    setCmd(CMD_HALT);
-                    SendStatus(SEND_COMMAND);
-                  }
-               }   
-             else
-             {
-              setCmd(st.getCmd());
-              SendStatus(SEND_COMMAND);
-              }
-              }
- }
-return 1; 
+} //else (nodriver)
+
+ //update command for HALT & XON and send MQTT status
+ if (command2Set) setCmd(command2Set | SEND_COMMAND);
+ if (operation) SendStatus(status2Send);
+
+debugSerial<<F("Ctrl Res:")<<res<<F(" time:")<<millis()-time<<endl; 
+return res; 
 }
 
 void printActiveStatus(bool active)
 {
-if (active) debugSerial<<F(" active ");
-    else debugSerial<<F(" inactive ");
+if (active) debugSerial<<F("(+) ");
+    else debugSerial<<F("(-) ");
 }
 
 int Item::isActive() {
     itemCmd st;
     int val = 0;
 
-
-    debugSerial<<itemArr->name;
+    debugSerial<<itemArr->name<<F(" ");
     if (!isValid())
                       {
                       debugSerial<<F(" invalid")<<endl;
@@ -1076,9 +1231,11 @@ int Item::isActive() {
     switch (itemType) {
         case CH_GROUP: //make recursive calculation - is it some active in group
             if (itemArg->type == aJson_Array) {
-                debugSerial<<F(" Grp:");
+                debugSerial<<F("[");
                 val=digGroup(itemArg);
+                debugSerial<<F("]=");
                 printActiveStatus(val);
+                debugSerial<<endl;
                 return val;
             } //if
             break;       
@@ -1101,7 +1258,35 @@ int Item::isActive() {
     if (val) return 1; else return 0;
 }
 
+
 int Item::Poll(int cause) {
+
+if (isPendedModbusWrites) resumeModbus();                         
+
+aJsonObject *timestampObj = aJson.getArrayItem(itemArr, I_TIMESTAMP);
+if (timestampObj)
+{
+  uint8_t  cmd = timestampObj->subtype;
+  int32_t remain = (uint32_t) timestampObj->valueint - (uint32_t)millis(); 
+
+  if (cmd)    {
+                 itemCmd st(ST_UINT32,cmd);
+                 st.Int(remain);
+
+                if (!(remain % 1000))
+                {     
+                    SendStatusImmediate(st,SEND_DELAYED);
+                    debugSerial<< remain/1000 << F(" sec remaining") << endl;
+                }
+
+                if (remain <0 && abs(remain)< 0xFFFFFFFFUL/2)
+                {
+                SendStatusImmediate(st,SEND_DELAYED);    
+                Ctrl(itemCmd(ST_VOID,cmd));
+                timestampObj->subtype=0;
+                }
+              }  
+}
 
 switch (cause)
 {
@@ -1119,11 +1304,13 @@ switch (cause)
             sendDelayedStatus();
             return INTERVAL_SLOW_POLLING;
             break;
+   /*
         case CH_VCTEMP:
             checkHeatRetry();
             sendDelayedStatus();
             return INTERVAL_SLOW_POLLING;
-            break;
+            break; */
+
         #endif
       /*  case CH_RGB:    //All channels with slider generate too many updates
         case CH_RGBW:
@@ -1140,7 +1327,7 @@ switch (cause)
   if (driver && driver->Status())
                       {
                       return driver->Poll(cause);
-                      }
+                      }                             
 
     return 0;
 }
@@ -1157,26 +1344,28 @@ void Item::sendDelayedStatus()
 
 
 int Item::SendStatus(int sendFlags) {
-
+    if (sendFlags & SEND_IMMEDIATE) sendFlags &= ~ (SEND_IMMEDIATE | SEND_DEFFERED);
     if ((sendFlags & SEND_DEFFERED) ||  freeRam()<150 || (!isNotRetainingStatus() )) {
         setFlag(sendFlags & (SEND_COMMAND | SEND_PARAMETERS));
         debugSerial<<F("Status deffered\n");
         return -1;
     }
-    else return SendStatusImmediate(sendFlags);
-}
-    
-    int Item::SendStatusImmediate(int sendFlags) {
+    else 
     {
-      itemCmd st(ST_VOID,CMD_VOID);  
-      st.loadItem(this, true);
-
-      sendFlags |= getFlag(SEND_COMMAND | SEND_PARAMETERS); //if some delayed status is pending
-
+        itemCmd st(ST_VOID,CMD_VOID);  
+        st.loadItem(this, SEND_COMMAND | SEND_PARAMETERS);
+        sendFlags |= getFlag(SEND_COMMAND | SEND_PARAMETERS); //if some delayed status is pending
+        //debugSerial<<F("ssi:")<<sendFlags<<endl;
+        return SendStatusImmediate(st,sendFlags);
+    }
+  }
+    
+    int Item::SendStatusImmediate(itemCmd st, int sendFlags, char * subItem) {
+    {
       char addrstr[48];
       char valstr[20] = "";
       char cmdstr[8] = "";
-
+    st.debugOut();
     if (sendFlags & SEND_COMMAND)
     {
     // Preparing Command payload  //////////////
@@ -1202,6 +1391,8 @@ int Item::SendStatus(int sendFlags) {
             sendFlags &= ~SEND_COMMAND;
     }
    }
+
+   //debugSerial<<"C"<<cmdstr<<endl;
       // publish to MQTT - OpenHab Legacy style to 
       // myhome/s_out/item - mix: value and command
       // send only for OH bus supported types
@@ -1212,7 +1403,7 @@ int Item::SendStatus(int sendFlags) {
           case ST_HSV255:
           case ST_FLOAT_CELSIUS:
 
-                      if (mqttClient.connected()  && !ethernetIdleCount)
+                      if (mqttClient.connected()  && !ethernetIdleCount && !subItem)
                       {
 
                         setTopic(addrstr,sizeof(addrstr),T_OUT);
@@ -1243,11 +1434,21 @@ int Item::SendStatus(int sendFlags) {
             // myhome/s_out/item/cmd
             // myhome/s_out/item/set
 
-          if (sendFlags & SEND_PARAMETERS)
+          if ((st.isValue() && (sendFlags & SEND_PARAMETERS) || (sendFlags & SEND_DELAYED)))
              {
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
-              strncat(addrstr, "/", sizeof(addrstr));
+              if (subItem) 
+                            {
+                            strncat(addrstr, "/", sizeof(addrstr)-1);    
+                            strncat(addrstr, subItem, sizeof(addrstr)-1);
+                            }
+
+              strncat(addrstr, "/", sizeof(addrstr)-1);
+              
+              if (sendFlags & SEND_DELAYED)
+                     strncat_P(addrstr, DEL_P, sizeof(addrstr)-1);
+              else   strncat_P(addrstr, SET_P, sizeof(addrstr)-1); 
 
         // Preparing parameters payload //////////
            switch (st.getArgType()) {
@@ -1258,17 +1459,11 @@ int Item::SendStatus(int sendFlags) {
                   st.toString(valstr, sizeof(valstr), SEND_PARAMETERS|SEND_COMMAND);
                   break;
             default:         
-           st.toString(valstr, sizeof(valstr), SEND_PARAMETERS,(SCALE_VOLUME_100));
+           st.toString(valstr, sizeof(valstr), (sendFlags & SEND_DELAYED)?SEND_COMMAND|SEND_PARAMETERS:SEND_PARAMETERS,(SCALE_VOLUME_100));
            }
               
-              switch (st.getArgType()) {
-                  case ST_RGB:
-                  case ST_RGBW:
-                     strncat_P(addrstr, SET_P, sizeof(addrstr));
-                     break;
-                  default:
-                     strncat_P(addrstr, SET_P, sizeof(addrstr));
-              }
+
+              
 
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
               if (mqttClient.connected()  && !ethernetIdleCount)
@@ -1304,6 +1499,11 @@ int Item::SendStatus(int sendFlags) {
 
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
+              if (subItem) 
+                            {
+                            strncat(addrstr, "/", sizeof(addrstr));    
+                            strncat(addrstr, subItem, sizeof(addrstr)-1);
+                            }
               strncat(addrstr, "/", sizeof(addrstr));
               strncat_P(addrstr, CMD_P, sizeof(addrstr));
 
@@ -1327,6 +1527,94 @@ int Item::getChanType()
 {
 if (driver) return driver->getChanType();
 return itemType;
+}
+
+
+// Setup SEND_RETRY flag to repeat unsucsessfull modbus tranzaction after release line
+void Item::mb_fail(int result) {
+    debugSerial<<F("Modbus op failed:")<<_HEX(result)<<endl;
+    setFlag(SEND_RETRY);
+    isPendedModbusWrites=true;
+}
+
+#define M_SUCCESS 1
+#define M_FAILED  0
+#define M_BUSY    -1
+#define M_CLEAN   2
+
+//Check pended transactoin
+//Output:
+//M_SUCCESS (1)  - Succeded 
+//M_FAILED  (0)  - Failed
+//M_BUSY    (-1) - Modbus busy
+//M_CLEAN   (2)  - Clean. Not needed to repeat 
+
+int Item::checkModbusRetry() {
+  int result = -1;  
+  if (modbusBusy) return M_BUSY;
+    if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
+      itemCmd val(ST_VOID,CMD_VOID);
+      val.loadItem(this, SEND_COMMAND | SEND_PARAMETERS);
+      debugSerial<<F("Retrying modbus CMD\n");
+      clearFlag(SEND_RETRY);     // Clean retry flag
+      if (driver) result=driver->Ctrl(val);
+      #ifndef MODBUS_DISABLE
+      else switch (itemType) 
+      {
+
+      case CH_MODBUS:
+           result=modbusDimmerSet(val);
+          break;
+      case CH_VC:
+           result=VacomSetFan(val);
+           break;     
+      case CH_VCTEMP:
+           result=VacomSetHeat(val);
+           break;           
+      default:
+          break;
+      }
+      #endif
+
+      switch (result){
+          case -1: return M_CLEAN;
+          case 0:  
+                    debugSerial<<itemArr->name<<F(":")<<F(" failed")<<endl;
+                    return M_FAILED; 
+      }
+      debugSerial<<itemArr->name<<F(":")<<F(" ok")<<endl;
+      return M_SUCCESS;
+    }
+return M_CLEAN;
+}
+
+bool Item::resumeModbus()
+{
+
+if (modbusBusy) return false;
+bool success = true;
+
+//debugSerial<<F("Pushing MB: ");
+configLocked++;
+if (items) {
+    aJsonObject * item = items->child;
+    while (items && item)
+        if (item->type == aJson_Array && aJson.getArraySize(item)>1)  {
+            Item it(item);
+            if (it.isValid()) {
+
+                        short res = it.checkModbusRetry(); 
+                        if (res<=0) success = false;
+               
+            } //isValid
+            yield();
+            item = item->next;
+        }  //if
+debugSerial<<endl;
+}
+configLocked--;
+ if (success) isPendedModbusWrites=false;
+return true;
 }
 
 //////////////////// Begin of legacy MODBUS code - to be moved in separate module /////////////////////
@@ -1364,7 +1652,10 @@ POLL  2101x10
 [22:27:29] => poll: 0A 03 08 34 00 0A 87 18
 
 */
+
 #ifndef MODBUS_DISABLE
+extern ModbusMaster node;
+
 int Item::modbusDimmerSet(itemCmd st)
         {
 
@@ -1394,16 +1685,6 @@ int Item::modbusDimmerSet(itemCmd st)
             }
             return 0;
         }
-#endif
-
-void Item::mb_fail() {
-    debugSerial<<F("Modbus op failed\n");
-    setFlag(SEND_RETRY);
-}
-
-#ifndef MODBUS_DISABLE
-extern ModbusMaster node;
-
 
 
 int Item::VacomSetFan(itemCmd st) {
@@ -1424,7 +1705,7 @@ int Item::VacomSetFan(itemCmd st) {
     if (modbusBusy) {
        // setCmd(cmd);
        // setVal(val);
-       st.saveItem(this,true);
+       st.saveItem(this,SEND_PARAMETERS|SEND_COMMAND);
         mb_fail();
         return 0;
     }
@@ -1443,9 +1724,10 @@ int Item::VacomSetFan(itemCmd st) {
     if (result == node.ku8MBSuccess) debugSerial << F("MB ok")<<endl;
     result = node.writeSingleRegister(2003 - 1, val * 100);
     modbusBusy = 0;
+    //resumeModbus();
 
     if (result == node.ku8MBSuccess) return 1;
-    mb_fail();
+    mb_fail(result);
     return 0;
 }
 
@@ -1470,7 +1752,7 @@ int addr;
     if (modbusBusy) {
       //setCmd(cmd);
       //setVal(val);
-       st.saveItem(this,true);
+       st.saveItem(this,SEND_COMMAND|SEND_PARAMETERS);
       mb_fail();
       return 0;
     }
@@ -1494,8 +1776,9 @@ int addr;
     //debugSerial<<regval);
     result=node.writeSingleRegister(2004 - 1, regval);
     modbusBusy = 0;
+    //resumeModbus();
     if (result == node.ku8MBSuccess) return 1;
-    mb_fail();
+    mb_fail(result);
     return 0;
 
 }
@@ -1514,6 +1797,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
 
     modbusSerial.begin(MODBUS_SERIAL_BAUD, dimPar);
     node.begin(addr, modbusSerial);
+    uint8_t t;
     switch (_mask) {
        case 1:
         value <<= 8;
@@ -1522,8 +1806,21 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
        case 0:
         value &= 0xff;
         value |= (0xff00);
+        break;
+       case 2:
+        break;
+       case 3: // Modbus relay
+        //value++;
+          if (value) value = 1;
+             else    value = 2;   
+       case 4: //Swap high and low bytes
+        t = (value & 0xff00) >> 8;
+        value <<=8;
+        value |= t;
+
+
     }
-    debugSerial<<addr<<F("=>")<<_HEX(_reg)<<F("(T:")<<_regType<<F("):")<<_HEX(value)<<endl;
+    debugSerial<<F("Addr:")<<addr<<F(" Reg:0x")<<_HEX(_reg)<<F(" T:")<<_regType<<F(" Val:0x")<<_HEX(value)<<endl;
     switch (_regType) {
         case MODBUS_HOLDING_REG_TYPE:
             result = node.writeSingleRegister(_reg, value);
@@ -1535,16 +1832,18 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
             debugSerial<<F("Not supported reg type\n");
     }
     modbusBusy = 0;
+    //resumeModbus();
 
     if (result == node.ku8MBSuccess) return 1;
-    mb_fail();
+    mb_fail(result);
     return 0;
 
 }
 
 int Item::checkFM() {
     if (modbusBusy) return -1;
-    if (checkVCRetry()) return -2;
+    //if (checkVCRetry()) return -2;
+    //if (checkModbusRetry()) return -2;
     modbusBusy = 1;
 
     uint8_t j, result;
@@ -1607,6 +1906,8 @@ int Item::checkFM() {
         result = node.readHoldingRegisters(2111 - 1, 1);
         if (result == node.ku8MBSuccess) aJson.addNumberToObject(out, "flt", (long int) node.getResponseBuffer(0));
         modbusBusy=0;
+        //resumeModbus();
+
         if (isActive()>0) Off(); //Shut down ///
         modbusBusy=1;
     } else aJson.addNumberToObject(out, "flt", (long int)0);
@@ -1646,54 +1947,13 @@ int Item::checkFM() {
     free(outch);
     aJson.deleteItem(out);
     modbusBusy = 0;
+    //resumeModbus();
     return 1;
-}
-
-boolean Item::checkModbusRetry() {
-  if (modbusBusy) return false;
-//    int cmd = getCmd();
-    if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
-      itemCmd val(ST_VOID,CMD_VOID);
-      val.loadItem(this, true);
-      debugSerial<<F("Retrying dimmer CMD\n");
-      clearFlag(SEND_RETRY);     // Clean retry flag
-      modbusDimmerSet(val);
-      return true;
-    }
-return false;
-}
-
-boolean Item::checkVCRetry() {
-    if (modbusBusy) return false;
-    //int cmd = getCmd();
-    if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
-      itemCmd val(ST_VOID,CMD_VOID);
-      val.loadItem(this, true);
-      debugSerial<<F("Retrying VC CMD\n");
-      clearFlag(SEND_RETRY);     // Clean retry flag
-      VacomSetFan(val);
-      return true;
-    }
-return false;
-}
-
-boolean Item::checkHeatRetry() {
-    if (modbusBusy) return false;
-    //int cmd = getCmd();
-    if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
-      itemCmd val(ST_VOID,CMD_VOID);
-      val.loadItem(this, true);
-      debugSerial<<F("Retrying VC temp CMD\n");
-      clearFlag(SEND_RETRY);     // Clean retry flag
-      VacomSetHeat(val);
-      return true;
-    }
-return false;
 }
 
 int Item::checkModbusDimmer() {
     if (modbusBusy) return -1;
-    if (checkModbusRetry()) return -2;
+    //if (checkModbusRetry()) return -2;
 
     short numpar = 0;
     if ((itemArg->type != aJson_Array) || ((numpar = aJson.getArraySize(itemArg)) < 2)) {
@@ -1759,6 +2019,7 @@ int Item::checkModbusDimmer() {
     } else
         debugSerial << F("Modbus polling error=") << _HEX(result) << endl;
     modbusBusy = 0;
+    //resumeModbus();
 
 return 1;
 }
@@ -1786,7 +2047,7 @@ int Item::checkModbusDimmer(int data) {
         if (d) { // Actually turned on
             if (cmd != CMD_XON && cmd != CMD_ON) setCmd(CMD_ON);  //store command
             st.Percents255(d);
-            st.saveItem(this);
+            st.saveItem(this,SEND_PARAMETERS);
             //setVal(d);       //store value
             if (cmd == CMD_OFF || cmd == CMD_HALT) SendStatus(SEND_COMMAND); //update OH with ON if it was turned off before
             SendStatus(SEND_PARAMETERS); //update OH with value

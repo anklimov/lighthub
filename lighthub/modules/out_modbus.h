@@ -4,12 +4,9 @@
 #include <abstractout.h>
 #include <item.h>
 #include "itemCmd.h"
+#include <utils.h>
 
-#if defined(ESP32)
-#define serialParamType uint32_t
-#else
-#define serialParamType uint16_t
-#endif
+
 
 class mbPersistent : public chPersistent  {
 

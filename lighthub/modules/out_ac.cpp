@@ -53,6 +53,7 @@ void out_AC::InsertData(byte data[], size_t size){
 
     char s_mode[10];
     set_tmp = data[B_SET_TMP]+16;
+    if (set_tmp>40 || set_tmp<16) return;
     cur_tmp = data[B_CUR_TMP];
     mode    = data[B_MODE];
     fan_spd = data[B_FAN_SPD];
@@ -82,8 +83,8 @@ void out_AC::InsertData(byte data[], size_t size){
   }
   */
 
-  Serial.print ("Power=");
-  Serial.println(power);
+  debugSerial.print ("Power=");
+  debugSerial.println(power);
 
   if (power & 0x08)
       publishTopic(item->itemArr->name, "ON", "/quiet");
@@ -188,8 +189,8 @@ byte getCRC(byte req[], size_t size){
 void SendData(byte req[], size_t size){
   AC_Serial.write(req, size - 1);
   AC_Serial.write(getCRC(req, size-1));
-  AC_Serial.flush();
-
+  //AC_Serial.flush();
+/*
  Serial.print("<<");
   for (int i=0; i < size-1; i++)
   {
@@ -203,6 +204,7 @@ void SendData(byte req[], size_t size){
              }
   }
 Serial.println();
+*/
 }
 
 inline unsigned char toHex( char ch ){
@@ -214,7 +216,7 @@ inline unsigned char toHex( char ch ){
 int  out_AC::Setup()
 {
 abstractOut::Setup();    
-Serial.println("AC Init");
+debugSerial<<F("AC Init")<<endl;
 AC_Serial.begin(9600);
 driverStatus = CST_INITIALIZED;
 return 1;
@@ -222,7 +224,7 @@ return 1;
 
 int  out_AC::Stop()
 {
-Serial.println("AC De-Init");
+debugSerial<<F("AC De-Init")<<endl;
 
 driverStatus = CST_UNKNOWN;
 return 1;
@@ -246,11 +248,11 @@ if (cause!=POLLING_SLOW) return 0;
   //if (now - prevPolling > INTERVAL_AC_POLLING) {
   if (isTimeOver(prevPolling,millis(),INTERVAL_AC_POLLING)) {
     prevPolling = millisNZ();
-    Serial.println ("Polling");
+    debugSerial.println(F("Polling"));
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
-delay(100);
-  if(AC_Serial.available() > 0){
+///delay(100);
+  if(AC_Serial.available() >= 37){ //was 0
     AC_Serial.readBytes(data, 37);
     while(AC_Serial.available()){
       delay(2);
@@ -281,13 +283,14 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
       switch(suffixCode)
       {
       case S_SET:
-      //case S_ESET:
           set_tmp = cmd.getInt();
-          if (set_tmp >= 10 && set_tmp <= 30)
+          if (set_tmp >= 16 && set_tmp <= 40)
           {
+            //if (set_tmp>40 || set_tmp<16) set_temp=21;
             data[B_SET_TMP] = set_tmp -16;
             publishTopic(item->itemArr->name,(long) set_tmp,"/set");
             }
+          else return -1;  
       break;
 
       case S_CMD:

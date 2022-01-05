@@ -7,22 +7,23 @@
 #endif
 
 #if defined(__SAM3X8E__)
-#include <DueFlashStorage.h>
 #include <watchdog.h>
 #include <ArduinoHttpClient.h>
+//#include "TimerInterrupt_Generic.h"
 #endif
 
 #if defined(ARDUINO_ARCH_AVR)
-#include "HTTPClientAVR.h"
+#include "HTTPClient.h"
+//#include <ArduinoHttpClient.h>
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
-#include <EEPROM.h>
 #endif
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
-//#include "SPIFFS.h"
+#ifndef FS_STORAGE
 #include <ESP_EEPROM.h>
+#endif
 //#include <ESP8266HTTPClient.h>
 //#include <ArduinoHttpClient.h>
 //#include "HttpClient.h"
@@ -38,7 +39,7 @@
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 //#include "SPIFFS.h"
 //#include <EEPROM.h>
-#include <NRFFlashStorage.h>
+//#include <NRFFlashStorage.h>
 //#include "HttpClient.h"
 //#include <ArduinoHttpClient.h>
 //#include <HTTPClient.h>
@@ -53,14 +54,14 @@
 #endif
 
 #ifdef NRF5
-#include <NRFFlashStorage.h>
+//#include <NRFFlashStorage.h>
 #include <ArduinoHttpClient.h>
 #endif
 
 #ifdef ARDUINO_ARCH_STM32
 #include "HttpClient.h"
 //#include "UIPEthernet.h"
-#include <NRFFlashStorage.h>
+//#include <NRFFlashStorage.h>
 //#include <EEPROM.h>
 #endif
 
@@ -128,10 +129,6 @@ extern Streamlog  errorSerial;
 #include <ModbusMaster.h>
 #endif
 
-//#ifndef DMX_DISABLE
-//#include "FastLED.h"
-//#endif
-
 #ifdef _owire
 #include "owTerm.h"
 #endif
@@ -149,19 +146,21 @@ extern Streamlog  errorSerial;
         #include <WiFiClientSecure.h>
         #include <WiFiManager.h>
         #include <WebServer.h>
+        #include <ESPmDNS.h>
   #else
         #include <ESP8266WiFi.h>
         #include <ESP8266HTTPClient.h>
         #include <WiFiManager.h>
         #include <DNSServer.h>
         #include <ESP8266WebServer.h>
+        #include <ESP8266mDNS.h>
   #endif
 #define Ethernet WiFi
 #else  //Wired connection
         #ifdef Wiz5500
         #include <Ethernet2.h>
         #else
-            #ifdef ARDUINO_ARCH_STM32
+            #ifdef UIPETHERNET
             #include "UIPEthernet.h"
             #else
             #include <Ethernet.h>
@@ -176,6 +175,12 @@ extern Streamlog  errorSerial;
 
 #ifdef SD_CARD_INSERTED
 #include "sd_card_w5100.h"
+#endif
+
+#ifdef MDNS_ENABLE
+    #ifndef WIFI_ENABLE
+    #include <ArduinoMDNS.h>
+    #endif
 #endif
 
 #include "Arduino.h"
@@ -202,14 +207,17 @@ enum lan_status {
     IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER = 4,
     RETAINING_COLLECTING = 5,
     OPERATION = 6,
-
+    OPERATION_NO_MQTT = 7,
     DO_REINIT = -10,
     REINIT = - 11,
     DO_RECONNECT =  12,
     RECONNECT = 13,
     READ_RE_CONFIG = 14,
+    DO_READ_RE_CONFIG = 15,
     DO_NOTHING = -15
 };
+
+extern lan_status lanStatus;
 
 typedef union {
     uint32_t  UID_Long[5];
@@ -217,7 +225,6 @@ typedef union {
 } UID;
 
 bool isNotRetainingStatus();
-//void watchdogSetup(void);
 
 void mqttCallback(char *topic, byte *payload, unsigned int length);
 
@@ -231,30 +238,26 @@ void Changed(int i, DeviceAddress addr, float currentTemp);
 
 void modbusIdle(void);
 
-void cmdFunctionHelp(int arg_cnt, char **args);
+int cmdFunctionHelp(int arg_cnt, char **args);
 
-void cmdFunctionKill(int arg_cnt, char **args);
+int cmdFunctionKill(int arg_cnt, char **args);
 
 void applyConfig();
 
-void cmdFunctionLoad(int arg_cnt, char **args);
+int cmdFunctionLoad(int arg_cnt, char **args);
 
 int loadConfigFromEEPROM();
 
-void cmdFunctionReq(int arg_cnt, char **args);
+int cmdFunctionSave(int arg_cnt, char **args);
 
-int mqttConfigRequest(int arg_cnt, char **args);
+int cmdFunctionSetMac(int arg_cnt, char **args);
 
-int mqttConfigResp(char *as);
+int cmdFunctionGet(int arg_cnt, char **args);
 
-void cmdFunctionSave(int arg_cnt, char **args);
-
-void cmdFunctionSetMac(int arg_cnt, char **args);
-
-void cmdFunctionGet(int arg_cnt, char **args);
+int cmdFunctionLoglevel(int arg_cnt, char **args);
 
 void printBool(bool arg);
-
+/*
 void saveFlash(short n, char *str);
 
 int loadFlash(short n, char *str, short l=MAXFLASHSTR);
@@ -262,8 +265,9 @@ int loadFlash(short n, char *str, short l=MAXFLASHSTR);
 void saveFlash(short n, IPAddress& ip);
 
 int ipLoadFromFlash(short n, IPAddress &ip);
+*/
 
-lan_status loadConfigFromHttp(int arg_cnt = 0, char **args = NULL);
+int loadConfigFromHttp();
 
 void preTransmission();
 
@@ -277,7 +281,7 @@ void owIdle(void);
 
 void modbusIdle(void);
 
-void inputLoop(void);
+void inputLoop(short);
 
 void inputSetup(void);
 

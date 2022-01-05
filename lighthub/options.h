@@ -1,5 +1,36 @@
+#pragma once
+#include <Arduino.h>
+#define DEFAULT_FILESIZE_LIMIT 65535
+#ifndef MAX_JSON_CONF_SIZE
+
+#if defined(__SAM3X8E__)
+#define MAX_JSON_CONF_SIZE 24000
+#elif defined(ARDUINO_ARCH_AVR)
+#define MAX_JSON_CONF_SIZE 4096
+#elif defined(ARDUINO_ARCH_ESP32)
+#define MAX_JSON_CONF_SIZE 65535
+#else
+#define MAX_JSON_CONF_SIZE 32000
+#endif
+
+#endif
+
+#ifdef MDNS_ENABLE
+    #ifndef OTA_PORT
+    #define OTA_PORT  65280
+    #endif
+#endif    
+
 // Configuration of drivers enabled
 #define SYSLOG_LOCAL_SOCKET 514
+
+#ifndef MODBUS_UART_RX_PIN
+#define MODBUS_UART_RX_PIN -1
+#endif
+
+#ifndef MODBUS_UART_TX_PIN
+#define MODBUS_UART_TX_PIN -1
+#endif
 
 #ifndef FASTLED
 #define ADAFRUIT_LED
@@ -30,7 +61,7 @@
 #define TXEnablePin MODBUS_TX_PIN
 #endif
 
-#define ESP_EEPROM_SIZE 2048
+//#define ESP_EEPROM_SIZE 2048
 
 #ifndef AVR_DMXOUT_PIN
 #define AVR_DMXOUT_PIN 18
@@ -39,9 +70,9 @@
 #define WIFI_TIMEOUT 60000UL
 #define TIMEOUT_RECONNECT 10000UL
 #define TIMEOUT_REINIT 5000UL
-#define TIMEOUT_RETAIN 5000UL
+#define TIMEOUT_RETAIN 8000UL
 #define INTERVAL_1W 5000UL
-#define PERIOD_THERMOSTAT_FAILED (600 * 1000UL)>>8
+#define PERIOD_THERMOSTAT_FAILED (600 * 1000UL)
 
 //#define T_ATTEMPTS 200
 //#define IET_TEMP     0
@@ -54,6 +85,7 @@
 #define MIN_VOLUME 25
 #define INIT_VOLUME 40
 
+/*
 #define MAXFLASHSTR 32
 #define PWDFLASHSTR 16
 #define EEPROM_SIGNATURE "LHCF"
@@ -69,13 +101,17 @@
 #define OFFSET_SIGNATURE OFFSET_MQTT_PWD+PWDFLASHSTR
 #define EEPROM_offset_NotAlligned OFFSET_SIGNATURE+EEPROM_SIGNATURE_LENGTH
 #define EEPROM_offsetJSON EEPROM_offset_NotAlligned + (4 -(EEPROM_offset_NotAlligned & 3))
+//#define EEPROM_offsetJSON IFLASH_PAGE_SIZE
 #define EEPROM_FIX_PART_LEN EEPROM_offsetJSON-OFFSET_MAC
-
+*/
 
 #ifndef INTERVAL_CHECK_INPUT
-#define INTERVAL_CHECK_INPUT  15
+#define INTERVAL_CHECK_INPUT  11
 #endif
 
+#ifndef TIMER_CHECK_INPUT
+#define TIMER_CHECK_INPUT  15
+#endif
 #ifndef INTERVAL_CHECK_SENSOR
 #define INTERVAL_CHECK_SENSOR  5000
 #endif
@@ -158,22 +194,33 @@
 
 #define DEFAULT_INC_STEP 5
 
+
 #if defined(ARDUINO_ARCH_AVR)
 //All options available
 #ifdef CONTROLLINO
 #define modbusSerial Serial3
-#define AC_Serial Serial2
+    #ifndef AC_Serial
+    #define AC_Serial Serial2
+    #endif
 #else
 #define modbusSerial Serial2
-#define AC_Serial Serial3
+    #ifndef AC_Serial
+    #define AC_Serial Serial3
+    #endif
 #endif
 #define dmxin DMXSerial
 #define dmxout DmxSimple
 #endif
 
 #if defined(__SAM3X8E__)
+#ifndef modbusSerial
 #define modbusSerial Serial2
+#endif
+
+#ifndef AC_Serial
 #define AC_Serial Serial3
+#endif
+
 #define dmxout DmxDue1
 #define dmxin  DmxDue1
 #endif
@@ -187,27 +234,35 @@
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #undef _dmxin
-//#undef _modbus
 
 #ifndef DMX_DISABLE
 #define _espdmx
 #endif
 
+#ifndef modbusSerial
 #define modbusSerial Serial1
+#endif
+
+#ifndef AC_Serial
 #define AC_Serial Serial1
+#endif
+
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32)
 #undef _dmxin
-//#undef _modbus
-
 #ifndef DMX_DISABLE
 #define _espdmx
 #endif
-//#undef _dmxout
-//#undef modbusSerial
+
+#ifndef modbusSerial
 #define modbusSerial Serial2
+#endif
+
+#ifndef AC_Serial
 #define AC_Serial Serial2
+#endif
+
 #endif
 
 #ifndef _dmxout
@@ -276,6 +331,6 @@
 #endif
 
 #if defined(NRF5)
-#define PINS_COUNT NUM_DIGITAL_PINS
+//#define PINS_COUNT NUM_DIGITAL_PINS
 #define isAnalogPin(p)  ((p >= 14) && (p<=21))
 #endif

@@ -22,11 +22,13 @@ struct reg_t
   const uint8_t id;
 };
 
+/*
 struct serial_t
 {
   const char verb[4];
   const serialParamType mode;
 };
+*/
 
 #define PAR_I16 1
 #define PAR_I32 2
@@ -53,6 +55,7 @@ const reg_t regSize_P[] PROGMEM =
 } ;
 #define regSizeNum sizeof(regSize_P)/sizeof(reg_t)
 
+/*
 const serial_t serialModes_P[] PROGMEM =
 {
   { "8E1", (serialParamType) SERIAL_8E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
@@ -90,6 +93,8 @@ serialParamType  str2SerialParam(char * str)
   debugSerial<< F("Default serial mode N81 used");
   return static_cast<serialParamType> (SERIAL_8N1);
 }
+*/
+
 int  str2regSize(char * str)
 {
   for(uint8_t i=0; i<regSizeNum && str;i++)
@@ -101,7 +106,7 @@ int  str2regSize(char * str)
 bool out_Modbus::getConfig()
 {
   // Retrieve and store template values from global modbus settings
-  if (!store || !item || !item->itemArg || (item->itemArg->type != aJson_Array) || aJson.getArraySize(item->itemArg)<2)
+  if (!store || !item || !item->itemArg || (item->itemArg->type != aJson_Array) || aJson.getArraySize(item->itemArg)<2 || !modbusObj)
   {
     errorSerial<<F("MBUS: config failed:")<<(bool)store<<F(",")<<(bool)item<<F(",")<<(bool)item->itemArg<<F(",")<<(item->itemArg->type != aJson_Array)<<F(",")<< (aJson.getArraySize(item->itemArg)<2)<<endl;
     return false;
@@ -131,6 +136,8 @@ bool out_Modbus::getConfig()
     modbusSerial.begin(store->baud, static_cast <USARTClass::USARTModes> (store->serialParam));
     #elif defined (ARDUINO_ARCH_ESP8266)
     modbusSerial.begin(store->baud, static_cast <SerialConfig>(store->serialParam));
+    #elif defined (ARDUINO_ARCH_ESP32)
+    modbusSerial.begin(store->baud, (store->serialParam),MODBUS_UART_RX_PIN,MODBUS_UART_TX_PIN);
     #else
     modbusSerial.begin(store->baud, (store->serialParam));
     #endif
@@ -180,7 +187,7 @@ else
 
 int  out_Modbus::Stop()
 {
-Serial.println("Modbus De-Init");
+debugSerial.println("Modbus De-Init");
 
 delete store;
 item->setPersistent(NULL);
@@ -216,7 +223,7 @@ switch (regType) {
     default:
         debugSerial<<F("Not supported reg type\n");
  }
-if (result != node.ku8MBSuccess) errorSerial<<F("MBUS: Polling error ")<<result<<endl;
+if (result != node.ku8MBSuccess) errorSerial<<F("MBUS: Polling error ")<<_HEX(result)<<endl;
 return (result == node.ku8MBSuccess);
 }
 
@@ -349,7 +356,7 @@ return is8bit;
 
                   //if (readModbus(registerFrom,MODBUS_HOLDING_REG_TYPE,registerTo-registerFrom+1))
                   if (readModbus(registerFrom,regType,registerTo-registerFrom+1))
-                    {
+                    { debugSerial<<endl;
                       for(int i=registerFrom;i<=registerTo;i++)
                         {
                           findRegister(i,i-registerFrom,regType);
@@ -416,6 +423,7 @@ int out_Modbus::getChanType()
 
 int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
 {
+  return 0;
 //int chActive = item->isActive();
 //bool toExecute = (chActive>0);
 //itemCmd st(ST_UINT32,CMD_VOID);
@@ -424,9 +432,9 @@ aJsonObject *templateParamObj = NULL;
 short mappedCmdVal = 0;
 
 // trying to find parameter in template with name == subItem (NB!! standard suffixes dint working here)
-if (subItem && strlen (subItem)) templateParamObj = aJson.getObjectItem(store->parameters, subItem);
+if (subItem && strlen (subItem) && store) templateParamObj = aJson.getObjectItem(store->parameters, subItem);
 
-if (!templateParamObj)
+if (!templateParamObj && store)
 {
   // Trying to find template parameter where id == suffixCode
  templateParamObj = store->parameters->child;

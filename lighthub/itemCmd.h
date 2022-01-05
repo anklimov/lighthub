@@ -19,7 +19,7 @@ e-mail    anklimov@gmail.com
 */
 #pragma once
 #include "Arduino.h"
-#include "aJson.h"
+#include "aJSON.h"
 
 typedef  char cmdstr[9];
 
@@ -64,12 +64,15 @@ const cmdstr commands_P[] PROGMEM =
 #define CMD_UNKNOWN  -1
 #define CMD_JSON -2
 
+#define SEND_IMMEDIATE 0x1
 #define SEND_COMMAND 0x100
 #define SEND_PARAMETERS 0x200
 #define SEND_RETRY 0x400
 #define SEND_DEFFERED 0x800
-#define ACTION_NEEDED 0x1000
-#define ACTION_IN_PROCESS 0x2000
+#define SEND_DELAYED 0x1000
+#define ACTION_NEEDED 0x2000
+#define ACTION_IN_PROCESS 0x4000
+
 
 
 int txt2cmd (char * payload);
@@ -93,7 +96,7 @@ int txt2cmd (char * payload);
 #define ST_INT32        10     /// 32 bits signed integer
 #define ST_UINT32       11     /// 32 bits unsigned integer
 #define ST_STRING       12     /// pointer to string (for further use)
-
+//#define ST_TIMESTAMP    13     /// Timestamp for delayed cmd execution
 
 #define MAP_SCALE       1
 #define MAP_VAL_CMD     2
@@ -108,21 +111,11 @@ typedef union
   struct
       {
         uint8_t cmdCode;
-            union {
-                  uint8_t cmdFlag;
-/*
-                  struct
-                      { uint8_t  suffixCode:4;
-                        uint8_t  itemArgType:4;
-                      };
-                      */
-                  };
-                  struct
-                      { uint8_t  suffixCode:4;
-                        uint8_t  itemArgType:4;
-                      };
-    //    uint8_t cmdEffect;
-        uint8_t cmdParam;
+        uint8_t  suffixCode:4;
+        uint8_t  itemArgType:4;
+        
+        uint8_t cmdEffect; //Reserve
+        uint8_t cmdParam;  //Reserve
       };
 } itemCmdStore;
 
@@ -168,8 +161,9 @@ public:
 
   itemCmd assignFrom(itemCmd from, short chanType=-1);
 
-  bool loadItem(Item * item, bool includeCommand=false );
-  bool saveItem(Item * item, bool includeCommand=false);
+  bool loadItem(Item * item, uint16_t optionsFlag=SEND_PARAMETERS);
+  bool loadItemDef(Item * item, uint16_t optionsFlag=SEND_PARAMETERS );
+  bool saveItem(Item * item, uint16_t optionsFlag=SEND_PARAMETERS);
 
   itemCmd Int(int32_t i);
   itemCmd Int(uint32_t i);
@@ -181,6 +175,7 @@ public:
   itemCmd HS(uint16_t h, uint8_t s);
   itemCmd RGB(uint8_t r, uint8_t g, uint8_t b);
   itemCmd RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w);
+  itemCmd Str(char * str);
   bool setH(uint16_t);
   bool setS(uint8_t);
   bool setColorTemp(int);
@@ -203,6 +198,7 @@ public:
 
   long int getInt();
   float    getFloat();
+  char *   getString();
   long int getSingleInt();
   short    getPercents(bool inverse=false);
   short    getPercents255(bool inverse=false);

@@ -55,7 +55,7 @@ e-mail    anklimov@gmail.com
 
 
 
-#define SAME_STATE_ATTEMPTS 3
+#define SAME_STATE_ATTEMPTS 2
 #define ANALOG_STATE_ATTEMPTS 6
 #define ANALOG_NOIZE 1
 

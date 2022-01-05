@@ -2,3 +2,5 @@
 -DCUSTOM_FIRMWARE_MAC=de:ad:be:ef:fe:07
 -DWiz5100
 #-DPID_DISABLE
+-DRESTART_LAN_ON_MQTT_ERRORS
+-D CORS=\"http://lazyhome.ru\"

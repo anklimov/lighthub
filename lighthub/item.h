@@ -35,12 +35,14 @@ e-mail    anklimov@gmail.com
 #define S_SAT  10
 #define S_TEMP 11
 #define S_VAL  12
-#define S_ADDITIONAL 12
+#define S_DELAYED 13
+#define S_RAW 14
+#define S_ADDITIONAL 14
 
-#define CH_DIMMER 0   //DMX 1 ch
+#define CH_DIMMER 0   //DMX 1-4 ch
 #define CH_RGBW   1   //DMX 4 ch
 #define CH_RGB    2   //DMX 3 ch
-#define CH_PWM    3   //PWM output directly to PIN
+#define CH_PWM    3   //PWM output directly to PIN 1-4 CH
 #define CH_MODBUS 4   //Modbus AC Dimmer
 #define CH_THERMO 5   //Simple ON/OFF thermostat
 #define CH_RELAY  6   //ON_OFF relay output
@@ -52,6 +54,11 @@ e-mail    anklimov@gmail.com
 #define CH_MOTOR  12
 #define CH_PID   13
 #define CH_MBUS  14
+#define CH_UARTBRIDGE  15
+#define CH_RELAYX 16
+#define CH_RGBWW    17
+#define CH_MULTIVENT 18
+#define CH_ELEVATOR 19
 
 //#define CHANNEL_TYPES 13
 
@@ -73,6 +80,7 @@ e-mail    anklimov@gmail.com
 #define I_VAL  2 //Latest preset (int or array of presets)
 #define I_CMD  3 //Latest CMD received
 #define I_EXT  4 //Chanell-depended extension - array
+#define I_TIMESTAMP 5
 
 #define MODBUS_CMD_ARG_ADDR 0
 #define MODBUS_CMD_ARG_REG 1
@@ -111,6 +119,7 @@ class Item
   int Ctrl(char * payload,  char * subItem=NULL);
 
   int getArg(short n=0);
+  float getFloatArg(short n=0);
   short getArgCount();
   //int getVal(short n); //From VAL array. Negative if no array
   long int getVal(); //From int val OR array
@@ -125,10 +134,11 @@ class Item
   void setFlag   (short flag);
   void clearFlag (short flag);
   void setVal(long int par);
+  void setFloatVal(float par);
   void setSubtype(uint8_t par);
   int Poll(int cause);
   int SendStatus(int sendFlags);
-  int SendStatusImmediate(int sendFlags);
+  int SendStatusImmediate(itemCmd st, int sendFlags, char * subItem=NULL);
   int isActive();
   int getChanType();
   inline int On (){return Ctrl(itemCmd(ST_VOID,CMD_ON));};
@@ -136,20 +146,23 @@ class Item
   inline int Toggle(){return Ctrl(itemCmd(ST_VOID,CMD_TOGGLE));};
 
   protected:
-  //short cmd2changeActivity(int lastActivity, short defaultCmd = CMD_SET);
+ 
   int VacomSetFan (itemCmd st);
   int VacomSetHeat(itemCmd st);
   int modbusDimmerSet(itemCmd st);
 
   int modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value);
-  void mb_fail();
+  void mb_fail(int result=0);
   void Parse();
   int checkModbusDimmer();
   int checkModbusDimmer(int data);
-  boolean checkModbusRetry();
-  boolean checkVCRetry();
-  boolean checkHeatRetry();
+
+  int checkModbusRetry();
+  //boolean checkVCRetry();
+  //boolean checkHeatRetry();
   void sendDelayedStatus();
+  bool resumeModbus();
+
 
   int checkFM();
   char defaultSubItem[10];

@@ -30,16 +30,22 @@ e-mail    anklimov@gmail.com
 #define ledFlash 32
 #define ledHidden 64
 
+#if defined(ARDUINO_ARCH_AVR)
+#define pinRED 47
+#define pinGREEN 48
+#define pinBLUE 49
+#else
 #define pinRED 50
 #define pinGREEN 51
 #define pinBLUE 52
+#endif
 
 #define ledDelayms 1000UL
 #define ledFastDelayms 300UL
 
-class statusLED {
+class StatusLED {
 public:
-  statusLED(uint8_t pattern = 0);
+  StatusLED(uint8_t pattern = 0);
   void set (uint8_t pattern);
   void show (uint8_t pattern);
   void poll();

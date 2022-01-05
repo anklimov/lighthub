@@ -2,13 +2,21 @@
 #include <Arduino.h>
 #include "statusled.h"
 
+#ifdef SYSLOG_ENABLE
+ char logBuffer[LOGBUFFER_SIZE];
+ int  logBufferPos=0;
+#endif
+
+uint8_t serialDebugLevel = 7;
+uint8_t udpDebugLevel =7;
+
 #if defined (STATUSLED)
-extern statusLED LED;
+extern StatusLED statusLED;
 #endif
 
 #ifdef SYSLOG_ENABLE
 extern bool syslogInitialized;
-Streamlog::Streamlog (HardwareSerial * _serialPort, int _severity , Syslog * _syslog, uint8_t _ledPattern )
+Streamlog::Streamlog (SerialPortType * _serialPort, uint8_t _severity , Syslog * _syslog, uint8_t _ledPattern )
 {
       serialPort=_serialPort;
       severity=_severity;
@@ -16,7 +24,7 @@ Streamlog::Streamlog (HardwareSerial * _serialPort, int _severity , Syslog * _sy
       ledPattern=_ledPattern;
 }
 #else
-Streamlog::Streamlog (HardwareSerial * _serialPort, int _severity,  uint8_t _ledPattern)
+Streamlog::Streamlog (SerialPortType * _serialPort, uint8_t _severity,  uint8_t _ledPattern)
 {
       serialPort=_serialPort;
       severity=_severity;
@@ -61,7 +69,7 @@ void Streamlog::flush(void)
 size_t Streamlog::write(uint8_t ch)
 {
 #ifdef SYSLOG_ENABLE
-if (syslogInitialized)
+if (syslogInitialized && (udpDebugLevel>=severity))
   {
   if (ch=='\n')
               {
@@ -77,10 +85,10 @@ if (syslogInitialized)
 #endif
 
   #if defined (STATUSLED)
-  if ((ch=='\n') && ledPattern) LED.flash(ledPattern);
+  if ((ch=='\n') && ledPattern) statusLED.flash(ledPattern);
   #endif
 
-  if (serialPort) return serialPort->write(ch);
+  if (serialPort && (serialDebugLevel>=severity)) return serialPort->write(ch);
 
   return 1;
 };

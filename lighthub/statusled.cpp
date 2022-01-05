@@ -22,7 +22,7 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 
 
-statusLED::statusLED(uint8_t pattern)
+StatusLED::StatusLED(uint8_t pattern)
 {
 #if defined (STATUSLED)
   pinMode(pinRED, OUTPUT);
@@ -33,7 +33,7 @@ statusLED::statusLED(uint8_t pattern)
 #endif
 }
 
-void statusLED::show (uint8_t pattern)
+void StatusLED::show (uint8_t pattern)
 {
 #if defined (STATUSLED)
     digitalWrite(pinRED,(pattern & ledRED)?HIGH:LOW );
@@ -42,7 +42,7 @@ void statusLED::show (uint8_t pattern)
 #endif
 }
 
-void statusLED::set (uint8_t pattern)
+void StatusLED::set (uint8_t pattern)
 {
 #if defined (STATUSLED)
     short newStat = pattern & ledParams;
@@ -56,7 +56,7 @@ void statusLED::set (uint8_t pattern)
 #endif
 }
 
-void statusLED::flash(uint8_t pattern)
+void StatusLED::flash(uint8_t pattern)
 {
 #if defined (STATUSLED)
   show(pattern);
@@ -64,7 +64,7 @@ void statusLED::flash(uint8_t pattern)
 #endif
 }
 
-void statusLED::poll()
+void StatusLED::poll()
 {
 #if defined (STATUSLED)
   if (curStat & ledFlash)

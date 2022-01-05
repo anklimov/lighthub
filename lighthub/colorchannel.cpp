@@ -25,6 +25,7 @@ int colorChannel::getDefaultStorageType()
           {
             case 3:
             case 4:
+            case 5:
               return ST_HSV255;
             case 1:
               return ST_PERCENTS255;  
@@ -62,7 +63,7 @@ case S_HSV:
           PixelCtrl(cmd, subItem, toExecute);
           return 1;
 case S_CMD:
-      item->setCmd(cmd.getCmd());
+      //item->setCmd(cmd.getCmd());
       switch (cmd.getCmd())
           {
           case CMD_ON:

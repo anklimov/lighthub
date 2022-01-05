@@ -23,7 +23,7 @@ e-mail    anklimov@gmail.com
 #define D_UPDATED4 8
 #define D_CHECKT 300
 
-#define MAX_CHANNELS 60
+//#define MAX_CHANNELS 60
 //define MAX_IN_CHANNELS 16
 
 //#define DMX_OUT_PIN  3
@@ -105,9 +105,9 @@ extern aJsonObject *dmxArr;
 void DMXput(void);
 void DMXinSetup(int channels);
 void DMXoutSetup(int channels);
-void ArtnetSetup();
+void artnetSetup();
+void artnetSetChans(uint8_t minCh, uint8_t maxCh);
 void DMXCheck(void);
 int itemCtrl2(char* name,int r,int g, int b, int w);
-void ArtnetSetup();
 void DmxWriteBuf(uint16_t chan,uint8_t val);
 void DMXOUT_propagate();

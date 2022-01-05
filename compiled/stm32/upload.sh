@@ -1,0 +1,1 @@
+dfu-util -D firmware.bin -a 1 

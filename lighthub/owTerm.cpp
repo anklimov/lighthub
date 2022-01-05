@@ -40,6 +40,13 @@ unsigned long owTimer = 0;
 
 owChangedType owChanged;
 
+bool zero(const uint8_t *addr, uint8_t len)
+{
+	while (len--) 
+		if (addr[len]) return false;
+	return true;
+}
+
 int owUpdate() {
 #ifndef OWIRE_DISABLE
     unsigned long finish = millis();// + OW_UPDATE_INTERVAL;
@@ -50,7 +57,7 @@ int owUpdate() {
          return false;
        }
 */
-    Serial.println(F("Searching"));
+    //Serial.println(F("Searching"));
     if (oneWire) oneWire->reset_search();
     for (short i = 0; i < t_count; i++) wstat[i] &= ~SW_FIND; //absent
 
@@ -67,7 +74,8 @@ int owUpdate() {
                     debugSerial.println(F(" alive"));
                     break;
                 }; //alive
-            if (ifind < 0 && sensors) {
+            if (ifind < 0 && sensors && !zero(term[t_count],8))
+                {
                 wstat[t_count] = SW_FIND; //Newly detected
                 debugSerial<<F("dev#")<<t_count<<F(" Addr:");
                 PrintBytes(term[t_count], 8,0);
@@ -219,13 +227,17 @@ int owFind(DeviceAddress addr) {
 
 void owAdd(DeviceAddress addr) {
 #ifndef OWIRE_DISABLE
+    infoSerial<<F("dev#")<<t_count<<F(" Addr:");
+    PrintBytes(term[t_count], 8,0);
+    infoSerial<<endl;
+
   if (t_count>=t_max) return;
+  if (zero(term[t_count],8)) return;
+
     wstat[t_count] = SW_FIND; //Newly detected
     memcpy(term[t_count], addr, 8);
 
-    debugSerial<<F("dev#")<<t_count<<F(" Addr:");
-    PrintBytes(term[t_count], 8,0);
-    debugSerial.println();
+
     #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     if (term[t_count][0] == 0x28)
                   oneWire->setStrongPullup();
@@ -238,6 +250,6 @@ void owAdd(DeviceAddress addr) {
 void setupOwIdle (void (*ptr)())
 {
   #ifdef DS2482_100_I2C_TO_1W_BRIDGE
-      if (oneWire) oneWire->idle(ptr);
+    if (oneWire) oneWire->idle(ptr);
   #endif
 }
