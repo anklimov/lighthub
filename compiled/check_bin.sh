@@ -1,0 +1,15 @@
+diff ../.pio/build/due/firmware.bin due
+diff ../.pio/build/controllino/firmware.hex controllino
+diff ../.pio/build/m5stack/firmware.bin m5stack
+diff ../.pio/build/mega2560slim-5100/firmware.hex mega2560slim-5100
+diff ../.pio/build/mega2560slim-5100/firmware.bin mega2560slim-5100
+diff ../.pio/build/mega2560-optiboot/firmware.hex mega2560-optiboot
+diff ../.pio/build/mega2560-optiboot/firmware.bin mega2560-optiboot
+diff ../.pio/build/mega2560-5100/firmware.hex mega2560-5100
+diff ../.pio/build/nrf52840/firmware.hex nrf52840-5500
+diff ../.pio/build/esp32-wifi/firmware.bin esp32-wifi
+diff ../.pio/build/stm32-enc2860/firmware.bin stm32-enc2860
+diff ../.pio/build/esp8266-wifi/firmware.bin esp8266-wifi
+diff ../.pio/build/lighthub21/firmware.bin lighthub21
+diff ../.pio/build/mega2560-5500/firmware.hex mega2560-5500
+diff ../.pio/build/stm32/firmware.* stm32
