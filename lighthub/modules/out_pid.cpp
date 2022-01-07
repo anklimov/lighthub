@@ -23,7 +23,7 @@ bool out_pid::getConfig()
   }
 
   aJsonObject * kPIDObj = aJson.getArrayItem(item->itemArg, 0);
-  if (kPIDObj->type != aJson_Array)
+  if (!kPIDObj || kPIDObj->type != aJson_Array)
             {
               errorSerial<<F("Invalid PID param array.")<<endl;
               return false;
@@ -88,19 +88,19 @@ bool out_pid::getConfig()
     default:
     store->setpoint = 20.;
    }
-
+   store->input=0.0;
+   store->output=0.0;
+   store->alarmTimer=millis();
+   store->alarmArmed=true;
+   store->alarmTimeout=alarmTO; //in sec
+   alarm(true);
    
   if (!store->pid)   
-  
       {store->pid= new PID  (&store->input, &store->output, &store->setpoint, kP, kI, kD, direction);
       if (!store->pid) return false;
       store->pid->SetMode(AUTOMATIC);
       //store->pid->SetOutputLimits(outMin,outMax);
       store->pid->SetSampleTime(dT*1000.0); 
-      store->alarmTimer=millis();
-      store->alarmArmed=false;
-      store->alarmTimeout=alarmTO; //in sec
-     
       return true;}
   else errorSerial<<F("PID already initialized")<<endl;    
 
@@ -168,10 +168,13 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
       //short cmd = st.getCmd();
       if (item->getCmd() != CMD_OFF)
       { 
-      if(store->pid->Compute() && !store->alarmArmed)
+      if(store->pid->Compute() )
       {
-      debugSerial<<F("PID ")<<item->itemArr->name<<F("- set:")<<store->setpoint<<F(" in:")<<store->input<<(" out:") << store->output<<endl;
-      if (abs(store->output-store->prevOut)>OUTPUT_TRESHOLD)
+      debugSerial<<F("PID ")<<item->itemArr->name<<F(" set:")<<store->setpoint<<F(" in:")<<store->input<<(" out:") << store->output <<F(" P:")<<store->pid->GetKp() <<F(" I:")<<store->pid->GetKi() <<F(" D:")<<store->pid->GetKd();
+      if (store->alarmArmed) debugSerial << F(" Alarm");
+      debugSerial<<endl;
+      
+      if ((abs(store->output-store->prevOut)>OUTPUT_TRESHOLD) && !store->alarmArmed)
           { 
             aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
             itemCmd value((float) (store->output));// * (100./255.)));
@@ -195,12 +198,12 @@ return 1;//store->pollingInterval;
 void  out_pid::alarm(bool state)
 {
 
-if (!item || item->itemArg) return;
+if (!item || !item->itemArg) return;
   if (state)
   {
 
    aJsonObject * kPIDObj = aJson.getArrayItem(item->itemArg, 0);
-   if (kPIDObj->type != aJson_Array)
+   if (!kPIDObj || kPIDObj->type != aJson_Array)
             {
               errorSerial<<F("Invalid PID param array.")<<endl;
               return;
@@ -281,8 +284,8 @@ debugSerial<<F("Input value:")<<store->input<<endl;
 store->alarmTimer=millis();
 if (store->alarmArmed)
         {
-         alarm(false); 
-         store->alarmArmed=false;
+         store->alarmArmed=false; 
+         alarm(false);    
         }
 return 1;
 //break;
