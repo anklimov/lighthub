@@ -285,7 +285,8 @@ store->alarmTimer=millis();
 if (store->alarmArmed)
         {
          store->alarmArmed=false; 
-         alarm(false);    
+         alarm(false);  
+         store->prevOut=-2.0;  
         }
 return 1;
 //break;
