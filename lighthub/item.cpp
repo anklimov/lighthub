@@ -887,6 +887,11 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     }
     if (itemType==CH_GROUP) 
     {
+    if (fr<350)
+            {
+                errorSerial<<F("Not enough memory for group operation")<<endl;
+                return -1;
+            }    
     if (allowRecursion && itemArg->type == aJson_Array && operation) 
                 {
                 digGroup(itemArg,&cmd,subItem);   
