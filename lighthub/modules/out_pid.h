@@ -41,5 +41,6 @@ public:
 protected:
     pidPersistent * store;
     bool getConfig();
+    int  getAlarmVal();
 };
 #endif

@@ -1066,6 +1066,13 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                         debugSerial<<F("ON:Already Active\n");
                         return -3;
                 }
+            //newly added. For climate commands need to restore previous temperature 
+            case CMD_AUTO:
+            case CMD_COOL:
+            case CMD_HEAT:
+            case CMD_FAN:
+            case CMD_DRY:
+
             if (!cmd.isValue()) cmd.loadItemDef(this); // if no_suffix - both, command ON and value provided
             status2Send |= SEND_COMMAND | SEND_PARAMETERS | SEND_IMMEDIATE; 
             toExecute=true; 
@@ -1700,6 +1707,7 @@ int Item::VacomSetFan(itemCmd st) {
   switch (cmd){
     case CMD_OFF:
     case CMD_HALT:
+    // produvka here
     val=0;
     break;
 
