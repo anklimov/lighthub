@@ -1076,7 +1076,7 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, bool scale100
                         {
                           int len;
                           strncpy_P(Buffer, commands_P[cmd.cmdCode], bufLen);
-                          //strncat(Buffer, " ", bufLen);
+                          if (isValue() && (sendFlags & SEND_PARAMETERS)) strncat(Buffer, " ", bufLen);
                           len=strlen(Buffer);
                           argPtr+=len;
                           bufLen-=len;
@@ -1084,9 +1084,9 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, bool scale100
                         }
        if (isValue() && (sendFlags & SEND_PARAMETERS))
        {
-       strncat(Buffer, " ", bufLen);
-       bufLen--;
-       argPtr++;
+       //strncat(Buffer, " ", bufLen);
+       //bufLen--;
+       //argPtr++;
 
        switch (cmd.itemArgType)
        { short colorTemp;

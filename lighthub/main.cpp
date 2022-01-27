@@ -424,8 +424,10 @@ else
  */
 
   if (itemName[0]=='$') return;// -6; //Skipping homie stuff
+  //debugSerial<<F("itemName ")<<itemName<<endl;
   Item item(itemName);
-  if (item.isValid())  item.Ctrl((char *)payload);        
+  if (item.isValid())  item.Ctrl((char *)payload);       
+ //    else debugSerial<<F("item invalid")<<endl;  
 
  return;// -7;   
 }

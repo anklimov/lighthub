@@ -95,23 +95,23 @@ int out_pwm::getChanType()
 {
   if (item)
   {
-  debugSerial<<F("PWM Chan type ");  
+  //debugSerial<<F("PWM Chan type ");  
   switch (numArgs)
   {
     case 3:
-    debugSerial<<F("RGB")<<endl;
+  //  debugSerial<<F("RGB")<<endl;
       return CH_RGB;
 
     case 4:
-    debugSerial<<F("RGBW")<<endl;
+  //  debugSerial<<F("RGBW")<<endl;
       return CH_RGBW;
 
     case 5:
-    debugSerial<<F("RGBWW")<<endl;
+   // debugSerial<<F("RGBWW")<<endl;
       return CH_RGBWW;
 
     default:
-    debugSerial<<F("#")<<item->itemType<<endl;
+   // debugSerial<<F("#")<<item->itemType<<endl;
       return item->itemType;
   }
  }

@@ -547,7 +547,7 @@ if (suffixCode == S_RAW)
     ic.setSuffix(suffixCode);
     return   Ctrl(ic,subItem);
 }
-
+//debugSerial<<F("SuffixCode: ")<<suffixCode<<endl;
 int i=0;
 while (payload[i]) {payload[i]=toupper(payload[i]);i++;};
 
@@ -607,7 +607,7 @@ st.setSuffix(suffixCode);
                               st.HSV255(Par0.getInt(),Par[0],Par[1]);
                               st.setColorTemp(Par[2]);
                       break;        
-                      default:;
+                      default: errorSerial<<F("Wrong paylad")<<endl;
                     }
               }
  

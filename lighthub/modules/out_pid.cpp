@@ -170,6 +170,8 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
       { 
       if(store->pid->Compute() )
       {
+      int alarmVal;  
+      if (store->alarmArmed && (alarmVal=getAlarmVal()>=0)) store->output=alarmVal; 
       debugSerial<<F("PID ")<<item->itemArr->name<<F(" set:")<<store->setpoint<<F(" in:")<<store->input<<(" out:") << store->output <<F(" P:")<<store->pid->GetKp() <<F(" I:")<<store->pid->GetKi() <<F(" D:")<<store->pid->GetKd();
       if (store->alarmArmed) debugSerial << F(" Alarm");
       debugSerial<<endl;
@@ -194,22 +196,16 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
 return 1;//store->pollingInterval;
 };
 
-
-void  out_pid::alarm(bool state)
+int out_pid::getAlarmVal()
 {
-
-if (!item || !item->itemArg) return;
-  if (state)
-  {
-
-   aJsonObject * kPIDObj = aJson.getArrayItem(item->itemArg, 0);
+  aJsonObject * kPIDObj = aJson.getArrayItem(item->itemArg, 0);
    if (!kPIDObj || kPIDObj->type != aJson_Array)
             {
               errorSerial<<F("Invalid PID param array.")<<endl;
-              return;
+              return -1;
             }
 
-   float outAlarm=0.;
+   int outAlarm=0;
    double kP=0.;
    
    bool alarmValDefined = false;
@@ -239,12 +235,25 @@ if (!item || !item->itemArg) return;
                 } 
                else if (!alarmValDefined) outAlarm = .255; 
               }     
-   }  
-   errorSerial<<item->itemArr->name<<F(" PID alarm. Set out to ")<<outAlarm<<endl;
+   }
+return outAlarm;   
+}   
 
-   aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
-   itemCmd value (outAlarm);// * (100./255.)));
-            executeCommand(oCmd,-1,value);
+void  out_pid::alarm(bool state)
+{
+
+if (!item || !item->itemArg) return;
+  if (state)
+  {
+   float outAlarm=getAlarmVal();  
+   errorSerial<<item->itemArr->name<<F(" PID alarm. ")<<endl;
+   if (outAlarm>=0)        
+          {
+          errorSerial<<F("Set out to ")<<outAlarm<<endl;
+          aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
+          itemCmd value ((float)outAlarm);// * (100./255.)));
+                    executeCommand(oCmd,-1,value);
+          }         
   }
   else 
   {
