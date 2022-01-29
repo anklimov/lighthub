@@ -956,7 +956,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
             // if (_once) {DMXput(); _once=0;}
             lanStatus = RETAINING_COLLECTING;//4;
             timerLanCheckTime = millis();// + 5000;
-            infoSerial<<F("Awaiting for retained topics");
+            infoSerial<<F("Awaiting for retained topics")<<endl;
         } else
            {
             errorSerial<<F("failed, rc=")<<mqttClient.state()<<F(" try again in 5 seconds")<<endl;

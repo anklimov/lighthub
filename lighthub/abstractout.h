@@ -12,7 +12,7 @@ public:
     virtual int isActive();
     virtual itemCmd getDefaultOnVal(){return itemCmd().Percents255(255);};
     virtual int getChanType(){return 0;}
-    virtual int getDefaultStorageType(){return ST_PERCENTS255;}  /// Remove?? Now getChanType used instead
+    virtual int getDefaultStorageType(){return 0;}  /// Remove?? Now getChanType used instead
     int Setup()  override;        
 protected:
       Item * item;

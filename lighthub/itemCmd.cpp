@@ -106,12 +106,13 @@ uint8_t itemCmd::getStoragetypeByChanType(short chanType)
     case CH_DIMMER:
     case CH_MOTOR:
     case CH_PWM:
-    case CH_RELAY:
     case CH_VC:
     case CH_MODBUS:
     //case CH_GROUP:
     return ST_PERCENTS255;
     break;
+    case CH_RELAY:
+    return ST_VOID;
     default:
     return ST_VOID;
   }
@@ -616,6 +617,12 @@ bool itemCmd::isCommand()
   return (cmd.cmdCode);
 }
 
+bool itemCmd::isChannelCommand()
+{
+ if (cmd.suffixCode==S_NOTFOUND || cmd.suffixCode==S_CMD )
+    return (cmd.cmdCode);
+  else return 0;  
+}
 bool itemCmd::isValue()
 {
 return (cmd.itemArgType);

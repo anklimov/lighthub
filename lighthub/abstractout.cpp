@@ -9,6 +9,7 @@ int  abstractOut::isActive()
         { 
             case CMD_OFF:
             case CMD_HALT:
+            case CMD_VOID:
               return 0;
               break;
             default:

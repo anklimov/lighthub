@@ -209,6 +209,7 @@ public:
   char   * toString(char * Buffer, int bufLen, int sendFlags = SEND_COMMAND | SEND_PARAMETERS, bool scale100 = false);
 
   bool isCommand();
+  bool isChannelCommand();
   bool isValue();
   bool isColor();
 

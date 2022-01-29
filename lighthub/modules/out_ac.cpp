@@ -190,21 +190,21 @@ void SendData(byte req[], size_t size){
   AC_Serial.write(req, size - 1);
   AC_Serial.write(getCRC(req, size-1));
   //AC_Serial.flush();
-/*
- Serial.print("<<");
+
+ debugSerial.print("AirCon<<");
   for (int i=0; i < size-1; i++)
   {
      if (req[i] < 10){
-       Serial.print("0");
-       Serial.print(req[i], HEX);
+       debugSerial.print("0");
+       debugSerial.print(req[i], HEX);
      }
         else
              {
-             Serial.print(req[i], HEX);
+             debugSerial.print(req[i], HEX);
              }
   }
-Serial.println();
-*/
+debugSerial.println();
+
 }
 
 inline unsigned char toHex( char ch ){
@@ -268,7 +268,10 @@ return INTERVAL_SLOW_POLLING;
 
 //int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
 int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
-{char s_mode[10];
+{
+  //char s_mode[10];
+  char s_speed[10];
+
   int suffixCode = cmd.getSuffix();
  // Some additional Subitems
        if (strcmp_P(subItem, LOCK_P) == 0) suffixCode = S_LOCK;
@@ -276,7 +279,7 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
   else if (strcmp_P(subItem, QUIET_P) == 0) suffixCode = S_QUIET;
   else if (strcmp_P(subItem, RAW_P) == 0) suffixCode = S_RAW;
 
-  if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
+  if (cmd.isCommand() && !suffixCode && !subItem) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
  //data[B_POWER] = power;
   //    debugSerial<<F(".");
@@ -294,7 +297,7 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
       break;
 
       case S_CMD:
-      s_mode[0]='\0';
+     // s_mode[0]='\0';
             switch (cmd.getCmd())
                 {
                   case CMD_ON:
@@ -302,7 +305,7 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
                       data[B_POWER] = power;
                       data[B_POWER] |= 1;
                       SendData(on, sizeof(on)/sizeof(byte));
-                      publishTopic(item->itemArr->name,"ON","/cmd");
+                   //   publishTopic(item->itemArr->name,"ON","/cmd");
                       return 1;
                   break;
                   case CMD_OFF:
@@ -310,73 +313,78 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
                       data[B_POWER] = power;
                       data[B_POWER] &= ~1;
                       SendData(off, sizeof(off)/sizeof(byte));
-                      publishTopic(item->itemArr->name,"OFF","/cmd");
+                   //   publishTopic(item->itemArr->name,"OFF","/cmd");
                       return 1;
                   break;
                   case CMD_AUTO:
                       data[B_MODE] = 0;
                       data[B_POWER] = power;
                       data[B_POWER] |= 1;
-                      strcpy_P(s_mode,AUTO_P);
+                    //  strcpy_P(s_mode,AUTO_P);
                   break;
                   case CMD_COOL:
                       data[B_MODE] = 1;
                       data[B_POWER] = power;
                       data[B_POWER] |= 1;
-                      strcpy_P(s_mode,COOL_P);
+                    //  strcpy_P(s_mode,COOL_P);
                   break;
                   case CMD_HEAT:
                       data[B_MODE] = 2;
                       data[B_POWER] = power;
                       data[B_POWER] |= 1;
-                      strcpy_P(s_mode,HEAT_P);
+                    //  strcpy_P(s_mode,HEAT_P);
                   break;
                   case CMD_DRY:
                       data[B_MODE] = 4;
                       data[B_POWER] = power;
                       data[B_POWER] |= 1;
-                      strcpy_P(s_mode,DRY_P);
+                   //   strcpy_P(s_mode,DRY_P);
                   break;
                   case CMD_FAN:
                       data[B_MODE] = 3;
-                      debugSerial<<"fan\n";
+                    //  debugSerial<<"fan\n";
                       data[B_POWER] = power;
                       data[B_POWER] |= 1;
-                      strcpy_P(s_mode,FAN_ONLY_P);
+                      if (data[B_FAN_SPD] == 3)
+                         {
+                           data[B_FAN_SPD] = 2; //Auto - fan speed in Ventilation mode not working
+                         }
+                    //  strcpy_P(s_mode,FAN_ONLY_P);
                   break;
                   case CMD_UNKNOWN:
                   return -1;
                   break;
                 }
-                publishTopic(item->itemArr->name,s_mode,"/cmd");
+              //  debugSerial<<F("Mode:")<<s_mode<<endl;
+              //  publishTopic(item->itemArr->name,s_mode,"/cmd");
       break;
 
       case S_FAN:
-      s_mode[0]='\0';
+      s_speed[0]='\0';
       switch (cmd.getCmd())
       {
       case CMD_AUTO:
       data[B_FAN_SPD] = 3;
-      strcpy_P(s_mode,AUTO_P);
+      strcpy_P(s_speed,AUTO_P);
       break;
       case CMD_HIGH:
       data[B_FAN_SPD] = 0;
-      strcpy_P(s_mode,HIGH_P);
+      strcpy_P(s_speed,HIGH_P);
       break;
       case CMD_MED:
       data[B_FAN_SPD] = 1;
-      strcpy_P(s_mode,MED_P);
+      strcpy_P(s_speed,MED_P);
       break;
       case CMD_LOW:
       data[B_FAN_SPD] = 2;
-      strcpy_P(s_mode,LOW_P);
+      strcpy_P(s_speed,LOW_P);
       break;
       default:
       //if (n) data[B_FAN_SPD] = Parameters[0];
       data[B_FAN_SPD] = cmd.getInt();
       //TODO - mapping digits to speed
       }
-      publishTopic(item->itemArr->name,s_mode,"/fan");
+      publishTopic(item->itemArr->name,s_speed,"/fan");
       break;
 
       case S_MODE:
@@ -401,14 +409,17 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
           {
             case CMD_ON:
             data[B_LOCK_REM] = 3;
+            publishTopic(item->itemArr->name,"ON","/swing"); 
             break;
             case CMD_OFF:
             data[B_LOCK_REM] = 0;
+            publishTopic(item->itemArr->name,"OFF","/swing"); 
             break;
             default:
             //if (n) data[B_SWING] = Parameters[0];
             data[B_SWING] = cmd.getInt();
           }
+         
       break;
 
       case S_QUIET:
@@ -476,12 +487,13 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
     data[9] = 1;
     data[10] = 77;
     data[11] = 95;
+    AC_Serial.flush();
     SendData(data, sizeof(data)/sizeof(byte));
     //InsertData(data, sizeof(data)/sizeof(byte));
-
+    //AC_Serial.flush();
     return 1;
 }
 
-
+int out_AC::getChanType() {return CH_THERMO;} 
 
 #endif

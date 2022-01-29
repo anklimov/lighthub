@@ -30,6 +30,7 @@ public:
     int Stop() override;
     int Status() override;
     int isActive() override;
+    int getChanType() override;
     int getDefaultStorageType(){return ST_FLOAT_CELSIUS;};
     int Ctrl(itemCmd cmd,  char* subItem=NULL, bool toExecute=true) override;
 
