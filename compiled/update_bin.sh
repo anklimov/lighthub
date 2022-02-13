@@ -6,7 +6,7 @@ cp ../.pio/build/mega2560slim-5100/firmware.bin mega2560slim-5100
 cp ../.pio/build/mega2560-optiboot/firmware.hex mega2560-optiboot
 cp ../.pio/build/mega2560-optiboot/firmware.bin mega2560-optiboot
 cp ../.pio/build/mega2560-5100/firmware.hex mega2560-5100
-cp ../.pio/build/nrf52840/firmware.hex nrf52840-5500
+cp ../.pio/build/nrf52840/firmware.hex nrf52840
 cp ../.pio/build/esp32-wifi/firmware.bin esp32-wifi
 cp ../.pio/build/stm32-enc2860/firmware.bin stm32-enc2860
 cp ../.pio/build/esp8266-wifi/firmware.bin esp8266-wifi
