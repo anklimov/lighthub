@@ -9,6 +9,7 @@ const char homiever_P[] PROGMEM = "3.0.1";
 
 const char name_P[] PROGMEM = "$name";
 const char nameval_P[] PROGMEM = "LightHub ";
+const char lighthub[]  = "lighthub";
 
 const char nodes_P[] PROGMEM = "$nodes";
 const char properties_P[] PROGMEM = "$properties";
@@ -33,13 +34,13 @@ const char true_P[]  PROGMEM = "true";
 const char false_P[] PROGMEM = "false";
 
 const char enumformat_P[]  PROGMEM = "ON,OFF,HALT,REST,XON,XOFF,TOGGLE";
-const char intformat_P[]   PROGMEM = "0-100";
+const char intformat_P[]   PROGMEM = "0-255";
 
 const char stats_P[]     PROGMEM = "$stats";
 const char statsval_P[]  PROGMEM = "uptime,freeheap";
 const char uptime_P[]    PROGMEM = "uptime";
 const char freeheap_P[]  PROGMEM = "freeheap";
-
+const char CMDTOPIC_P[]  PROGMEM = CMDTOPIC;
 /*
 
 {"name": "Спальня LED",
@@ -105,7 +106,6 @@ const char ERROR_P[]  PROGMEM = "ERR";
 
 // SubTopics
 const char SET_P[]  PROGMEM = "set";
-const char ESET_P[]  PROGMEM = "eset";
 const char CMD_P[]  PROGMEM = "cmd";
 const char MODE_P[] PROGMEM = "mode";
 const char FAN_P[]  PROGMEM = "fan";

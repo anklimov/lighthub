@@ -376,7 +376,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
 
     debugSerial<<F("\n")<<fr<<F(":[")<<topic<<F("] ");
 
-    if (fr < 250) {
+    if (fr < 250+MQTT_TOPIC_LENGTH) {
         errorSerial<<F("OutOfMemory!")<<endl;
         return;// -2;
     }
@@ -386,6 +386,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
     short pfxlen  = 0;
     char * itemName = NULL;
     char * subItem = NULL;
+    char savedTopic[MQTT_TOPIC_LENGTH] = "";
 
 // in Retaining status - trying to restore previous state from retained output topic. Retained input topics are not relevant.
 if  (lanStatus == RETAINING_COLLECTING) 
@@ -398,8 +399,9 @@ if  (lanStatus == RETAINING_COLLECTING)
                 pfxlen=inTopic(topic,T_BCST);
                 if (!pfxlen) pfxlen = inTopic(topic,T_DEV);   
                 if (!pfxlen)  return; // Not command topic ever
-                itemName=topic+pfxlen;
-                if (itemName[0]=='$') return;// -6; //Skipping homie stuff
+                //itemName=topic+pfxlen; 
+                if (strrchr(topic,'$')) return;
+                //if (itemName[0]=='$') return;// -6; //Skipping homie stuff
                 debugSerial<<F("CleanUp retained topic ")<<topic<<endl;
                 mqttClient.deleteTopic(topic);
                 }
@@ -408,8 +410,10 @@ if  (lanStatus == RETAINING_COLLECTING)
  }
 else
 {
-        pfxlen=inTopic(topic,T_BCST);
-        if (!pfxlen) pfxlen = inTopic(topic,T_DEV);      
+        pfxlen=inTopic(topic,T_DEV);
+        if (!pfxlen) pfxlen = inTopic(topic,T_BCST);  
+           else // Personal device topic
+               strncpy(savedTopic,topic,sizeof(savedTopic)-1);    
 }   
     
     if (!pfxlen) {
@@ -419,20 +423,20 @@ else
 
     itemName=topic+pfxlen;
     // debugSerial<<itemName<<endl;
-    if(!strcmp(itemName,CMDTOPIC) && payload && (strlen((char*) payload)>1)) {
-      //  mqttClient.publish(topic, "");
+    if(!strcmp_P(itemName,CMDTOPIC_P) && payload && (strlen((char*) payload)>1)) {
+        mqttClient.deleteTopic(topic);
         cmd_parse((char *)payload);
         return;// -4;
     }
   if (itemName[0]=='$') return;// -6; //Skipping homie stuff
-  //debugSerial<<F("itemName ")<<itemName<<endl;
+
   Item item(itemName);
-  if (item.isValid())  item.Ctrl((char *)payload);       
- //    else debugSerial<<F("item invalid")<<endl;  
-  if  (lanStatus != RETAINING_COLLECTING && (mqttClient.isRetained())) 
+  if (item.isValid() && (item.Ctrl((char *)payload)>0) && savedTopic[0] && lanStatus != RETAINING_COLLECTING)       
+
+  //if  (lanStatus != RETAINING_COLLECTING && (mqttClient.isRetained())) 
         {
-           debugSerial<<F("CleanUp retained topic ")<<topic<<endl;
-           mqttClient.deleteTopic(topic);   
+           debugSerial<<F("Complete. Remove topic ")<<savedTopic<<endl;
+           mqttClient.deleteTopic(savedTopic);   
         }
  
  return;// -7;   
@@ -506,8 +510,9 @@ void setupSyslog()
 //    udpSyslogClient.begin(SYSLOG_LOCAL_SOCKET);
 
         udpSyslogArr = aJson.getObjectItem(root, "syslog");
-      if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
+        if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
         char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
+         
         if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
 
         _inet_ntoa_r(Ethernet.localIP(),syslogDeviceHostname,sizeof(syslogDeviceHostname));
@@ -519,6 +524,7 @@ void setupSyslog()
 
         if (mqttArr) deviceName = getStringFromConfig(mqttArr, 0);
         if (deviceName) udpSyslog.appName(deviceName);
+            else udpSyslog.appName(lighthub);
         udpSyslog.defaultPriority(LOG_KERN);
         syslogInitialized=true;
 
@@ -777,92 +783,119 @@ void onMQTTConnect(){
   // High level homie topics publishing
   //strncpy_P(topic, outprefix, sizeof(topic));
   setTopic(topic,sizeof(topic),T_DEV);
-  strncat_P(topic, state_P, sizeof(topic));
-  strncpy_P(buf, ready_P, sizeof(buf));
+  strncat_P(topic, state_P, sizeof(topic)-1);
+  strncpy_P(buf, ready_P, sizeof(buf)-1);
   mqttClient.publish(topic,buf,true);
 
   //strncpy_P(topic, outprefix, sizeof(topic));
   setTopic(topic,sizeof(topic),T_DEV);
-  strncat_P(topic, name_P, sizeof(topic));
-  strncpy_P(buf, nameval_P, sizeof(buf));
-  strncat_P(buf,(verval_P),sizeof(buf));
+  strncat_P(topic, name_P, sizeof(topic)-1);
+  strncpy_P(buf, nameval_P, sizeof(buf)-1);
+  strncat_P(buf,(verval_P),sizeof(buf)-1);
   mqttClient.publish(topic,buf,true);
 
   //strncpy_P(topic, outprefix, sizeof(topic));
   setTopic(topic,sizeof(topic),T_DEV);
-  strncat_P(topic, stats_P, sizeof(topic));
-  strncpy_P(buf, statsval_P, sizeof(buf));
+  strncat_P(topic, stats_P, sizeof(topic)-1);
+  strncpy_P(buf, statsval_P, sizeof(buf)-1);
   mqttClient.publish(topic,buf,true);
 
   #ifndef NO_HOMIE
 
 //  strncpy_P(topic, outprefix, sizeof(topic));
   setTopic(topic,sizeof(topic),T_DEV);
-  strncat_P(topic, homie_P, sizeof(topic));
-  strncpy_P(buf, homiever_P, sizeof(buf));
+  strncat_P(topic, homie_P, sizeof(topic)-1);
+  strncpy_P(buf, homiever_P, sizeof(buf)-1);
   mqttClient.publish(topic,buf,true);
   configLocked++;
   if (items) {
     char datatype[32]="\0";
     char format [64]="\0";
       aJsonObject * item = items->child;
-      while (items && item)
+      
+      int nodesLen=0;
+      while (items && item) {
           if (item->type == aJson_Array && aJson.getArraySize(item)>0) {
 ///              strncat(buf,item->name,sizeof(buf));
 ///              strncat(buf,",",sizeof(buf));
-
+                 nodesLen+=strlen(item->name)+1;
                   switch (  aJson.getArrayItem(item, I_TYPE)->valueint) {
                       case CH_THERMO:
-                      strncpy_P(datatype,float_P,sizeof(datatype));
+                      strncpy_P(datatype,float_P,sizeof(datatype)-1);
                       format[0]=0;
                       break;
 
                       case CH_RELAY:
                       case CH_GROUP:
-                      strncpy_P(datatype,enum_P,sizeof(datatype));
-                      strncpy_P(format,enumformat_P,sizeof(format));
+                      strncpy_P(datatype,int_P,sizeof(datatype)-1);
+                      strncpy_P(format,intformat_P,sizeof(format)-1);
                       break;
 
                       case  CH_RGBW:
+                      case  CH_RGBWW:
                       case  CH_RGB:
-                      strncpy_P(datatype,color_P,sizeof(datatype));
-                      strncpy_P(format,hsv_P,sizeof(format));
+                      strncpy_P(datatype,color_P,sizeof(datatype)-1);
+                      strncpy_P(format,hsv_P,sizeof(format)-1);
                       break;
                       case  CH_DIMMER:
                       case  CH_MODBUS:
                       case  CH_PWM:
                       case  CH_VCTEMP:
                       case  CH_VC:
-                      strncpy_P(datatype,int_P,sizeof(datatype));
-                      strncpy_P(format,intformat_P,sizeof(format));
+                      strncpy_P(datatype,int_P,sizeof(datatype)-1);
+                      strncpy_P(format,intformat_P,sizeof(format)-1);
                       break;
                   } //switch
 
-                  //strncpy_P(topic, outprefix, sizeof(topic));
                   setTopic(topic,sizeof(topic),T_DEV);
-
-                  strncat(topic,item->name,sizeof(topic));
-                  strncat(topic,"/",sizeof(topic));
+                  strncat(topic,item->name,sizeof(topic)-1);
+                  strncat(topic,"/cmd/",sizeof(topic)-1);
                   strncat_P(topic,datatype_P,sizeof(topic));
+                  mqttClient.publish_P(topic,enum_P,true);
+
+                  setTopic(topic,sizeof(topic),T_DEV);
+                  strncat(topic,item->name,sizeof(topic)-1);
+                  strncat(topic,"/cmd/",sizeof(topic)-1);
+                  strncat_P(topic,format_P,sizeof(topic));
+                  mqttClient.publish_P(topic,enumformat_P,true);
+
+                  setTopic(topic,sizeof(topic),T_DEV);
+                  strncat(topic,item->name,sizeof(topic)-1);
+                  strncat(topic,"/set/",sizeof(topic)-1);
+                  strncat_P(topic,datatype_P,sizeof(topic)-1);
                   mqttClient.publish(topic,datatype,true);
 
                   if (format[0])
                   {
-                  //strncpy_P(topic, outprefix, sizeof(topic));
                   setTopic(topic,sizeof(topic),T_DEV);
-
-                  strncat(topic,item->name,sizeof(topic));
-                  strncat(topic,"/",sizeof(topic));
-                  strncat_P(topic,format_P,sizeof(topic));
+                  strncat(topic,item->name,sizeof(topic)-1);
+                  strncat(topic,"/set/",sizeof(topic));
+                  strncat_P(topic,format_P,sizeof(topic)-1);
                   mqttClient.publish(topic,format,true);
                   }
-              yield();
-              item = item->next;
           }  //if
+         yield(); 
+         item = item->next; 
+         }   //while
+
           //strncpy_P(topic, outprefix, sizeof(topic));
           setTopic(topic,sizeof(topic),T_DEV);
-          strncat_P(topic, nodes_P, sizeof(topic));
-    ///      mqttClient.publish(topic,buf,true);
+          strncat_P(topic, nodes_P, sizeof(topic)-1);
+          //debugSerial<<topic<<"->> "<<nodesLen<<endl;
+          
+          mqttClient.beginPublish(topic,nodesLen-1,true);
+          item = items->child;
+          while (items && item)
+          {
+                if (item->type == aJson_Array && aJson.getArraySize(item)>0) 
+                {
+                    mqttClient.write((uint8_t*)item->name,strlen(item->name));
+                    if (item->next) mqttClient.write(',');
+                }
+         yield(); 
+         item = item->next; 
+         }   
+          mqttClient.endPublish(); 
   }
 configLocked--;
 #endif
@@ -893,6 +926,8 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
 
     deviceName = getStringFromConfig(mqttArr, 0);
+    if (!deviceName) deviceName = (char*) lighthub;
+
     infoSerial<<F("Device Name:")<<deviceName<<endl;
     
     #if defined  (MDNS_ENABLE) && ! defined (WIFI_ENABLE)             
