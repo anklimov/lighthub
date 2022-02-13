@@ -388,12 +388,30 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
     char * subItem = NULL;
 
 // in Retaining status - trying to restore previous state from retained output topic. Retained input topics are not relevant.
-if  (lanStatus == RETAINING_COLLECTING) pfxlen=inTopic(topic,T_OUT);
+if  (lanStatus == RETAINING_COLLECTING) 
+{
+        pfxlen=inTopic(topic,T_OUT);
+        if (!pfxlen) // There is not status topic
+           {
+            if (mqttClient.isRetained()) 
+                {
+                pfxlen=inTopic(topic,T_BCST);
+                if (!pfxlen) pfxlen = inTopic(topic,T_DEV);   
+                if (!pfxlen)  return; // Not command topic ever
+                itemName=topic+pfxlen;
+                if (itemName[0]=='$') return;// -6; //Skipping homie stuff
+                debugSerial<<F("CleanUp retained topic ")<<topic<<endl;
+                mqttClient.deleteTopic(topic);
+                }
+            return;     
+           } 
+ }
 else
 {
         pfxlen=inTopic(topic,T_BCST);
         if (!pfxlen) pfxlen = inTopic(topic,T_DEV);      
 }   
+    
     if (!pfxlen) {
         debugSerial<<F("Skipping..")<<endl;
         return;// -3;
@@ -406,29 +424,17 @@ else
         cmd_parse((char *)payload);
         return;// -4;
     }
-/*
-    if (subItem = strchr(itemName, '/'))
-      {
-        *subItem = 0;
-        subItem++;
-        if (*subItem=='$') return;// -5; //Skipping homie stuff
-      }
-
-    if (itemName[0]=='$') return;// -6; //Skipping homie stuff
-
-    Item item(itemName);
-    if (item.isValid()) {
-        //return 
-        item.Ctrl((char *)payload,subItem);        
-    } //valid item
- */
-
   if (itemName[0]=='$') return;// -6; //Skipping homie stuff
   //debugSerial<<F("itemName ")<<itemName<<endl;
   Item item(itemName);
   if (item.isValid())  item.Ctrl((char *)payload);       
  //    else debugSerial<<F("item invalid")<<endl;  
-
+  if  (lanStatus != RETAINING_COLLECTING && (mqttClient.isRetained())) 
+        {
+           debugSerial<<F("CleanUp retained topic ")<<topic<<endl;
+           mqttClient.deleteTopic(topic);   
+        }
+ 
  return;// -7;   
 }
 
