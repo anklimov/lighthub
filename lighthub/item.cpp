@@ -691,6 +691,12 @@ return false;
 }
 
 //Main routine to control Item
+//Return values
+// 1  complete
+// 3  complete, no action, target reached
+// -3 ignored
+// -1 system error
+// -4 invalid argument
 int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
 { 
 
@@ -911,7 +917,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
                               break;
                           default:
-                              return -3;
+                              return 3;
                       }
                   status2Send |= SEND_COMMAND;     
                   break;
@@ -924,7 +930,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               break;
                           default:
                               debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
-                            return -3;
+                            return 3;
                     }
                     break;
           
@@ -940,7 +946,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
               else
               { 
                 debugSerial<<F("XON:Already Active\n");
-                return -3;
+                return 3;
               }
             break;
             case CMD_HALT:
@@ -954,7 +960,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
             else    
                   {
                     debugSerial<<F("HALT:Already Inactive\n");
-                    return -3;
+                    return 3;
                   }
             break;
       }
@@ -981,7 +987,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                 if (subitemCmd != prevCmd)
                     {
                         debugSerial<<F("Ignored, channel cmd=")<<prevCmd<<endl;
-                        return -1;
+                        return -3;
                     }
                 subItem=NULL;   
                 }
@@ -1007,7 +1013,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               status2Send |= SEND_COMMAND | SEND_IMMEDIATE;     
                               break;
                           default:
-                              return -3;
+                              return 3;
                       }
                   status2Send |= SEND_COMMAND;     
                   break;
@@ -1021,7 +1027,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               break;
                           default:
                               debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
-                            return -3;
+                            return 3;
                     }
                     break;
           
@@ -1037,7 +1043,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
               else
               { 
                 debugSerial<<F("XON:Already Active\n");
-                return -3;
+                return 3;
               }
             break;
             case CMD_HALT:
@@ -1051,7 +1057,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
             else    
                   {
                     debugSerial<<F("HALT:Already Inactive\n");
-                    return -3;
+                    return 3;
                   }
             break;
             
@@ -1062,7 +1068,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                     break;
                 }
 
-            if (getCmd() == CMD_HALT) return -3; //Halted, ignore OFF
+            if (getCmd() == CMD_HALT) return 3; //Halted, ignore OFF
             status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
             toExecute=true;
             break;
@@ -1077,7 +1083,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
             if (chActive) 
                 {
                         debugSerial<<F("ON:Already Active\n");
-                        return -3;
+                        return 3;
                 }
             //newly added. For climate commands need to restore previous temperature 
             case CMD_AUTO:
@@ -2001,7 +2007,7 @@ int Item::checkModbusDimmer() {
     short numpar = 0;
     if ((itemArg->type != aJson_Array) || ((numpar = aJson.getArraySize(itemArg)) < 2)) {
         debugSerial<<F("Illegal arguments\n");
-        return -3;
+        return -4;
     }
 
     modbusBusy = 1;
