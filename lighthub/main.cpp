@@ -429,7 +429,8 @@ else
         cmd_parse((char *)payload);
         return;// -4;
     }
-  if (itemName[0]=='$') return;// -6; //Skipping homie stuff
+  //if (itemName[0]=='$') return;// -6; //Skipping homie stuff
+  if (strrchr(topic,'$')) return;
 
   Item item(itemName);
   if (item.isValid() && (item.Ctrl((char *)payload)>0) && savedTopic[0] && lanStatus != RETAINING_COLLECTING)       
