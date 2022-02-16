@@ -369,7 +369,7 @@ int intopic;
 
 void mqttCallback(char *topic, byte *payload, unsigned int length) 
 {
-    if (!payload || !payload[0]) return;
+    if (!payload || !length) {debugSerial<<F("\n")<<F("Empty: [")<<topic<<F("]")<<endl;return;}
     payload[length] = 0;
 
     int fr = freeRam();
@@ -382,7 +382,8 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
     }
     
     statusLED.flash(ledBLUE);
-    debugSerial<<(char*)payload<<endl;
+    debugSerial<<F("\"")<<(char*)payload<<F("\"")<<endl;
+   
     short pfxlen  = 0;
     char * itemName = NULL;
     char * subItem = NULL;
