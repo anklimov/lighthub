@@ -369,7 +369,7 @@ int intopic;
 
 void mqttCallback(char *topic, byte *payload, unsigned int length) 
 {
-    if (!payload) return;
+    if (!payload || !payload[0]) return;
     payload[length] = 0;
 
     int fr = freeRam();
