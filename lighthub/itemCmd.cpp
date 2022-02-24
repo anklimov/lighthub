@@ -635,6 +635,33 @@ return (cmd.itemArgType==ST_HS || cmd.itemArgType==ST_HSV255 || cmd.itemArgType=
 
 }
 
+long int itemCmd::getTens()
+{
+  switch (cmd.itemArgType) {
+
+    case ST_INT32:
+    case ST_UINT32:
+    case ST_RGB:
+    case ST_RGBW:
+    
+      return param.aslong*10;
+    case ST_PERCENTS255:
+    case ST_HSV255:
+      return param.v*10;
+
+    case ST_FLOAT:
+    case ST_FLOAT_CELSIUS:
+    case ST_FLOAT_FARENHEIT:
+      return param.asfloat*10.0;
+    case ST_TENS:
+      return param.aslong; 
+    default:
+    return 0;
+  }
+}
+
+
+
 
 long int itemCmd::getInt()
 {

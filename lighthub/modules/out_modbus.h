@@ -22,6 +22,8 @@ public:
   aJsonObject * parameters;
 };
 
+#define MB_NEED_SEND  1
+#define MB_SEND_ERROR 2
 
 
 class out_Modbus : public abstractOut {
@@ -40,7 +42,9 @@ public:
 protected:
     mbPersistent * store;
     bool getConfig();
-    int findRegister(int registerNum, int posInBuffer, int regType);
+    int  findRegister(int registerNum, int posInBuffer, int regType);
     void pollModbus(aJsonObject * reg, int regType);
+    void initLine();
+    int  sendModbus(char * paramName, uint32_t value, uint8_t regType);
 };
 #endif

@@ -197,6 +197,7 @@ public:
   bool incrementS(int16_t);
 
   long int getInt();
+  long int getTens();
   float    getFloat();
   char *   getString();
   long int getSingleInt();

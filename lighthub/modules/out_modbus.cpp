@@ -171,8 +171,6 @@ if (!store)
 store->timestamp=millisNZ();
 if (getConfig())
     {
-        //item->clearFlag(ACTION_NEEDED);
-        //item->clearFlag(ACTION_IN_PROCESS);
         infoSerial<<F("Modbus config loaded ")<< item->itemArr->name<<endl;
         store->driverStatus = CST_INITIALIZED;
         return 1;
@@ -285,7 +283,7 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
 
                       case PAR_U8H:
                       //is8bit=true;
-                      param = data << 8;
+                      param = (data & 0xFF00) >> 8;
                       mappedParam.Int((uint32_t)param);
                       break;
 
@@ -371,13 +369,9 @@ return is8bit;
             }
     }
 
-int out_Modbus::Poll(short cause)
+void out_Modbus::initLine()
 {
-if ((store->pollingRegisters || store->pollingIrs) && !modbusBusy && (Status() == CST_INITIALIZED) && isTimeOver(store->timestamp,millis(),store->pollingInterval))
-  {
-    debugSerial<<F("Poll ")<< item->itemArr->name << endl;
-    modbusBusy=1;
-    //store->serialParam=(USARTClass::USARTModes) SERIAL_8N1;
+//store->serialParam=(USARTClass::USARTModes) SERIAL_8N1;
     #if defined (__SAM3X8E__)
     modbusSerial.begin(store->baud, static_cast <USARTClass::USARTModes> (store->serialParam));
     #elif defined (ARDUINO_ARCH_ESP8266)
@@ -391,12 +385,121 @@ if ((store->pollingRegisters || store->pollingIrs) && !modbusBusy && (Status() =
     #endif
     debugSerial<< store->baud << F("---")<< store->serialParam<<endl;
     node.begin(item->getArg(0), modbusSerial);
+}
+
+int out_Modbus::sendModbus(char * paramName, uint32_t value, uint8_t regType)
+{
+ if (!store) return -1;
+ aJsonObject * templateParamObj = aJson.getObjectItem(store->parameters, paramName);
+ if (!templateParamObj) return -1; 
+ aJsonObject * regObj = aJson.getObjectItem(templateParamObj, "reg");
+ if (!regObj) return -2;
+ int res = -1;
+
+// int8_t    regType = PAR_I16;
+// aJsonObject * typeObj = aJson.getObjectItem(templateParamObj, "type");
+// if (typeObj && typeObj->type == aJson_String) regType=str2regSize(typeObj->valuestring);
+
+                    switch(regType) {
+                      case PAR_I16:
+                      case PAR_U16:
+                      case PAR_TENS:
+                      res = node.writeSingleRegister(regObj->valueint,value);
+                      break;
+
+                      
+                      break;
+                      case PAR_I32:
+                      case PAR_U32:
+                      res = node.writeSingleRegister(regObj->valueint,value & 0xFFFF);
+                      res += node.writeSingleRegister(regObj->valueint+1,value >> 16) ;
+                      break;
+
+                      case PAR_U8L:
+                      res = node.writeSingleRegister(regObj->valueint,value & 0xFF);
+                      
+                      break;
+
+                      case PAR_U8H:
+                      res = node.writeSingleRegister(regObj->valueint,(value & 0xFFFF)>> 8);
+                      break;
+                    }
+ debugSerial<<F("MB_SEND Res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<value<<endl;
+ return ( res == 0);
+}
+
+int out_Modbus::Poll(short cause)
+{
+bool lineInitialized = false;  
+
+if (modbusBusy || (Status() != CST_INITIALIZED)) return 0;
+
+aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
+if (itemParametersObj && itemParametersObj->type ==aJson_Object)
+           {
+            aJsonObject *execObj = itemParametersObj->child; 
+            while (execObj && execObj->type == aJson_Object)
+                          {     
+                                 if ((execObj->subtype & MB_NEED_SEND) && !(execObj->subtype & MB_SEND_ERROR))
+                                 {
+                                 aJsonObject *outValue = aJson.getObjectItem(execObj,"@V");                      
+                                      if (outValue)
+                                          {    
+                                                modbusBusy=1;
+                                                if (!lineInitialized)
+                                                    {
+                                                      lineInitialized=true;  
+                                                      initLine();
+                                                    }
+                                              switch (sendModbus(execObj->name,outValue->valueint,outValue->subtype)) 
+                                              {
+                                               case 1: //success
+                                                 execObj->subtype&=~ MB_NEED_SEND;
+                                                 break;
+                                               case 0: //fault 
+                                                 execObj->subtype |= MB_SEND_ERROR;  
+                                                 break;
+                                               default: //param not found
+                                                 errorSerial<<F("MBus param ")<<execObj->name<<F(" not found")<<endl;
+                                                 execObj->subtype&=~ MB_NEED_SEND;
+                                               }    
+                                          }
+                                  }   
+                            execObj=execObj->next;          
+                           }
+           modbusBusy=0;                
+           }
+  
+
+if (isTimeOver(store->timestamp,millis(),store->pollingInterval))
+{
+
+// Clean_up SEND_ERROR flag 
+if (itemParametersObj && itemParametersObj->type ==aJson_Object)
+           {
+            aJsonObject *execObj = itemParametersObj->child; 
+            while (execObj && execObj->type == aJson_Object)
+                          {     
+                                 if (execObj->subtype & MB_SEND_ERROR) execObj->subtype&=~ MB_SEND_ERROR;
+                                 execObj=execObj->next;
+                          }     
+           }                
+
+// if some polling configured
+if (store->pollingRegisters || store->pollingIrs)
+  {
+    debugSerial<<F("Poll ")<< item->itemArr->name << endl;
+    modbusBusy=1;
+
+    if (!lineInitialized)
+    {
+    lineInitialized=true;  
+    initLine();
+    }
 
     pollModbus(store->pollingRegisters,MODBUS_HOLDING_REG_TYPE);
     pollModbus(store->pollingIrs,MODBUS_INPUT_REG_TYPE);
-    
-  store->timestamp=millisNZ();
-  debugSerial<<F("endPoll ")<< item->itemArr->name << endl;
+    debugSerial<<F("endPoll ")<< item->itemArr->name << endl;
 
   //Non blocking waiting to release line
   uint32_t time = millis();
@@ -405,13 +508,15 @@ if ((store->pollingRegisters || store->pollingIrs) && !modbusBusy && (Status() =
 
   modbusBusy =0;
   }
+ store->timestamp=millisNZ();  
+}
 
 return store->pollingInterval;
 };
 
 int out_Modbus::getChanType()
 {
-   return CH_MODBUS;
+   return CH_MBUS;
 }
 
 
@@ -423,41 +528,87 @@ int out_Modbus::getChanType()
 
 int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
 {
-  return 0;
-//int chActive = item->isActive();
-//bool toExecute = (chActive>0);
-//itemCmd st(ST_UINT32,CMD_VOID);
 int suffixCode = cmd.getSuffix();
 aJsonObject *templateParamObj = NULL;
 short mappedCmdVal = 0;
+
+char * suffixStr = subItem;
 
 // trying to find parameter in template with name == subItem (NB!! standard suffixes dint working here)
 if (subItem && strlen (subItem) && store) templateParamObj = aJson.getObjectItem(store->parameters, subItem);
 
 if (!templateParamObj && store)
 {
-  // Trying to find template parameter where id == suffixCode
+  // Fallback - Trying to find template parameter where id == suffixCode
  templateParamObj = store->parameters->child;
 
   while (templateParamObj)
           {
             //aJsonObject *regObj = aJson.getObjectItem(paramObj, "reg");
             aJsonObject *idObj = aJson.getObjectItem(templateParamObj, "id");
-            if (idObj->type==aJson_Int && idObj->valueint == suffixCode) break;
+            if (idObj->type==aJson_Int && idObj->valueint == suffixCode) 
+                            {
+                            suffixStr=templateParamObj->name;  
+                            break;
+                            }
 
-            aJsonObject *mapObj = aJson.getObjectItem(templateParamObj, "mapcmd");
-            if (mapObj && (mappedCmdVal = cmd.doReverseMappingCmd(mapObj))) break;
+         //   aJsonObject *mapObj = aJson.getObjectItem(templateParamObj, "mapcmd");
+         //   if (mapObj && (mappedCmdVal = cmd.doReverseMappingCmd(mapObj))) break;
 
             templateParamObj=templateParamObj->next;                       
           }
 }
 
 
-//                    aJsonObject *typeObj = aJson.getObjectItem(paramObj, "type");
-//                    aJsonObject *mapObj = aJson.getObjectItem(paramObj, "map");
-//                    aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
-//                    uint16_t data = node.getResponseBuffer(posInBuffer);
+if (templateParamObj)
+{
+// We have find template for suffix or suffixCode
+long  Value = 0;
+int8_t    regType = PAR_I16;
+aJsonObject * typeObj = aJson.getObjectItem(templateParamObj, "type");
 
+                    if (typeObj && typeObj->type == aJson_String) regType=str2regSize(typeObj->valuestring);
+                    switch(regType) {
+                      case PAR_I16:
+                      case PAR_I32:
+                      case PAR_U32:
+                      case PAR_U8L:
+                      case PAR_U8H:
+                        Value=cmd.getInt();
+                      break;
+                      case PAR_TENS:
+                        Value=cmd.getTens();
+                    }
+
+debugSerial<<F("MB suffix:")<<suffixStr<< F(" Val: ")<<Value<<endl;
+aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
+if (itemParametersObj && itemParametersObj->type ==aJson_Object)
+           {
+            aJsonObject *execObj =  aJson.getObjectItem(itemParametersObj,suffixStr); 
+            if (execObj && execObj->type == aJson_Object)
+                          {     
+                              execObj->subtype |= MB_NEED_SEND;
+
+                                      aJsonObject *outValue = aJson.getObjectItem(execObj,"@V");                      
+                                      if (outValue)
+                                          {    
+                                           outValue->valueint=Value;
+                                           outValue->subtype =regType; 
+                                          }
+                               else //No container to store value yet 
+                                      {
+                                        debugSerial<<F("Add @V: ")<<execObj->name<<endl;
+                                        aJson.addNumberToObject(execObj, "@V", Value);
+                                        outValue = aJson.getObjectItem(execObj,"@V");  
+                                        if (outValue) outValue->subtype =regType; 
+                                      }      
+                           }  
+           }
+  
+
+
+}
+else errorSerial<<F("No template for ")<<subItem<<F("/")<<suffixCode<<endl;
 
 
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
