@@ -45,6 +45,6 @@ protected:
     int  findRegister(int registerNum, int posInBuffer, int regType);
     void pollModbus(aJsonObject * reg, int regType);
     void initLine();
-    int  sendModbus(char * paramName, uint32_t value, uint8_t regType);
+    int  sendModbus(char * paramName, int32_t value, uint8_t regType);
 };
 #endif

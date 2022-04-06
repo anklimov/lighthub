@@ -59,6 +59,7 @@ e-mail    anklimov@gmail.com
 #define CH_RGBWW    17
 #define CH_MULTIVENT 18
 #define CH_ELEVATOR 19
+#define CH_COUNTER 20
 
 //#define CHANNEL_TYPES 13
 
@@ -146,7 +147,7 @@ class Item
   inline int Toggle(){return Ctrl(itemCmd(ST_VOID,CMD_TOGGLE));};
 
   protected:
- 
+  long int limitSetValue();
   int VacomSetFan (itemCmd st);
   int VacomSetHeat(itemCmd st);
   int modbusDimmerSet(itemCmd st);

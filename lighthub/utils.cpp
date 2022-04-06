@@ -116,31 +116,45 @@ int getInt(char **chan) {
 // Function return first retrived number and move pointer to position next after ','
 itemCmd getNumber(char **chan) {
     itemCmd val(ST_TENS,CMD_VOID);
-    int fract =0; 
     if (chan && *chan && **chan)
     {
     //Skip non-numeric values
     while (**chan && !(**chan == '-' || (**chan >= '0' && **chan<='9'))) *chan += 1;
-    int ch = atoi(*chan);
-    
+
+    long   fractnumbers = 0;
+    short  fractlen = 0;
+    short  intlen   = 0;
+
+    char * intptr = * chan;
+    if (*intptr == '-') intptr ++;
+    while (isDigit(*(intptr+intlen))) intlen++; 
+
     char * fractptr = strchr(*chan,'.');
     if (fractptr) 
     {
-      //  fract = atoi(fractptr);
-      //  *chan = fractptr;
-      fractptr += 1;
-      fract = constrain(*fractptr-'0',0,9);
+      fractptr ++;
+      while (isDigit(*(fractptr+fractlen))) fractlen++; 
+
+      for (short i=0;i<TENS_FRACT_LEN;i++) 
+         {
+          fractnumbers = fractnumbers * 10;    
+          if (isDigit(*(fractptr+i))) fractnumbers += constrain(*(fractptr+i)-'0',0,9);  
+         }
     }
+    
+    if (!fractlen) val.Int(atol(*chan));
+    else if (fractlen<=TENS_FRACT_LEN && intlen+TENS_FRACT_LEN<=9)
+        {
+         long intpart = atol(*chan);   
+         val.Tens_raw(intpart*TENS_BASE+((intpart>=0)?fractnumbers:-fractnumbers));
+        }
+    else 
+      val.Float(atof(*chan)); 
     
     //Move pointer to next element (after ,)
     *chan = strchr(*chan, ',');
     if (*chan) *chan += 1;
-    //debugSerialPort.print(F("Par:")); debugSerialPort.println(ch);
-    
-    if (fract)
-      val.Tens(ch*10+((ch>0)?fract:-fract));
-    else
-      val.Int((int32_t)ch);
+   
    }
    //val.debugOut();
    return val;

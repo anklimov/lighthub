@@ -1,5 +1,10 @@
 #pragma once
 #include <Arduino.h>
+
+
+#define TENS_FRACT_LEN 2
+#define TENS_BASE 100
+
 #define DEFAULT_FILESIZE_LIMIT 65535
 #ifndef MAX_JSON_CONF_SIZE
 

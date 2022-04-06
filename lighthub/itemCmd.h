@@ -169,6 +169,7 @@ public:
   itemCmd Int(uint32_t i);
   itemCmd Float(float f);
   itemCmd Tens(int32_t i);
+  itemCmd Tens_raw(int32_t i);
   itemCmd Cmd(uint8_t i);
   itemCmd HSV(uint16_t h, uint8_t s, uint8_t v);
   itemCmd HSV255(uint16_t h, uint8_t s, uint8_t v);
@@ -192,12 +193,13 @@ public:
   uint8_t getSuffix();
   itemCmd setSuffix(uint8_t suffix);
 
-  bool incrementPercents(int16_t);
-  bool incrementH(int16_t);
-  bool incrementS(int16_t);
+  bool incrementPercents(long int, long int limit);
+  bool incrementH(long int);
+  bool incrementS(long int);
 
   long int getInt();
   long int getTens();
+  long int getTens_raw();
   float    getFloat();
   char *   getString();
   long int getSingleInt();

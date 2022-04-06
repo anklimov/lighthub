@@ -39,6 +39,7 @@ struct serial_t
 #define PAR_U8H 7
 #define PAR_U8L 8
 #define PAR_TENS 9
+#define PAR_100 10
 
 
 const reg_t regSize_P[] PROGMEM =
@@ -51,7 +52,8 @@ const reg_t regSize_P[] PROGMEM =
   { "i8l", (uint8_t) PAR_I8L },
   { "u8h", (uint8_t) PAR_U8H },
   { "u8l", (uint8_t) PAR_U8L },
-  { "x10", (uint8_t) PAR_TENS }
+  { "x10", (uint8_t) PAR_TENS },
+  { "100", (uint8_t) PAR_100 }
 } ;
 #define regSizeNum sizeof(regSize_P)/sizeof(reg_t)
 
@@ -233,7 +235,7 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
   bool is8bit = false;
   while (paramObj)
           {
-            aJsonObject *regObj;
+            aJsonObject *regObj=NULL;
             switch (regType) {
               case MODBUS_HOLDING_REG_TYPE: regObj = aJson.getObjectItem(paramObj, "reg");
                 break;
@@ -257,12 +259,13 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
 
                       case PAR_I16:
                       //isSigned=true;
+                      param=data;
                       mappedParam.Int((int32_t)data);
                       break;
 
                       case PAR_U16:
+                      param=data;
                       mappedParam.Int((uint32_t)data);
-                      //param=data;
                       break;
                       case PAR_I32:
                       //isSigned=true;
@@ -288,7 +291,14 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                       break;
 
                       case PAR_TENS:
+                      param=data;
                       mappedParam.Tens((int32_t) data);
+                      break;
+
+                      case PAR_100:
+                      param=data;
+                      mappedParam.Tens_raw(data * (TENS_BASE/100));
+                      mappedParam.Float((int32_t) data/100.);
                     }
 
                     if (mapObj && (mapObj->type==aJson_Array || mapObj->type==aJson_Object))
@@ -306,16 +316,24 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                                       aJsonObject *lastMeasured = aJson.getObjectItem(execObj,"@S");
                                       if (lastMeasured)
                                           {
-                                          if   (lastMeasured->valueint == mappedParam.getSingleInt())
+                                          if   (lastMeasured->valueint == param)
                                                 submitParam=false; //supress repeating execution for same val
-                                          else  lastMeasured->valueint=mappedParam.getSingleInt();
+                                          else  lastMeasured->valueint=param;
                                           }
                                       else //No container to store value yet 
                                       {
                                         debugSerial<<F("Add @S: ")<<paramObj->name<<endl;
-                                        aJson.addNumberToObject(execObj, "@S", mappedParam.getSingleInt());
+                                        aJson.addNumberToObject(execObj, "@S", (long) param);
                                       }                                      
-                                      if (submitParam) executeCommand(execObj, -1, mappedParam);
+                                      if (submitParam)                                       
+                                      { // Compare with last submitted val
+                                       aJsonObject *settedValue = aJson.getObjectItem(execObj,"@V");                      
+                                       if (settedValue && (settedValue->valueint == param))
+                                          {    
+                                           debugSerial<<F("Ignored - equal with setted val")<<endl;
+                                          }  
+                                        else executeCommand(execObj, -1, mappedParam);   
+                                      }
                                       }
                           }
                     if (!is8bit) return 1;
@@ -387,7 +405,7 @@ void out_Modbus::initLine()
     node.begin(item->getArg(0), modbusSerial);
 }
 
-int out_Modbus::sendModbus(char * paramName, uint32_t value, uint8_t regType)
+int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
 {
  if (!store) return -1;
  aJsonObject * templateParamObj = aJson.getObjectItem(store->parameters, paramName);
@@ -401,9 +419,12 @@ int out_Modbus::sendModbus(char * paramName, uint32_t value, uint8_t regType)
 // if (typeObj && typeObj->type == aJson_String) regType=str2regSize(typeObj->valuestring);
 
                     switch(regType) {
-                      case PAR_I16:
                       case PAR_U16:
+                      //res = node.writeSingleRegister(regObj->valueint,value);
+                      //break;
+                      case PAR_I16:  
                       case PAR_TENS:
+                      case PAR_100:
                       res = node.writeSingleRegister(regObj->valueint,value);
                       break;
 
@@ -424,7 +445,7 @@ int out_Modbus::sendModbus(char * paramName, uint32_t value, uint8_t regType)
                       res = node.writeSingleRegister(regObj->valueint,(value & 0xFFFF)>> 8);
                       break;
                     }
- debugSerial<<F("MB_SEND Res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<value<<endl;
+ debugSerial<<F("MB_SEND Res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<value<<F(" ival:")<<(int32_t) value<<endl;
  return ( res == 0);
 }
 
@@ -458,6 +479,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                  break;
                                                case 0: //fault 
                                                  execObj->subtype |= MB_SEND_ERROR;  
+                                                 errorSerial<<F("MBus ")<<execObj->name<<F(" send error")<<endl;
                                                  break;
                                                default: //param not found
                                                  errorSerial<<F("MBus param ")<<execObj->name<<F(" not found")<<endl;
@@ -578,6 +600,9 @@ aJsonObject * typeObj = aJson.getObjectItem(templateParamObj, "type");
                       break;
                       case PAR_TENS:
                         Value=cmd.getTens();
+                      break;  
+                      case PAR_100:  
+                        Value=cmd.getTens_raw()*(100/TENS_BASE);
                     }
 
 debugSerial<<F("MB suffix:")<<suffixStr<< F(" Val: ")<<Value<<endl;
@@ -586,22 +611,32 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            {
             aJsonObject *execObj =  aJson.getObjectItem(itemParametersObj,suffixStr); 
             if (execObj && execObj->type == aJson_Object)
-                          {     
-                              execObj->subtype |= MB_NEED_SEND;
-
-                                      aJsonObject *outValue = aJson.getObjectItem(execObj,"@V");                      
-                                      if (outValue)
+                          {   
+                              aJsonObject *polledValue = aJson.getObjectItem(execObj,"@S");                      
+                                      if (polledValue && (polledValue->valueint == Value))
                                           {    
-                                           outValue->valueint=Value;
-                                           outValue->subtype =regType; 
+                                           debugSerial<<F("Ignored - not changed")<<endl;
                                           }
-                               else //No container to store value yet 
-                                      {
-                                        debugSerial<<F("Add @V: ")<<execObj->name<<endl;
-                                        aJson.addNumberToObject(execObj, "@V", Value);
-                                        outValue = aJson.getObjectItem(execObj,"@V");  
-                                        if (outValue) outValue->subtype =regType; 
-                                      }      
+
+                                      else 
+                                      { //Schedule update
+                                        execObj->subtype |= MB_NEED_SEND;
+
+                                        aJsonObject *outValue = aJson.getObjectItem(execObj,"@V");                      
+                                        if (outValue)
+                                            {    
+                                            outValue->valueint=Value;
+                                            outValue->subtype =regType; 
+                                            polledValue->valueint=Value; //to pevent suppressing to change back to previously polled value if this occurs before next polling
+                                            }
+                                        else //No container to store value yet 
+                                            {
+                                              debugSerial<<F("Add @V: ")<<execObj->name<<endl;
+                                              aJson.addNumberToObject(execObj, "@V", Value);
+                                              outValue = aJson.getObjectItem(execObj,"@V");  
+                                              if (outValue) outValue->subtype =regType; 
+                                            }
+                                      }          
                            }  
            }
   

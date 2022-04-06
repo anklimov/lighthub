@@ -113,6 +113,8 @@ uint8_t itemCmd::getStoragetypeByChanType(short chanType)
     break;
     case CH_RELAY:
     return ST_VOID;
+    //case CH_COUNTER:
+    //return ST_TENS;
     default:
     return ST_VOID;
   }
@@ -236,13 +238,14 @@ uint16_t itemCmd::getS()
   return param.s;
 }
 
-bool itemCmd::incrementPercents(int16_t dif)
-{ int par=param.v;
+
+bool itemCmd::incrementPercents(long int dif, long int limit )
+{ long par=param.v;
   switch (cmd.itemArgType)
   {
     case ST_PERCENTS255:
     case ST_HSV255:
-     par+=dif;
+     par+=dif/TENS_BASE;
      if (par>255) par=255;
      if (par<0) par=0;
     param.v=par;
@@ -251,9 +254,9 @@ bool itemCmd::incrementPercents(int16_t dif)
     case ST_INT32:
     case ST_UINT32:
      par=param.asInt32;
-     par+=dif;
-     if (par>100) par=100;
-     if (par<0) par=0;
+     par+=dif/TENS_BASE;
+     if (par>limit) par=limit;
+     if (limit && par<0) par=0;
      param.asInt32=par;
     break;  
 
@@ -261,18 +264,18 @@ bool itemCmd::incrementPercents(int16_t dif)
     case ST_FLOAT_CELSIUS:
     case ST_FLOAT_FARENHEIT:
      par=param.asfloat;
-     par+=dif;
-     if (par>100) par=100;
-     if (par<0) par=0;
+     par+=dif/TENS_BASE;
+    if (limit && par>limit) par=limit;
+    if (limit && par<0) par=0;
      param.asfloat=par;
     break;  
  
     case ST_TENS:
     
      par=param.asInt32;
-     par+=dif*10;
-     if (par>1000) par=1000;
-     if (par<0) par=0;
+     par+=dif;
+//   if (par>100*TENS_BASE) par=100*TENS_BASE;
+//   if (par<0) par=0;
      param.asInt32=par;
     break;  
 
@@ -282,13 +285,13 @@ bool itemCmd::incrementPercents(int16_t dif)
   return true;
 }
 
-bool itemCmd::incrementH(int16_t dif)
+bool itemCmd::incrementH(long int dif)
 { int par=param.h;
   switch (cmd.itemArgType)
   {
   //case ST_HSV:
   case ST_HSV255:
-   par+=dif;
+   par+=dif/TENS_BASE;
    if (par>365) par=0;
    if (par<0) par=365;
    break;
@@ -299,12 +302,12 @@ param.h=par;
 return true;
 }
 
-bool itemCmd::incrementS(int16_t dif)
+bool itemCmd::incrementS(long int dif)
 {int par=param.s;
   switch (cmd.itemArgType)
   {
     case ST_HSV255:
-     par+=dif;
+     par+=dif/TENS_BASE;
      if (par>100) par=100;
      if (par<0) par=0;
     break;
@@ -356,7 +359,7 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                    param.v=constrain(from.param.asInt32,0,255);
                    break;
               case ST_TENS:
-                   param.v=constrain(from.param.asInt32/10,0,255);   
+                   param.v=constrain(from.param.asInt32/TENS_BASE,0,255);   
                    break;                    
               case ST_HSV255:
                    param.h=from.param.h;
@@ -420,7 +423,9 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
              break; 
 
              case ST_TENS:
-              param.asfloat=from.param.asInt32/10.;
+              //param.asfloat=(float) from.param.asInt32/(float)TENS_BASE;
+               param.asInt32 = from.param.asInt32;
+               cmd.itemArgType=from.cmd.itemArgType;
              break;
              case ST_PERCENTS255:             
               param.asfloat=from.param.v; 
@@ -507,7 +512,7 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
               vol=from.param.asInt32;
               break; 
             case ST_TENS:
-              vol=from.param.asInt32/10;
+              vol=from.param.asInt32/TENS_BASE;
               break; 
             case ST_FLOAT:
               vol=from.param.asfloat;
@@ -654,12 +659,36 @@ long int itemCmd::getTens()
     case ST_FLOAT_FARENHEIT:
       return param.asfloat*10.0;
     case ST_TENS:
-      return param.aslong; 
+      return param.aslong/(TENS_BASE/10); 
     default:
     return 0;
   }
 }
 
+long int itemCmd::getTens_raw()
+{
+  switch (cmd.itemArgType) {
+
+    case ST_INT32:
+    case ST_UINT32:
+    case ST_RGB:
+    case ST_RGBW:
+    
+      return param.aslong*TENS_BASE;
+    case ST_PERCENTS255:
+    case ST_HSV255:
+      return param.v*TENS_BASE;
+
+    case ST_FLOAT:
+    case ST_FLOAT_CELSIUS:
+    case ST_FLOAT_FARENHEIT:
+      return param.asfloat*(float)TENS_BASE;
+    case ST_TENS:
+      return param.aslong; 
+    default:
+    return 0;
+  }
+}
 
 
 
@@ -682,7 +711,7 @@ long int itemCmd::getInt()
     case ST_FLOAT_FARENHEIT:
       return param.asfloat;
     case ST_TENS:
-      return param.aslong/10; 
+      return param.aslong/TENS_BASE; 
 
 
  
@@ -714,7 +743,7 @@ float itemCmd::getFloat()
    
       return param.aslong;
      case ST_TENS:
-      return param.aslong/10;  
+      return param.aslong/TENS_BASE;  
 
     case ST_PERCENTS255:
     case ST_HSV255:
@@ -758,8 +787,8 @@ short itemCmd::getPercents(bool inverse)
             else return constrain (param.asfloat,0,100);   
 
     case ST_TENS:
-           if (inverse) return constrain (100-param.asInt32/10,0,100);
-            else return constrain(param.asInt32/10,0,100);
+           if (inverse) return constrain (100-param.asInt32/TENS_BASE,0,100);
+            else return constrain(param.asInt32/TENS_BASE,0,100);
     case ST_VOID:
           return 0;
 
@@ -784,7 +813,7 @@ bool itemCmd::setPercents(int percents)
       param.asfloat=map(percents,0,100,0,255);;
     break;   
     case ST_TENS:
-    param.asInt32 = map(percents,0,100,0,2550);;
+    param.asInt32 = map(percents,0,100,0,255*TENS_BASE);;
     default:
     return false;
   }
@@ -807,7 +836,7 @@ short itemCmd::getPercents255(bool inverse)
        if (inverse) return 255-constrain(param.asfloat,0,255); else return constrain(param.asfloat,0,255); 
 
     case ST_TENS:
-      if (inverse) return 255-constrain(param.asInt32/10,0,255); else return constrain(param.asInt32/10,0,255); 
+      if (inverse) return 255-constrain(param.asInt32/TENS_BASE,0,255); else return constrain(param.asInt32/TENS_BASE,0,255); 
     
     case ST_VOID:
       return 0;
@@ -908,9 +937,16 @@ itemCmd itemCmd::Float(float f)
 itemCmd itemCmd::Tens(int32_t i)
         {
           cmd.itemArgType=ST_TENS;
-          param.asInt32=i;
+          param.asInt32=i*(TENS_BASE/10);
           return *this;
         }
+
+itemCmd itemCmd::Tens_raw(int32_t i)
+        {
+          cmd.itemArgType=ST_TENS;
+          param.asInt32=i;
+          return *this;
+        }        
 
 itemCmd itemCmd::HSV(uint16_t h, uint8_t s, uint8_t v)
 {
@@ -1002,7 +1038,7 @@ bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
   if (subtype)
         {
           cmd.itemArgType= subtype;
-          if (optionsFlag & SEND_PARAMETERS) param.asInt32  =  item->getVal();
+          if (optionsFlag & SEND_PARAMETERS) param.asInt32  =  item->itemVal->valueint;
           //debugSerial<<F("Loaded :");
           //debugOut();
           return true;
@@ -1067,8 +1103,9 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
                                      break;
 
                                      default: 
-                                     item->setSubtype(cmd.itemArgType); 
+                                     //item->setSubtype(cmd.itemArgType); 
                                      item->setVal(param.asInt32);
+                                     item->setSubtype(cmd.itemArgType); 
                                     }
   debugSerial<<F("Saved:");
   debugOut();
@@ -1135,7 +1172,7 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, bool scale100
             snprintf(argPtr, bufLen, "%ld", param.asInt32);
          break;
          case ST_TENS:
-            snprintf(argPtr, bufLen, "%ld.%d", param.asInt32/10, abs(param.asInt32 % 10));
+            snprintf(argPtr, bufLen, "%ld.%0"QUOTE(TENS_FRACT_LEN)"d", param.asInt32/TENS_BASE, abs(param.asInt32 % TENS_BASE));
          break;
          case ST_HSV255:
          colorTemp=getColorTemp();
@@ -1158,12 +1195,12 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, bool scale100
         float tmpVal = (param.asfloat < 0) ? -param.asfloat : param.asfloat;
         int tmpInt1 = tmpVal;                  // Get the integer 
         float tmpFrac = tmpVal - tmpInt1;      // Get fraction 
-        int tmpInt2 = trunc(tmpFrac * 100);  // Turn into integer 
+        int tmpInt2 = trunc(tmpFrac * 1000);  // Turn into integer 
         // Print as parts, note that you need 0-padding for fractional bit.
 
         if (param.asfloat < 0)
-        snprintf (argPtr, bufLen, "-%d.%02d",  tmpInt1, tmpInt2);
-        else snprintf (argPtr, bufLen, "%d.%02d", tmpInt1, tmpInt2);
+        snprintf (argPtr, bufLen, "-%d.%03d",  tmpInt1, tmpInt2);
+        else snprintf (argPtr, bufLen, "%d.%03d", tmpInt1, tmpInt2);
         }  
          break;
          case ST_RGB:

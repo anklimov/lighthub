@@ -276,8 +276,6 @@ int out_pid::getChanType()
 int out_pid::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
 {
 if (!store || !store->pid || (Status() != CST_INITIALIZED)) return 0;    
-
-
 int suffixCode = cmd.getSuffix();
 
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
@@ -307,6 +305,12 @@ case S_SET:
 if (!cmd.isValue()) return 0;
 store->setpoint=cmd.getFloat();  
 debugSerial<<F("Setpoint:")<<store->setpoint<<endl;
+
+{
+ aJsonObject * itemCascadeObj = aJson.getArrayItem(item->itemArg, 2);
+if (itemCascadeObj) executeCommand(itemCascadeObj,-1,cmd); 
+}
+
 //cmd.saveItem(item);
 //item->SendStatus(SEND_PARAMETERS);
 return 1;
