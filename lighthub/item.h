@@ -60,6 +60,7 @@ e-mail    anklimov@gmail.com
 #define CH_MULTIVENT 18
 #define CH_ELEVATOR 19
 #define CH_COUNTER 20
+#define CH_HUMIDIFIER 21
 
 //#define CHANNEL_TYPES 13
 
@@ -74,6 +75,7 @@ e-mail    anklimov@gmail.com
 #define POLLING_SLOW 1
 #define POLLING_FAST 2
 #define POLLING_INT  3
+#define POLLING_1S   4
 
 
 #define I_TYPE 0 //Type of item

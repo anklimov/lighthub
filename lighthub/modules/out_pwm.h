@@ -12,7 +12,6 @@ public:
 
     out_pwm(Item * _item):colorChannel(_item){};
     int Setup() override;
-    int Poll(short cause) override;
     int Stop() override;
     int Status() override;
     

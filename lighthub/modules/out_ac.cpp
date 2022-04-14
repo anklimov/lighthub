@@ -242,16 +242,14 @@ return (power & 1);
 
 int out_AC::Poll(short cause)
 {
-if (cause!=POLLING_SLOW) return 0;
+if (cause!=POLLING_SLOW) return false;
 
-//long now = millis();
-  //if (now - prevPolling > INTERVAL_AC_POLLING) {
   if (isTimeOver(prevPolling,millis(),INTERVAL_AC_POLLING)) {
     prevPolling = millisNZ();
     debugSerial.println(F("Polling"));
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
-///delay(100);
+
   if(AC_Serial.available() >= 37){ //was 0
     AC_Serial.readBytes(data, 37);
     while(AC_Serial.available()){
@@ -263,10 +261,9 @@ if (cause!=POLLING_SLOW) return 0;
       InsertData(data, 37);
     }
   }
-return INTERVAL_SLOW_POLLING;
+return true;
 };
 
-//int out_AC::Ctrl(short cmd, short n, int * Parameters,  int suffixCode, char* subItem)
 int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
 {
   //char s_mode[10];

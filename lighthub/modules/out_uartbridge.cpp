@@ -287,6 +287,7 @@ bufB[0]=0;
 
 int out_UARTbridge::Poll(short cause)
 {
+  if (cause==POLLING_SLOW) return 0;
   uint8_t chA;
   uint8_t chB;
 

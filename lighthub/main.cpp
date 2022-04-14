@@ -2268,6 +2268,15 @@ infoSerial<<F("\n(+)MULTIVENT");
 infoSerial<<F("\n(-)MULTIVENT");
 #endif
 infoSerial<<endl;
+
+#ifdef HUMIDIFIER_ENABLE
+infoSerial<<F("\n(+)HUMIDIFIER");
+#endif
+
+#ifdef ELEVATOR_ENABLE
+infoSerial<<F("\n(+)ELEVATOR");
+#endif
+
 //    WDT_Disable( WDT ) ;
 #if defined(__SAM3X8E__)
 
@@ -2564,17 +2573,21 @@ configLocked++;
 configLocked--;
 }
 
-
+// POLLINT_FAST - as often AS possible every item
+// POLLING_1S   - once per second every item
+// POLLING_SLOW - just one item every 1S (Note: item::Poll() should return true if some action done - it will postpone next SLOW POLLING)
 void pollingLoop(void) {
- if (!items) return;   
-// FAST POLLINT - as often AS possible every item
+if (!items) return;   
+bool secExpired = isTimeOver(timerPollingCheck,millis(),INTERVAL_SLOW_POLLING);
+if (secExpired) timerPollingCheck = millis();
+
 configLocked++;
     aJsonObject * item = items->child;
     while (items && item)
         if (item->type == aJson_Array && aJson.getArraySize(item)>1) {
             Item it(item);
             if (it.isValid()) {
-               it.Poll(POLLING_FAST);
+               it.Poll((secExpired)?POLLING_1S:POLLING_FAST);
             } //isValid
             yield();
             item = item->next;
@@ -2583,8 +2596,8 @@ configLocked--;
 // SLOW POLLING
     boolean done = false;
     if (lanStatus == RETAINING_COLLECTING) return;
-    //if (millis() > timerPollingCheck) 
-    if (isTimeOver(timerPollingCheck,millis(),INTERVAL_SLOW_POLLING))    
+   
+    if (secExpired)    
         {
         while (pollingItem && !done) {
             if (pollingItem->type == aJson_Array) {
@@ -2592,7 +2605,7 @@ configLocked--;
                 uint32_t ret = it.Poll(POLLING_SLOW);
                 if (ret)
                 {
-                  timerPollingCheck = millis();// +  ret;  //INTERVAL_CHECK_MODBUS;
+                 ////// timerPollingCheck = millis();// +  ret;  //INTERVAL_CHECK_MODBUS;
                   done = true;
                 }
             }//if

@@ -31,12 +31,6 @@ int  out_dmx::Status()
 return driverStatus;
 }
 
-
-int out_dmx::Poll(short cause)
-{
-return 0;
-};
-
 int out_dmx::getChanType()
 {
   if (item)

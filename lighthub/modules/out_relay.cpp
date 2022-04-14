@@ -7,7 +7,7 @@
 #include "item.h"
 #include "main.h"
 #include "dmx.h"
-
+#include "utils.h"
 static int driverStatus = CST_UNKNOWN;
 
 void out_relay::getConfig()
@@ -44,7 +44,7 @@ if (item) item->setExt(0);
 //if (item->getCmd()) item->setFlag(SEND_COMMAND);
 //if (item->itemVal)  item->setFlag(SEND_PARAMETERS);
 driverStatus = CST_INITIALIZED;
-if (!item->isActive()) 
+if (item->isActive()>0)  ///????
     {
     item->setExt(millisNZ());
     }
@@ -63,7 +63,7 @@ int  out_relay::Status()
 {
 return driverStatus;
 }
-
+/*
 const char action_P[] PROGMEM = "action";
 const char cooling_P[] PROGMEM = "cooling";
 const char heating_P[] PROGMEM = "heating";
@@ -71,7 +71,7 @@ const char drying_P[] PROGMEM = "drying";
 const char idle_P[] PROGMEM = "idle";
 const char fan_P[] PROGMEM = "fan";
 const char off_P[] PROGMEM = "off";
-
+*/
 
 void  out_relay::relay(bool state)
 {
@@ -111,14 +111,9 @@ debugSerial << F("pub action ") << publishTopic(item->itemArr->name,val,subtopic
 }
 
 
-bool getPinVal(uint8_t pin)
-{
-  return (0!=(*portOutputRegister( digitalPinToPort(pin) ) & digitalPinToBitMask(pin)));
-}
-
-
 int out_relay::Poll(short cause)
 {
+  if (cause==POLLING_SLOW) return 0;
   if (!item) return 0;
   itemCmd st;
   st.loadItem(item);

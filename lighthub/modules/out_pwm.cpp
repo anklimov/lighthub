@@ -85,12 +85,6 @@ return driverStatus;
 }
 
 
-
-int out_pwm::Poll(short cause)
-{
-return 0;
-};
-
 int out_pwm::getChanType()
 {
   if (item)

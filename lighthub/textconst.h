@@ -41,6 +41,16 @@ const char statsval_P[]  PROGMEM = "uptime,freeheap";
 const char uptime_P[]    PROGMEM = "uptime";
 const char freeheap_P[]  PROGMEM = "freeheap";
 const char CMDTOPIC_P[]  PROGMEM = CMDTOPIC;
+
+const char action_P[] PROGMEM = "action";
+const char cooling_P[] PROGMEM = "cooling";
+const char heating_P[] PROGMEM = "heating";
+const char drying_P[] PROGMEM = "drying";
+const char idle_P[] PROGMEM = "idle";
+const char fan_P[] PROGMEM = "fan";
+const char off_P[] PROGMEM = "off";
+const char on_P[] PROGMEM = "on";
+
 /*
 
 {"name": "Спальня LED",

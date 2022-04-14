@@ -89,12 +89,6 @@ return driverStatus;
 }
 
 
-
-int out_SPILed::Poll(short cause)
-{
-return 0;
-};
-
 int out_SPILed::getChanType()
 {
 

@@ -581,7 +581,7 @@ bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t m
   return   ((currTime>endTime) && (currTime <timestamp)) ||
               ((timestamp<endTime) && ((currTime>endTime) || (currTime <timestamp)));
 }
-
+//millis() - tmr1 >= MY_PERIOD
 
 
 
@@ -721,10 +721,11 @@ itemCmd mapInt(int32_t arg, aJsonObject* map)
   return _itemCmd.Int(arg);
 }
 
+//Same as millis() but never return 0 or -1
 unsigned long millisNZ(uint8_t shift)
 {
  unsigned long now = millis()>>shift;
- if (!now) now=1;
+ if (!now || !(now+1)) now=1;
  return now;
 }
 
@@ -774,5 +775,11 @@ serialParamType  str2SerialParam(char * str)
   debugSerial<< F("Default serial mode N81 used");
   return static_cast<serialParamType> (SERIAL_8N1);
 }
+
+bool getPinVal(uint8_t pin)
+{
+  return (0!=(*portOutputRegister( digitalPinToPort(pin) ) & digitalPinToBitMask(pin)));
+}
+
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

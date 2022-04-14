@@ -57,6 +57,10 @@ e-mail    anklimov@gmail.com
 #include "modules/out_elevator.h"
 #endif
 
+#ifdef HUMIDIFIER_ENABLE
+#include "modules/out_humidifier.h"
+#endif
+
 short modbusBusy = 0;
 bool isPendedModbusWrites = false;
 
@@ -207,6 +211,13 @@ void Item::Parse() {
 //          debugSerial<<F("AC driver created")<<endl;
           break;
 #endif
+
+#ifdef HUMIDIFIER_ENABLE
+          case CH_HUMIDIFIER:
+          driver = new out_humidifier (this);
+          break;
+#endif
+
 #ifndef COUNTER_DISABLE
           case CH_COUNTER:
           driver = new out_counter (this);
@@ -1341,7 +1352,8 @@ if (timestampObj)
                  itemCmd st(ST_UINT32,cmd);
                  st.Int(remain);
 
-                if (!(remain % 1000))
+                //if (!(remain % 1000))
+                if (cause == POLLING_1S)
                 {     
                     SendStatusImmediate(st,SEND_DELAYED);
                     debugSerial<< remain/1000 << F(" sec remaining") << endl;
@@ -1365,28 +1377,14 @@ switch (cause)
         case CH_MODBUS:
             checkModbusDimmer();
             sendDelayedStatus();
-            return INTERVAL_SLOW_POLLING;
+            return true;
             break;
         case CH_VC:
             checkFM();
             sendDelayedStatus();
-            return INTERVAL_SLOW_POLLING;
+            return true;
             break;
-   /*
-        case CH_VCTEMP:
-            checkHeatRetry();
-            sendDelayedStatus();
-            return INTERVAL_SLOW_POLLING;
-            break; */
-
-        #endif
-      /*  case CH_RGB:    //All channels with slider generate too many updates
-        case CH_RGBW:
-        case CH_DIMMER:
-        case CH_PWM:
-        case CH_VCTEMP:
-        case CH_THERMO:
-        case CH_GROUP:*/
+      #endif
              default:
             sendDelayedStatus();
     }
@@ -1397,7 +1395,7 @@ switch (cause)
                       return driver->Poll(cause);
                       }                             
 
-    return 0;
+    return false;
 }
 
 void Item::sendDelayedStatus()

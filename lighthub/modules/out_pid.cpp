@@ -160,6 +160,7 @@ return (item->getCmd()!=CMD_OFF);
 
 int out_pid::Poll(short cause)
 {
+if (cause==POLLING_SLOW) return 0;
 if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCmd()!=CMD_OFF))   
       {
       //double prevOut=store->output;  

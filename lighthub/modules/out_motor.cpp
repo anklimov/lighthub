@@ -101,6 +101,7 @@ return st.getPercents255();
 */
 int out_Motor::Poll(short cause)
 {
+if (cause==POLLING_SLOW) return 0;  
 int curPos = -1;
 int targetPos = -1;
 int dif;

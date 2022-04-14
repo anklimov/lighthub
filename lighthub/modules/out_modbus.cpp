@@ -451,6 +451,7 @@ int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
 
 int out_Modbus::Poll(short cause)
 {
+if (cause==POLLING_SLOW) return 0;  
 bool lineInitialized = false;  
 
 if (modbusBusy || (Status() != CST_INITIALIZED)) return 0;

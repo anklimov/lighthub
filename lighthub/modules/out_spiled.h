@@ -17,7 +17,6 @@ public:
 
     out_SPILed(Item * _item):colorChannel(_item){getConfig();};
     int Setup() override;
-    int Poll(short cause) override;
     int Stop() override;
     int Status() override;
     int getChanType() override;

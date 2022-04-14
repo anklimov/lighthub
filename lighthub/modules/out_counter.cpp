@@ -38,6 +38,7 @@ return driverStatus;
 
 int out_counter::Poll(short cause)
 {
+  if (cause==POLLING_SLOW) return 0;
   if (!item) return 0;
 
 
