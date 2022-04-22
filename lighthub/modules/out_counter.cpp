@@ -44,14 +44,14 @@ int out_counter::Poll(short cause)
 
 uint32_t timer = item->getExt(); 
 
-   if (timer && isTimeOver(timer,millis(),period))
+   if (timer && period && isTimeOver(timer,millis(),period))
     {
       item->setExt(millisNZ());
       itemCmd st;
-      st.loadItem(item);
+      st.loadItem(item,SEND_PARAMETERS|SEND_COMMAND);
       float val = st.getFloat();
       //short cmd = st.getCmd();
-      val+=period;
+      val+=impulse;
       st.Float(val);
       st.saveItem(item);
     }   

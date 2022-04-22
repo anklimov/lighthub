@@ -253,11 +253,25 @@ bool itemCmd::incrementPercents(long int dif, long int limit )
 
     case ST_INT32:
     case ST_UINT32:
+    if (dif<TENS_BASE) // Step < 1 - convert to tens
+      {
+        par=param.asInt32*TENS_BASE;
+        par+=dif;
+
+        if (limit && par>limit*TENS_BASE) par=limit*TENS_BASE;
+        if (limit && par<0) par=0;
+
+        param.asInt32=par;
+        cmd.itemArgType=ST_TENS;
+      }
+     else
+     {
      par=param.asInt32;
      par+=dif/TENS_BASE;
-     if (par>limit) par=limit;
+     if (limit && par>limit) par=limit;
      if (limit && par<0) par=0;
      param.asInt32=par;
+     }
     break;  
 
     case ST_FLOAT:
@@ -274,8 +288,8 @@ bool itemCmd::incrementPercents(long int dif, long int limit )
     
      par=param.asInt32;
      par+=dif;
-//   if (par>100*TENS_BASE) par=100*TENS_BASE;
-//   if (par<0) par=0;
+        if (limit && par>limit*TENS_BASE) par=limit*TENS_BASE;
+        if (limit && par<0) par=0;
      param.asInt32=par;
     break;  
 

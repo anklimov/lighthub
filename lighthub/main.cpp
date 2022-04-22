@@ -143,9 +143,10 @@ int8_t mqttErrorRate=0;
 void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
 #endif
 
-void cleanConf()
+bool cleanConf()
 {
   if (!root) return;
+  bool clean = true;
 debugSerial<<F("Unlocking config ...")<<endl;
 uint32_t stamp=millis();
 while (configLocked && !isTimeOver(stamp,millis(),10000))
@@ -167,6 +168,7 @@ while (configLocked && !isTimeOver(stamp,millis(),10000))
 if (configLocked)
 {
     errorSerial<<F("Not unlocked in 10s - continue ...")<<endl;
+    clean = false;
 }
 
 debugSerial<<F("Stopping channels ...")<<endl;
@@ -219,6 +221,7 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
      
      configOk=false;
  timerHandlerBusy--;     
+ return clean;
 }
 
 bool isNotRetainingStatus() {

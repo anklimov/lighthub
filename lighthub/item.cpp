@@ -368,8 +368,8 @@ float Item::getFloatArg(short n) //Return arg float or first array element if Ar
     if ((itemArg->type == aJson_Array) && ( n < aJson.getArraySize(itemArg))) 
            {
            aJsonObject * obj =  aJson.getArrayItem(itemArg, n);
-           if (obj->type == aJson_Int) return obj->valueint;
-           if (obj->type == aJson_Float) return obj->valuefloat;
+           if (obj && obj->type == aJson_Int) return obj->valueint;
+           if (obj && obj->type == aJson_Float) return obj->valuefloat;
            return 0;
            }
 
@@ -908,11 +908,14 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                         case S_NOTFOUND:
                              toExecute=true;
                         case S_SET:
-  
-                             if (cmd.incrementPercents(step,(suffixCode==S_NOTFOUND)?100:limitSetValue()))
+                          {
+                             long limit = limitSetValue();
+                             if (limit && suffixCode==S_NOTFOUND) limit = 100;    
+                             if (cmd.incrementPercents(step,limit))
                              {  
                                status2Send |= SEND_PARAMETERS | SEND_DEFFERED;    
                              } else {cmd=fallbackCmd;invalidArgument=true;}
+                          }  
                         break;
                       
                         case S_HUE:

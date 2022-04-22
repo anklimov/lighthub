@@ -315,11 +315,14 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                                       //Retrive previous data
                                       aJsonObject *lastMeasured = aJson.getObjectItem(execObj,"@S");
                                       if (lastMeasured)
-                                          {
-                                          if   (lastMeasured->valueint == param)
-                                                submitParam=false; //supress repeating execution for same val
-                                          else  lastMeasured->valueint=param;
-                                          }
+                                      { 
+                                                if   (lastMeasured->type == aJson_Int)
+                                                  {
+                                                  if   (lastMeasured->valueint == param)
+                                                        submitParam=false; //supress repeating execution for same val
+                                                  else  lastMeasured->valueint=param;
+                                                  }
+                                      }            
                                       else //No container to store value yet 
                                       {
                                         debugSerial<<F("Add @S: ")<<paramObj->name<<endl;
@@ -614,7 +617,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
             if (execObj && execObj->type == aJson_Object)
                           {   
                               aJsonObject *polledValue = aJson.getObjectItem(execObj,"@S");                      
-                                      if (polledValue && (polledValue->valueint == Value))
+                                      if (polledValue && polledValue->type == aJson_Int && (polledValue->valueint == Value))
                                           {    
                                            debugSerial<<F("Ignored - not changed")<<endl;
                                           }
