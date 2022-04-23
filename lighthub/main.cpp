@@ -145,7 +145,7 @@ void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init f
 
 bool cleanConf()
 {
-  if (!root) return;
+  if (!root) return true;
   bool clean = true;
 debugSerial<<F("Unlocking config ...")<<endl;
 uint32_t stamp=millis();
