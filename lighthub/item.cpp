@@ -358,13 +358,6 @@ int Item::getArg(short n) //Return arg int or first array element if Arg is arra
 float Item::getFloatArg(short n) //Return arg float or first array element if Arg is array
 {
     if (!itemArg) return 0;//-1;
-    if (!n)
-    { 
-    if (itemArg->type == aJson_Int) return itemArg->valueint; 
-    else  if (itemArg->type == aJson_Float) return itemArg->valuefloat; 
-          else return 0; 
-    }  
-
     if ((itemArg->type == aJson_Array) && ( n < aJson.getArraySize(itemArg))) 
            {
            aJsonObject * obj =  aJson.getArrayItem(itemArg, n);
@@ -373,7 +366,12 @@ float Item::getFloatArg(short n) //Return arg float or first array element if Ar
            return 0;
            }
 
-    else return 0;//-2;
+    else if (!n)
+    { 
+    if (itemArg->type == aJson_Int) return itemArg->valueint; 
+    else  if (itemArg->type == aJson_Float) return itemArg->valuefloat; 
+    } 
+    return 0;
 }
 
 short Item::getArgCount()
@@ -910,7 +908,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                         case S_SET:
                           {
                              long limit = limitSetValue();
-                             if (limit && suffixCode==S_NOTFOUND) limit = 100;    
+                             //if (limit && suffixCode==S_NOTFOUND) limit = 100;    
                              if (cmd.incrementPercents(step,limit))
                              {  
                                status2Send |= SEND_PARAMETERS | SEND_DEFFERED;    

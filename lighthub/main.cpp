@@ -1495,14 +1495,17 @@ if (arg_cnt>1)
     #endif
 
 #if defined(__SAM3X8E__) 
-  char* outBuf = (char*) malloc(MAX_JSON_CONF_SIZE); /* XXX: Dynamic size. */
-  if (outBuf == NULL)
+  long configBufSize = min(MAX_JSON_CONF_SIZE,freeRam()-1024);
+  debugSerial<<"Allocate "<<configBufSize<<" bytes for buffer"<<endl;
+  char* outBuf = (char*) malloc(configBufSize); /* XXX: Dynamic size. */
+  if (!outBuf)
     {
       sysConfStream.close();  
+      errorSerial<<"Can't allocate RAM"<<endl;
       return 500;
     }
   infoSerial<<F("Saving config to EEPROM..")<<endl;
-  aJsonStringStream stringStream(NULL, outBuf, MAX_JSON_CONF_SIZE);
+  aJsonStringStream stringStream(NULL, outBuf, configBufSize);
   aJson.print(root, &stringStream);
   int len = strlen(outBuf);
   outBuf[len++]= EOFchar;

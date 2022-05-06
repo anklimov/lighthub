@@ -87,8 +87,13 @@
 #define THERMO_OVERHEAT_CELSIUS 38.
 #define FM_OVERHEAT_CELSIUS 40.
 
-#define MIN_VOLUME 25
-#define INIT_VOLUME 40
+#ifndef MIN_VOLUME
+#define MIN_VOLUME 20
+#endif
+
+#ifndef INIT_VOLUME
+#define INIT_VOLUME 30
+#endif
 
 /*
 #define MAXFLASHSTR 32
