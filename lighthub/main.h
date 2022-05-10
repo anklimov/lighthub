@@ -183,6 +183,10 @@ extern Streamlog  errorSerial;
     #endif
 #endif
 
+#ifdef IPMODBUS
+#include "ipmodbus.h"
+#endif
+
 #include "Arduino.h"
 #include "utils.h"
 #include "textconst.h"

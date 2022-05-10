@@ -600,6 +600,10 @@ lan_status lanLoop() {
                 #ifdef _artnet
                             if (artnet) artnet->begin();
                 #endif
+
+                #ifdef IPMODBUS
+                setupIpmodbus();
+                #endif
                 initializedListeners = true;
         }
         lanStatus = LIBS_INITIALIZED;
@@ -2068,7 +2072,7 @@ void setup_main() {
         #else
         pinMode(TXEnablePin, OUTPUT);
         #endif
-    modbusSerial.begin(MODBUS_SERIAL_BAUD);
+    modbusSerial.begin(MODBUS_SERIAL_BAUD,dimPar);
     node.idle(&modbusIdle);
     node.preTransmission(preTransmission);
     node.postTransmission(postTransmission);
@@ -2273,7 +2277,6 @@ infoSerial<<F("\n(+)MULTIVENT");
 #else
 infoSerial<<F("\n(-)MULTIVENT");
 #endif
-infoSerial<<endl;
 
 #ifdef HUMIDIFIER_ENABLE
 infoSerial<<F("\n(+)HUMIDIFIER");
@@ -2282,6 +2285,7 @@ infoSerial<<F("\n(+)HUMIDIFIER");
 #ifdef ELEVATOR_ENABLE
 infoSerial<<F("\n(+)ELEVATOR");
 #endif
+infoSerial<<endl;
 
 //    WDT_Disable( WDT ) ;
 #if defined(__SAM3X8E__)
@@ -2431,6 +2435,9 @@ void loop_main() {
     dmxout.update();
 #endif
 
+#ifdef IPMODBUS
+if (initializedListeners) ipmodbusLoop();
+#endif
 
 }
 
@@ -2451,6 +2458,10 @@ inputLoop(CHECK_INTERRUPT);
 #if defined (_espdmx)
     yield();
     dmxout.update();
+#endif
+
+#ifdef IPMODBUS
+if (initializedListeners) ipmodbusLoop();
 #endif
 }
 void ethernetIdle(void){

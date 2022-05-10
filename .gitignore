@@ -21,6 +21,8 @@ custom-build-flags/build_flags_nrf52840
 .vscode/launch.json
 lighthub/modules/out_elevator.cpp
 lighthub/modules/out_elevator.h
+lighthub/modules/out_humidifier.cpp
+lighthub/modules/out_humidifier.h
 spare_files/*
 spare_files/ArduinoOTA/*
 lib/*
