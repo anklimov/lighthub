@@ -168,7 +168,7 @@ class Item
 
 
   int checkFM();
-  char defaultSubItem[10];
+  char defaultSubItem[16];
   int  defaultSuffixCode;
 
 };

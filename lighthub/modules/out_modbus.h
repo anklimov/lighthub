@@ -22,8 +22,9 @@ public:
   aJsonObject * parameters;
 };
 
-#define MB_NEED_SEND  1
-#define MB_SEND_ERROR 2
+#define MB_NEED_SEND  8
+#define MB_SEND_ERROR 4
+#define MB_SEND_ATTEMPTS 3
 
 
 class out_Modbus : public abstractOut {
@@ -46,5 +47,6 @@ protected:
     void pollModbus(aJsonObject * reg, int regType);
     void initLine();
     int  sendModbus(char * paramName, int32_t value, uint8_t regType);
+    int  sendItemCmd(aJsonObject *templateParamObj, itemCmd cmd);
 };
 #endif

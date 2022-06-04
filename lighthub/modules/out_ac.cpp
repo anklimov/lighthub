@@ -186,11 +186,11 @@ byte getCRC(byte req[], size_t size){
   return crc;
 }
 
-void SendData(byte req[], size_t size){
+void out_AC::SendData(byte req[], size_t size){
   AC_Serial.write(req, size - 1);
   AC_Serial.write(getCRC(req, size-1));
   //AC_Serial.flush();
-
+  item->setExt(millisNZ());
  debugSerial.print("AirCon<<");
   for (int i=0; i < size-1; i++)
   {
@@ -485,9 +485,12 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
     data[10] = 77;
     data[11] = 95;
     AC_Serial.flush();
+    uint32_t ts=item->getExt();
+    while (ts && !isTimeOver(ts,millis(),100)) yield();
     SendData(data, sizeof(data)/sizeof(byte));
     //InsertData(data, sizeof(data)/sizeof(byte));
     //AC_Serial.flush();
+    //item->setExt(millisNZ());
     return 1;
 }
 

@@ -142,7 +142,7 @@ itemCmd getNumber(char **chan) {
          }
     }
     
-    if (!fractlen) val.Int(atol(*chan));
+    if (!fractlen) val.Int((int32_t) atol(*chan));
     else if (fractlen<=TENS_FRACT_LEN && intlen+TENS_FRACT_LEN<=9)
         {
          long intpart = atol(*chan);   
@@ -162,7 +162,10 @@ itemCmd getNumber(char **chan) {
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
 unsigned long freeRam ()
-{return system_get_free_heap_size();}
+{   
+    return esp_get_free_heap_size();//heap_caps_get_free_size();
+    //return system_get_free_heap_size();
+    }
 #endif
 
 #if defined(__AVR__)

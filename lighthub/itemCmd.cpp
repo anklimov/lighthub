@@ -1129,15 +1129,39 @@ return false;
 }
 
 
-  int itemCmd::doMapping(aJsonObject *mappingData)
+  itemCmd itemCmd::doMapping(aJsonObject *mappingData)
   {
+   if (isCommand())
+    {
+      switch (getCmd())
+      {
+        case CMD_AUTO:
+        case CMD_ON:
+        return itemCmd().Int((uint32_t)3);
+        case CMD_OFF:
+        return itemCmd().Int((uint32_t)0);
+        case CMD_FAN:
+        return itemCmd().Int((uint32_t)1);
+        case CMD_HEAT:
+        return itemCmd().Int((uint32_t)2);   
 
-  return 0;
+        case CMD_LOW:
+        return itemCmd().Int((uint32_t)10);
+        case CMD_MED:
+        return itemCmd().Int((uint32_t)128);
+        case CMD_HIGH:
+        return itemCmd().Int((uint32_t)255);  
+
+        default:
+         return itemCmd().Int((uint32_t)0);     
+      }
+    }
+  return *this;
   }
-  int itemCmd::doReverseMapping (aJsonObject *mappingData)
+  itemCmd itemCmd::doReverseMapping (aJsonObject *mappingData)
 
   {
-  return 0;
+  return *this;
   }
 
 int itemCmd::doMappingCmd(aJsonObject *mappingData)

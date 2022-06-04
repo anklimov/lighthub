@@ -280,7 +280,7 @@ Item::Item(char *name) //Constructor
         buf[i]=0;
         itemArr = aJson.getObjectItem(items, buf);
         sub++;
-        strncpy(defaultSubItem,sub,sizeof(defaultSubItem));
+        strncpy(defaultSubItem,sub,sizeof(defaultSubItem)-1);
         defaultSuffixCode = retrieveCode (&pDefaultSubItem);
         if (!pDefaultSubItem) defaultSubItem[0] =0; //Zero string
         //debugSerial<<F("defaultSubItem: ")<<defaultSubItem<<F(" defaultSuffixCode:")<<defaultSuffixCode<<endl;
@@ -761,7 +761,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     
     int fr = freeRam();
     
-    debugSerial<<F("RAM=")<<fr<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" Cmd:");
+    debugSerial<<F("RAM=")<<fr<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" ");
      if (fr < 200) 
         {
         errorSerial<<F("OutOfMemory!\n")<<endl;
@@ -1281,6 +1281,15 @@ int Item::isActive() {
                       }
     int cmd = getCmd();
 
+    if (driver) {
+                short active =  driver->isActive();
+                if (active >= 0)
+                   { 
+                    printActiveStatus(active);
+                    return active;
+                   }
+                }
+ // No driver - check command     
 
     if (itemType != CH_GROUP)
 // Simple check last command first
@@ -1300,12 +1309,7 @@ int Item::isActive() {
         }
 
 // Last time was not a command but parameters set. Looking inside
-    if (driver) {
-                bool active =  driver->isActive();
-                printActiveStatus(active);
-                return active;
-                }
- // No driver - check value               
+          
     st.loadItem(this);
 
     switch (itemType) {
@@ -1431,7 +1435,7 @@ int Item::SendStatus(int sendFlags) {
     {
       char addrstr[48];
       char valstr[20] = "";
-      char cmdstr[8] = "";
+      char cmdstr[9] = "";
     st.debugOut();
     if (sendFlags & SEND_COMMAND)
     {
@@ -1571,11 +1575,11 @@ int Item::SendStatus(int sendFlags) {
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
               if (subItem) 
                             {
-                            strncat(addrstr, "/", sizeof(addrstr));    
+                            strncat(addrstr, "/", sizeof(addrstr)-1);    
                             strncat(addrstr, subItem, sizeof(addrstr)-1);
                             }
-              strncat(addrstr, "/", sizeof(addrstr));
-              strncat_P(addrstr, CMD_P, sizeof(addrstr));
+              strncat(addrstr, "/", sizeof(addrstr)-1);
+              strncat_P(addrstr, CMD_P, sizeof(addrstr)-1);
 
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
               if (mqttClient.connected()  && !ethernetIdleCount)

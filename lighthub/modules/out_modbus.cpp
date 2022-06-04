@@ -423,15 +423,12 @@ int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
 
                     switch(regType) {
                       case PAR_U16:
-                      //res = node.writeSingleRegister(regObj->valueint,value);
-                      //break;
                       case PAR_I16:  
                       case PAR_TENS:
                       case PAR_100:
                       res = node.writeSingleRegister(regObj->valueint,value);
                       break;
-
-                      
+            
                       break;
                       case PAR_I32:
                       case PAR_U32:
@@ -440,11 +437,12 @@ int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
                       break;
 
                       case PAR_U8L:
-                      res = node.writeSingleRegister(regObj->valueint,value & 0xFF);
-                      
+                      case PAR_I8L:
+                      res = node.writeSingleRegister(regObj->valueint,value & 0xFF);                 
                       break;
 
                       case PAR_U8H:
+                      case PAR_I8H:
                       res = node.writeSingleRegister(regObj->valueint,(value & 0xFFFF)>> 8);
                       break;
                     }
@@ -484,6 +482,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                case 0: //fault 
                                                  execObj->subtype |= MB_SEND_ERROR;  
                                                  errorSerial<<F("MBus ")<<execObj->name<<F(" send error")<<endl;
+                                                 if ((execObj->subtype & 3) != MB_SEND_ATTEMPTS) execObj->subtype++;
                                                  break;
                                                default: //param not found
                                                  errorSerial<<F("MBus param ")<<execObj->name<<F(" not found")<<endl;
@@ -507,6 +506,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
             while (execObj && execObj->type == aJson_Object)
                           {     
                                  if (execObj->subtype & MB_SEND_ERROR) execObj->subtype&=~ MB_SEND_ERROR;
+                                 if ((execObj->subtype & 0x3) >= MB_SEND_ATTEMPTS) execObj->subtype&=~ MB_NEED_SEND;
                                  execObj=execObj->next;
                           }     
            }                
@@ -545,68 +545,39 @@ int out_Modbus::getChanType()
    return CH_MBUS;
 }
 
-
-//!Control unified Modbus item  
-// Priority of selection sub-items control to:
-// 1. if defined standard suffix Code inside cmd
-// 2. custom textual subItem
-// 3. non-standard numeric  suffix Code equal param id
-
-int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
+int out_Modbus::sendItemCmd(aJsonObject *templateParamObj, itemCmd cmd)
 {
-int suffixCode = cmd.getSuffix();
-aJsonObject *templateParamObj = NULL;
-short mappedCmdVal = 0;
-
-char * suffixStr = subItem;
-
-// trying to find parameter in template with name == subItem (NB!! standard suffixes dint working here)
-if (subItem && strlen (subItem) && store) templateParamObj = aJson.getObjectItem(store->parameters, subItem);
-
-if (!templateParamObj && store)
-{
-  // Fallback - Trying to find template parameter where id == suffixCode
- templateParamObj = store->parameters->child;
-
-  while (templateParamObj)
-          {
-            //aJsonObject *regObj = aJson.getObjectItem(paramObj, "reg");
-            aJsonObject *idObj = aJson.getObjectItem(templateParamObj, "id");
-            if (idObj->type==aJson_Int && idObj->valueint == suffixCode) 
-                            {
-                            suffixStr=templateParamObj->name;  
-                            break;
-                            }
-
-         //   aJsonObject *mapObj = aJson.getObjectItem(templateParamObj, "mapcmd");
-         //   if (mapObj && (mappedCmdVal = cmd.doReverseMappingCmd(mapObj))) break;
-
-            templateParamObj=templateParamObj->next;                       
-          }
-}
-
-
 if (templateParamObj)
 {
+int suffixCode = cmd.getSuffix(); 
+//bool isCommand = cmd.isCommand();
+if (!suffixCode) return 0;
+
+char *suffixStr =templateParamObj->name;   
 // We have find template for suffix or suffixCode
 long  Value = 0;
 int8_t    regType = PAR_I16;
 aJsonObject * typeObj = aJson.getObjectItem(templateParamObj, "type");
+aJsonObject * mapObj = aJson.getObjectItem(templateParamObj, "map");
 
                     if (typeObj && typeObj->type == aJson_String) regType=str2regSize(typeObj->valuestring);
                     switch(regType) {
                       case PAR_I16:
+                      case PAR_U16:
                       case PAR_I32:
                       case PAR_U32:
                       case PAR_U8L:
-                      case PAR_U8H:
-                        Value=cmd.getInt();
+                      case PAR_U8H: 
+                      case PAR_I8H:
+                      case PAR_I8L:
+                     
+                        Value=cmd.doMapping(mapObj).getInt();
                       break;
                       case PAR_TENS:
-                        Value=cmd.getTens();
+                        Value=cmd.doMapping(mapObj).getTens();
                       break;  
                       case PAR_100:  
-                        Value=cmd.getTens_raw()*(100/TENS_BASE);
+                        Value=cmd.doMapping(mapObj).getTens_raw()*(100/TENS_BASE);
                     }
 
 debugSerial<<F("MB suffix:")<<suffixStr<< F(" Val: ")<<Value<<endl;
@@ -643,49 +614,52 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                       }          
                            }  
            }
-  
-
-
+return 1;  
 }
-else errorSerial<<F("No template for ")<<subItem<<F("/")<<suffixCode<<endl;
+else return 0;
+}
 
+//!Control unified Modbus item  
+// Priority of selection sub-items control to:
+// 1. if defined standard suffix Code inside cmd
+// 2. custom textual subItem
+// 3. non-standard numeric  suffix Code equal param id
 
-if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
-
-switch(suffixCode)
+int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
 {
-case S_NOTFOUND:
-  // turn on  and set
-toExecute = true;
-debugSerial<<F("Forced execution");
-case S_SET:
-//case S_ESET:
-          if (!cmd.isValue()) return 0;
+if (!store) return -1;
 
-//TODO
-          return 1;
-          //break;
+int          suffixCode = cmd.getSuffix();
+aJsonObject *templateParamObj = NULL;
+int          res = -1;
 
-case S_CMD:
-      switch (cmd.getCmd())
-          {
-          case CMD_ON:
+// trying to find parameter in template with name == subItem (NB!! standard suffixes dint working here)
+if (subItem && strlen (subItem)) 
+      
+      {
+      templateParamObj = aJson.getObjectItem(store->parameters, subItem);
+      res= sendItemCmd(templateParamObj,cmd);
+      }
+else
 
-            return 1;
-
-            case CMD_OFF:
-
-            return 1;
-
-            default:
-            debugSerial<<F("Unknown cmd ")<<cmd.getCmd()<<endl;
-          } //switch cmd
-
-    default:
-  debugSerial<<F("Unknown suffix ")<<suffixCode<<endl;
-} //switch suffix
-
-return 0;
+// No subitem, trying to find suffix with root item  - (Trying to find template parameter where id == suffixCode)
+      {
+      templateParamObj = store->parameters->child;
+      bool suffixFinded = false;
+        while (templateParamObj)
+                {
+                  aJsonObject *idObj = aJson.getObjectItem(templateParamObj, "id");
+                  if (idObj->type==aJson_Int && idObj->valueint == suffixCode) 
+                                  {
+                                    res= sendItemCmd(templateParamObj,cmd);
+                                    suffixFinded = true;
+                                  }
+                  templateParamObj=templateParamObj->next;                       
+                }
+         if (!suffixFinded) errorSerial<<F("No template for ")<<subItem<<F(" or suffix ")<<suffixCode<<endl;                       
+      } 
+return res;          
 }
+
 
 #endif

@@ -220,8 +220,8 @@ public:
   itemCmd setChanType(short chanType);
   void debugOut();
 
-  int doMapping(aJsonObject *mappingData);
-  int doReverseMapping (aJsonObject *mappingData);
+  itemCmd doMapping(aJsonObject *mappingData);
+  itemCmd doReverseMapping (aJsonObject *mappingData);
   int doMappingCmd(aJsonObject *mappingData);
   int doReverseMappingCmd (aJsonObject *mappingData);
   bool scale100();

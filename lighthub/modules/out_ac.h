@@ -36,5 +36,6 @@ public:
 
 protected:
     void InsertData(byte data[], size_t size);
+    void SendData(byte req[], size_t size);
 };
 #endif
