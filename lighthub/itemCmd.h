@@ -26,8 +26,8 @@ typedef  char cmdstr[9];
 const cmdstr commands_P[] PROGMEM =
 {
 "","ON","OFF","REST","TOGGLE","HALT","XON","XOFF","INCREASE","DECREASE",
-"HEAT","COOL","AUTO","FAN_ONLY","DRY","STOP","HIGH","MEDIUM","LOW",
-"TRUE","FALSE","ENABLED","DISABLED","RGB","HSV"
+"HEAT","COOL","AUTO","FAN_ONLY","DRY","STOP","HIGH","MEDIUM","LOW","ENABLE","DISABLE",
+"TRUE","FALSE","RGB","HSV"
 };
 #define commandsNum sizeof(commands_P)/sizeof(cmdstr)
 
@@ -50,8 +50,8 @@ const cmdstr commands_P[] PROGMEM =
 #define CMD_HIGH 0x10   /// AC/Vent fan level HIGH
 #define CMD_MED 0x11    /// AC/Vent fan level MEDIUM
 #define CMD_LOW 0x12    /// AC/Vent fan level LOW
-#define CMD_ENABLED 0x13 /// Aliase for ON
-#define CMD_DISABLED 0x14 /// Aliase for OFF
+#define CMD_ENABLE 0x13 /// for PID regulator
+#define CMD_DISABLE 0x14 /// for PID regulator
 #define CMD_TRUE 0x15   /// Aliase for ON
 #define CMD_FALSE 0x16  /// Aliase for OFF
 #define CMD_RGB  0x17 
@@ -222,8 +222,6 @@ public:
 
   itemCmd doMapping(aJsonObject *mappingData);
   itemCmd doReverseMapping (aJsonObject *mappingData);
-  int doMappingCmd(aJsonObject *mappingData);
-  int doReverseMappingCmd (aJsonObject *mappingData);
   bool scale100();
 
   };

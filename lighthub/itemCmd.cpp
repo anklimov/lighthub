@@ -1128,52 +1128,177 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
 return false;
 }
 
+ int replaceCmdToInt(aJsonObject* verb)
+  {
+   if (verb && verb->type == aJson_String) 
+    {
+      int cmd = txt2cmd(verb->valuestring);
+      if (cmd>0)
+          {
+            free(verb->valuestring);
+            verb->valueint=cmd;
+            verb->type=aJson_Int;
+            return verb->valueint;
+          }   
+    } else if (verb && verb->type == aJson_Int) return verb->valueint;
+   return 0; 
+  }
 
+  // Mapping from unified itemCmd object to some specific device-depended value
   itemCmd itemCmd::doMapping(aJsonObject *mappingData)
   {
-   if (isCommand())
+   if (!mappingData) return *this; 
+   aJsonObject *cmdMapping = aJson.getObjectItem(mappingData, "cmd");
+   aJsonObject *matchedCmd = NULL;
+                 
+   if (isCommand() && cmdMapping)
+   switch (cmdMapping->type)
+   {
+    case aJson_Array:
     {
+      debugSerial<<"Array mapping"<<endl; 
+      aJsonObject *i = cmdMapping->child;
+      //if first array element is not array - this is default mapping value
+      if (i && i->type==aJson_Int) 
+        {
+         matchedCmd = i;
+         i=i->next;
+        }
+
+      while (i)
+        {
+          if (i->type == aJson_Array && aJson.getArraySize(i) == 2)
+            {
+              int cmdFrom = replaceCmdToInt(aJson.getArrayItem(i,0));
+              aJsonObject *to = aJson.getArrayItem(i,1);
+              if (getCmd()==cmdFrom && to->type == aJson_Int) 
+                                            {
+                                            matchedCmd=to;
+                                            break;
+                                            }
+
+            }
+          i=i->next;
+        }
+    }
+  case aJson_String:
+    if (strcmp(cmdMapping->valuestring,"fan")==0)
       switch (getCmd())
       {
+        /*
         case CMD_AUTO:
         case CMD_ON:
         return itemCmd().Int((uint32_t)3);
-        case CMD_OFF:
-        return itemCmd().Int((uint32_t)0);
         case CMD_FAN:
         return itemCmd().Int((uint32_t)1);
         case CMD_HEAT:
         return itemCmd().Int((uint32_t)2);   
-
+        */
+        case CMD_OFF:
+        return itemCmd().Int((uint32_t)0);
         case CMD_LOW:
-        return itemCmd().Int((uint32_t)10);
+        return itemCmd().Int((uint32_t)20);
         case CMD_MED:
         return itemCmd().Int((uint32_t)128);
         case CMD_HIGH:
         return itemCmd().Int((uint32_t)255);  
 
         default:
-         return itemCmd().Int((uint32_t)0);     
+         return *this;     
       }
+
+  } //switch 
+
+if (matchedCmd)  return itemCmd().Int((uint32_t)matchedCmd->valueint); 
+
+aJsonObject *valMapping = aJson.getObjectItem(mappingData, "val");
+if (isValue() && valMapping && valMapping->type == aJson_Array && aJson.getArraySize(valMapping) == 4)
+    {
+     if (getInt()<aJson.getArrayItem(valMapping,0)->valueint) return itemCmd().Int((uint32_t) 0); 
+     return itemCmd().Int((uint32_t) 
+      map(getInt(),
+        aJson.getArrayItem(valMapping,0)->valueint,aJson.getArrayItem(valMapping,1)->valueint,
+        aJson.getArrayItem(valMapping,2)->valueint,aJson.getArrayItem(valMapping,3)->valueint));      
     }
   return *this;
   }
-  itemCmd itemCmd::doReverseMapping (aJsonObject *mappingData)
 
+  // Mapping from some device specific value back to unified itemcmd
+  itemCmd itemCmd::doReverseMapping (aJsonObject *mappingData)
   {
+  if (!mappingData) return *this; 
+   aJsonObject *cmdMapping = aJson.getObjectItem(mappingData, "cmd");
+   aJsonObject *matchedCmd = NULL;
+                 
+   if (cmdMapping)
+
+    switch (cmdMapping->type )
+    {
+    case aJson_Array:  
+    {
+      aJsonObject *i = cmdMapping->child;
+      //if first array element is not array - this is default mapping value
+      if (i && i->type==aJson_Int) 
+        {
+         matchedCmd = i;
+         i=i->next;
+        }
+
+      while (i)
+        {
+          if (i->type == aJson_Array && aJson.getArraySize(i) == 2)
+            {
+              aJsonObject *from =aJson.getArrayItem(i,0);
+              int cmdFrom = replaceCmdToInt(from);
+              aJsonObject *to = aJson.getArrayItem(i,1);
+              if (to->type == aJson_Int && getInt()==to->valueint) 
+                                            {
+                                            matchedCmd=from;
+                                            break;
+                                            }
+
+            }
+          i=i->next;
+        }
+    }
+ break;   
+ case aJson_String:
+ {
+   if (strcmp(cmdMapping->valuestring,"fan")==0)
+     {  
+     if (getInt())
+         switch (constrain(map(getInt(),0,255,1,3),1,3))
+            {
+              case 1:
+                  return itemCmd().setSuffix(S_FAN).Cmd(CMD_LOW);
+              case 2:
+                  return itemCmd().setSuffix(S_FAN).Cmd(CMD_MED); 
+              case 3:
+                  return itemCmd().setSuffix(S_FAN).Cmd(CMD_HIGH);
+            }
+      else return itemCmd().setSuffix(S_FAN).Cmd(CMD_OFF);
+     }     
+ }
+}//switch
+
+
+if (matchedCmd)  return itemCmd().Cmd(matchedCmd->valueint); 
+
+aJsonObject *valMapping = aJson.getObjectItem(mappingData, "val");
+if (valMapping && valMapping->type == aJson_Array && aJson.getArraySize(valMapping) == 4)
+    {
+     int a =  aJson.getArrayItem(valMapping,0)->valueint;
+     int b =  aJson.getArrayItem(valMapping,1)->valueint;
+     int c =  aJson.getArrayItem(valMapping,2)->valueint;
+     int d =  aJson.getArrayItem(valMapping,3)->valueint;
+
+    if (getInt()<aJson.getArrayItem(valMapping,2)->valueint) return itemCmd().Int((uint32_t) 0);  
+     int diff = ((b-a)/(d-c))/2;
+     return itemCmd().Int((uint32_t) constrain(map(getInt(),c,d,a,b)+diff,0,255));  
+    }
   return *this;
   }
 
-int itemCmd::doMappingCmd(aJsonObject *mappingData)
-  {
-  return 0;
-
-  }
-  int itemCmd::doReverseMappingCmd (aJsonObject *mappingData)
-
-  {
-  return 0;
-  }
 
 char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, bool scale100 )
      {

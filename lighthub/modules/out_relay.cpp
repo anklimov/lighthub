@@ -173,7 +173,18 @@ case S_SET:
                     item->setExt(0);
                     relay(false);              
                     } 
-          }         
+          } else //not execute
+            {
+              switch (item->getCmd())
+              {
+                case CMD_AUTO:
+                case CMD_ON:
+                case CMD_COOL:
+                case CMD_DRY:
+                case CMD_HEAT:
+                if (cmd.getPercents255() && !item->getExt()) item->setExt(millisNZ());
+              }
+            }
           return 1;
 case S_CMD:
 

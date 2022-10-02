@@ -23,10 +23,10 @@ e-mail    anklimov@gmail.com
 #include "itemCmd.h"
 
 #define S_NOTFOUND  0
-//#define S_SETnCMD 0
 #define S_CMD  1
 #define S_SET  2
-//#define S_ESET 4
+#define S_VAL  3
+#define S_DELAYED 4
 #define S_HSV  5
 #define S_RGB  6
 #define S_FAN  7
@@ -34,10 +34,8 @@ e-mail    anklimov@gmail.com
 #define S_HUE  9
 #define S_SAT  10
 #define S_TEMP 11
-#define S_VAL  12
-#define S_DELAYED 13
-#define S_RAW 14
-#define S_ADDITIONAL 14
+#define S_RAW 12
+#define S_ADDITIONAL 12
 
 #define CH_DIMMER 0   //DMX 1-4 ch
 #define CH_RGBW   1   //DMX 4 ch

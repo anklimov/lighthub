@@ -38,17 +38,7 @@ const char LOCK_P[]   PROGMEM = "lock";
 const char QUIET_P[]  PROGMEM = "queit";
 const char SWING_P[]  PROGMEM = "swing";
 const char RAW_P[]    PROGMEM = "raw";
-//const char IDLE_P[]   PROGMEM = "IDLE";
-/*
-extern const char HEAT_P[] PROGMEM;
-extern const char COOL_P[] PROGMEM;
-extern const char AUTO_P[] PROGMEM;
-extern const char FAN_ONLY_P[] PROGMEM;
-extern const char DRY_P[] PROGMEM;
-extern const char HIGH_P[] PROGMEM;
-extern const char MED_P[]  PROGMEM;
-extern const char LOW_P[]  PROGMEM;
-*/
+
 void out_AC::InsertData(byte data[], size_t size){
 
     char s_mode[10];
@@ -405,11 +395,11 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
       switch (cmd.getCmd())
           {
             case CMD_ON:
-            data[B_LOCK_REM] = 3;
+            data[B_SWING] = 3;
             publishTopic(item->itemArr->name,"ON","/swing"); 
             break;
             case CMD_OFF:
-            data[B_LOCK_REM] = 0;
+            data[B_SWING] = 0;
             publishTopic(item->itemArr->name,"OFF","/swing"); 
             break;
             default:

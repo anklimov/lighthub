@@ -300,11 +300,14 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                       mappedParam.Tens_raw(data * (TENS_BASE/100));
                       mappedParam.Float((int32_t) data/100.);
                     }
-
-                    if (mapObj && (mapObj->type==aJson_Array || mapObj->type==aJson_Object))
-                       mappedParam.doMapping(mapObj);
                        
                     debugSerial << F("MB got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from ")<<regType<<F(":")<<paramObj->name<<endl;             
+
+                  if (mapObj && (mapObj->type==aJson_Array || mapObj->type==aJson_Object))
+                    {
+                       mappedParam=mappedParam.doReverseMapping(mapObj);
+                       debugSerial << F("Mapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
+                    }
 
                     if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                           {
@@ -329,13 +332,16 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                                         aJson.addNumberToObject(execObj, "@S", (long) param);
                                       }                                      
                                       if (submitParam)                                       
-                                      { // Compare with last submitted val
+                                      { 
+                                      //#ifdef MB_SUPPRESS_OUT_EQ_IN   
+                                      // Compare with last submitted val (if @V NOT marked as NULL in config)
                                        aJsonObject *settedValue = aJson.getObjectItem(execObj,"@V");                      
-                                       if (settedValue && (settedValue->valueint == param))
+                                       if (settedValue && settedValue->type==aJson_Int && (settedValue->valueint == param))
                                           {    
                                            debugSerial<<F("Ignored - equal with setted val")<<endl;
                                           }  
-                                        else executeCommand(execObj, -1, mappedParam);   
+                                        else executeCommand(execObj, -1, mappedParam);
+                                      //#endif     
                                       }
                                       }
                           }
@@ -598,18 +604,19 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                         execObj->subtype |= MB_NEED_SEND;
 
                                         aJsonObject *outValue = aJson.getObjectItem(execObj,"@V");                      
-                                        if (outValue)
+                                        if (outValue) // Existant. Preserve original @type
                                             {    
                                             outValue->valueint=Value;
-                                            outValue->subtype =regType; 
-                                            polledValue->valueint=Value; //to pevent suppressing to change back to previously polled value if this occurs before next polling
+                                            outValue->subtype =regType & 0xF; 
+                                            if (outValue->type == aJson_Int) polledValue->valueint=Value; //to pevent suppressing to change back to previously polled value if this occurs before next polling
                                             }
                                         else //No container to store value yet 
+                                        // If no  @V in config - creating with INT type - normal behavior - no supress in-to-out 
                                             {
                                               debugSerial<<F("Add @V: ")<<execObj->name<<endl;
                                               aJson.addNumberToObject(execObj, "@V", Value);
                                               outValue = aJson.getObjectItem(execObj,"@V");  
-                                              if (outValue) outValue->subtype =regType; 
+                                              if (outValue) outValue->subtype =regType & 0xF; 
                                             }
                                       }          
                            }  

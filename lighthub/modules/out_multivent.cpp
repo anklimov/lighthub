@@ -102,6 +102,24 @@ if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command fi
 
 aJsonObject * i = NULL;
 
+if (cmd.isCommand() && cmd.getSuffix()==S_FAN)
+      switch (cmd.getCmd())
+          {
+          case CMD_HIGH:
+          cmd.Percents255(255);
+          break;
+
+          case CMD_MED:
+          cmd.Percents255(128);
+          break;
+
+          case CMD_LOW:
+          cmd.setPercents(10);
+          break;
+
+} //switch cmd
+
+
 if (gatesObj) i = gatesObj->child; // Pass 1 - calculate summ air value, max value etc
 
 int activeV = 0;
@@ -116,6 +134,7 @@ while (i)
 
   aJsonObject * setObj=aJson.getObjectItem(i, "set");
   aJsonObject * cmdObj=aJson.getObjectItem(i, "cmd");
+  aJsonObject * cascadeObj=aJson.getObjectItem(i, "cas");
    if (setObj && cmdObj && setObj->type==aJson_Int && cmdObj->type==aJson_Int) 
    {
 
@@ -128,30 +147,77 @@ while (i)
                                           {
                                           cmdObj->valueint = cmd.getCmd();
                                           //publishTopic(i->name,cmdObj->valueint,"/set");
-                                          if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_COMMAND,i->name);
+                                          switch (cmd.getCmd())
+                                          {
+                                            case CMD_ON:
+                                            cmd.Percents255(setObj->valueint);
+                                            break;
+                                            case CMD_OFF:
+                                            cmd.Percents255(0);
                                           }
-              if (setObj && cmd.isValue())   
+                                          if (cmdObj->valueint == CMD_ON && setObj->valueint<20)
+                                                                  {
+                                                                    setObj->valueint=30;
+                                                                    cmd.Percents255(30);
+                                                                    //if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_PARAMETERS,i->name);
+                                                                  }
+
+                                          if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_COMMAND|SEND_PARAMETERS,i->name);
+                                          }
+
+              else if (setObj && cmdObj && suffixCode == S_FAN && cmd.isValue())   
+                                          {
+                                          if (cmd.getInt())
+                                                {
+
+                                                if (cmdObj->valueint == CMD_OFF || cmdObj->valueint == -1) 
+                                                    { 
+                                                     debugSerial<<"Turning ON"<<endl;
+                                                     cmdObj->valueint = CMD_ON; 
+                                                     cmd.Cmd(CMD_ON);
+                                                     //if (isNotRetainingStatus()) item->SendStatusImmediate(itemCmd().Cmd(CMD_ON),SEND_COMMAND,i->name);
+                                                        } 
+                                                
+                                                setObj->valueint = cmd.getInt();
+                                                }
+                                           else
+                                                {
+                                             if (cmdObj->valueint != CMD_OFF && cmdObj->valueint != -1)  
+                                                    { debugSerial<<"Turning OFF"<<endl; 
+                                                      cmdObj->valueint = CMD_OFF; 
+                                                      cmd.Cmd(CMD_OFF);
+                                                      //if (isNotRetainingStatus()) item->SendStatusImmediate(itemCmd().Cmd(CMD_OFF),SEND_COMMAND,i->name);
+                                                        } 
+              
+                                                setObj->valueint = 0;
+                                                }
+
+                                           if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_PARAMETERS|SEND_COMMAND,i->name);
+                                          }
+
+              else if (setObj && cmd.isValue())   
                                           {
                                           setObj->valueint = cmd.getPercents255();
                                           //publishTopic(i->name,setObj->valueint,"/set");
                                           if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_PARAMETERS,i->name);
                                           }
+              if (cascadeObj) executeCommand(cascadeObj,-1,cmd);                           
               }
 
-      if (cmdObj->valueint != CMD_OFF) 
+      if (cmdObj->valueint != CMD_OFF && cmdObj->valueint != -1) 
                       { 
                       requestedV=V*setObj->valueint;
                       activeV+=requestedV;
+
+                            if (setObj->valueint>maxPercent )
+                                  {
+                                  maxRequestedV=requestedV;
+                                  maxV=V;
+                                  maxPercent=setObj->valueint;
+                                  }
                       }
       totalV+=V;
 
-      //if(requestedV>maxRequestedV) 
-      if (setObj->valueint>maxPercent)
-                      {
-                      maxRequestedV=requestedV;
-                      maxV=V;
-                      maxPercent=setObj->valueint;
-                      }
    }
   i=i->next;
 }
@@ -161,7 +227,7 @@ if (!totalV) return 0;
 int fanV=activeV/totalV;
 debugSerial << F("Total V:")<<totalV<<F(" active V:")<<activeV/255<< F(" fan%:")<<fanV<< F(" Max request:")<<maxRequestedV/255 <<F(" from ")<<maxV<<F(" m3")<< endl;
 
-executeCommand(aJson.getObjectItem(gatesObj, ""),-1,itemCmd().Percents255(fanV));
+executeCommand(aJson.getObjectItem(gatesObj, ""),-1,itemCmd().Percents255(fanV).Cmd((fanV)?CMD_ON:CMD_OFF));
 
 i=NULL;
 if (gatesObj) i = gatesObj->child; //Pass 2: re-distribute airflow
@@ -177,7 +243,7 @@ while (i)
   if (outObj && setObj && cmdObj && outObj->type==aJson_Int && setObj->type==aJson_Int && cmdObj->type==aJson_Int && V) 
   {
          long int out = 0;
-        if (cmdObj->valueint != CMD_OFF && maxRequestedV) 
+        if (cmdObj->valueint != CMD_OFF && cmdObj->valueint != -1 && maxRequestedV) 
           {
             int requestedV=V*setObj->valueint;
             out = (( long)requestedV*255L)/(( long)V)*( long)maxV/( long)maxRequestedV;

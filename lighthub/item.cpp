@@ -1122,12 +1122,14 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                     toExecute=true;
                     break;
                 }
-
             if (chActive) 
                 {
                         debugSerial<<F("ON:Already Active\n");
+                        setCmd(CMD_ON);
+                        SendStatus(SEND_COMMAND | SEND_DEFFERED);
                         return 3;
                 }
+
             //newly added. For climate commands need to restore previous temperature 
             case CMD_AUTO:
             case CMD_COOL:
@@ -1433,9 +1435,10 @@ int Item::SendStatus(int sendFlags) {
     
     int Item::SendStatusImmediate(itemCmd st, int sendFlags, char * subItem) {
     {
-      char addrstr[48];
+      char addrstr[64];
       char valstr[20] = "";
       char cmdstr[9] = "";
+    //debugSerial<<"SSI "<<subItem<<endl;  
     st.debugOut();
     if (sendFlags & SEND_COMMAND)
     {
@@ -1469,9 +1472,10 @@ int Item::SendStatus(int sendFlags) {
       // myhome/s_out/item - mix: value and command
     
 
-                      if (mqttClient.connected()  && !ethernetIdleCount && !subItem)
+                      if (mqttClient.connected()  && !ethernetIdleCount)
                       {
-
+                        if (!subItem)
+                        {
                         setTopic(addrstr,sizeof(addrstr),T_OUT);
                         strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
                           
@@ -1490,6 +1494,7 @@ int Item::SendStatus(int sendFlags) {
                             debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
 
                         }
+                        } //!subItem
                       }
               else
                       {

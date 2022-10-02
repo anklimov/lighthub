@@ -167,7 +167,7 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
       //itemCmd st;
       //st.loadItem(item);
       //short cmd = st.getCmd();
-      if (item->getCmd() != CMD_OFF)
+      if (item->getCmd() != CMD_OFF && item->getCmd() != CMD_DISABLE)
       { 
       if(store->pid->Compute() )
       {
@@ -337,7 +337,15 @@ case S_CMD:
 
              executeCommand(oCmd,-1,value); 
           return 1;
-          
+          case CMD_ENABLE:
+          item->setCmd(CMD_ENABLE);
+          item->SendStatus(SEND_COMMAND);          
+          return 1;
+
+          case CMD_DISABLE:
+          item->setCmd(CMD_DISABLE);
+          item->SendStatus(SEND_COMMAND);
+          return 1;
 /*
           case CMD_OFF:
           {  
