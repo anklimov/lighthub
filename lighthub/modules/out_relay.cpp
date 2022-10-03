@@ -147,7 +147,7 @@ int out_relay::Ctrl(itemCmd cmd, char* subItem, bool toExecute)
 {
 debugSerial<<F("relayCtr: ");
 cmd.debugOut();
-if (! strcmp_P(subItem,action_P)) return 0;
+if ((subItem && !strcmp_P(subItem,action_P)) || !item) return 0;
 int suffixCode;
 if (cmd.isCommand()) suffixCode = S_CMD;
    else suffixCode = cmd.getSuffix();

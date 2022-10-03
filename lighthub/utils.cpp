@@ -160,11 +160,18 @@ itemCmd getNumber(char **chan) {
    return val;
 }
 
-#if defined(ARDUINO_ARCH_ESP32) || defined(ESP8266)
+#if defined(ARDUINO_ARCH_ESP32) 
 unsigned long freeRam ()
 {   
     return esp_get_free_heap_size();//heap_caps_get_free_size();
-    //return system_get_free_heap_size();
+
+    }
+#endif
+
+#if defined(ESP8266)
+unsigned long freeRam ()
+{   
+    return system_get_free_heap_size();
     }
 #endif
 

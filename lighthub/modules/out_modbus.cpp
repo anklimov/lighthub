@@ -641,7 +641,7 @@ aJsonObject *templateParamObj = NULL;
 int          res = -1;
 
 // trying to find parameter in template with name == subItem (NB!! standard suffixes dint working here)
-if (subItem && strlen (subItem)) 
+if (subItem && strlen (subItem) && store && store->parameters) 
       
       {
       templateParamObj = aJson.getObjectItem(store->parameters, subItem);
@@ -651,12 +651,12 @@ else
 
 // No subitem, trying to find suffix with root item  - (Trying to find template parameter where id == suffixCode)
       {
-      templateParamObj = store->parameters->child;
+      if (store && store->parameters) templateParamObj = store->parameters->child;
       bool suffixFinded = false;
         while (templateParamObj)
                 {
                   aJsonObject *idObj = aJson.getObjectItem(templateParamObj, "id");
-                  if (idObj->type==aJson_Int && idObj->valueint == suffixCode) 
+                  if (idObj && idObj->type==aJson_Int && idObj->valueint == suffixCode) 
                                   {
                                     res= sendItemCmd(templateParamObj,cmd);
                                     suffixFinded = true;

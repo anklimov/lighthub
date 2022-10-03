@@ -19,3 +19,6 @@
 -DRESTART_LAN_ON_MQTT_ERRORS
 #-D CORS=\"http://lazyhome.ru\"
 -DOTA_PORT=80
+
+#oct22 - violation in Publish/OnMQTTConnect while publish homie info
+-DNO_HOMIE
