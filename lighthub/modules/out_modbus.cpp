@@ -260,7 +260,7 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                       case PAR_I16:
                       //isSigned=true;
                       param=data;
-                      mappedParam.Int((int32_t)data);
+                      mappedParam.Int((int32_t)(int16_t)data);
                       break;
 
                       case PAR_U16:
@@ -292,13 +292,13 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
 
                       case PAR_TENS:
                       param=data;
-                      mappedParam.Tens((int32_t) data);
+                      mappedParam.Tens((int16_t) data);
                       break;
 
                       case PAR_100:
                       param=data;
-                      mappedParam.Tens_raw(data * (TENS_BASE/100));
-                      mappedParam.Float((int32_t) data/100.);
+                      mappedParam.Tens_raw((int16_t) data * (TENS_BASE/100));
+                      mappedParam.Float((int32_t) (int16_t) data/100.);
                     }
                        
                     debugSerial << F("MB got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from ")<<regType<<F(":")<<paramObj->name<<endl;             
