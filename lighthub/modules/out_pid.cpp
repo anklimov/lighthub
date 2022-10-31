@@ -213,16 +213,17 @@ int out_pid::getAlarmVal()
    aJsonObject * param;         
    switch (aJson.getArraySize(kPIDObj))
    { 
-     case 7: //kP,kI,kD, alarmTO, alarmVal, outMin, outMax
-     case 6: //kP,kI,kD, alarmTO, alarmVal, outMin
-     case 5: //kP,kI,kD, alarmTO, alarmVal
-       param = aJson.getArrayItem(kPIDObj, 4);
+     case 8: //kP,kI,kD,dT, alarmTO, alarmVal, outMin, outMax
+     case 7: //kP,kI,kD,dT, alarmTO, alarmVal, outMin
+     case 6: //kP,kI,kD,dT,alarmTO, alarmVal
+       param = aJson.getArrayItem(kPIDObj, 5);
        alarmValDefined=true;
        if (param->type == aJson_Float) outAlarm=param->valuefloat;
        else if (param->type == aJson_Int) outAlarm=param->valueint;   
        else alarmValDefined=false; 
 
-     case 4: //kP,kI,kD, alarmTO
+     case 5: //kP,kI,kD,dT, alarmTO
+     case 4: //kP,kI,kD,dT
      case 3: //kP,kI,kD
      case 2: //kP,kI
      case 1: //kP
@@ -234,7 +235,7 @@ int out_pid::getAlarmVal()
                 {
                     if (!alarmValDefined) outAlarm = 0.;
                 } 
-               else if (!alarmValDefined) outAlarm = .255; 
+               else if (!alarmValDefined) outAlarm = 255.; 
               }     
    }
 return outAlarm;   

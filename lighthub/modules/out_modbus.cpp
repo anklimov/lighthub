@@ -340,7 +340,13 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                                           {    
                                            debugSerial<<F("Ignored - equal with setted val")<<endl;
                                           }  
-                                        else executeCommand(execObj, -1, mappedParam);
+                                        else 
+                                          {
+                                          executeCommand(execObj, -1, mappedParam);
+                                          // if param updated by device and no new value queued to send - update @V to avoid "Ignored - equal with setted val" 
+                                          if (settedValue && !(execObj->subtype & MB_NEED_SEND)) 
+                                              settedValue->valueint=param;
+                                          }
                                       //#endif     
                                       }
                                       }
@@ -593,13 +599,14 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
             aJsonObject *execObj =  aJson.getObjectItem(itemParametersObj,suffixStr); 
             if (execObj && execObj->type == aJson_Object)
                           {   
+                            /*
                               aJsonObject *polledValue = aJson.getObjectItem(execObj,"@S");                      
                                       if (polledValue && polledValue->type == aJson_Int && (polledValue->valueint == Value))
                                           {    
                                            debugSerial<<F("Ignored - not changed")<<endl;
                                           }
 
-                                      else 
+                                      else */
                                       { //Schedule update
                                         execObj->subtype |= MB_NEED_SEND;
 
@@ -608,7 +615,6 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                             {    
                                             outValue->valueint=Value;
                                             outValue->subtype =regType & 0xF; 
-                                            if (outValue->type == aJson_Int) polledValue->valueint=Value; //to pevent suppressing to change back to previously polled value if this occurs before next polling
                                             }
                                         else //No container to store value yet 
                                         // If no  @V in config - creating with INT type - normal behavior - no supress in-to-out 
@@ -618,6 +624,10 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                               outValue = aJson.getObjectItem(execObj,"@V");  
                                               if (outValue) outValue->subtype =regType & 0xF; 
                                             }
+
+                                        aJsonObject *polledValue = aJson.getObjectItem(execObj,"@S"); 
+                                        if (polledValue && outValue->type == aJson_Int) polledValue->valueint=Value; //to pevent suppressing to change back to previously polled value if this occurs before next polling
+
                                       }          
                            }  
            }
