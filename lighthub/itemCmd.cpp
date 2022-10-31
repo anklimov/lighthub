@@ -1181,6 +1181,7 @@ return false;
           i=i->next;
         }
     }
+   break; 
   case aJson_String:
     if (strcmp(cmdMapping->valuestring,"fan")==0)
       switch (getCmd())
@@ -1209,7 +1210,10 @@ return false;
 
   } //switch 
 
-if (matchedCmd)  return itemCmd().Int((uint32_t)matchedCmd->valueint); 
+if (matchedCmd && matchedCmd->type != aJson_NULL)  
+          {
+          return itemCmd().Int((uint32_t)matchedCmd->valueint); 
+          }
 
 aJsonObject *valMapping = aJson.getObjectItem(mappingData, "val");
 if (isValue() && valMapping && valMapping->type == aJson_Array && aJson.getArraySize(valMapping) == 4)
@@ -1220,7 +1224,7 @@ if (isValue() && valMapping && valMapping->type == aJson_Array && aJson.getArray
         aJson.getArrayItem(valMapping,0)->valueint,aJson.getArrayItem(valMapping,1)->valueint,
         aJson.getArrayItem(valMapping,2)->valueint,aJson.getArrayItem(valMapping,3)->valueint));      
     }
-    else if (valMapping && valMapping->type == aJson_NULL)  cmd.itemArgType = ST_VOID;
+    else if (valMapping && valMapping->type == aJson_NULL)  return itemCmd(ST_VOID,CMD_VOID);
   return *this;
   }
 

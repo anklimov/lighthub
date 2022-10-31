@@ -567,7 +567,8 @@ if (!suffixCode) return 0;
 
 char *suffixStr =templateParamObj->name;   
 // We have find template for suffix or suffixCode
-long  Value = 0;
+itemCmd  cmdValue =  itemCmd(ST_VOID,CMD_VOID);
+long Value = 0;
 int8_t    regType = PAR_I16;
 aJsonObject * typeObj = aJson.getObjectItem(templateParamObj, "type");
 aJsonObject * mapObj = aJson.getObjectItem(templateParamObj, "map");
@@ -583,13 +584,19 @@ aJsonObject * mapObj = aJson.getObjectItem(templateParamObj, "map");
                       case PAR_I8H:
                       case PAR_I8L:
                      
-                        Value=cmd.doMapping(mapObj).getInt();
+                        cmdValue=cmd.doMapping(mapObj);
+                        if (!cmdValue.isValue())return 0;
+                        Value=cmdValue.getInt();
                       break;
                       case PAR_TENS:
-                        Value=cmd.doMapping(mapObj).getTens();
+                        cmdValue=cmd.doMapping(mapObj);
+                        if (!cmdValue.isValue())return 0;
+                        Value=cmdValue.getTens();
                       break;  
                       case PAR_100:  
-                        Value=cmd.doMapping(mapObj).getTens_raw()*(100/TENS_BASE);
+                        cmdValue=cmd.doMapping(mapObj);
+                        if (!cmdValue.isValue())return 0;
+                        Value=cmdValue.getTens_raw()*(100/TENS_BASE);
                     }
 
 debugSerial<<F("MB suffix:")<<suffixStr<< F(" Val: ")<<Value<<endl;
