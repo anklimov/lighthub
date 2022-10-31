@@ -1220,6 +1220,7 @@ if (isValue() && valMapping && valMapping->type == aJson_Array && aJson.getArray
         aJson.getArrayItem(valMapping,0)->valueint,aJson.getArrayItem(valMapping,1)->valueint,
         aJson.getArrayItem(valMapping,2)->valueint,aJson.getArrayItem(valMapping,3)->valueint));      
     }
+    else if (valMapping && valMapping->type == aJson_NULL)  cmd.itemArgType = ST_VOID;
   return *this;
   }
 
