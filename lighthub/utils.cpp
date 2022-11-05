@@ -124,9 +124,14 @@ itemCmd getNumber(char **chan) {
     long   fractnumbers = 0;
     short  fractlen = 0;
     short  intlen   = 0;
+    bool   negative = false;
 
     char * intptr = * chan;
-    if (*intptr == '-') intptr ++;
+    if (*intptr == '-') 
+                    {
+                    negative=true;    
+                    intptr ++;
+                    }
     while (isDigit(*(intptr+intlen))) intlen++; 
 
     char * fractptr = strchr(*chan,'.');
@@ -146,7 +151,7 @@ itemCmd getNumber(char **chan) {
     else if (fractlen<=TENS_FRACT_LEN && intlen+TENS_FRACT_LEN<=9)
         {
          long intpart = atol(*chan);   
-         val.Tens_raw(intpart*TENS_BASE+((intpart>=0)?fractnumbers:-fractnumbers));
+         val.Tens_raw(intpart*TENS_BASE+((negative)?-fractnumbers:fractnumbers));
         }
     else 
       val.Float(atof(*chan)); 
@@ -243,7 +248,7 @@ void parseBytes(const char *str, char separator, byte *bytes, int maxBytes, int 
 }
 
 
-void printFloatValueToStr(float value, char *valstr) {
+void printFloatValueToStr(char *valstr, float value) {
     #if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
     sprintf(valstr, "%2.1f", value);
     #endif
@@ -499,6 +504,8 @@ return buf;
 
 
 void printUlongValueToStr(char *valstr, unsigned long value) {
+    ultoa(value,valstr,10);
+    /*
     char buf[11];
     int i=0;
     for(;value>0;i++){
@@ -510,7 +517,7 @@ void printUlongValueToStr(char *valstr, unsigned long value) {
     for(int n=0;n<=i;n++){
         valstr[n]=buf[i-n-1];
     }
-    valstr[i]='\0';
+    valstr[i]='\0';*/
 }
 
 
@@ -771,7 +778,7 @@ const serial_st serialModes_P[] PROGMEM =
 #define serialModesNum sizeof(serialModes_P)/sizeof(serial_st)
 
 serialParamType  str2SerialParam(char * str)
-{ debugSerial<<str<<F(" =>");
+{ //debugSerial<<str<<F(" =>");
   for(uint8_t i=0; i<serialModesNum && str;i++)
       if (strcmp_P(str, serialModes_P[i].verb) == 0)
            {
@@ -782,7 +789,7 @@ serialParamType  str2SerialParam(char * str)
            else 
              return pgm_read_word_near(&serialModes_P[i].mode);
          }
-  debugSerial<< F("Default serial mode N81 used");
+  debugSerial<< F("Default serial mode N81 used")<<endl;
   return static_cast<serialParamType> (SERIAL_8N1);
 }
 

@@ -1340,7 +1340,10 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, bool scale100
             snprintf(argPtr, bufLen, "%ld", param.asInt32);
          break;
          case ST_TENS:
-            snprintf(argPtr, bufLen, "%ld.%0"QUOTE(TENS_FRACT_LEN)"d", param.asInt32/TENS_BASE, abs(param.asInt32 % TENS_BASE));
+         if (param.asInt32<0)
+            snprintf(argPtr, bufLen, "-%ld.%0"QUOTE(TENS_FRACT_LEN)"d", abs(param.asInt32)/TENS_BASE, abs(param.asInt32 % TENS_BASE));
+         else 
+            snprintf(argPtr, bufLen, "%ld.%0"QUOTE(TENS_FRACT_LEN)"d", param.asInt32/TENS_BASE, abs(param.asInt32 % TENS_BASE));   
          break;
          case ST_HSV255:
          colorTemp=getColorTemp();

@@ -15,6 +15,7 @@ extern aJsonObject *modbusObj;
 extern ModbusMaster node;
 extern short modbusBusy;
 extern void modbusIdle(void) ;
+static uint32_t mbusSlenceTimer = 0;
 
 struct reg_t
 {
@@ -116,13 +117,13 @@ bool out_Modbus::getConfig()
   aJsonObject * templateIdObj = aJson.getArrayItem(item->itemArg, 1);
   if (templateIdObj->type != aJson_String || !templateIdObj->valuestring)
             {
-              errorSerial<<F("Invalid template.")<<endl;
+              errorSerial<<F("MBUS: Invalid template.")<<endl;
               return false;
             }
   aJsonObject * templateObj = aJson.getObjectItem(modbusObj, templateIdObj->valuestring);
   if (! templateObj)
             {
-              errorSerial<<F("Modbus template not found: ")<<templateIdObj->valuestring<<endl;
+              errorSerial<<F("MBUS: Modbus template not found: ")<<templateIdObj->valuestring<<endl;
               return false;
             }
 
@@ -173,12 +174,12 @@ if (!store)
 store->timestamp=millisNZ();
 if (getConfig())
     {
-        infoSerial<<F("Modbus config loaded ")<< item->itemArr->name<<endl;
+        infoSerial<<F("MBUS: config loaded ")<< item->itemArr->name<<endl;
         store->driverStatus = CST_INITIALIZED;
         return 1;
       }
 else
- {  errorSerial<<F("Modbus config error")<<endl;
+ {  errorSerial<<F("MBUS: config error")<<endl;
     store->driverStatus = CST_FAILED;
     return 0;
   }
@@ -187,7 +188,7 @@ else
 
 int  out_Modbus::Stop()
 {
-debugSerial.println("Modbus De-Init");
+debugSerial.println("MBUS: De-Init");
 
 delete store;
 item->setPersistent(NULL);
@@ -221,8 +222,9 @@ switch (regType) {
         result = node.readInputRegisters(reg, count);
         break;
     default:
-        debugSerial<<F("Not supported reg type\n");
+        debugSerial<<F("MBUS: Not supported reg type\n");
  }
+mbusSlenceTimer = millisNZ(); 
 if (result != node.ku8MBSuccess) errorSerial<<F("MBUS: Polling error ")<<_HEX(result)<<endl;
 return (result == node.ku8MBSuccess);
 }
@@ -301,12 +303,12 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                       mappedParam.Float((int32_t) (int16_t) data/100.);
                     }
                        
-                    debugSerial << F("MB got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from ")<<regType<<F(":")<<paramObj->name<<endl;             
+                    debugSerial << F("MBUSD:  got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from ")<<regType<<F(":")<<paramObj->name<<endl;             
 
                   if (mapObj && (mapObj->type==aJson_Array || mapObj->type==aJson_Object))
                     {
                        mappedParam=mappedParam.doReverseMapping(mapObj);
-                       debugSerial << F("Mapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
+                       debugSerial << F("MBUSD: Mapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
                     }
 
                     if (itemParametersObj && itemParametersObj->type ==aJson_Object)
@@ -328,7 +330,7 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                                       }            
                                       else //No container to store value yet 
                                       {
-                                        debugSerial<<F("Add @S: ")<<paramObj->name<<endl;
+                                        debugSerial<<F("MBUS: Add @S: ")<<paramObj->name<<endl;
                                         aJson.addNumberToObject(execObj, "@S", (long) param);
                                       }                                      
                                       if (submitParam)                                       
@@ -338,7 +340,7 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                                        aJsonObject *settedValue = aJson.getObjectItem(execObj,"@V");                      
                                        if (settedValue && settedValue->type==aJson_Int && (settedValue->valueint == param))
                                           {    
-                                           debugSerial<<F("Ignored - equal with setted val")<<endl;
+                                           debugSerial<<F("MBUSD: Ignored - equal with setted val")<<endl;
                                           }  
                                         else 
                                           {
@@ -416,7 +418,7 @@ void out_Modbus::initLine()
     #else
     modbusSerial.begin(store->baud, (store->serialParam));
     #endif
-    debugSerial<< store->baud << F("---")<< store->serialParam<<endl;
+    //debugSerial<< store->baud << F("---")<< store->serialParam<<endl;
     node.begin(item->getArg(0), modbusSerial);
 }
 
@@ -458,7 +460,8 @@ int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
                       res = node.writeSingleRegister(regObj->valueint,(value & 0xFFFF)>> 8);
                       break;
                     }
- debugSerial<<F("MB_SEND Res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<value<<F(" ival:")<<(int32_t) value<<endl;
+ mbusSlenceTimer = millisNZ();                   
+ debugSerial<<F("Res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<value<<endl;
  return ( res == 0);
 }
 
@@ -467,7 +470,7 @@ int out_Modbus::Poll(short cause)
 if (cause==POLLING_SLOW) return 0;  
 bool lineInitialized = false;  
 
-if (modbusBusy || (Status() != CST_INITIALIZED)) return 0;
+if (modbusBusy || (Status() != CST_INITIALIZED) || ( mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),100))) return 0;
 
 aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
@@ -486,18 +489,22 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                       lineInitialized=true;  
                                                       initLine();
                                                     }
+                                              debugSerial<<"MBUS: SEND "<<item->itemArr->name<<" ";      
                                               switch (sendModbus(execObj->name,outValue->valueint,outValue->subtype)) 
                                               {
                                                case 1: //success
                                                  execObj->subtype&=~ MB_NEED_SEND;
+                                                 ///return 1; //relax
+                                                 
                                                  break;
                                                case 0: //fault 
                                                  execObj->subtype |= MB_SEND_ERROR;  
-                                                 errorSerial<<F("MBus ")<<execObj->name<<F(" send error")<<endl;
+                                                 errorSerial<<F("MBUS:  ")<<execObj->name<<F(" send error. ");
                                                  if ((execObj->subtype & 3) != MB_SEND_ATTEMPTS) execObj->subtype++;
+                                                 errorSerial<<"Attempt: "<< (execObj->subtype & 3) <<endl;
                                                  break;
                                                default: //param not found
-                                                 errorSerial<<F("MBus param ")<<execObj->name<<F(" not found")<<endl;
+                                                 errorSerial<<F("MBUS:  param ")<<execObj->name<<F(" not found")<<endl;
                                                  execObj->subtype&=~ MB_NEED_SEND;
                                                }    
                                           }
@@ -508,7 +515,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            }
   
 
-if (isTimeOver(store->timestamp,millis(),store->pollingInterval))
+if (isTimeOver(store->timestamp,millis(),store->pollingInterval) && ( !mbusSlenceTimer || isTimeOver(mbusSlenceTimer,millis(),100)))
 {
 
 // Clean_up SEND_ERROR flag 
@@ -518,7 +525,14 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
             while (execObj && execObj->type == aJson_Object)
                           {     
                                  if (execObj->subtype & MB_SEND_ERROR) execObj->subtype&=~ MB_SEND_ERROR;
-                                 if ((execObj->subtype & 0x3) >= MB_SEND_ATTEMPTS) execObj->subtype&=~ MB_NEED_SEND;
+                                 if ((execObj->subtype & 0x3) >= MB_SEND_ATTEMPTS) 
+                                                                        {
+                                                                        //execObj->subtype&=~ MB_NEED_SEND;
+                                                                        //Clean ERROR, NEED, Attempts
+                                                                        errorSerial<<"MBUS: send failed "<<item->itemArr->name<<endl;
+                                                                        execObj->subtype = 0;
+                                                                        }
+
                                  execObj=execObj->next;
                           }     
            }                
@@ -526,7 +540,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
 // if some polling configured
 if (store->pollingRegisters || store->pollingIrs)
   {
-    debugSerial<<F("Poll ")<< item->itemArr->name << endl;
+    debugSerial<<F("MBUSD: Poll ")<< item->itemArr->name << endl;
     modbusBusy=1;
 
     if (!lineInitialized)
@@ -537,7 +551,7 @@ if (store->pollingRegisters || store->pollingIrs)
 
     pollModbus(store->pollingRegisters,MODBUS_HOLDING_REG_TYPE);
     pollModbus(store->pollingIrs,MODBUS_INPUT_REG_TYPE);
-    debugSerial<<F("endPoll ")<< item->itemArr->name << endl;
+    debugSerial<<F("MBUSD: endPoll ")<< item->itemArr->name << endl;
 
   //Non blocking waiting to release line
   uint32_t time = millis();
@@ -599,7 +613,7 @@ aJsonObject * mapObj = aJson.getObjectItem(templateParamObj, "map");
                         Value=cmdValue.getTens_raw()*(100/TENS_BASE);
                     }
 
-debugSerial<<F("MB suffix:")<<suffixStr<< F(" Val: ")<<Value<<endl;
+debugSerial<<F("MBUSD: suffix:")<<suffixStr<< F(" Val: ")<<Value<<endl;
 aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            {
@@ -680,7 +694,7 @@ else
                                   }
                   templateParamObj=templateParamObj->next;                       
                 }
-         if (!suffixFinded) errorSerial<<F("No template for ")<<subItem<<F(" or suffix ")<<suffixCode<<endl;                       
+         if (!suffixFinded) errorSerial<<F("MBUS: No template for ")<<subItem<<F(" or suffix ")<<suffixCode<<endl;                       
       } 
 return res;          
 }

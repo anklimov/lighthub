@@ -503,11 +503,11 @@ debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") <<
         strncpy(addrstr, emit->valuestring, sizeof(addrstr));
         if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
         strcat(addrstr, "T");
-        printFloatValueToStr(temp, valstr);
+        printFloatValueToStr(valstr, temp);
         if (mqttClient.connected()  && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
         addrstr[strlen(addrstr) - 1] = 'H';
-        printFloatValueToStr(humidity, valstr);
+        printFloatValueToStr(valstr, humidity);
         if (mqttClient.connected()  && !ethernetIdleCount)
             mqttClient.publish(addrstr, valstr);
 

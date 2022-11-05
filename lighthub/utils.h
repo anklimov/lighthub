@@ -58,7 +58,7 @@ itemCmd getNumber(char ** chan);
 unsigned long freeRam ();
 void parseBytes(const char* str, char separator, byte* bytes, int maxBytes, int base);
 int log(const char *str, ...);
-void printFloatValueToStr(float value, char *valstr);
+void printFloatValueToStr(char *valstr, float value);
 void ReadUniqueID( uint32_t * pdwUniqueID );
 int _inet_aton(const char* aIPAddrString, IPAddress& aResult);
 char *_inet_ntoa_r(IPAddress addr, char *buf, int buflen);

@@ -20,7 +20,7 @@ int abstractIn::publish(long value, const char* subtopic)
 int abstractIn::publish(float value, const  char* subtopic)
 {
   char valstr[16];
-  printFloatValueToStr(value, valstr);
+  printFloatValueToStr(valstr, value);
   return publish(valstr,subtopic);
 };
 

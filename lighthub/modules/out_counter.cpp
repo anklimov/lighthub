@@ -14,7 +14,8 @@ void out_counter::getConfig()
 {
   if (!item) return;
   impulse = item->getFloatArg(0);
-  period = item->getFloatArg(1)*1000.0;        
+  period = item->getFloatArg(1)*1000.0;  
+  //debugSerial<<"CTR: imp:"<<impulse<<" period:"<<period<<endl;      
 }
 
 int  out_counter::Setup()
@@ -38,7 +39,7 @@ return driverStatus;
 
 int out_counter::Poll(short cause)
 {
-  if (cause==POLLING_SLOW) return 0;
+  if (cause==POLLING_SLOW || cause==POLLING_INT) return 0;
   if (!item) return 0;
 
 
@@ -47,13 +48,18 @@ uint32_t timer = item->getExt();
    if (timer && period && isTimeOver(timer,millis(),period))
     {
       item->setExt(millisNZ());
+
       itemCmd st;
       st.loadItem(item,SEND_PARAMETERS|SEND_COMMAND);
       float val = st.getFloat();
       //short cmd = st.getCmd();
+      debugSerial<<"CTR: tick val:"<<val<<endl; 
+
       val+=impulse;
       st.Float(val);
       st.saveItem(item);
+      debugSerial<<"CTR: tick saved val:"<<val<<endl; 
+      item->SendStatus(SEND_PARAMETERS);
     }   
 
     return 0;
@@ -82,13 +88,11 @@ case S_SET:
              if (!item->getExt()) 
                                     {
                                     item->setExt(millisNZ());
-                                    //relay(true);
                                     }
             }
           else        
                     {     
                     item->setExt(0);
-         
                     } 
           }         
           return 1;
@@ -105,13 +109,11 @@ case S_CMD:
              if (!item->getExt())  
                                       {
                                       item->setExt(millisNZ());
-                                      //relay(true);
                                       }
             return 1;
 
             case CMD_OFF:
              item->setExt(0);
-
             return 1;
 
             default:

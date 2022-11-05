@@ -10,7 +10,7 @@ extern PubSubClient mqttClient;
 extern int8_t ethernetIdleCount;
 
 int abstractCh::publishTopic(const char* topic, long value, const char* subtopic)
-{
+{ 
   char valstr[16];
   printUlongValueToStr(valstr, value);
   return publishTopic(topic, valstr,subtopic);
@@ -19,7 +19,7 @@ int abstractCh::publishTopic(const char* topic, long value, const char* subtopic
 int abstractCh::publishTopic(const char* topic, float value, const char* subtopic)
 {
   char valstr[16];
-  printFloatValueToStr(value, valstr);
+  printFloatValueToStr(valstr, value);
   return publishTopic(topic, valstr,subtopic);
 };
 

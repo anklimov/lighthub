@@ -340,12 +340,14 @@ case S_CMD:
           return 1;
           case CMD_ENABLE:
           item->setCmd(CMD_ENABLE);
-          item->SendStatus(SEND_COMMAND);          
+          item->SendStatus(SEND_COMMAND);   
+          //executeCommand(oCmd,-1,value);       
           return 1;
 
           case CMD_DISABLE:
           item->setCmd(CMD_DISABLE);
           item->SendStatus(SEND_COMMAND);
+          //executeCommand(oCmd,-1,value);
           return 1;
 /*
           case CMD_OFF:
