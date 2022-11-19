@@ -53,9 +53,10 @@ class flashStream : public seekableStream
 protected:
 unsigned int pos;  
 unsigned int startPos; 
+char openmode ;
 
 public:
-    flashStream():seekableStream(MAX_STREAM_SIZE){};
+    flashStream():seekableStream(MAX_STREAM_SIZE){openmode = '\0';};
     void setSize(unsigned int _size);
     int open(short fileNum, char mode='\0') ; 
     virtual int open(String _filename, char mode='\0') override;

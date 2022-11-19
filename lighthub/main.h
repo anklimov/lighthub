@@ -317,4 +317,6 @@ void ip_ready_config_loaded_connecting_to_broker();
 
 void printCurentLanConfig();
 
+void onMQTTConnect();
+
 //void printFreeRam();

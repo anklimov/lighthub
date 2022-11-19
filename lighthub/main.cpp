@@ -664,6 +664,8 @@ lan_status lanLoop() {
                 setTopic(buf,sizeof(buf),T_OUT);
                 strncat(buf, "+/+/#", sizeof(buf)); // Subscribing only on separated command/parameters topics
                 mqttClient.unsubscribe(buf);
+                
+                onMQTTConnect();
 
                 lanStatus = OPERATION;//3;
                 infoSerial<<F("Accepting commands...\n");
@@ -1002,7 +1004,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
             debugSerialPort.println(buf);
             mqttClient.subscribe(buf);
 
-            onMQTTConnect();
+            //onMQTTConnect();
             // if (_once) {DMXput(); _once=0;}
             lanStatus = RETAINING_COLLECTING;//4;
             timerLanCheckTime = millis();// + 5000;
@@ -1497,11 +1499,11 @@ if (arg_cnt>1)
     #else
     sysConfStream.open(FN_CONFIG_JSON,'w');
     #endif
-
+/*
 #if defined(__SAM3X8E__) 
   long configBufSize = min(MAX_JSON_CONF_SIZE,freeRam()-1024);
   debugSerial<<"Allocate "<<configBufSize<<" bytes for buffer"<<endl;
-  char* outBuf = (char*) malloc(configBufSize); /* XXX: Dynamic size. */
+  char* outBuf = (char*) malloc(configBufSize); 
   if (!outBuf)
     {
       sysConfStream.close();  
@@ -1509,23 +1511,22 @@ if (arg_cnt>1)
       return 500;
     }
   infoSerial<<F("Saving config to EEPROM..")<<endl;
-  aJsonStringStream stringStream(NULL, outBuf, configBufSize);
+  aJsonStringStream stringStream(NULL, outBuf, configBufSize-2);
   aJson.print(root, &stringStream);
   int len = strlen(outBuf);
   outBuf[len++]= EOFchar;
-  
+  infoSerial<<len<< F(" bytes collected")<<endl;
   size_t res = sysConfStream.write((byte*) outBuf,len);
   free (outBuf);
-  infoSerial<<res<< F(" bytes from ")<<len<<F(" are saved to EEPROM")<<endl;
-#else
+  infoSerial<<res<< F(" bytes are saved to EEPROM")<<endl;
+#else */
+
     aJsonStream jsonEEPROMStream = aJsonStream(&sysConfStream);
     infoSerial<<F("Saving config to EEPROM..");
     aJson.print(root, &jsonEEPROMStream);
-    //sysConfStream.putEOF();
-    //sysConfStream.flush();
     sysConfStream.close();
     infoSerial<<F("Saved to EEPROM")<<endl;
-#endif
+//#endif
 sysConf.saveETAG();
 return 200;
 }
@@ -2284,6 +2285,10 @@ infoSerial<<F("\n(+)HUMIDIFIER");
 
 #ifdef ELEVATOR_ENABLE
 infoSerial<<F("\n(+)ELEVATOR");
+#endif
+
+#ifdef IPMODBUS
+infoSerial<<F("\n(+)IPMODBUS");
 #endif
 infoSerial<<endl;
 

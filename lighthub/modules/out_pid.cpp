@@ -14,6 +14,7 @@ bool out_pid::getConfig()
   double kI=0.0;
   double kD=0.0;
   int direction = DIRECT;
+  bool limits = false;
 
   // Retrieve and store 
   if (!store || !item || !item->itemArg || (item->itemArg->type != aJson_Array) || aJson.getArraySize(item->itemArg)<1)
@@ -28,8 +29,8 @@ bool out_pid::getConfig()
               errorSerial<<F("Invalid PID param array.")<<endl;
               return false;
             }
-   double outMin=0.;  //UNUSED
-   double outMax=255.;//UNUSED
+   double outMin=0.;  
+   double outMax=255.;
    float  dT=5.;
    uint32_t   alarmTO=PERIOD_THERMOSTAT_FAILED;
 
@@ -37,13 +38,13 @@ bool out_pid::getConfig()
    switch (aJson.getArraySize(kPIDObj))
    { case 8: //kP,kI,kD,dT, alarmTO, alarmVal, outMin, outMax
        param = aJson.getArrayItem(kPIDObj, 7);
-       if (param->type == aJson_Float) outMax=param->valuefloat;
-       else if (param->type == aJson_Int) outMax=param->valueint;
+       if (param->type == aJson_Float) {outMax=param->valuefloat;limits=true;}
+       else if (param->type == aJson_Int) {outMax=param->valueint;limits=true;}
 
      case 7: //kP,kI,kD,dT alarmTO, alarmVal, outMin
        param = aJson.getArrayItem(kPIDObj, 6);
-       if (param->type == aJson_Float) outMin=param->valuefloat;
-       else if (param->type == aJson_Int) outMin=param->valueint;    
+       if (param->type == aJson_Float) {outMin=param->valuefloat;limits=true;}
+       else if (param->type == aJson_Int) {outMin=param->valueint;limits=true;}    
 
      case 6: //kP,kI,kD,dT, alarmTO, alarmVal
      case 5: //kP,kI,kD,dT, alarmTO
@@ -99,7 +100,7 @@ bool out_pid::getConfig()
       {store->pid= new PID  (&store->input, &store->output, &store->setpoint, kP, kI, kD, direction);
       if (!store->pid) return false;
       store->pid->SetMode(AUTOMATIC);
-      //store->pid->SetOutputLimits(outMin,outMax);
+      if (limits) store->pid->SetOutputLimits(outMin,outMax);
       store->pid->SetSampleTime(dT*1000.0); 
       return true;}
   else errorSerial<<F("PID already initialized")<<endl;    

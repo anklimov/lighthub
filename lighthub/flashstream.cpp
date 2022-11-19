@@ -39,6 +39,8 @@ extern NRFFlashStorage EEPROM;
 
 #if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
+ static char samBuffer[64];
+ short samBufferPos = 0;
 #endif
 
 #ifdef NRF5
@@ -129,6 +131,10 @@ NRFFlashStorage EEPROM;
     int  flashStream::open(short fileNum, char mode) 
                 {
 
+                  #if  defined(__SAM3X8E__)
+                  samBufferPos = 0;
+                  #endif 
+
                  switch (fileNum) {
                    case FN_CONFIG_JSON:     
                         pos = 0;
@@ -138,6 +144,7 @@ NRFFlashStorage EEPROM;
                         #ifdef OTA
                         contentType = HTTP_TEXT_JSON;
                         #endif
+                        openmode = mode;
                         return 1;    
                     
                   case FN_CONFIG_BIN:                    
@@ -148,6 +155,7 @@ NRFFlashStorage EEPROM;
                         #ifdef OTA
                         contentType = HTTP_OCTET_STREAM;
                         #endif
+                        openmode = mode;
                         return 1;
 
                    default:
@@ -171,7 +179,13 @@ NRFFlashStorage EEPROM;
                 };
 
      unsigned int flashStream::seek(unsigned int _pos) 
-        {   pos=min(_pos, streamSize);
+        {   
+         
+          #if  defined(__SAM3X8E__)
+          if (samBufferPos) flush();
+          #endif
+
+         pos=min(_pos, streamSize);
             //debugSerial<<F("Seek:")<<pos<<endl;
             return pos;
         };
@@ -196,21 +210,37 @@ NRFFlashStorage EEPROM;
             else return -1;    
             };
 
+    
     void flashStream::flush() {
         #if defined(ESP8266) || defined(ESP32)
         if (EEPROM.commitReset())
                 infoSerial<<"Commited to FLASH"<<endl;
         else    errorSerial<<"Commit error. len:"<<EEPROM.length()<<endl;       
+        #elif  defined(__SAM3X8E__)
+        if (samBufferPos)
+             EEPROM.write(startPos+pos-samBufferPos,(byte*)samBuffer,samBufferPos);    
         #endif
    };
-          
+   
+
     size_t flashStream::write(uint8_t ch) 
             {
                #if defined(__AVR__)
                   EEPROM.update(startPos+pos++,(char)ch);
                   return 1;
                #elif  defined(__SAM3X8E__)
-                  return EEPROM.write(startPos+pos++,(char)ch);
+      
+               if (samBufferPos==sizeof(samBuffer))
+                        {            
+                           samBufferPos = 0;
+                           EEPROM.write(startPos+pos-sizeof(samBuffer),(byte*)samBuffer,sizeof(samBuffer));                     
+                        }
+           
+               samBuffer[samBufferPos++]=ch;
+               pos++;
+               return 1;
+                //  return EEPROM.write(startPos+pos++,(char)ch);
+
                #else 
                   EEPROM.write(startPos+pos++,(char)ch);
                   return 1;  
@@ -237,7 +267,10 @@ NRFFlashStorage EEPROM;
 
  void flashStream::close()  
     {  
-       putEOF();
+      if (openmode == 'w') putEOF();
+      #if  defined(__SAM3X8E__)
+      if (samBufferPos) flush();
+      #endif
     }    
 
 
