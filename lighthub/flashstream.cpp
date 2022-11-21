@@ -132,6 +132,7 @@ NRFFlashStorage EEPROM;
                 {
 
                   #if  defined(__SAM3X8E__)
+                  if (samBufferPos) flush();
                   samBufferPos = 0;
                   #endif 
 
@@ -219,6 +220,7 @@ NRFFlashStorage EEPROM;
         #elif  defined(__SAM3X8E__)
         if (samBufferPos)
              EEPROM.write(startPos+pos-samBufferPos,(byte*)samBuffer,samBufferPos);    
+        samBufferPos=0;     
         #endif
    };
    
