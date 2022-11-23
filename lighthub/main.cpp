@@ -247,9 +247,9 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
           
          ArduinoOTA.sendHttpResponse(client,301,false);  // Send only HTTP header, no close socket 
          client.println(
-#ifdef CORS
+#ifdef REDIRECTION_URL
 //Redirect to cloud PWA application               
-             String(F("Location: " CORS "/pwa"))
+             String(F("Location: " REDIRECTION_URL))
 #else
              String(F("Location: /index.html"))
 #endif   
@@ -924,6 +924,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
     if (mqttClient.connected())
         {
+          //mqttClient.setKeepAlive(10);  
           lanStatus = RETAINING_COLLECTING;
           return;
         }

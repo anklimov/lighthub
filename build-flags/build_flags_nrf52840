@@ -14,3 +14,5 @@
 -DPID_DISABLE
 #-DMCP23017
 
+-D CORS=\"*\"
+-D REDIRECTION_URL=\"http://lazyhome.ru/pwa\"

@@ -10,7 +10,8 @@
 -DARDUINO_OTA_MDNS_DISABLE
 -DMDNS_ENABLE
 -DMCP23017
--DCORS=\"http://lazyhome.ru\"
+-D CORS=\"*\"
+-D REDIRECTION_URL=\"http://lazyhome.ru/pwa\"
 -DTIMER_INT
 
 -DRESTART_LAN_ON_MQTT_ERRORS

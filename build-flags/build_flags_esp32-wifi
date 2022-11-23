@@ -46,5 +46,10 @@
 -DFS_PREPARE
 
 -DRESTART_LAN_ON_MQTT_ERRORS
--D CORS=\"http://lazyhome.ru\"
+#-D CORS=\"http://lazyhome.ru\"
 -DOTA_PORT=80
+
+-DMQTT_KEEPALIVE=10 
+-DMQTT_SOCKET_TIMEOUT=20
+-D CORS=\"*\"
+-D REDIRECTION_URL=\"http://lazyhome.ru/pwa\"
