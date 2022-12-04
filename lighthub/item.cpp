@@ -1451,6 +1451,8 @@ int Item::SendStatus(int sendFlags) {
         case CMD_COOL:
         case CMD_DRY:
         case CMD_FAN:
+        case CMD_ENABLE:
+        case CMD_DISABLE:
             strcpy_P(cmdstr, ON_P);
             break;
         case CMD_OFF:
@@ -1571,6 +1573,12 @@ int Item::SendStatus(int sendFlags) {
                     case CMD_FAN:
                           strcpy_P(cmdstr, FAN_ONLY_P);          
                         break;
+                    case CMD_ENABLE:
+                          strcpy_P(cmdstr, ENABLE_P);          
+                        break;  
+                    case CMD_DISABLE:
+                          strcpy_P(cmdstr, DISABLE_P);          
+                        break;                                                
                     case CMD_ON:
                     case CMD_XON:
                           if (itemType == CH_THERMO) strcpy_P(cmdstr, AUTO_P);

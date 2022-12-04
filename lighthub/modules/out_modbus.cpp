@@ -231,10 +231,15 @@ return (result == node.ku8MBSuccess);
 
 
 
-int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
+itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uint8_t regType, uint16_t registerFrom, uint16_t registerTo, bool doExecution, bool * submitParam)
 {
   aJsonObject * paramObj = store->parameters->child;
-  bool is8bit = false;
+  
+  bool tmpSubmitParam;  
+  if (!submitParam) submitParam=&tmpSubmitParam;  
+  *submitParam=true;
+
+  //bool is8bit = false;
   while (paramObj)
           {
             aJsonObject *regObj=NULL;
@@ -248,11 +253,14 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                     {
                     aJsonObject *typeObj = aJson.getObjectItem(paramObj, "type");
                     aJsonObject *mapObj = aJson.getObjectItem(paramObj, "map");
+                    aJsonObject *idObj = aJson.getObjectItem(paramObj, "id");
                     aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
                     uint16_t data = node.getResponseBuffer(posInBuffer);
                     int8_t    regType = PAR_I16;
                     uint32_t  param =0;
                     itemCmd   mappedParam;
+                    bool executeWithoutCheck=false; //Afler recurrent check, all dublicatess and suppressing checked by recurrent 
+                    bool submitRecurrentOut = false; //false if recurrent check find duplicates 
                     char buf[16];
 
                     //bool isSigned=false;
@@ -308,15 +316,47 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                   if (mapObj && (mapObj->type==aJson_Array || mapObj->type==aJson_Object))
                     {
                        mappedParam=mappedParam.doReverseMapping(mapObj);
-                       debugSerial << F("MBUSD: Mapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
-                    }
+                       if (!mappedParam.isCommand() && !mappedParam.isValue())  //Not mapped
+                          {  
+                          aJsonObject *nextRegObj = NULL;  
+                          int registerType = 0;
+                          
+                          nextRegObj = aJson.getObjectItem(paramObj, "nextreg");
+                          if (nextRegObj) registerType=MODBUS_HOLDING_REG_TYPE;           
+                          else 
+                            {
+                            nextRegObj =  aJson.getObjectItem(paramObj, "nextir");
+                            if (nextRegObj) registerType=MODBUS_INPUT_REG_TYPE;
+                            }
 
+                          if (registerType && (nextRegObj->type) ==aJson_Int && (nextRegObj->valueint>= registerFrom) && (nextRegObj->valueint<=registerTo))  
+                                  { 
+                                  debugSerial<<F("Recurrent searching nextreg")<<endl;   
+                                  mappedParam = findRegister(nextRegObj->valueint,nextRegObj->valueint-registerFrom,registerType,registerFrom,registerTo,false,&submitRecurrentOut);
+                                  executeWithoutCheck=true;
+                                  }
+                          else errorSerial<<F("nextreg out of range")<<endl;        
+                          }  
+                        else   
+                           debugSerial << F("MBUSD: Mapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
+                    } //mapping       
+
+                    if (doExecution && idObj && idObj->type==aJson_Int) 
+                       switch (idObj->valueint)
+                        {
+                          case S_CMD: 
+                          mappedParam.saveItem(item,SEND_COMMAND);
+                            break;
+                          case S_SET:
+                          mappedParam.saveItem(item,SEND_PARAMETERS);
+                        }
+
+                
                     if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                           {
                           aJsonObject *execObj = aJson.getObjectItem(itemParametersObj,paramObj->name);
                           if (execObj) 
                                       {
-                                      bool submitParam=true;  
                                       //Retrive previous data
                                       aJsonObject *lastMeasured = aJson.getObjectItem(execObj,"@S");
                                       if (lastMeasured)
@@ -324,7 +364,7 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                                                 if   (lastMeasured->type == aJson_Int)
                                                   {
                                                   if   (lastMeasured->valueint == param)
-                                                        submitParam=false; //supress repeating execution for same val
+                                                        *submitParam=false; //supress repeating execution for same val
                                                   else  lastMeasured->valueint=param;
                                                   }
                                       }            
@@ -332,32 +372,40 @@ int out_Modbus::findRegister(int registerNum, int posInBuffer, int regType)
                                       {
                                         debugSerial<<F("MBUS: Add @S: ")<<paramObj->name<<endl;
                                         aJson.addNumberToObject(execObj, "@S", (long) param);
-                                      }                                      
-                                      if (submitParam)                                       
-                                      { 
-                                      //#ifdef MB_SUPPRESS_OUT_EQ_IN   
+                                      }  
+
+
+                                       if (executeWithoutCheck)
+                                            {
+                                            
+                                            if (doExecution && (submitRecurrentOut || *submitParam)) executeCommand(execObj, -1, mappedParam); 
+                                            return mappedParam;  
+                                            }
+
+                                      if (*submitParam)                                       
+                                      {   
                                       // Compare with last submitted val (if @V NOT marked as NULL in config)
                                        aJsonObject *settedValue = aJson.getObjectItem(execObj,"@V");                      
                                        if (settedValue && settedValue->type==aJson_Int && (settedValue->valueint == param))
                                           {    
                                            debugSerial<<F("MBUSD: Ignored - equal with setted val")<<endl;
+                                           *submitParam=false;
                                           }  
                                         else 
                                           {
-                                          executeCommand(execObj, -1, mappedParam);
+                                          if (doExecution) executeCommand(execObj, -1, mappedParam);
                                           // if param updated by device and no new value queued to send - update @V to avoid "Ignored - equal with setted val" 
                                           if (settedValue && !(execObj->subtype & MB_NEED_SEND)) 
                                               settedValue->valueint=param;
                                           }
-                                      //#endif     
                                       }
                                       }
                           }
-                    if (!is8bit) return 1;
+                    return mappedParam;
                     }
             paramObj=paramObj->next;
           }
-return is8bit;
+return itemCmd();
 }
 
 
@@ -376,7 +424,7 @@ return is8bit;
                 //if (readModbus(registerNum,MODBUS_HOLDING_REG_TYPE,1)) 
                 if (readModbus(registerNum,regType,1))
                   {
-                    findRegister(registerNum,0,regType);
+                    findRegister(registerNum,0,regType,registerNum,registerNum);
                 //    data = node.getResponseBuffer(j);
                   }
                 }
@@ -392,7 +440,7 @@ return is8bit;
                     { debugSerial<<endl;
                       for(int i=registerFrom;i<=registerTo;i++)
                         {
-                          findRegister(i,i-registerFrom,regType);
+                          findRegister(i,i-registerFrom,regType,registerFrom,registerTo);
                         }
                       //data = node.getResponseBuffer(j);
                     }

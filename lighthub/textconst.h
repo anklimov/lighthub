@@ -112,6 +112,8 @@ const char HIGH_P[] PROGMEM = "HIGH";
 const char MED_P[]  PROGMEM = "MEDIUM";
 const char LOW_P[]  PROGMEM = "LOW";
 const char ERROR_P[]  PROGMEM = "ERR";
+const char ENABLE_P[]  PROGMEM = "ENABLE";
+const char DISABLE_P[] PROGMEM = "DISABLE";
 
 
 // SubTopics

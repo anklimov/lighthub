@@ -172,15 +172,20 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
       { 
       if(store->pid->Compute() )
       {
-      int alarmVal;  
-      if (store->alarmArmed && (alarmVal=getAlarmVal()>=0)) store->output=alarmVal; 
+      float alarmVal;  
+      if (store->alarmArmed && ((alarmVal=getAlarmVal())>=0.)) store->output=alarmVal; 
       debugSerial<<F("PID ")<<item->itemArr->name<<F(" set:")<<store->setpoint<<F(" in:")<<store->input<<(" out:") << store->output <<F(" P:")<<store->pid->GetKp() <<F(" I:")<<store->pid->GetKi() <<F(" D:")<<store->pid->GetKd();
       if (store->alarmArmed) debugSerial << F(" Alarm");
       debugSerial<<endl;
       
-      if ((abs(store->output-store->prevOut)>OUTPUT_TRESHOLD) && !store->alarmArmed)
+      if (((abs(store->output-store->prevOut)>OUTPUT_TRESHOLD) || (item->getCmd() == CMD_ENABLE)) && !store->alarmArmed)
           { 
             aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
+            if (item->getCmd() == CMD_ENABLE)
+              {
+                executeCommand(oCmd,-1,itemCmd().Cmd(CMD_ON));
+                item->setCmd(CMD_VOID);
+              }
             itemCmd value((float) (store->output));// * (100./255.)));
             value.setSuffix(S_SET);
             executeCommand(oCmd,-1,value);
@@ -198,16 +203,16 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
 return 1;//store->pollingInterval;
 };
 
-int out_pid::getAlarmVal()
+float out_pid::getAlarmVal()
 {
   aJsonObject * kPIDObj = aJson.getArrayItem(item->itemArg, 0);
    if (!kPIDObj || kPIDObj->type != aJson_Array)
             {
               errorSerial<<F("Invalid PID param array.")<<endl;
-              return -1;
+              return -1.;
             }
 
-   int outAlarm=0;
+   float outAlarm=0.;
    double kP=0.;
    
    bool alarmValDefined = false;
@@ -232,13 +237,14 @@ int out_pid::getAlarmVal()
        if (param->type == aJson_Float) kP=param->valuefloat;  
        else if (param->type == aJson_Int) kP=param->valueint;
               {
-              if (kP<0)
+              if (kP<0.)
                 {
                     if (!alarmValDefined) outAlarm = 0.;
                 } 
                else if (!alarmValDefined) outAlarm = 255.; 
               }     
    }
+debugSerial<<F("Alarm value: ")<<outAlarm<< " ";   
 return outAlarm;   
 }   
 
@@ -250,7 +256,7 @@ if (!item || !item->itemArg) return;
   {
    float outAlarm=getAlarmVal();  
    errorSerial<<item->itemArr->name<<F(" PID alarm. ")<<endl;
-   if (outAlarm>=0)        
+   if (outAlarm>=0.)        
           {
           errorSerial<<F("Set out to ")<<outAlarm<<endl;
           aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
@@ -337,18 +343,19 @@ case S_CMD:
           case CMD_FAN:
           case CMD_DRY:
 
-             executeCommand(oCmd,-1,value); 
+          executeCommand(oCmd,-1,value); 
           return 1;
+
           case CMD_ENABLE:
           item->setCmd(CMD_ENABLE);
-          item->SendStatus(SEND_COMMAND);   
-          //executeCommand(oCmd,-1,value);       
+          item->SendStatus(SEND_COMMAND);
+          executeCommand(oCmd,-1,value);      
           return 1;
 
           case CMD_DISABLE:
           item->setCmd(CMD_DISABLE);
           item->SendStatus(SEND_COMMAND);
-          //executeCommand(oCmd,-1,value);
+          executeCommand(oCmd,-1,value);
           return 1;
 /*
           case CMD_OFF:
@@ -361,11 +368,11 @@ case S_CMD:
           } */
 
             default:
-            debugSerial<<F("Unknown cmd ")<<cmd.getCmd()<<endl;
+            debugSerial<<F("PID: Unknown cmd ")<<cmd.getCmd()<<endl;
           } //switch cmd
       }
     default:
-  debugSerial<<F("Unknown suffix ")<<suffixCode<<endl;
+  debugSerial<<F("PID: Unknown suffix ")<<suffixCode<<endl;
 } //switch suffix
 
 return 0;

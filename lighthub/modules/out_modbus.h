@@ -43,7 +43,7 @@ public:
 protected:
     mbPersistent * store;
     bool getConfig();
-    int  findRegister(int registerNum, int posInBuffer, int regType);
+    itemCmd  findRegister(uint16_t registerNum, uint16_t posInBuffer, uint8_t regType, uint16_t registerFrom, uint16_t registerTo, bool doExecution = true, bool * submitParam = NULL);
     void pollModbus(aJsonObject * reg, int regType);
     void initLine();
     int  sendModbus(char * paramName, int32_t value, uint8_t regType);

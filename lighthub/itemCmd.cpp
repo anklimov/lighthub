@@ -1242,10 +1242,10 @@ if (isValue() && valMapping && valMapping->type == aJson_Array && aJson.getArray
     case aJson_Array:  
     {
       aJsonObject *i = cmdMapping->child;
-      //if first array element is not array - this is default mapping value
+      //if first array element is not array - this is default mapping value, no reverse mapping, skipping
       if (i && i->type==aJson_Int) 
         {
-         matchedCmd = i;
+         //matchedCmd = i;
          i=i->next;
         }
 
@@ -1301,6 +1301,7 @@ if (valMapping && valMapping->type == aJson_Array && aJson.getArraySize(valMappi
      int diff = ((b-a)/(d-c))/2;
      return itemCmd().Int((uint32_t) constrain(map(getInt(),c,d,a,b)+diff,0,255));  
     }
+  if (valMapping && valMapping->type == aJson_NULL) return itemCmd();  
   return *this;
   }
 
