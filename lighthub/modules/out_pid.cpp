@@ -181,7 +181,7 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
       if (((abs(store->output-store->prevOut)>OUTPUT_TRESHOLD) || (item->getCmd() == CMD_ENABLE)) && !store->alarmArmed)
           { 
             aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
-            if (item->getCmd() == CMD_ENABLE)
+            if ((item->getCmd() == CMD_ENABLE) && (store->output>0.))
               {
                 executeCommand(oCmd,-1,itemCmd().Cmd(CMD_ON));
                 item->setCmd(CMD_VOID);
@@ -349,7 +349,8 @@ case S_CMD:
           case CMD_ENABLE:
           item->setCmd(CMD_ENABLE);
           item->SendStatus(SEND_COMMAND);
-          executeCommand(oCmd,-1,value);      
+          executeCommand(oCmd,-1,value);   
+          store->prevOut=-2.0;   
           return 1;
 
           case CMD_DISABLE:

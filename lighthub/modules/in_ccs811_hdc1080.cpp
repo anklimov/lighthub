@@ -21,16 +21,21 @@ static bool CCS811ready = false;
 
 int  in_ccs811::Setup()
 {
-  if (CCS811ready) {debugSerial<<F("ccs811 is already initialized")<<endl; return 0;}
+  if (CCS811ready) {errorSerial<<F("ccs811 is already initialized")<<endl; return 0;}
 
 #ifdef WAK_PIN
   pinMode(WAK_PIN,OUTPUT);
   digitalWrite(WAK_PIN,LOW);
 #endif
 
-debugSerial.println("CCS811 Init");
+infoSerial.println("CCS811 Init");
 
+#if defined (TWI_SCL) && defined (TWI_SDA)
+Wire.begin(TWI_SDA,TWI_SCL); //Inialize I2C Harware
+#else
 Wire.begin(); //Inialize I2C Harware
+#endif
+
 Wire.setClock(4000);
 
   //It is recommended to check return status on .begin(), but it is not
@@ -40,7 +45,7 @@ Wire.setClock(4000);
   if (returnCode != CCS811Core::SENSOR_SUCCESS)
   //if (returnCode != CCS811Core::CCS811_Stat_SUCCESS)
   {
-    Serial.print("CCS811 Init error ");
+    errorSerial.print("CCS811 Init error ");
     //debugSerial.println(ccs811.statusString(returnCode));
     printDriverError(returnCode);
     return 0;
@@ -116,8 +121,8 @@ if (reg!=0xff)
 // New tyle unified activities
     aJsonObject *actT = aJson.getObjectItem(in->inputObj, "temp");
     aJsonObject *actH = aJson.getObjectItem(in->inputObj, "hum");
-    executeCommand(actT,-1,itemCmd(t));
-    executeCommand(actH,-1,itemCmd(h));
+    if (!isnan(t)) executeCommand(actT,-1,itemCmd(t));
+    if (!isnan(t)) executeCommand(actH,-1,itemCmd(h));
     
   publish(t,"/T");
   publish(h,"/H");

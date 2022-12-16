@@ -116,7 +116,7 @@ NRFFlashStorage EEPROM;
         debugSerial<<(F(" Res:"))<<res<<endl;
         return res;
       };         
-    void flashStream::close()  {fs.close(); debugSerial<<filename<<"  Closed\n";};
+    void flashStream::close()  {fs.flush();fs.close(); debugSerial<<filename<<"  Closed\n";};
     void flashStream::flush()  {fs.flush(); debugSerial<<filename<<"  Flushed\n";};
     size_t flashStream::write(uint8_t ch) 
                 {

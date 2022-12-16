@@ -10,15 +10,22 @@
 //#define CCS811_ADDR 0x5B //Default I2C Address
 #define CCS811_ADDR 0x5A //Alternate I2C Address
 
-#if defined (ARDUINO_ARCH_ESP8266)
-#define twi_scl D1
-#ifndef WAK_PIN
-#define WAK_PIN D3
-#endif
+#if defined (ARDUINO_ARCH_ESP8266) 
 
-#define SCL_LOW()   (GPES = (1 << twi_scl))
-#define SCL_HIGH()  (GPEC = (1 << twi_scl))
-#define SCL_RESET
+    #if not defined (TWI_SCL) && defined (D1)
+    #define TWI_SCL D1
+    #endif
+
+    #if not defined (WAK_PIN) && defined (D3)
+    #define WAK_PIN D3
+    #endif
+
+    #if defined (TWI_SCL)
+    #define SCL_LOW()   (GPES = (1 << TWI_SCL))
+    #define SCL_HIGH()  (GPEC = (1 << TWI_SCL))
+    #define SCL_RESET
+    #endif
+
 #endif
 
 /*

@@ -39,13 +39,26 @@ e-mail    anklimov@gmail.com
 Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_BSD);
 static char syslogDeviceHostname[16];
 
-Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog);
-Streamlog errorSerial(&debugSerialPort,LOG_ERROR,&udpSyslog,ledRED);
-Streamlog infoSerial (&debugSerialPort,LOG_INFO,&udpSyslog);
+    #if defined(debugSerialPort) 
+    Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog);
+    Streamlog errorSerial(&debugSerialPort,LOG_ERROR,&udpSyslog,ledRED);
+    Streamlog infoSerial (&debugSerialPort,LOG_INFO,&udpSyslog);
+    #else
+    Streamlog debugSerial(NULL,LOG_DEBUG,&udpSyslog);
+    Streamlog errorSerial(NULL,LOG_ERROR,&udpSyslog,ledRED);
+    Streamlog infoSerial (NULL,LOG_INFO,&udpSyslog);
+    #endif
+
 #else
-Streamlog debugSerial(&debugSerialPort,LOG_DEBUG);
-Streamlog errorSerial(&debugSerialPort,LOG_ERROR, ledRED);
-Streamlog infoSerial (&debugSerialPort,LOG_INFO);
+     #if defined(debugSerialPort) 
+        Streamlog debugSerial(&debugSerialPort,LOG_DEBUG);
+        Streamlog errorSerial(&debugSerialPort,LOG_ERROR, ledRED);
+        Streamlog infoSerial (&debugSerialPort,LOG_INFO);
+     #else
+        Streamlog debugSerial(NULL,LOG_DEBUG);
+        Streamlog errorSerial(NULL,LOG_ERROR, ledRED);
+        Streamlog infoSerial (NULL,LOG_INFO);
+     #endif   
 #endif
 
 flashStream sysConfStream;
@@ -400,12 +413,11 @@ if  (lanStatus == RETAINING_COLLECTING)
            {
             if (mqttClient.isRetained()) 
                 {
-                pfxlen=inTopic(topic,T_BCST);
-                if (!pfxlen) pfxlen = inTopic(topic,T_DEV);   
-                if (!pfxlen)  return; // Not command topic ever
-                //itemName=topic+pfxlen; 
+                //pfxlen=inTopic(topic,T_BCST);   //Dont delete bcast topics (just skip on restore retaining)
+                //if (!pfxlen) pfxlen = inTopic(topic,T_DEV);
+                pfxlen = inTopic(topic,T_DEV);   
+                if (!pfxlen)  return; // Not command topic
                 if (strrchr(topic,'$')) return;
-                //if (itemName[0]=='$') return;// -6; //Skipping homie stuff
                 debugSerial<<F("CleanUp retained topic ")<<topic<<endl;
                 mqttClient.deleteTopic(topic);
                 }
@@ -585,6 +597,7 @@ lan_status lanLoop() {
               if (isTimeOver(WiFiAwaitingTime,millis(),WIFI_TIMEOUT))
             {
                 errorSerial<<F("\nProblem with WiFi!");
+                WiFi.reconnect();
                 return lanStatus = DO_REINIT;
             }
         #else
@@ -697,6 +710,19 @@ lan_status lanLoop() {
             if (mqttClient.connected()) mqttClient.disconnect();
             timerLanCheckTime = millis();// + 5000;
             lanStatus = RECONNECT;
+
+            /*
+            #if defined(WIFI_ENABLE)
+            if (WiFi.status() != WL_CONNECTED) 
+                    {
+                    infoSerial<<"Reconnecting WiFi"<<endl;    
+                    lanStatus = INITIAL_STATE;
+                    WiFi.disconnect();
+                    WiFi.reconnect();
+                    }
+
+            #endif
+            */
             break;
 
         case RECONNECT:
@@ -1002,7 +1028,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
             setTopic(buf,sizeof(buf),T_DEV);
             strncat(buf, "#", sizeof(buf));
-            debugSerialPort.println(buf);
+            debugSerial.println(buf);
             mqttClient.subscribe(buf);
 
             //onMQTTConnect();
@@ -1500,28 +1526,7 @@ if (arg_cnt>1)
     #else
     sysConfStream.open(FN_CONFIG_JSON,'w');
     #endif
-/*
-#if defined(__SAM3X8E__) 
-  long configBufSize = min(MAX_JSON_CONF_SIZE,freeRam()-1024);
-  debugSerial<<"Allocate "<<configBufSize<<" bytes for buffer"<<endl;
-  char* outBuf = (char*) malloc(configBufSize); 
-  if (!outBuf)
-    {
-      sysConfStream.close();  
-      errorSerial<<"Can't allocate RAM"<<endl;
-      return 500;
-    }
-  infoSerial<<F("Saving config to EEPROM..")<<endl;
-  aJsonStringStream stringStream(NULL, outBuf, configBufSize-2);
-  aJson.print(root, &stringStream);
-  int len = strlen(outBuf);
-  outBuf[len++]= EOFchar;
-  infoSerial<<len<< F(" bytes collected")<<endl;
-  size_t res = sysConfStream.write((byte*) outBuf,len);
-  free (outBuf);
-  infoSerial<<res<< F(" bytes are saved to EEPROM")<<endl;
-#else */
-
+    
     aJsonStream jsonEEPROMStream = aJsonStream(&sysConfStream);
     infoSerial<<F("Saving config to EEPROM..");
     aJson.print(root, &jsonEEPROMStream);
@@ -1995,13 +2000,113 @@ int16_t attachTimer(double microseconds, timerCallback callback, const char* Tim
 }
 #endif
 
+#if defined(WIFI_ENABLE)
+#if defined (ESP32)
+void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info)
+{
+    debugSerial.printf("[WiFi-event] event: %d\n", event);
+
+    switch (event) {
+        case SYSTEM_EVENT_WIFI_READY: 
+            debugSerial.println("WiFi interface ready");
+            break;
+        case SYSTEM_EVENT_SCAN_DONE:
+            debugSerial.println("Completed scan for access points");
+            break;
+        case SYSTEM_EVENT_STA_START:
+            debugSerial.println("WiFi client started");
+            break;
+        case SYSTEM_EVENT_STA_STOP:
+            debugSerial.println("WiFi client stopped");
+            //changeState(MYSTATE_OFFLINE);
+            break;
+        case SYSTEM_EVENT_STA_CONNECTED:
+            debugSerial.println("Connected to access point");
+            break;
+        case SYSTEM_EVENT_STA_DISCONNECTED:
+            debugSerial.println("Disconnected from WiFi access point");
+            WiFi.reconnect();
+            break;
+        case SYSTEM_EVENT_STA_AUTHMODE_CHANGE:
+            debugSerial.println("Authentication mode of access point has changed");
+            break;
+        case SYSTEM_EVENT_STA_GOT_IP:
+            debugSerial.print("Obtained IP address: ");
+            //Serial.println(WiFi.localIP());
+            //Serial.println("WiFi connected");
+            //Serial.print("IP address: ");
+            debugSerial.println(IPAddress(info.got_ip.ip_info.ip.addr));
+
+            //changeState(MYSTATE_ONLINE);
+
+            break;
+        case SYSTEM_EVENT_STA_LOST_IP:
+            debugSerial.println("Lost IP address and IP address is reset to 0");
+            //changeState(MYSTATE_OFFLINE);
+            break;
+        case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:
+            debugSerial.println("WiFi Protected Setup (WPS): succeeded in enrollee mode");
+            break;
+        case SYSTEM_EVENT_STA_WPS_ER_FAILED:
+            debugSerial.println("WiFi Protected Setup (WPS): failed in enrollee mode");
+            break;
+        case SYSTEM_EVENT_STA_WPS_ER_TIMEOUT:
+            debugSerial.println("WiFi Protected Setup (WPS): timeout in enrollee mode");
+            break;
+        case SYSTEM_EVENT_STA_WPS_ER_PIN:
+            debugSerial.println("WiFi Protected Setup (WPS): pin code in enrollee mode");
+            break;
+        case SYSTEM_EVENT_AP_START:
+            debugSerial.println("WiFi access point started");
+            break;
+        case SYSTEM_EVENT_AP_STOP:
+            debugSerial.println("WiFi access point  stopped");
+            break;
+        case SYSTEM_EVENT_AP_STACONNECTED:
+            debugSerial.println("Client connected");
+            break;
+        case SYSTEM_EVENT_AP_STADISCONNECTED:
+            debugSerial.println("Client disconnected");
+            break;
+        case SYSTEM_EVENT_AP_STAIPASSIGNED:
+            debugSerial.println("Assigned IP address to client");
+            break;
+        case SYSTEM_EVENT_AP_PROBEREQRECVED:
+            debugSerial.println("Received probe request");
+            break;
+        case SYSTEM_EVENT_GOT_IP6:
+            debugSerial.println("IPv6 is preferred");
+            break;
+        case SYSTEM_EVENT_ETH_START:
+            debugSerial.println("Ethernet started");
+            break;
+        case SYSTEM_EVENT_ETH_STOP:
+            debugSerial.println("Ethernet stopped");
+            break;
+        case SYSTEM_EVENT_ETH_CONNECTED:
+            debugSerial.println("Ethernet connected");
+            break;
+        case SYSTEM_EVENT_ETH_DISCONNECTED:
+            debugSerial.println("Ethernet disconnected");
+            break;
+        case SYSTEM_EVENT_ETH_GOT_IP:
+            debugSerial.println("Obtained IP address");
+            break;
+        default: break;
+    }
+}
+#endif
+#endif
+
 void setup_main() {
 
   #if (SERIAL_BAUD)
-  debugSerialPort.begin(SERIAL_BAUD);
+            #if defined(debugSerialPort)
+            debugSerialPort.begin(SERIAL_BAUD);
+            #endif
   #else 
 
-  #if not defined (__SAM3X8E__)
+  #if not defined (__SAM3X8E__) && defined (debugSerialPort)
   debugSerialPort.begin();
   #endif
   delay(1000);
@@ -2020,11 +2125,15 @@ void setup_main() {
             if(SPIFFS.begin())
             #endif
             {
+            #if defined(debugSerialPort) 
                 debugSerialPort.println("SPIFFS Initialize....ok");
+            #endif    
             }
             else
             {
+            #if defined(debugSerialPort)     
                 debugSerialPort.println("SPIFFS Initialization...failed");
+            #endif    
             }
     #endif
  #else
@@ -2039,7 +2148,9 @@ void setup_main() {
 
     if (!sysConf.isValidSysConf()) 
                 {
+                #if defined(debugSerialPort)     
                 debugSerialPort.println(F("No valid EEPROM data. Initializing."));    
+                #endif
                 sysConf.clear();
                 }                   
   //  scan_i2c_bus();
@@ -2092,6 +2203,11 @@ void setup_main() {
 //#ifdef _artnet
 //    artnetSetup();
 //#endif
+#if defined(WIFI_ENABLE)
+#if defined (ESP32)
+WiFi.onEvent(WiFiEvent);
+#endif
+#endif
 
 #if defined(WIFI_ENABLE) and not defined(WIFI_MANAGER_DISABLE)
 //    WiFiManager wifiManager;

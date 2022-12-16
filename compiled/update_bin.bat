@@ -1,0 +1,16 @@
+copy ..\.pio\build\due\firmware.bin due
+copy ..\.pio\build\controllino\firmware.hex controllino
+copy ..\.pio\build\m5stack\firmware.bin m5stack
+copy ..\.pio\build\mega2560slim-5100\firmware.hex mega2560slim-5100
+copy ..\.pio\build\mega2560slim-5100\firmware.bin mega2560slim-5100
+copy ..\.pio\build\mega2560slim2\firmware.hex mega2560slim2
+copy ..\.pio\build\mega2560slim2\firmware.bin mega2560slim2
+copy ..\.pio\build\due-5100\firmware.bin due-5100
+copy ..\.pio\build\mega2560-5100\firmware.hex mega2560-5100
+copy ..\.pio\build\due-5500\firmware.bin due-5500
+copy ..\.pio\build\nrf52840\firmware.hex nrf52840-5500
+copy ..\.pio\build\esp32-wifi\firmware.bin esp32-wifi
+copy ..\.pio\build\stm32-enc2860\firmware.bin stm32-enc2860
+copy ..\.pio\build\esp8266-wifi\firmware.bin esp8266-wifi
+copy ..\.pio\build\lighthub21\firmware.bin lighthub21
+copy ..\.pio\build\mega2560-5500\firmware.hex mega2560-5500

@@ -303,11 +303,13 @@
 //#ifdef M5STACK
 //#define debugSerial M5.Lcd
 //#endif
-
-#ifndef debugSerialPort
-#define debugSerialPort Serial
+#ifdef noSerial
+    #undef debugSerialPort
+#else
+    #ifndef debugSerialPort
+    #define debugSerialPort Serial
+    #endif
 #endif
-
 
 #ifndef Wiz5500
 #define W5100_ETHERNET_SHIELD

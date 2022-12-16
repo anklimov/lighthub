@@ -464,6 +464,8 @@ void Input::dht22Poll() {
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
     DHTesp dhtSensor;
     dhtSensor.setup(pin, DHTesp::DHT22);
+    //pinMode(pin, INPUT_PULLUP);
+	//digitalWrite(pin, LOW); // Switch bus to receive data
     TempAndHumidity dhtSensorData = dhtSensor.getTempAndHumidity();
     float temp = roundf(dhtSensorData.temperature * 10) / 10;
     float humidity = roundf(dhtSensorData.humidity);
@@ -479,8 +481,8 @@ debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") <<
 // New tyle unified activities
     aJsonObject *actT = aJson.getObjectItem(inputObj, "temp");
     aJsonObject *actH = aJson.getObjectItem(inputObj, "hum");
-    executeCommand(actT,-1,itemCmd(temp));
-    executeCommand(actH,-1,itemCmd(humidity));
+    if (!isnan(temp)) executeCommand(actT,-1,itemCmd(temp));
+    if (!isnan(humidity)) executeCommand(actH,-1,itemCmd(humidity));
 
 //Legacy action conf - TODO - remove in further releases
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");

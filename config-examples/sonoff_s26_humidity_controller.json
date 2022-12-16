@@ -1,0 +1,25 @@
+{
+  "syslog":["95.31.43.9"],
+  "items": {
+    "ledhum":[6,-13],
+    "reghum": [13, [
+      [50, 10, 0, 60, 250, 200], [{"item": "relayhum"}, {"item":"ledhum"}]
+    ], 30, 12],
+    
+    "relayhum": [16, [12, 1200], 255, 2]
+    },
+"in":{
+          "0":{"T":0,
+                "click":{ "item":"reghum","icmd":"TOGGLE"},
+                "dclick":{ "emit":"myhome/light-d2/light","ecmd":"TOGGLE"}
+              },
+          
+          "3":{"T":4,
+            "temp":{"emit":"plugtemp"},
+            "hum":{"item":"reghum/val","emit":"plughum"}
+              }
+          
+         },
+
+  "mqtt":["plug00","192.168.88.2"]
+}

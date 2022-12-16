@@ -155,7 +155,7 @@ while (i)
                                             case CMD_OFF:
                                             cmd.Percents255(0);
                                           }
-                                          if (cmdObj->valueint == CMD_ON && setObj->valueint<20)
+                                          if (isNotRetainingStatus() && (cmdObj->valueint == CMD_ON) && (setObj->valueint<20))
                                                                   {
                                                                     setObj->valueint=30;
                                                                     cmd.Percents255(30);
