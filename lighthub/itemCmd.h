@@ -58,20 +58,27 @@ const cmdstr commands_P[] PROGMEM =
 #define CMD_HSV  0x18
 
 #define CMD_MASK 0xff
-#define FLAG_MASK 0xff00
+#define FLAG_MASK 0xffff00
+//#define STATE_MASK 0xff0000
 
 #define CMD_VOID 0
 #define CMD_UNKNOWN  -1
 #define CMD_JSON -2
 
-#define SEND_IMMEDIATE 0x1
-#define SEND_COMMAND 0x100
-#define SEND_PARAMETERS 0x200
-#define SEND_RETRY 0x400
-#define SEND_DEFFERED 0x800
-#define SEND_DELAYED 0x1000
-#define ACTION_NEEDED 0x2000
-#define ACTION_IN_PROCESS 0x4000
+//FLAGS
+#define FLAG_SEND_IMMEDIATE 0x1
+#define FLAG_COMMAND 0x100
+#define FLAG_PARAMETERS 0x200
+#define FLAG_SEND_RETRY 0x400
+#define FLAG_SEND_DEFFERED 0x800
+#define FLAG_SEND_DELAYED 0x1000
+#define FLAG_ACTION_NEEDED 0x2000
+#define FLAG_ACTION_IN_PROCESS 0x4000
+
+#define FLAG_DISABLED 0x10000
+#define FLAG_DISABLED_ALL 0x20000
+#define FLAG_HALTED 0x40000
+#define FLAG__XON 0x80000
 
 
 
@@ -161,9 +168,9 @@ public:
 
   itemCmd assignFrom(itemCmd from, short chanType=-1);
 
-  bool loadItem(Item * item, uint16_t optionsFlag=SEND_PARAMETERS);
-  bool loadItemDef(Item * item, uint16_t optionsFlag=SEND_PARAMETERS );
-  bool saveItem(Item * item, uint16_t optionsFlag=SEND_PARAMETERS);
+  bool loadItem(Item * item, uint16_t optionsFlag=FLAG_PARAMETERS);
+  bool loadItemDef(Item * item, uint16_t optionsFlag=FLAG_PARAMETERS );
+  bool saveItem(Item * item, uint16_t optionsFlag=FLAG_PARAMETERS);
 
   itemCmd Int(int32_t i);
   itemCmd Int(uint32_t i);
@@ -209,7 +216,7 @@ public:
   uint8_t    getCmd();
   uint8_t    getArgType();
   uint8_t    getCmdParam();
-  char   * toString(char * Buffer, int bufLen, int sendFlags = SEND_COMMAND | SEND_PARAMETERS, bool scale100 = false);
+  char   * toString(char * Buffer, int bufLen, int sendFlags = FLAG_COMMAND | FLAG_PARAMETERS, bool scale100 = false);
 
   bool isCommand();
   bool isChannelCommand();

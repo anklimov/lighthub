@@ -41,8 +41,8 @@ debugSerial<<F("Relay-Out #")<<pin<<F(" init")<<endl;
 pinMode(pin, OUTPUT);
 digitalWrite(pin,INACTIVE);
 if (item) item->setExt(0);
-//if (item->getCmd()) item->setFlag(SEND_COMMAND);
-//if (item->itemVal)  item->setFlag(SEND_PARAMETERS);
+//if (item->getCmd()) item->setFlag(FLAG_COMMAND);
+//if (item->itemVal)  item->setFlag(FLAG_PARAMETERS);
 driverStatus = CST_INITIALIZED;
 if (item->isActive()>0)  ///????
     {

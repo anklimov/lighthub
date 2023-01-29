@@ -59,6 +59,7 @@ e-mail    anklimov@gmail.com
 #define CH_ELEVATOR 19
 #define CH_COUNTER 20
 #define CH_HUMIDIFIER 21
+#define CH_MERCURY 22
 
 //#define CHANNEL_TYPES 13
 
@@ -131,9 +132,9 @@ class Item
   chPersistent * getPersistent();
   chPersistent * setPersistent(chPersistent * par);
   void setCmd(uint8_t cmdValue);
-  short getFlag   (short flag=FLAG_MASK);
-  void setFlag   (short flag);
-  void clearFlag (short flag);
+  uint32_t getFlag   (uint32_t flag=FLAG_MASK);
+  void setFlag   (uint32_t flag);
+  void clearFlag (uint32_t flag);
   void setVal(long int par);
   void setFloatVal(float par);
   void setSubtype(uint8_t par);

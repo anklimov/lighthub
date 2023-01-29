@@ -209,9 +209,9 @@ case S_HSV:
           {
             if (chActive>0 && !st.getPercents()) item->setCmd(CMD_OFF);
             if (chActive==0 && st.getPercents()) item->setCmd(CMD_ON);
-            item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
+            item->SendStatus(SEND_COMMAND | FLAG_PARAMETERS | FLAG_SEND_DEFFERED);
           }
-          else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+          else    item->SendStatus(FLAG_PARAMETERS | FLAG_SEND_DEFFERED);
           }
           return 1;
           //break;
@@ -234,7 +234,7 @@ case S_CMD:
 
             if (st.getInt() )  //Stored smthng
             {
-              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS);
+              item->SendStatus(SEND_COMMAND | FLAG_PARAMETERS);
               debugSerial<<F("Restored: ")<<st.param.h<<F(",")<<st.param.s<<F(",")<<st.param.v<<endl;
             }
             else
@@ -245,7 +245,7 @@ case S_CMD:
               // Store
               //item->setVal(st.getInt());
               st.saveItem(item);
-              item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
+              item->SendStatus(SEND_COMMAND | FLAG_PARAMETERS );
             }
 
             PixelCtrl(st,from,to);

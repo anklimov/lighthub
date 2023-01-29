@@ -159,10 +159,10 @@ while (i)
                                                                   {
                                                                     setObj->valueint=30;
                                                                     cmd.Percents255(30);
-                                                                    //if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_PARAMETERS,i->name);
+                                                                    //if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,FLAG_PARAMETERS,i->name);
                                                                   }
 
-                                          if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_COMMAND|SEND_PARAMETERS,i->name);
+                                          if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,FLAG_COMMAND|FLAG_PARAMETERS,i->name);
                                           }
 
               else if (setObj && cmdObj && suffixCode == S_FAN && cmd.isValue())   
@@ -175,7 +175,7 @@ while (i)
                                                      debugSerial<<"Turning ON"<<endl;
                                                      cmdObj->valueint = CMD_ON; 
                                                      cmd.Cmd(CMD_ON);
-                                                     //if (isNotRetainingStatus()) item->SendStatusImmediate(itemCmd().Cmd(CMD_ON),SEND_COMMAND,i->name);
+                                                     //if (isNotRetainingStatus()) item->SendStatusImmediate(itemCmd().Cmd(CMD_ON),FLAG_COMMAND,i->name);
                                                         } 
                                                 
                                                 setObj->valueint = cmd.getInt();
@@ -186,20 +186,20 @@ while (i)
                                                     { debugSerial<<"Turning OFF"<<endl; 
                                                       cmdObj->valueint = CMD_OFF; 
                                                       cmd.Cmd(CMD_OFF);
-                                                      //if (isNotRetainingStatus()) item->SendStatusImmediate(itemCmd().Cmd(CMD_OFF),SEND_COMMAND,i->name);
+                                                      //if (isNotRetainingStatus()) item->SendStatusImmediate(itemCmd().Cmd(CMD_OFF),FLAG_COMMAND,i->name);
                                                         } 
               
                                                 setObj->valueint = 0;
                                                 }
 
-                                           if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_PARAMETERS|SEND_COMMAND,i->name);
+                                           if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,FLAG_PARAMETERS|FLAG_COMMAND,i->name);
                                           }
 
               else if (setObj && cmd.isValue())   
                                           {
                                           setObj->valueint = cmd.getPercents255();
                                           //publishTopic(i->name,setObj->valueint,"/set");
-                                          if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,SEND_PARAMETERS,i->name);
+                                          if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,FLAG_PARAMETERS,i->name);
                                           }
               if (cascadeObj) executeCommand(cascadeObj,-1,cmd);                           
               }

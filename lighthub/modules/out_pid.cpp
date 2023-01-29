@@ -122,8 +122,8 @@ if (getConfig())
     {
         infoSerial<<F("PID config loaded ")<< item->itemArr->name<<endl;
         //item->On(); // Turn ON pid by default
-  //      if (item->getCmd()) item->setFlag(SEND_COMMAND);
-  //      if (item->itemVal)  item->setFlag(SEND_PARAMETERS);
+  //      if (item->getCmd()) item->setFlag(FLAG_COMMAND);
+  //      if (item->itemVal)  item->setFlag(FLAG_PARAMETERS);
         store->prevOut = -2.0;
         store->driverStatus = CST_INITIALIZED;
         return 1;
@@ -321,7 +321,7 @@ if (itemCascadeObj) executeCommand(itemCascadeObj,-1,cmd);
 }
 
 //cmd.saveItem(item);
-//item->SendStatus(SEND_PARAMETERS);
+//item->SendStatus(FLAG_PARAMETERS);
 return 1;
 //break;
 
@@ -348,14 +348,14 @@ case S_CMD:
 
           case CMD_ENABLE:
           item->setCmd(CMD_ENABLE);
-          item->SendStatus(SEND_COMMAND);
+          item->SendStatus(FLAG_COMMAND);
           executeCommand(oCmd,-1,value);   
           store->prevOut=-2.0;   
           return 1;
 
           case CMD_DISABLE:
           item->setCmd(CMD_DISABLE);
-          item->SendStatus(SEND_COMMAND);
+          item->SendStatus(FLAG_COMMAND);
           executeCommand(oCmd,-1,value);
           return 1;
 /*

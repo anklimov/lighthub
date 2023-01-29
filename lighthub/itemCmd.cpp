@@ -1047,18 +1047,18 @@ bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
   if (item && item->isValid())
   {
   short subtype =item->getSubtype();
-  if (optionsFlag & SEND_COMMAND)    cmd.cmdCode    =  item->getCmd();
+  if (optionsFlag & FLAG_COMMAND)    cmd.cmdCode    =  item->getCmd();
 
   if (subtype)
         {
           cmd.itemArgType= subtype;
-          if (optionsFlag & SEND_PARAMETERS) param.asInt32  =  item->itemVal->valueint;
+          if (optionsFlag & FLAG_PARAMETERS) param.asInt32  =  item->itemVal->valueint;
           //debugSerial<<F("Loaded :");
           //debugOut();
           return true;
         }
  
-        if (optionsFlag & SEND_PARAMETERS) 
+        if (optionsFlag & FLAG_PARAMETERS) 
           switch (item->itemVal->type)
           {
             case aJson_Int:
@@ -1091,7 +1091,7 @@ bool itemCmd::loadItemDef(Item * item, uint16_t optionsFlag)
                                     setDefault();
                                     saveItem(item);
                                     debugOut();
-                                    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                                    item->SendStatus(FLAG_PARAMETERS | FLAG_SEND_DEFFERED);
                                     return false;
                                     }
 return true;                                    
@@ -1101,8 +1101,8 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
 {
   if (item && item->isValid())
   {
-  if (optionsFlag & SEND_COMMAND)    item->setCmd(cmd.cmdCode);
-  if (optionsFlag & SEND_PARAMETERS) 
+  if (optionsFlag & FLAG_COMMAND)    item->setCmd(cmd.cmdCode);
+  if (optionsFlag & FLAG_PARAMETERS) 
                                     switch (cmd.itemArgType)
                                     {
                                      case ST_FLOAT:
@@ -1312,17 +1312,17 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, bool scale100
        if (!Buffer || !bufLen) return NULL;
        *Buffer=0;
        char * argPtr=Buffer;
-       if (isCommand() && (sendFlags & SEND_COMMAND))
+       if (isCommand() && (sendFlags & FLAG_COMMAND))
                         {
                           int len;
                           strncpy_P(Buffer, commands_P[cmd.cmdCode], bufLen);
-                          if (isValue() && (sendFlags & SEND_PARAMETERS)) strncat(Buffer, " ", bufLen);
+                          if (isValue() && (sendFlags & FLAG_PARAMETERS)) strncat(Buffer, " ", bufLen);
                           len=strlen(Buffer);
                           argPtr+=len;
                           bufLen-=len;
                           bufLen--;
                         }
-       if (isValue() && (sendFlags & SEND_PARAMETERS))
+       if (isValue() && (sendFlags & FLAG_PARAMETERS))
        {
        //strncat(Buffer, " ", bufLen);
        //bufLen--;

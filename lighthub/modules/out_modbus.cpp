@@ -15,7 +15,7 @@ extern aJsonObject *modbusObj;
 extern ModbusMaster node;
 extern short modbusBusy;
 extern void modbusIdle(void) ;
-static uint32_t mbusSlenceTimer = 0;
+uint32_t mbusSlenceTimer = 0;
 
 struct reg_t
 {
@@ -97,6 +97,7 @@ serialParamType  str2SerialParam(char * str)
   return static_cast<serialParamType> (SERIAL_8N1);
 }
 */
+uint16_t swap (uint16_t x) {return  ((x & 0xff) << 8) | ((x & 0xff00) >> 8);}
 
 int  str2regSize(char * str)
 {
@@ -279,12 +280,12 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                       break;
                       case PAR_I32:
                       //isSigned=true;
-                      param = data | (node.getResponseBuffer(posInBuffer+1)<<16);
+                      param = swap(data ) | swap(node.getResponseBuffer(posInBuffer+1)<<16);
                       mappedParam.Int((int32_t)param);
                       break;
 
                       case PAR_U32:
-                      param = data | (node.getResponseBuffer(posInBuffer+1)<<16);
+                      param = swap(data )| swap (node.getResponseBuffer(posInBuffer+1)<<16 );
                       mappedParam.Int((uint32_t)param);
                       break;
 
@@ -345,10 +346,10 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                        switch (idObj->valueint)
                         {
                           case S_CMD: 
-                          mappedParam.saveItem(item,SEND_COMMAND);
+                          mappedParam.saveItem(item,FLAG_COMMAND);
                             break;
                           case S_SET:
-                          mappedParam.saveItem(item,SEND_PARAMETERS);
+                          mappedParam.saveItem(item,FLAG_PARAMETERS);
                         }
 
                 
@@ -494,8 +495,8 @@ int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
                       break;
                       case PAR_I32:
                       case PAR_U32:
-                      res = node.writeSingleRegister(regObj->valueint,value & 0xFFFF);
-                      res += node.writeSingleRegister(regObj->valueint+1,value >> 16) ;
+                      res = node.writeSingleRegister(regObj->valueint,swap(value & 0xFFFF));
+                      res += node.writeSingleRegister(regObj->valueint+1,swap(value >> 16)) ;
                       break;
 
                       case PAR_U8L:
@@ -566,7 +567,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
 if (isTimeOver(store->timestamp,millis(),store->pollingInterval) && ( !mbusSlenceTimer || isTimeOver(mbusSlenceTimer,millis(),100)))
 {
 
-// Clean_up SEND_ERROR flag 
+// Clean_up FLAG_SEND_ERROR flag 
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            {
             aJsonObject *execObj = itemParametersObj->child; 

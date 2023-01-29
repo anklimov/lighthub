@@ -250,7 +250,7 @@ void parseBytes(const char *str, char separator, byte *bytes, int maxBytes, int 
 
 void printFloatValueToStr(char *valstr, float value) {
     #if defined(ESP8266) || defined(ARDUINO_ARCH_ESP32)
-    sprintf(valstr, "%2.1f", value);
+    sprintf(valstr, "%2.2f", value);
     #endif
     #if defined(__AVR__)
     sprintf(valstr, "%d", (int)value);
@@ -261,7 +261,7 @@ void printFloatValueToStr(char *valstr, float value) {
     valstr[val_len+2]='\0';
     #endif
     #if defined(__SAM3X8E__)
-    sprintf(valstr, "%2.1f",value);
+    sprintf(valstr, "%2.2f",value);
     #endif
 }
 
@@ -797,6 +797,7 @@ bool getPinVal(uint8_t pin)
 {
   return (0!=(*portOutputRegister( digitalPinToPort(pin) ) & digitalPinToBitMask(pin)));
 }
+
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

@@ -53,6 +53,10 @@ e-mail    anklimov@gmail.com
 #include "modules/out_relay.h"
 #include "modules/out_counter.h"
 
+#ifdef MERCURY_ENABLE
+#include "modules/out_mercury.h"
+#endif
+
 #ifdef ELEVATOR_ENABLE
 #include "modules/out_elevator.h"
 #endif
@@ -218,6 +222,12 @@ void Item::Parse() {
           break;
 #endif
 
+#ifdef MERCURY_ENABLE
+          case CH_MERCURY:
+          driver = new out_Mercury (this);
+          break;
+#endif
+
 #ifndef COUNTER_DISABLE
           case CH_COUNTER:
           driver = new out_counter (this);
@@ -238,8 +248,8 @@ if (driver)
         if (driver->Status()) driver->Stop();
         if (driver->Setup())
                 {
-                         if (getCmd()) setFlag(SEND_COMMAND);
-                         if (itemVal)  setFlag(SEND_PARAMETERS);
+                         if (getCmd()) setFlag(FLAG_COMMAND);
+                         if (itemVal)  setFlag(FLAG_PARAMETERS);
                 }
         return true;
        }
@@ -306,12 +316,12 @@ void Item::setCmd(uint8_t cmdValue) {
     if (itemCmd && (itemCmd->type == aJson_Int || itemCmd->type == aJson_NULL))
     {   
         itemCmd->type = aJson_Int;
-        itemCmd->valueint = cmdValue & CMD_MASK | itemCmd->valueint & FLAG_MASK;   // Preserve special bits
+        itemCmd->valueint = cmdValue & CMD_MASK | itemCmd->valueint & (FLAG_MASK);   // Preserve special bits
         debugSerial<<F("SetCmd:")<<cmdValue<<endl;
       }
 }
 
-short Item::getFlag   (short flag)
+uint32_t Item::getFlag   (uint32_t flag)
 {
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
   if (itemCmd && (itemCmd->type == aJson_Int))
@@ -321,7 +331,7 @@ short Item::getFlag   (short flag)
 return 0;
 }
 
-void Item::setFlag   (short flag)
+void Item::setFlag   (uint32_t flag)
 {
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
   if (itemCmd && (itemCmd->type == aJson_Int || itemCmd->type == aJson_NULL))
@@ -333,15 +343,16 @@ void Item::setFlag   (short flag)
 
 }
 
-void Item::clearFlag (short flag)
+void Item::clearFlag (uint32_t flag)
 {
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
   if (itemCmd && (itemCmd->type == aJson_Int || itemCmd->type == aJson_NULL))
   {
-      itemCmd->valueint &= CMD_MASK | ~(flag & FLAG_MASK);    // Preserve CMD bits
+      itemCmd->valueint &= CMD_MASK  | ~(flag & FLAG_MASK);    // Preserve CMD bits
     //  debugSerial<<F("ClrFlag:")<<flag<<endl;
     }
 }
+
 
 
 int Item::getArg(short n) //Return arg int or first array element if Arg is array
@@ -820,8 +831,8 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                                      scale100=true;  //openHab topic format
                                      chActive=(isActive()>0);
                                         debugSerial<<chActive<<" "<<cmd.getInt()<<endl;
-                                     if (chActive>0 && !cmd.getInt()) {cmd.Cmd(CMD_OFF);status2Send |= SEND_COMMAND | SEND_IMMEDIATE;}
-                                     if (chActive==0 && cmd.getInt()) {cmd.Cmd(CMD_ON);status2Send |= SEND_COMMAND | SEND_IMMEDIATE;}
+                                     if (chActive>0 && !cmd.getInt()) {cmd.Cmd(CMD_OFF);status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE;}
+                                     if (chActive==0 && cmd.getInt()) {cmd.Cmd(CMD_ON);status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE;}
             
                                      // continue processing as SET
                                      case S_SET:
@@ -840,7 +851,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                                      if ((scale100 || SCALE_VOLUME_100) && (cmd.getArgType()==ST_HSV255 || cmd.getArgType()==ST_PERCENTS255 || cmd.getArgType()==ST_INT32 || cmd.getArgType()==ST_UINT32)) 
                                             stored.scale100();
                                      cmd=stored;
-                                     status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
+                                     status2Send |= FLAG_PARAMETERS | FLAG_SEND_DEFFERED;  
 
                                      break;
                                      case S_VAL:
@@ -852,7 +863,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                                         { 
                                           cmd=stored;
                                           cmd.setSuffix(S_SET);  
-                                          status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
+                                          status2Send |= FLAG_PARAMETERS | FLAG_SEND_DEFFERED;  
                                         } else invalidArgument=true;
                                      break;
 
@@ -862,14 +873,14 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                                         {
                                           cmd=stored;  
                                           cmd.setSuffix(S_SET);   
-                                          status2Send |= SEND_PARAMETERS | SEND_DEFFERED;    
+                                          status2Send |= FLAG_PARAMETERS | FLAG_SEND_DEFFERED;    
                                         } else invalidArgument=true;
                                     break;
                                     case S_TEMP:
                                     stored.loadItemDef(this);
                                     stored.setColorTemp(cmd.getColorTemp());
                                     cmd=stored;
-                                    status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
+                                    status2Send |= FLAG_PARAMETERS | FLAG_SEND_DEFFERED;  
                                    }
 
                         }   
@@ -884,7 +895,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                              // cmd.loadItemDef(this);  ///
                               cmd.Cmd(CMD_ON);
                             }   
-                  status2Send |=SEND_COMMAND | SEND_IMMEDIATE;    
+                  status2Send |=FLAG_COMMAND | FLAG_SEND_IMMEDIATE;    
                 break;
 
 
@@ -911,7 +922,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                              //if (limit && suffixCode==S_NOTFOUND) limit = 100;    
                              if (cmd.incrementPercents(step,limit))
                              {  
-                               status2Send |= SEND_PARAMETERS | SEND_DEFFERED;    
+                               status2Send |= FLAG_PARAMETERS | FLAG_SEND_DEFFERED;    
                              } else {cmd=fallbackCmd;invalidArgument=true;}
                           }  
                         break;
@@ -919,14 +930,14 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                         case S_HUE:
                              if (cmd.incrementH(step))
                              {
-                               status2Send |= SEND_PARAMETERS | SEND_DEFFERED;     
+                               status2Send |= FLAG_PARAMETERS | FLAG_SEND_DEFFERED;     
                                cmd.setSuffix(S_SET);      
                              } else {cmd=fallbackCmd;invalidArgument=true;}
                              break;
                         case S_SAT:
                              if (cmd.incrementS(step))
                              {
-                               status2Send |= SEND_PARAMETERS | SEND_DEFFERED;  
+                               status2Send |= FLAG_PARAMETERS | FLAG_SEND_DEFFERED;  
                                cmd.setSuffix(S_SET);  
                              } else {cmd=fallbackCmd;invalidArgument=true;}
                       } //switch suffix
@@ -957,19 +968,19 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               debugSerial << F("Restored from:") << t << endl;
                               cmd.loadItemDef(this);
                               cmd.Cmd(CMD_ON);    //turning on
-                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                              status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
                               break;
                           default:
                               return 3;
                       }
-                  status2Send |= SEND_COMMAND;     
+                  status2Send |= FLAG_COMMAND;     
                   break;
               case CMD_XOFF:    // individual for group members
                       switch (t = getCmd()) {
                           case CMD_XON: //previous command was CMD_XON ?
                               debugSerial << F("Turned off from:") << t << endl;
                               cmd.Cmd(CMD_OFF);    //turning Off
-                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                              status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
                               break;
                           default:
                               debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
@@ -984,7 +995,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                     cmd.loadItemDef(this);
                     cmd.Cmd(CMD_ON);
                     command2Set=CMD_XON;
-                    status2Send |= SEND_COMMAND | SEND_IMMEDIATE;  
+                    status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE;  
                   }
               else
               { 
@@ -998,7 +1009,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                   {
                     cmd.Cmd(CMD_OFF);  
                     command2Set=CMD_HALT;
-                    status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                    status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
                   }
             else    
                   {
@@ -1008,9 +1019,9 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
             break;
       }
 
-     status2Send |= SEND_IMMEDIATE;  
-     if (cmd.isChannelCommand()) status2Send |= SEND_COMMAND;       
-     if (cmd.isValue() || cmd.loadItem(this,SEND_PARAMETERS)) status2Send |= SEND_PARAMETERS; ;
+     status2Send |= FLAG_SEND_IMMEDIATE;  
+     if (cmd.isChannelCommand()) status2Send |= FLAG_COMMAND;       
+     if (cmd.isValue() || cmd.loadItem(this,FLAG_PARAMETERS)) status2Send |= FLAG_PARAMETERS; ;
     } // end GROUP
     
     else
@@ -1053,12 +1064,12 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               toExecute=true;
                               if (itemType == CH_THERMO) cmd.Cmd(CMD_AUTO); ////
                                   else cmd.Cmd(CMD_ON);    //turning on
-                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE;     
+                              status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE;     
                               break;
                           default:
                               return 3;
                       }
-                  status2Send |= SEND_COMMAND;     
+                  status2Send |= FLAG_COMMAND;     
                   break;
               case CMD_XOFF:    // individual for group members
                       switch (t = getCmd()) {
@@ -1066,7 +1077,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               debugSerial << F("Turned off from:") << t << endl;
                               toExecute=true;
                               cmd.Cmd(CMD_OFF);    //turning Off
-                              status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                              status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
                               break;
                           default:
                               debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
@@ -1080,7 +1091,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                     cmd.loadItemDef(this);
                     cmd.Cmd(CMD_ON);
                     command2Set=CMD_XON;
-                    status2Send |= SEND_COMMAND | SEND_IMMEDIATE;  
+                    status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE;  
                     toExecute=true;
                   }
               else
@@ -1094,7 +1105,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                   {
                     cmd.Cmd(CMD_OFF);  
                     command2Set=CMD_HALT;
-                    status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                    status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
                     toExecute=true;
                   }
             else    
@@ -1112,7 +1123,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                 }
 
             if (getCmd() == CMD_HALT) return 3; //Halted, ignore OFF
-            status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+            status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
             toExecute=true;
             break;
 
@@ -1126,7 +1137,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                 {
                         debugSerial<<F("ON:Already Active\n");
                         setCmd(CMD_ON);
-                        SendStatus(SEND_COMMAND | SEND_DEFFERED);
+                        SendStatus(FLAG_COMMAND | FLAG_SEND_DEFFERED);
                         return 3;
                 }
 
@@ -1143,7 +1154,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                 }
 
             if (!cmd.isValue()) cmd.loadItemDef(this); // if no_suffix - both, command ON and value provided
-            status2Send |= SEND_COMMAND | SEND_PARAMETERS | SEND_IMMEDIATE; 
+            status2Send |= FLAG_COMMAND | FLAG_PARAMETERS | FLAG_SEND_IMMEDIATE; 
             toExecute=true; 
             break;
           case CMD_VOID:
@@ -1153,8 +1164,8 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
             break;   
 
           default:
-            if (cmd.isCommand()) status2Send |= SEND_COMMAND;
-            if (cmd.isValue())   status2Send |= SEND_PARAMETERS; 
+            if (cmd.isCommand()) status2Send |= FLAG_COMMAND;
+            if (cmd.isValue())   status2Send |= FLAG_PARAMETERS; 
             toExecute=true;
           } //Switch commands
 } // NO GROUP
@@ -1166,7 +1177,7 @@ if (status2Send) cmd.saveItem(this,status2Send);
 if (driver) //New style modular code
           {
           res = driver->Ctrl(cmd, subItem, toExecute);   
-          if (driver->getChanType() == CH_THERMO) status2Send |= SEND_IMMEDIATE;
+          if (driver->getChanType() == CH_THERMO) status2Send |= FLAG_SEND_IMMEDIATE;
           //if (res==-1) status2Send=0;  ///////not working
           }     
 else 
@@ -1196,7 +1207,7 @@ switch (itemType) {
                       else
                           digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_AUTO) ? HIGH : LOW));
                       debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
-                      status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                      status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
                       res=1;
                       }
                 }
@@ -1220,12 +1231,12 @@ switch (itemType) {
                       }
                       break;
                       case S_SET:
-                      status2Send |= SEND_PARAMETERS | SEND_IMMEDIATE; 
+                      status2Send |= FLAG_PARAMETERS | FLAG_SEND_IMMEDIATE; 
                       res=1;
                       //st.saveItem(this);
                       break;
                       case S_CMD:
-                      status2Send |= SEND_COMMAND | SEND_IMMEDIATE; 
+                      status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
                       res=1;
                      }
                    break;
@@ -1239,7 +1250,7 @@ switch (itemType) {
                 if (!chActive && cmd.getCmd()== CMD_ON && (vol=cmd.getPercents())<MIN_VOLUME && vol>=0) 
                         {
                         cmd.setPercents(INIT_VOLUME);
-                        status2Send |= SEND_PARAMETERS | SEND_IMMEDIATE; 
+                        status2Send |= FLAG_PARAMETERS | FLAG_SEND_IMMEDIATE; 
                         };
 
                   res=modbusDimmerSet(cmd);
@@ -1258,7 +1269,7 @@ switch (itemType) {
 } //else (nodriver)
 
  //update command for HALT & XON and send MQTT status
- if (command2Set) setCmd(command2Set | SEND_COMMAND);
+ if (command2Set) setCmd(command2Set | FLAG_COMMAND);
  if (operation) SendStatus(status2Send);
 
 debugSerial<<F("Ctrl Res:")<<res<<F(" time:")<<millis()-time<<endl; 
@@ -1362,13 +1373,13 @@ if (timestampObj)
                 //if (!(remain % 1000))
                 if (cause == POLLING_1S)
                 {     
-                    SendStatusImmediate(st,SEND_DELAYED);
+                    SendStatusImmediate(st,FLAG_SEND_DELAYED);
                     debugSerial<< remain/1000 << F(" sec remaining") << endl;
                 }
 
                 if (remain <0 && abs(remain)< 0xFFFFFFFFUL/2)
                 {
-                SendStatusImmediate(st,SEND_DELAYED);    
+                SendStatusImmediate(st,FLAG_SEND_DELAYED);    
                 Ctrl(itemCmd(ST_VOID,cmd));
                 timestampObj->subtype=0;
                 }
@@ -1406,28 +1417,28 @@ switch (cause)
 }
 
 void Item::sendDelayedStatus()
-{ long int flags = getFlag(SEND_COMMAND | SEND_PARAMETERS);
+{ long int flags = getFlag(FLAG_COMMAND | FLAG_PARAMETERS);
 
       if (flags && lanStatus==OPERATION)
       {
-      SendStatus(flags);//(SEND_COMMAND | SEND_PARAMETERS);
-      clearFlag(SEND_COMMAND | SEND_PARAMETERS);
+      SendStatus(flags);//(FLAG_COMMAND | FLAG_PARAMETERS);
+      clearFlag(FLAG_COMMAND | FLAG_PARAMETERS);
       }
 }
 
 
 int Item::SendStatus(int sendFlags) {
-    if (sendFlags & SEND_IMMEDIATE) sendFlags &= ~ (SEND_IMMEDIATE | SEND_DEFFERED);
-    if ((sendFlags & SEND_DEFFERED) ||  freeRam()<150 || (!isNotRetainingStatus() )) {
-        setFlag(sendFlags & (SEND_COMMAND | SEND_PARAMETERS));
+    if (sendFlags & FLAG_SEND_IMMEDIATE) sendFlags &= ~ (FLAG_SEND_IMMEDIATE | FLAG_SEND_DEFFERED);
+    if ((sendFlags & FLAG_SEND_DEFFERED) ||  freeRam()<150 || (!isNotRetainingStatus() )) {
+        setFlag(sendFlags & (FLAG_COMMAND | FLAG_PARAMETERS));
         debugSerial<<F("Status deffered\n");
         return -1;
     }
     else 
     {
         itemCmd st(ST_VOID,CMD_VOID);  
-        st.loadItem(this, SEND_COMMAND | SEND_PARAMETERS);
-        sendFlags |= getFlag(SEND_COMMAND | SEND_PARAMETERS); //if some delayed status is pending
+        st.loadItem(this, FLAG_COMMAND | FLAG_PARAMETERS);
+        sendFlags |= getFlag(FLAG_COMMAND | FLAG_PARAMETERS); //if some delayed status is pending
         //debugSerial<<F("ssi:")<<sendFlags<<endl;
         return SendStatusImmediate(st,sendFlags);
     }
@@ -1440,7 +1451,7 @@ int Item::SendStatus(int sendFlags) {
       char cmdstr[9] = "";
     //debugSerial<<"SSI "<<subItem<<endl;  
     st.debugOut();
-    if (sendFlags & SEND_COMMAND)
+    if (sendFlags & FLAG_COMMAND)
     {
     // Preparing legacy Command payload  //////////////
     switch (st.getCmd()) {
@@ -1461,12 +1472,12 @@ int Item::SendStatus(int sendFlags) {
             break;
         case CMD_VOID:
         case CMD_RGB:
-        sendFlags &= ~SEND_COMMAND; // Not send command for parametrized req
+        sendFlags &= ~FLAG_COMMAND; // Not send command for parametrized req
             break;
 
         default:
             debugSerial<<F("Unknown cmd \n");
-            sendFlags &= ~SEND_COMMAND;
+            sendFlags &= ~FLAG_COMMAND;
     }
    }
 
@@ -1482,15 +1493,15 @@ int Item::SendStatus(int sendFlags) {
                         strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
                           
 
-                        if (sendFlags & SEND_PARAMETERS && st.getCmd() != CMD_OFF && st.getCmd() != CMD_HALT &&
+                        if (sendFlags & FLAG_PARAMETERS && st.getCmd() != CMD_OFF && st.getCmd() != CMD_HALT &&
                           // send only for OH bus supported types 
                           (st.getArgType() == ST_PERCENTS255 || st.getArgType() == ST_HSV255 || st.getArgType() == ST_FLOAT_CELSIUS))
                         {
-                            st.toString(valstr, sizeof(valstr), SEND_PARAMETERS,true); 
+                            st.toString(valstr, sizeof(valstr), FLAG_PARAMETERS,true); 
                             mqttClient.publish(addrstr, valstr, true);
                             debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
                         }
-                      else if (sendFlags & SEND_COMMAND)
+                      else if (sendFlags & FLAG_COMMAND)
                         {
                             mqttClient.publish(addrstr, cmdstr, true);
                             debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
@@ -1509,7 +1520,7 @@ int Item::SendStatus(int sendFlags) {
             // myhome/s_out/item/cmd
             // myhome/s_out/item/set
 
-          if ((st.isValue() && (sendFlags & SEND_PARAMETERS) || (sendFlags & SEND_DELAYED)))
+          if ((st.isValue() && (sendFlags & FLAG_PARAMETERS) || (sendFlags & FLAG_SEND_DELAYED)))
              {
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
@@ -1521,7 +1532,7 @@ int Item::SendStatus(int sendFlags) {
 
               strncat(addrstr, "/", sizeof(addrstr)-1);
               
-              if (sendFlags & SEND_DELAYED)
+              if (sendFlags & FLAG_SEND_DELAYED)
                      strncat_P(addrstr, DEL_P, sizeof(addrstr)-1);
               else   strncat_P(addrstr, SET_P, sizeof(addrstr)-1); 
 
@@ -1531,10 +1542,10 @@ int Item::SendStatus(int sendFlags) {
                   case ST_RGBW:
                   //valstr[0]='#';
                   st.Cmd(CMD_RGB);
-                  st.toString(valstr, sizeof(valstr), SEND_PARAMETERS|SEND_COMMAND);
+                  st.toString(valstr, sizeof(valstr), FLAG_PARAMETERS|FLAG_COMMAND);
                   break;
             default:         
-           st.toString(valstr, sizeof(valstr), (sendFlags & SEND_DELAYED)?SEND_COMMAND|SEND_PARAMETERS:SEND_PARAMETERS,(SCALE_VOLUME_100));
+           st.toString(valstr, sizeof(valstr), (sendFlags & FLAG_SEND_DELAYED)?FLAG_COMMAND|FLAG_PARAMETERS:FLAG_PARAMETERS,(SCALE_VOLUME_100));
            }
               
 
@@ -1544,7 +1555,7 @@ int Item::SendStatus(int sendFlags) {
               if (mqttClient.connected()  && !ethernetIdleCount)
                  {
                   mqttClient.publish(addrstr, valstr,true);
-                  clearFlag(SEND_PARAMETERS);
+                  clearFlag(FLAG_PARAMETERS);
                  }
               else
                {
@@ -1554,7 +1565,7 @@ int Item::SendStatus(int sendFlags) {
               }
 
 
-              if (sendFlags & SEND_COMMAND)
+              if (sendFlags & FLAG_COMMAND)
               {
               // Some additional preparing for extended set of commands:
                 switch (st.getCmd()) {
@@ -1598,7 +1609,7 @@ int Item::SendStatus(int sendFlags) {
               if (mqttClient.connected()  && !ethernetIdleCount)
                  {
                   mqttClient.publish(addrstr, cmdstr,true);
-                  clearFlag(SEND_COMMAND);
+                  clearFlag(FLAG_COMMAND);
                  }
               else
                {
@@ -1617,10 +1628,10 @@ return itemType;
 }
 
 
-// Setup SEND_RETRY flag to repeat unsucsessfull modbus tranzaction after release line
+// Setup FLAG_SEND_RETRY flag to repeat unsucsessfull modbus tranzaction after release line
 void Item::mb_fail(int result) {
     debugSerial<<F("Modbus op failed:")<<_HEX(result)<<endl;
-    setFlag(SEND_RETRY);
+    setFlag(FLAG_SEND_RETRY);
     isPendedModbusWrites=true;
 }
 
@@ -1639,11 +1650,11 @@ void Item::mb_fail(int result) {
 int Item::checkModbusRetry() {
   int result = -1;  
   if (modbusBusy) return M_BUSY;
-    if (getFlag(SEND_RETRY)) {   // if last sending attempt of command was failed
+    if (getFlag(FLAG_SEND_RETRY)) {   // if last sending attempt of command was failed
       itemCmd val(ST_VOID,CMD_VOID);
-      val.loadItem(this, SEND_COMMAND | SEND_PARAMETERS);
+      val.loadItem(this, FLAG_COMMAND | FLAG_PARAMETERS);
       debugSerial<<F("Retrying modbus CMD\n");
-      clearFlag(SEND_RETRY);     // Clean retry flag
+      clearFlag(FLAG_SEND_RETRY);     // Clean retry flag
       if (driver) result=driver->Ctrl(val);
       #ifndef MODBUS_DISABLE
       else switch (itemType) 
@@ -1802,7 +1813,7 @@ int Item::VacomSetFan(itemCmd st) {
     if (modbusBusy) {
        // setCmd(cmd);
        // setVal(val);
-       st.saveItem(this,SEND_PARAMETERS|SEND_COMMAND);
+       st.saveItem(this,FLAG_PARAMETERS|FLAG_COMMAND);
         mb_fail();
         return 0;
     }
@@ -1849,7 +1860,7 @@ int addr;
     if (modbusBusy) {
       //setCmd(cmd);
       //setVal(val);
-       st.saveItem(this,SEND_COMMAND|SEND_PARAMETERS);
+       st.saveItem(this,FLAG_COMMAND|FLAG_PARAMETERS);
       mb_fail();
       return 0;
     }
@@ -2144,14 +2155,14 @@ int Item::checkModbusDimmer(int data) {
         if (d) { // Actually turned on
             if (cmd != CMD_XON && cmd != CMD_ON) setCmd(CMD_ON);  //store command
             st.Percents255(d);
-            st.saveItem(this,SEND_PARAMETERS);
+            st.saveItem(this,FLAG_PARAMETERS);
             //setVal(d);       //store value
-            if (cmd == CMD_OFF || cmd == CMD_HALT) SendStatus(SEND_COMMAND); //update OH with ON if it was turned off before
-            SendStatus(SEND_PARAMETERS); //update OH with value
+            if (cmd == CMD_OFF || cmd == CMD_HALT) SendStatus(FLAG_COMMAND); //update OH with ON if it was turned off before
+            SendStatus(FLAG_PARAMETERS); //update OH with value
         } else {
             if (cmd != CMD_HALT && cmd != CMD_OFF) {
                 setCmd(CMD_OFF); // store command (not value)
-                SendStatus(SEND_COMMAND);// update OH
+                SendStatus(FLAG_COMMAND);// update OH
             }
         }
     } //if data changed

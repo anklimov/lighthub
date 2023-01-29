@@ -76,3 +76,4 @@ unsigned long millisNZ(uint8_t shift=0);
 serialParamType  str2SerialParam(char * str);
 String toString(const IPAddress& address);
 bool getPinVal(uint8_t pin);
+int  str2regSize(char * str);

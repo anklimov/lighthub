@@ -289,7 +289,7 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
           if (!item.isValid() || !item.Ctrl((char*) body.c_str())) return 400;
 
         itemCmd ic;
-        ic.loadItem(&item,SEND_COMMAND|SEND_PARAMETERS);
+        ic.loadItem(&item,FLAG_COMMAND|FLAG_PARAMETERS);
         char buf[32];
         response=ic.toString(buf, sizeof(buf));    
         return 200 | HTTP_TEXT_PLAIN;         
@@ -305,7 +305,7 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
            {if (item.isActive()) item.setCmd(CMD_ON); else item.setCmd(CMD_OFF);} 
 
          itemCmd ic;
-         ic.loadItem(&item,SEND_COMMAND|SEND_PARAMETERS);
+         ic.loadItem(&item,FLAG_COMMAND|FLAG_PARAMETERS);
 
          char buf[32];
          response=ic.toString(buf, sizeof(buf));
@@ -1392,8 +1392,8 @@ setupSyslog();
                     switch (it.itemType) {
                         case CH_THERMO:
                             if (cmd<1) it.setCmd(CMD_OFF); 
-                            it.setFlag(SEND_COMMAND);
-                            if (it.itemVal) it.setFlag(SEND_PARAMETERS);
+                            it.setFlag(FLAG_COMMAND);
+                            if (it.itemVal) it.setFlag(FLAG_PARAMETERS);
                             pinMode(pin, OUTPUT);
                             digitalWrite(pin, false); //Initially, all thermostates are LOW (OFF for electho heaters, open for water NO)
                             debugSerial<<F("Thermo:")<<pin<<F("=LOW")<<F(";");

@@ -3,7 +3,7 @@
 
 #define CST_UNKNOWN  0
 #define CST_INITIALIZED  1
-#define CST_FAILED 2
+#define CST_FAILED -1
 
 class abstractCh {
 public:

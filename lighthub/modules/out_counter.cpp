@@ -50,7 +50,7 @@ uint32_t timer = item->getExt();
       item->setExt(millisNZ());
 
       itemCmd st;
-      st.loadItem(item,SEND_PARAMETERS|SEND_COMMAND);
+      st.loadItem(item,FLAG_PARAMETERS|FLAG_COMMAND);
       float val = st.getFloat();
       //short cmd = st.getCmd();
       debugSerial<<"CTR: tick val:"<<val<<endl; 
@@ -59,7 +59,7 @@ uint32_t timer = item->getExt();
       st.Float(val);
       st.saveItem(item);
       debugSerial<<"CTR: tick saved val:"<<val<<endl; 
-      item->SendStatus(SEND_PARAMETERS);
+      item->SendStatus(FLAG_PARAMETERS);
     }   
 
     return 0;

@@ -1023,7 +1023,7 @@ void Input::onAnalogChanged(itemCmd newValue) {
               strncpy(addrstr,emit->valuestring,sizeof(addrstr));
               if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
               char strVal[16];
-              newValue.toString(strVal,sizeof(strVal),SEND_PARAMETERS);
+              newValue.toString(strVal,sizeof(strVal),FLAG_PARAMETERS);
 
               if (mqttClient.connected() && !ethernetIdleCount)
                   mqttClient.publish(addrstr, strVal, true);

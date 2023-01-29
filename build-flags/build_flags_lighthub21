@@ -38,3 +38,5 @@
 -DOTA_PORT=80
 -D CORS=\"*\"
 -D REDIRECTION_URL=\"http://lazyhome.ru/pwa\"
+#-D MERCURY_ENABLE
+#-D IPMODBUS

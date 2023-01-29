@@ -71,16 +71,16 @@ case S_CMD:
                 {
                 cmd.setPercents(INIT_VOLUME);
                 cmd.saveItem(item);
-                item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+                item->SendStatus(FLAG_PARAMETERS | FLAG_SEND_DEFFERED);
                 };
             PixelCtrl(cmd,subItem, true);
-    //        item->SendStatus(SEND_COMMAND | SEND_PARAMETERS );
+    //        item->SendStatus(FLAG_COMMAND | FLAG_PARAMETERS );
             return 1;
 
             case CMD_OFF:
               cmd.param.asInt32=0;
               PixelCtrl(cmd, subItem, true);
-    //          item->SendStatus(SEND_COMMAND);
+    //          item->SendStatus(FLAG_COMMAND);
             return 1;
 
             default:

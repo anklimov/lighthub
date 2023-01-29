@@ -61,8 +61,8 @@ digitalWrite(pinDown,INACTIVE);
 
 pinMode(pinFeedback, INPUT);
 item->setExt(0);
-item->clearFlag(ACTION_NEEDED);
-item->clearFlag(ACTION_IN_PROCESS);
+item->clearFlag(FLAG_ACTION_NEEDED);
+item->clearFlag(FLAG_ACTION_IN_PROCESS);
 driverStatus = CST_INITIALIZED;
 motorQuote = MOTOR_QUOTE;
 return 1;
@@ -105,13 +105,13 @@ if (cause==POLLING_SLOW) return 0;
 int curPos = -1;
 int targetPos = -1;
 int dif;
-if (!item->getFlag(ACTION_NEEDED)) return 0;
+if (!item->getFlag(FLAG_ACTION_NEEDED)) return 0;
 
-if (!item->getFlag(ACTION_IN_PROCESS))
+if (!item->getFlag(FLAG_ACTION_IN_PROCESS))
     {
     if (motorQuote)
       {
-        item->setFlag(ACTION_IN_PROCESS);
+        item->setFlag(FLAG_ACTION_IN_PROCESS);
         motorQuote--;
       }
     else return 0;
@@ -245,8 +245,8 @@ else //Target zone
   digitalWrite(pinUp,INACTIVE);
   digitalWrite(pinDown,INACTIVE);
   item->setExt(0);
-  item->clearFlag(ACTION_NEEDED);
-  item->clearFlag(ACTION_IN_PROCESS);
+  item->clearFlag(FLAG_ACTION_NEEDED);
+  item->clearFlag(FLAG_ACTION_IN_PROCESS);
   motorQuote++;
 }
 
@@ -269,7 +269,7 @@ int suffixCode = cmd.getSuffix();
 //itemCmd st(ST_PERCENTS,CMD_VOID);
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
-item->setFlag(ACTION_NEEDED);
+item->setFlag(FLAG_ACTION_NEEDED);
 
 switch(suffixCode)
 {
@@ -290,10 +290,10 @@ case S_SET:
           {
             if (chActive>0 && !st.getPercents()) item->setCmd(CMD_OFF);
             if (chActive==0 && st.getPercents()) item->setCmd(CMD_ON);
-            item->SendStatus(SEND_COMMAND | SEND_PARAMETERS | SEND_DEFFERED);
+            item->SendStatus(FLAG_COMMAND | FLAG_PARAMETERS | FLAG_SEND_DEFFERED);
             if (item->getExt()) item->setExt(millisNZ()); //Extend motor time
           }
-          else    item->SendStatus(SEND_PARAMETERS | SEND_DEFFERED);
+          else    item->SendStatus(FLAG_PARAMETERS | FLAG_SEND_DEFFERED);
           */
           return 1;
           //break;
@@ -307,7 +307,7 @@ case S_CMD:
             return 1;
 
             case CMD_OFF:
-              ////item->SendStatus(SEND_COMMAND);
+              ////item->SendStatus(FLAG_COMMAND);
               if (item->getExt()) item->setExt(millisNZ()); //Extend motor time
             return 1;
 
