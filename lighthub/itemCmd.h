@@ -47,6 +47,7 @@ const cmdstr commands_P[] PROGMEM =
 #define CMD_FAN 0xd     /// AC set to Fan-only mode 
 #define CMD_DRY 0xe     /// AC set to Dry mode
 #define CMD_STOP 0xf    /// stop dimming (for further use)
+
 #define CMD_HIGH 0x10   /// AC/Vent fan level HIGH
 #define CMD_MED 0x11    /// AC/Vent fan level MEDIUM
 #define CMD_LOW 0x12    /// AC/Vent fan level LOW
@@ -57,8 +58,8 @@ const cmdstr commands_P[] PROGMEM =
 #define CMD_RGB  0x17 
 #define CMD_HSV  0x18
 
-#define CMD_MASK 0xff
-#define FLAG_MASK 0xffff00
+#define CMD_MASK 0xffUL
+#define FLAG_MASK 0x00ffff00UL
 //#define STATE_MASK 0xff0000
 
 #define CMD_VOID 0
@@ -66,19 +67,20 @@ const cmdstr commands_P[] PROGMEM =
 #define CMD_JSON -2
 
 //FLAGS
-#define FLAG_SEND_IMMEDIATE 0x1
-#define FLAG_COMMAND 0x100
-#define FLAG_PARAMETERS 0x200
-#define FLAG_SEND_RETRY 0x400
-#define FLAG_SEND_DEFFERED 0x800
-#define FLAG_SEND_DELAYED 0x1000
-#define FLAG_ACTION_NEEDED 0x2000
-#define FLAG_ACTION_IN_PROCESS 0x4000
+#define FLAG_SEND_IMMEDIATE 0x1UL
+#define FLAG_COMMAND 0x100UL
+#define FLAG_PARAMETERS 0x200UL
+#define FLAG_FLAGS 0x400UL
+#define FLAG_SEND_RETRY 0x800UL
+#define FLAG_SEND_DEFFERED 0x1000UL
+#define FLAG_SEND_DELAYED 0x2000UL
+#define FLAG_ACTION_NEEDED 0x4000UL
+#define FLAG_ACTION_IN_PROCESS 0x8000UL
 
-#define FLAG_DISABLED 0x10000
-#define FLAG_DISABLED_ALL 0x20000
-#define FLAG_HALTED 0x40000
-#define FLAG__XON 0x80000
+#define FLAG_DISABLED 0x10000UL
+#define FLAG_DISABLED_ALL 0x20000UL
+#define FLAG_HALTED 0x40000UL
+#define FLAG_XON 0x80000UL
 
 
 

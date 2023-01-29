@@ -31,11 +31,13 @@ e-mail    anklimov@gmail.com
 #define S_RGB  6
 #define S_FAN  7
 #define S_MODE 8
-#define S_HUE  9
-#define S_SAT  10
-#define S_TEMP 11
-#define S_RAW 12
-#define S_ADDITIONAL 12
+#define S_CTRL 9
+#define S_HUE  10
+#define S_SAT  11
+#define S_TEMP 12
+#define S_RAW 13
+
+#define S_ADDITIONAL 13
 
 #define CH_DIMMER 0   //DMX 1-4 ch
 #define CH_RGBW   1   //DMX 4 ch
@@ -146,6 +148,8 @@ class Item
   inline int On (){return Ctrl(itemCmd(ST_VOID,CMD_ON));};
   inline int Off(){return Ctrl(itemCmd(ST_VOID,CMD_OFF));};
   inline int Toggle(){return Ctrl(itemCmd(ST_VOID,CMD_TOGGLE));};
+  int scheduleCommand(itemCmd cmd);
+  int isScheduled();
 
   protected:
   long int limitSetValue();

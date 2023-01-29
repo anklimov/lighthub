@@ -129,6 +129,7 @@ const char RGB_P[]   PROGMEM = "RGB";
 const char VAL_P[]   PROGMEM = "val";
 const char DEL_P[]   PROGMEM = "del";
 const char _RAW_P[]   PROGMEM = "raw";
+const char CTRL_P[]  PROGMEM = "ctrl";
 
 /*
 const char RPM_P[]   PROGMEM = "rpm";

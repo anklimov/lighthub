@@ -1049,6 +1049,10 @@ bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
   short subtype =item->getSubtype();
   if (optionsFlag & FLAG_COMMAND)    cmd.cmdCode    =  item->getCmd();
 
+  //if (optionsFlag & FLAG_FLAGS)    
+  //        if (item->getFlag(FLAG_DISABLED))
+  //          cmd.cmdCode    =  CMD_DISABLE;
+
   if (subtype)
         {
           cmd.itemArgType= subtype;
@@ -1101,7 +1105,27 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
 {
   if (item && item->isValid())
   {
-  if (optionsFlag & FLAG_COMMAND)    item->setCmd(cmd.cmdCode);
+
+  if (optionsFlag & FLAG_FLAGS)    
+                                  switch (cmd.cmdCode)
+                                  {
+                                  case CMD_DISABLE:
+                                  item->setFlag(FLAG_DISABLED);
+                                  break;
+
+                                  case CMD_ENABLE:
+                                  item->clearFlag(FLAG_DISABLED);
+                                  break;
+                                  }  
+  if (optionsFlag & FLAG_COMMAND)    
+                                  switch (cmd.cmdCode)
+                                  {
+                                  case CMD_DISABLE:
+                                  case CMD_ENABLE:
+                                  break;
+                                  default:  
+                                  item->setCmd(cmd.cmdCode);
+                                  }
   if (optionsFlag & FLAG_PARAMETERS) 
                                     switch (cmd.itemArgType)
                                     {

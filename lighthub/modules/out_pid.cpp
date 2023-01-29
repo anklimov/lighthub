@@ -168,7 +168,7 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
       //itemCmd st;
       //st.loadItem(item);
       //short cmd = st.getCmd();
-      if (item->getCmd() != CMD_OFF && item->getCmd() != CMD_DISABLE)
+      if (item->getCmd() != CMD_OFF && /* item->getCmd() != CMD_DISABLE*/ ! item->getFlag(FLAG_DISABLED))
       { 
       if(store->pid->Compute() )
       {
@@ -326,6 +326,7 @@ return 1;
 //break;
 
 case S_CMD:
+case S_CTRL:
       {
       aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);   
       short command = cmd.getCmd();  
@@ -347,15 +348,15 @@ case S_CMD:
           return 1;
 
           case CMD_ENABLE:
-          item->setCmd(CMD_ENABLE);
-          item->SendStatus(FLAG_COMMAND);
+          //item->setCmd(CMD_ENABLE);
+          //item->SendStatus(FLAG_COMMAND);
           executeCommand(oCmd,-1,value);   
           store->prevOut=-2.0;   
           return 1;
 
           case CMD_DISABLE:
-          item->setCmd(CMD_DISABLE);
-          item->SendStatus(FLAG_COMMAND);
+          //item->setCmd(CMD_DISABLE);
+          //item->SendStatus(FLAG_COMMAND);
           executeCommand(oCmd,-1,value);
           return 1;
 /*
