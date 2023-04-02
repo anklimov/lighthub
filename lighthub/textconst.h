@@ -114,7 +114,8 @@ const char LOW_P[]  PROGMEM = "LOW";
 const char ERROR_P[]  PROGMEM = "ERR";
 const char ENABLE_P[]  PROGMEM = "ENABLE";
 const char DISABLE_P[] PROGMEM = "DISABLE";
-
+const char FREEZE_P[]  PROGMEM = "FREEZE";
+const char UNFREEZE_P[] PROGMEM = "UNFREEZE";
 
 // SubTopics
 const char SET_P[]  PROGMEM = "set";

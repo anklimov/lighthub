@@ -108,6 +108,7 @@ uint8_t itemCmd::getStoragetypeByChanType(short chanType)
     case CH_PWM:
     case CH_VC:
     case CH_MODBUS:
+    //case CH_RELAY:
     //case CH_GROUP:
     return ST_PERCENTS255;
     break;
@@ -1115,13 +1116,23 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
 
                                   case CMD_ENABLE:
                                   item->clearFlag(FLAG_DISABLED);
+                                  item->clearFlag(FLAG_FREEZED);
                                   break;
+                                  case CMD_FREEZE:
+                                  item->setFlag(FLAG_FREEZED);
+                                  break;
+
+                                  case CMD_UNFREEZE:
+                                  item->clearFlag(FLAG_FREEZED);
+                                  break;                                  
                                   }  
   if (optionsFlag & FLAG_COMMAND)    
                                   switch (cmd.cmdCode)
                                   {
                                   case CMD_DISABLE:
                                   case CMD_ENABLE:
+                                  case CMD_FREEZE:
+                                  case CMD_UNFREEZE:
                                   break;
                                   default:  
                                   item->setCmd(cmd.cmdCode);

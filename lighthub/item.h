@@ -149,6 +149,7 @@ class Item
   inline int Off(){return Ctrl(itemCmd(ST_VOID,CMD_OFF));};
   inline int Toggle(){return Ctrl(itemCmd(ST_VOID,CMD_TOGGLE));};
   int scheduleCommand(itemCmd cmd);
+  int scheduleOppositeCommand(itemCmd cmd);
   int isScheduled();
 
   protected:

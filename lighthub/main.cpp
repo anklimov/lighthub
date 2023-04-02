@@ -39,8 +39,8 @@ e-mail    anklimov@gmail.com
 Syslog udpSyslog(udpSyslogClient, SYSLOG_PROTO_BSD);
 static char syslogDeviceHostname[16];
 
-    #if defined(debugSerialPort) 
-    Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog);
+    #if defined(debugSerialPort) && !defined(NOSERIAL)
+    Streamlog debugSerial(&debugSerialPort,LOG_DEBUG,&udpSyslog); 
     Streamlog errorSerial(&debugSerialPort,LOG_ERROR,&udpSyslog,ledRED);
     Streamlog infoSerial (&debugSerialPort,LOG_INFO,&udpSyslog);
     #else
@@ -50,7 +50,7 @@ static char syslogDeviceHostname[16];
     #endif
 
 #else
-     #if defined(debugSerialPort) 
+     #if defined(debugSerialPort) && !defined(NOSERIAL)
         Streamlog debugSerial(&debugSerialPort,LOG_DEBUG);
         Streamlog errorSerial(&debugSerialPort,LOG_ERROR, ledRED);
         Streamlog infoSerial (&debugSerialPort,LOG_INFO);
@@ -139,6 +139,7 @@ bool owReady = false;
 bool configOk = false; // At least once connected to MQTT
 bool configLoaded = false;
 bool initializedListeners = false;
+uint8_t DHCP_failures = 0;
 volatile int8_t ethernetIdleCount =0;
 volatile int8_t configLocked = 0;
 
@@ -762,7 +763,8 @@ lan_status lanLoop() {
         wdt_dis();
         if (lanStatus >= HAVE_IP_ADDRESS)
         {
-        int etherStatus = Ethernet.maintain();
+        int etherStatus = 0;
+        if (!DHCP_failures) etherStatus = Ethernet.maintain();
 
         #ifndef Wiz5500
         #define NO_LINK 5
@@ -1108,7 +1110,11 @@ if (WiFi.status() == WL_CONNECTED) {
     IPAddress ip, dns, gw, mask;
     int res = 1;
     infoSerial<<F("Starting lan")<<endl;
-    if (sysConf.getIP(ip)) {
+    bool loadAddressRes = sysConf.getIP(ip); 
+    if (    loadAddressRes &&
+            (!sysConf.getDHCPfallback() || (DHCP_failures >= DHCP_ATTEMPTS_FALLBACK)) 
+        )
+       {
         infoSerial<<F("Loaded from flash IP:");
         printIPAddress(ip);
         if (sysConf.getDNS(dns)) {
@@ -1142,6 +1148,7 @@ if (WiFi.status() == WL_CONNECTED) {
 
     if (res == 0) {
         errorSerial<<F("Failed to configure Ethernet using DHCP. You can set ip manually!")<<F("'ip [ip[,dns[,gw[,subnet]]]]' - set static IP\n");
+        DHCP_failures++;
         lanStatus = DO_REINIT;//-10;
         //timerLanCheckTime = millis();// + DHCP_RETRY_INTERVAL;
 #ifdef RESET_PIN
@@ -1149,8 +1156,25 @@ if (WiFi.status() == WL_CONNECTED) {
 #endif
     } else {
         infoSerial<<F("Got IP address:");
-        printIPAddress(Ethernet.localIP());
+        ip=Ethernet.localIP();
+        printIPAddress(ip);
+
         infoSerial<<endl;
+
+        sysConf.setIP(ip);
+
+        dns=Ethernet.dnsServerIP();
+        sysConf.setDNS(dns);
+
+        gw=Ethernet.gatewayIP();
+        sysConf.setGW(gw);
+
+        mask=Ethernet.subnetMask();
+        sysConf.setMask(mask);
+
+        sysConf.setDHCPfallback(true);
+
+        DHCP_failures = 0;
         lanStatus = HAVE_IP_ADDRESS;
     }
   }//DHCP
@@ -1608,6 +1632,7 @@ int cmdFunctionIp(int arg_cnt, char **args)
             printIPAddress(current_mask); */
     //}
     infoSerial<<F("Saved\n");
+    sysConf.setDHCPfallback(false);
     return 200;
 }
 
@@ -1757,7 +1782,7 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
     // FILE is the return STREAM type of the HTTPClient
     configStream = hclient.getURI(URI,NULL,get_header);
     responseStatusCode = hclient.getLastReturnCode();
-    //debugSerial<<F("http retcode ")<<responseStatusCode<<endl;delay(100);
+    debugSerial<<F("http retcode ")<<responseStatusCode<<endl;delay(100);
     //wdt_en();
     
     if (configStream != NULL) {
@@ -2101,12 +2126,12 @@ void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info)
 void setup_main() {
 
   #if (SERIAL_BAUD)
-            #if defined(debugSerialPort)
+            #if defined(debugSerialPort) && !defined(NOSERIAL)    
             debugSerialPort.begin(SERIAL_BAUD);
             #endif
   #else 
 
-  #if not defined (__SAM3X8E__) && defined (debugSerialPort)
+  #if not defined (__SAM3X8E__) && defined (debugSerialPort) && !defined(NOSERIAL)
   debugSerialPort.begin();
   #endif
   delay(1000);
@@ -2125,13 +2150,13 @@ void setup_main() {
             if(SPIFFS.begin())
             #endif
             {
-            #if defined(debugSerialPort) 
+            #if defined(debugSerialPort) && !defined(NOSERIAL)    
                 debugSerialPort.println("SPIFFS Initialize....ok");
             #endif    
             }
             else
             {
-            #if defined(debugSerialPort)     
+            #if defined(debugSerialPort) && !defined(NOSERIAL)        
                 debugSerialPort.println("SPIFFS Initialization...failed");
             #endif    
             }
@@ -2148,7 +2173,7 @@ void setup_main() {
 
     if (!sysConf.isValidSysConf()) 
                 {
-                #if defined(debugSerialPort)     
+                #if defined(debugSerialPort) && !defined(NOSERIAL)    
                 debugSerialPort.println(F("No valid EEPROM data. Initializing."));    
                 #endif
                 sysConf.clear();
@@ -2185,7 +2210,7 @@ void setup_main() {
         #else
         pinMode(TXEnablePin, OUTPUT);
         #endif
-    modbusSerial.begin(MODBUS_SERIAL_BAUD,dimPar);
+    modbusSerial.begin(MODBUS_SERIAL_BAUD,MODBUS_SERIAL_PARAM);
     node.idle(&modbusIdle);
     node.preTransmission(preTransmission);
     node.postTransmission(postTransmission);
@@ -2277,9 +2302,15 @@ infoSerial<<F("\nFirmware MAC Address " QUOTE(CUSTOM_FIRMWARE_MAC));
 #endif
 
 #ifdef _modbus
-    infoSerial<<F("\n(+)MODBUS " QUOTE(MODBUS_DIMMER_PARAM) " at " QUOTE(modbusSerial) " speed:"  QUOTE(MODBUS_SERIAL_BAUD));
+    infoSerial<<F("\n(+)MODBUS " QUOTE(MODBUS_SERIAL_PARAM) " at " QUOTE(modbusSerial) " speed:"  QUOTE(MODBUS_SERIAL_BAUD));
 #else
     infoSerial<<F("\n(-)MODBUS");
+#endif
+
+#ifdef IPMODBUS
+    infoSerial<<F("\n(+)IPMODBUS ");// QUOTE(MODBUS_TCP_PARAM) " at " QUOTE(modbusSerial) " speed:"  QUOTE(MODBUS_TCP_BAUD));
+#else
+    infoSerial<<F("\n(-)IPMODBUS");
 #endif
 
 #ifndef OWIRE_DISABLE
@@ -2400,13 +2431,17 @@ infoSerial<<F("\n(-)MULTIVENT");
 infoSerial<<F("\n(+)HUMIDIFIER");
 #endif
 
+#ifdef NOSERIAL
+infoSerial<<F("\nNOSERIAL");
+#endif
+
 #ifdef ELEVATOR_ENABLE
 infoSerial<<F("\n(+)ELEVATOR");
 #endif
 
-#ifdef IPMODBUS
-infoSerial<<F("\n(+)IPMODBUS");
-#endif
+//#ifdef IPMODBUS
+//infoSerial<<F("\n(+)IPMODBUS");
+//#endif
 infoSerial<<endl;
 
 //    WDT_Disable( WDT ) ;
@@ -2432,17 +2467,22 @@ void publishStat(){
   uint32_t ut = millis()/1000UL;
   if (!mqttClient.connected()  || ethernetIdleCount) return;
     setTopic(topic,sizeof(topic),T_DEV);
-    strncat_P(topic, stats_P, sizeof(topic));
+    strncat_P(topic, stats_P, sizeof(topic)-1);
     strncat(topic, "/", sizeof(topic));
-    strncat_P(topic, freeheap_P, sizeof(topic));
+    strncat_P(topic, freeheap_P, sizeof(topic)-1);
     printUlongValueToStr(intbuf, fr);
     mqttClient.publish(topic,intbuf,true);
 
     setTopic(topic,sizeof(topic),T_DEV);
-    strncat_P(topic, stats_P, sizeof(topic));
+    strncat_P(topic, stats_P, sizeof(topic)-1);
     strncat(topic, "/", sizeof(topic));
-    strncat_P(topic, uptime_P, sizeof(topic));
+    strncat_P(topic, uptime_P, sizeof(topic)-1);
     printUlongValueToStr(intbuf, ut);
+    mqttClient.publish(topic,intbuf,true);
+
+    setTopic(topic,sizeof(topic),T_DEV);
+    strncat_P(topic, state_P, sizeof(topic)-1);
+    strncpy_P(intbuf, ready_P, sizeof(intbuf)-1);
     mqttClient.publish(topic,intbuf,true);
 }
 

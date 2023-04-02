@@ -207,7 +207,7 @@ unsigned long freeRam() {
 extern char _end;
 extern "C" char *sbrk(int i);
 
-unsigned long freeRam() {
+unsigned long  freeRam()  {
     char *ramstart = (char *) 0x20070000;
     char *ramend = (char *) 0x20088000;
     char *heapend = sbrk(0);
@@ -719,6 +719,13 @@ switch (cmdType)
         Item it(item->valuestring);
         if (it.isValid()) 
         {
+        int fr = freeRam();                           
+        if (fr < minimalMemory) 
+            {
+            errorSerial<<F("CTRL/exec: OutOfMemory: ")<<fr<<endl;
+            return -1;
+            }     
+
         if (itemCommand) it.Ctrl(itemCommand);
             else it.Ctrl(_itemCmd);
         }

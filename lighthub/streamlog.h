@@ -36,8 +36,8 @@ class Streamlog : public Print
     #else
     Streamlog (SerialPortType * _serialPort, uint8_t _severity = LOG_DEBUG, uint8_t _ledPattern = 0);
     #endif
-    void begin(unsigned long speed);
-    void end() ;
+    //void begin(unsigned long speed);
+    //void end() ;
 
     int available(void);
     int peek(void);

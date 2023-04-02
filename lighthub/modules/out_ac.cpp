@@ -14,7 +14,7 @@
 
 #define INTERVAL_AC_POLLING      5000L
 
-static int driverStatus = CST_UNKNOWN;
+//static int driverStatus = CST_UNKNOWN;
 
 static int fresh =0;
 static int power = 0;
@@ -38,6 +38,32 @@ const char LOCK_P[]   PROGMEM = "lock";
 const char QUIET_P[]  PROGMEM = "queit";
 const char SWING_P[]  PROGMEM = "swing";
 const char RAW_P[]    PROGMEM = "raw";
+
+void out_AC::getConfig(){
+  ACSerial=&AC_Serial;
+  if (item->getArgCount())
+
+    switch(portNum=item->getArg(0)){
+      case 0: ACSerial=&Serial;
+      
+      break;
+      //#if defined (Serial1)
+      case 1: ACSerial=&Serial1;
+      break;
+      //#endif
+      //#if defined (Serial2)
+      case 2: ACSerial=&Serial2;
+      break;
+      //#endif
+      //#if defined (Serial3)
+      case 3: ACSerial=&Serial3;
+      break;
+      //#endif
+
+    }
+
+
+}
 
 void out_AC::InsertData(byte data[], size_t size){
 
@@ -177,11 +203,11 @@ byte getCRC(byte req[], size_t size){
 }
 
 void out_AC::SendData(byte req[], size_t size){
-  AC_Serial.write(req, size - 1);
-  AC_Serial.write(getCRC(req, size-1));
-  //AC_Serial.flush();
+  ACSerial->write(req, size - 1);
+  ACSerial->write(getCRC(req, size-1));
+  //ACSerial->flush();
   item->setExt(millisNZ());
- debugSerial.print("AirCon<<");
+ debugSerial<<F("AirCon ")<<portNum<<F(" <<");
   for (int i=0; i < size-1; i++)
   {
      if (req[i] < 10){
@@ -206,23 +232,30 @@ inline unsigned char toHex( char ch ){
 int  out_AC::Setup()
 {
 abstractOut::Setup();    
-debugSerial<<F("AC Init")<<endl;
-AC_Serial.begin(9600);
-driverStatus = CST_INITIALIZED;
+if (!item) return 0;  
+debugSerial<<F("AC Init: ")<<portNum<<endl;
+if (!portNum)// && (g_APinDescription[0].ulPinType == PIO_PA8A_URXD))
+    {
+      pinMode(0, INPUT_PULLUP);
+    }
+ACSerial->begin(9600);
+item->itemArr->subtype = CST_INITIALIZED;
+//driverStatus = CST_INITIALIZED;
 return 1;
 }
 
 int  out_AC::Stop()
 {
-debugSerial<<F("AC De-Init")<<endl;
-
-driverStatus = CST_UNKNOWN;
+if (!item) return 0;    
+debugSerial<<F("AC De-Init: ")<<portNum<<endl;
+item->itemArr->subtype = CST_UNKNOWN;
 return 1;
 }
 
 int  out_AC::Status()
 {
-return driverStatus;
+if (!item) return 0;  
+return item->itemArr->subtype;
 }
 
 int out_AC::isActive()
@@ -240,16 +273,34 @@ if (cause!=POLLING_SLOW) return false;
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
 
-  if(AC_Serial.available() >= 37){ //was 0
-    AC_Serial.readBytes(data, 37);
-    while(AC_Serial.available()){
+  if(ACSerial->available() >= 37){ //was 0
+    ACSerial->readBytes(data, 37);
+    while(ACSerial->available()){
       delay(2);
-      AC_Serial.read();
+      ACSerial->read();
     }
+
+debugSerial<<F("AirCon ")<<portNum<<F(" >> ");
+  for (int i=0; i < 37-1; i++)
+  {
+     if (data[i] < 10){
+       debugSerial.print("0");
+       debugSerial.print(data[i], HEX);
+     }
+        else
+             {
+             debugSerial.print(data[i], HEX);
+             }
+  }
+
+
     if (data[36] != inCheck){
       inCheck = data[36];
       InsertData(data, 37);
+      debugSerial<<F(" OK");
     }
+
+ debugSerial.println();   
   }
 return true;
 };
@@ -434,8 +485,8 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
           hexbyte[0] = buf[i] ;
           hexbyte[1] = buf[i+1] ;
           data[i/2] = (toHex(hexbyte[0]) << 4) | toHex(hexbyte[1]);
-        AC_Serial.write(data, 37);
-        AC_Serial.flush();
+        ACSerial->write(data, 37);
+        ACSerial->flush();
         publishTopic("RAW", buf);
       }
       */
@@ -474,12 +525,12 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
     data[9] = 1;
     data[10] = 77;
     data[11] = 95;
-    AC_Serial.flush();
+    ACSerial->flush();
     uint32_t ts=item->getExt();
     while (ts && !isTimeOver(ts,millis(),100)) yield();
     SendData(data, sizeof(data)/sizeof(byte));
     //InsertData(data, sizeof(data)/sizeof(byte));
-    //AC_Serial.flush();
+    //ACSerial->flush();
     //item->setExt(millisNZ());
     return 1;
 }

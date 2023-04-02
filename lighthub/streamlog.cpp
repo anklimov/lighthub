@@ -30,7 +30,7 @@ Streamlog::Streamlog (SerialPortType * _serialPort, uint8_t _severity,  uint8_t 
       severity=_severity;
 }
 #endif
-
+/*
 void Streamlog::begin(unsigned long speed)
 {
   if (serialPort) serialPort->begin(speed);
@@ -40,6 +40,7 @@ void Streamlog::end()
 {
   if (serialPort) serialPort->end();
 };
+*/
 
 int Streamlog::available(void)
 {
@@ -79,7 +80,7 @@ if (syslogInitialized && (udpDebugLevel>=severity))
               }
       else
         {
-          if (logBufferPos<LOGBUFFER_SIZE-1 && (ch!='\r')) logBuffer[logBufferPos++]=ch;
+          if ((logBufferPos<LOGBUFFER_SIZE-1) && (ch!='\r')) logBuffer[logBufferPos++]=ch;
         }
    }
 #endif
@@ -87,8 +88,8 @@ if (syslogInitialized && (udpDebugLevel>=severity))
   #if defined (STATUSLED)
   if ((ch=='\n') && ledPattern) statusLED.flash(ledPattern);
   #endif
-
-  if (serialPort && (serialDebugLevel>=severity)) return serialPort->write(ch);
-
+  #if !defined(noSerial)
+  if (serialPort && (serialDebugLevel>=severity)) serialPort->write(ch);
+  #endif
   return 1;
 };

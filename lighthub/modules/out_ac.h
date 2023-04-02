@@ -24,7 +24,8 @@ extern void modbusIdle(void) ;
 class out_AC : public abstractOut {
 public:
 
-    out_AC(Item * _item):abstractOut(_item){};
+    out_AC(Item * _item):abstractOut(_item){getConfig();};
+    void getConfig();
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;
@@ -33,9 +34,16 @@ public:
     int getChanType() override;
     int getDefaultStorageType(){return ST_FLOAT_CELSIUS;};
     int Ctrl(itemCmd cmd,  char* subItem=NULL, bool toExecute=true) override;
-
+    
 protected:
     void InsertData(byte data[], size_t size);
     void SendData(byte req[], size_t size);
+    uint8_t portNum;
+    #if  defined (__SAM3X8E__)
+    UARTClass *ACSerial;
+    #else 
+    HardwareSerial *ACSerial;
+    #endif
+
 };
 #endif

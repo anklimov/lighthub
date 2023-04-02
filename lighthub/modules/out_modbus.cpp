@@ -358,8 +358,10 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                           aJsonObject *execObj = aJson.getObjectItem(itemParametersObj,paramObj->name);
                           if (execObj) 
                                       {
+                                      aJsonObject * markObj = execObj;
+                                      if (execObj->type == aJson_Array) markObj = execObj->child;  
                                       //Retrive previous data
-                                      aJsonObject *lastMeasured = aJson.getObjectItem(execObj,"@S");
+                                      aJsonObject *lastMeasured = aJson.getObjectItem(markObj,"@S");
                                       if (lastMeasured)
                                       { 
                                                 if   (lastMeasured->type == aJson_Int)
@@ -372,7 +374,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                       else //No container to store value yet 
                                       {
                                         debugSerial<<F("MBUS: Add @S: ")<<paramObj->name<<endl;
-                                        aJson.addNumberToObject(execObj, "@S", (long) param);
+                                        aJson.addNumberToObject(markObj, "@S", (long) param);
                                       }  
 
 
@@ -386,7 +388,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                       if (*submitParam)                                       
                                       {   
                                       // Compare with last submitted val (if @V NOT marked as NULL in config)
-                                       aJsonObject *settedValue = aJson.getObjectItem(execObj,"@V");                      
+                                       aJsonObject *settedValue = aJson.getObjectItem(markObj,"@V");                      
                                        if (settedValue && settedValue->type==aJson_Int && (settedValue->valueint == param))
                                           {    
                                            debugSerial<<F("MBUSD: Ignored - equal with setted val")<<endl;
@@ -473,11 +475,14 @@ void out_Modbus::initLine()
 
 int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
 {
- if (!store) return -1;
+ if (!store) {errorSerial<<F(" internal send error - no store")<<endl; return -1;}
+
  aJsonObject * templateParamObj = aJson.getObjectItem(store->parameters, paramName);
- if (!templateParamObj) return -1; 
+ if (!templateParamObj) {errorSerial<<F(" internal send error - no template")<<endl; return -1;}
+
  aJsonObject * regObj = aJson.getObjectItem(templateParamObj, "reg");
- if (!regObj) return -2;
+ if (!regObj) {errorSerial<<F(" internal send error - no regObj")<<endl; return -2;}
+
  int res = -1;
 
 // int8_t    regType = PAR_I16;
@@ -525,11 +530,16 @@ aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            {
             aJsonObject *execObj = itemParametersObj->child; 
-            while (execObj && execObj->type == aJson_Object)
+            while (execObj && (execObj->type == aJson_Object) || (execObj->type == aJson_Array) )
                           {     
+                             
                                  if ((execObj->subtype & MB_NEED_SEND) && !(execObj->subtype & MB_SEND_ERROR))
                                  {
-                                 aJsonObject *outValue = aJson.getObjectItem(execObj,"@V");                      
+
+                                aJsonObject * markObj = execObj;
+                                if (execObj->type == aJson_Array) markObj = execObj->child; 
+
+                                 aJsonObject *outValue = aJson.getObjectItem(markObj,"@V");                      
                                       if (outValue)
                                           {    
                                                 modbusBusy=1;
@@ -571,7 +581,7 @@ if (isTimeOver(store->timestamp,millis(),store->pollingInterval) && ( !mbusSlenc
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            {
             aJsonObject *execObj = itemParametersObj->child; 
-            while (execObj && execObj->type == aJson_Object)
+            while (execObj && (execObj->type == aJson_Object) || (execObj->type == aJson_Array))
                           {     
                                  if (execObj->subtype & MB_SEND_ERROR) execObj->subtype&=~ MB_SEND_ERROR;
                                  if ((execObj->subtype & 0x3) >= MB_SEND_ATTEMPTS) 
@@ -667,7 +677,7 @@ aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            {
             aJsonObject *execObj =  aJson.getObjectItem(itemParametersObj,suffixStr); 
-            if (execObj && execObj->type == aJson_Object)
+            if (execObj && (execObj->type == aJson_Object) || (execObj->type == aJson_Array))
                           {   
                             /*
                               aJsonObject *polledValue = aJson.getObjectItem(execObj,"@S");                      
@@ -680,7 +690,10 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                       { //Schedule update
                                         execObj->subtype |= MB_NEED_SEND;
 
-                                        aJsonObject *outValue = aJson.getObjectItem(execObj,"@V");                      
+                                        aJsonObject * markObj = execObj;
+                                        if (execObj->type == aJson_Array) markObj = execObj->child;
+
+                                        aJsonObject *outValue = aJson.getObjectItem(markObj,"@V");                      
                                         if (outValue) // Existant. Preserve original @type
                                             {    
                                             outValue->valueint=Value;
@@ -690,12 +703,12 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                         // If no  @V in config - creating with INT type - normal behavior - no supress in-to-out 
                                             {
                                               debugSerial<<F("Add @V: ")<<execObj->name<<endl;
-                                              aJson.addNumberToObject(execObj, "@V", Value);
-                                              outValue = aJson.getObjectItem(execObj,"@V");  
+                                              aJson.addNumberToObject(markObj, "@V", Value);
+                                              outValue = aJson.getObjectItem(markObj,"@V");  
                                               if (outValue) outValue->subtype =regType & 0xF; 
                                             }
 
-                                        aJsonObject *polledValue = aJson.getObjectItem(execObj,"@S"); 
+                                        aJsonObject *polledValue = aJson.getObjectItem(markObj,"@S"); 
                                         if (polledValue && outValue->type == aJson_Int) polledValue->valueint=Value; //to pevent suppressing to change back to previously polled value if this occurs before next polling
 
                                       }          

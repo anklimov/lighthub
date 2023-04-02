@@ -541,9 +541,9 @@ void setupIpmodbus(){
    // Calculate Modbus RTU character timeout and frame delay
   byte bits =                                         // number of bits per character (11 in default Modbus RTU settings)
     1 +                                               // start bit
-    (((MODBUS_DIMMER_PARAM & 0x06) >> 1) + 5) +  // data bits
-    (((MODBUS_DIMMER_PARAM & 0x08) >> 3) + 1);   // stop bits
-  if (((MODBUS_DIMMER_PARAM & 0x30) >> 4) > 1) bits += 1;    // parity bit (if present)
+    (((MODBUS_SERIAL_PARAM & 0x06) >> 1) + 5) +  // data bits
+    (((MODBUS_SERIAL_PARAM & 0x08) >> 3) + 1);   // stop bits
+  if (((MODBUS_SERIAL_PARAM & 0x30) >> 4) > 1) bits += 1;    // parity bit (if present)
   //bits = 11;
 
   int T = ((unsigned long)bits * 1000000UL) / MODBUS_SERIAL_BAUD;       // time to send 1 character over serial in microseconds

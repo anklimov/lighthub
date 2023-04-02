@@ -107,7 +107,7 @@ int txt2subItem(char *payload) {
     if (!payload || !strlen(payload)) return S_NOTFOUND;
     // Check for command
     if (strcmp_P(payload, SET_P) == 0) cmd = S_SET;
-    //else if (strcmp_P(payload, ESET_P) == 0) cmd = S_ESET;
+    else if (strcmp_P(payload, CTRL_P) == 0) cmd = S_CTRL;
     else if (strcmp_P(payload, CMD_P) == 0) cmd = S_CMD;
     else if (strcmp_P(payload, MODE_P) == 0) cmd = S_MODE;
     else if (strcmp_P(payload, HSV_P) == 0) cmd = S_HSV;
@@ -326,7 +326,7 @@ uint32_t Item::getFlag   (uint32_t flag)
   aJsonObject *itemCmd = aJson.getArrayItem(itemArr, I_CMD);
   if (itemCmd && (itemCmd->type == aJson_Int))
   {
-      return itemCmd->valueint & flag & FLAG_MASK;
+      return (uint32_t) itemCmd->valueint & flag & FLAG_MASK;
     }
 return 0;
 }
@@ -572,7 +572,12 @@ long int Item::limitSetValue()
 int Item::Ctrl(char * payload, char * subItem)
 {
 if (!payload) return 0;
-
+int fr = freeRam();                           
+if (fr < minimalMemory) 
+    {
+        errorSerial<<F("CTRL/txt: OutOfMemory: ")<<fr<<endl;
+        return -1;
+    }   
 
 int   suffixCode = 0;
 
@@ -741,51 +746,54 @@ bool digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem)
 return false;
 }
 
-//Main routine to control Item
-//Return values
-// 1  complete
-// 3  complete, no action, target reached
-// -3 ignored
-// -1 system error
-// -4 invalid argument
-int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
-{ 
 
-  uint32_t time=millis();  
-  int suffixCode = cmd.getSuffix();
-  bool operation = isNotRetainingStatus();
-  
-    if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
-        subItem = defaultSubItem;  /// possible problem here with truncated default
+int Item::isScheduled()
+{
+aJsonObject *timestampObj = aJson.getArrayItem(itemArr, I_TIMESTAMP);
+                if (timestampObj && (timestampObj->subtype > 0))
+                {     
+                 return timestampObj->subtype;
+                }
+return 0;
+}
 
-    if (!suffixCode && subItem && strlen(subItem))
-        {    
-        suffixCode = retrieveCode(&subItem);
-        if (!cmd.getSuffix()) cmd.setSuffix(suffixCode);
-        }
+int Item::scheduleOppositeCommand(itemCmd cmd)
+{
+    itemCmd nextCmd=cmd;
+    
+    switch (cmd.getCmd()){
+    case CMD_XON:  nextCmd.Cmd(CMD_XOFF);
+    break;
+    case CMD_XOFF:  nextCmd.Cmd(CMD_XON);
+    break;
+    case CMD_ON:  nextCmd.Cmd(CMD_OFF);
+    break;
+    case CMD_OFF:  nextCmd.Cmd(CMD_ON);
+    break;
+    case CMD_ENABLE:  nextCmd.Cmd(CMD_DISABLE);
+    break;
+    case CMD_DISABLE:  nextCmd.Cmd(CMD_ENABLE);
+    break;
+    case CMD_FREEZE:  nextCmd.Cmd(CMD_UNFREEZE);
+    break;
+    case CMD_UNFREEZE:  nextCmd.Cmd(CMD_FREEZE);
+    break;
+    case CMD_HALT:  nextCmd.Cmd(CMD_RESTORE);
+    break;
+    case CMD_RESTORE:  nextCmd.Cmd(CMD_HALT);
+    break;
+   
+    default: return 0;
+    }
+     debugSerial<<F("CTRL: Schedule cmd ")<<nextCmd.getCmd()<<F(" for (ms):")<<nextCmd.getInt()<<endl;
+    scheduleCommand(nextCmd);
+    return 1;
+}  
 
-    if (!suffixCode && defaultSuffixCode)
-        {
-        suffixCode = defaultSuffixCode;
-        if (!cmd.getSuffix()) cmd.setSuffix(suffixCode);
-        }    
-    
-    int fr = freeRam();
-    
-    debugSerial<<F("RAM=")<<fr<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" ");
-     if (fr < 200) 
-        {
-        errorSerial<<F("OutOfMemory!\n")<<endl;
-        return -1;
-        }
-    cmd.debugOut();
-    //debugSerial<<endl; 
-    if (subItem && subItem[0] == '$') {debugSerial<<F("Skipped homie stuff")<<endl;return -4; }
-    if (!itemArr) return -1;
-    
-    /// DELAYED COMMANDS processing
-     if (suffixCode == S_DELAYED)
-        {
+int Item::scheduleCommand(itemCmd cmd)
+{
+    if (!itemArr)     return 0;
+
                 for (int i = aJson.getArraySize(itemArr); i <= I_TIMESTAMP; i++)
                             aJson.addItemToArray(itemArr, aJson.createNull());
             
@@ -807,6 +815,56 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                 return 1;
                 }        
          return 0;              
+
+}
+//Main routine to control Item
+//Return values
+// 1  complete
+// 3  complete, no action, target reached
+// -3 ignored
+// -1 system error
+// -4 invalid argument
+int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
+{      
+       int fr = freeRam();
+       if (fr < minimalMemory) 
+        {
+        errorSerial<<F("CTRL: OutOfMemory: ")<<fr<<endl;
+        return -1;
+        }
+  {      
+  uint32_t time=millis();  
+  int suffixCode = cmd.getSuffix();
+  bool operation = isNotRetainingStatus();
+  
+    if ((!subItem || !strlen(subItem)) && strlen(defaultSubItem))
+        subItem = defaultSubItem;  /// possible problem here with truncated default
+
+    if (!suffixCode && subItem && strlen(subItem))
+        {    
+        suffixCode = retrieveCode(&subItem);
+        if (!cmd.getSuffix()) cmd.setSuffix(suffixCode);
+        }
+
+    if (!suffixCode && defaultSuffixCode)
+        {
+        suffixCode = defaultSuffixCode;
+        if (!cmd.getSuffix()) cmd.setSuffix(suffixCode);
+        }    
+    
+    
+    
+    debugSerial<<F("CTRL: RAM=")<<fr<<F(" Item=")<<itemArr->name<<F(" Sub=")<<subItem<<F(" ");
+
+    cmd.debugOut();
+    //debugSerial<<endl; 
+    if (subItem && subItem[0] == '$') {debugSerial<<F("Skipped homie stuff")<<endl;return -4; }
+    if (!itemArr) return -1;
+    
+    /// DELAYED COMMANDS processing
+     if (suffixCode == S_DELAYED)
+        {
+            return scheduleCommand(cmd);
         }
     /// 
     int8_t  chActive  = -1;
@@ -827,6 +885,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                                switch (suffixCode)
                                {
                                      case S_NOTFOUND: //For empty (universal) OPENHAB suffix - turn ON/OFF automatically
+                                     if (subItem) {debugSerial<<F("CTRL: Unknown suffix")<<endl; break;}; // if some unknown suffix
                                      toExecute=true;
                                      scale100=true;  //openHab topic format
                                      chActive=(isActive()>0);
@@ -950,11 +1009,12 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     {
     if (fr<350)
             {
-                errorSerial<<F("Not enough memory for group operation")<<endl;
+                errorSerial<<F("CTRL: Not enough memory for group operation")<<endl;
                 return -1;
             }    
     if (allowRecursion && itemArg->type == aJson_Array && operation) 
                 {
+                chActive=(isActive()>0);    
                 digGroup(itemArg,&cmd,subItem);   
                 }
        res=1;            
@@ -965,7 +1025,8 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
               case CMD_RESTORE:  // individual for group members
                       switch (t = getCmd()) {
                           case CMD_HALT: //previous command was HALT ?
-                              debugSerial << F("Restored from:") << t << endl;
+                              if ((suffixCode==S_CMD) && cmd.isValue() && (!chActive || isScheduled())) scheduleOppositeCommand(cmd);
+                              debugSerial << F("CTRL: Restored from:") << t << endl;
                               cmd.loadItemDef(this);
                               cmd.Cmd(CMD_ON);    //turning on
                               status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
@@ -978,20 +1039,30 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
               case CMD_XOFF:    // individual for group members
                       switch (t = getCmd()) {
                           case CMD_XON: //previous command was CMD_XON ?
-                              debugSerial << F("Turned off from:") << t << endl;
+                             if ((suffixCode==S_CMD) && cmd.isValue() && (chActive || isScheduled())) scheduleOppositeCommand(cmd);
+                              debugSerial << F("CTRL: Turned off from:") << t << endl;
                               cmd.Cmd(CMD_OFF);    //turning Off
                               status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
                               break;
                           default:
-                              debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
+                              debugSerial << F("CTRL: XOFF skipped. Prev cmd:") << t <<endl;
                             return 3;
                     }
                     break;
           
             case CMD_XON:
-            chActive=(isActive()>0);
+            
+            if (!getFlag(FLAG_DISABLED))
+            {
+            if (chActive == -1) chActive=(isActive()>0);
+
+            if ((suffixCode==S_CMD) && cmd.isValue() && (!chActive || isScheduled())) scheduleOppositeCommand(cmd);
+   
+
             if (!chActive)  //if channel was'nt active before CMD_XON
-                  {
+                {
+
+
                     cmd.loadItemDef(this);
                     cmd.Cmd(CMD_ON);
                     command2Set=CMD_XON;
@@ -999,13 +1070,21 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                   }
               else
               { 
-                debugSerial<<F("XON:Already Active\n");
+                debugSerial<<F("CTRL: XON:Already Active\n");
                 return 3;
               }
+            }           
+                        else 
+                { 
+                    debugSerial<<F("CTRL: XON: Disabled\n");
+                    return 3;
+                }
+
             break;
             case CMD_HALT:
-            chActive=(isActive()>0);
-            if (chActive)  //if channel was active before CMD_HALT
+            if (chActive == -1) chActive=(isActive()>0);
+            if ((suffixCode==S_CMD) && cmd.isValue() && (chActive || isScheduled())) scheduleOppositeCommand(cmd);
+            if (chActive)  //if channel was active before CMD_HALT /// HERE bug - if cmd == On but 0 = active
                   {
                     cmd.Cmd(CMD_OFF);  
                     command2Set=CMD_HALT;
@@ -1013,7 +1092,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                   }
             else    
                   {
-                    debugSerial<<F("HALT:Already Inactive\n");
+                    debugSerial<<F("CTRL: HALT:Already Inactive\n");
                     return 3;
                   }
             break;
@@ -1028,7 +1107,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
     {  // NON GROUP part
         if (chActive<0) chActive  = (isActive()>0);
         toExecute=chActive || toExecute; // Execute if active 
-        debugSerial<<F("Active:")<<chActive<<F( " Exec:")<<toExecute<<endl;
+        debugSerial<<F("CTRL: Active:")<<chActive<<F( " Exec:")<<toExecute<<endl;
         if (subItem) 
         {
         //Check if subitem is some sort of command    
@@ -1040,7 +1119,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                 {           
                 if (subitemCmd != prevCmd)
                     {
-                        debugSerial<<F("Ignored, channel cmd=")<<prevCmd<<endl;
+                        debugSerial<<F("CTRL: Ignored, channel cmd=")<<prevCmd<<endl;
                         return -3;
                     }
                 subItem=NULL;   
@@ -1059,7 +1138,10 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
               case CMD_RESTORE:  // individual for group members
                       switch (t = getCmd()) {
                           case CMD_HALT: //previous command was HALT ?
-                              debugSerial << F("Restored from:") << t << endl;
+                              if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue() && (chActive || isScheduled())) //invoked not as group part, delayed, non Active or re-schedule 
+                                                                                     scheduleOppositeCommand(cmd);
+
+                              debugSerial << F("CTRL: Restored from:") << t << endl;
                               cmd.loadItemDef(this);
                               toExecute=true;
                               if (itemType == CH_THERMO) cmd.Cmd(CMD_AUTO); ////
@@ -1074,33 +1156,52 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
               case CMD_XOFF:    // individual for group members
                       switch (t = getCmd()) {
                           case CMD_XON: //previous command was CMD_XON ?
-                              debugSerial << F("Turned off from:") << t << endl;
+                            if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue() && (chActive || isScheduled())) //invoked not as group part, delayed, non Active or re-schedule 
+                                                                                     scheduleOppositeCommand(cmd);
+                              debugSerial << F("CTRL: Turned off from:") << t << endl;
                               toExecute=true;
                               cmd.Cmd(CMD_OFF);    //turning Off
+                              clearFlag(FLAG_XON);
                               status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
                               break;
                           default:
-                              debugSerial << F("XOFF skipped. Prev cmd:") << t <<endl;
+                              debugSerial << F("CTRL: XOFF skipped. Prev cmd:") << t <<endl;
                             return 3;
                     }
                     break;
           
             case CMD_XON:
-            if (!chActive)  //if channel was'nt active before CMD_XON
-                  {
-                    cmd.loadItemDef(this);
-                    cmd.Cmd(CMD_ON);
-                    command2Set=CMD_XON;
-                    status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE;  
-                    toExecute=true;
-                  }
-              else
-              { 
-                debugSerial<<F("XON:Already Active\n");
-                return 3;
-              }
+            if (!getFlag(FLAG_DISABLED))
+            {
+                if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue() && (!chActive || isScheduled())) //invoked not as group part, delayed, non Active or re-schedule 
+                                                                                     scheduleOppositeCommand(cmd);
+
+                if (!chActive)  //if channel was'nt active before CMD_XON
+                    {
+
+                        cmd.loadItemDef(this);
+                        cmd.Cmd(CMD_ON);
+                        command2Set=CMD_XON;
+                        setFlag(FLAG_XON);
+                        status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE;  
+                        toExecute=true;
+                    }
+                else
+                { 
+                    debugSerial<<F("CTRL: XON:Already Active\n");
+                    return 3;
+                }
+            }
+            else 
+                { 
+                    debugSerial<<F("CTRL: XON: Disabled\n");
+                    return 3;
+                }
             break;
+
             case CMD_HALT:
+            if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue() && (chActive || isScheduled())) //invoked not as group part, delayed, non Active or re-schedule 
+                                                                                     scheduleOppositeCommand(cmd);
             if (chActive)  //if channel was active before CMD_HALT
                   {
                     cmd.Cmd(CMD_OFF);  
@@ -1110,7 +1211,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                   }
             else    
                   {
-                    debugSerial<<F("HALT:Already Inactive\n");
+                    debugSerial<<F("CTRL: HALT:Already Inactive\n");
                     return 3;
                   }
             break;
@@ -1123,11 +1224,18 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                 }
 
             if (getCmd() == CMD_HALT) return 3; //Halted, ignore OFF
+            
+            if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue() && (chActive || isScheduled())) //invoked not as group part, delayed, non Active or re-schedule 
+                                                                                     scheduleOppositeCommand(cmd);
             status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
             toExecute=true;
             break;
 
             case CMD_ON:
+
+            if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue() && (!chActive || isScheduled())) //invoked not as group part, delayed, non Active or re-schedule 
+                                                                                     scheduleOppositeCommand(cmd);
+
                 if (!cmd.isChannelCommand())  //Command for driver, not for whole channel    
                 {
                     toExecute=true;
@@ -1135,7 +1243,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                 }
             if (chActive) 
                 {
-                        debugSerial<<F("ON:Already Active\n");
+                        debugSerial<<F("CTRL: ON:Already Active\n");
                         setCmd(CMD_ON);
                         SendStatus(FLAG_COMMAND | FLAG_SEND_DEFFERED);
                         return 3;
@@ -1163,6 +1271,43 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
           case CMD_UP:
             break;   
 
+          case CMD_ENABLE:
+            //clearFlag(FLAG_DISABLED); //saveItem have this
+            status2Send |= FLAG_FLAGS;
+            toExecute=true;
+            //debugSerial<<F("Disable Flag is:")<<getFlag(FLAG_DISABLED)<<endl;
+            if (allowRecursion && cmd.isValue() && (getFlag(FLAG_DISABLED) || isScheduled())) //invoked not as group part, delayed, non Active or re-schedule 
+                                                                                     scheduleOppositeCommand(cmd);
+          break;
+
+          case CMD_DISABLE:
+            //setFlag(FLAG_DISABLED); //saveItem have this
+            status2Send |= FLAG_FLAGS;
+            toExecute=true;
+            //debugSerial<<F("Disable Flag is:")<<getFlag(FLAG_DISABLED)<<endl;
+            if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue() && (!getFlag(FLAG_DISABLED) || isScheduled())) //invoked not as group part, delayed, non Active or re-schedule 
+                                                                                     scheduleOppositeCommand(cmd);
+          break;
+
+          case CMD_UNFREEZE:
+            //clearFlag(FLAG_DISABLED); //saveItem have this
+            status2Send = FLAG_FLAGS;
+            toExecute=true;
+            //debugSerial<<F("Disable Flag is:")<<getFlag(FLAG_DISABLED)<<endl;
+            if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue() && (getFlag(FLAG_FREEZED) || isScheduled())) //invoked not as group part, delayed, non Active or re-schedule 
+                                                                                     scheduleOppositeCommand(cmd);
+          break;
+
+          case CMD_FREEZE:
+            //setFlag(FLAG_DISABLED); //saveItem have this
+            status2Send = FLAG_FLAGS;
+            command2Set = 0;
+            toExecute=true;
+            //debugSerial<<F("Disable Flag is:")<<getFlag(FLAG_DISABLED)<<endl;
+            if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue() && (!getFlag(FLAG_FREEZED) || isScheduled())) //invoked not as group part, delayed, non Active or re-schedule 
+                                                                                     scheduleOppositeCommand(cmd);
+          break;
+
           default:
             if (cmd.isCommand()) status2Send |= FLAG_COMMAND;
             if (cmd.isValue())   status2Send |= FLAG_PARAMETERS; 
@@ -1170,110 +1315,145 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
           } //Switch commands
 } // NO GROUP
 if (invalidArgument) return -4;
-// UPDATE internal variables 
-if (status2Send) cmd.saveItem(this,status2Send);
-//debugSerial<<F("sts:")<<status2Send<<endl;
 
-if (driver) //New style modular code
-          {
-          res = driver->Ctrl(cmd, subItem, toExecute);   
-          if (driver->getChanType() == CH_THERMO) status2Send |= FLAG_SEND_IMMEDIATE;
-          //if (res==-1) status2Send=0;  ///////not working
-          }     
-else 
+if ((!driver || driver->isAllowed(cmd)) && (!getFlag(FLAG_FREEZED)))
 {
-switch (itemType) {
-/// rest of Legacy monolite core code (to be refactored ) BEGIN ///
-              case CH_RELAY:
-              {
-                 short iaddr=getArg();
-                 short icmd =cmd.getCmd();
+    // UPDATE internal variables 
+    if (status2Send) cmd.saveItem(this,status2Send);
+    //debugSerial<<F("sts:")<<status2Send<<endl;
 
-                 if (iaddr)
-                 {
-                  int k;
-                  short inverse = 0;
-
-                  if (iaddr < 0) {
-                      iaddr = -iaddr;
-                      inverse = 1;
-                  }
-                  if (iaddr <= (short) PINS_COUNT && iaddr>0)
-                      {
-                      pinMode(iaddr, OUTPUT);
-
-                      if (inverse)
-                          digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_AUTO) ? LOW : HIGH));
-                      else
-                          digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_AUTO) ? HIGH : LOW));
-                      debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
-                      status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
-                      res=1;
-                      }
-                }
-                   break;
-              }
-
-              case CH_THERMO:
-                     switch (suffixCode)
-                     {
-                      case S_VAL:
-                      //S_NOTFOUND:   
-                      {
-                      thermostatStore tStore;
-                      tStore.asint=getExt();
-                      if (!tStore.timestamp16) mqttClient.publish("/alarmoff/snsr", itemArr->name);
-                      tStore.tempX100=cmd.getFloat()*100.;         //Save measurement
-                      tStore.timestamp16=millisNZ(8) & 0xFFFF;    //And timestamp
-                      debugSerial<<F(" T:")<<tStore.tempX100<<F(" TS:")<<tStore.timestamp16<<endl;
-                      setExt(tStore.asint);
-                      res=1;
-                      }
-                      break;
-                      case S_SET:
-                      status2Send |= FLAG_PARAMETERS | FLAG_SEND_IMMEDIATE; 
-                      res=1;
-                      //st.saveItem(this);
-                      break;
-                      case S_CMD:
-                      status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
-                      res=1;
-                     }
-                   break;
-
-
-      #ifndef MODBUS_DISABLE
-              case CH_MODBUS:
-                if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue()))
+    if (driver) //New style modular code
+            {
+            res = driver->Ctrl(cmd, subItem, toExecute);   
+            if (driver->getChanType() == CH_THERMO) status2Send |= FLAG_SEND_IMMEDIATE;
+            //if (res==-1) status2Send=0;  ///////not working
+            if (status2Send & FLAG_FLAGS) res =1; //ENABLE & DISABLE processed by core
+            }     
+    else 
+    {
+          switch (itemType) {
+    /// rest of Legacy monolite core code (to be refactored ) BEGIN ///
+                case CH_RELAY:
+                if (cmd.isCommand())
                 {
-                int vol;    
-                if (!chActive && cmd.getCmd()== CMD_ON && (vol=cmd.getPercents())<MIN_VOLUME && vol>=0) 
+
+                    
+                    short iaddr=getArg();
+                    short icmd =cmd.getCmd();
+
+                    if (iaddr)
+                    {
+                    int k;
+                    short inverse = 0;
+
+                    if (iaddr < 0) {
+                        iaddr = -iaddr;
+                        inverse = 1;
+                    }
+                    if (iaddr <= (short) PINS_COUNT && iaddr>0)
                         {
-                        cmd.setPercents(INIT_VOLUME);
-                        status2Send |= FLAG_PARAMETERS | FLAG_SEND_IMMEDIATE; 
-                        };
+                        pinMode(iaddr, OUTPUT);
 
-                  res=modbusDimmerSet(cmd);
+                    switch (icmd){
+                        case CMD_AUTO:
+                        case CMD_COOL:
+                        case CMD_ON:
+                        case CMD_DRY:
+                        case CMD_FAN:
+                        case CMD_XON:
+                        digitalWrite(iaddr, k = (inverse) ? LOW : HIGH);
+                     break;
+                        case CMD_OFF:
+                        case CMD_HALT:
+                        case CMD_XOFF:   
+                        digitalWrite(iaddr, k = (inverse) ? HIGH : LOW); 
+                    }
+/*
+                        if (inverse)
+                            digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_AUTO) ? LOW : HIGH));
+                        else
+                            digitalWrite(iaddr, k = ((icmd == CMD_ON || icmd == CMD_AUTO) ? HIGH : LOW));
+
+  */                  
+                        debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
+                        status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
+                        res=1;
+                        }
+                    }
+                    break;
                 }
-                  break;
-              case CH_VC:
-                  if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue())) res=VacomSetFan(cmd);
-                  break;
-              case CH_VCTEMP:
-                  if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue())) res=VacomSetHeat(cmd);
-                  break;
-     #endif
-/// rest of Legacy monolite core code (to be refactored ) END ///
 
-  } //switch
-} //else (nodriver)
+                case CH_THERMO:
+                        switch (suffixCode)
+                        {
+                        case S_VAL:
+                        //S_NOTFOUND:   
+                        {
+                        thermostatStore tStore;
+                        tStore.asint=getExt();
+                        if (!tStore.timestamp16) mqttClient.publish("/alarmoff/snsr", itemArr->name);
+                        tStore.tempX100=cmd.getFloat()*100.;         //Save measurement
+                        tStore.timestamp16=millisNZ(8) & 0xFFFF;    //And timestamp
+                        debugSerial<<F(" T:")<<tStore.tempX100<<F(" TS:")<<tStore.timestamp16<<endl;
+                        setExt(tStore.asint);
+                        res=1;
+                        }
+                        break;
+                        case S_SET:
+                        status2Send |= FLAG_PARAMETERS | FLAG_SEND_IMMEDIATE; 
+                        res=1;
+                        //st.saveItem(this);
+                        break;
+                        case S_CMD:
+                        status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
+                        res=1;
+                        }
+                    break;
 
- //update command for HALT & XON and send MQTT status
- if (command2Set) setCmd(command2Set | FLAG_COMMAND);
- if (operation) SendStatus(status2Send);
 
-debugSerial<<F("Ctrl Res:")<<res<<F(" time:")<<millis()-time<<endl; 
+        #ifndef MODBUS_DISABLE
+                case CH_MODBUS:
+                    if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue()))
+                    {
+                    int vol;    
+                    if (!chActive && cmd.getCmd()== CMD_ON && (vol=cmd.getPercents())<MIN_VOLUME && vol>=0) 
+                            {
+                            cmd.setPercents(INIT_VOLUME);
+                            status2Send |= FLAG_PARAMETERS | FLAG_SEND_IMMEDIATE; 
+                            };
+
+                    res=modbusDimmerSet(cmd);
+                    }
+                    break;
+                case CH_VC:
+                    if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue())) res=VacomSetFan(cmd);
+                    break;
+                case CH_VCTEMP:
+                    if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue())) res=VacomSetHeat(cmd);
+                    break;
+        #endif
+    /// rest of Legacy monolite core code (to be refactored ) END ///
+
+    } //switch
+
+    } //else (nodriver)
+
+    //update command for HALT & XON and send MQTT status
+    if (command2Set) setCmd(command2Set | FLAG_COMMAND);
+    if (operation) SendStatus(status2Send);
+} //alowed cmd
+ else 
+        {
+            errorSerial<<F("CTRL: Command blocked by driver or channel frozen")<<endl;
+             if ((status2Send & FLAG_FLAGS) && operation) 
+                                {
+                                cmd.saveItem(this,FLAG_FLAGS);
+                                SendStatus(FLAG_FLAGS);
+                                }
+        }                   
+debugSerial<<F("CTRL: Res:")<<res<<F(" time:")<<millis()-time<<endl; 
 return res; 
+  }
 }
 
 void printActiveStatus(bool active)
@@ -1379,7 +1559,15 @@ if (timestampObj)
 
                 if (remain <0 && abs(remain)< 0xFFFFFFFFUL/2)
                 {
-                SendStatusImmediate(st,FLAG_SEND_DELAYED);    
+                int fr = freeRam();    
+                SendStatusImmediate(st,FLAG_SEND_DELAYED);   
+                       
+                if (fr < minimalMemory) 
+                    {
+                    errorSerial<<F("CTRL/poll: OutOfMemory: ")<<fr<<endl;
+                    return -1;
+                    } 
+
                 Ctrl(itemCmd(ST_VOID,cmd));
                 timestampObj->subtype=0;
                 }
@@ -1430,7 +1618,7 @@ void Item::sendDelayedStatus()
 int Item::SendStatus(int sendFlags) {
     if (sendFlags & FLAG_SEND_IMMEDIATE) sendFlags &= ~ (FLAG_SEND_IMMEDIATE | FLAG_SEND_DEFFERED);
     if ((sendFlags & FLAG_SEND_DEFFERED) ||  freeRam()<150 || (!isNotRetainingStatus() )) {
-        setFlag(sendFlags & (FLAG_COMMAND | FLAG_PARAMETERS));
+        setFlag(sendFlags & (FLAG_COMMAND | FLAG_PARAMETERS | FLAG_FLAGS));
         debugSerial<<F("Status deffered\n");
         return -1;
     }
@@ -1438,7 +1626,7 @@ int Item::SendStatus(int sendFlags) {
     {
         itemCmd st(ST_VOID,CMD_VOID);  
         st.loadItem(this, FLAG_COMMAND | FLAG_PARAMETERS);
-        sendFlags |= getFlag(FLAG_COMMAND | FLAG_PARAMETERS); //if some delayed status is pending
+        sendFlags |= getFlag(FLAG_COMMAND | FLAG_PARAMETERS | FLAG_FLAGS); //if some delayed status is pending
         //debugSerial<<F("ssi:")<<sendFlags<<endl;
         return SendStatusImmediate(st,sendFlags);
     }
@@ -1462,10 +1650,11 @@ int Item::SendStatus(int sendFlags) {
         case CMD_COOL:
         case CMD_DRY:
         case CMD_FAN:
-        case CMD_ENABLE:
-        case CMD_DISABLE:
             strcpy_P(cmdstr, ON_P);
-            break;
+            break;  
+        //case CMD_ENABLE:
+        //case CMD_DISABLE:
+        //    break; 
         case CMD_OFF:
         case CMD_HALT:
             strcpy_P(cmdstr, OFF_P);
@@ -1487,7 +1676,7 @@ int Item::SendStatus(int sendFlags) {
 
                       if (mqttClient.connected()  && !ethernetIdleCount)
                       {
-                        if (!subItem)
+                        if (!subItem )
                         {
                         setTopic(addrstr,sizeof(addrstr),T_OUT);
                         strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
@@ -1501,7 +1690,7 @@ int Item::SendStatus(int sendFlags) {
                             mqttClient.publish(addrstr, valstr, true);
                             debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
                         }
-                      else if (sendFlags & FLAG_COMMAND)
+                      else if ((sendFlags & FLAG_COMMAND) && (strlen(cmdstr)))
                         {
                             mqttClient.publish(addrstr, cmdstr, true);
                             debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
@@ -1584,12 +1773,12 @@ int Item::SendStatus(int sendFlags) {
                     case CMD_FAN:
                           strcpy_P(cmdstr, FAN_ONLY_P);          
                         break;
-                    case CMD_ENABLE:
-                          strcpy_P(cmdstr, ENABLE_P);          
-                        break;  
-                    case CMD_DISABLE:
-                          strcpy_P(cmdstr, DISABLE_P);          
-                        break;                                                
+                    //case CMD_ENABLE:
+                    //      strcpy_P(cmdstr, ENABLE_P);          
+                    //    break;  
+                    //case CMD_DISABLE:
+                    //      strcpy_P(cmdstr, DISABLE_P);          
+                    //    break;                                                
                     case CMD_ON:
                     case CMD_XON:
                           if (itemType == CH_THERMO) strcpy_P(cmdstr, AUTO_P);
@@ -1610,6 +1799,43 @@ int Item::SendStatus(int sendFlags) {
                  {
                   mqttClient.publish(addrstr, cmdstr,true);
                   clearFlag(FLAG_COMMAND);
+                 }
+              else
+               {
+                setFlag(sendFlags);
+                return 0;
+               }
+              }
+// Send ctrl
+              if (sendFlags & FLAG_FLAGS)
+            {
+              if (getFlag(FLAG_DISABLED))
+                   strcpy_P(cmdstr, DISABLE_P);
+
+              else if (getFlag(FLAG_FREEZED))
+                   strcpy_P(cmdstr, FREEZE_P);
+
+              else strcpy_P(cmdstr, ENABLE_P);   
+
+
+              //else strcpy_P(cmdstr, UNFREEZE_P); 
+
+    
+              setTopic(addrstr,sizeof(addrstr),T_OUT);
+              strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
+              if (subItem) 
+                            {
+                            strncat(addrstr, "/", sizeof(addrstr)-1);    
+                            strncat(addrstr, subItem, sizeof(addrstr)-1);
+                            }
+              strncat(addrstr, "/", sizeof(addrstr)-1);
+              strncat_P(addrstr, CTRL_P, sizeof(addrstr)-1);
+
+              debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
+              if (mqttClient.connected()  && !ethernetIdleCount)
+                 {
+                  mqttClient.publish(addrstr, cmdstr,true);
+                  clearFlag(FLAG_FLAGS);
                  }
               else
                {
@@ -1821,7 +2047,7 @@ int Item::VacomSetFan(itemCmd st) {
     //uint8_t j;//, result;
     //uint16_t data[1];
 
-    modbusSerial.begin(9600, fmPar);
+    modbusSerial.begin(MODBUS_FM_BAUD, MODBUS_FM_PARAM);
     node.begin(addr, modbusSerial);
 
     if (val) {
@@ -1866,7 +2092,7 @@ int addr;
     }
     modbusBusy = 1;
 
-    modbusSerial.begin(9600, fmPar);
+    modbusSerial.begin(MODBUS_FM_BAUD, MODBUS_FM_PARAM);
     node.begin(addr, modbusSerial);
 
     uint16_t regval;
@@ -1903,7 +2129,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
     };
     modbusBusy = 1;
 
-    modbusSerial.begin(MODBUS_SERIAL_BAUD, dimPar);
+    modbusSerial.begin(MODBUS_SERIAL_BAUD, MODBUS_SERIAL_PARAM);
     node.begin(addr, modbusSerial);
     uint8_t t;
     switch (_mask) {
@@ -1971,7 +2197,7 @@ int Item::checkFM() {
     // aJson.addStringToObject(out,"type",   "rect");
 
 
-    modbusSerial.begin(9600, fmPar);
+    modbusSerial.begin(MODBUS_FM_BAUD, MODBUS_FM_PARAM);
     node.begin(getArg(), modbusSerial);
 
 
@@ -2090,7 +2316,7 @@ int Item::checkModbusDimmer() {
 
     //node.setSlave(addr);
 
-    modbusSerial.begin(MODBUS_SERIAL_BAUD, dimPar);
+    modbusSerial.begin(MODBUS_SERIAL_BAUD, MODBUS_SERIAL_PARAM);
     node.begin(addr, modbusSerial);
 
     switch (_regType) {

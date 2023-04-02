@@ -97,6 +97,7 @@ int out_Multivent::getChanType()
 int out_Multivent::Ctrl(itemCmd cmd,   char* subItem , bool toExecute)
 {
 
+if (cmd.getCmd()==CMD_DISABLE || cmd.getCmd()==CMD_ENABLE) return 0;
 int suffixCode = cmd.getSuffix();
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
@@ -229,6 +230,9 @@ debugSerial << F("Total V:")<<totalV<<F(" active V:")<<activeV/255<< F(" fan%:")
 
 executeCommand(aJson.getObjectItem(gatesObj, ""),-1,itemCmd().Percents255(fanV).Cmd((fanV)?CMD_ON:CMD_OFF));
 
+//Move gates only if fan is actually on
+if (!fanV) return 1;
+
 i=NULL;
 if (gatesObj) i = gatesObj->child; //Pass 2: re-distribute airflow
 
@@ -250,11 +254,11 @@ while (i)
             debugSerial<<i->name<<(" Req:")<<requestedV/255<<F(" Out:")<<out<<endl;
           } 
 
-          // executeCommand(i,-1,itemCmd().Percents255(out));
-            if (out != outObj->valueint)
+         
+            if ((out != outObj->valueint))
                 {
                   //report out
-                  executeCommand(i,-1,itemCmd().Percents255(out));
+                  executeCommand(i,-1,itemCmd().Percents255(out)); 
                   outObj->valueint=out;
                 }
   }        
@@ -262,37 +266,6 @@ while (i)
 }
 
 return 1;
-
-switch(suffixCode)
-{
-case S_NOTFOUND:
-  // turn on  and set
-toExecute = true;
-debugSerial<<F("Forced execution");
-case S_SET:
-          if (!cmd.isValue()) return 0;
-
-          return 1;
-          //break;
-
-case S_CMD:
-      //item->setCmd(cmd.getCmd());
-      switch (cmd.getCmd())
-          {
-          case CMD_ON:
-
-            return 1;
-
-            case CMD_OFF:
-
-            return 1;
-
-} //switch cmd
-
-break;
-} //switch suffix
-debugSerial<<F("Unknown cmd")<<endl;
-return 0;
 }
 
 #endif

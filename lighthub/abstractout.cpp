@@ -12,6 +12,8 @@ int  abstractOut::isActive()
             case CMD_VOID:
               return 0;
               break;
+            case CMD_ON:  //trying (PWM ON set=0 issue)
+              return 1;  
             default:
               st.loadItem(item);
               return st.getPercents255();

@@ -1,7 +1,7 @@
 #pragma once
 #include <Arduino.h>
 
-
+#define DHCP_ATTEMPTS_FALLBACK 3
 #define TENS_FRACT_LEN 2
 #define TENS_BASE 100
 
@@ -138,12 +138,22 @@
 #define MODBUS_SERIAL_BAUD 9600
 #endif
 
-#ifndef MODBUS_DIMMER_PARAM
-#define MODBUS_DIMMER_PARAM SERIAL_8N1
+#ifndef MODBUS_SERIAL_PARAM
+#define MODBUS_SERIAL_PARAM SERIAL_8N1
 #endif
 
-#define dimPar MODBUS_DIMMER_PARAM
-#define fmPar  SERIAL_8N1
+/*
+#ifndef MODBUS_TCP_BAUD
+#define MODBUS_TCP_BAUD 9600
+#endif
+
+#ifndef MODBUS_TCP_PARAM
+#define MODBUS_TCP_PARAM SERIAL_8N1
+#endif
+*/
+
+#define MODBUS_FM_BAUD 9600
+#define MODBUS_FM_PARAM  SERIAL_8N1
 
 #ifndef SERIAL_BAUD
 #define SERIAL_BAUD 115200
@@ -303,7 +313,7 @@
 //#ifdef M5STACK
 //#define debugSerial M5.Lcd
 //#endif
-#ifdef noSerial
+#ifdef NOSERIAL
     #undef debugSerialPort
 #else
     #ifndef debugSerialPort
@@ -345,4 +355,10 @@
 #if defined(NRF5)
 //#define PINS_COUNT NUM_DIGITAL_PINS
 #define isAnalogPin(p)  ((p >= 14) && (p<=21))
+#endif
+
+#ifdef AVR
+#define minimalMemory 200
+#else
+#define minimalMemory 1200
 #endif

@@ -50,7 +50,7 @@ int  out_Motor::Setup()
 {
 abstractOut::Setup();    
 getConfig();
-debugSerial.println("Motor Init");
+debugSerial.println("Motor: Init");
 pinMode(pinUp,OUTPUT);
 pinMode(pinDown,OUTPUT);
 
@@ -70,7 +70,7 @@ return 1;
 
 int  out_Motor::Stop()
 {
-debugSerial.println("Motor De-Init");
+debugSerial.println("Motor: De-Init");
 digitalWrite(pinUp,INACTIVE);
 digitalWrite(pinDown,INACTIVE);
 
@@ -145,13 +145,13 @@ if (curPos>255) curPos=255;
 }
 
 if (motorOfftime && isTimeOver(motorOfftime,millis(),maxOnTime))
-  {dif = 0; debugSerial<<F("Motor timeout")<<endl;}
+  {dif = 0; debugSerial<<F("Motor: timeout")<<endl;}
 else if (curPos>=0)
   dif=targetPos-curPos;
 else
   dif=targetPos-255/2; // Have No feedback
 
-debugSerial<<F("In:")<<pinFeedback<<F(" Val:")<<fb<<F("/")<<curPos<<F("->")<<targetPos<<F(" delta:")<<dif<<endl;
+debugSerial<<F("Motor: in:")<<pinFeedback<<F(" Val:")<<fb<<F("/")<<curPos<<F("->")<<targetPos<<F(" delta:")<<dif<<endl;
 
 if (dif<-POS_ERR)
 {
@@ -241,7 +241,7 @@ else
 
 }
 else //Target zone
-{ debugSerial.println("Target");
+{ debugSerial.println("Motor: Target");
   digitalWrite(pinUp,INACTIVE);
   digitalWrite(pinDown,INACTIVE);
   item->setExt(0);
@@ -263,10 +263,7 @@ int out_Motor::getChanType()
 
 int out_Motor::Ctrl(itemCmd cmd,   char* subItem , bool toExecute)
 {
-//int chActive = item->isActive();
-//bool toExecute = (chActive>0);
 int suffixCode = cmd.getSuffix();
-//itemCmd st(ST_PERCENTS,CMD_VOID);
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
 item->setFlag(FLAG_ACTION_NEEDED);
@@ -276,30 +273,15 @@ switch(suffixCode)
 case S_NOTFOUND:
   // turn on  and set
 toExecute = true;
-debugSerial<<F("Forced execution");
+debugSerial<<F("Motor: Forced execution");
 case S_SET:
 //case S_ESET:
           if (!cmd.isValue()) return 0;
-          // item->setVal(cmd.getPercents());
           if (item->getExt()) item->setExt(millisNZ()); //Extend motor time
-          /*
-          st.assignFrom(cmd);
-          //Store
-          st.saveItem(item);
-          if (!suffixCode)
-          {
-            if (chActive>0 && !st.getPercents()) item->setCmd(CMD_OFF);
-            if (chActive==0 && st.getPercents()) item->setCmd(CMD_ON);
-            item->SendStatus(FLAG_COMMAND | FLAG_PARAMETERS | FLAG_SEND_DEFFERED);
-            if (item->getExt()) item->setExt(millisNZ()); //Extend motor time
-          }
-          else    item->SendStatus(FLAG_PARAMETERS | FLAG_SEND_DEFFERED);
-          */
           return 1;
           //break;
 
 case S_CMD:
-      //item->setCmd(cmd.getCmd());
       switch (cmd.getCmd())
           {
           case CMD_ON:
@@ -307,7 +289,6 @@ case S_CMD:
             return 1;
 
             case CMD_OFF:
-              ////item->SendStatus(FLAG_COMMAND);
               if (item->getExt()) item->setExt(millisNZ()); //Extend motor time
             return 1;
 

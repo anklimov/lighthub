@@ -55,7 +55,7 @@ void SetAddr(char * out,  uint8_t* addr);
 uint8_t HEX2DEC(char i);
 int getInt(char ** chan);
 itemCmd getNumber(char ** chan);
-unsigned long freeRam ();
+unsigned long  freeRam ();
 void parseBytes(const char* str, char separator, byte* bytes, int maxBytes, int base);
 int log(const char *str, ...);
 void printFloatValueToStr(char *valstr, float value);

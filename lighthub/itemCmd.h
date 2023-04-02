@@ -26,8 +26,10 @@ typedef  char cmdstr[9];
 const cmdstr commands_P[] PROGMEM =
 {
 "","ON","OFF","REST","TOGGLE","HALT","XON","XOFF","INCREASE","DECREASE",
-"HEAT","COOL","AUTO","FAN_ONLY","DRY","STOP","HIGH","MEDIUM","LOW","ENABLE","DISABLE",
-"TRUE","FALSE","RGB","HSV"
+"ENABLE","DISABLE","UNFREEZE","FREEZE",
+"AUTO","FAN_ONLY",
+"HIGH","MEDIUM","LOW",
+"HEAT","COOL","DRY","STOP","RGB","HSV"
 };
 #define commandsNum sizeof(commands_P)/sizeof(cmdstr)
 
@@ -41,20 +43,24 @@ const cmdstr commands_P[] PROGMEM =
 #define CMD_XOFF 7      /// OFF only if was previously turned on by CMD_XON
 #define CMD_UP 8        /// increase
 #define CMD_DN 9        /// decrease
-#define CMD_HEAT 0xa    /// Thermostat/AC set to HEATing mode 
-#define CMD_COOL 0xb    /// Thermostat/AC set to COOLing mode 
-#define CMD_AUTO 0xc    /// Thermostat/AC set to Auto mode 
-#define CMD_FAN 0xd     /// AC set to Fan-only mode 
-#define CMD_DRY 0xe     /// AC set to Dry mode
-#define CMD_STOP 0xf    /// stop dimming (for further use)
+
+#define CMD_ENABLE 0xa /// for PID regulator and XON/XOFF - chan limitation
+#define CMD_DISABLE 0xb /// for PID regulator
+#define CMD_UNFREEZE 0xc   /// Aliase for ON
+#define CMD_FREEZE 0xd /// Aliase for OFF
+
+#define CMD_AUTO 0xe    /// Thermostat/AC set to Auto mode 
+#define CMD_FAN 0xf     /// AC set to Fan-only mode 
 
 #define CMD_HIGH 0x10   /// AC/Vent fan level HIGH
 #define CMD_MED 0x11    /// AC/Vent fan level MEDIUM
 #define CMD_LOW 0x12    /// AC/Vent fan level LOW
-#define CMD_ENABLE 0x13 /// for PID regulator
-#define CMD_DISABLE 0x14 /// for PID regulator
-#define CMD_TRUE 0x15   /// Aliase for ON
-#define CMD_FALSE 0x16  /// Aliase for OFF
+
+#define CMD_HEAT 0x13    /// Thermostat/AC set to HEATing mode 
+#define CMD_COOL 0x14    /// Thermostat/AC set to COOLing mode 
+#define CMD_DRY 0x15     /// AC set to Dry mode
+#define CMD_STOP 0x16    /// stop dimming (for further use)
+
 #define CMD_RGB  0x17 
 #define CMD_HSV  0x18
 
@@ -78,7 +84,7 @@ const cmdstr commands_P[] PROGMEM =
 #define FLAG_ACTION_IN_PROCESS 0x8000UL
 
 #define FLAG_DISABLED 0x10000UL
-#define FLAG_DISABLED_ALL 0x20000UL
+#define FLAG_FREEZED 0x20000UL
 #define FLAG_HALTED 0x40000UL
 #define FLAG_XON 0x80000UL
 

@@ -61,6 +61,9 @@ class systemConfig {
  bool             saveETAG(); 
  bool             loadETAG(); 
 
+ bool             getDHCPfallback();
+ bool             setDHCPfallback(bool flag);
+
  systemConfigFlags getConfigFlags();
  bool setConfigFlags(systemConfigFlags flags);
 

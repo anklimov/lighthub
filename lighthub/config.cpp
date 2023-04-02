@@ -293,6 +293,19 @@ bool systemConfig::setConfigFlags(systemConfigFlags flags)
   return setConfigFlags(flags);
  }
 
+bool             systemConfig::getDHCPfallback()
+{
+  systemConfigFlags flags = getConfigFlags();
+  return flags.dhcpFallback;
+}
+
+bool             systemConfig::setDHCPfallback(bool flag)
+ {
+  systemConfigFlags flags = getConfigFlags();
+  flags.dhcpFallback=flag;   
+  return setConfigFlags(flags);
+ } 
+
 bool             systemConfig::getLoadHTTPConfig()
 {
   systemConfigFlags flags = getConfigFlags();

@@ -12,8 +12,8 @@
 -DTIMER_INT
 #-DFLASH_OFFSET=-256
 
-# Serial parameters for LEGACY Modbus
--DMODBUS_DIMMER_PARAM=SERIAL_8E1
+# default MODBUS Serial parameters for LEGACY Modbus  and MODBUS over IP
+#-DMODBUS_SERIAL_PARAM=SERIAL_8E1
 
 #Set Logariphmic law for DMX channels bright 
 -DBRIGHT_LOG
