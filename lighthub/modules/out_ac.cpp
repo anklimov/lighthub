@@ -8,6 +8,11 @@
 #include "textconst.h"
 #include "main.h"
 
+#include "config.h"
+#include "streamlog.h"
+extern systemConfig sysConf;
+extern bool disableCMD;
+
 #ifndef AC_Serial
 #define AC_Serial Serial3
 #endif
@@ -237,6 +242,12 @@ debugSerial<<F("AC Init: ")<<portNum<<endl;
 if (!portNum)// && (g_APinDescription[0].ulPinType == PIO_PA8A_URXD))
     {
       pinMode(0, INPUT_PULLUP);
+      #if debugSerial == Serial
+      infoSerial<<F("Serial used by AC - disabling serial logging and cmd")<<
+      sysConf.setSerialDebuglevel(0);
+      serialDebugLevel = 0;
+      disableCMD=true;
+      #endif
     }
 ACSerial->begin(9600);
 item->itemArr->subtype = CST_INITIALIZED;

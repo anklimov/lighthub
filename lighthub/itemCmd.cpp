@@ -4,6 +4,7 @@
 #include "Streaming.h"
 #include "item.h"
 #include "bright.h"
+#include <utility/stringbuffer.h>>
 
 #ifndef HSV_DISABLE
 #ifdef ADAFRUIT_LED
@@ -1170,7 +1171,7 @@ return false;
       int cmd = txt2cmd(verb->valuestring);
       if (cmd>0)
           {
-            free(verb->valuestring);
+            freeString(verb->valuestring);
             verb->valueint=cmd;
             verb->type=aJson_Int;
             return verb->valueint;

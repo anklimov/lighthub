@@ -1510,6 +1510,7 @@ int loadConfigFromEEPROM()
     #endif
 
     if (sysConfStream.peek() == '{') {
+        debugSerial<<F("Trying Load from EEPROM")<<endl;
         aJsonStream as = aJsonStream(&sysConfStream);
         cleanConf();
         root = aJson.parse(&as);

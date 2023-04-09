@@ -67,11 +67,11 @@ public:
     virtual void flush();      
     virtual size_t write(uint8_t ch) ;       
     
-    #if defined(__SAM3X8E__)
-    virtual size_t write(const uint8_t *buffer, size_t size) override;
-    #else 
+    //#if defined(__SAM3X8E__)
+    //virtual size_t write(const uint8_t *buffer, size_t size) override;
+    //#else 
     using Print::write;//(const uint8_t *buffer, size_t size);         
-    #endif    
+    //#endif    
 
     #if defined(ESP8266) || defined(ESP32)      
     virtual void putEOF() override ;          

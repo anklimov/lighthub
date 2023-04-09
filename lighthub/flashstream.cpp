@@ -248,7 +248,7 @@ NRFFlashStorage EEPROM;
                   return 1;  
                #endif                
             };
-    
+  /*  
    #if defined(__SAM3X8E__)
     size_t flashStream::write(const uint8_t *buffer, size_t size) 
             {     
@@ -258,7 +258,7 @@ NRFFlashStorage EEPROM;
             };
      
    #endif    
-
+*/
     #if defined(ESP8266) || defined(ESP32)      
      void flashStream::putEOF()  
             {
@@ -269,7 +269,11 @@ NRFFlashStorage EEPROM;
 
  void flashStream::close()  
     {  
-      if (openmode == 'w') putEOF();
+      if (openmode == 'w') 
+                              {
+                              putEOF();
+                              debugSerial<<F("EOF")<<endl;
+                              }
       #if  defined(__SAM3X8E__)
       if (samBufferPos) flush();
       #endif

@@ -28,7 +28,7 @@ REM bin file exist?
 IF NOT EXIST "%BINFILE%" GOTO error_binfile
 
 REM fetch DeviceID of Arduino Due Programming Port from WMI Service
-FOR /f "tokens=* skip=1" %%a IN ('wmic PATH Win32_SerialPort Where "Caption LIKE '%%USB%%'" get DeviceID') DO (
+FOR /f "tokens=* skip=1" %%a IN ('wmic PATH Win32_SerialPort Where "Caption LIKE '%%BOSSA%%'" get DeviceID') DO (
     SET COMX=%%a
     GOTO exit1
 )
@@ -59,8 +59,9 @@ PING -n %WAIT_ERASED% 127.0.0.1>NUL
 
 REM Execute bossac.exe
 ECHO Execute bossac with command line:
-"%BOSSACPATH%"  -i  --port=%COMPORT% -U false -e -u -w -v -b "%BINFILE%" -R
-REM START /WAIT "" "%BOSSACPATH%" -i  --port=%COMPORT% -U false -e -w -v -b "%BINFILE%" -R
+
+"%BOSSACPATH%" -i --port=%COMPORT% -u -e -w -v -b "%BINFILE%" -R
+REM START /WAIT "" "%BOSSACPATH%" -i  --port=%COMPORT% -u -e -w -v -b "%BINFILE%" -R
 
 GOTO end
 
