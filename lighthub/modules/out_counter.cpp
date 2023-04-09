@@ -13,7 +13,8 @@ static int driverStatus = CST_UNKNOWN;
 void out_counter::getConfig()
 {
   if (!item) return;
-  impulse = item->getFloatArg(0);
+  impulse = item->getFloatArg(0)*TENS_BASE;
+  
   period = item->getFloatArg(1)*1000.0;  
   //debugSerial<<"CTR: imp:"<<impulse<<" period:"<<period<<endl;      
 }
@@ -51,12 +52,14 @@ uint32_t timer = item->getExt();
 
       itemCmd st;
       st.loadItem(item,FLAG_PARAMETERS|FLAG_COMMAND);
-      float val = st.getFloat();
+      //float val = st.getFloat();
+      uint32_t val = st.getTens_raw();
       //short cmd = st.getCmd();
-      debugSerial<<"CTR: tick val:"<<val<<endl; 
+      debugSerial<<"CTR: tick val:"<<val<< " + "<< impulse << endl; 
 
       val+=impulse;
-      st.Float(val);
+      //st.Float(val);
+      st.Tens_raw(val);
       st.saveItem(item);
       debugSerial<<"CTR: tick saved val:"<<val<<endl; 
       item->SendStatus(FLAG_PARAMETERS);

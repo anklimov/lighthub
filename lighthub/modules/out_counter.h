@@ -20,7 +20,8 @@ public:
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true) override;
 
 protected:
-    float impulse; 
+    //float impulse;
+    uint32_t impulse; 
     uint32_t period;
 };
 #endif
