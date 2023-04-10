@@ -19,21 +19,14 @@ extern bool disableCMD;
 
 #define INTERVAL_AC_POLLING      5000L
 
-//static int driverStatus = CST_UNKNOWN;
+#define AC_FAILED 15
+#define AC_UNKNOWN CST_UNKNOWN
+#define AC_IDLE CST_INITIALIZED
+#define AC_SENDING 2
 
-static int fresh =0;
-static int power = 0;
-static int swing =0;
-static int lock_rem =0;
-static int cur_tmp = 0;
-static int set_tmp = 0;
-static int fan_spd = 0;
-static int mode = 0;
-
-long prevPolling = 0;
 byte inCheck = 0;
 byte qstn[] = {255,255,10,0,0,0,0,0,1,1,77,1,90}; // Команда опроса
-byte data[37] = {}; //Массив данных
+
 byte on[]   = {255,255,10,0,0,0,0,0,1,1,77,2,91}; // Включение кондиционера
 byte off[]  = {255,255,10,0,0,0,0,0,1,1,77,3,92}; // Выключение кондиционера
 byte lock[] = {255,255,10,0,0,0,0,0,1,3,0,0,14};  // Блокировка пульта
@@ -45,7 +38,10 @@ const char SWING_P[]  PROGMEM = "swing";
 const char RAW_P[]    PROGMEM = "raw";
 
 void out_AC::getConfig(){
+ 
   ACSerial=&AC_Serial;
+  if (!item) return;
+
   if (item->getArgCount())
 
     switch(portNum=item->getArg(0)){
@@ -72,14 +68,24 @@ void out_AC::getConfig(){
 
 void out_AC::InsertData(byte data[], size_t size){
 
+    int fresh =0;
+
+    int swing =0;
+    int lock_rem =0;
+    int cur_tmp = 0;
+    int set_tmp = 0;
+    int fan_spd = 0;
+
+
     char s_mode[10];
+
     set_tmp = data[B_SET_TMP]+16;
     if (set_tmp>40 || set_tmp<16) return;
     cur_tmp = data[B_CUR_TMP];
-    mode    = data[B_MODE];
+    store->mode    = data[B_MODE];
     fan_spd = data[B_FAN_SPD];
     swing   = data[B_SWING];
-    power   = data[B_POWER];
+    store->power   = data[B_POWER];
     lock_rem = data[B_LOCK_REM];
     fresh   = data[B_FRESH];
   /////////////////////////////////
@@ -104,15 +110,15 @@ void out_AC::InsertData(byte data[], size_t size){
   }
   */
 
-  debugSerial.print ("Power=");
-  debugSerial.println(power);
+  debugSerial.print ("AC: Power=");
+  debugSerial.println(store->power);
 
-  if (power & 0x08)
+  if (store->power & 0x08)
       publishTopic(item->itemArr->name, "ON", "/quiet");
   else  publishTopic(item->itemArr->name, "OFF" , "/quiet");
 
 
-  if (power & 0x02) //Compressor on
+  if (store->power & 0x02) //Compressor on
       publishTopic(item->itemArr->name, "ON","/compressor");
   else
       publishTopic(item->itemArr->name, "OFF","/compressor");
@@ -155,28 +161,28 @@ void out_AC::InsertData(byte data[], size_t size){
   ////////////////////////////////////
   s_mode[0]='\0';
 
-  if (mode == 0x00){
+  if (store->mode == 0x00){
     strcpy_P(s_mode,AUTO_P);
   }
-  else if (mode == 0x01){
+  else if (store->mode == 0x01){
     strcpy_P(s_mode,COOL_P);
   }
-  else if (mode == 0x02){
+  else if (store->mode == 0x02){
     strcpy_P(s_mode,HEAT_P);
   }
-  else if (mode == 0x03){
+  else if (store->mode == 0x03){
     strcpy_P(s_mode,FAN_ONLY_P);
   }
-  else if (mode == 0x04){
+  else if (store->mode == 0x04){
     strcpy_P(s_mode,DRY_P);
   }
-  else if (mode == 109){
+  else if (store->mode == 109){
       strcpy_P(s_mode,ERROR_P);
   }
 
-  publishTopic(item->itemArr->name, (long) mode, "/mode");
+  publishTopic(item->itemArr->name, (long) store->mode, "/mode");
 
-  if (power & 0x01)
+  if (store->power & 0x01)
       publishTopic(item->itemArr->name, s_mode,"/cmd");
 
   else publishTopic(item->itemArr->name, "OFF","/cmd");
@@ -208,11 +214,17 @@ byte getCRC(byte req[], size_t size){
 }
 
 void out_AC::SendData(byte req[], size_t size){
+if (!store || !item) return;  
+if (item->itemArr->subtype == AC_SENDING)
+     {
+      while (store->timestamp && !isTimeOver(store->timestamp,millis(),150)) yield();
+     }
+
   ACSerial->write(req, size - 1);
   ACSerial->write(getCRC(req, size-1));
   //ACSerial->flush();
-  item->setExt(millisNZ());
- debugSerial<<F("AirCon ")<<portNum<<F(" <<");
+  store->timestamp=millisNZ();
+  debugSerial<<F("AC: ")<<portNum<<F(" <<");
   for (int i=0; i < size-1; i++)
   {
      if (req[i] < 10){
@@ -225,7 +237,7 @@ void out_AC::SendData(byte req[], size_t size){
              }
   }
 debugSerial.println();
-
+item->itemArr->subtype = AC_SENDING;
 }
 
 inline unsigned char toHex( char ch ){
@@ -238,19 +250,32 @@ int  out_AC::Setup()
 {
 abstractOut::Setup();    
 if (!item) return 0;  
-debugSerial<<F("AC Init: ")<<portNum<<endl;
+debugSerial<<F("AC: Init: ")<<portNum<<endl;
+
+if (!store) store= (acPersistent *)item->setPersistent(new acPersistent);
+if (!store)
+              { errorSerial<<F("AC: Out of memory")<<endl;
+                return 0;}
+
+memset(store->data,0,sizeof(acPersistent::data));
+store->mode=0;
+store->power=0;
+store->inCheck=0;
+store->timestamp=millisNZ();            
+
 if (!portNum)// && (g_APinDescription[0].ulPinType == PIO_PA8A_URXD))
     {
       pinMode(0, INPUT_PULLUP);
       #if debugSerial == Serial
-      infoSerial<<F("Serial used by AC - disabling serial logging and cmd")<<
-      sysConf.setSerialDebuglevel(0);
+      infoSerial<<F("AC: Serial used by AC - disabling serial logging and cmd")<<endl;
+      //sysConf.setSerialDebuglevel(0);
       serialDebugLevel = 0;
       disableCMD=true;
       #endif
     }
 ACSerial->begin(9600);
-item->itemArr->subtype = CST_INITIALIZED;
+item->itemArr->subtype = AC_IDLE;
+
 //driverStatus = CST_INITIALIZED;
 return 1;
 }
@@ -258,7 +283,10 @@ return 1;
 int  out_AC::Stop()
 {
 if (!item) return 0;    
-debugSerial<<F("AC De-Init: ")<<portNum<<endl;
+debugSerial<<F("AC: De-Init: ")<<portNum<<endl;
+delete store;
+item->setPersistent(NULL);
+store = NULL;
 item->itemArr->subtype = CST_UNKNOWN;
 return 1;
 }
@@ -266,49 +294,72 @@ return 1;
 int  out_AC::Status()
 {
 if (!item) return 0;  
-return item->itemArr->subtype;
+switch (item->itemArr->subtype)
+{
+case AC_FAILED: return CST_FAILED;
+case AC_UNKNOWN: return CST_UNKNOWN;
+default:
+return CST_INITIALIZED;
+//return item->itemArr->subtype;
 }
-
+}
 int out_AC::isActive()
 {
-return (power & 1);
+if (!store) return 0;  
+return (store->power & 1);
 }
 
 int out_AC::Poll(short cause)
 {
+if (!store) return -1;
+
+switch (item->itemArr->subtype)
+{  
+case AC_FAILED: return -1;
+case AC_UNKNOWN: return -1;
+case AC_SENDING:
+      {
+      if (store->timestamp && isTimeOver(store->timestamp,millis(),150)) 
+                                            {
+                                            item->itemArr->subtype = AC_IDLE;
+                                            store->timestamp=millisNZ();
+                                            }
+      }
+}
+
 if (cause!=POLLING_SLOW) return false;
 
-  if (isTimeOver(prevPolling,millis(),INTERVAL_AC_POLLING)) {
-    prevPolling = millisNZ();
-    debugSerial.println(F("Polling"));
+  if ((item->itemArr->subtype == AC_IDLE) && isTimeOver(store->timestamp,millis(),INTERVAL_AC_POLLING)) 
+  {
+    debugSerial.println(F("AC: Polling"));
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
 
   if(ACSerial->available() >= 37){ //was 0
-    ACSerial->readBytes(data, 37);
+    ACSerial->readBytes(store->data, 37);
     while(ACSerial->available()){
       delay(2);
       ACSerial->read();
     }
 
-debugSerial<<F("AirCon ")<<portNum<<F(" >> ");
+debugSerial<<F("AC: ")<<portNum<<F(" >> ");
   for (int i=0; i < 37-1; i++)
   {
-     if (data[i] < 10){
+     if (store->data[i] < 10){
        debugSerial.print("0");
-       debugSerial.print(data[i], HEX);
+       debugSerial.print(store->data[i], HEX);
      }
         else
              {
-             debugSerial.print(data[i], HEX);
+             debugSerial.print(store->data[i], HEX);
              }
   }
 
 
-    if (data[36] != inCheck){
-      inCheck = data[36];
-      InsertData(data, 37);
-      debugSerial<<F(" OK");
+    if (store->data[36] != store->inCheck){
+      store->inCheck = store->data[36];
+      InsertData(store->data, 37);
+      debugSerial<<F("AC: OK");
     }
 
  debugSerial.println();   
@@ -335,14 +386,16 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
       switch(suffixCode)
       {
       case S_SET:
-          set_tmp = cmd.getInt();
+          {
+          byte set_tmp = cmd.getInt();
           if (set_tmp >= 16 && set_tmp <= 40)
           {
             //if (set_tmp>40 || set_tmp<16) set_temp=21;
-            data[B_SET_TMP] = set_tmp -16;
+            store->data[B_SET_TMP] = set_tmp -16;
             publishTopic(item->itemArr->name,(long) set_tmp,"/set");
             }
-          else return -1;  
+          else return -1;
+          }  
       break;
 
       case S_CMD:
@@ -351,52 +404,52 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
                 {
                   case CMD_ON:
                   case CMD_XON:
-                      data[B_POWER] = power;
-                      data[B_POWER] |= 1;
+                      store->data[B_POWER] = store->power;
+                      store->data[B_POWER] |= 1;
                       SendData(on, sizeof(on)/sizeof(byte));
                    //   publishTopic(item->itemArr->name,"ON","/cmd");
                       return 1;
                   break;
                   case CMD_OFF:
                   case CMD_HALT:
-                      data[B_POWER] = power;
-                      data[B_POWER] &= ~1;
+                      store->data[B_POWER] = store->power;
+                      store->data[B_POWER] &= ~1;
                       SendData(off, sizeof(off)/sizeof(byte));
                    //   publishTopic(item->itemArr->name,"OFF","/cmd");
                       return 1;
                   break;
                   case CMD_AUTO:
-                      data[B_MODE] = 0;
-                      data[B_POWER] = power;
-                      data[B_POWER] |= 1;
+                      store->data[B_MODE] = 0;
+                      store->data[B_POWER] = store->power;
+                      store->data[B_POWER] |= 1;
                     //  strcpy_P(s_mode,AUTO_P);
                   break;
                   case CMD_COOL:
-                      data[B_MODE] = 1;
-                      data[B_POWER] = power;
-                      data[B_POWER] |= 1;
+                      store->data[B_MODE] = 1;
+                      store->data[B_POWER] = store->power;
+                      store->data[B_POWER] |= 1;
                     //  strcpy_P(s_mode,COOL_P);
                   break;
                   case CMD_HEAT:
-                      data[B_MODE] = 2;
-                      data[B_POWER] = power;
-                      data[B_POWER] |= 1;
+                      store->data[B_MODE] = 2;
+                      store->data[B_POWER] = store->power;
+                      store->data[B_POWER] |= 1;
                     //  strcpy_P(s_mode,HEAT_P);
                   break;
                   case CMD_DRY:
-                      data[B_MODE] = 4;
-                      data[B_POWER] = power;
-                      data[B_POWER] |= 1;
+                      store->data[B_MODE] = 4;
+                      store->data[B_POWER] = store->power;
+                      store->data[B_POWER] |= 1;
                    //   strcpy_P(s_mode,DRY_P);
                   break;
                   case CMD_FAN:
-                      data[B_MODE] = 3;
+                      store->data[B_MODE] = 3;
                     //  debugSerial<<"fan\n";
-                      data[B_POWER] = power;
-                      data[B_POWER] |= 1;
-                      if (data[B_FAN_SPD] == 3)
+                      store->data[B_POWER] = store->power;
+                      store->data[B_POWER] |= 1;
+                      if (store->data[B_FAN_SPD] == 3)
                          {
-                           data[B_FAN_SPD] = 2; //Auto - fan speed in Ventilation mode not working
+                           store->data[B_FAN_SPD] = 2; //Auto - fan speed in Ventilation mode not working
                          }
                     //  strcpy_P(s_mode,FAN_ONLY_P);
                   break;
@@ -413,24 +466,24 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
       switch (cmd.getCmd())
       {
       case CMD_AUTO:
-      data[B_FAN_SPD] = 3;
+      store->data[B_FAN_SPD] = 3;
       strcpy_P(s_speed,AUTO_P);
       break;
       case CMD_HIGH:
-      data[B_FAN_SPD] = 0;
+      store->data[B_FAN_SPD] = 0;
       strcpy_P(s_speed,HIGH_P);
       break;
       case CMD_MED:
-      data[B_FAN_SPD] = 1;
+      store->data[B_FAN_SPD] = 1;
       strcpy_P(s_speed,MED_P);
       break;
       case CMD_LOW:
-      data[B_FAN_SPD] = 2;
+      store->data[B_FAN_SPD] = 2;
       strcpy_P(s_speed,LOW_P);
       break;
       default:
       //if (n) data[B_FAN_SPD] = Parameters[0];
-      data[B_FAN_SPD] = cmd.getInt();
+      store->data[B_FAN_SPD] = cmd.getInt();
       //TODO - mapping digits to speed
       }
       publishTopic(item->itemArr->name,s_speed,"/fan");
@@ -438,17 +491,17 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
 
       case S_MODE:
       //data[B_MODE]    = Parameters[0];
-      data[B_MODE]    = cmd.getInt();
+      store->data[B_MODE]    = cmd.getInt();
       break;
 
       case S_LOCK:
       switch (cmd.getCmd())
           {
             case CMD_ON:
-            data[B_LOCK_REM] = 80;
+            store->data[B_LOCK_REM] = 80;
             break;
             case CMD_OFF:
-            data[B_LOCK_REM] = 0;
+            store->data[B_LOCK_REM] = 0;
             break;
           }
       break;
@@ -457,16 +510,16 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
       switch (cmd.getCmd())
           {
             case CMD_ON:
-            data[B_SWING] = 3;
+            store->data[B_SWING] = 3;
             publishTopic(item->itemArr->name,"ON","/swing"); 
             break;
             case CMD_OFF:
-            data[B_SWING] = 0;
+            store->data[B_SWING] = 0;
             publishTopic(item->itemArr->name,"OFF","/swing"); 
             break;
             default:
             //if (n) data[B_SWING] = Parameters[0];
-            data[B_SWING] = cmd.getInt();
+            store->data[B_SWING] = cmd.getInt();
           }
          
       break;
@@ -475,10 +528,10 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
       switch (cmd.getCmd())
           {
             case CMD_ON:
-            data[B_POWER] |= 8;
+            store->data[B_POWER] |= 8;
             break;
             case CMD_OFF:
-            data[B_POWER] &= ~8;
+            store->data[B_POWER] &= ~8;
             break;
           }
 
@@ -532,14 +585,16 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
 
     //if (strTopic == "/myhome/in/Conditioner/RAW")
 
-    data[B_CMD] = 0;
-    data[9] = 1;
-    data[10] = 77;
-    data[11] = 95;
-    ACSerial->flush();
-    uint32_t ts=item->getExt();
-    while (ts && !isTimeOver(ts,millis(),100)) yield();
-    SendData(data, sizeof(data)/sizeof(byte));
+    store->data[B_CMD] = 0;
+    store->data[9] = 1;
+    store->data[10] = 77;
+    store->data[11] = 95;
+    
+    ///ACSerial->flush();
+
+    //uint32_t ts=item->getExt();
+    //while (ts && !isTimeOver(ts,millis(),100)) yield();
+    SendData(store->data, sizeof(store->data)/sizeof(byte));
     //InsertData(data, sizeof(data)/sizeof(byte));
     //ACSerial->flush();
     //item->setExt(millisNZ());

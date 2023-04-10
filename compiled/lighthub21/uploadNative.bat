@@ -60,7 +60,7 @@ PING -n %WAIT_ERASED% 127.0.0.1>NUL
 REM Execute bossac.exe
 ECHO Execute bossac with command line:
 
-"%BOSSACPATH%" -i --port=%COMPORT% -u -e -w -v -b "%BINFILE%" -R
+"%BOSSACPATH%" -i --port=%COMPORT%  -w -v -b "%BINFILE%" -R
 REM START /WAIT "" "%BOSSACPATH%" -i  --port=%COMPORT% -u -e -w -v -b "%BINFILE%" -R
 
 GOTO end

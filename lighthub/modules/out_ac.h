@@ -2,6 +2,7 @@
 #pragma once
 #ifndef AC_DISABLE
 #include <abstractout.h>
+#include <item.h>
 #include "itemCmd.h"
 
 #define LEN_B   37
@@ -21,10 +22,20 @@
 //#define S_RAW S_ADDITIONAL+4
 
 extern void modbusIdle(void) ;
+
+class acPersistent : public chPersistent  {
+public:
+  byte data[37];
+  byte power;
+  byte mode;
+  byte inCheck;
+  uint32_t timestamp;
+};
+
 class out_AC : public abstractOut {
 public:
 
-    out_AC(Item * _item):abstractOut(_item){getConfig();};
+    out_AC(Item * _item):abstractOut(_item){store = (acPersistent *) item->getPersistent(); getConfig();};
     void getConfig();
     int Setup() override;
     int Poll(short cause) override;
@@ -36,6 +47,7 @@ public:
     int Ctrl(itemCmd cmd,  char* subItem=NULL, bool toExecute=true) override;
     
 protected:
+    acPersistent * store;
     void InsertData(byte data[], size_t size);
     void SendData(byte req[], size_t size);
     uint8_t portNum;
