@@ -8,7 +8,7 @@
 #endif
 
 
-#if defined(ARDUINO_ARCH_AVR) 
+#if defined(ARDUINO_ARCH_AVR)
 #include <EEPROM.h>
 #endif
 
@@ -31,10 +31,13 @@ extern DueFlashStorage EEPROM;
 extern NRFFlashStorage EEPROM;
 #endif
 
-#ifdef ARDUINO_ARCH_STM32
-#include <NRFFlashStorage.h>   //STUB
-extern NRFFlashStorage EEPROM;
-#endif
+//#ifdef ARDUINO_ARCH_STM32
+//#include <NRFFlashStorage.h>   //STUB
+//extern NRFFlashStorage EEPROM;
+
+// static char samBuffer[64];
+// short samBufferPos = 0;
+//#endif
 
 
 #if defined(__SAM3X8E__)
@@ -48,7 +51,10 @@ NRFFlashStorage EEPROM;
 #endif
 
 #ifdef ARDUINO_ARCH_STM32
-NRFFlashStorage EEPROM;
+//NRFFlashStorage EEPROM;
+#include <EEPROM.h>
+#define DATA_LENGTH E2END
+//FLASH_PAGE_SIZE = 0x400
 #endif
 
 #if defined(FS_STORAGE)
@@ -131,10 +137,14 @@ NRFFlashStorage EEPROM;
     int  flashStream::open(short fileNum, char mode) 
                 {
 
-                  #if  defined(__SAM3X8E__)
+                  #if  defined(__SAM3X8E__) //|| defined (ARDUINO_ARCH_STM32)
                   if (samBufferPos) flush();
                   samBufferPos = 0;
                   #endif 
+
+                 #if  defined (ARDUINO_ARCH_STM32)    
+                 eeprom_buffer_fill();
+                 #endif
 
                  switch (fileNum) {
                    case FN_CONFIG_JSON:     
@@ -182,9 +192,13 @@ NRFFlashStorage EEPROM;
      unsigned int flashStream::seek(unsigned int _pos) 
         {   
          
-          #if  defined(__SAM3X8E__)
-          if (samBufferPos) flush();
-          #endif
+         #if  defined(__SAM3X8E__) //|| defined (ARDUINO_ARCH_STM32)
+         if (samBufferPos) flush();
+         #endif
+
+         #if defined (ARDUINO_ARCH_STM32)
+         //eeprom_buffer_flush();
+         #endif
 
          pos=min(_pos, streamSize);
             //debugSerial<<F("Seek:")<<pos<<endl;
@@ -217,10 +231,12 @@ NRFFlashStorage EEPROM;
         if (EEPROM.commitReset())
                 infoSerial<<"Commited to FLASH"<<endl;
         else    errorSerial<<"Commit error. len:"<<EEPROM.length()<<endl;       
-        #elif  defined(__SAM3X8E__)
+        #elif  defined(__SAM3X8E__) //|| defined (ARDUINO_ARCH_STM32)
         if (samBufferPos)
              EEPROM.write(startPos+pos-samBufferPos,(byte*)samBuffer,samBufferPos);    
         samBufferPos=0;     
+        #elif defined (ARDUINO_ARCH_STM32)
+        eeprom_buffer_flush();
         #endif
    };
    
@@ -230,12 +246,13 @@ NRFFlashStorage EEPROM;
                #if defined(__AVR__)
                   EEPROM.update(startPos+pos++,(char)ch);
                   return 1;
-               #elif  defined(__SAM3X8E__)
+               #elif  defined(__SAM3X8E__)// || defined (ARDUINO_ARCH_STM32)
       
                if (samBufferPos==sizeof(samBuffer))
                         {            
                            samBufferPos = 0;
-                           EEPROM.write(startPos+pos-sizeof(samBuffer),(byte*)samBuffer,sizeof(samBuffer));                     
+                           EEPROM.write(startPos+pos-sizeof(samBuffer),(byte*)samBuffer,sizeof(samBuffer));     
+                                         
                         }
            
                samBuffer[samBufferPos++]=ch;
@@ -243,6 +260,17 @@ NRFFlashStorage EEPROM;
                return 1;
                 //  return EEPROM.write(startPos+pos++,(char)ch);
 
+               #elif defined (ARDUINO_ARCH_STM32)
+               if (startPos+pos<=DATA_LENGTH) 
+                   {
+                   eeprom_buffered_write_byte(startPos+pos++,(char)ch);  
+                   return 1;
+                   }
+               else 
+                     {
+                     errorSerial<<F("Flash sector exceeded")<<endl;    
+                     return 0;
+                     }
                #else 
                   EEPROM.write(startPos+pos++,(char)ch);
                   return 1;  

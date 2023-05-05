@@ -48,18 +48,18 @@ void out_AC::getConfig(){
       case 0: ACSerial=&Serial;
       
       break;
-      //#if defined (Serial1)
+      #if not defined (AVR) || defined (DMX_DISABLE)
       case 1: ACSerial=&Serial1;
       break;
-      //#endif
-      //#if defined (Serial2)
+      #endif
+      #if defined (HAVE_HWSERIAL2) || defined (__SAM3X8E__) || defined (ESP32)
       case 2: ACSerial=&Serial2;
       break;
-      //#endif
-      //#if defined (Serial3)
+      #endif
+      #if defined (HAVE_HWSERIAL3) || defined (__SAM3X8E__) 
       case 3: ACSerial=&Serial3;
       break;
-      //#endif
+      #endif
 
     }
 
