@@ -46,8 +46,8 @@ const cmdstr commands_P[] PROGMEM =
 
 #define CMD_ENABLE 0xa /// for PID regulator and XON/XOFF - chan limitation
 #define CMD_DISABLE 0xb /// for PID regulator
-#define CMD_UNFREEZE 0xc   /// Aliase for ON
-#define CMD_FREEZE 0xd /// Aliase for OFF
+#define CMD_UNFREEZE 0xc   ///
+#define CMD_FREEZE 0xd /// 
 
 #define CMD_AUTO 0xe    /// Thermostat/AC set to Auto mode 
 #define CMD_FAN 0xf     /// AC set to Fan-only mode 

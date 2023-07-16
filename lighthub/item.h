@@ -119,7 +119,7 @@ class Item
   boolean Setup();
   void Stop();
   //int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL);
-  int Ctrl(itemCmd cmd, char* subItem=NULL, bool allowRecursion = true);
+  int Ctrl(itemCmd cmd, char* subItem=NULL, bool allowRecursion = true, bool authorized=false);
   int Ctrl(char * payload,  char * subItem=NULL);
 
   int getArg(short n=0);

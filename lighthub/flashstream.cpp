@@ -23,30 +23,13 @@
 
 #if defined(__SAM3X8E__)
 #include <DueFlashStorage.h>
-extern DueFlashStorage EEPROM;
-#endif
-
-#ifdef NRF5
-#include <NRFFlashStorage.h>   //STUB
-extern NRFFlashStorage EEPROM;
-#endif
-
-//#ifdef ARDUINO_ARCH_STM32
-//#include <NRFFlashStorage.h>   //STUB
-//extern NRFFlashStorage EEPROM;
-
-// static char samBuffer[64];
-// short samBufferPos = 0;
-//#endif
-
-
-#if defined(__SAM3X8E__)
 DueFlashStorage EEPROM;
  static char samBuffer[64];
  short samBufferPos = 0;
 #endif
 
 #ifdef NRF5
+#include <NRFFlashStorage.h>   //STUB
 NRFFlashStorage EEPROM;
 #endif
 
@@ -200,8 +183,10 @@ NRFFlashStorage EEPROM;
          //eeprom_buffer_flush();
          #endif
 
-         pos=min(_pos, streamSize);
-            //debugSerial<<F("Seek:")<<pos<<endl;
+         pos=min(_pos, streamSize);         
+            //Serial.print("StartPos=");Serial.println(startPos);
+            //Serial.print("Pos=");Serial.println(pos);
+            //Serial.print("streamSize=");Serial.println(streamSize);
             return pos;
         };
 

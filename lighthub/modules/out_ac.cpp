@@ -124,7 +124,7 @@ void out_AC::InsertData(byte data[], size_t size){
       publishTopic(item->itemArr->name, "OFF","/compressor");
 
 
-  publishTopic(item->itemArr->name, (long) swing,"/swing");
+  //publishTopic(item->itemArr->name, (long) swing,"/swing");
   //publishTopic(item->itemArr->name, (long) fan_spd,"/fan");
 
   /////////////////////////////////

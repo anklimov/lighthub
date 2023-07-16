@@ -30,7 +30,7 @@ bool             systemConfig::isValidSysConf()
                        stream->close();  
                        return false;
                        } 
-    stream->close();                    
+    stream->close();                 
     return true;                   
 }; 
 
@@ -44,7 +44,7 @@ bool             systemConfig::isValidSysConf()
     bool isMacValid = false; 
      for (short i = 0; i < 6; i++) {
         mac[i] = stream->read();
-        if (mac[i] != 0 && mac[i] != 0xff) isMacValid = true;
+        if ((mac[i] != 0) && (mac[i] != 0xff)) isMacValid = true;
     }
    stream->close();  
    return isMacValid;
@@ -53,7 +53,7 @@ bool             systemConfig::isValidSysConf()
   bool             systemConfig::setMAC(macAddress& _mac)
  {
    if (!stream || !isValidSysConf()) return false;    
-   openStream('a');
+   openStream('r'); //was 'a'
    stream->seek(offsetof(systemConfigData,mac));
    stream->write ((const uint8_t *)&_mac,sizeof(_mac));
    memcpy(mac, _mac, sizeof(mac));

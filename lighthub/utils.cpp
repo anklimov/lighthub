@@ -28,6 +28,10 @@ e-mail    anklimov@gmail.com
 #include <PubSubClient.h>
 #include <HardwareSerial.h>
 
+#ifdef CRYPT
+#include "SHA256.h"
+#endif
+
 #ifndef debugSerialPort
 #define debugSerialPort Serial
 #endif
@@ -324,8 +328,8 @@ Awesome work Mark T!*/
 
 
 __attribute__ ((section (".ramfunc")))
-
-void ReadUniqueID( uint32_t * pdwUniqueID )
+// #pragma optimize("", off)
+uint32_t ReadUniqueID( uint32_t * pdwUniqueID )
 {
     unsigned int status ;
 
@@ -354,8 +358,14 @@ void ReadUniqueID( uint32_t * pdwUniqueID )
     {
         status = EFC1->EEFC_FSR ;
     } while ( (status & EEFC_FSR_FRDY) != EEFC_FSR_FRDY ) ;
+
+   
+    return  *(uint32_t *)(IFLASH1_ADDR + 128); // dont remove: SAM defect workaround - MPU dont leave Unique Identifier mode until read flash out UID of range 
+    
+    
 #endif
 }
+//#pragma optimize("", on)
 
 
 int _inet_aton(const char* aIPAddrString, IPAddress& aResult)
@@ -804,7 +814,55 @@ bool getPinVal(uint8_t pin)
 {
   return (0!=(*portOutputRegister( digitalPinToPort(pin) ) & digitalPinToBitMask(pin)));
 }
+#ifdef CRYPT
 
+#define HASH_SIZE 32
+SHA256 sha256;
+extern uint32_t cryptoSalt;
+//extern 
+const char cryptoKey[] ="12345678";
+
+bool checkToken(char * token, char * data)
+{
+ // Make valid random salted data   
+ char saltStr[32];
+ printUlongValueToStr(saltStr, cryptoSalt);
+
+
+ // get hash
+ uint8_t result[HASH_SIZE];
+ memset(result, 0xAA, sizeof(result));
+ 
+ sha256.reset();
+ sha256.update(saltStr,strlen(saltStr));
+ sha256.update(cryptoKey,strlen(cryptoKey));
+ if (data) sha256.update(data,strlen(data));
+ sha256.finalize(result,sizeof(result));
+ sha256.clear();
+ //hmac<SHA256>(result, HASH_SIZE, cryptoKey, strlen(cryptoKey), testData, strlen(testData));
+ 
+ //for (int i=0;i<HASH_SIZE;i++) {if(result[i]<0x10) debugSerial.print('0'); debugSerial.print(result[i],HEX);}
+//debugSerial.println();
+for (unsigned int i=0;i<strlen(token)/2;i++)
+ {
+      uint8_t digit = ((((token[i*2] <= '9') ? token[i*2] - '0' : (token[i*2] & 0x7) + 9) << 4) +
+      ((token[i*2+1] <= '9') ? token[i*2+1] - '0' : (token[i*2+1] & 0x7) + 9));
+ //debugSerial.print(digit,HEX);     
+
+  if (digit!=result[i])
+         {
+        debugSerial.println(F("signature Failed"));
+        return false;
+       }
+ }
+        debugSerial.println(F("signature Passed"));
+        return true;
+}
+
+#else
+bool checkToken(char * token, char * data)
+{return true;}
+#endif
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

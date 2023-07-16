@@ -26,6 +26,7 @@ e-mail    anklimov@gmail.com
 #include "main.h"
 #include "bright.h"
 #include "itemCmd.h"
+//#include "SHA256.h"
 
 #ifdef _dmxout
 #include "dmx.h"
@@ -597,6 +598,17 @@ if (suffixCode == S_RAW)
     return   Ctrl(ic,subItem);
 }
 //debugSerial<<F("SuffixCode: ")<<suffixCode<<endl;
+
+bool authorized = false;
+char * authPos = strchr(payload,'@');
+if (authPos)
+{
+ *authPos=0;   
+ //char * authToken=payload;   
+ authorized = checkToken(payload,authPos+1);
+ payload=authPos+1;
+}
+
 int i=0;
 while (payload[i]) {payload[i]=toupper(payload[i]);i++;};
 
@@ -660,7 +672,7 @@ st.setSuffix(suffixCode);
                     }
               }
  
-          return   Ctrl(st,subItem);
+          return   Ctrl(st,subItem,true,authorized);
         } //Void command
           break;
 
@@ -824,7 +836,7 @@ int Item::scheduleCommand(itemCmd cmd)
 // -3 ignored
 // -1 system error
 // -4 invalid argument
-int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
+int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized)
 {      
        int fr = freeRam();
        if (fr < minimalMemory) 
@@ -945,6 +957,8 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                         }   
                         break;
               case CMD_TOGGLE:
+                if (suffixCode != S_CTRL)
+                  {
                   chActive=(isActive()>0);
                   toExecute=true;
 
@@ -955,6 +969,13 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
                               cmd.Cmd(CMD_ON);
                             }   
                   status2Send |=FLAG_COMMAND | FLAG_SEND_IMMEDIATE;    
+                  }
+                 else
+                  {
+                    if (getFlag(FLAG_DISABLED)) clearFlag(FLAG_DISABLED); else setFlag(FLAG_DISABLED);
+                    status2Send |= FLAG_FLAGS | FLAG_SEND_IMMEDIATE;
+                    res=1;
+                  } 
                 break;
 
 
@@ -1127,7 +1148,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion)
             else // Fast track for commands to subitems
             {   
                 if (driver) return driver->Ctrl(cmd,subItem,toExecute);
-                return 0;
+               ///// return 0;
             }
         }
 

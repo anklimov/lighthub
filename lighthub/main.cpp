@@ -27,6 +27,9 @@ e-mail    anklimov@gmail.com
 #include "TimerInterrupt_Generic.h"
 #endif
 
+#ifdef CRYPT
+#include "RNG.h"
+#endif
 
 #ifdef SYSLOG_ENABLE
 #include <Syslog.h>
@@ -132,6 +135,7 @@ volatile uint32_t timerSensorCheck =0;
 volatile unsigned long timerCount=0; 
 volatile int16_t  timerNumber=-1;
 volatile int8_t   timerHandlerBusy=0;
+volatile uint32_t cryptoSalt=0;
 
 aJsonObject *pollingItem = NULL;
 
@@ -681,6 +685,12 @@ lan_status lanLoop() {
                 
                 onMQTTConnect();
 
+                #ifdef CRYPT
+                //setTopic(buf,sizeof(buf),T_OUT);
+                strncpy(buf, "+/+/$salt", sizeof(buf));      // Only on separated cmd/val topics
+                mqttClient.subscribe(buf);
+                #endif
+
                 lanStatus = OPERATION;//3;
                 infoSerial<<F("Accepting commands...\n");
             }
@@ -838,6 +848,16 @@ void onMQTTConnect(){
   strncat_P(topic, stats_P, sizeof(topic)-1);
   strncpy_P(buf, statsval_P, sizeof(buf)-1);
   mqttClient.publish(topic,buf,true);
+
+#ifdef CRYPT
+    RNG.rand((uint8_t *) &cryptoSalt,sizeof(cryptoSalt));
+    setTopic(topic,sizeof(topic),T_DEV);
+    //strncat_P(topic, stats_P, sizeof(topic)-1);
+    //strncat(topic, "/", sizeof(topic));
+    strncat_P(topic, salt_P, sizeof(topic)-1);
+    printUlongValueToStr(buf, cryptoSalt);
+    mqttClient.publish(topic,buf,true);
+#endif    
 
   #ifndef NO_HOMIE
 
@@ -1510,7 +1530,7 @@ int loadConfigFromEEPROM()
     #endif
 
     if (sysConfStream.peek() == '{') {
-        debugSerial<<F("Trying Load from EEPROM")<<endl;
+        debugSerial<<F("JSON detected")<<endl;
         aJsonStream as = aJsonStream(&sysConfStream);
         cleanConf();
         root = aJson.parse(&as);
@@ -2178,17 +2198,18 @@ void setup_main() {
                 debugSerialPort.println(F("No valid EEPROM data. Initializing."));    
                 #endif
                 sysConf.clear();
-                }                   
+                } 
+       else  debugSerialPort << F("EEPROM signature ok")<<endl;                          
   //  scan_i2c_bus();
 
   serialDebugLevel=sysConf.getSerialDebuglevel();
   udpDebugLevel=sysConf.getUdpDebuglevel();
 
-  #if defined(__SAM3X8E__)
+   #if defined(__SAM3X8E__)
   memset(&UniqueID,0,sizeof(UniqueID));
   #endif
 
-  #if defined(M5STACK)
+   #if defined(M5STACK)
    // Initialize the M5Stack object
    M5.begin();
   #endif
@@ -2200,7 +2221,9 @@ void setup_main() {
 #ifdef SD_CARD_INSERTED
     sd_card_w5100_setup();
 #endif
-    setupMacAddress();
+  //  Serial.print("Sig4=");
+  //  Serial.println(FLASH_START[0],HEX); 
+     setupMacAddress(); //тут почему-то не считывается из флэш
 
 #ifdef _modbus
         #ifdef CONTROLLINO
@@ -2254,8 +2277,8 @@ WiFi.onEvent(WiFiEvent);
         infoSerial<<F("Use W5500 pin: ");
         infoSerial<<QUOTE(W5500_CS_PIN)<<endl;
     #endif
-
-        loadConfigFromEEPROM();       
+        
+        loadConfigFromEEPROM();    
 }
 
 void printFirmwareVersionAndBuildOptions() {
@@ -2485,10 +2508,21 @@ void publishStat(){
     strncat_P(topic, state_P, sizeof(topic)-1);
     strncpy_P(intbuf, ready_P, sizeof(intbuf)-1);
     mqttClient.publish(topic,intbuf,true);
+
+#ifdef CRYPT
+    RNG.rand((uint8_t *) &cryptoSalt,sizeof(cryptoSalt));
+    setTopic(topic,sizeof(topic),T_DEV);
+    //strncat_P(topic, stats_P, sizeof(topic)-1);
+    //strncat(topic, "/", sizeof(topic));
+    strncat_P(topic, salt_P, sizeof(topic)-1);
+    printUlongValueToStr(intbuf, cryptoSalt);
+    mqttClient.publish(topic,intbuf,true);
+#endif    
 }
 
 void setupMacAddress() {  
 //Check MAC, stored in NVRAM
+
 if (!sysConf.getMAC()) {
     infoSerial<<F("No MAC configured: set firmware's MAC\n");
 

@@ -3,6 +3,7 @@
 const char state_P[] PROGMEM = "$state";
 const char disconnected_P[] PROGMEM = "disconnected";
 const char ready_P[] PROGMEM = "ready";
+const char salt_P[] PROGMEM = "$salt";
 
 const char homie_P[] PROGMEM = "$homie";
 const char homiever_P[] PROGMEM = "3.0.1";
