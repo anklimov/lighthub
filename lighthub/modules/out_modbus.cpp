@@ -41,6 +41,7 @@ struct serial_t
 #define PAR_U8L 8
 #define PAR_TENS 9
 #define PAR_100 10
+#define PAR_COIL 11
 
 
 const reg_t regSize_P[] PROGMEM =
@@ -55,6 +56,7 @@ const reg_t regSize_P[] PROGMEM =
   { "u8l", (uint8_t) PAR_U8L },
   { "x10", (uint8_t) PAR_TENS },
   { "100", (uint8_t) PAR_100 }
+ // { "bit", (uint8_t) PAR_COIL }
 } ;
 #define regSizeNum sizeof(regSize_P)/sizeof(reg_t)
 
@@ -151,6 +153,8 @@ bool out_Modbus::getConfig()
     {
       store->pollingRegisters=aJson.getObjectItem(pollObj, "regs");
       store->pollingIrs=aJson.getObjectItem(pollObj, "irs");
+      store->pollingCoils=aJson.getObjectItem(pollObj, "coils");
+      store->poolingDiscreteIns=aJson.getObjectItem(pollObj, "dins");
       aJsonObject * delayObj= aJson.getObjectItem(pollObj, "delay");
       if (delayObj) store->pollingInterval = delayObj->valueint;
           else store->pollingInterval = 1000;
@@ -242,31 +246,41 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
 
   //bool is8bit = false;
   while (paramObj)
-          {
+          { 
+            int8_t       parType = PAR_I16;
             aJsonObject *regObj=NULL;
             switch (regType) {
-              case MODBUS_HOLDING_REG_TYPE: regObj = aJson.getObjectItem(paramObj, "reg");
+              case MODBUS_HOLDING_REG_TYPE: 
+                regObj = aJson.getObjectItem(paramObj, "reg");
                 break;
-              case MODBUS_INPUT_REG_TYPE:  regObj = aJson.getObjectItem(paramObj, "ir");
+              case MODBUS_INPUT_REG_TYPE:  
+                regObj = aJson.getObjectItem(paramObj, "ir");
+                break;
+              case MODBUS_COIL_REG_TYPE:  
+                regObj = aJson.getObjectItem(paramObj, "coil");  
+                parType = PAR_COIL;
+                break;
+              case MODBUS_DISCRETE_REG_TYPE:  
+                regObj = aJson.getObjectItem(paramObj, "din");  
+                parType = PAR_COIL;  
             }  
 
               if (regObj && regObj->valueint ==registerNum)
                     {
-                    aJsonObject *typeObj = aJson.getObjectItem(paramObj, "type");
-                    aJsonObject *mapObj = aJson.getObjectItem(paramObj, "map");
-                    aJsonObject *idObj = aJson.getObjectItem(paramObj, "id");
+                    aJsonObject *idObj = aJson.getObjectItem(paramObj, "id");                 
                     aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
                     uint16_t data = node.getResponseBuffer(posInBuffer);
-                    int8_t    regType = PAR_I16;
-                    uint32_t  param =0;
-                    itemCmd   mappedParam;
                     bool executeWithoutCheck=false; //Afler recurrent check, all dublicatess and suppressing checked by recurrent 
                     bool submitRecurrentOut = false; //false if recurrent check find duplicates 
                     char buf[16];
 
-                    //bool isSigned=false;
-                    if (typeObj && typeObj->type == aJson_String) regType=str2regSize(typeObj->valuestring);
-                    switch(regType) {
+                    uint32_t  param =0;
+                    itemCmd   mappedParam;
+                    aJsonObject *typeObj = aJson.getObjectItem(paramObj, "type");
+                    aJsonObject *mapObj = aJson.getObjectItem(paramObj, "map");
+
+                    if (typeObj && typeObj->type == aJson_String) parType=str2regSize(typeObj->valuestring);
+                    switch(parType) {
 
                       case PAR_I16:
                       //isSigned=true;
@@ -278,6 +292,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                       param=data;
                       mappedParam.Int((uint32_t)data);
                       break;
+
                       case PAR_I32:
                       //isSigned=true;
                       param = swap(data ) | swap(node.getResponseBuffer(posInBuffer+1)<<16);
@@ -310,15 +325,104 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                       param=data;
                       mappedParam.Tens_raw((int16_t) data * (TENS_BASE/100));
                       mappedParam.Float((int32_t) (int16_t) data/100.);
+                      break;
+
+                      case PAR_COIL:
+                      param = (node.getResponseBuffer(posInBuffer/16) >> (posInBuffer % 16)) & 1;
+                      mappedParam.Int((uint32_t)param);
                     }
                        
-                    debugSerial << F("MBUSD:  got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from ")<<regType<<F(":")<<paramObj->name<<endl;             
+                    debugSerial << F("MBUSD:  got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from type ")<<parType<<F(":")<<paramObj->name<<endl;             
 
                   if (mapObj && (mapObj->type==aJson_Array || mapObj->type==aJson_Object))
                     {
                        mappedParam=mappedParam.doReverseMapping(mapObj);
                        if (!mappedParam.isCommand() && !mappedParam.isValue())  //Not mapped
                           {  
+                          aJsonObject *defMappingObj;
+                          defMappingObj = aJson.getObjectItem(mapObj, "def");
+                          if (defMappingObj)
+                             {
+                              switch (defMappingObj->type)
+                               {
+                                case aJson_Int: //register/coil/.. number
+                                  debugSerial<<F("Searching reg#")<<defMappingObj->valueint<<endl; 
+                                  if ((defMappingObj->valueint>= registerFrom) && (defMappingObj->valueint<=registerTo))  
+                                      {   
+                                      mappedParam = findRegister(defMappingObj->valueint,defMappingObj->valueint-registerFrom,regType,registerFrom,registerTo,false,&submitRecurrentOut);
+                                      executeWithoutCheck=true;
+                                      }
+                                  else errorSerial<<F("reg# out of range")<<endl;    
+
+                                break;
+                                case aJson_String: // parameter name
+                                 debugSerial<<F("Searching reg: ")<<defMappingObj->valuestring<<endl; 
+                                 if (itemParametersObj && itemParametersObj->type ==aJson_Object) 
+                                    {      
+                                      //Searching item param for nested mapping 
+                                      aJsonObject *itemParObj = aJson.getObjectItem(itemParametersObj,defMappingObj->valuestring);
+                                      if (itemParObj) 
+                                          {
+                                            //aJsonObject * markObj = execObj;
+                                            //if (execObj->type == aJson_Array) markObj = execObj->child;  
+                                            //Retrive previous data
+                                            aJsonObject *lastMeasured = aJson.getObjectItem(itemParObj,"@S");
+                                            if (lastMeasured && lastMeasured->type ==aJson_Int)
+                                            {
+                                            debugSerial<<F("LastKnown value: ")<<lastMeasured->valueint<<endl; 
+                                            //Searching template param for nested mapping
+                                            aJsonObject * templateParObj = aJson.getObjectItem(store->parameters,defMappingObj->valuestring);
+                                              if (templateParObj)
+                                                 {
+                                                  int8_t nestedParType = PAR_I16;
+                                                  
+                                                  aJsonObject * nestedTypeObj = aJson.getObjectItem(templateParObj, "type");
+                                                  if (nestedTypeObj && nestedTypeObj->type == aJson_String) parType=str2regSize(nestedTypeObj->valuestring);
+
+                                                  switch(nestedParType) {
+                                                      case PAR_I16:
+                                                      case PAR_I32:
+                                                      mappedParam.Int((int32_t)lastMeasured->valueint);
+                                                      break;
+
+                                                      case PAR_U32:
+                                                      case PAR_U16:
+                                                      case PAR_U8L:
+                                                      case PAR_U8H:
+                                                      case PAR_COIL:
+                                                      mappedParam.Int((uint32_t)lastMeasured->valueint);
+                                                      break;
+
+                                                      case PAR_TENS:
+                                                      mappedParam.Tens((int16_t) data);
+                                                      break;
+
+                                                      case PAR_100:
+                                                      mappedParam.Tens_raw((int16_t) lastMeasured->valueint * (TENS_BASE/100));
+                                                      mappedParam.Float((int32_t) (int16_t) lastMeasured->valueint/100.);
+                                                      break;
+                                                      default: errorSerial<<F("Invalid regtype")<<endl;
+                                                    }
+
+                                                  aJsonObject * nestedMapObj = aJson.getObjectItem(templateParObj, "map");  
+                                                  if (nestedMapObj && (nestedMapObj->type==aJson_Array || nestedMapObj->type==aJson_Object)) mappedParam=mappedParam.doReverseMapping(nestedMapObj);
+                                                  debugSerial << F("MBUSD: NestedMapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
+
+                                                  if (!(lastMeasured->subtype & MB_VALUE_OUTDATED))
+                                                      {
+                                                          executeWithoutCheck=true;
+                                                          submitRecurrentOut=true;
+                                                          lastMeasured->subtype|= MB_VALUE_OUTDATED;
+                                                      }
+
+                                                 } 
+                                            }
+                                          }
+                                    }
+                                break;
+                               }
+                             }                          
+/*
                           aJsonObject *nextRegObj = NULL;  
                           int registerType = 0;
                           
@@ -328,15 +432,26 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                             {
                             nextRegObj =  aJson.getObjectItem(paramObj, "nextir");
                             if (nextRegObj) registerType=MODBUS_INPUT_REG_TYPE;
+                              else 
+                              {
+                              nextRegObj =  aJson.getObjectItem(paramObj, "nextcoil");
+                              if (nextRegObj) registerType=MODBUS_COIL_REG_TYPE;
+                                 else 
+                                  {
+                                  nextRegObj =  aJson.getObjectItem(paramObj, "nextdin");
+                                  if (nextRegObj) registerType=MODBUS_DISCRETE_REG_TYPE;
+                                  }
+                              }      
                             }
-
-                          if (registerType && (nextRegObj->type) ==aJson_Int && (nextRegObj->valueint>= registerFrom) && (nextRegObj->valueint<=registerTo))  
+                                
+                          if (registerType && nextRegObj && (nextRegObj->type) ==aJson_Int && (nextRegObj->valueint>= registerFrom) && (nextRegObj->valueint<=registerTo))  
                                   { 
                                   debugSerial<<F("Recurrent searching nextreg")<<endl;   
                                   mappedParam = findRegister(nextRegObj->valueint,nextRegObj->valueint-registerFrom,registerType,registerFrom,registerTo,false,&submitRecurrentOut);
                                   executeWithoutCheck=true;
                                   }
-                          else errorSerial<<F("nextreg out of range")<<endl;        
+                          else errorSerial<<F("nextreg out of range")<<endl;    
+       */                   
                           }  
                         else   
                            debugSerial << F("MBUSD: Mapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
@@ -368,7 +483,11 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                                   {
                                                   if   (lastMeasured->valueint == param)
                                                         *submitParam=false; //supress repeating execution for same val
-                                                  else  lastMeasured->valueint=param;
+                                                  else  
+                                                        {
+                                                        lastMeasured->valueint=param;
+                                                        lastMeasured->subtype&=~MB_VALUE_OUTDATED;
+                                                        }
                                                   }
                                       }            
                                       else //No container to store value yet 
@@ -416,19 +535,16 @@ return itemCmd();
     {
     if (!reg) return;
     reg=reg->child;  
-    //aJsonObject * reg = store->pollingRegisters->child;
     while (reg)
             {
             switch (reg->type)
               {
                 case aJson_Int:
                 {
-                int registerNum = reg->valueint;
-                //if (readModbus(registerNum,MODBUS_HOLDING_REG_TYPE,1)) 
+                int registerNum = reg->valueint; 
                 if (readModbus(registerNum,regType,1))
                   {
                     findRegister(registerNum,0,regType,registerNum,registerNum);
-                //    data = node.getResponseBuffer(j);
                   }
                 }
                 break;
@@ -438,14 +554,12 @@ return itemCmd();
                   int registerFrom=aJson.getArrayItem(reg, 0)->valueint;
                   int registerTo=aJson.getArrayItem(reg, 1)->valueint;
 
-                  //if (readModbus(registerFrom,MODBUS_HOLDING_REG_TYPE,registerTo-registerFrom+1))
                   if (readModbus(registerFrom,regType,registerTo-registerFrom+1))
                     { debugSerial<<endl;
                       for(int i=registerFrom;i<=registerTo;i++)
                         {
                           findRegister(i,i-registerFrom,regType,registerFrom,registerTo);
                         }
-                      //data = node.getResponseBuffer(j);
                     }
 
                 }
@@ -481,7 +595,13 @@ int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
  if (!templateParamObj) {errorSerial<<F(" internal send error - no template")<<endl; return -1;}
 
  aJsonObject * regObj = aJson.getObjectItem(templateParamObj, "reg");
- if (!regObj) {errorSerial<<F(" internal send error - no regObj")<<endl; return -2;}
+
+ if (!regObj)
+    {  
+    regObj = aJson.getObjectItem(templateParamObj, "coil");
+    if (!regObj) {errorSerial<<F(" internal send error - no reg/coil")<<endl; return -2;}
+       else regType = PAR_COIL;
+    } 
 
  int res = -1;
 
@@ -513,6 +633,9 @@ int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
                       case PAR_I8H:
                       res = node.writeSingleRegister(regObj->valueint,(value & 0xFFFF)>> 8);
                       break;
+                      case PAR_COIL:
+                      res = node.writeSingleCoil (regObj->valueint,value);
+                      break;
                     }
  mbusSlenceTimer = millisNZ();                   
  debugSerial<<F("Res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<value<<endl;
@@ -530,7 +653,8 @@ aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            {
             aJsonObject *execObj = itemParametersObj->child; 
-            while (execObj && (execObj->type == aJson_Object) || (execObj->type == aJson_Array) )
+            bool onceSendOk=false;
+            while (execObj && ((execObj->type == aJson_Object) || (execObj->type == aJson_Array)) && !onceSendOk)
                           {     
                              
                                  if ((execObj->subtype & MB_NEED_SEND) && !(execObj->subtype & MB_SEND_ERROR))
@@ -553,6 +677,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                               {
                                                case 1: //success
                                                  execObj->subtype&=~ MB_NEED_SEND;
+                                                 onceSendOk=true;
                                                  ///return 1; //relax
                                                  
                                                  break;
@@ -597,7 +722,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            }                
 
 // if some polling configured
-if (store->pollingRegisters || store->pollingIrs)
+if (store->pollingRegisters || store->pollingIrs || store->pollingCoils || store->poolingDiscreteIns)
   {
     debugSerial<<F("MBUSD: Poll ")<< item->itemArr->name << endl;
     modbusBusy=1;
@@ -610,6 +735,8 @@ if (store->pollingRegisters || store->pollingIrs)
 
     pollModbus(store->pollingRegisters,MODBUS_HOLDING_REG_TYPE);
     pollModbus(store->pollingIrs,MODBUS_INPUT_REG_TYPE);
+    pollModbus(store->pollingCoils,MODBUS_COIL_REG_TYPE);  
+    pollModbus(store->poolingDiscreteIns ,MODBUS_DISCRETE_REG_TYPE);  
     debugSerial<<F("MBUSD: endPoll ")<< item->itemArr->name << endl;
 
   //Non blocking waiting to release line
@@ -709,7 +836,11 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                             }
 
                                         aJsonObject *polledValue = aJson.getObjectItem(markObj,"@S"); 
-                                        if (polledValue && outValue->type == aJson_Int) polledValue->valueint=Value; //to pevent suppressing to change back to previously polled value if this occurs before next polling
+                                        if (polledValue && outValue->type == aJson_Int) 
+                                                                {
+                                                                polledValue->valueint=Value; //to pevent suppressing to change back to previously polled value if this occurs before next polling
+                                                                polledValue->subtype&=~MB_VALUE_OUTDATED;
+                                                                }
 
                                       }          
                            }  

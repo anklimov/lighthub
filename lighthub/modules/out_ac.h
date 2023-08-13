@@ -45,6 +45,7 @@ public:
     int getChanType() override;
     int getDefaultStorageType(){return ST_FLOAT_CELSIUS;};
     int Ctrl(itemCmd cmd,  char* subItem=NULL, bool toExecute=true) override;
+    void SubmitParameters(const char * name, itemCmd value);
     
 protected:
     acPersistent * store;

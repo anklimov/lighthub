@@ -369,21 +369,21 @@ int Item::getArg(short n) //Return arg int or first array element if Arg is arra
 
 float Item::getFloatArg(short n) //Return arg float or first array element if Arg is array
 {
-    if (!itemArg) return 0;//-1;
+    if (!itemArg) return 0.0;//-1;
     if ((itemArg->type == aJson_Array) && ( n < aJson.getArraySize(itemArg))) 
            {
            aJsonObject * obj =  aJson.getArrayItem(itemArg, n);
-           if (obj && obj->type == aJson_Int) return obj->valueint;
+           if (obj && obj->type == aJson_Int) return static_cast<float> (obj->valueint);
            if (obj && obj->type == aJson_Float) return obj->valuefloat;
-           return 0;
+           return 0.0;
            }
 
     else if (!n)
     { 
-    if (itemArg->type == aJson_Int) return itemArg->valueint; 
+    if (itemArg->type == aJson_Int) return static_cast<float>(itemArg->valueint); 
     else  if (itemArg->type == aJson_Float) return itemArg->valuefloat; 
     } 
-    return 0;
+    return 0.0;
 }
 
 short Item::getArgCount()

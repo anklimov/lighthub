@@ -24,7 +24,7 @@ extern bool disableCMD;
 #define AC_IDLE CST_INITIALIZED
 #define AC_SENDING 2
 
-byte inCheck = 0;
+//byte inCheck = 0;
 byte qstn[] = {255,255,10,0,0,0,0,0,1,1,77,1,90}; // Команда опроса
 
 byte on[]   = {255,255,10,0,0,0,0,0,1,1,77,2,91}; // Включение кондиционера
@@ -66,6 +66,20 @@ void out_AC::getConfig(){
 
 }
 
+void out_AC::SubmitParameters(const char * name, itemCmd value){
+
+    if (!item || !item->itemArg) return;
+    if ((item->itemArg->type == aJson_Array) && ( 1 < aJson.getArraySize(item->itemArg)))
+    { 
+     aJsonObject * callbackObj = aJson.getArrayItem(item->itemArg, 1);  
+     if (callbackObj && callbackObj->type == aJson_Object)
+        {
+          aJsonObject * execObj = aJson.getObjectItem(callbackObj,name);
+          if (execObj) executeCommand(execObj,-1,value);
+        }
+    }
+}
+
 void out_AC::InsertData(byte data[], size_t size){
 
     int fresh =0;
@@ -77,7 +91,8 @@ void out_AC::InsertData(byte data[], size_t size){
     int fan_spd = 0;
 
 
-    char s_mode[10];
+    char s_buffer[10];
+    itemCmd icmd;
 
     set_tmp = data[B_SET_TMP]+16;
     if (set_tmp>40 || set_tmp<16) return;
@@ -128,18 +143,47 @@ void out_AC::InsertData(byte data[], size_t size){
   //publishTopic(item->itemArr->name, (long) fan_spd,"/fan");
 
   /////////////////////////////////
+   s_buffer[0]='\0';
+  switch (fan_spd){
+    case 0x00:
+     strcpy_P(s_buffer,HIGH_P);
+     icmd.Cmd(CMD_HIGH);
+    break;
+    case 0x01:
+     strcpy_P(s_buffer,MED_P);
+     icmd.Cmd(CMD_MED);
+    break;
+    case 0x02:
+     strcpy_P(s_buffer,LOW_P);
+     icmd.Cmd(CMD_LOW);
+    break;
+    case 0x03:
+    strcpy_P(s_buffer,AUTO_P);
+    icmd.Cmd(CMD_AUTO);
+    break;
+    default:
+    strcpy_P(s_buffer,ERROR_P);
+    icmd.Cmd(CMD_VOID);
+  }
+publishTopic(item->itemArr->name, s_buffer,"/fan");
+SubmitParameters("fan",icmd);
+
+ /*      
   if (fan_spd == 0x00){
       publishTopic(item->itemArr->name, "high","/fan");
+      SubmitParameters("fan","")
   }
   if (fan_spd == 0x01){
       publishTopic(item->itemArr->name, "medium","/fan");
   }
+
   if (fan_spd == 0x02){
       publishTopic(item->itemArr->name, "low","/fan");
   }
   if (fan_spd == 0x03){
       publishTopic(item->itemArr->name, "auto","/fan");
   }
+*/
 
   if (swing == 0x00)
        publishTopic(item->itemArr->name, "OFF","/swing");
@@ -159,33 +203,47 @@ void out_AC::InsertData(byte data[], size_t size){
   publishTopic(item->itemArr->name,(long)set_tmp,"/set");
   if (cur_tmp!=255) publishTopic(item->itemArr->name, (long)cur_tmp, "/temp");
   ////////////////////////////////////
-  s_mode[0]='\0';
+  
+  //itoa(set_tmp,s_buffer,10);
+  //SubmitParameters("set",itemCmd().Int((int32_t)set_tmp).setSuffix(S_SET));
+  SubmitParameters("set",itemCmd().Int((int32_t)set_tmp));
+
+  //itoa(cur_tmp,s_buffer,10);
+  SubmitParameters("temp",itemCmd().Int((int32_t)cur_tmp).setSuffix(S_VAL));
+
+  s_buffer[0]='\0';
 
   if (store->mode == 0x00){
-    strcpy_P(s_mode,AUTO_P);
+    strcpy_P(s_buffer,AUTO_P);icmd.Cmd(CMD_AUTO);
   }
   else if (store->mode == 0x01){
-    strcpy_P(s_mode,COOL_P);
+    strcpy_P(s_buffer,COOL_P);icmd.Cmd(CMD_COOL);
   }
   else if (store->mode == 0x02){
-    strcpy_P(s_mode,HEAT_P);
+    strcpy_P(s_buffer,HEAT_P);icmd.Cmd(CMD_HEAT);
   }
   else if (store->mode == 0x03){
-    strcpy_P(s_mode,FAN_ONLY_P);
+    strcpy_P(s_buffer,FAN_ONLY_P);icmd.Cmd(CMD_FAN);
   }
   else if (store->mode == 0x04){
-    strcpy_P(s_mode,DRY_P);
+    strcpy_P(s_buffer,DRY_P);icmd.Cmd(CMD_DRY);
   }
   else if (store->mode == 109){
-      strcpy_P(s_mode,ERROR_P);
+      strcpy_P(s_buffer,ERROR_P);icmd.Cmd(CMD_VOID);
   }
 
   publishTopic(item->itemArr->name, (long) store->mode, "/mode");
 
+  if (!(store->power & 0x01)) {strcpy_P(s_buffer,OFF_P);icmd.Cmd(CMD_OFF);}
+  publishTopic(item->itemArr->name, s_buffer,"/cmd");
+  SubmitParameters("cmd",icmd);
+ /* 
   if (store->power & 0x01)
-      publishTopic(item->itemArr->name, s_mode,"/cmd");
+      publishTopic(item->itemArr->name, s_buffer,"/cmd");
 
   else publishTopic(item->itemArr->name, "OFF","/cmd");
+  */
+
 /*
   String raw_str;
   char raw[75];
@@ -220,6 +278,10 @@ if (item->itemArr->subtype == AC_SENDING)
       while (store->timestamp && !isTimeOver(store->timestamp,millis(),150)) yield();
      }
 
+  //#if defined (__SAM3X8E__)
+  //if (item->getArg(0)==2) preTransmission();
+  //#endif
+
   ACSerial->write(req, size - 1);
   ACSerial->write(getCRC(req, size-1));
   //ACSerial->flush();
@@ -238,6 +300,9 @@ if (item->itemArr->subtype == AC_SENDING)
   }
 debugSerial.println();
 item->itemArr->subtype = AC_SENDING;
+//  #if defined (__SAM3X8E__)
+//  if (item->getArg(0)==2) postTransmission();
+//  #endif
 }
 
 inline unsigned char toHex( char ch ){
@@ -268,6 +333,7 @@ if (!portNum)// && (g_APinDescription[0].ulPinType == PIO_PA8A_URXD))
       pinMode(0, INPUT_PULLUP);
       #if debugSerial == Serial
       infoSerial<<F("AC: Serial used by AC - disabling serial logging and cmd")<<endl;
+      Serial.flush();
       //sysConf.setSerialDebuglevel(0);
       serialDebugLevel = 0;
       disableCMD=true;

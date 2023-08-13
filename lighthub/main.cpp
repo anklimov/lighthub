@@ -2192,12 +2192,33 @@ void setup_main() {
  #endif
 //debugSerialPort << "Checkin EEPROM integrity (signature)"<<endl;
 
-    if (!sysConf.isValidSysConf()) 
+bool needClean = false;
+#ifdef CONFIG_CLEAN_PIN
+pinMode(CONFIG_CLEAN_PIN,INPUT_PULLUP);
+int i = 0;
+while  ((digitalRead(CONFIG_CLEAN_PIN)==LOW) && !needClean)
+{
+    
+    statusLED.set(ledRED);
+        delay(500);
+    statusLED.set(ledGREEN);
+        delay(500);
+    statusLED.set(ledBLUE);
+        delay(500);
+    if (i>4) needClean = true;
+    i++;    
+}
+
+//if (needClean) cmdFunctionClearEEPROM(0, NULL);
+#endif
+
+    if (!sysConf.isValidSysConf() || needClean) 
                 {
                 #if defined(debugSerialPort) && !defined(NOSERIAL)    
-                debugSerialPort.println(F("No valid EEPROM data. Initializing."));    
+                debugSerialPort.println(F("Initializing EEPROM."));    
                 #endif
-                sysConf.clear();
+                cmdFunctionClearEEPROM(0, NULL);
+                //sysConf.clear();
                 } 
        else  debugSerialPort << F("EEPROM signature ok")<<endl;                          
   //  scan_i2c_bus();
@@ -2884,7 +2905,9 @@ void thermoLoop(void) {
                 int   thermoStateCommand = thermostat.getCmd();
                 float curTemp       = (float) tStore.tempX100/100.;
                 bool  active        = thermostat.isActive();
-
+                //float overHeatTemp  = thermostat.getFloatArg(1);
+                //if (overHeatTemp == 0.) overHeatTemp = THERMO_OVERHEAT_CELSIUS;
+                float overHeatTemp  = THERMO_OVERHEAT_CELSIUS;
                 debugSerial << F(" Set:") << thermoSetting << F(" Cur:") << curTemp
                             << F(" cmd:") << thermoStateCommand;
 
@@ -2900,7 +2923,7 @@ void thermoLoop(void) {
                         }
                          else
                          { // Not expired yet
-                            if (curTemp > THERMO_OVERHEAT_CELSIUS) mqttClient.publish("/alarm/ovrht", thermoItem->name); 
+                            if (curTemp > overHeatTemp) mqttClient.publish("/alarm/ovrht", thermoItem->name); 
 
                             if (!active) thermoRelay(thermoPin,HEATER_OFF);//OFF 
                                else if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) thermoRelay(thermoPin,HEATER_HEAT);//ON

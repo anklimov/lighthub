@@ -12,7 +12,7 @@
 #define MIN_PWM 70
 // The number of simultaniusly working motors
 #ifndef MOTOR_QUOTE
-#define MOTOR_QUOTE 1
+#define MOTOR_QUOTE 2
 #endif
 
 static int8_t motorQuote = MOTOR_QUOTE;

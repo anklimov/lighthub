@@ -19,12 +19,15 @@ public:
   uint32_t timestamp;
   aJsonObject * pollingRegisters;
   aJsonObject * pollingIrs;
+  aJsonObject * pollingCoils;
+  aJsonObject * poolingDiscreteIns;
   aJsonObject * parameters;
 };
 
 #define MB_NEED_SEND  8
 #define MB_SEND_ERROR 4
 #define MB_SEND_ATTEMPTS 3
+#define MB_VALUE_OUTDATED 1
 
 
 class out_Modbus : public abstractOut {
