@@ -389,7 +389,7 @@ int out_UARTbridge::getChanType()
 // 2. custom textual subItem
 // 3. non-standard numeric  suffix Code equal param id
 
-int out_UARTbridge::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
+int out_UARTbridge::Ctrl(itemCmd cmd,   char* subItem, bool toExecute, bool authorized)
 {
 //int chActive = item->isActive();
 //bool toExecute = (chActive>0);

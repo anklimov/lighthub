@@ -44,7 +44,7 @@ return val;
 }
 */
 
-int colorChannel::Ctrl(itemCmd cmd, char* subItem, bool toExecute)
+int colorChannel::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authorized)
 {
 debugSerial<<F("clrCtr: ");
 cmd.debugOut();
@@ -67,7 +67,8 @@ case S_CMD:
       switch (cmd.getCmd())
           {
           case CMD_ON:
-            if (vol=cmd.getPercents()<MIN_VOLUME && vol>=0) 
+            vol=cmd.getPercents();
+            if (vol<MIN_VOLUME && vol>=0) 
                 {
                 cmd.setPercents(INIT_VOLUME);
                 cmd.saveItem(item);

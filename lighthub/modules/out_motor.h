@@ -29,7 +29,7 @@ public:
     int getChanType() override;
     int getDefaultStorageType(){return ST_PERCENTS255;};
     //int Ctrl(short cmd, short n=0, int * Parameters=NULL,  int suffixCode=0, char* subItem=NULL) override;
-    int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true) override;
+    int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized = false) override;
 
     int8_t pinUp;
     int8_t pinDown;

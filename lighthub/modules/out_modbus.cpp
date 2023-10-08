@@ -856,7 +856,7 @@ else return 0;
 // 2. custom textual subItem
 // 3. non-standard numeric  suffix Code equal param id
 
-int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
+int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute,bool authorized)
 {
 if (!store) return -1;
 

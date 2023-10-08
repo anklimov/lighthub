@@ -143,7 +143,7 @@ bool needToOff = isTimeOver(timer,millis(),period*val/255);
 };
 
 
-int out_relay::Ctrl(itemCmd cmd, char* subItem, bool toExecute)
+int out_relay::Ctrl(itemCmd cmd, char* subItem, bool toExecute,bool authorized)
 {
 debugSerial<<F("relayCtr: ");
 cmd.debugOut();

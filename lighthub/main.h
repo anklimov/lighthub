@@ -319,4 +319,6 @@ void printCurentLanConfig();
 
 void onMQTTConnect();
 
+int16_t attachMaturaTimer();
+
 //void printFreeRam();

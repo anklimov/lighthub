@@ -286,7 +286,7 @@ int out_pid::getChanType()
 // /val suffix - to put value into controller
 // accept ON and OFF commands
 
-int out_pid::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
+int out_pid::Ctrl(itemCmd cmd,   char* subItem, bool toExecute, bool authorized)
 {
 if (!store || !store->pid || (Status() != CST_INITIALIZED)) return 0;    
 int suffixCode = cmd.getSuffix();

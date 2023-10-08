@@ -98,6 +98,10 @@ lan_status lanStatus = INITIAL_STATE;
 const char configserver[] PROGMEM = CONFIG_SERVER;
 const char verval_P[] PROGMEM = QUOTE(PIO_SRC_REV);
 
+#ifdef CRYPT
+char cryptoKey[] = QUOTE(SHAREDSECRET);
+#endif
+
 #if defined(__SAM3X8E__)
 UID UniqueID;
 #endif
@@ -2046,6 +2050,56 @@ int16_t attachTimer(double microseconds, timerCallback callback, const char* Tim
 }
 #endif
 
+#if defined(__SAM3X8E__) && defined (PULSEPIN12)
+#define MATURA_PULSE 100
+#define MATURA_PERIOD 2500
+
+void maturaTimerHandler(void){ }
+
+volatile int maturaTimerNumber = -1;
+int16_t attachMaturaTimer()
+{  
+    if (maturaTimerNumber==-1) 
+                {
+                    DueTimerInterrupt dueTimerInterrupt =  DueTimerInterrupt(8);
+                    dueTimerInterrupt.attachInterruptInterval(MATURA_PERIOD*1000, maturaTimerHandler);
+                    maturaTimerNumber = dueTimerInterrupt.getTimerNumber();
+                    TC_SetRB(TC2,2,REG_TC2_RC2 - (REG_TC2_RC2  / MATURA_PERIOD * MATURA_PULSE));
+                    REG_TC2_CMR2 |=  TC_CMR_BCPB_SET | TC_CMR_BCPC_CLEAR | TC_CMR_EEVT_XC0; // on CTR==A -> SET; on CTR == C - CLEAR pin, enable TIOB as out
+                }
+    debugSerial<<F("Matura attached to Timer(")<<maturaTimerNumber<<F(")")<<endl;            
+    //pinMode(11,OUTPUT); //PIO_PD7B_TIOA8  PERIPH_B //T7
+    pinMode(12,OUTPUT); //PIO_PD8B_TIOB8  PERIPH_B //T8
+    
+    // Memo for some future use timers:
+    //pinMode(2,OUTPUT); //PIO_PB25B_TIOA0 PERIPH_B
+    //pinMode(13,OUTPUT);//PIO_PB27B_TIOB0 PERIPH_B
+
+    //pinMode(3,OUTPUT); //PIO_PC28B_TIOA7 PERIPH_B
+    //pinMode(10,OUTPUT);//PIO_PC29B_TIOB7 PERIPH_B
+
+    //pinMode(5,OUTPUT); //PIO_PC25B_TIOA6 PERIPH_B
+    //pinMode(4,OUTPUT); //PIO_PC26B_TIOB6 PERIPH_B
+
+    // 11 & 12 pins example (TC2 ch2 (#8) A & B channels for some future use) 
+    //REG_PIOD_PDR = PIO_PD7 | PIO_PD8;
+    //REG_PIOD_ABSR |= PIO_PD7 | PIO_PD8;
+    //REG_TC2_CMR2 |= TC_CMR_ACPA_SET | TC_CMR_ACPC_CLEAR  | TC_CMR_BCPB_SET | TC_CMR_BCPC_CLEAR | TC_CMR_EEVT_XC0;
+    //TC_SetRA(TC2,2,1000000);TC_SetRB(TC2,2,1500000);
+
+    REG_PIOD_PDR = PIO_PD8; //Disabling PD8 IO - move to pereferia
+    REG_PIOD_ABSR |= PIO_PD8; //Select Pereferia B
+    //REG_TC2_CMR2 |=  TC_CMR_BCPB_SET | TC_CMR_BCPC_CLEAR | TC_CMR_EEVT_XC0; // on CTR==A -> SET; on CTR == C - CLEAR pin, enable TIOB as out
+
+  
+
+    //REG_PIOD_WPMR = PIO_WPMR_WPKEY(0x50494f) | 1;  //Write protect whole IOD
+  return maturaTimerNumber;
+}
+#else 
+int16_t attachMaturaTimer(){};
+#endif
+
 #if defined(WIFI_ENABLE)
 #if defined (ESP32)
 void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info)
@@ -2804,6 +2858,8 @@ configLocked++;
     #if defined(__SAM3X8E__) && defined (TIMER_INT)  
     // Interval in microsecs
     attachTimer(TIMER_CHECK_INPUT * 1000, TimerHandler, "ITimer");  
+    attachMaturaTimer();
+
     #endif     
 configLocked--;
 }

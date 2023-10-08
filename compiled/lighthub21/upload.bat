@@ -28,7 +28,7 @@ REM bin file exist?
 IF NOT EXIST "%BINFILE%" GOTO error_binfile
 
 REM fetch DeviceID of Arduino Due Programming Port from WMI Service
-FOR /f "tokens=* skip=1" %%a IN ('wmic PATH Win32_SerialPort Where "Caption LIKE '%%USB%%'" get DeviceID') DO (
+FOR /f "tokens=* skip=1" %%a IN ('wmic PATH Win32_SerialPort Where "Caption LIKE '%%Due%%'" get DeviceID') DO (
     SET COMX=%%a
     GOTO exit1
 )

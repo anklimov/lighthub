@@ -18,7 +18,7 @@ public:
     int getChanType() override;
 //    int Ctrl(itemCmd cmd, char* subItem=NULL) override;
 //    int PixelCtrl(itemCmd cmd) override;
-    virtual int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true ) override;
+    virtual int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true) override;
 
 protected:
 };

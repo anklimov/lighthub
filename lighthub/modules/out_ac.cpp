@@ -433,7 +433,7 @@ debugSerial<<F("AC: ")<<portNum<<F(" >> ");
 return true;
 };
 
-int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute)
+int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute, bool authorized)
 {
   //char s_mode[10];
   char s_speed[10];

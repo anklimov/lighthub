@@ -99,12 +99,12 @@ void SetAddr(char *out, uint8_t *addr) {
 
 // chan is pointer to pointer to string
 // Function return first retrived integer and move pointer to position next after ','
-int getInt(char **chan) {
+long getInt(char **chan) {
     if (chan && *chan && **chan)
     {
     //Skip non-numeric values
     while (**chan && !(**chan == '-' || (**chan >= '0' && **chan<='9'))) *chan += 1;
-    int ch = atoi(*chan);
+    long ch = atol(*chan);
 
     //Move pointer to next element (after ,)
     *chan = strchr(*chan, ',');
@@ -362,7 +362,8 @@ uint32_t ReadUniqueID( uint32_t * pdwUniqueID )
    
     return  *(uint32_t *)(IFLASH1_ADDR + 128); // dont remove: SAM defect workaround - MPU dont leave Unique Identifier mode until read flash out UID of range 
     
-    
+#else
+return 0;    
 #endif
 }
 //#pragma optimize("", on)
@@ -814,13 +815,12 @@ bool getPinVal(uint8_t pin)
 {
   return (0!=(*portOutputRegister( digitalPinToPort(pin) ) & digitalPinToBitMask(pin)));
 }
-#ifdef CRYPT
 
+#ifdef CRYPT
 #define HASH_SIZE 32
 SHA256 sha256;
 extern uint32_t cryptoSalt;
-//extern 
-const char cryptoKey[] ="12345678";
+extern char cryptoKey[];
 
 bool checkToken(char * token, char * data)
 {
@@ -863,6 +863,13 @@ for (unsigned int i=0;i<strlen(token)/2;i++)
 bool checkToken(char * token, char * data)
 {return true;}
 #endif
+
+  bool isProtectedPin(short pin)
+  {
+  for (short i=0; i<protectedPinsNum; i++) 
+    if (pin==protectedPins[i]) return true;
+  return false;    
+  }
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

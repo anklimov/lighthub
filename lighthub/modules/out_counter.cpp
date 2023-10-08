@@ -69,7 +69,7 @@ uint32_t timer = item->getExt();
 };
 
 
-int out_counter::Ctrl(itemCmd cmd, char* subItem, bool toExecute)
+int out_counter::Ctrl(itemCmd cmd, char* subItem, bool toExecute,bool authorized)
 {
 debugSerial<<F("Counter: ");
 cmd.debugOut();

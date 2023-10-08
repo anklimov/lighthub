@@ -151,7 +151,7 @@ else if (curPos>=0)
 else
   dif=targetPos-255/2; // Have No feedback
 
-debugSerial<<F("Motor: in:")<<pinFeedback<<F(" Val:")<<fb<<F("/")<<curPos<<F("->")<<targetPos<<F(" delta:")<<dif<<endl;
+//debugSerial<<F("Motor: in:")<<pinFeedback<<F(" Val:")<<fb<<F("/")<<curPos<<F("->")<<targetPos<<F(" delta:")<<dif<<endl;
 
 if (dif<-POS_ERR)
 {
@@ -261,7 +261,7 @@ int out_Motor::getChanType()
 
 
 
-int out_Motor::Ctrl(itemCmd cmd,   char* subItem , bool toExecute)
+int out_Motor::Ctrl(itemCmd cmd,   char* subItem , bool toExecute,bool authorized)
 {
 int suffixCode = cmd.getSuffix();
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it

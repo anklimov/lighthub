@@ -49,7 +49,7 @@ public:
     int Stop() override;
     int Status() override;
     int getChanType() override;
-    int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true) override;
+    int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized = false) override;
     int getDefaultStorageType(){return ST_INT32;};
 
 

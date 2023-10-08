@@ -103,7 +103,7 @@ extern aJsonObject *items;
 extern short thermoSetCurTemp(char *name, float t);
 
 int txt2cmd (char * payload);
-bool digGroup (aJsonObject *itemArr, itemCmd *cmd = NULL, char* subItem = NULL);
+bool digGroup (aJsonObject *itemArr, itemCmd *cmd = NULL, char* subItem = NULL, bool authorized = false);
 class Item
 {
   public:
@@ -148,8 +148,8 @@ class Item
   inline int On (){return Ctrl(itemCmd(ST_VOID,CMD_ON));};
   inline int Off(){return Ctrl(itemCmd(ST_VOID,CMD_OFF));};
   inline int Toggle(){return Ctrl(itemCmd(ST_VOID,CMD_TOGGLE));};
-  int scheduleCommand(itemCmd cmd);
-  int scheduleOppositeCommand(itemCmd cmd);
+  int scheduleCommand(itemCmd cmd, bool authorized);
+  int scheduleOppositeCommand(itemCmd cmd,bool authorized);
   int isScheduled();
 
   protected:

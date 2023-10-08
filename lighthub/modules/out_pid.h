@@ -34,7 +34,7 @@ public:
     int isActive() override;
     int getChanType() override;
     int getDefaultStorageType(){return ST_FLOAT;};
-    int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true) override;
+    int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized = false) override;
     void alarm(bool);
 
 

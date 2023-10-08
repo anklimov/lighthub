@@ -94,7 +94,7 @@ int out_Multivent::getChanType()
 
 
 
-int out_Multivent::Ctrl(itemCmd cmd,   char* subItem , bool toExecute)
+int out_Multivent::Ctrl(itemCmd cmd,   char* subItem , bool toExecute, bool authorized)
 {
 
 if (cmd.getCmd()==CMD_DISABLE || cmd.getCmd()==CMD_ENABLE) return 0;

@@ -362,3 +362,17 @@
 #else
 #define minimalMemory 1200
 #endif
+
+#if not defined PROTECTED_PINS 
+#define PROTECTED_PINS
+#endif
+
+const short protectedPins[]={PROTECTED_PINS};
+#define protectedPinsNum (sizeof(protectedPins)/sizeof(short))
+
+#ifdef CRYPT
+#if not defined SHAREDSECRET
+#define SHAREDSECRET "12345678"
+#endif
+
+#endif

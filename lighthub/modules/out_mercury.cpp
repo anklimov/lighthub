@@ -337,6 +337,7 @@ int out_Mercury::Poll(short cause)
 //bool lineInitialized = false;    
 if (cause==POLLING_SLOW) return 0;  
 if (modbusBusy || ( mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),100))) return 0;
+if (store->driverStatus == CST_FAILED) return 0;
 if (!getConfig()) return 0;
 
  switch (Status())
@@ -474,7 +475,7 @@ int out_Mercury::getChanType()
 
 
 //!Control unified  item  
-int out_Mercury::Ctrl(itemCmd cmd,   char* subItem, bool toExecute)
+int out_Mercury::Ctrl(itemCmd cmd,   char* subItem, bool toExecute,bool authorized)
 {
 if (!store) return -1;
 
