@@ -55,7 +55,7 @@ void out_Mercury::initLine(bool full)
     #elif defined (ARDUINO_ARCH_ESP8266)
     modbusSerial.begin(baud, static_cast <SerialConfig>(serialParam));
     #elif defined (ESP32)
-    if (full) modbusSerial.begin(store->baud, (serialParam),MODBUS_UART_RX_PIN,MODBUS_UART_TX_PIN);
+    if (full) modbusSerial.begin(baud, (serialParam),MODBUS_UART_RX_PIN,MODBUS_UART_TX_PIN);
         else  modbusSerial.updateBaudRate (baud); //Some terrible error in ESP32 core with uart reinit
     #else
     modbusSerial.begin(baud, (serialParam));

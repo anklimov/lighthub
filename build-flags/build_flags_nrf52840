@@ -16,4 +16,4 @@
 
 -D CORS=\"*\"
 -D REDIRECTION_URL=\"http://lazyhome.ru/pwa\"
--DMERCURY_ENABLE
+#-DMERCURY_ENABLE

@@ -2097,7 +2097,7 @@ int16_t attachMaturaTimer()
   return maturaTimerNumber;
 }
 #else 
-int16_t attachMaturaTimer(){};
+int16_t attachMaturaTimer(){return 0;};
 #endif
 
 #if defined(WIFI_ENABLE)
