@@ -1,9 +1,12 @@
 # LightHub
 is Flexible, Arduino-Mega/Arduino DUE/ESP8266/ESP32 open-software and open-hardware SmartHome controller. 
 Useful links:
-[Article/RU](https://geektimes.ru/post/295109/) 
-[HOME-site/RU](http://lazyhome.ru)
-[WIKI/RU](https://www.lazyhome.ru/dokuwiki/doku.php?id=start)
+
+  * [Article/RU](https://geektimes.ru/post/295109/) 
+
+  * [HOME-site/RU](http://lazyhome.ru)
+
+  * [WIKI/RU](https://www.lazyhome.ru/dokuwiki/doku.php?id=start)
 
 It may operate both: 
 * On [especially designed hardware board](http://www.lazyhome.ru/index.php/featurerequest) with 16 optocoupled digital inputs, 16 ESD protected digital/analog Inputs/outputs, 8 open-collector outputs (up to 0.5A/50V), DMX IN/OUT, MODBUS RTU and hardware 1-wire support circuit.
@@ -17,7 +20,7 @@ Lighthub allows connecting together:
 * Temperature/Humidity/CO2 sensors: DHT22, CS811, HDC1080 and any type of Modbus connected devices
 * Standard nonexpensive Relay board with TTL inputs, [like this](http://ali.pub/2zlosh) to control AC powered lamps, floor heaters, boilers etc
 * [Standard nonexpensive LED dimmers](http://ali.pub/2zlokp) and [AC DMX-512 dimmers](http://ali.pub/2zlont)
-* Modbus RTU devices (Currently, possible to control two types of Modbus devices: AC Dimmer and Ventilation set (Based on [Vacon 10 controller](http://files.danfoss.com/download/Drives/Vacon-10-Quick-Guide-DPD00714F1-UK.pdf)) and configure polling of virtually any Modbus device. 
+* Modbus RTU devices (Currently, possible to control any type of Modbus devices - e.c dimmers, sensors, wall climate panels, HVAC e.t.c
 * Simple DMX wall sensor panel [like this](http://ali.pub/2zlohe)
 
 [List of non-expensive compatible components from AliExpress here](http://ppv.alipromo.com/custom/promo.php?hash=pjagwaovaero6vkeabjpkpvy4gznbgkc&landing_id=39661)
@@ -48,14 +51,16 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 
 # Platforms specific details:
 
-**AVR** version (Arduino Mega) is basic, long time in production and have all functions
+**AVR** version (Arduino Mega) is basic, long time in production and have most functions
 * DMX-out is software (DMXSimple) on pin3, can be re-defined to PIN 18 (USART1 TX)
 * DMX-in - hardware
 * WIZNET 5100 and 5500 Ethernets are supported
 * Modbus on USART2
+* Very limited in terms of RAM available
+* OptiBoot bootloader recommended
 
 **SAM3X8E** (Arduino DUE): (Tested. In production. Recomended hardware at current moment)
-* default PWM out frequency
+* Reachest funcionality from all possible options
 * both, DMX-in and DMX-out are hardware USART based. Use USART1 (pins 18 and 19) for DMX-out and DMX-in
 * WIZNET 5100 and 5500 Ethernets are supported
 * Modbus on USART2
@@ -63,7 +68,7 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 **ESP8266, ESP32**: (Tested)
 * DMX-OUT on USART1 TX
 * DMX-IN - disabled - not possible to deploy in ESP8266
-* Modbus - disabled on ESP8266, Might be configured in future on USART0 instead CLI/DEBUG, on ESP32 binded with UART2
+* Modbus - disabled on ESP8266, Might be configured  on USART0 instead CLI/DEBUG, on ESP32 binded with UART2
 * Uses Wifi interface instead wired connection
 
 **NRF52840** : Still early development stage
