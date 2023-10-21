@@ -140,7 +140,8 @@ void Item::Parse() {
         for (int i = aJson.getArraySize(itemArr); i < 4; i++)
             aJson.addItemToArray(itemArr, aJson.createNull());//( (long int) 0));
                    // int(defval[i]) )); //Enlarge item to 4 elements. VAL=int if no other definition in conf
-        itemType = aJson.getArrayItem(itemArr, I_TYPE)->valueint;
+        //itemType = aJson.getArrayItem(itemArr, I_TYPE)->valueint;
+        itemType = replaceTypeToInt (aJson.getArrayItem(itemArr, I_TYPE));
         itemArg = aJson.getArrayItem(itemArr, I_ARG);
         itemVal = aJson.getArrayItem(itemArr, I_VAL);
         itemExt = aJson.getArrayItem(itemArr, I_EXT);
@@ -794,6 +795,8 @@ int Item::scheduleOppositeCommand(itemCmd cmd,bool authorized)
     break;
     case CMD_RESTORE:  nextCmd.Cmd(CMD_HALT);
     break;
+    case CMD_TOGGLE:  nextCmd.Cmd(CMD_TOGGLE);
+    break;
    
     default: return 0;
     }
@@ -1341,12 +1344,12 @@ if (invalidArgument) return -4;
 
 if ((!driver || driver->isAllowed(cmd)) && (!getFlag(FLAG_FREEZED)))
 {
-    // UPDATE internal variables 
-    if (status2Send) cmd.saveItem(this,status2Send);
-    //debugSerial<<F("sts:")<<status2Send<<endl;
 
     if (driver) //New style modular code
             {
+            // UPDATE internal variables 
+            if (status2Send) cmd.saveItem(this,status2Send);    
+
             res = driver->Ctrl(cmd, subItem, toExecute,authorized);   
             if (driver->getChanType() == CH_THERMO) status2Send |= FLAG_SEND_IMMEDIATE;
             //if (res==-1) status2Send=0;  ///////not working
@@ -1364,6 +1367,9 @@ if ((!driver || driver->isAllowed(cmd)) && (!getFlag(FLAG_FREEZED)))
                     short iaddr=getArg();
                     short icmd =cmd.getCmd();
                     if (!authorized && isProtectedPin(iaddr)) {errorSerial<<F("Unauthorized")<<endl; return -5;}
+
+                        // UPDATE internal variables 
+                        if (status2Send) cmd.saveItem(this,status2Send);
 
                     if (iaddr)
                     {
@@ -1409,6 +1415,9 @@ if ((!driver || driver->isAllowed(cmd)) && (!getFlag(FLAG_FREEZED)))
                 }
 
                 case CH_THERMO:
+                            // UPDATE internal variables 
+                            if (status2Send) cmd.saveItem(this,status2Send);
+
                         switch (suffixCode)
                         {
                         case S_VAL:
@@ -1438,6 +1447,9 @@ if ((!driver || driver->isAllowed(cmd)) && (!getFlag(FLAG_FREEZED)))
 
         #ifndef MODBUS_DISABLE
                 case CH_MODBUS:
+                            // UPDATE internal variables 
+                            if (status2Send) cmd.saveItem(this,status2Send);
+
                     if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue()))
                     {
                     int vol;    
@@ -1451,9 +1463,13 @@ if ((!driver || driver->isAllowed(cmd)) && (!getFlag(FLAG_FREEZED)))
                     }
                     break;
                 case CH_VC:
+                            // UPDATE internal variables 
+                            if (status2Send) cmd.saveItem(this,status2Send);
                     if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue())) res=VacomSetFan(cmd);
                     break;
                 case CH_VCTEMP:
+                            // UPDATE internal variables 
+                            if (status2Send) cmd.saveItem(this,status2Send);
                     if (toExecute && !(chActive && cmd.getCmd()==CMD_ON && !cmd.isValue())) res=VacomSetHeat(cmd);
                     break;
         #endif

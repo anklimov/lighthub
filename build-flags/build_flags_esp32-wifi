@@ -57,3 +57,4 @@
 -DMQTT_SOCKET_TIMEOUT=20
 -D CORS=\"*\"
 -D REDIRECTION_URL=\"http://lazyhome.ru/pwa\"
+-DMERCURY_ENABLE

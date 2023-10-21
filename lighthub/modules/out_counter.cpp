@@ -6,18 +6,9 @@
 
 #include "item.h"
 #include "main.h"
-//#include "dmx.h"
+
 
 static int driverStatus = CST_UNKNOWN;
-
-void out_counter::getConfig()
-{
-  if (!item) return;
-  impulse = item->getFloatArg(0)*TENS_BASE;
-  
-  period = item->getFloatArg(1)*1000.0;  
-  //debugSerial<<"CTR: imp:"<<impulse<<" period:"<<period<<endl;      
-}
 
 int  out_counter::Setup()
 {
@@ -43,22 +34,18 @@ int out_counter::Poll(short cause)
   if (cause==POLLING_SLOW || cause==POLLING_INT) return 0;
   if (!item) return 0;
 
-
-uint32_t timer = item->getExt(); 
-
+   uint32_t timer = item->getExt(); 
+   uint32_t period  = item->getFloatArg(1)*1000.0;  
    if (timer && period && isTimeOver(timer,millis(),period))
     {
+      uint32_t impulse = item->getFloatArg(0)*TENS_BASE; 
       item->setExt(millisNZ());
 
       itemCmd st;
       st.loadItem(item,FLAG_PARAMETERS|FLAG_COMMAND);
-      //float val = st.getFloat();
       uint32_t val = st.getTens_raw();
-      //short cmd = st.getCmd();
       debugSerial<<"CTR: tick val:"<<val<< " + "<< impulse << endl; 
-
       val+=impulse;
-      //st.Float(val);
       st.Tens_raw(val);
       st.saveItem(item);
       debugSerial<<"CTR: tick saved val:"<<val<<endl; 

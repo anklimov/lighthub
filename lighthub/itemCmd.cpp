@@ -39,6 +39,20 @@ int txt2cmd(char *payload) {
   return cmd;
 }
 
+
+int type2num(char *payload) {
+  if (!payload || !payload[0]) return -1;
+
+    for(uint8_t i=0; i<ch_typeNum ;i++)
+        if (strncmp_P(payload, ch_type_P[i], strlen_P(ch_type_P[i])) == 0)
+             {
+             return i;
+           }
+  return -1;
+}
+
+
+
 /*!
      \brief Constructor with definition of type and command
      \param type - type of value (ST_???, ST_VOID by default) 
@@ -1178,6 +1192,22 @@ return false;
           }   
     } else if (verb && verb->type == aJson_Int) return verb->valueint;
    return 0; 
+  }
+
+  int replaceTypeToInt(aJsonObject* verb)
+  {
+   if (verb && verb->type == aJson_String) 
+    {
+      int type = type2num(verb->valuestring);
+      if (type>=0)
+          {
+            freeString(verb->valuestring);
+            verb->valueint=type;
+            verb->type=aJson_Int;
+            return verb->valueint;
+          }   
+    } else if (verb && verb->type == aJson_Int) return verb->valueint;
+   return -1; 
   }
 
   // Mapping from unified itemCmd object to some specific device-depended value

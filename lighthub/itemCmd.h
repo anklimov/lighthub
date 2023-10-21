@@ -31,7 +31,38 @@ const cmdstr commands_P[] PROGMEM =
 "HIGH","MEDIUM","LOW",
 "HEAT","COOL","DRY","STOP","RGB","HSV"
 };
+
 #define commandsNum sizeof(commands_P)/sizeof(cmdstr)
+
+typedef  char ch_type[9];
+const ch_type ch_type_P[] PROGMEM =
+{
+"DMX",    //    0   //DMX 1-4 ch
+"DMXRGBW",//    1   //DMX 4 ch
+"DMXRGB", //    2   //DMX 3 ch
+"PWM",    //    3   //PWM output directly to PIN 1-4 CH
+"MBUSDIM",//    4   //Modbus AC Dimmer
+"THERMO", //    5   //Simple ON/OFF thermostat
+"RELAY",  //    6   //ON_OFF relay output
+"GROUP",  //    7   //Group pseudochannel
+"VCTEMP", //    8   //Vacom PID regulator
+"MBUSVC", //    9   //Vacom modbus motor regulator
+"ACHAIER",//    10  //AC Haier
+"SPILED", //    11  //SPI led strip
+"MOTOR",  //    12  //Motorized gate with feedback resistor
+"PID",    //    13  //PID regulator
+"MBUS",   //    14  //Universal Modbus Master channel
+"UARTBRDG", //  15  //Bridge between 2 UARTS with reporting PDUs to Wireshark via UDP
+"RELAYPWM", //  16  //Slow PWM relay to control objects with inertia
+"DMXRGBWW", //  17  //DMX RGBWW channel (warm&cold white)
+"VENTS",    //  18  //Multichannel ventilation 
+"ELEVATOR", //  19  //
+"COUNTER",  //  20  //Generic counter
+"HUM",      //  21  //Humidifier
+"MERCURY"   //  22  //Mercury energy meter/RS485 interface
+};
+
+#define ch_typeNum sizeof(ch_type_P)/sizeof(ch_type)
 
 /// Definition of Commands
 #define CMD_ON  1       /// Turn channel ON 
@@ -241,4 +272,5 @@ public:
 
   };
 
+int replaceTypeToInt(aJsonObject* verb);
 #pragma pack(pop)
