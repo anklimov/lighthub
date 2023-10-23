@@ -138,7 +138,8 @@ else
 
 int  out_pid::Stop()
 {
-debugSerial.println("PID: De-Init");
+debugSerial.print(F("PID: De-Init "));
+debugSerial.println(item->itemArr->name);
 if (store) delete (store->pid);
 delete store;
 item->setPersistent(NULL);

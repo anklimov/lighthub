@@ -815,11 +815,11 @@ int Item::scheduleCommand(itemCmd cmd,bool authorized)
                 aJsonObject *timestampObj = aJson.getArrayItem(itemArr, I_TIMESTAMP);
                 if (timestampObj && cmd.getCmd()<=0xf)
                 { 
-                   if ((cmd.getInt()>0) && (timestampObj->type == aJson_Int || timestampObj->type == aJson_NULL))       
+                   if ((cmd.getInt()>0) && (timestampObj->type == aJson_Int || timestampObj->type == aJson_NULL || timestampObj->type == aJson_Reserved))       
                     {
                         timestampObj->valueint = millis()+cmd.getInt();
-                        timestampObj->type = aJson_Int;
-                        timestampObj->subtype=(cmd.getCmd() & 0xF) | ((authorized?1:0)<<4);
+                        timestampObj->type = (authorized?aJson_Reserved:aJson_Int);
+                        timestampObj->subtype=(cmd.getCmd() & 0xF);
                 
                         debugSerial<<F( "Armed for ")<< cmd.getInt() << F(" ms :")<<timestampObj->valueint<<endl;
                     }
@@ -1585,7 +1585,8 @@ aJsonObject *timestampObj = aJson.getArrayItem(itemArr, I_TIMESTAMP);
 if (timestampObj)
 {
   uint8_t  cmd = timestampObj->subtype & 0xF;
-  bool authorized = timestampObj->subtype & 0x10;
+  bool authorized = (timestampObj->type==aJson_Reserved); 
+
   int32_t remain = (uint32_t) timestampObj->valueint - (uint32_t)millis(); 
 
   if (cmd)    {

@@ -20,7 +20,7 @@ void analogWrite(int pin, int val)
 int  out_pwm::Setup()
 {
 abstractOut::Setup();    
-debugSerial<<F("PWM-Out #")<<iaddr<<F(" init")<<endl;
+debugSerial<<F("PWM-Out #")<<iaddr<<F(" ")<<item->itemArr->name<<F(" init")<<endl;
 if (!item || iaddr) return 0;
 
 switch (getChanType())
@@ -61,7 +61,7 @@ return 1;
 
 int  out_pwm::Stop()
 {
-debugSerial<<F("PWM-Out #")<<iaddr<<F(" stop")<<endl;
+debugSerial<<F("PWM-Out #")<<iaddr<<F(" ")<<item->itemArr->name<<F(" stop")<<endl;
 
 switch (getChanType())
 {

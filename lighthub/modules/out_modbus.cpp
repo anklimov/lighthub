@@ -193,9 +193,10 @@ else
 
 int  out_Modbus::Stop()
 {
-debugSerial.println("MBUS: De-Init");
+debugSerial.print("MBUS: De-Init ");
+debugSerial.println(item->itemArr->name);
 
-delete store;
+if (store) delete store;
 item->setPersistent(NULL);
 store = NULL;
 return 1;

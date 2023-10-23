@@ -165,10 +165,12 @@ int8_t mqttErrorRate=0;
 void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
 #endif
 
-bool cleanConf()
+bool cleanConf(bool wait)
 {
   if (!root) return true;
   bool clean = true;
+if (wait)
+{  
 debugSerial<<F("Unlocking config ...")<<endl;
 uint32_t stamp=millis();
 while (configLocked && !isTimeOver(stamp,millis(),10000))
@@ -192,6 +194,7 @@ if (configLocked)
     errorSerial<<F("Not unlocked in 10s - continue ...")<<endl;
     clean = false;
 }
+} //wait
 
 debugSerial<<F("Stopping channels ...")<<endl;
 timerHandlerBusy++;
@@ -201,19 +204,16 @@ if (items)
 aJsonObject * item = items->child;
     while (item)
     {
-        if (item->type == aJson_Array && aJson.getArraySize(item)>0)
-        {
-            if (item->type == aJson_Array && aJson.getArraySize(item)>0)
-            {
+            if (item->type == aJson_Array && (aJson.getArraySize(item)>0))
+            {  
                 Item it(item->name);
                 if (it.isValid()) it.Stop();
                 yield();
 
             }
         item = item->next;
-        }
     } 
-}
+} else debugSerial<<F("nothing to stop")<<endl;
 pollingItem = NULL;
 debugSerial<<F("Stopped")<<endl;
 delay(100);
@@ -747,22 +747,19 @@ lan_status lanLoop() {
                 lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
             break;
 
-       case DO_READ_RE_CONFIG: // Pause and re-read EEPROM
-             timerLanCheckTime = millis();
-             lanStatus = READ_RE_CONFIG;
-             //statusLED.set(ledRED|((configLoaded)?ledBLINK:0));
+       case DO_READ_RE_CONFIG: 
+           timerLanCheckTime = millis();
+           lanStatus=READ_RE_CONFIG;
              break;
 
         case READ_RE_CONFIG: // Restore config from FLASH, re-init LAN
-            if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_REINIT))
-                {
-                    debugSerial<<F("Restoring config from EEPROM")<<endl; 
-                    if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;//2;
-                    else {
-                        //timerLanCheckTime = millis();// + 5000;
-                        lanStatus = DO_REINIT;//-10;
-                    }
-                }
+            if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+              else 
+                 if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_RELOAD))
+                 {
+                    errorSerial<<F("30s EEPROM is not reloaded. Reboot");
+                    softRebootFunc();
+                 }
             break;
 
         case DO_NOTHING:
@@ -1513,12 +1510,14 @@ void printConfigSummary() {
 }
 
 int cmdFunctionLoad(int arg_cnt, char **args) {
-
+/*
     if (!loadConfigFromEEPROM()) 
                                     {
                                         lanStatus=DO_REINIT;
                                         return 500;
-                                    }
+                                         }
+ */
+lanStatus=DO_READ_RE_CONFIG;                                  
  return 200;                                   
 }
 
@@ -1526,6 +1525,8 @@ int cmdFunctionLoad(int arg_cnt, char **args) {
 int loadConfigFromEEPROM()
 {
     if (configLocked) return 0;
+    configLocked++;
+
     infoSerial<<F("Loading Config from EEPROM")<<endl;
     #if defined(FS_STORAGE)
     sysConfStream.open("/config.json",'r');
@@ -1536,16 +1537,18 @@ int loadConfigFromEEPROM()
     if (sysConfStream.peek() == '{') {
         debugSerial<<F("JSON detected")<<endl;
         aJsonStream as = aJsonStream(&sysConfStream);
-        cleanConf();
+        cleanConf(false);
         root = aJson.parse(&as);
         sysConfStream.close();
         if (!root) {
             errorSerial<<F("load failed")<<endl;
             sysConf.setETAG("");
         //    sysConfStream.close();
+            configLocked--;
             return 0;
         }
         infoSerial<<F("Loaded from EEPROM")<<endl;
+        configLocked--;
         applyConfig();
         sysConf.loadETAG();
         //ethClient.stop(); //Refresh MQTT connect to get retained info
@@ -1558,6 +1561,7 @@ int loadConfigFromEEPROM()
            }
     sysConfStream.close();   
     infoSerial<<F("No stored config")<<endl;
+    configLocked--;
     return 0;
 }
 
@@ -1816,7 +1820,7 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
             infoSerial<<F("got Config\n"); delay(500);
             aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
-            cleanConf();
+            cleanConf(true);
             root = aJson.parse(&as);
             interrupts();
             hclient.closeStream(configStream);  // this is very important -- be sure to close the STREAM
@@ -1888,7 +1892,7 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
     if (responseStatusCode == 200) {
         aJsonStream socketStream = aJsonStream(&htclient);
         debugSerial<<F("Free:")<<freeRam()<<endl;
-        cleanConf();
+        cleanConf(true);
         debugSerial<<F("Configuration cleaned")<<endl;
         debugSerial<<F("Free:")<<freeRam()<<endl;
         //root = aJson.parse((char *) response.c_str());
