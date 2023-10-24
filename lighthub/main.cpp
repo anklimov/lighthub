@@ -1972,7 +1972,7 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
             sysConf.setETAG(httpClient.header("ETag"));
             //String response = httpClient.getString();
             //debugSerial<<response;
-            cleanConf();
+            cleanConf(true);
             //root = aJson.parse((char *) response.c_str());
             root = aJson.parse(&socketStream);
     
