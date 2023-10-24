@@ -16,7 +16,7 @@ public:
                         };
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized=false) override;
     int getDefaultStorageType()override;
-    virtual int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true ) =0;
+    virtual int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true, bool authorized = false ) =0;
     short getChannelAddr(short n =0);
 //    int isActive() override;
 protected:

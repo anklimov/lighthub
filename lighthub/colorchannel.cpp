@@ -60,7 +60,7 @@ toExecute = true;
 case S_SET:
 //case S_ESET:
 case S_HSV:
-          PixelCtrl(cmd, subItem, toExecute);
+          PixelCtrl(cmd, subItem, toExecute, authorized);
           return 1;
 case S_CMD:
       //item->setCmd(cmd.getCmd());
@@ -74,13 +74,13 @@ case S_CMD:
                 cmd.saveItem(item);
                 item->SendStatus(FLAG_PARAMETERS | FLAG_SEND_DEFFERED);
                 };
-            PixelCtrl(cmd,subItem, true);
+            PixelCtrl(cmd,subItem, true, authorized);
     //        item->SendStatus(FLAG_COMMAND | FLAG_PARAMETERS );
             return 1;
 
             case CMD_OFF:
               cmd.param.asInt32=0;
-              PixelCtrl(cmd, subItem, true);
+              PixelCtrl(cmd, subItem, true,authorized);
     //          item->SendStatus(FLAG_COMMAND);
             return 1;
 

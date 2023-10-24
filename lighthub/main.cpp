@@ -1439,6 +1439,9 @@ setupSyslog();
                             if (cmd<1) it.setCmd(CMD_OFF); 
                             it.setFlag(FLAG_COMMAND);
                             if (it.itemVal) it.setFlag(FLAG_PARAMETERS);
+                            
+                            if (isProtectedPin(pin)) {errorSerial<<F("pin protected: ")<<pin<<endl; break;}
+
                             pinMode(pin, OUTPUT);
                             digitalWrite(pin, false); //Initially, all thermostates are LOW (OFF for electho heaters, open for water NO)
                             debugSerial<<F("Thermo:")<<pin<<F("=LOW")<<F(";");
@@ -1447,11 +1450,15 @@ setupSyslog();
                         {
                             int k;
                             pinMode(pin, OUTPUT);
-                            if (inverse)
-                            digitalWrite(pin, k = ((cmd == CMD_ON) ? LOW : HIGH));
+                            if (isProtectedPin(pin)) digitalWrite (pin,LOW); 
                             else
-                            digitalWrite(pin, k = ((cmd == CMD_ON) ? HIGH : LOW));
-                            debugSerial<<F("Pin:")<<pin<<F("=")<<k<<F(";");
+                            {
+                                if (inverse)
+                                digitalWrite(pin, k = ((cmd == CMD_ON) ? LOW : HIGH));
+                                else
+                                digitalWrite(pin, k = ((cmd == CMD_ON) ? HIGH : LOW));
+                                debugSerial<<F("Pin:")<<pin<<F("=")<<k<<F(";");
+                            }
                         }
                             break;
                     } //switch
@@ -2922,6 +2929,7 @@ enum heaterMode {HEATER_HEAT,HEATER_OFF,HEATER_ERROR};
 void thermoRelay(int pin, heaterMode on)
 {   
     int thermoPin = abs(pin);
+    if(isProtectedPin(thermoPin)) {errorSerial<<F("pin disabled ")<<thermoPin<<endl;return;}
     pinMode(thermoPin, OUTPUT);
     
     if (on == HEATER_ERROR)

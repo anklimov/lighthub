@@ -51,6 +51,7 @@ int  out_Motor::Setup()
 abstractOut::Setup();    
 getConfig();
 debugSerial.println("Motor: Init");
+if (isProtectedPin(pinUp)||isProtectedPin(pinDown)) {errorSerial<<F("pin disabled")<<endl;return 0;}
 pinMode(pinUp,OUTPUT);
 pinMode(pinDown,OUTPUT);
 
@@ -71,11 +72,13 @@ return 1;
 int  out_Motor::Stop()
 {
 debugSerial.println("Motor: De-Init");
+item->setExt(0);
+driverStatus = CST_UNKNOWN;
+
+if (isProtectedPin(pinUp)||isProtectedPin(pinDown)) {errorSerial<<F("pin disabled")<<endl;return 0;}
 digitalWrite(pinUp,INACTIVE);
 digitalWrite(pinDown,INACTIVE);
 
-item->setExt(0);
-driverStatus = CST_UNKNOWN;
 return 1;
 }
 
@@ -116,6 +119,8 @@ if (!item->getFlag(FLAG_ACTION_IN_PROCESS))
       }
     else return 0;
     }
+    
+if (isProtectedPin(pinUp)||isProtectedPin(pinDown)) {return 0;}
 
 uint32_t motorOfftime = item->getExt();
 itemCmd st;

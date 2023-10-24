@@ -17,7 +17,7 @@ public:
     
     int getChanType() override;
     //int Ctrl(itemCmd cmd, char* subItem=NULL) override;
-    int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true ) override;
+    int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true, bool authorized = false ) override;
 
 protected:
     short numChannels;

@@ -51,7 +51,7 @@ int out_dmx::getChanType()
 return 0; 
 }
 
-int out_dmx::PixelCtrl(itemCmd cmd, char* subItem, bool show)
+int out_dmx::PixelCtrl(itemCmd cmd, char* subItem, bool show, bool authorized)
 //int out_dmx::PixelCtrl(itemCmd cmd)
 {
 if (!item || !show) return 0;

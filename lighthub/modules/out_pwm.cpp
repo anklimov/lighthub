@@ -112,7 +112,7 @@ int out_pwm::getChanType()
   return 0;
 }
 
-int out_pwm::PixelCtrl(itemCmd cmd, char* subItem, bool show)
+int out_pwm::PixelCtrl(itemCmd cmd, char* subItem, bool show, bool authorized)
 {
 if (!item || !iaddr || !show) return 0;
 
@@ -132,7 +132,8 @@ switch (cmd.getCmd()){
   {
     case CH_PWM:
           { short k;
-            analogWrite(iaddr, k=cmd.getPercents255(inverse));
+            if (authorized || !isProtectedPin(iaddr))
+                      analogWrite(iaddr, k=cmd.getPercents255(inverse));
             debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
             return 1;
           }
@@ -151,13 +152,20 @@ itemCmd st(storageType,CMD_VOID);
 st.assignFrom(cmd);
 
 switch (cType)
-{
+{ short pin;
   case CH_RGBW:
-  analogWrite(getChannelAddr(3), st.param.w);
+  pin=getChannelAddr(3);
+  if (authorized || !isProtectedPin(pin)) analogWrite(pin, st.param.w);
+
   case CH_RGB:
-  analogWrite(iaddr, st.param.r);
-  analogWrite(getChannelAddr(1), st.param.g);
-  analogWrite(getChannelAddr(2), st.param.b);
+
+  if (authorized || !isProtectedPin(iaddr)) analogWrite(iaddr, st.param.r);
+
+  pin=getChannelAddr(1);
+  if (authorized || !isProtectedPin(pin))  analogWrite(pin, st.param.g);
+
+  pin=getChannelAddr(2);
+  if (authorized || !isProtectedPin(pin))  analogWrite(pin, st.param.b);
   break;
   default: ;
 }

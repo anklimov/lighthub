@@ -98,7 +98,7 @@ int out_SPILed::getChanType()
    return CH_RGBW;
 }
 
-int out_SPILed::PixelCtrl(itemCmd cmd, char* subItem, bool show )
+int out_SPILed::PixelCtrl(itemCmd cmd, char* subItem, bool show, bool authorized )
 //int out_SPILed::PixelCtrl(itemCmd cmd, int from, int to, bool show)
 {
 

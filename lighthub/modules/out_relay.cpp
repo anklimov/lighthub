@@ -37,7 +37,7 @@ int  out_relay::Setup()
 abstractOut::Setup();    
 
 debugSerial<<F("Relay-Out #")<<pin<<F(" init")<<endl;
-
+if (isProtectedPin(pin)) {errorSerial<<F("pin disabled")<<endl;return 0;}
 pinMode(pin, OUTPUT);
 digitalWrite(pin,INACTIVE);
 if (item) item->setExt(0);
@@ -148,6 +148,9 @@ int out_relay::Ctrl(itemCmd cmd, char* subItem, bool toExecute,bool authorized)
 debugSerial<<F("relayCtr: ");
 cmd.debugOut();
 if ((subItem && !strcmp_P(subItem,action_P)) || !item) return 0;
+
+if (isProtectedPin(pin)) {return 0;}
+
 int suffixCode;
 if (cmd.isCommand()) suffixCode = S_CMD;
    else suffixCode = cmd.getSuffix();
