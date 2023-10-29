@@ -60,6 +60,7 @@ extern aJsonObject *topics;
 
 
 void PrintBytes(uint8_t *addr, uint8_t count, bool newline) {
+    if (!addr) return;
     for (uint8_t i = 0; i < count; i++) {
         infoSerial<< _HEX(addr[i] >> 4);
         infoSerial<< _HEX(addr[i] & 0x0f);
@@ -72,6 +73,7 @@ const char HEXSTR[] = "0123456789ABCDEF";
 
 void SetBytes(uint8_t *addr, uint8_t count, char *out) {
     // debugSerialPort.println("SB:");
+    if (!addr || !out) return;
     for (uint8_t i = 0; i < count; i++) {
         *(out++) = HEXSTR[(addr[i] >> 4)];
         *(out++) = HEXSTR[(addr[i] & 0x0f)];
@@ -81,20 +83,23 @@ void SetBytes(uint8_t *addr, uint8_t count, char *out) {
 }
 
 
-byte HEX2DEC(char i) {
+byte HEX2DEC(char i, bool *err) {
     byte v=0;
     if ('a' <= i && i <= 'f') { v = i - 97 + 10; }
     else if ('A' <= i && i <= 'F') { v = i - 65 + 10; }
     else if ('0' <= i && i <= '9') { v = i - 48; }
+    else if (err) *err = true; 
     return v;
 }
 
-void SetAddr(char *out, uint8_t *addr) {
-
+bool SetAddr(char *in, uint8_t *addr) {
+bool err=false;
+    if (!addr || !in) return false;
     for (uint8_t i = 0; i < 8; i++) {
-        *addr = HEX2DEC(*out++) << 4;
-        *addr++ |= HEX2DEC(*out++);
+        *addr = HEX2DEC(*in++,&err) << 4;
+        *addr++ |= HEX2DEC(*in++,&err);
     }
+return !err;    
 }
 
 // chan is pointer to pointer to string

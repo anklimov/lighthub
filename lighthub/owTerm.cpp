@@ -25,20 +25,28 @@ e-mail    anklimov@gmail.com
 #include "utils.h"
 #include "options.h"
 #include "main.h"
+#include "aJSON.h"
 
+extern aJsonObject *owArr;
+aJsonObject *dev2Check = NULL;
 
 OneWire *oneWire = NULL;
 
-DeviceAddress *term = NULL;
+//DeviceAddress *term = NULL;
+//uint16_t *wstat = NULL;
 
-uint16_t *wstat = NULL;
 DallasTemperature *sensors = NULL;
 
-short si = 0;
-int t_count = 0;
+//short si = 0;
+//int t_count = 0;
 unsigned long owTimer = 0;
 
-owChangedType owChanged;
+//owChangedType owChanged;
+
+void owSearch()
+{
+    owUpdate();
+}
 
 bool zero(const uint8_t *addr, uint8_t len)
 {
@@ -47,17 +55,75 @@ bool zero(const uint8_t *addr, uint8_t len)
 	return true;
 }
 
+char * getReableNote(aJsonObject * owObj)
+{
+     if (owObj && owObj->child)
+     {
+       if (owObj->child->type==aJson_String && owObj->child->valuestring) return owObj->child->valuestring;
+       if (owObj->child->child && owObj->child->child->type==aJson_String && owObj->child->child->valuestring) return owObj->child->child->valuestring;
+       return NULL;
+     }
+
+}
+void processTemp(aJsonObject * owObj, float currentTemp) {
+    if (!owObj || !owArr) return;
+    char* note = getReableNote(owObj);   
+    debugSerial<<endl<<F("1WT:")<<currentTemp<<F(" <")<<owObj->name<<F("> ");    
+    if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
+        {
+        if (note) debugSerial<<note;    
+        debugSerial<<endl;    
+        executeCommand(owObj,-1,itemCmd(currentTemp).setSuffix(S_VAL));    
+        }
+    else 
+        if (note) errorSerial<<F("1WT: Read error for ")<<note<<endl;  
+  
+/*
+#ifdef WITH_DOMOTICZ
+            aJsonObject *idx = aJson.getObjectItem(owObj, "idx");
+        if (idx && && idx->type ==aJson_String && idx->valuestring) {//DOMOTICZ json format support
+            debugSerial << endl << idx->valuestring << F(" Domoticz valstr:");
+            char valstr[50];
+            sprintf(valstr, "{\"idx\":%s,\"svalue\":\"%.1f\"}", idx->valuestring, currentTemp);
+            debugSerial << valstr;
+            if (mqttClient.connected() && !ethernetIdleCount)
+                  mqttClient.publish(owEmitString, valstr);
+            return;
+        }
+#endif
+*/
+}
+
+
 int owUpdate() {
 #ifndef OWIRE_DISABLE
-    unsigned long finish = millis();// + OW_UPDATE_INTERVAL;
+    DeviceAddress dev;
+    //unsigned long finish = millis();// + OW_UPDATE_INTERVAL;
+    if (!oneWire || !owArr) return 0;
+    oneWire->reset_search();
+    debugSerial << F("1WT: Searching dev")<<endl;
+    while (oneWire->wireSearch(dev) > 0)
+        {   
+            char addrstr[17];
+            SetBytes(dev, 8, addrstr);
+            addrstr[16] = 0;
+            aJsonObject * owObj=aJson.getObjectItem(owArr,addrstr);
+            debugSerial<<F("1WT:")<<addrstr;
+            if (owObj)
+                    {
+                        char * note = getReableNote(owObj);
+                        if (note) debugSerial<<F(" is ")<<note<<endl;
+                    }
+            else 
+                    {
+                        debugSerial<<F(" new")<<endl;
+                    }    
+        }
+
+
+
 /*
-    if (oneWire->getError() == DS2482_ERROR_SHORT)
-       {
-         debugSerial<<F("1-wire shorted.")<<endl;
-         return false;
-       }
-*/
-    //Serial.println(F("Searching"));
+
     if (oneWire) oneWire->reset_search();
     for (short i = 0; i < t_count; i++) wstat[i] &= ~SW_FIND; //absent
 
@@ -71,6 +137,7 @@ int owUpdate() {
                     wstat[i] |= SW_FIND;
                     debugSerial.print(F(" Node:"));
                     PrintBytes(term[t_count], 8,0);
+                    processTemp(-1, term[t_count], 0.0); //print note
                     debugSerial.println(F(" alive"));
                     break;
                 }; //alive
@@ -79,6 +146,7 @@ int owUpdate() {
                 wstat[t_count] = SW_FIND; //Newly detected
                 debugSerial<<F("dev#")<<t_count<<F(" Addr:");
                 PrintBytes(term[t_count], 8,0);
+                if processTemp(-1, term[t_count], 0.0); //print note
                 debugSerial.println();
                 if (term[t_count][0] == 0x28) {
                     sensors->setResolution(term[t_count], TEMPERATURE_PRECISION);
@@ -93,12 +161,13 @@ int owUpdate() {
     } //while
 
     debugSerial<<F("1-wire count: ")<<t_count<<endl;
+*/
 #endif
 return true;
 }
 
 
-int owSetup(owChangedType owCh) {
+int owSetup() {
 #ifndef OWIRE_DISABLE
     //// todo - move memory allocation to here
     if (oneWire) return true;    // Already initialized
@@ -117,9 +186,13 @@ if (!oneWire)
                     errorSerial<<F("Error 1-w init #1")<<endl;
                     return false;
                 }
+
+            
+
 // Pass our oneWire reference to Dallas Temperature.
 //    sensors = new DallasTemperature(oneWire);
 
+/*
     term = new DeviceAddress[t_max];
     debugSerial<<F("Term. Free:")<<freeRam()<<endl;
 //regs = new    int [t_max];
@@ -132,6 +205,7 @@ if (!term || ! wstat)
                 }
 
     owChanged = owCh;
+*/
 
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     Wire.begin();
@@ -173,45 +247,57 @@ int sensors_loop(void) {
        }
 #endif
 
-    if (!sensors)
+
+if (!sensors)
        {
          // Setup sensors library and resolution
          sensors = new DallasTemperature(oneWire);
          sensors->begin();
          // IC Default 9 bit. If you have troubles consider upping it 12. Ups the delay giving the IC more time to process the temperature measurement
-         for (short i = 0; i < t_count; i++) sensors->setResolution(term[i],TEMPERATURE_PRECISION);
-         sensors->setWaitForConversion(false);
-       }
 
+         //for (short i = 0; i < t_count; i++) sensors->setResolution(term[i],TEMPERATURE_PRECISION);
+         sensors->setWaitForConversion(false);
+        }
+
+    if (!dev2Check && owArr)
+        {
+ 
+          if (owArr && owArr->type == aJson_Object && owArr->child) dev2Check = owArr->child;
+          ///owUpdate(); //every check circle - scan for new devices
+        }
+
+/*
     if (si >= t_count) {
         owUpdate(); //every check circle - scan for new devices
         si = 0;
         return 8000;
     }
-
+*/
+    DeviceAddress curDev;
+    
+    if (dev2Check && SetAddr(dev2Check->name,curDev))
+    {
     float t;
-    switch (term[si][0]) {
+    switch (curDev[0]) {
 
         case 0x28: // Thermomerer
-            t = sensors->getTempC(term[si]);//*10.0;
-            if (owChanged) owChanged(si, term[si], t);
-            sensors->requestTemperaturesByAddress(term[si]);
-            si++;
-            return 2500;
+            sensors->setResolution(curDev,TEMPERATURE_PRECISION);
 
-            //   default
-            //   return sensors_ext();
+            t = sensors->getTempC(curDev);//*10.0;
+            processTemp(dev2Check, t);
+            sensors->requestTemperaturesByAddress(curDev);
+
     } //switch
+    }
 
-
-    si++;
-    return check_circle;
+    //si++;
+    dev2Check=dev2Check->next;
+    return INTERVAL_1W;
 
 }
 
 
 void owLoop() {
-    //if (millis() >= owTimer) owTimer = millis() + sensors_loop();
     if (isTimeOver(owTimer,millis(),INTERVAL_1W))
     {
         sensors_loop();
@@ -219,7 +305,7 @@ void owLoop() {
     }
 }
 
-
+/*
 int owFind(DeviceAddress addr) {
     for (short i = 0; i < t_count; i++) if (!memcmp(term[i], addr, 8)) return i;//find
     return -1;
@@ -245,6 +331,8 @@ void owAdd(DeviceAddress addr) {
     t_count++;
 #endif
 }
+
+*/
 #endif
 
 void setupOwIdle (void (*ptr)())
@@ -253,3 +341,4 @@ void setupOwIdle (void (*ptr)())
     if (oneWire) oneWire->idle(ptr);
   #endif
 }
+

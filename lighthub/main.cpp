@@ -1237,7 +1237,7 @@ void resetHard() {
 }
 
 #ifdef _owire
-
+/*
 void Changed(int i, DeviceAddress addr, float currentTemp) {
     char addrstr[32] = "NIL";
     //char addrbuf[17];
@@ -1248,21 +1248,23 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
     SetBytes(addr, 8, addrstr);
     addrstr[17] = 0;
     if (!root) return;
-    //printFloatValueToStr(currentTemp,valstr);
-    debugSerial<<endl<<F("T:")<<currentTemp<<F("<")<<addrstr<<F(">")<<endl;
-    aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr);     
+    aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr); 
+
+    if (i<0) //just print note about address
+    { 
+      if (owObj && owObj->child && owObj->child->type==aJson_String && owObj->child->valuestring)  
+      debugSerial<<F(" ")<<owObj->child->valuestring<<F(" ");  
+      return;  
+    }
+
+    debugSerial<<endl<<F("T:")<<currentTemp<<F("<")<<addrstr<<F(">")<<endl;    
     if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
-        executeCommand(owObj,-1,itemCmd(currentTemp).setSuffix(S_VAL));
+        executeCommand(owObj,-1,itemCmd(currentTemp).setSuffix(S_VAL));    
+    else 
+        if (owObj && owObj->child && owObj->child->type==aJson_String && owObj->child->valuestring)
+              errorSerial<<F("Read error for ")<<owObj->child->valuestring<<endl;    
 
-    /*
-    if (owObj) {
-        owEmitString = getStringFromConfig(owObj, "emit");
-        debugSerial<<owEmitString<<F(">")<<endl;
-          if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
-          {
-           if (owEmitString)      // publish temperature to MQTT if configured
-            {
-
+////
 #ifdef WITH_DOMOTICZ
             aJsonObject *idx = aJson.getObjectItem(owObj, "idx");
         if (idx && && idx->type ==aJson_String && idx->valuestring) {//DOMOTICZ json format support
@@ -1275,23 +1277,9 @@ void Changed(int i, DeviceAddress addr, float currentTemp) {
             return;
         }
 #endif
-
-            //strcpy_P(addrstr, outprefix);
-            setTopic(addrstr,sizeof(addrstr),T_OUT);
-            strncat(addrstr, owEmitString, sizeof(addrstr));
-            if (mqttClient.connected() && !ethernetIdleCount)
-                  mqttClient.publish(addrstr, valstr);
-        }
-        // And translate temp to internal items
-        owItem = getStringFromConfig(owObj, "item");
-        if (owItem)
-            thermoSetCurTemp(owItem, currentTemp);  ///TODO: Refactore using Items interface
-        } // if valid temperature
-  } // if Address in config
-  else debugSerial<<addrstr<<F(">")<<endl; // No item found
-*/
+////
 }
-
+*/
 #endif //_owire
 
 int cmdFunctionHelp(int arg_cnt, char **args)
@@ -1310,6 +1298,7 @@ int cmdFunctionHelp(int arg_cnt, char **args)
                           "'log [serial_loglevel] [udp_loglevel]' - define log level (0..7)\n"
                           "'kill' - test watchdog\n"
                           "'clear' - clear EEPROM\n"
+                          "'search' - search 1-wire dev\n"
                           "'reboot' - reboot controller");
 return 200;                            
 }
@@ -1337,6 +1326,12 @@ int cmdFunctionReboot(int arg_cnt, char **args) {
     infoSerial<<F("Soft rebooting...");
     softRebootFunc();
 return 500;    
+}
+
+int cmdFunctionSearch(int arg_cnt, char **args) {
+    infoSerial<<F("searching");
+    owSearch();
+return 200;    
 }
 
 void applyConfig() {
@@ -1403,10 +1398,10 @@ setupSyslog();
     owArr = aJson.getObjectItem(root, "ow");
     if (owArr && !owReady) {
         aJsonObject *item = owArr->child;
-        owReady = owSetup(&Changed);
+        owReady = owSetup();
         if (owReady) infoSerial<<F("One wire Ready\n");
-        t_count = 0;
-
+///        t_count = 0;
+/*
         while (item && owReady) {
             if ((item->type == aJson_Object)) {
                 DeviceAddress addr;
@@ -1417,6 +1412,8 @@ setupSyslog();
             yield();
             item = item->next;
         }
+
+        */
     }
 #endif
 
@@ -2658,6 +2655,7 @@ void setupCmdArduino() {
     cmdAdd("clear",cmdFunctionClearEEPROM);
     cmdAdd("reboot",cmdFunctionReboot);
     cmdAdd("log",cmdFunctionLoglevel);
+    cmdAdd("search",cmdFunctionSearch);
 }
 
 void loop_main() { 

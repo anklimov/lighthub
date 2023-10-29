@@ -31,7 +31,7 @@ e-mail    anklimov@gmail.com
 #define SW_INMASK 0xFC
 
 #define recheck_interval 5
-#define check_circle 2000/t_count
+//#define check_circle 2000/t_count
 
 #define SW_FIND        1
 #define SW_DOUBLECHECK 2      //Doublecheck required
@@ -45,8 +45,8 @@ e-mail    anklimov@gmail.com
 #define SW_PULSE1_R      0x200    //Pulse Reset requested
 
 
-#define recheck_interval 5
-#define check_circle 2000/t_count
+//#define recheck_interval 5
+//#define check_circle 2000/t_count
 
 #if not defined (OW_DEVICES_LIMIT)
 #define t_max 20 //Maximum number of 1w devices
@@ -63,7 +63,7 @@ e-mail    anklimov@gmail.com
 
 extern aJsonObject *owArr;
 
-typedef   void (*owChangedType) (int , DeviceAddress, float) ;
+//typedef   void (*owChangedType) (int , DeviceAddress, float) ;
 
 #ifndef USE_1W_PIN
 #define DS2482_100_I2C_TO_1W_BRIDGE // HW driver
@@ -81,21 +81,22 @@ typedef   void (*owChangedType) (int , DeviceAddress, float) ;
 extern OneWire *oneWire;
 
 extern DallasTemperature *sensors;
-extern DeviceAddress *term ;
-extern int           *regs ;
-extern uint16_t       *wstat;
-extern int            t_count;
-extern short          si;
+//extern DeviceAddress *term ;
+//extern int           *regs ;
+//extern uint16_t       *wstat;
+//extern int            t_count;
+//extern short          si;
 
-extern owChangedType  owChanged;
+//extern owChangedType  owChanged;
 
 
 
 int  owUpdate();
-int  owSetup(owChangedType owCh);
+int  owSetup();
 void owLoop();
 void setupOwIdle(void (*)()) ;
-int owFind(DeviceAddress addr);
-void owAdd (DeviceAddress addr);
+//int owFind(DeviceAddress addr);
+//void owAdd (DeviceAddress addr);
+void owSearch();
 
 #endif

@@ -51,8 +51,8 @@ enum topicType {
 
 void PrintBytes(uint8_t* addr, uint8_t count, bool newline);
 void SetBytes(uint8_t* addr, uint8_t count, char * out);
-void SetAddr(char * out,  uint8_t* addr);
-uint8_t HEX2DEC(char i);
+bool SetAddr(char * in,  uint8_t* addr);
+uint8_t HEX2DEC(char i, bool* err);
 long getInt(char ** chan);
 itemCmd getNumber(char ** chan);
 unsigned long  freeRam ();
