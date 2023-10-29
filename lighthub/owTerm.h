@@ -30,7 +30,7 @@ e-mail    anklimov@gmail.com
 #define SW_MASK 0xF
 #define SW_INMASK 0xFC
 
-#define recheck_interval 5
+//#define recheck_interval 5
 //#define check_circle 2000/t_count
 
 #define SW_FIND        1
@@ -79,24 +79,12 @@ extern aJsonObject *owArr;
 
 
 extern OneWire *oneWire;
-
 extern DallasTemperature *sensors;
-//extern DeviceAddress *term ;
-//extern int           *regs ;
-//extern uint16_t       *wstat;
-//extern int            t_count;
-//extern short          si;
-
-//extern owChangedType  owChanged;
-
-
 
 int  owUpdate();
 int  owSetup();
 void owLoop();
 void setupOwIdle(void (*)()) ;
-//int owFind(DeviceAddress addr);
-//void owAdd (DeviceAddress addr);
 void owSearch();
 
 #endif

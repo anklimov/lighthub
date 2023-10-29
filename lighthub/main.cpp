@@ -1236,51 +1236,6 @@ void resetHard() {
 #endif
 }
 
-#ifdef _owire
-/*
-void Changed(int i, DeviceAddress addr, float currentTemp) {
-    char addrstr[32] = "NIL";
-    //char addrbuf[17];
-    //char valstr[16] = "NIL";
-    //char *owEmitString = NULL;
-    //char *owItem = NULL;
-
-    SetBytes(addr, 8, addrstr);
-    addrstr[17] = 0;
-    if (!root) return;
-    aJsonObject *owObj = aJson.getObjectItem(owArr, addrstr); 
-
-    if (i<0) //just print note about address
-    { 
-      if (owObj && owObj->child && owObj->child->type==aJson_String && owObj->child->valuestring)  
-      debugSerial<<F(" ")<<owObj->child->valuestring<<F(" ");  
-      return;  
-    }
-
-    debugSerial<<endl<<F("T:")<<currentTemp<<F("<")<<addrstr<<F(">")<<endl;    
-    if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
-        executeCommand(owObj,-1,itemCmd(currentTemp).setSuffix(S_VAL));    
-    else 
-        if (owObj && owObj->child && owObj->child->type==aJson_String && owObj->child->valuestring)
-              errorSerial<<F("Read error for ")<<owObj->child->valuestring<<endl;    
-
-////
-#ifdef WITH_DOMOTICZ
-            aJsonObject *idx = aJson.getObjectItem(owObj, "idx");
-        if (idx && && idx->type ==aJson_String && idx->valuestring) {//DOMOTICZ json format support
-            debugSerial << endl << idx->valuestring << F(" Domoticz valstr:");
-            char valstr[50];
-            sprintf(valstr, "{\"idx\":%s,\"svalue\":\"%.1f\"}", idx->valuestring, currentTemp);
-            debugSerial << valstr;
-            if (mqttClient.connected() && !ethernetIdleCount)
-                  mqttClient.publish(owEmitString, valstr);
-            return;
-        }
-#endif
-////
-}
-*/
-#endif //_owire
 
 int cmdFunctionHelp(int arg_cnt, char **args)
 {
@@ -1329,7 +1284,7 @@ return 500;
 }
 
 int cmdFunctionSearch(int arg_cnt, char **args) {
-    infoSerial<<F("searching");
+    //infoSerial<<F("searching");
     owSearch();
 return 200;    
 }
@@ -1400,20 +1355,6 @@ setupSyslog();
         aJsonObject *item = owArr->child;
         owReady = owSetup();
         if (owReady) infoSerial<<F("One wire Ready\n");
-///        t_count = 0;
-/*
-        while (item && owReady) {
-            if ((item->type == aJson_Object)) {
-                DeviceAddress addr;
-                //infoSerial<<F("Add:")),infoSerial<<item->name);
-                SetAddr(item->name, addr);
-                owAdd(addr);
-            }
-            yield();
-            item = item->next;
-        }
-
-        */
     }
 #endif
 

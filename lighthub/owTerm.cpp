@@ -31,17 +31,9 @@ extern aJsonObject *owArr;
 aJsonObject *dev2Check = NULL;
 
 OneWire *oneWire = NULL;
-
-//DeviceAddress *term = NULL;
-//uint16_t *wstat = NULL;
-
 DallasTemperature *sensors = NULL;
 
-//short si = 0;
-//int t_count = 0;
 unsigned long owTimer = 0;
-
-//owChangedType owChanged;
 
 void owSearch()
 {
@@ -55,7 +47,7 @@ bool zero(const uint8_t *addr, uint8_t len)
 	return true;
 }
 
-char * getReableNote(aJsonObject * owObj)
+char * getReadableNote(aJsonObject * owObj)
 {
      if (owObj && owObj->child)
      {
@@ -67,7 +59,7 @@ char * getReableNote(aJsonObject * owObj)
 }
 void processTemp(aJsonObject * owObj, float currentTemp) {
     if (!owObj || !owArr) return;
-    char* note = getReableNote(owObj);   
+    char* note = getReadableNote(owObj);   
     debugSerial<<endl<<F("1WT:")<<currentTemp<<F(" <")<<owObj->name<<F("> ");    
     if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
         {
@@ -76,7 +68,7 @@ void processTemp(aJsonObject * owObj, float currentTemp) {
         executeCommand(owObj,-1,itemCmd(currentTemp).setSuffix(S_VAL));    
         }
     else 
-        if (note) errorSerial<<F("1WT: Read error for ")<<note<<endl;  
+        if (note) debugSerial<<F(" read error for ")<<note<<endl;  
   
 /*
 #ifdef WITH_DOMOTICZ
@@ -98,32 +90,29 @@ void processTemp(aJsonObject * owObj, float currentTemp) {
 int owUpdate() {
 #ifndef OWIRE_DISABLE
     DeviceAddress dev;
-    //unsigned long finish = millis();// + OW_UPDATE_INTERVAL;
     if (!oneWire || !owArr) return 0;
     oneWire->reset_search();
-    debugSerial << F("1WT: Searching dev")<<endl;
+    infoSerial << F("1WT: Searching dev")<<endl;
     while (oneWire->wireSearch(dev) > 0)
         {   
+            wdt_res();
             char addrstr[17];
             SetBytes(dev, 8, addrstr);
             addrstr[16] = 0;
             aJsonObject * owObj=aJson.getObjectItem(owArr,addrstr);
-            debugSerial<<F("1WT:")<<addrstr;
+            infoSerial<<F("1WT:")<<addrstr;
             if (owObj)
                     {
-                        char * note = getReableNote(owObj);
-                        if (note) debugSerial<<F(" is ")<<note<<endl;
+                        char * note = getReadableNote(owObj);
+                        if (note) infoSerial<<F(" is ")<<note<<endl;
                     }
             else 
                     {
-                        debugSerial<<F(" new")<<endl;
+                        infoSerial<<F(" new")<<endl;
                     }    
         }
 
-
-
 /*
-
     if (oneWire) oneWire->reset_search();
     for (short i = 0; i < t_count; i++) wstat[i] &= ~SW_FIND; //absent
 
@@ -183,14 +172,9 @@ int owSetup() {
 
 if (!oneWire)
                 {
-                    errorSerial<<F("Error 1-w init #1")<<endl;
+                    errorSerial<<F("Error 1-w init")<<endl;
                     return false;
                 }
-
-            
-
-// Pass our oneWire reference to Dallas Temperature.
-//    sensors = new DallasTemperature(oneWire);
 
 /*
     term = new DeviceAddress[t_max];
@@ -203,7 +187,6 @@ if (!term || ! wstat)
                     errorSerial<<F("Error 1-w init #2 Free:")<<freeRam()<<endl;
                     return false;
                 }
-
     owChanged = owCh;
 */
 
@@ -223,8 +206,8 @@ if (!term || ! wstat)
             debugSerial.println(F("\tReset done"));
         return true;
     }
-    debugSerial.println(F("\tDS2482 error"));
-    return false;
+    debugSerial.println(F("\tDS2482 reset error"));
+    return true;
 #else
    // software driver
    oneWire->reset();
@@ -239,12 +222,33 @@ return false;
 
 int sensors_loop(void) {
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
-    if (oneWire->getError() == DS2482_ERROR_SHORT)
-       {
-         debugSerial<<F("1-wire shorted")<<endl;
-         oneWire->wireReset();
-         return 10000;
-       }
+    switch (oneWire->getError())
+    {  
+        case 0:
+        break;
+
+        case  DS2482_ERROR_SHORT:
+        errorSerial<<F("1WT: 1-wire shorted")<<endl;
+        oneWire->wireReset();
+        return INTERVAL_1W; 
+        
+        case  DS2482_ERROR_CONFIG:
+        errorSerial<<F("1WT: DS2482_ERROR_CONFIG")<<endl;
+        oneWire->wireReset();
+        return INTERVAL_1W;
+
+        case  DS2482_ERROR_TIMEOUT:
+        errorSerial<<F("1WT: 1-wire shorted")<<endl;
+        oneWire->wireReset();
+        return INTERVAL_1W;
+
+        default:
+        errorSerial<<F("1WT: error")<<endl;
+        oneWire->wireReset();
+        return INTERVAL_1W;
+    }
+            
+       
 #endif
 
 
@@ -261,7 +265,6 @@ if (!sensors)
 
     if (!dev2Check && owArr)
         {
- 
           if (owArr && owArr->type == aJson_Object && owArr->child) dev2Check = owArr->child;
           ///owUpdate(); //every check circle - scan for new devices
         }
