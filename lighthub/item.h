@@ -164,11 +164,11 @@ class Item
   int checkModbusDimmer();
   int checkModbusDimmer(int data);
 
-  int checkModbusRetry();
+  int checkRetry();
   //boolean checkVCRetry();
   //boolean checkHeatRetry();
   void sendDelayedStatus();
-  bool resumeModbus();
+  //bool resumeModbus();
 
 
   int checkFM();

@@ -67,7 +67,7 @@ e-mail    anklimov@gmail.com
 #endif
 
 short modbusBusy = 0;
-bool isPendedModbusWrites = false;
+//bool isPendedModbusWrites = false;
 
 extern aJsonObject *pollingItem;
 extern PubSubClient mqttClient;
@@ -1615,7 +1615,8 @@ int Item::isActive() {
 
 int Item::Poll(int cause) {
 
-if (isPendedModbusWrites) resumeModbus();                         
+//if (isPendedModbusWrites) resumeModbus();                         
+checkRetry(); 
 
 aJsonObject *timestampObj = aJson.getArrayItem(itemArr, I_TIMESTAMP);
 if (timestampObj)
@@ -1937,7 +1938,7 @@ return itemType;
 void Item::mb_fail(int result) {
     debugSerial<<F("Modbus op failed:")<<_HEX(result)<<endl;
     setFlag(FLAG_SEND_RETRY);
-    isPendedModbusWrites=true;
+ //   isPendedModbusWrites=true;
 }
 
 #define M_SUCCESS 1
@@ -1952,26 +1953,40 @@ void Item::mb_fail(int result) {
 //M_BUSY    (-1) - Modbus busy
 //M_CLEAN   (2)  - Clean. Not needed to repeat 
 
-int Item::checkModbusRetry() {
+int Item::checkRetry() {
   int result = -1;  
-  if (modbusBusy) return M_BUSY;
-    if (getFlag(FLAG_SEND_RETRY)) {   // if last sending attempt of command was failed
+
+    if (getFlag(FLAG_SEND_RETRY)) 
+    {   // if last sending attempt of command was failed
       itemCmd val(ST_VOID,CMD_VOID);
       val.loadItem(this, FLAG_COMMAND | FLAG_PARAMETERS);
-      debugSerial<<F("Retrying modbus CMD\n");
-      clearFlag(FLAG_SEND_RETRY);     // Clean retry flag
-      if (driver) result=driver->Ctrl(val);
+      
+      if (driver) 
+                    {
+                    clearFlag(FLAG_SEND_RETRY);     // Clean retry flag    
+                    debugSerial<<F("Retrying CMD\n");
+                    result=driver->Ctrl(val);
+                    }
       #ifndef MODBUS_DISABLE
       else switch (itemType) 
       {
 
       case CH_MODBUS:
+        if (modbusBusy) return M_BUSY;
+           clearFlag(FLAG_SEND_RETRY);     // Clean retry flag
+           debugSerial<<F("Retrying modbus CMD\n");
            result=modbusDimmerSet(val);
           break;
       case CH_VC:
+           if (modbusBusy) return M_BUSY;
+           clearFlag(FLAG_SEND_RETRY);     // Clean retry flag
+           debugSerial<<F("Retrying VC CMD\n");
            result=VacomSetFan(val);
            break;     
       case CH_VCTEMP:
+           if (modbusBusy) return M_BUSY;
+           clearFlag(FLAG_SEND_RETRY);     // Clean retry flag
+           debugSerial<<F("Retrying VCTEMP CMD\n");
            result=VacomSetHeat(val);
            break;           
       default:
@@ -1991,6 +2006,7 @@ int Item::checkModbusRetry() {
 return M_CLEAN;
 }
 
+/*
 bool Item::resumeModbus()
 {
 
@@ -2019,6 +2035,8 @@ configLocked--;
  if (success) isPendedModbusWrites=false;
 return true;
 }
+
+*/
 
 //////////////////// Begin of legacy MODBUS code - to be moved in separate module /////////////////////
 
