@@ -1253,7 +1253,10 @@ int cmdFunctionHelp(int arg_cnt, char **args)
                           "'log [serial_loglevel] [udp_loglevel]' - define log level (0..7)\n"
                           "'kill' - test watchdog\n"
                           "'clear' - clear EEPROM\n"
+                          
+#ifndef OWIRE_DISABLE
                           "'search' - search 1-wire dev\n"
+#endif                          
                           "'reboot' - reboot controller");
 return 200;                            
 }
@@ -1283,11 +1286,14 @@ int cmdFunctionReboot(int arg_cnt, char **args) {
 return 500;    
 }
 
+#ifndef OWIRE_DISABLE
+
 int cmdFunctionSearch(int arg_cnt, char **args) {
     //infoSerial<<F("searching");
     owSearch();
 return 200;    
 }
+#endif
 
 void applyConfig() {
     if (!root || configLocked) return;
@@ -2596,7 +2602,10 @@ void setupCmdArduino() {
     cmdAdd("clear",cmdFunctionClearEEPROM);
     cmdAdd("reboot",cmdFunctionReboot);
     cmdAdd("log",cmdFunctionLoglevel);
+    
+#ifndef OWIRE_DISABLE
     cmdAdd("search",cmdFunctionSearch);
+#endif    
 }
 
 void loop_main() { 
