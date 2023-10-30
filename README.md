@@ -8,6 +8,8 @@ Useful links:
 
   * [WIKI/RU](https://www.lazyhome.ru/dokuwiki/doku.php?id=start)
 
+  * [Doxigen autodocumentation for developers](https://anklimov.github.io/lighthub/docs/html/index.html) (litle bit outdated)
+
 It may operate both: 
 * On [especially designed hardware board](http://www.lazyhome.ru/index.php/featurerequest) with 16 optocoupled digital inputs, 16 ESD protected digital/analog Inputs/outputs, 8 open-collector outputs (up to 0.5A/50V), DMX IN/OUT, MODBUS RTU and hardware 1-wire support circuit.
 * On plain Arduino MEGA 2560, Arduino DUE, ESP8266, ESP32 and even on [Controllino](http://controllino.biz/)
