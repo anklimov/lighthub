@@ -707,14 +707,14 @@ if (isTimeOver(store->timestamp,millis(),store->pollingInterval) && ( !mbusSlenc
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            {
             aJsonObject *execObj = itemParametersObj->child; 
-            while (execObj && (execObj->type == aJson_Object) || (execObj->type == aJson_Array))
+            while (execObj && ((execObj->type == aJson_Object) || (execObj->type == aJson_Array)))
                           {     
                                  if (execObj->subtype & MB_SEND_ERROR) execObj->subtype&=~ MB_SEND_ERROR;
                                  if ((execObj->subtype & 0x3) >= MB_SEND_ATTEMPTS) 
                                                                         {
                                                                         //execObj->subtype&=~ MB_NEED_SEND;
                                                                         //Clean ERROR, NEED, Attempts
-                                                                        errorSerial<<"MBUS: send failed "<<item->itemArr->name<<endl;
+                                                                        errorSerial<<"MBUS: send failed "<<item->itemArr->name<<"/"<<execObj->name<<endl;
                                                                         execObj->subtype = 0;
                                                                         }
 
@@ -805,7 +805,7 @@ aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            {
             aJsonObject *execObj =  aJson.getObjectItem(itemParametersObj,suffixStr); 
-            if (execObj && (execObj->type == aJson_Object) || (execObj->type == aJson_Array))
+            if (execObj && ((execObj->type == aJson_Object) || (execObj->type == aJson_Array)))
                           {   
                             /*
                               aJsonObject *polledValue = aJson.getObjectItem(execObj,"@S");                      
