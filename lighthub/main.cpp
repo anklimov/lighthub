@@ -2229,7 +2229,7 @@ while  ((digitalRead(CONFIG_CLEAN_PIN)==LOW) && !needClean)
                 cmdFunctionClearEEPROM(0, NULL);
                 //sysConf.clear();
                 } 
-       else  debugSerialPort << F("EEPROM signature ok")<<endl;                          
+       else  debugSerial << F("EEPROM signature ok")<<endl;                          
   //  scan_i2c_bus();
 
   serialDebugLevel=sysConf.getSerialDebuglevel();

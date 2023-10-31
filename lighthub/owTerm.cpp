@@ -53,9 +53,9 @@ char * getReadableNote(aJsonObject * owObj)
      {
        if (owObj->child->type==aJson_String && owObj->child->valuestring) return owObj->child->valuestring;
        if (owObj->child->child && owObj->child->child->type==aJson_String && owObj->child->child->valuestring) return owObj->child->child->valuestring;
-       return NULL;
+   
      }
-
+    return NULL;
 }
 void processTemp(aJsonObject * owObj, float currentTemp) {
     if (!owObj || !owArr) return;

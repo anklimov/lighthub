@@ -1,0 +1,31 @@
+Компактная сборка с набором опций, умещающаяся в 50 процентов flash ESP12
+CLI и отладочная информация на serial0 отключена для возможности использования PIN0-1
+
+(-)MULTIVENT
+(+)PWM_RELAY
+(+)MDNS
+(-)UARTBRIDGE
+(+)SYSLOG
+(+)PID
+(-)MCP23017
+(-)ARTNET
+(+)OTA
+(-)SPI LED
+(-)MOTOR CTR
+(+)AC HAIER 
+(+)CCS811 & HDC1080
+(+)RESTART_LAN_ON_MQTT_ERRORS
+(-)HARDRESET, using soft
+(-)COUNTER
+(+)DHT
+(-)OWIRE
+(-)IPMODBUS
+(-)MODBUS
+(-)DMX
+(+)WiFi
+(+)FreeRam printing
+(+)WATCHDOG
+
+Config server:lazyhome.ru
+201703L C++ 
+version:e9355ef_2023-10-31

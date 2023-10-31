@@ -1,0 +1,32 @@
+Полная версия прошивки
+
+(+)MULTIVENT
+(+)PWM_RELAY
+(+)MDNS
+(-)UARTBRIDGE
+(+)SYSLOG
+(+)PID
+(+)MCP23017
+(+)ARTNET
+(+)OTA
+(+)SPI LED
+(+)MOTOR CTR
+(+)AC HAIER 
+(+)CCS811 & HDC1080
+(+)RESTART_LAN_ON_MQTT_ERRORS
+(-)HARDRESET, using soft
+(+)COUNTER
+(+)DHT
+(-)DS2482-100 USE_1W_PIN
+(+)OWIRE
+(-)IPMODBUS
+(+)MODBUS SERIAL_8N1 at Serial1 speed:9600
+(+)ADAFRUIT LED
+(+)DMX
+(+)WiFi
+(+)FreeRam printing
+(+)WATCHDOG
+
+lazyhome.ru
+Config server:
+201703L C++ version:e9355ef_2023-10-31

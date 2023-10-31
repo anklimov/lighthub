@@ -7,7 +7,6 @@
 -DARTNET_ENABLE
 -DUSE_1W_PIN=16
 -DW5500_CS_PIN=15
-#-DPID_DISABLE
 -DARDUINO_OTA_MDNS_DISABLE
 -DMDNS_ENABLE
 -DWM_MDNS
@@ -23,3 +22,25 @@
 
 #oct22 - violation in Publish/OnMQTTConnect while publish homie info
 -DNO_HOMIE
+
+#options to fit firmware to Sonoff-S26 (uncomment it)
+
+##Disabling debug log and move I2C to 1-3 pins
+#-DnoSerial
+#-D TWI_SCL=1
+#-D TWI_SDA=3
+##Slimming firmware to fit 50% of 1m flash
+-DDMX_DISABLE
+-UDARTNET_ENABLE
+-DMODBUS_DISABLE
+-DMBUS_DISABLE
+-DOWIRE_DISABLE
+-DCOUNTER_DISABLE
+-DAC_DISABLE
+-DMOTOR_DISABLE
+-DMULTIVENT_DISABLE
+-DHSV_DISABLE
+-UMCP23017
+-D BEARSSL_SSL_BASIC
+-D SPILED_DISABLE 
+-D PWM_DISABLE

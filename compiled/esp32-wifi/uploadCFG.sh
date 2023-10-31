@@ -1,2 +1,2 @@
 ~/.platformio/packages/tool-mkspiffs/mkspiffs_espressif32_arduino -s 20480 -c data data.bin
-../tools/mac/arduinoOTA -v -address 192.168.88.50 -port 65280 -username arduino -password password -sketch data.bin  -upload /data -b
+../tools/mac/arduinoOTA -v -address 192.168.88.50 -port 80 -username arduino -password password -sketch data.bin  -upload /data -b
