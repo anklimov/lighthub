@@ -193,7 +193,7 @@ if (!term || ! wstat)
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     Wire.begin();
     if (oneWire->checkPresence()) {
-        debugSerial.println(F("DS2482-100 present"));
+        infoSerial.println(F("1WT: DS2482-100 present"));
         oneWire->deviceReset();
 #ifdef APU_OFF
         debugSerial.println(F("APU off"));
@@ -204,19 +204,49 @@ if (!term || ! wstat)
         debugSerial.println(F("\tChecking for 1-Wire devices..."));
         if (oneWire->wireReset())
             debugSerial.println(F("\tReset done"));
-        return true;
-    }
-    debugSerial.println(F("\tDS2482 reset error"));
-    return true;
+        else 
+            debugSerial.println(F("\tDS2482 reset error"));    
+        //return true;
+    }   
+        else 
+            {
+            errorSerial.println(F("1WT: DS2482-100 not present"));
+            return false;
+            }
 #else
    // software driver
    oneWire->reset();
    delay(500);
-   return true;
+ //  return true;
 #endif //DS2482-100
 
-#endif //1w is not disabled
+if (!owArr) return false;
+
+if (!sensors)
+       {
+         // Setup sensors library and resolution
+         sensors = new DallasTemperature(oneWire);
+         sensors->begin();
+         // IC Default 9 bit. If you have troubles consider upping it 12. Ups the delay giving the IC more time to process the temperature measurement
+
+         //for (short i = 0; i < t_count; i++) sensors->setResolution(term[i],TEMPERATURE_PRECISION);
+         sensors->setWaitForConversion(false);
+        }
+
+aJsonObject *item = owArr->child;
+DeviceAddress curDev;
+while (owArr && item && SetAddr(item->name,curDev) )
+{
+debugSerial<<F("1WT: setup resolution ")<<item->name<<endl;    
+sensors->setResolution(curDev,TEMPERATURE_PRECISION);
+item=item->next;   
+}
+return true;
+
+#else //1w is not disabled
+
 return false;
+#endif
 }
 
 
@@ -251,17 +281,11 @@ int sensors_loop(void) {
        
 #endif
 
-
-if (!sensors)
-       {
-         // Setup sensors library and resolution
-         sensors = new DallasTemperature(oneWire);
-         sensors->begin();
-         // IC Default 9 bit. If you have troubles consider upping it 12. Ups the delay giving the IC more time to process the temperature measurement
-
-         //for (short i = 0; i < t_count; i++) sensors->setResolution(term[i],TEMPERATURE_PRECISION);
-         sensors->setWaitForConversion(false);
-        }
+if (!sensors || !owArr)
+    {
+        errorSerial<<F("1WT: not init")<<endl;
+        return INTERVAL_1W;
+    }
 
     if (!dev2Check && owArr)
         {
@@ -284,10 +308,12 @@ if (!sensors)
     switch (curDev[0]) {
 
         case 0x28: // Thermomerer
-            sensors->setResolution(curDev,TEMPERATURE_PRECISION);
+
 
             t = sensors->getTempC(curDev);//*10.0;
             processTemp(dev2Check, t);
+
+
             sensors->requestTemperaturesByAddress(curDev);
 
     } //switch

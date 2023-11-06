@@ -1358,7 +1358,7 @@ setupSyslog();
 #ifdef _owire
     owArr = aJson.getObjectItem(root, "ow");
     if (owArr && !owReady) {
-        aJsonObject *item = owArr->child;
+        //aJsonObject *item = owArr->child;
         owReady = owSetup();
         if (owReady) infoSerial<<F("One wire Ready\n");
     }
@@ -2661,6 +2661,8 @@ void loop_main() {
     yield();
     inputLoop(CHECK_INPUT);
 
+    yield();
+    inputSensorsLoop();
 #if defined (_espdmx)
     yield();
     dmxout.update();
@@ -2705,7 +2707,14 @@ ethernetIdleCount++;
 ethernetIdleCount--;
 };
 
+//static uint32_t tm=0;
 void modbusIdle(void) {
+/*
+    if (isTimeOver(tm,millis(),500))
+    {
+        tm=millis();
+        debugSerial<<F("MB: Tick")<<endl;
+    } */
     wdt_res();
     statusLED.poll();
     yield();
@@ -2782,9 +2791,16 @@ configLocked++;
         if (cause != CHECK_INTERRUPT) timerInputCheck = millis();// + INTERVAL_CHECK_INPUT;
         inCache.invalidateInputCache();
     }
+configLocked--;
+inputLoopBusy--;
+}
 
-    //if (millis() > timerSensorCheck) 
-    if (cause != CHECK_INTERRUPT && isTimeOver(timerSensorCheck,millis(),INTERVAL_CHECK_SENSOR))
+
+void inputSensorsLoop() {
+if (!inputs || inputLoopBusy) return;
+//inputLoopBusy++;
+configLocked++;
+    if (isTimeOver(timerSensorCheck,millis(),INTERVAL_CHECK_SENSOR))
     {
         aJsonObject *input = inputs->child;
         while (input) {
@@ -2793,13 +2809,15 @@ configLocked++;
                 in.Poll(CHECK_SENSOR);
             }
             yield();
+            inputLoop(CHECK_INPUT);
             input = input->next;
         }
-        timerSensorCheck = millis();// + INTERVAL_CHECK_SENSOR;
+        timerSensorCheck = millis();
     }
 configLocked--;
-inputLoopBusy--;
+//inputLoopBusy--;
 }
+
 
 
 void inputSetup(void) {

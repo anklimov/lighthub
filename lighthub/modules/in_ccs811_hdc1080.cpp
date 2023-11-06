@@ -82,8 +82,9 @@ return 1;
 }
 
 void i2cReset(){
-Wire.endTransmission(true);
+
 #if defined (SCL_RESET)
+Wire.endTransmission(true);
 SCL_LOW();
 delay(300);
 SCL_HIGH();

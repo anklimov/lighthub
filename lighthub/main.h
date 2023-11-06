@@ -287,6 +287,8 @@ void modbusIdle(void);
 
 void inputLoop(short);
 
+void inputSensorsLoop();
+
 void inputSetup(void);
 
 void pollingLoop(void);
