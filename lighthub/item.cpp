@@ -1936,7 +1936,7 @@ return itemType;
 
 // Setup FLAG_SEND_RETRY flag to repeat unsucsessfull modbus tranzaction after release line
 void Item::mb_fail(int result) {
-    debugSerial<<F("Modbus op failed:")<<_HEX(result)<<endl;
+    debugSerial<<F("Modbus op ")<<itemArr->name<<F(" failed:")<<_HEX(result)<<endl;
     setFlag(FLAG_SEND_RETRY);
  //   isPendedModbusWrites=true;
 }
@@ -2132,7 +2132,7 @@ int Item::VacomSetFan(itemCmd st) {
   }
     uint8_t result;
     int addr = getArg();
-    debugSerial<<F("VC#")<<addr<<F("=")<<val<<endl;
+    debugSerial<<F("MB: VC#")<<addr<<F("=")<<val<<endl;
     if (modbusBusy) {
        // setCmd(cmd);
        // setVal(val);
@@ -2152,7 +2152,7 @@ int Item::VacomSetFan(itemCmd st) {
         //node.writeSingleRegister(2001-1,1);
     } else result=node.writeSingleRegister(2001 - 1, 0);
     delay(100);
-    if (result == node.ku8MBSuccess) debugSerial << F("MB ok")<<endl;
+    if (result == node.ku8MBSuccess) debugSerial << F("MB: ok")<<endl;
     result = node.writeSingleRegister(2003 - 1, val * 100);
     modbusBusy = 0;
     //resumeModbus();
@@ -2179,7 +2179,7 @@ int addr;
     if (it.isValid() && it.itemType == CH_VC) addr=it.getArg();
     else return 0;
 
-    debugSerial<<F("VC_heat#")<<addr<<F("=")<<val<<F(" cmd=")<<cmd<<endl;
+    debugSerial<<F("MB: VC_heat#")<<addr<<F("=")<<val<<F(" cmd=")<<cmd<<endl;
     if (modbusBusy) {
       //setCmd(cmd);
       //setVal(val);
@@ -2219,7 +2219,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
     if (_regType != MODBUS_COIL_REG_TYPE || _regType != MODBUS_HOLDING_REG_TYPE) {
 
     }
-
+    debugSerial<<F("MB: Addr:")<<addr<<F(" Reg:0x")<<_HEX(_reg)<<F(" T:")<<_regType<<F(" Val:0x")<<_HEX(value)<<endl;
     if (modbusBusy) {
       mb_fail();
         return 0;
@@ -2251,7 +2251,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
 
 
     }
-    debugSerial<<F("Addr:")<<addr<<F(" Reg:0x")<<_HEX(_reg)<<F(" T:")<<_regType<<F(" Val:0x")<<_HEX(value)<<endl;
+    
     switch (_regType) {
         case MODBUS_HOLDING_REG_TYPE:
             result = node.writeSingleRegister(_reg, value);
@@ -2260,7 +2260,7 @@ int Item::modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint
             result = node.writeSingleCoil(_reg, value);
             break;
         default:
-            debugSerial<<F("Not supported reg type\n");
+            debugSerial<<F("MB: Not supported reg type\n");
     }
     modbusBusy = 0;
     //resumeModbus();
@@ -2297,12 +2297,13 @@ int Item::checkFM() {
     modbusSerial.begin(MODBUS_FM_BAUD, MODBUS_FM_PARAM);
     node.begin(getArg(), modbusSerial);
 
-
+    debugSerial << F("MB: polling FM ") << itemArr->name<< endl;
+    delay(50);
     result = node.readHoldingRegisters(2101 - 1, 10);
 
     // do something with data if read is successful
     if (result == node.ku8MBSuccess) {
-        debugSerial<<F(" FM Val :");
+        debugSerial<<F("MB: FM Val :");
         for (j = 0; j < 10; j++) {
             data = node.getResponseBuffer(j);
             debugSerial<<_HEX(data)<<F("-");
@@ -2330,10 +2331,12 @@ int Item::checkFM() {
             }
         }
     } else
-        debugSerial << F("Modbus polling error=") << _HEX(result) << endl;
+        debugSerial << F("MB: polling ") << itemArr->name<< F(" error=") << _HEX(result) << endl;
 
     if (node.getResponseBuffer(0) & 8) //Active fault
     {
+        debugSerial << F("MB: polling FM fault ") << itemArr->name<< endl;
+        delay(50);
         result = node.readHoldingRegisters(2111 - 1, 1);
         if (result == node.ku8MBSuccess) aJson.addNumberToObject(out, "flt", (long int) node.getResponseBuffer(0));
         modbusBusy=0;
@@ -2342,13 +2345,14 @@ int Item::checkFM() {
         if (isActive()>0) Off(); //Shut down ///
         modbusBusy=1;
     } else aJson.addNumberToObject(out, "flt", (long int)0);
-
+    
+    debugSerial << F("MB: polling PI ") << itemArr->name<< endl;
     delay(50);
     result = node.readHoldingRegisters(20 - 1, 4);
 
     // do something with data if read is successful
     if (result == node.ku8MBSuccess) {
-        debugSerial << F(" PI Val :");
+        debugSerial << F("MB: PI Val :");
         for (j = 0; j < 4; j++) {
             data = node.getResponseBuffer(j);
             debugSerial << data << F("-");
@@ -2371,7 +2375,8 @@ int Item::checkFM() {
             Off(); //Shut down
         }
     } else
-        debugSerial << F("Modbus polling error=") << _HEX(result);
+         debugSerial << F("MB: polling PI ") << itemArr->name<< F(" error=") << _HEX(result) << endl;
+
     outch = aJson.print(out);
     if (mqttClient.connected()  && !ethernetIdleCount)
         mqttClient.publish(addrstr, outch);
@@ -2388,7 +2393,7 @@ int Item::checkModbusDimmer() {
 
     short numpar = 0;
     if ((itemArg->type != aJson_Array) || ((numpar = aJson.getArraySize(itemArg)) < 2)) {
-        debugSerial<<F("Illegal arguments\n");
+        debugSerial<<F("MB: Illegal arguments\n");
         return -4;
     }
 
@@ -2415,7 +2420,7 @@ int Item::checkModbusDimmer() {
 
     modbusSerial.begin(MODBUS_SERIAL_BAUD, MODBUS_SERIAL_PARAM);
     node.begin(addr, modbusSerial);
-
+    debugSerial << F("MB: polling dimmer ") << itemArr->name<< endl;
     switch (_regType) {
         case MODBUS_HOLDING_REG_TYPE:
             result = node.readHoldingRegisters(reg, 1);
@@ -2430,7 +2435,7 @@ int Item::checkModbusDimmer() {
             result = node.readInputRegisters(reg, 1);
             break;
         default:
-            debugSerial<<F("Not supported reg type\n");
+            debugSerial<<F("MB: Not supported reg type\n");
     }
 
     if (result == node.ku8MBSuccess) {
@@ -2448,7 +2453,8 @@ int Item::checkModbusDimmer() {
                     pollingItem = items->child;
             }
     } else
-        debugSerial << F("Modbus polling error=") << _HEX(result) << endl;
+        debugSerial << F("MB: polling ") << itemArr->name<< F(" error=") << _HEX(result) << endl;
+
     modbusBusy = 0;
     //resumeModbus();
 
@@ -2457,6 +2463,8 @@ return 1;
 
 
 int Item::checkModbusDimmer(int data) {
+    if (getFlag(FLAG_SEND_RETRY)) return 0; //Active send transaction
+    
     short mask = getArg(2);
     itemCmd st;
     

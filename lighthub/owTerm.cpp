@@ -28,6 +28,7 @@ e-mail    anklimov@gmail.com
 #include "aJSON.h"
 
 extern aJsonObject *owArr;
+extern  uint32_t timerCtr;
 aJsonObject *dev2Check = NULL;
 
 OneWire *oneWire = NULL;
@@ -96,6 +97,7 @@ int owUpdate() {
     while (oneWire->wireSearch(dev) > 0)
         {   
             wdt_res();
+   //         owIdle();
             char addrstr[17];
             SetBytes(dev, 8, addrstr);
             addrstr[16] = 0;
@@ -112,45 +114,7 @@ int owUpdate() {
                     }    
         }
 
-/*
-    if (oneWire) oneWire->reset_search();
-    for (short i = 0; i < t_count; i++) wstat[i] &= ~SW_FIND; //absent
 
-    while (oneWire && oneWire->wireSearch(term[t_count]) > 0 && (t_count < t_max)  && !isTimeOver(finish,millis(), OW_UPDATE_INTERVAL))//&& finish > millis()) 
-    {
-        short ifind = -1;
-        if (oneWire->crc8(term[t_count], 7) == term[t_count][7]) {
-            for (short i = 0; i < t_count; i++)
-                if (!memcmp(term[i], term[t_count], 8)) {
-                    ifind = i;
-                    wstat[i] |= SW_FIND;
-                    debugSerial.print(F(" Node:"));
-                    PrintBytes(term[t_count], 8,0);
-                    processTemp(-1, term[t_count], 0.0); //print note
-                    debugSerial.println(F(" alive"));
-                    break;
-                }; //alive
-            if (ifind < 0 && sensors && !zero(term[t_count],8))
-                {
-                wstat[t_count] = SW_FIND; //Newly detected
-                debugSerial<<F("dev#")<<t_count<<F(" Addr:");
-                PrintBytes(term[t_count], 8,0);
-                if processTemp(-1, term[t_count], 0.0); //print note
-                debugSerial.println();
-                if (term[t_count][0] == 0x28) {
-                    sensors->setResolution(term[t_count], TEMPERATURE_PRECISION);
-                    #ifdef DS2482_100_I2C_TO_1W_BRIDGE
-                    oneWire->setStrongPullup();
-                    #endif
-                    //                sensors.requestTemperaturesByAddress(term[t_count]);
-                }
-                t_count++;
-            }
-        }//if
-    } //while
-
-    debugSerial<<F("1-wire count: ")<<t_count<<endl;
-*/
 #endif
 return true;
 }
@@ -175,20 +139,7 @@ if (!oneWire)
                     errorSerial<<F("Error 1-w init")<<endl;
                     return false;
                 }
-
-/*
-    term = new DeviceAddress[t_max];
-    debugSerial<<F("Term. Free:")<<freeRam()<<endl;
-//regs = new    int [t_max];
-    wstat = new uint16_t[t_max];
-    debugSerial<<F("wstat. Free:")<<freeRam()<<endl;
-if (!term || ! wstat)
-                {
-                    errorSerial<<F("Error 1-w init #2 Free:")<<freeRam()<<endl;
-                    return false;
-                }
-    owChanged = owCh;
-*/
+    
 
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     Wire.begin();
@@ -241,6 +192,9 @@ debugSerial<<F("1WT: setup resolution ")<<item->name<<endl;
 sensors->setResolution(curDev,TEMPERATURE_PRECISION);
 item=item->next;   
 }
+
+//owUpdate();
+
 return true;
 
 #else //1w is not disabled
@@ -293,13 +247,8 @@ if (!sensors || !owArr)
           ///owUpdate(); //every check circle - scan for new devices
         }
 
-/*
-    if (si >= t_count) {
-        owUpdate(); //every check circle - scan for new devices
-        si = 0;
-        return 8000;
-    }
-*/
+
+    setupOwIdle(&owIdle);
     DeviceAddress curDev;
     
     if (dev2Check && SetAddr(dev2Check->name,curDev))
@@ -308,14 +257,17 @@ if (!sensors || !owArr)
     switch (curDev[0]) {
 
         case 0x28: // Thermomerer
-
+//debugSerial<<millis()<<" "<<timerCtr<<endl;
 
             t = sensors->getTempC(curDev);//*10.0;
+            //owIdle();
+//debugSerial<<millis()<<" "<<timerCtr<<endl;
             processTemp(dev2Check, t);
-
+            //owIdle();
 
             sensors->requestTemperaturesByAddress(curDev);
-
+            //owIdle();
+//debugSerial<<millis()<<" "<<timerCtr<<endl;
     } //switch
     }
 
@@ -334,34 +286,7 @@ void owLoop() {
     }
 }
 
-/*
-int owFind(DeviceAddress addr) {
-    for (short i = 0; i < t_count; i++) if (!memcmp(term[i], addr, 8)) return i;//find
-    return -1;
-}
 
-void owAdd(DeviceAddress addr) {
-#ifndef OWIRE_DISABLE
-    infoSerial<<F("dev#")<<t_count<<F(" Addr:");
-    PrintBytes(term[t_count], 8,0);
-    infoSerial<<endl;
-
-  if (t_count>=t_max) return;
-  if (zero(term[t_count],8)) return;
-
-    wstat[t_count] = SW_FIND; //Newly detected
-    memcpy(term[t_count], addr, 8);
-
-
-    #ifdef DS2482_100_I2C_TO_1W_BRIDGE
-    if (term[t_count][0] == 0x28)
-                  oneWire->setStrongPullup();
-    #endif
-    t_count++;
-#endif
-}
-
-*/
 #endif
 
 void setupOwIdle (void (*ptr)())

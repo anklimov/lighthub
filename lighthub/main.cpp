@@ -140,6 +140,7 @@ volatile unsigned long timerCount=0;
 volatile int16_t  timerNumber=-1;
 volatile int8_t   timerHandlerBusy=0;
 volatile uint32_t cryptoSalt=0;
+//uint32_t timerCtr=0;
 
 aJsonObject *pollingItem = NULL;
 
@@ -1978,18 +1979,19 @@ void postTransmission() {
 
 void TimerHandler(void)
 {   
-    timerHandlerBusy++;
-    interrupts();
-    timerCount=micros();
+    timerCount=micros(); 
      if (configLoaded && !timerHandlerBusy) 
                     {
+                    timerHandlerBusy++;  
+                    interrupts();  
+                    
                     inputLoop(CHECK_INTERRUPT);
                     #ifdef DMX_SMOOTH
                     DMXOUT_propagate();
                     #endif
+                    timerHandlerBusy--;
                     }
-    timerCount=micros()-timerCount;
-    timerHandlerBusy--;
+    timerCount=micros()-timerCount;  
 }
 
 #if defined(__SAM3X8E__) && defined (TIMER_INT)
@@ -2273,9 +2275,7 @@ while  ((digitalRead(CONFIG_CLEAN_PIN)==LOW) && !needClean)
     delay(20);
     //owReady = 0;
 
-    #ifdef _owire
-        setupOwIdle(&owIdle);
-    #endif
+
 
     mqttClient.setCallback(mqttCallback);
 
@@ -2674,13 +2674,32 @@ if (initializedListeners) ipmodbusLoop();
 
 }
 
+//static uint32_t tm=0;
+
 void owIdle(void) {
+ //   timerCtr++;    
 #ifdef _artnet
     if (artnet && (lanStatus>=HAVE_IP_ADDRESS)) artnet->read();
 #endif
 
 wdt_res();
-inputLoop(CHECK_INTERRUPT);
+inputLoop(CHECK_INPUT);
+//inputLoop(CHECK_INTERRUPT);
+/*
+    if (isTimeOver(tm,millis(),100))
+    {
+        tm=millis();
+        debugSerial<<F("1WT: Tick")<<endl;
+    } 
+*/
+
+
+
+#if defined (_espdmx)
+    yield();
+    dmxout.update();
+#endif
+
     return; //?????
 
 #ifdef _dmxin
@@ -2688,10 +2707,7 @@ inputLoop(CHECK_INTERRUPT);
     DMXCheck();
 #endif
 
-#if defined (_espdmx)
-    yield();
-    dmxout.update();
-#endif
+
 
 #ifdef IPMODBUS
 if (initializedListeners) ipmodbusLoop();
@@ -2707,14 +2723,9 @@ ethernetIdleCount++;
 ethernetIdleCount--;
 };
 
-//static uint32_t tm=0;
+
 void modbusIdle(void) {
-/*
-    if (isTimeOver(tm,millis(),500))
-    {
-        tm=millis();
-        debugSerial<<F("MB: Tick")<<endl;
-    } */
+
     wdt_res();
     statusLED.poll();
     yield();
