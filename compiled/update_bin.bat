@@ -1,8 +1,8 @@
 copy ..\.pio\build\due\firmware.bin due
 copy ..\.pio\build\controllino\firmware.hex controllino
 copy ..\.pio\build\m5stack\firmware.bin m5stack
-copy ..\.pio\build\mega2560slim-5100\firmware.hex mega2560slim-5100
-copy ..\.pio\build\mega2560slim-5100\firmware.bin mega2560slim-5100
+copy ..\.pio\build\mega2560slim\firmware.hex mega2560slim
+copy ..\.pio\build\mega2560slim\firmware.bin mega2560slim
 copy ..\.pio\build\mega2560slim2\firmware.hex mega2560slim2
 copy ..\.pio\build\mega2560slim2\firmware.bin mega2560slim2
 copy ..\.pio\build\due-5100\firmware.bin due-5100
