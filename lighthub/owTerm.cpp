@@ -26,6 +26,7 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 #include "main.h"
 #include "aJSON.h"
+//#include "twi.h"
 
 extern aJsonObject *owArr;
 extern  uint32_t timerCtr;
@@ -125,6 +126,9 @@ int owSetup() {
     //// todo - move memory allocation to here
     if (oneWire) return true;    // Already initialized
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
+//twi_setTimeoutInMicros()
+i2cReset();
+
     debugSerial<<F("DS2482_100_I2C_TO_1W_BRIDGE init")<<endl;
     debugSerial<<F("Free:")<<freeRam()<<endl;
     oneWire = new OneWire;

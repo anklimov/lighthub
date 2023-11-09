@@ -876,5 +876,32 @@ bool checkToken(char * token, char * data)
   return false;    
   }
 
+
+
+
+void i2cReset(){
+
+#if defined (SCL_RESET)
+Wire.endTransmission(true);
+SCL_LOW();
+delay(300);
+SCL_HIGH();
+#endif
+
+Wire.endTransmission(true);
+Wire.end();
+pinMode(SCL,OUTPUT);
+pinMode(SDA,INPUT);
+  //10 сигналов клок
+  bool pulse=false;
+  for (int i=0; i<20;i++) {
+    //i2c_scl_toggle(i2c);
+        digitalWrite(SCL,pulse?HIGH:LOW);
+        pulse=!pulse;
+        delay(10);//10us мкс
+  }
+Wire.begin();
+}
+
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

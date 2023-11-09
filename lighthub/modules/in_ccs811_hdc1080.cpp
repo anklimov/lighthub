@@ -4,6 +4,7 @@
 #include "Streaming.h"
 #include "item.h"
 #include "main.h"
+#include "Wire.h"
 
 #if defined(M5STACK)
 #include <M5Stack.h>
@@ -63,8 +64,10 @@ delay(2000); */
 return 1;
 }
 
+
 int in_hdc1080::Setup()
 {
+//i2cReset();  
 if (HDC1080ready)  {debugSerial<<F("hdc1080 is already initialized")<<endl; return 0;}
 debugSerial.println("HDC1080 Init ");
 Wire.begin(); //Inialize I2C Harware
@@ -81,15 +84,7 @@ HDC1080ready = true;
 return 1;
 }
 
-void i2cReset(){
 
-#if defined (SCL_RESET)
-Wire.endTransmission(true);
-SCL_LOW();
-delay(300);
-SCL_HIGH();
-#endif
-}
 
 int in_hdc1080::Poll(short cause)
 {
