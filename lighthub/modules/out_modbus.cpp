@@ -180,12 +180,12 @@ store->timestamp=millisNZ();
 if (getConfig())
     {
         infoSerial<<F("MBUS: config loaded ")<< item->itemArr->name<<endl;
-        store->driverStatus = CST_INITIALIZED;
+        setStatus(CST_INITIALIZED);
         return 1;
       }
 else
  {  errorSerial<<F("MBUS: config error")<<endl;
-    store->driverStatus = CST_FAILED;
+    setStatus(CST_FAILED);
     return 0;
   }
 
@@ -202,12 +202,6 @@ store = NULL;
 return 1;
 }
 
-int  out_Modbus::Status()
-{
-if (store)
-    return store->driverStatus;
-return CST_UNKNOWN;
-}
 
 
 

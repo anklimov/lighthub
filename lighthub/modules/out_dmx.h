@@ -13,7 +13,6 @@ public:
     out_dmx(Item * _item):colorChannel(_item){};
     int Setup() override;
     int Stop() override;
-    int Status() override;
   
     int getChanType() override;
 //    int Ctrl(itemCmd cmd, char* subItem=NULL) override;

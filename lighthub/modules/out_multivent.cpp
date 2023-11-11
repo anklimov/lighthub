@@ -8,7 +8,6 @@
 #include "item.h"
 #include "main.h"
 
-static int driverStatus = CST_UNKNOWN;
 
 void out_Multivent::getConfig()
 {
@@ -46,7 +45,7 @@ if (gatesObj /*&& aJson.getArraySize(item->itemArg)>=2*/)
              i=i->next; 
           }
       debugSerial << F ("MultiVent init")<< endl;
-      driverStatus = CST_INITIALIZED;
+      setStatus(CST_INITIALIZED);
       return 1;
       }
 
@@ -58,30 +57,10 @@ return 0;
 int  out_Multivent::Stop()
 {
 debugSerial << F ("Multivent De-Init") << endl;
-driverStatus = CST_UNKNOWN;
+setStatus(CST_UNKNOWN);
 return 1;
 }
 
-int  out_Multivent::Status()
-{
-return driverStatus;
-}
-/*
-int out_Multivent::isActive()
-{
-itemCmd st;  
-switch (item->getCmd())
-{ 
-  case CMD_OFF:
-  case CMD_HALT:
-  return 0;
-  break;
-  default:
-st.loadItem(item);
-return st.getPercents255();
-}  
-}
-*/
 int out_Multivent::Poll(short cause)
 {
 return 0;
@@ -91,7 +70,6 @@ int out_Multivent::getChanType()
 {
    return CH_PWM;
 }
-
 
 
 int out_Multivent::Ctrl(itemCmd cmd,   char* subItem , bool toExecute, bool authorized)

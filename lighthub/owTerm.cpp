@@ -126,8 +126,6 @@ int owSetup() {
     //// todo - move memory allocation to here
     if (oneWire) return true;    // Already initialized
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
-//twi_setTimeoutInMicros()
-i2cReset();
 
     debugSerial<<F("DS2482_100_I2C_TO_1W_BRIDGE init")<<endl;
     debugSerial<<F("Free:")<<freeRam()<<endl;
@@ -165,8 +163,14 @@ if (!oneWire)
     }   
         else 
             {
-            errorSerial.println(F("1WT: DS2482-100 not present"));
-            return false;
+            i2cReset();
+            if (oneWire->checkPresence())
+            infoSerial<<F("1WT: DS2482-100 I2C restored")<<endl;
+            else
+            {    
+                errorSerial.println(F("1WT: DS2482-100 not present"));
+                return false;
+            }
             }
 #else
    // software driver
@@ -235,6 +239,11 @@ int sensors_loop(void) {
         oneWire->wireReset();
         return INTERVAL_1W;
     }
+    if (!oneWire->checkPresence()) 
+    {
+        infoSerial.println(F("1WT: lost DS2482-100"));
+        i2cReset();
+    }   
             
        
 #endif

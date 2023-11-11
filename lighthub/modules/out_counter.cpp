@@ -8,25 +8,20 @@
 #include "main.h"
 
 
-static int driverStatus = CST_UNKNOWN;
 
 int  out_counter::Setup()
 {
   abstractOut::Setup();    
-  driverStatus = CST_INITIALIZED;
+  setStatus(CST_INITIALIZED);
 return 1;
 }
 
 int  out_counter::Stop()
 {
-driverStatus = CST_UNKNOWN;
+setStatus(CST_UNKNOWN); 
 return 1;
 }
 
-int  out_counter::Status()
-{
-return driverStatus;
-}
 
 
 int out_counter::Poll(short cause)

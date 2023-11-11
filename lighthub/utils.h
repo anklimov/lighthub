@@ -79,5 +79,5 @@ bool getPinVal(uint8_t pin);
 int  str2regSize(char * str);
 bool checkToken(char * token, char * data);
  bool isProtectedPin(short pin);
- void i2cReset();
+ bool i2cReset();
 

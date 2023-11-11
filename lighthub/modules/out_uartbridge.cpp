@@ -121,12 +121,12 @@ if (!store)
 if (getConfig())
     {
         infoSerial<<F("UARTbridge config loaded ")<< item->itemArr->name<<endl;
-        store->driverStatus = CST_INITIALIZED;
+        setStatus(CST_INITIALIZED)
         return 1;
       }
 else
  {  errorSerial<<F("UARTbridge config error")<<endl;
-    store->driverStatus = CST_FAILED;
+    setStatus(CST_FAILED);
     return 0;
   }
 
@@ -146,12 +146,6 @@ store = NULL;
 return 1;
 }
 
-int  out_UARTbridge::Status()
-{
-if (store)
-    return store->driverStatus;
-return CST_UNKNOWN;
-}
 
 String _RR_A;
 String _WR_A;

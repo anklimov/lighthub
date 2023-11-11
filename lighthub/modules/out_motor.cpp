@@ -8,7 +8,6 @@
 #include "item.h"
 #include "main.h"
 
-static int driverStatus = CST_UNKNOWN;
 
 void out_Motor::getConfig()
 {
@@ -64,7 +63,7 @@ pinMode(pinFeedback, INPUT);
 item->setExt(0);
 item->clearFlag(FLAG_ACTION_NEEDED);
 item->clearFlag(FLAG_ACTION_IN_PROCESS);
-driverStatus = CST_INITIALIZED;
+setStatus(CST_INITIALIZED);
 motorQuote = MOTOR_QUOTE;
 return 1;
 }
@@ -73,7 +72,7 @@ int  out_Motor::Stop()
 {
 debugSerial.println("Motor: De-Init");
 item->setExt(0);
-driverStatus = CST_UNKNOWN;
+setStatus(CST_UNKNOWN);
 
 if (isProtectedPin(pinUp)||isProtectedPin(pinDown)) {errorSerial<<F("pin disabled")<<endl;return 0;}
 digitalWrite(pinUp,INACTIVE);
@@ -82,26 +81,6 @@ digitalWrite(pinDown,INACTIVE);
 return 1;
 }
 
-int  out_Motor::Status()
-{
-return driverStatus;
-}
-/*
-int out_Motor::isActive()
-{
-itemCmd st;  
-switch (item->getCmd())
-{ 
-  case CMD_OFF:
-  case CMD_HALT:
-  return 0;
-  break;
-  default:
-st.loadItem(item);
-return st.getPercents255();
-}  
-}
-*/
 int out_Motor::Poll(short cause)
 {
 if (cause==POLLING_SLOW) return 0;  

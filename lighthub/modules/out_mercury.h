@@ -12,7 +12,6 @@
 class mercuryPersistent : public chPersistent  {
 
 public:
-  int8_t driverStatus;
   uint32_t timestamp;
   uint32_t lastSuccessTS;
 };
@@ -47,7 +46,6 @@ public:
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;
-    int Status() override;
     int getChanType() override;
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized = false) override;
     int getDefaultStorageType(){return ST_INT32;};
@@ -58,7 +56,6 @@ protected:
     uint16_t pollingInterval;
     bool getConfig();
     void initLine(bool full = false);
-    void setStatus(short);
     short connectMercury();
     short disconnectMercury();
     short getCurrentVal12(byte param, String topic,int divisor=1);

@@ -19,10 +19,10 @@ extern bool disableCMD;
 
 #define INTERVAL_AC_POLLING      5000L
 
-#define AC_FAILED 15
+#define AC_FAILED  CST_FAILED
 #define AC_UNKNOWN CST_UNKNOWN
 #define AC_IDLE CST_INITIALIZED
-#define AC_SENDING 2
+#define AC_SENDING 3
 
 //byte inCheck = 0;
 byte qstn[] = {255,255,10,0,0,0,0,0,1,1,77,1,90}; // Команда опроса
@@ -273,7 +273,7 @@ byte getCRC(byte req[], size_t size){
 
 void out_AC::SendData(byte req[], size_t size){
 if (!store || !item) return;  
-if (item->itemArr->subtype == AC_SENDING)
+if (Status() == AC_SENDING)
      {
       while (store->timestamp && !isTimeOver(store->timestamp,millis(),150)) yield();
      }
@@ -299,7 +299,7 @@ if (item->itemArr->subtype == AC_SENDING)
              }
   }
 debugSerial.println();
-item->itemArr->subtype = AC_SENDING;
+setStatus(AC_SENDING);
 //  #if defined (__SAM3X8E__)
 //  if (item->getArg(0)==2) postTransmission();
 //  #endif
@@ -340,9 +340,9 @@ if (!portNum)// && (g_APinDescription[0].ulPinType == PIO_PA8A_URXD))
       #endif
     }
 ACSerial->begin(9600);
-item->itemArr->subtype = AC_IDLE;
+setStatus (AC_IDLE);
 
-//driverStatus = CST_INITIALIZED;
+
 return 1;
 }
 
@@ -353,10 +353,11 @@ debugSerial<<F("AC: De-Init: ")<<portNum<<endl;
 delete store;
 item->setPersistent(NULL);
 store = NULL;
-item->itemArr->subtype = CST_UNKNOWN;
+setStatus (CST_UNKNOWN);
 return 1;
 }
 
+/*
 int  out_AC::Status()
 {
 if (!item) return 0;  
@@ -368,7 +369,8 @@ default:
 return CST_INITIALIZED;
 //return item->itemArr->subtype;
 }
-}
+}*/
+
 int out_AC::isActive()
 {
 if (!store) return 0;  
@@ -379,7 +381,7 @@ int out_AC::Poll(short cause)
 {
 if (!store) return -1;
 
-switch (item->itemArr->subtype)
+switch (Status())
 {  
 case AC_FAILED: return -1;
 case AC_UNKNOWN: return -1;
@@ -387,7 +389,7 @@ case AC_SENDING:
       {
       if (store->timestamp && isTimeOver(store->timestamp,millis(),150)) 
                                             {
-                                            item->itemArr->subtype = AC_IDLE;
+                                            setStatus(AC_IDLE);
                                             store->timestamp=millisNZ();
                                             }
       }
@@ -395,7 +397,7 @@ case AC_SENDING:
 
 if (cause!=POLLING_SLOW) return false;
 
-  if ((item->itemArr->subtype == AC_IDLE) && isTimeOver(store->timestamp,millis(),INTERVAL_AC_POLLING)) 
+  if ((Status() == AC_IDLE) && isTimeOver(store->timestamp,millis(),INTERVAL_AC_POLLING)) 
   {
     debugSerial.println(F("AC: Polling"));
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера

@@ -879,14 +879,8 @@ bool checkToken(char * token, char * data)
 
 
 
-void i2cReset(){
-
-#if defined (SCL_RESET)
-Wire.endTransmission(true);
-SCL_LOW();
-delay(300);
-SCL_HIGH();
-#endif
+bool i2cReset(){
+debugSerial.println("I2C Reset");
 
 Wire.endTransmission(true);
 Wire.end();
@@ -901,6 +895,23 @@ pinMode(SDA,INPUT);
         delay(10);//10us мкс
   }
 Wire.begin();
+
+#ifdef DS2482_100_I2C_TO_1W_BRIDGE
+if (oneWire && oneWire->checkPresence())
+{        
+        oneWire->deviceReset();
+#ifndef APU_OFF
+        oneWire->setActivePullup();
+#endif
+        if (oneWire->wireReset())
+            debugSerial.println(F("\tReset done"));
+        else 
+            debugSerial.println(F("\tDS2482 reset error"));   
+}
+#endif
+
+
+return true;
 }
 
 #pragma message(VAR_NAME_VALUE(debugSerial))

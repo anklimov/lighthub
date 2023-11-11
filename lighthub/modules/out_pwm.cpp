@@ -8,7 +8,6 @@
 #include "main.h"
 #include "dmx.h"
 
-static int driverStatus = CST_UNKNOWN;
 
 #if defined(ARDUINO_ARCH_ESP32)
 void analogWrite(int pin, int val)
@@ -55,7 +54,7 @@ switch (getChanType())
  TCCR3B |= tval;
 #endif
 
-driverStatus = CST_INITIALIZED;
+setStatus(CST_INITIALIZED);
 return 1;
 }
 
@@ -75,13 +74,8 @@ switch (getChanType())
   default:
    pinMode(iaddr, INPUT);
 }
-driverStatus = CST_UNKNOWN;
+setStatus(CST_UNKNOWN);
 return 1;
-}
-
-int  out_pwm::Status()
-{
-return driverStatus;
 }
 
 

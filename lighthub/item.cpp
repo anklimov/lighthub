@@ -2121,7 +2121,7 @@ int Item::VacomSetFan(itemCmd st) {
     default:
     return -1;    
     }
-
+    
   switch (cmd){
     case CMD_OFF:
     case CMD_HALT:
@@ -2165,7 +2165,7 @@ int Item::VacomSetFan(itemCmd st) {
 #define a 0.1842f
 #define b -36.68f
 
-///move to float todo
+
 int Item::VacomSetHeat(itemCmd st)
 {
 float val=st.getFloat();
@@ -2176,7 +2176,10 @@ int addr;
     if (itemArg->type != aJson_String) return 0;
 
     Item it(itemArg->valuestring);
-    if (it.isValid() && it.itemType == CH_VC) addr=it.getArg();
+    if (it.isValid() && it.itemType == CH_VC) 
+                            {
+                            addr=it.getArg();
+                            }
     else return 0;
 
     debugSerial<<F("MB: VC_heat#")<<addr<<F("=")<<val<<F(" cmd=")<<cmd<<endl;
@@ -2197,17 +2200,18 @@ int addr;
     switch (cmd) {
         case CMD_OFF:
         case CMD_HALT:
+        case CMD_FAN:
             regval = 0;
+            it.itemArr->subtype = 0;
             break;
 
         default:
+            it.itemArr->subtype = 1;
             regval = round(( val - b) * 10 / a);
     }
 
-    //debugSerial<<regval);
     result=node.writeSingleRegister(2004 - 1, regval);
     modbusBusy = 0;
-    //resumeModbus();
     if (result == node.ku8MBSuccess) return 1;
     mb_fail(result);
     return 0;
@@ -2464,7 +2468,7 @@ return 1;
 
 int Item::checkModbusDimmer(int data) {
     if (getFlag(FLAG_SEND_RETRY)) return 0; //Active send transaction
-    
+
     short mask = getArg(2);
     itemCmd st;
     

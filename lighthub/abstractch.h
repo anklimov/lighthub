@@ -2,8 +2,8 @@
 #include "Arduino.h"
 
 #define CST_UNKNOWN  0
-#define CST_INITIALIZED  1
-#define CST_FAILED -1
+#define CST_FAILED 1
+#define CST_INITIALIZED  2
 
 class abstractCh {
 public:
@@ -14,6 +14,7 @@ public:
     virtual int Anounce () {return 0;};
     virtual int Stop() {return 0;};         //Should free resources
     virtual int Status() {return CST_UNKNOWN;}
+    virtual void setStatus(uint8_t status) {}
 
 
 protected:

@@ -24,7 +24,6 @@ static CRGB *leds = NULL;
 
 #define NUM_LEDS 43
 
-static int driverStatus = CST_UNKNOWN;
 
 void out_SPILed::getConfig()
 {
@@ -63,7 +62,7 @@ FastLED.addLeds<CONTROLLER, DATA_PIN, ORDER>(leds, numLeds);
 #endif
 }
 
-driverStatus = CST_INITIALIZED;
+setStatus(CST_INITIALIZED);
 return 1;
 }
 
@@ -78,15 +77,11 @@ delete leds;
 FastLED.clear(true);
 delete [] leds;
 #endif
-driverStatus = CST_UNKNOWN;
+setStatus(CST_UNKNOWN);
 
 return 1;
 }
 
-int  out_SPILed::Status()
-{
-return driverStatus;
-}
 
 
 int out_SPILed::getChanType()

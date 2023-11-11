@@ -9,26 +9,20 @@
 #include "main.h"
 #include "dmx.h"
 
-static int driverStatus = CST_UNKNOWN;
 
 int  out_dmx::Setup()
 {
 abstractOut::Setup();  
 debugSerial<<F("DMX-Out Init: ")<< item->itemArr->name <<endl;
-driverStatus = CST_INITIALIZED;
+setStatus(CST_INITIALIZED);
 return 1;
 }
 
 int  out_dmx::Stop()
 {
 debugSerial<<F("DMX-Out stop: ")<< item->itemArr->name << endl;
-driverStatus = CST_UNKNOWN;
+setStatus(CST_UNKNOWN);
 return 1;
-}
-
-int  out_dmx::Status()
-{
-return driverStatus;
 }
 
 int out_dmx::getChanType()

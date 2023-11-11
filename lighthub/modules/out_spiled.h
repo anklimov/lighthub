@@ -18,7 +18,6 @@ public:
     out_SPILed(Item * _item):colorChannel(_item){getConfig();};
     int Setup() override;
     int Stop() override;
-    int Status() override;
     int getChanType() override;
     //int Ctrl(short cmd, short n=0, int * Parameters=NULL,  int suffixCode=0, char* subItem=NULL) override;
     //int Ctrl(itemCmd cmd, char* subItem=NULL) override;

@@ -126,7 +126,6 @@ if (reg!=0xff)
 }
 else //ESP I2C glitch
   {
-    debugSerial.println("I2C Reset");
     i2cReset();
   }
 return INTERVAL_SLOW_POLLING;

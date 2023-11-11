@@ -8,7 +8,6 @@
 #include "main.h"
 #include "dmx.h"
 #include "utils.h"
-static int driverStatus = CST_UNKNOWN;
 
 void out_relay::getConfig()
 {
@@ -43,7 +42,7 @@ digitalWrite(pin,INACTIVE);
 if (item) item->setExt(0);
 //if (item->getCmd()) item->setFlag(FLAG_COMMAND);
 //if (item->itemVal)  item->setFlag(FLAG_PARAMETERS);
-driverStatus = CST_INITIALIZED;
+setStatus(CST_INITIALIZED);
 if (item->isActive()>0)  ///????
     {
     item->setExt(millisNZ());
@@ -55,23 +54,9 @@ int  out_relay::Stop()
 {
 debugSerial<<F("Relay-Out #")<<pin<<F(" stop")<<endl;
 pinMode(pin, INPUT);
-driverStatus = CST_UNKNOWN;
+setStatus(CST_UNKNOWN);
 return 1;
 }
-
-int  out_relay::Status()
-{
-return driverStatus;
-}
-/*
-const char action_P[] PROGMEM = "action";
-const char cooling_P[] PROGMEM = "cooling";
-const char heating_P[] PROGMEM = "heating";
-const char drying_P[] PROGMEM = "drying";
-const char idle_P[] PROGMEM = "idle";
-const char fan_P[] PROGMEM = "fan";
-const char off_P[] PROGMEM = "off";
-*/
 
 void  out_relay::relay(bool state)
 {

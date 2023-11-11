@@ -78,14 +78,14 @@ store->timestamp=millisNZ();
 if (getConfig())
     {
         infoSerial<<F("Mercury: config loaded ")<< item->itemArr->name<<endl;
-        store->driverStatus = CST_INITIALIZED;
+        setStatus(CST_INITIALIZED);
         store->lastSuccessTS = 0;
           initLine(true);
         return 1;
       }
 else
  {  errorSerial<<F("Mercury: config error")<<endl;
-    store->driverStatus = CST_FAILED;
+    setStatus(CST_FAILED);
     return 0;
   }
 
@@ -101,18 +101,6 @@ store = NULL;
 return 1;
 }
 
-int  out_Mercury::Status()
-{
-if (store)
-    return store->driverStatus;
-return CST_UNKNOWN;
-}
-
-
-void out_Mercury::setStatus(short status)
-{
-if (store) store->driverStatus=status;
-}
 
 short out_Mercury::connectMercury()
 {
@@ -337,7 +325,7 @@ int out_Mercury::Poll(short cause)
 //bool lineInitialized = false;    
 if (cause==POLLING_SLOW) return 0;  
 if (modbusBusy || ( mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),100))) return 0;
-if (store->driverStatus == CST_FAILED) return 0;
+if (Status() == CST_FAILED) return 0;
 if (!getConfig()) return 0;
 
  switch (Status())

@@ -14,6 +14,8 @@ public:
     virtual itemCmd getDefaultOnVal(){return itemCmd().Percents255(255);};
     virtual int getChanType(){return 0;}
     virtual int getDefaultStorageType(){return 0;}  /// Remove?? Now getChanType used instead
+    virtual int Status() override;
+    virtual void setStatus(uint8_t status) override;
     int Setup()  override;        
 protected:
       Item * item;

@@ -15,7 +15,6 @@ public:
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;
-    int Status() override;
     //int isActive() override;
     int getChanType() override;
     int getDefaultStorageType(){return ST_PERCENTS255;};

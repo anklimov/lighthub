@@ -15,7 +15,6 @@ public:
   double input;
   double setpoint;
   float  prevOut; 
-  int driverStatus;
   uint32_t alarmTimer;
   bool alarmArmed;
   uint16_t alarmTimeout; //in sec
@@ -30,7 +29,6 @@ public:
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;
-    int Status() override;
     int isActive() override;
     int getChanType() override;
     int getDefaultStorageType(){return ST_FLOAT;};
