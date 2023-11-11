@@ -883,7 +883,9 @@ bool i2cReset(){
 debugSerial.println("I2C Reset");
 
 Wire.endTransmission(true);
+#if  !defined(ARDUINO_ARCH_ESP8266)
 Wire.end();
+#endif
 pinMode(SCL,OUTPUT);
 pinMode(SDA,INPUT);
   //10 сигналов клок
