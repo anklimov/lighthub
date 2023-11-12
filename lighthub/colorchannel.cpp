@@ -16,7 +16,7 @@ short colorChannel::getChannelAddr(short n)
   return item->getArg(n);
 }
 
-
+/*
 int colorChannel::getDefaultStorageType()
     {
 
@@ -33,7 +33,7 @@ int colorChannel::getDefaultStorageType()
           return ST_VOID;
         }
 
-/*
+
 int colorChannel::isActive()
 {
 itemCmd st;
@@ -58,7 +58,6 @@ case S_NOTFOUND:
   // turn on  and set
 toExecute = true;
 case S_SET:
-//case S_ESET:
 case S_HSV:
           PixelCtrl(cmd, subItem, toExecute, authorized);
           return 1;

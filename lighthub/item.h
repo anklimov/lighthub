@@ -37,6 +37,11 @@ e-mail    anklimov@gmail.com
 #define S_TEMP 12
 #define S_RAW 13
 
+typedef  char suffixstr[5];
+const suffixstr suffix_P[] PROGMEM =
+{"","cmd","set","val","del","HSV","RGB","fan","mode","ctrl","hue","sat","temp","raw"};
+#define suffixNum sizeof(suffix_P)/sizeof(suffixstr)
+
 #define S_ADDITIONAL 13
 
 #define CH_DIMMER 0   //DMX 1-4 ch
@@ -62,16 +67,6 @@ e-mail    anklimov@gmail.com
 #define CH_COUNTER 20
 #define CH_HUMIDIFIER 21
 #define CH_MERCURY 22
-
-//#define CHANNEL_TYPES 13
-
-//static uint32_t pollInterval[CHANNEL_TYPES] = {0,0,0,0,MODB};
-//static uint32_t nextPollTime[CHANNEL_TYPES] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-#define CH_WHITE   127//
-
-
-
 
 #define POLLING_SLOW 1
 #define POLLING_FAST 2
@@ -157,24 +152,16 @@ class Item
   int VacomSetFan (itemCmd st);
   int VacomSetHeat(itemCmd st);
   int modbusDimmerSet(itemCmd st);
-
   int modbusDimmerSet(int addr, uint16_t _reg, int _regType, int _mask, uint16_t value);
   void mb_fail(int result=0);
   void Parse();
   int checkModbusDimmer();
   int checkModbusDimmer(int data);
-
   int checkRetry();
-  //boolean checkVCRetry();
-  //boolean checkHeatRetry();
   void sendDelayedStatus();
-  //bool resumeModbus();
-
-
   int checkFM();
   char defaultSubItem[16];
   int  defaultSuffixCode;
-
 };
 
 typedef union

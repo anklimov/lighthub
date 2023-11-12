@@ -11,7 +11,7 @@ public:
     virtual ~abstractCh(){};
     virtual int Poll(short cause) {return 0;}
     virtual int Setup() =0;        //Should initialize hardware and reserve resources
-    virtual int Anounce () {return 0;};
+   // virtual int Anounce () {return 0;};
     virtual int Stop() {return 0;};         //Should free resources
     virtual int Status() {return CST_UNKNOWN;}
     virtual void setStatus(uint8_t status) {}

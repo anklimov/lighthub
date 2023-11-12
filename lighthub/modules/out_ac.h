@@ -42,7 +42,7 @@ public:
     int Stop() override;
     int isActive() override;
     int getChanType() override;
-    int getDefaultStorageType(){return ST_FLOAT_CELSIUS;};
+   // int getDefaultStorageType(){return ST_FLOAT_CELSIUS;};
     int Ctrl(itemCmd cmd,  char* subItem=NULL, bool toExecute=true, bool authorized = false) override;
     void SubmitParameters(const char * name, itemCmd value);
     

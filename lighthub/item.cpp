@@ -104,8 +104,15 @@ int subitem2cmd(char *payload) {
 }
 
 int txt2subItem(char *payload) {
-    int cmd = S_NOTFOUND;
     if (!payload || !strlen(payload)) return S_NOTFOUND;
+    for(uint8_t i=1; i<suffixNum ;i++)
+        if (strncmp_P(payload, suffix_P[i], strlen_P(suffix_P[i])) == 0)
+             {
+             return i;
+             }
+    return S_NOTFOUND;
+/*
+  int cmd = S_NOTFOUND;
     // Check for command
     if (strcmp_P(payload, SET_P) == 0) cmd = S_SET;
     else if (strcmp_P(payload, CTRL_P) == 0) cmd = S_CTRL;
@@ -120,7 +127,8 @@ int txt2subItem(char *payload) {
     else if (strcmp_P(payload, VAL_P) == 0) cmd = S_VAL;
     else if (strcmp_P(payload, DEL_P) == 0) cmd = S_DELAYED;
     else if (strcmp_P(payload, _RAW_P) == 0) cmd = S_RAW;
-    return cmd;
+    return cmd; */
+
 }
 
 //const short defval[4] = {0, 0, 0, 0}; //Type,Arg,Val,Cmd
@@ -1801,9 +1809,14 @@ int Item::SendStatus(int sendFlags) {
 
               strncat(addrstr, "/", sizeof(addrstr)-1);
               
+   //           if (sendFlags & FLAG_SEND_DELAYED)
+   //                  strncat_P(addrstr, DEL_P, sizeof(addrstr)-1);
+   //           else   strncat_P(addrstr, SET_P, sizeof(addrstr)-1); 
+
               if (sendFlags & FLAG_SEND_DELAYED)
-                     strncat_P(addrstr, DEL_P, sizeof(addrstr)-1);
-              else   strncat_P(addrstr, SET_P, sizeof(addrstr)-1); 
+                     strncat_P(addrstr, suffix_P[S_DELAYED], sizeof(addrstr)-1);
+              else   strncat_P(addrstr, suffix_P[S_SET], sizeof(addrstr)-1); 
+
 
         // Preparing parameters payload //////////
            switch (st.getArgType()) {
@@ -1872,7 +1885,8 @@ int Item::SendStatus(int sendFlags) {
                             strncat(addrstr, subItem, sizeof(addrstr)-1);
                             }
               strncat(addrstr, "/", sizeof(addrstr)-1);
-              strncat_P(addrstr, CMD_P, sizeof(addrstr)-1);
+//              strncat_P(addrstr, CMD_P, sizeof(addrstr)-1);
+              strncat_P(addrstr, suffix_P[S_CMD], sizeof(addrstr)-1);              
 
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
               if (mqttClient.connected()  && !ethernetIdleCount)
@@ -1909,7 +1923,8 @@ int Item::SendStatus(int sendFlags) {
                             strncat(addrstr, subItem, sizeof(addrstr)-1);
                             }
               strncat(addrstr, "/", sizeof(addrstr)-1);
-              strncat_P(addrstr, CTRL_P, sizeof(addrstr)-1);
+              //strncat_P(addrstr, CTRL_P, sizeof(addrstr)-1);
+              strncat_P(addrstr, suffix_P[S_CTRL], sizeof(addrstr)-1);        
 
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
               if (mqttClient.connected()  && !ethernetIdleCount)
@@ -2005,38 +2020,6 @@ int Item::checkRetry() {
     }
 return M_CLEAN;
 }
-
-/*
-bool Item::resumeModbus()
-{
-
-if (modbusBusy) return false;
-bool success = true;
-
-//debugSerial<<F("Pushing MB: ");
-configLocked++;
-if (items) {
-    aJsonObject * item = items->child;
-    while (items && item)
-        if (item->type == aJson_Array && aJson.getArraySize(item)>1)  {
-            Item it(item);
-            if (it.isValid()) {
-
-                        short res = it.checkModbusRetry(); 
-                        if (res<=0) success = false;
-               
-            } //isValid
-            yield();
-            item = item->next;
-        }  //if
-debugSerial<<endl;
-}
-configLocked--;
- if (success) isPendedModbusWrites=false;
-return true;
-}
-
-*/
 
 //////////////////// Begin of legacy MODBUS code - to be moved in separate module /////////////////////
 
@@ -2409,14 +2392,6 @@ int Item::checkModbusDimmer() {
     uint16_t reg = getArg(MODBUS_CMD_ARG_REG);
     int _regType = MODBUS_HOLDING_REG_TYPE;
     if (numpar >= (MODBUS_CMD_ARG_REG_TYPE+1)) _regType = aJson.getArrayItem(itemArg, MODBUS_CMD_ARG_REG_TYPE)->valueint;
-  //  short mask = getArg(2);
-    // debugSerial<<F("Modbus polling "));
-    // debugSerial<<addr);
-    // debugSerial<<F("=>"));
-    // debugSerial<<reg, HEX);
-    // debugSerial<<F("(T:"));
-    // debugSerial<<_regType);
-    // debugSerial<<F(")"));
 
     int data;
 

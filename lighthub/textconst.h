@@ -82,17 +82,29 @@ const char on_P[] PROGMEM = "on";
 
 */
 
+#define ON_P commands_P[CMD_ON]
+#define OFF_P commands_P[CMD_OFF]
+#define REST_P commands_P[CMD_RESTORE]
+#define TOGGLE_P commands_P[CMD_TOGGLE]
+#define HALT_P commands_P[CMD_HALT]
+#define XON_P commands_P[CMD_XON]
+#define XOFF_P commands_P[CMD_XOFF]
+#define HEAT_P commands_P[CMD_HEAT]
+#define COOL_P commands_P[CMD_COOL]
+#define AUTO_P commands_P[CMD_AUTO]
+#define FAN_ONLY_P commands_P[CMD_FAN]
+#define DRY_P commands_P[CMD_DRY]
+#define HIGH_P commands_P[CMD_HIGH]
+#define MED_P commands_P[CMD_MED]
+#define LOW_P commands_P[CMD_LOW]
+#define ENABLE_P commands_P[CMD_ENABLE]
+#define DISABLE_P commands_P[CMD_DISABLE]
+#define FREEZE_P commands_P[CMD_FREEZE]
+#define UNFREEZE_P commands_P[CMD_UNFREEZE]
 
+const char ERROR_P[]  PROGMEM = "ERR";
 
 //Commands
-
-const char ON_P[]   PROGMEM = "ON";
-const char OFF_P[]  PROGMEM = "OFF";
-const char REST_P[] PROGMEM = "REST";
-const char TOGGLE_P[] PROGMEM = "TOGGLE";
-const char HALT_P[] PROGMEM = "HALT";
-const char XON_P[]  PROGMEM = "XON";
-const char XOFF_P[] PROGMEM = "XOFF";
 /*
 const char INCREASE_P[] PROGMEM = "INCREASE";
 const char DECREASE_P[] PROGMEM = "DECREASE";
@@ -102,6 +114,15 @@ const char FALSE_P[] PROGMEM = "FALSE";
 const char ENABLED_P[]  PROGMEM = "ENABLED";
 const char DISABLED_P[] PROGMEM = "DISABLED";
 */
+
+/*
+const char ON_P[]   PROGMEM = "ON";
+const char OFF_P[]  PROGMEM = "OFF";
+const char REST_P[] PROGMEM = "REST";
+const char TOGGLE_P[] PROGMEM = "TOGGLE";
+const char HALT_P[] PROGMEM = "HALT";
+const char XON_P[]  PROGMEM = "XON";
+const char XOFF_P[] PROGMEM = "XOFF";
 const char HEAT_P[] PROGMEM = "HEAT";
 const char COOL_P[] PROGMEM = "COOL";
 const static char AUTO_P[] PROGMEM = "AUTO";
@@ -112,13 +133,15 @@ const char DRY_P[]  PROGMEM = "DRY";
 const char HIGH_P[] PROGMEM = "HIGH";
 const char MED_P[]  PROGMEM = "MEDIUM";
 const char LOW_P[]  PROGMEM = "LOW";
-const char ERROR_P[]  PROGMEM = "ERR";
+
 const char ENABLE_P[]  PROGMEM = "ENABLE";
 const char DISABLE_P[] PROGMEM = "DISABLE";
 const char FREEZE_P[]  PROGMEM = "FREEZE";
 const char UNFREEZE_P[] PROGMEM = "UNFREEZE";
+*/
 
 // SubTopics
+/*
 const char SET_P[]  PROGMEM = "set";
 const char CMD_P[]  PROGMEM = "cmd";
 const char MODE_P[] PROGMEM = "mode";
@@ -132,7 +155,7 @@ const char VAL_P[]   PROGMEM = "val";
 const char DEL_P[]   PROGMEM = "del";
 const char _RAW_P[]   PROGMEM = "raw";
 const char CTRL_P[]  PROGMEM = "ctrl";
-
+*/
 /*
 const char RPM_P[]   PROGMEM = "rpm";
 const char STATE_P[] PROGMEM = "state";

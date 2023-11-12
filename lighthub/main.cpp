@@ -230,7 +230,7 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
     topics = NULL;
     mqttArr = NULL;
     deviceName = NULL;
-    topics = NULL;
+
   #ifdef _dmxout
   dmxArr = NULL;
   #endif

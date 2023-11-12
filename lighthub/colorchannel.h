@@ -15,7 +15,7 @@ public:
                           numArgs = item->getArgCount(); // and how many addresses is configured
                         };
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized=false) override;
-    int getDefaultStorageType()override;
+    //int getDefaultStorageType()override;
     virtual int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true, bool authorized = false ) =0;
     short getChannelAddr(short n =0);
 //    int isActive() override;

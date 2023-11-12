@@ -27,6 +27,7 @@ e-mail    anklimov@gmail.com
 #include "item.h"
 #include <PubSubClient.h>
 #include <HardwareSerial.h>
+#include "templateStr.h"
 
 #ifdef CRYPT
 #include "SHA256.h"
@@ -690,8 +691,17 @@ switch (cmdType)
     //else    itemCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
 
     char * emitCommand;
+    short suffix=0;
+   // aJsonObject * dict=NULL; 
+
     if(ecmd && ecmd->type == aJson_String) emitCommand = ecmd->valuestring;
-    else    emitCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
+    else    
+            {
+            emitCommand = _itemCmd.toString(Buffer,sizeof(Buffer));
+    //        dict = aJson.createObject();
+    //        aJson.addStringToObject(dict, "sfx", )
+            suffix=_itemCmd.getSuffix();
+            }
 
     //debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
     if (item) {
@@ -705,7 +715,12 @@ switch (cmdType)
 
 
     if (emit && emitCommand && emit->type == aJson_String) {
-    debugSerial << F("Emit: ")<<emit->valuestring<< F(" -> ")<<emitCommand<<endl;    
+
+    templateStream ts(emit->valuestring,suffix);
+    char addrstr[MQTT_TOPIC_LENGTH];
+    //ts.setTimeout(0);
+    addrstr[ts.readBytesUntil('\0',addrstr,sizeof(addrstr))]='\0';
+    debugSerial << F("Emit: ")<<emit->valuestring<<" "<<addrstr<< F(" -> ")<<emitCommand<<endl;    
     /*
     TODO implement
     #ifdef WITH_DOMOTICZ
@@ -720,8 +735,8 @@ switch (cmdType)
     */
 
 
-    char addrstr[MQTT_TOPIC_LENGTH];
-    strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+   
+    //strncpy(addrstr,emit->valuestring,sizeof(addrstr));
     if (mqttClient.connected() && !ethernetIdleCount)
     {
     if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
@@ -915,6 +930,9 @@ if (oneWire && oneWire->checkPresence())
 
 return true;
 }
+
+
+
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))
