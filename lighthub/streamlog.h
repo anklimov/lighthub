@@ -24,10 +24,12 @@ extern uint8_t udpDebugLevel;
 #define SerialPortType HardwareSerial
 #endif
 
+#define LOG_TRACE 9
 #define LOG_DEBUG 7
 #define LOG_INFO  6
 #define LOG_ERROR 3
 
+#define traceSerial if (serialDebugLevel>=LOG_TRACE || udpDebugLevel>=LOG_TRACE) debugSerial
 class Streamlog : public Print
 {
   public:

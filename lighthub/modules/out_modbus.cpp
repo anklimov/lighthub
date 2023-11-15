@@ -327,7 +327,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                       mappedParam.Int((uint32_t)param);
                     }
                        
-                    debugSerial << F("MBUSD:  got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from type ")<<parType<<F(":")<<paramObj->name<<endl;             
+                    traceSerial << F("MBUSD:  got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from type ")<<parType<<F(":")<<paramObj->name<<endl;             
 
                   if (mapObj && (mapObj->type==aJson_Array || mapObj->type==aJson_Object))
                     {
@@ -401,7 +401,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
 
                                                   aJsonObject * nestedMapObj = aJson.getObjectItem(templateParObj, "map");  
                                                   if (nestedMapObj && (nestedMapObj->type==aJson_Array || nestedMapObj->type==aJson_Object)) mappedParam=mappedParam.doReverseMapping(nestedMapObj);
-                                                  debugSerial << F("MBUSD: NestedMapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
+                                                  traceSerial << F("MBUSD: NestedMapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
 
                                                   if (!(lastMeasured->subtype & MB_VALUE_OUTDATED))
                                                       {
@@ -449,7 +449,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
        */                   
                           }  
                         else   
-                           debugSerial << F("MBUSD: Mapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
+                           traceSerial << F("MBUSD: Mapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
                     } //mapping       
 
                     if (doExecution && idObj && idObj->type==aJson_Int) 
@@ -505,7 +505,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                        aJsonObject *settedValue = aJson.getObjectItem(markObj,"@V");                      
                                        if (settedValue && settedValue->type==aJson_Int && (settedValue->valueint == param))
                                           {    
-                                           debugSerial<<F("MBUSD: Ignored - equal with setted val")<<endl;
+                                           traceSerial<<F("MBUSD: Ignored - equal with setted val")<<endl;
                                            *submitParam=false;
                                           }  
                                         else 
@@ -719,7 +719,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
 // if some polling configured
 if (store->pollingRegisters || store->pollingIrs || store->pollingCoils || store->poolingDiscreteIns)
   {
-    debugSerial<<F("MBUSD: Poll ")<< item->itemArr->name << endl;
+    traceSerial<<F("MBUSD: Poll ")<< item->itemArr->name << endl;
     modbusBusy=1;
 
     if (!lineInitialized)
@@ -732,7 +732,7 @@ if (store->pollingRegisters || store->pollingIrs || store->pollingCoils || store
     pollModbus(store->pollingIrs,MODBUS_INPUT_REG_TYPE);
     pollModbus(store->pollingCoils,MODBUS_COIL_REG_TYPE);  
     pollModbus(store->poolingDiscreteIns ,MODBUS_DISCRETE_REG_TYPE);  
-    debugSerial<<F("MBUSD: endPoll ")<< item->itemArr->name << endl;
+    traceSerial<<F("MBUSD: endPoll ")<< item->itemArr->name << endl;
 
   //Non blocking waiting to release line
   uint32_t time = millis();
@@ -794,7 +794,7 @@ aJsonObject * mapObj = aJson.getObjectItem(templateParamObj, "map");
                         Value=cmdValue.getTens_raw()*(100/TENS_BASE);
                     }
 
-debugSerial<<F("MBUSD: suffix:")<<suffixStr<< F(" Val: ")<<Value<<endl;
+traceSerial<<F("MBUSD: suffix:")<<suffixStr<< F(" Val: ")<<Value<<endl;
 aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            {

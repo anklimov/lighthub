@@ -226,11 +226,11 @@ int sensors_loop(void) {
         
         case  DS2482_ERROR_CONFIG:
         errorSerial<<F("1WT: DS2482_ERROR_CONFIG")<<endl;
-        oneWire->wireReset();
-        return INTERVAL_1W;
+        i2cReset();
+        break;
 
         case  DS2482_ERROR_TIMEOUT:
-        errorSerial<<F("1WT: 1-wire shorted")<<endl;
+        errorSerial<<F("1WT: timeout")<<endl;
         oneWire->wireReset();
         return INTERVAL_1W;
 
