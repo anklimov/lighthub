@@ -916,6 +916,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
     int     res       = -1;
     uint16_t status2Send = 0;
     uint8_t  command2Set = 0;
+    itemCmd  originalCmd = cmd;
 
     /// Common (GRP & NO GRP) commands
     switch (cmd.getCmd()) 
@@ -1071,7 +1072,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
 
                 if ((suffixCode==S_CMD) &&  cmd.isValue())  
                                             {
-                                            scheduleOppositeCommand(cmd,chActive,authorized);         
+                                            scheduleOppositeCommand(originalCmd,chActive,authorized);         
                                             scheduledOppositeCommand = true;
                                             }   
                 }
@@ -1380,7 +1381,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
 
           if (oppositeCommandToBeSchedulled) //invoked not as group part, delayed
                                                                                     { 
-                                                                                     scheduleOppositeCommand(cmd,chActive,authorized);
+                                                                                     scheduleOppositeCommand(originalCmd,chActive,authorized);
                                                                                      status2Send &=~FLAG_PARAMETERS;
                                                                                     }
 } // NO GROUP
