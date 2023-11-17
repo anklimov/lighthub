@@ -2,6 +2,8 @@
 #define _TEMPLATE_STREAM_H_
 
 #include <Stream.h>
+#include <aJSON.h>
+#include <streamlog.h>
 //#define KEYLEN 8
 extern aJsonObject * topics;
 
@@ -30,6 +32,7 @@ public:
                         { 
                          str[pos+2+i]='\0';
                          val=resolveKey(str+pos+2);
+                         valpos=0;
                          str[pos+2+i]='}';
                          pos+=3+i;
                         }
@@ -83,8 +86,9 @@ public:
                  if (valObj->type == aJson_String) return valObj->valuestring;
 
                 }
-             if (suffix && (suffix<=suffixNum) && !strcmp(key,"sfx"))  
+             if (suffix && (suffix<suffixNum) && !strcmp(key,"sfx"))  
                             {
+                            //debugSerial<<F("Template: Suffix=")<<suffix<<endl;    
                             buffer[0]='/';       
                             strncpy_P(buffer+1,suffix_P[suffix],sizeof(buffer)-2);    
                             return buffer;

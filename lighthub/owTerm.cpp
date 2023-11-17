@@ -127,8 +127,8 @@ int owSetup() {
     if (oneWire) return true;    // Already initialized
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
 
-    debugSerial<<F("DS2482_100_I2C_TO_1W_BRIDGE init")<<endl;
-    debugSerial<<F("Free:")<<freeRam()<<endl;
+    debugSerial<<F("1WT: DS2482_100_I2C_TO_1W_BRIDGE init")<<endl;
+    //debugSerial<<F("Free:")<<freeRam()<<endl;
     oneWire = new OneWire;
 #else
     debugSerial.print(F("One wire setup on PIN:"));
@@ -146,7 +146,7 @@ if (!oneWire)
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
     Wire.begin();
     if (oneWire->checkPresence()) {
-        infoSerial.println(F("1WT: DS2482-100 present"));
+        infoSerial.println(F("1WT: DS2482-100 present, reset"));
         oneWire->deviceReset();
 #ifdef APU_OFF
         debugSerial.println(F("APU off"));
@@ -154,11 +154,11 @@ if (!oneWire)
         oneWire->setActivePullup();
 #endif
 
-        debugSerial.println(F("\tChecking for 1-Wire devices..."));
+       // debugSerial.println(F("\tChecking for 1-Wire devices..."));
         if (oneWire->wireReset())
-            debugSerial.println(F("\tReset done"));
+            debugSerial.println(F("1WT: Bus Reset done"));
         else 
-            debugSerial.println(F("\tDS2482 reset error"));    
+            debugSerial.println(F("1WT: Bus reset error"));    
         //return true;
     }   
         else 
@@ -229,22 +229,22 @@ int sensors_loop(void) {
         i2cReset();
         break;
 
-        case  DS2482_ERROR_TIMEOUT:
-        errorSerial<<F("1WT: timeout")<<endl;
-        oneWire->wireReset();
-        return INTERVAL_1W;
+        case  DS2482_ERROR_TIMEOUT: //Busy over time
+        errorSerial<<F("1WT: BUSY timeout")<<endl;
+        i2cReset();
+        break;
 
         default:
-        errorSerial<<F("1WT: error")<<endl;
-        oneWire->wireReset();
-        return INTERVAL_1W;
+        break;
     }
+    /*
     if (!oneWire->checkPresence()) 
     {
         infoSerial.println(F("1WT: lost DS2482-100"));
         i2cReset();
     }   
-            
+
+  */          
        
 #endif
 

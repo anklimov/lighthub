@@ -701,6 +701,11 @@ switch (cmdType)
     //        dict = aJson.createObject();
     //        aJson.addStringToObject(dict, "sfx", )
             suffix=_itemCmd.getSuffix();
+            if (!suffix)
+            {
+             if (_itemCmd.isCommand()) suffix=S_CMD;
+                else if (_itemCmd.isValue()) suffix = S_SET; 
+            }
             }
 
     //debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
@@ -720,7 +725,7 @@ switch (cmdType)
     char addrstr[MQTT_TOPIC_LENGTH];
     //ts.setTimeout(0);
     addrstr[ts.readBytesUntil('\0',addrstr,sizeof(addrstr))]='\0';
-    debugSerial << F("Emit: ")<<emit->valuestring<<" "<<addrstr<< F(" -> ")<<emitCommand<<endl;    
+    debugSerial << F("Emit: <")<<emit->valuestring<<"> "<<addrstr<< F(" -> ")<<emitCommand<<endl;    
     /*
     TODO implement
     #ifdef WITH_DOMOTICZ
@@ -895,7 +900,7 @@ bool checkToken(char * token, char * data)
 
 
 bool i2cReset(){
-debugSerial.println("I2C Reset");
+debugSerial.println(F("I2C Reset"));
 
 Wire.endTransmission(true);
 #if  !defined(ARDUINO_ARCH_ESP8266)
@@ -911,19 +916,22 @@ pinMode(SDA,INPUT);
         pulse=!pulse;
         delay(10);//10us мкс
   }
+
+delay(20);
 Wire.begin();
 
 #ifdef DS2482_100_I2C_TO_1W_BRIDGE
 if (oneWire && oneWire->checkPresence())
 {        
         oneWire->deviceReset();
+        debugSerial.println(F("1WT: DS2482 present, reset"));  
 #ifndef APU_OFF
         oneWire->setActivePullup();
 #endif
         if (oneWire->wireReset())
-            debugSerial.println(F("\tReset done"));
+            debugSerial.println(F("1WT: Bus Reset done"));
         else 
-            debugSerial.println(F("\tDS2482 reset error"));   
+            debugSerial.println(F("1WT: Bus reset error"));   
 }
 #endif
 
