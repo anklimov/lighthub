@@ -127,11 +127,14 @@ void DMXSemiImmediateUpdate(short tch,short trh, int val)
 void DMXput(void)
 {
 if (!DMXin) return;  
+
+
 for (short tch=0; tch<=3 ; tch++)
     {
     short base = tch*4;
     DMXImmediateUpdate(tch,DMXin[base],DMXin[base+1],DMXin[base+2],DMXin[base+3]);
     }
+    
 };
 
 extern volatile uint8_t timerHandlerBusy;
@@ -139,7 +142,7 @@ extern volatile uint8_t timerHandlerBusy;
 #if defined(_dmxin)
 volatile int DMXinDoublecheck=0;
 #endif
-
+/*
 void DMXUpdate(void)
 {
 #if defined(_dmxin)
@@ -181,7 +184,40 @@ for (short tch=0; tch<=3 ; tch++)
     //Serial.print(D_State,BIN);Serial.println();
 #endif
 }
+*/
+void DMXUpdate(void)
+{
+#if defined(_dmxin)
+int t;
+if(!DMXin) return;
+#if defined(__SAM3X8E__)
+if (dmxin.getRxLength()<16) return;
+#endif
+for (short tch=0; tch<=3 ; tch++)
+    {
+    short base = tch*4;
+    bool updated = 0;
 
+    for (short trh=0; trh<4 ; trh++)
+    if ((t=dmxin.read(base+trh+1)) != DMXin[base+trh])
+      {
+        D_State |= (1<<tch);
+        updated=1;
+        //Serial.print("onContactChanged :"); Serial.print(DMXin[tch*4+trh]); Serial.print(" => "); Serial.print(t);Serial.println();
+        DMXin[base+trh]=t;
+        //DMXImmediateUpdate(tch,trh,t);
+        //break;
+      }
+
+     if (updated)
+        {
+        DMXImmediateUpdate(tch,DMXin[base],DMXin[base+1],DMXin[base+2],DMXin[base+3]);
+        D_checkT=millisNZ();
+        }
+    }
+    //Serial.print(D_State,BIN);Serial.println();
+#endif
+}
 
  void DMXCheck(void)
 {
@@ -209,7 +245,7 @@ D_checkT=0;
 // Here code for network update
 //int ch = 0;
 
-DMXput();
+//DMXput();
 
 #ifdef _dmxout
 for (int i=1; i<17; i++) {debugSerial.print(dmxin.read(i));debugSerial.print(";");}
