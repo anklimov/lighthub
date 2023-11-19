@@ -40,3 +40,4 @@
 -D REDIRECTION_URL=\"http://lazyhome.ru/pwa\"
 -D MERCURY_ENABLE
 #-D IPMODBUS
+-D CONFIG_CLEAN_PIN=2

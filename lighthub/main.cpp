@@ -2003,6 +2003,10 @@ int16_t attachTimer(double microseconds, timerCallback callback, const char* Tim
     dueTimerInterrupt.attachInterruptInterval(microseconds, callback);
     timerNumber = dueTimerInterrupt.getTimerNumber();
     debugSerial<<TimerName<<F(" attached to Timer(")<<timerNumber<<F(")")<<endl;
+    //DueTimer.Timers[timerNumber].irq
+    NVIC_SetPriority(TC0_IRQn,2);
+    debugSerial << "USART0 prio:" << NVIC_GetPriority (USART0_IRQn)<< " TC0 prio:" << NVIC_GetPriority (TC0_IRQn)<<endl;
+
   return timerNumber;
 }
 #endif
@@ -2832,6 +2836,7 @@ configLocked--;
 
 
 void inputSetup(void) {
+infoSerial<<F("Initializing Inputs")<<endl;       
     if (!inputs) return;
 configLocked++;
         aJsonObject *input = inputs->child;
