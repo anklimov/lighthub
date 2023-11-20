@@ -21,8 +21,8 @@ extern bool disableCMD;
 
 #define AC_FAILED  CST_FAILED
 #define AC_UNKNOWN CST_UNKNOWN
-#define AC_IDLE CST_INITIALIZED
-#define AC_SENDING 3
+#define AC_IDLE    CST_INITIALIZED
+#define AC_SENDING CST_USER
 
 //byte inCheck = 0;
 byte qstn[] = {255,255,10,0,0,0,0,0,1,1,77,1,90}; // Команда опроса

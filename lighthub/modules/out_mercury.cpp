@@ -97,6 +97,7 @@ debugSerial.println("Mercury: De-Init");
 disconnectMercury();
 delete store;
 item->setPersistent(NULL);
+setStatus(CST_UNKNOWN);
 store = NULL;
 return 1;
 }

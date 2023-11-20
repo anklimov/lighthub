@@ -2497,6 +2497,11 @@ infoSerial<<F("\nNOSERIAL");
 infoSerial<<F("\n(+)ELEVATOR");
 #endif
 
+#ifdef MERCURY_ENABLE
+infoSerial<<F("\n(+)MERCURY");
+#else
+infoSerial<<F("\n(-)MERCURY");
+#endif
 //#ifdef IPMODBUS
 //infoSerial<<F("\n(+)IPMODBUS");
 //#endif

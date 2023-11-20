@@ -4,6 +4,7 @@
 #define CST_UNKNOWN  0
 #define CST_FAILED 1
 #define CST_INITIALIZED  2
+#define CST_USER 3
 
 class abstractCh {
 public:
