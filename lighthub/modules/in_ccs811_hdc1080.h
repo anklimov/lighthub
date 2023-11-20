@@ -7,6 +7,10 @@
 #include "ClosedCube_HDC1080.h"
 #include "SparkFunCCS811.h" //Click here to get the library: http://librarymanager/All#SparkFun_CCS811
 
+//#ifndef I2C_CLOCK
+//#define I2C_CLOCK 4000
+//#endif
+
 //#define CCS811_ADDR 0x5B //Default I2C Address
 #define CCS811_ADDR 0x5A //Alternate I2C Address
 
@@ -28,13 +32,7 @@
 
 #endif
 
-/*
-#if defined (__SAM3X8E__)
-#define SCL_LOW()   digitalWrite(21,LOW)
-#define SCL_HIGH()  digitalWrite(21,HIGH)
-#define SCL_RESET
-#endif
-*/
+
 
 #if defined (ARDUINO_ARCH_ESP32)
 #undef WAK_PIN

@@ -22,14 +22,14 @@ static bool CCS811ready = false;
 
 int  in_ccs811::Setup()
 {
-  if (CCS811ready) {errorSerial<<F("ccs811 is already initialized")<<endl; return 0;}
+  if (CCS811ready) {errorSerial<<F("CCS811: Already initialized")<<endl; return 0;}
 
 #ifdef WAK_PIN
   pinMode(WAK_PIN,OUTPUT);
   digitalWrite(WAK_PIN,LOW);
 #endif
 
-infoSerial.println("CCS811 Init");
+infoSerial.println(F("CCS811: Init"));
 
 #if defined (TWI_SCL) && defined (TWI_SDA)
 Wire.begin(TWI_SDA,TWI_SCL); //Inialize I2C Harware
@@ -37,7 +37,9 @@ Wire.begin(TWI_SDA,TWI_SCL); //Inialize I2C Harware
 Wire.begin(); //Inialize I2C Harware
 #endif
 
-Wire.setClock(4000);
+#ifdef I2C_CLOCK
+Wire.setClock(I2C_CLOCK);
+#endif
 
   //It is recommended to check return status on .begin(), but it is not
   //required.
@@ -46,8 +48,7 @@ Wire.setClock(4000);
   if (returnCode != CCS811Core::SENSOR_SUCCESS)
   //if (returnCode != CCS811Core::CCS811_Stat_SUCCESS)
   {
-    errorSerial.print("CCS811 Init error ");
-    //debugSerial.println(ccs811.statusString(returnCode));
+    errorSerial.print(F("CCS811: Init error "));
     printDriverError(returnCode);
     return 0;
   }
@@ -68,16 +69,16 @@ return 1;
 int in_hdc1080::Setup()
 {
 //i2cReset();  
-if (HDC1080ready)  {debugSerial<<F("hdc1080 is already initialized")<<endl; return 0;}
-debugSerial.println("HDC1080 Init ");
+if (HDC1080ready)  {debugSerial<<F("HDC1080: Already initialized")<<endl; return 0;}
+debugSerial.print(F("HDC1080: Init. "));
 Wire.begin(); //Inialize I2C Harware
 // Default settings:
 // - Heater off
 // - 14 bit Temperature and Humidity Measurement Resolutions
 hdc1080.begin(0x40);
-debugSerial.print("Manufacturer ID=0x");
-debugSerial.println(hdc1080.readManufacturerId(), HEX); // 0x5449 ID of Texas Instruments
-debugSerial.print("Device ID=0x");
+debugSerial.print(F("Manufacturer ID=0x"));
+debugSerial.print(hdc1080.readManufacturerId(), HEX); // 0x5449 ID of Texas Instruments
+debugSerial.print(F(" Device ID=0x"));
 debugSerial.println(hdc1080.readDeviceId(), HEX); // 0x1050 ID of the device
 printSerialNumber();
 HDC1080ready = true;
@@ -91,14 +92,14 @@ int in_hdc1080::Poll(short cause)
   float h,t;
   int reg;
 if (cause!=POLLING_SLOW) return 0;
-if (!HDC1080ready) {debugSerial<<F("HDC1080 not initialized")<<endl; return 0;}
-debugSerial.print("HDC Status=");
-debugSerial.println(reg=hdc1080.readRegister().rawData,HEX);
+if (!HDC1080ready) {errorSerial<<F("HDC1080: Not initialized")<<endl; return 0;}
+debugSerial.print(F("HDC1080: Status="));
+debugSerial.print(reg=hdc1080.readRegister().rawData,HEX);
 if (reg!=0xff)
 {
   debugSerial.print(" T=");
   debugSerial.print(t=hdc1080.readTemperature());
-  debugSerial.print("C, RH=");
+  debugSerial.print(F("C, RH="));
   debugSerial.print(h=hdc1080.readHumidity());
   debugSerial.println("%");
 
@@ -126,6 +127,7 @@ if (reg!=0xff)
 }
 else //ESP I2C glitch
   {
+    debugSerial.println();
     i2cReset();
   }
 return INTERVAL_SLOW_POLLING;
@@ -147,14 +149,14 @@ int in_ccs811::Poll(short cause)
     CCS811Core::status returnCode = ccs811.readAlgorithmResults();
     printDriverError(returnCode);
     float co2,tvoc;
-    debugSerial.print(" CO2[");
+    debugSerial.print(F(" CO2["));
     //Returns calculated CO2 reading
     debugSerial.print(co2 = ccs811.getCO2());
-    debugSerial.print("] tVOC[");
+    debugSerial.print(F("] tVOC["));
     //Returns calculated TVOC reading
 
     debugSerial.print(tvoc = ccs811.getTVOC());
-    debugSerial.print("] baseline[");
+    debugSerial.print(F("] baseline["));
     debugSerial.print(ccs811Baseline = ccs811.getBaseline());
 
     #ifdef M5STACK
@@ -192,11 +194,11 @@ int in_ccs811::Poll(short cause)
 }
 
 void in_hdc1080::printSerialNumber() {
-debugSerial.print("Device Serial Number=");
+infoSerial.print(F("Device Serial Number="));
 HDC1080_SerialNumber sernum = hdc1080.readSerialNumber();
 char format[16];
 sprintf(format, "%02X-%04X-%04X", sernum.serialFirst, sernum.serialMid, sernum.serialLast);
-debugSerial.println(format);
+infoSerial.println(format);
 }
 
 //printDriverError decodes the CCS811Core::status type and prints the
@@ -206,25 +208,26 @@ debugSerial.println(format);
 //to this function to see what the output was.
 void in_ccs811::printDriverError( CCS811Core::status errorCode )
 {
+  debugSerial.print(F("CCS811: "));
   switch ( errorCode )
   {
     case CCS811Core::SENSOR_SUCCESS:
-      debugSerial.print("SUCCESS");
+      debugSerial.print(F("SUCCESS"));
       break;
     case CCS811Core::SENSOR_ID_ERROR:
-      debugSerial.print("ID_ERROR");
+      debugSerial.print(F("ID_ERROR"));
       break;
     case CCS811Core::SENSOR_I2C_ERROR:
-      debugSerial.print("I2C_ERROR");
+      debugSerial.print(F("I2C_ERROR"));
       break;
     case CCS811Core::SENSOR_INTERNAL_ERROR:
-      debugSerial.print("INTERNAL_ERROR");
+      debugSerial.print(F("INTERNAL_ERROR"));
       break;
     case CCS811Core::SENSOR_GENERIC_ERROR:
-      debugSerial.print("GENERIC_ERROR");
+      debugSerial.print(F("GENERIC_ERROR"));
       break;
     default:
-      debugSerial.print("Unspecified error.");
+      debugSerial.print(F("Unspecified error."));
   }
 }
 
@@ -236,18 +239,18 @@ void in_ccs811::printSensorError()
 
   if ( error == 0xFF ) //comm error
   {
-    debugSerial.println("Failed to get ERROR_ID register.");
+    errorSerial.println(F("CCS811: Failed to get ERROR_ID register."));
   }
   else
   {
-    //debugSerial.print("");
-    if (error & 1 << 5) debugSerial.print("Error: HeaterSupply");
-    if (error & 1 << 4) debugSerial.print("Error: HeaterFault");
-    if (error & 1 << 3) debugSerial.print("Error: MaxResistance");
-    if (error & 1 << 2) debugSerial.print("Error: MeasModeInvalid");
-    if (error & 1 << 1) debugSerial.print("Error: ReadRegInvalid");
-    if (error & 1 << 0) debugSerial.print("Error: MsgInvalid");
-    debugSerial.println();
+    if (error) errorSerial.print(F("CCS811: Error "));
+    if (error & 1 << 5) errorSerial.print(F("HeaterSupply"));
+    if (error & 1 << 4) errorSerial.print(F("HeaterFault"));
+    if (error & 1 << 3) errorSerial.print(F("MaxResistance"));
+    if (error & 1 << 2) errorSerial.print(F("MeasModeInvalid"));
+    if (error & 1 << 1) errorSerial.print(F("ReadRegInvalid"));
+    if (error & 1 << 0) errorSerial.print(F("MsgInvalid"));
+    if (error) errorSerial.println();
   }
 }
 #endif

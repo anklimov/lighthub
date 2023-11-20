@@ -26,10 +26,9 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 #include "main.h"
 #include "aJSON.h"
-//#include "twi.h"
 
 extern aJsonObject *owArr;
-extern  uint32_t timerCtr;
+//extern  uint32_t timerCtr;
 aJsonObject *dev2Check = NULL;
 
 OneWire *oneWire = NULL;
@@ -62,7 +61,7 @@ char * getReadableNote(aJsonObject * owObj)
 void processTemp(aJsonObject * owObj, float currentTemp) {
     if (!owObj || !owArr) return;
     char* note = getReadableNote(owObj);   
-    debugSerial<<endl<<F("1WT:")<<currentTemp<<F(" <")<<owObj->name<<F("> ");    
+    debugSerial <<F("1WT:")<<currentTemp<<F(" <")<<owObj->name<<F("> ");    
     if ((currentTemp != -127.0) && (currentTemp != 85.0) && (currentTemp != 0.0))
         {
         if (note) debugSerial<<note;    
