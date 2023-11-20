@@ -47,6 +47,7 @@ volatile uint32_t checkTimestamp=0L;
 #if defined(_dmxin)
 volatile uint32_t D_State=0;
 volatile unsigned long D_checkT=0;
+uint8_t DMXINChannels=0;
 #endif
 
 #ifdef _artnet
@@ -68,7 +69,6 @@ int itemCtrl2(char* name,int r,int g, int b, int w)
 
        if (itemArr && (itemArr->type==aJson_Array))
        {
-
         short itemtype = aJson.getArrayItem(itemArr,0)->valueint;
         short itemaddr = aJson.getArrayItem(itemArr,1)->valueint;
        switch (itemtype){
@@ -84,7 +84,6 @@ int itemCtrl2(char* name,int r,int g, int b, int w)
 
        case CH_RGB: // RGB
       {
-
         DmxWrite(itemaddr,   r);
         DmxWrite(itemaddr+1, g);
         DmxWrite(itemaddr+2, b);
@@ -96,7 +95,7 @@ int itemCtrl2(char* name,int r,int g, int b, int w)
         if (groupArr && (groupArr->type==aJson_Array))
         { aJsonObject *i =groupArr->child;
           while (i)
-            { //Serial.println(i->valuestring);
+            {
             if (i->type == aJson_String) itemCtrl2(i->valuestring,r,g,b,w);
               i=i->next;}
         }
@@ -119,16 +118,31 @@ void DMXImmediateUpdate(short tch,short r, short g, short b, short w) {
         }
 }
 
-void DMXSemiImmediateUpdate(short tch,short trh, int val)
+void DMXSemiImmediateUpdate(short tch,short r, short g, short b, short w)
 {
 //Here any code for  passthrow between DMX IN and DMX OUT in idle state
+       if (dmxArr && (dmxArr->type==aJson_Array))
+
+        {
+        aJsonObject *DMXch =   aJson.getArrayItem(dmxArr,tch);
+        char* itemname = NULL;
+        if (DMXch->type == aJson_String) itemname=DMXch->valuestring;
+         if (itemname)
+          {
+            Item it(itemname);
+            if (!r && !g && !b && !w) it.Ctrl(itemCmd().Cmd(CMD_OFF).setSuffix(S_CMD));
+               else 
+                  {
+                  it.Ctrl(itemCmd().RGBW(r,g,b,w).setSuffix(S_SET));
+                  it.Ctrl(itemCmd().Cmd(CMD_ON).setSuffix(S_CMD));
+                  }
+          }
+        }
 }
 
 void DMXput(void)
 {
 if (!DMXin) return;  
-
-
 for (short tch=0; tch<=3 ; tch++)
     {
     short base = tch*4;
@@ -142,115 +156,63 @@ extern volatile uint8_t timerHandlerBusy;
 #if defined(_dmxin)
 volatile int DMXinDoublecheck=0;
 #endif
-/*
+
+// INVOKED BY INTERRUPTS - MUST BE SAFE CODE
 void DMXUpdate(void)
 {
 #if defined(_dmxin)
-int t;
-if(!DMXin) return;
-
-#if defined(__SAM3X8E__)
-if (dmxin.getRxLength()<16) return;
-#endif
-for (short tch=0; tch<=3 ; tch++)
-    {
-    short base = tch*4;
-    bool updated   = 0;
-    bool confirmed = 0;
-
-    for (short trh=0; trh<4 ; trh++)
-    if (((t=dmxin.read(base+trh+1)) != DMXin[base+trh]))
-      {
-        updated=1;
-         if (DMXinDoublecheck>2)
-           {
-            D_State |= (1<<tch);
-            DMXin[base+trh]=t;
-            confirmed = 1;
-           }
-      } 
-
-    if (updated) DMXinDoublecheck++; else DMXinDoublecheck=0;
-
-
-     if (confirmed)
-        {
-
-        DMXImmediateUpdate(tch,DMXin[base],DMXin[base+1],DMXin[base+2],DMXin[base+3]);
-        //for (int i=1; i<17; i++) {debugSerial.print(dmxin.read(i));debugSerial.print("-");};debugSerial.print("|");
-        D_checkT=millisNZ();
-        }
-    }
-    //Serial.print(D_State,BIN);Serial.println();
-#endif
-}
-*/
-void DMXUpdate(void)
-{
-#if defined(_dmxin)
-int t;
 if(!DMXin) return;
 #if defined(__SAM3X8E__)
-if (dmxin.getRxLength()<16) return;
+if (dmxin.getRxLength()<DMXINChannels) return;
 #endif
-for (short tch=0; tch<=3 ; tch++)
+
+uint8_t RGBWChannels=DMXINChannels >> 2;
+for (short tch=0; tch<RGBWChannels ; tch++)
     {
     short base = tch*4;
-    bool updated = 0;
+    bool updated = false;
+    int t;
 
     for (short trh=0; trh<4 ; trh++)
     if ((t=dmxin.read(base+trh+1)) != DMXin[base+trh])
       {
         D_State |= (1<<tch);
         updated=1;
-        //Serial.print("onContactChanged :"); Serial.print(DMXin[tch*4+trh]); Serial.print(" => "); Serial.print(t);Serial.println();
         DMXin[base+trh]=t;
-        //DMXImmediateUpdate(tch,trh,t);
-        //break;
       }
-
      if (updated)
         {
         DMXImmediateUpdate(tch,DMXin[base],DMXin[base+1],DMXin[base+2],DMXin[base+3]);
         D_checkT=millisNZ();
         }
     }
-    //Serial.print(D_State,BIN);Serial.println();
 #endif
 }
 
- void DMXCheck(void)
+// INVOKED in safe loop
+void DMXCheck(void)
 {
-//  CHSV hsv;
-//  CRGB rgb;
 DMXOUT_propagate();
 #if defined(_dmxin)
-
-short t,tch;
-//Here code for semi-immediate update
-  for (t=1,tch=0; t<=8 ; t<<=1,tch++)
-       if (D_State & t)
-       {
-          // Serial.print(D_State,BIN);Serial.print(":");
-       D_State &= ~t;
-       for (short trh=0; trh<4 ; trh++)
-          DMXSemiImmediateUpdate(tch,trh,DMXin[tch*4+trh]);
-
-       }
-
-//if ((millis()<D_checkT) || (D_checkT==0)) return;
-  if ( (!D_checkT) || (!isTimeOver(D_checkT,millis(),D_CHECKT))) return;
+if ( (!D_checkT) || (!isTimeOver(D_checkT,millis(),D_CHECKT))) return;
 D_checkT=0;
+uint8_t RGBWChannels=DMXINChannels >> 2;
+for (short rgbwChan=0; rgbwChan < RGBWChannels; rgbwChan++)
+    {
+    short base = rgbwChan*4;
+    short bitMask = 1 << rgbwChan;
+       if (D_State & bitMask)
+       {
+       D_State &= ~bitMask;
+       DMXSemiImmediateUpdate(rgbwChan,DMXin[base],DMXin[base+1],DMXin[base+2],DMXin[base+3]);
+       break;
+       }
+    }   
 
-// Here code for network update
-//int ch = 0;
-
-//DMXput();
-
-#ifdef _dmxout
-for (int i=1; i<17; i++) {debugSerial.print(dmxin.read(i));debugSerial.print(";");}
-debugSerial.println();
-#endif
+//#ifdef _dmxout
+//for (int i=1; i<17; i++) {debugSerial.print(dmxin.read(i));debugSerial.print(";");}
+//debugSerial.println();
+//#endif
 
 #endif
 }
@@ -274,7 +236,9 @@ void DMXinSetup(int channels)
   //DmxSimple.maxChannel(channels);
 
 #if defined(_dmxin)
+   if (channels>(32*4)) channels = 32*4;
    DMXin = new uint8_t [channels];
+   DMXINChannels=channels;
 #if defined(ARDUINO_ARCH_AVR)
    DMXSerial.init(DMXReceiver,0,channels);
     if (DMXSerial.getBuffer()) {debugSerial.print(F("Init in ch:"));debugSerial.println(channels);} else debugSerial.println(F("DMXin Buffer alloc err"));
