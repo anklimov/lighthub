@@ -62,6 +62,61 @@ extern aJsonObject *items;
 extern aJsonObject *dmxArr;
 
 
+
+itemCmd rgb2hsv(itemCmd in)
+{
+    itemCmd         out;
+    out.setArgType(ST_HSV255);
+
+    double      min, max, delta;
+    
+    double inr=in.param.r/255;
+    double ing=in.param.g/255;
+    double inb=in.param.b/255;
+    double inw=in.param.w/255; 
+
+    min = inr < ing ? inr : ing;
+    min = min  < inb ? min  : inb;
+
+    max = inr > ing ? inr : ing;
+    max = max  > inb ? max  : inb;
+    max = max  > inw ? max  : inw;
+
+    out.param.v = max*255;                                // v
+    delta = max - min;
+    if (delta < 0.00001)
+    {
+        out.param.s = 0;
+        out.param.h = 0; // undefined, maybe nan?
+        return out;
+    }
+    if( max > 0.0 ) { // NOTE: if Max is == 0, this divide would cause a crash
+        out.param.s = (delta / max)*100;                  // s
+    } else {
+        // if max is 0, then r = g = b = 0              
+        // s = 0, h is undefined
+        out.param.s = 0;
+        out.param.h = 0;                            // its now undefined
+        return out;
+    }
+    double outh;
+    if( inr >= max )                           // > is bogus, just keeps compilor happy
+        outh = ( ing - inb ) / delta;        // between yellow & magenta
+    else
+    if( ing >= max )
+        outh = 2.0 + ( inb - inr ) / delta;  // between cyan & yellow
+    else
+        outh = 4.0 + ( inr - ing ) / delta;  // between magenta & cyan
+
+    outh *= 60.0;                              // degrees
+
+    if( outh < 0.0 )
+        outh += 360.0;
+    out.param.h=outh;
+    return out;
+}
+
+
 int itemCtrl2(char* name,int r,int g, int b, int w)
 {
   if (!items) return 0;
@@ -133,7 +188,15 @@ void DMXSemiImmediateUpdate(short tch,short r, short g, short b, short w)
             if (!r && !g && !b && !w) it.Ctrl(itemCmd().Cmd(CMD_OFF).setSuffix(S_CMD));
                else 
                   {
+                    /*
+                  CRGB rgb;
+                  rgb.r = r;
+                  rgb.g = g;
+                  rgb.b = b;    
+                  CHSV hsv = rgb2hsv_approximate(rgb);  
+                  it.Ctrl(itemCmd().HSV255(hsv.h,hsv.s,hsv.v).setSuffix(S_SET)); */
                   it.Ctrl(itemCmd().RGBW(r,g,b,w).setSuffix(S_SET));
+                  //it.Ctrl(rgb2hsv(itemCmd().RGBW(r,g,b,w)).setSuffix(S_SET));
                   it.Ctrl(itemCmd().Cmd(CMD_ON).setSuffix(S_CMD));
                   }
           }
