@@ -170,6 +170,13 @@ bool cleanConf(bool wait)
 {
   if (!root) return true;
   bool clean = true;
+if (configLocked)
+                {
+                    errorSerial<<F("Can not clean - locked")<<endl;
+                    return false;
+                }
+/*
+No more unsafe operations  
 if (wait)
 {  
 debugSerial<<F("Unlocking config ...")<<endl;
@@ -196,6 +203,7 @@ if (configLocked)
     clean = false;
 }
 } //wait
+*/
 
 debugSerial<<F("Stopping channels ...")<<endl;
 timerHandlerBusy++;
@@ -753,7 +761,7 @@ lan_status lanLoop() {
            lanStatus=READ_RE_CONFIG;
              break;
 
-        case READ_RE_CONFIG: // Restore config from FLASH, re-init LAN
+       case READ_RE_CONFIG: // Restore config from FLASH, re-init LAN
             if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
               else 
                  if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_RELOAD))
@@ -762,6 +770,29 @@ lan_status lanLoop() {
                     softRebootFunc();
                  }
             break;
+
+        case DO_GET:
+            if (mqttClient.connected()) mqttClient.disconnect();
+            timerLanCheckTime = millis();// + 5000;
+            lanStatus = GET;
+            break;
+
+        case GET:
+            statusLED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
+            if (configLocked) return GET;      
+
+            if (loadConfigFromHttp()==200) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+                            else if (configLoaded)   {
+                                                        infoSerial<<F("Continue with previously loaded config")<<endl;
+                                                        lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+                                                        }
+                            
+                            else if (Ethernet.localIP()) lanStatus = DO_READ_RE_CONFIG;
+
+                            else lanStatus = DO_REINIT; //Load from NVRAM
+                           
+            break;      
+
 
         case DO_NOTHING:
         case OPERATION_NO_MQTT:
@@ -1680,7 +1711,10 @@ if (arg_cnt>1)
 if (lanStatus>=HAVE_IP_ADDRESS)
 {
 
-
+lanStatus = DO_GET;
+return 200;
+/*
+let Re-Get will be only in safe time 
 int retCode=loadConfigFromHttp();
     if (retCode==200)
     {
@@ -1699,6 +1733,7 @@ int retCode=loadConfigFromHttp();
     if (configLoaded) lanStatus =IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
        else lanStatus = DO_READ_RE_CONFIG;
     return retCode; 
+    */
 }
 errorSerial<<F("No IP adress")<<endl;
 return 500;
@@ -1772,7 +1807,12 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
             infoSerial<<F("got Config\n"); delay(500);
             aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
-            cleanConf(true);
+        if (!cleanConf(true))
+        {
+            errorSerial<<F("Get aborted")<<endl;
+            htclient.stop();
+            return 500;
+        }
             root = aJson.parse(&as);
             interrupts();
             hclient.closeStream(configStream);  // this is very important -- be sure to close the STREAM
@@ -1844,7 +1884,13 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
     if (responseStatusCode == 200) {
         aJsonStream socketStream = aJsonStream(&htclient);
         debugSerial<<F("Free:")<<freeRam()<<endl;
-        cleanConf(true);
+        if (!cleanConf(true))
+        {
+            errorSerial<<F("Get aborted")<<endl;
+            htclient.stop();
+            return 500;
+        }
+
         debugSerial<<F("Configuration cleaned")<<endl;
         debugSerial<<F("Free:")<<freeRam()<<endl;
         //root = aJson.parse((char *) response.c_str());
@@ -1917,7 +1963,12 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
             sysConf.setETAG(httpClient.header("ETag"));
             //String response = httpClient.getString();
             //debugSerial<<response;
-            cleanConf(true);
+        if (!cleanConf(true))
+        {
+            errorSerial<<F("Get aborted")<<endl;
+            htclient.stop();
+            return 500;
+        }
             //root = aJson.parse((char *) response.c_str());
             root = aJson.parse(&socketStream);
     

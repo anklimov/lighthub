@@ -218,7 +218,9 @@ enum lan_status {
     RECONNECT = 13,
     READ_RE_CONFIG = 14,
     DO_READ_RE_CONFIG = 15,
-    DO_NOTHING = -15
+    DO_NOTHING = -15,
+    DO_GET = -16,
+    GET = -17
 };
 
 extern lan_status lanStatus;
