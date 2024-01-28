@@ -46,7 +46,7 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 * [Russian-language Wiki](https://www.lazyhome.ru/dokuwiki/doku.php)
 * [Compiling and flashing](https://github.com/anklimov/lighthub/wiki/Compiling-and-flashing)
 * [Configuring](https://github.com/anklimov/lighthub/wiki/Configuring)
-* [Browser Plugin for searching and configure controllers] (https://github.com/anklimov/zeroconf-lighthub) 
+* [Browser Plugin for searching and configure controllers](https://github.com/anklimov/zeroconf-lighthub) 
 * [Channel commands](https://github.com/anklimov/lighthub/wiki/Channel-commands)
 * [OpenHab integration](https://github.com/anklimov/lighthub/wiki/OpenHab--integration)
 * [Doxygen developers documentation](https://anklimov.github.io/lighthub/docs/html/index.html)
