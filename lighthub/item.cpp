@@ -327,7 +327,7 @@ void Item::setCmd(uint8_t cmdValue) {
     {   
         itemCmd->type = aJson_Int;
         itemCmd->valueint = cmdValue & CMD_MASK | itemCmd->valueint & (FLAG_MASK);   // Preserve special bits
-        debugSerial<<F("SetCmd:")<<cmdValue<<endl;
+        //debugSerial<<F("SetCmd:")<<cmdValue<<endl;
       }
 }
 

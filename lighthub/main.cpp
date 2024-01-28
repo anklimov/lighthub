@@ -408,7 +408,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
 
     int fr = freeRam();
 
-    debugSerial<<F("\n")<<fr<<F(":[")<<topic<<F("] ");
+    debugSerial<<fr<<F(":[")<<topic<<F("] ");
 
     if (fr < 250+MQTT_TOPIC_LENGTH) {
         errorSerial<<F("OutOfMemory!")<<endl;
@@ -780,7 +780,7 @@ lan_status lanLoop() {
         case GET:
             statusLED.set(ledRED|ledGREEN|((configLoaded)?ledBLINK:0));
             if (configLocked) return GET;      
-
+            lanStatus = GET_IN_PROGRESS;
             if (loadConfigFromHttp()==200) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
                             else if (configLoaded)   {
                                                         infoSerial<<F("Continue with previously loaded config")<<endl;
@@ -796,6 +796,7 @@ lan_status lanLoop() {
 
         case DO_NOTHING:
         case OPERATION_NO_MQTT:
+        case GET_IN_PROGRESS:
         ;
     }
 

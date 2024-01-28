@@ -334,32 +334,38 @@ case S_CTRL:
       switch (command)
           {
           case CMD_OFF:
-            //value.Percents255(0);
-
+             if (isNotRetainingStatus()) executeCommand(oCmd,-1,itemCmd().Cmd(CMD_DISABLE)); // Not actually disable, just inform depended systems, that no autoreg now (for pannels indication)
+          executeCommand(oCmd,-1,value); 
+          item->SendStatus(FLAG_FLAGS);
+          return 1;  
           case CMD_ON:
           case CMD_HEAT:
           case CMD_COOL:
           case CMD_AUTO:
           case CMD_FAN:
           case CMD_DRY:
-
-          executeCommand(oCmd,-1,value); 
           executeCommand(oCmd,-1,itemCmd().Cmd((item->getFlag(FLAG_DISABLED))?CMD_DISABLE:CMD_ENABLE));
+          executeCommand(oCmd,-1,value); 
           item->SendStatus(FLAG_FLAGS);
           return 1;
 
           case CMD_ENABLE:
-          //item->setCmd(CMD_ENABLE);
-          //item->SendStatus(FLAG_COMMAND);
+          if (isNotRetainingStatus()) 
+                {
+                  item->setCmd(CMD_ON);
+                  item->SendStatus(FLAG_COMMAND);
+                }
           item->setFlag(FLAG_ACTION_NEEDED);
-          executeCommand(oCmd,-1,value);   
+          executeCommand(oCmd,-1,value);
+          if (isActive()) executeCommand(oCmd,-1,itemCmd().Cmd((CMD_ON)));   
+       
+
           store->prevOut=-2.0;   
           return 1;
 
           case CMD_DISABLE:
-          //item->setCmd(CMD_DISABLE);
-          //item->SendStatus(FLAG_COMMAND);
           executeCommand(oCmd,-1,value);
+          if (!isActive()) executeCommand(oCmd,-1,itemCmd().Cmd((CMD_OFF))); 
           return 1;
 /*
           case CMD_OFF:

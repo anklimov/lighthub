@@ -1171,8 +1171,8 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
                                      item->setVal(param.asInt32);
                                      item->setSubtype(cmd.itemArgType); 
                                     }
-  debugSerial<<F("Saved:");
-  debugOut();
+  //debugSerial<<F("Saved:");
+  //debugOut();
   return true;
   }
 return false;

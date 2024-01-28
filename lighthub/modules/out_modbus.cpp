@@ -341,7 +341,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                               switch (defMappingObj->type)
                                {
                                 case aJson_Int: //register/coil/.. number
-                                  debugSerial<<F("Searching reg#")<<defMappingObj->valueint<<endl; 
+                                  traceSerial<<F("Searching reg#")<<defMappingObj->valueint<<endl; 
                                   if ((defMappingObj->valueint>= registerFrom) && (defMappingObj->valueint<=registerTo))  
                                       {   
                                       mappedParam = findRegister(defMappingObj->valueint,defMappingObj->valueint-registerFrom,regType,registerFrom,registerTo,false,&submitRecurrentOut);
@@ -351,7 +351,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
 
                                 break;
                                 case aJson_String: // parameter name
-                                 debugSerial<<F("Searching reg: ")<<defMappingObj->valuestring<<endl; 
+                                 traceSerial<<F("Searching reg: ")<<defMappingObj->valuestring<<endl; 
                                  if (itemParametersObj && itemParametersObj->type ==aJson_Object) 
                                     {      
                                       //Searching item param for nested mapping 
@@ -364,7 +364,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                             aJsonObject *lastMeasured = aJson.getObjectItem(itemParObj,"@S");
                                             if (lastMeasured && lastMeasured->type ==aJson_Int)
                                             {
-                                            debugSerial<<F("LastKnown value: ")<<lastMeasured->valueint<<endl; 
+                                            traceSerial<<F("LastKnown value: ")<<lastMeasured->valueint<<endl; 
                                             //Searching template param for nested mapping
                                             aJsonObject * templateParObj = aJson.getObjectItem(store->parameters,defMappingObj->valuestring);
                                               if (templateParObj)
@@ -550,7 +550,7 @@ return itemCmd();
                   int registerTo=aJson.getArrayItem(reg, 1)->valueint;
 
                   if (readModbus(registerFrom,regType,registerTo-registerFrom+1))
-                    { debugSerial<<endl;
+                    { traceSerial<<endl;
                       for(int i=registerFrom;i<=registerTo;i++)
                         {
                           findRegister(i,i-registerFrom,regType,registerFrom,registerTo);
@@ -633,7 +633,7 @@ int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
                       break;
                     }
  mbusSlenceTimer = millisNZ();                   
- debugSerial<<F("Res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<value<<endl;
+ debugSerial<<F("MBUS res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<value<<endl;
  return ( res == 0);
 }
 
@@ -667,8 +667,18 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                       lineInitialized=true;  
                                                       initLine();
                                                     }
-                                              debugSerial<<"MBUS: SEND "<<item->itemArr->name<<" ";      
-                                              switch (sendModbus(execObj->name,outValue->valueint,outValue->subtype)) 
+
+                                              int sendRes;
+                                              int savedValue;
+                                              do
+                                                  {
+                                                  savedValue = outValue->valueint;  
+                                                  debugSerial<<"MBUS: SEND "<<item->itemArr->name<<" ";   
+                                                  sendRes = sendModbus(execObj->name,outValue->valueint,outValue->subtype);
+                                                  }
+                                              while (savedValue != outValue->valueint); //repeat sending if target value changed while we're waited for mbus responce
+
+                                              switch (sendRes) 
                                               {
                                                case 1: //success
                                                  execObj->subtype&=~ MB_NEED_SEND;
