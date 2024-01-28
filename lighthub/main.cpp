@@ -627,12 +627,14 @@ lan_status lanLoop() {
         if (!initializedListeners)
         {
                 setupSyslog();
+                debugSerial<<F("Setup OTA")<<endl;
                 setupOTA();
                 #ifdef _artnet
                             if (artnet) artnet->begin();
                 #endif
 
                 #ifdef IPMODBUS
+                debugSerial<<F("Setup IPModbus")<<endl;
                 setupIpmodbus();
                 #endif
                 initializedListeners = true;
@@ -2686,12 +2688,12 @@ void loop_main() {
 
         #if defined(OTA)
         yield();
-        ArduinoOTA.poll();
+        if (initializedListeners) ArduinoOTA.poll();
         #endif
 
 #ifdef _artnet
         yield();
-        if (artnet) artnet->read();  ///hung if network not initialized
+        if (artnet && initializedListeners) artnet->read();  ///hung if network not initialized
 #endif
 #ifdef MDNS_ENABLE
         #ifndef WIFI_ENABLE
@@ -2740,7 +2742,7 @@ if (initializedListeners) ipmodbusLoop();
 void owIdle(void) {
  //   timerCtr++;    
 #ifdef _artnet
-    if (artnet && (lanStatus>=HAVE_IP_ADDRESS)) artnet->read();
+    if (artnet && initializedListeners && (lanStatus>=HAVE_IP_ADDRESS)) artnet->read();
 #endif
 
 wdt_res();
@@ -2799,7 +2801,7 @@ void modbusIdle(void) {
         yield();
         mqttClient.loop();
 #ifdef _artnet
-        if (artnet) artnet->read();
+        if (artnet && initializedListeners) artnet->read();
 #endif
 #if defined(OTA)
         yield();
@@ -2871,9 +2873,10 @@ inputLoopBusy--;
 void inputSensorsLoop() {
 if (!inputs || inputLoopBusy) return;
 //inputLoopBusy++;
-configLocked++;
+//configLocked++;
     if (isTimeOver(timerSensorCheck,millis(),INTERVAL_CHECK_SENSOR))
     {
+        configLocked++;
         aJsonObject *input = inputs->child;
         while (input) {
             if ((input->type == aJson_Object)) {
@@ -2885,8 +2888,9 @@ configLocked++;
             input = input->next;
         }
         timerSensorCheck = millis();
+        configLocked--;
     }
-configLocked--;
+//configLocked--;
 //inputLoopBusy--;
 }
 
