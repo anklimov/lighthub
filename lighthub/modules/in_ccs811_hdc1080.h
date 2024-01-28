@@ -16,13 +16,13 @@
 
 #if defined (ARDUINO_ARCH_ESP8266) 
 
-    #if not defined (TWI_SCL) && defined (D1)
-    #define TWI_SCL D1
-    #endif
+ //   #if not defined (TWI_SCL) && defined (D1)
+ //   #define TWI_SCL D1
+ //   #endif
 
-    #if not defined (WAK_PIN) && defined (D3)
-    #define WAK_PIN D3
-    #endif
+  //  #if not defined (WAK_PIN) && defined (D3)
+  //  #define WAK_PIN D3
+  //  #endif
 
     #if defined (TWI_SCL)
     #define SCL_LOW()   (GPES = (1 << TWI_SCL))
@@ -35,7 +35,7 @@
 
 
 #if defined (ARDUINO_ARCH_ESP32)
-#undef WAK_PIN
+//#undef WAK_PIN
 #undef SCL_RESET
 //#ifndef WAK_PIN
 //#define WAK_PIN 17
@@ -43,9 +43,9 @@
 #endif
 
 #if defined(ARDUINO_ARCH_AVR)
-#ifndef WAK_PIN
-#define WAK_PIN 3  // for LightHub UEXT SCS Pin
-#endif
+//#ifndef WAK_PIN
+//#define WAK_PIN 3  // for LightHub UEXT SCS Pin
+//#endif
 #endif
 
 

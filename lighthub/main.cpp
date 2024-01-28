@@ -1811,7 +1811,7 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
         if (!cleanConf(true))
         {
             errorSerial<<F("Get aborted")<<endl;
-            htclient.stop();
+            hclient.closeStream(configStream); 
             return 500;
         }
             root = aJson.parse(&as);
@@ -1967,7 +1967,7 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
         if (!cleanConf(true))
         {
             errorSerial<<F("Get aborted")<<endl;
-            htclient.stop();
+            httpClient.end();
             return 500;
         }
             //root = aJson.parse((char *) response.c_str());
