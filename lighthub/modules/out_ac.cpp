@@ -448,7 +448,7 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute, bool authorized)
   else if (strcmp_P(subItem, RAW_P) == 0) suffixCode = S_RAW;
 
   if (cmd.isCommand() && !suffixCode && !subItem) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
-
+  
  //data[B_POWER] = power;
   //    debugSerial<<F(".");
       switch(suffixCode)
@@ -468,6 +468,7 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute, bool authorized)
 
       case S_CMD:
      // s_mode[0]='\0';
+            store->inCheck=0;
             switch (cmd.getCmd())
                 {
                   case CMD_ON:
@@ -549,9 +550,42 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute, bool authorized)
       store->data[B_FAN_SPD] = 2;
       strcpy_P(s_speed,LOW_P);
       break;
+      case CMD_OFF:
+                      store->inCheck=0;
+                      store->data[B_POWER] = store->power;
+                      store->data[B_POWER] &= ~1;
+                      SendData(off, sizeof(off)/sizeof(byte));
+      return 1;
       default:
-      //if (n) data[B_FAN_SPD] = Parameters[0];
-      store->data[B_FAN_SPD] = cmd.getInt();
+      {
+      uint8_t speed = 0;
+      if (cmd.getInt()) speed =  map(cmd.getInt(),1,255,1,3);
+      store->inCheck=0;
+      switch (speed) {
+        case 0:
+                      store->data[B_POWER] = store->power;
+                      store->data[B_POWER] &= ~1;
+                      SendData(off, sizeof(off)/sizeof(byte));
+        return 1;
+        case 1:
+            store->data[B_FAN_SPD] = 2;
+            strcpy_P(s_speed,LOW_P);
+            store->data[B_POWER] = store->power;
+            store->data[B_POWER] |= 1;
+        break;
+        case 2:
+              store->data[B_FAN_SPD] = 1;
+              strcpy_P(s_speed,MED_P);
+              store->data[B_POWER] = store->power;
+              store->data[B_POWER] |= 1;
+        break;
+        case 3:
+              store->data[B_FAN_SPD] = 0;
+              strcpy_P(s_speed,HIGH_P);  
+              store->data[B_POWER] = store->power;
+              store->data[B_POWER] |= 1;    
+      }
+      }
       //TODO - mapping digits to speed
       }
       publishTopic(item->itemArr->name,s_speed,"/fan");

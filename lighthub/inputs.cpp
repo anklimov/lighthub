@@ -146,7 +146,8 @@ if (input->type == aJson_Object)  {
     else
     {
      Input in(input);
-     in.Poll(CHECK_INPUT);
+     in.store->aslong = 0;
+     //in.Poll(CHECK_INPUT);
     }
 }
 }
@@ -524,7 +525,7 @@ bool Input::changeState(uint8_t newState, short cause)
 if (!inputObj ||  !store) return false;
 
 if (newState == IS_REQSTATE)
-  if (store->delayedState && cause != CHECK_INTERRUPT)
+  if (store->delayedState && (cause != CHECK_INTERRUPT))
     {
       // Requested delayed change State and safe moment
       newState=store->reqState; //Retrieve requested state

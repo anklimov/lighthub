@@ -105,7 +105,7 @@ extern aJsonObject *inputs;
 
 
 typedef union {
-    long int aslong;
+    uint32_t aslong;
     uint32_t timestamp;
     // Analog input structure
     struct {

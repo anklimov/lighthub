@@ -44,19 +44,19 @@ if (gatesObj /*&& aJson.getArraySize(item->itemArg)>=2*/)
              } 
              i=i->next; 
           }
-      debugSerial << F ("MultiVent init")<< endl;
+      debugSerial << F ("VENT: init")<< endl;
       setStatus(CST_INITIALIZED);
       return 1;
       }
 
-debugSerial << F ("MultiVent config failed")<< endl;
+debugSerial << F ("VENT: config failed")<< endl;
 return 0;
 
 }
 
 int  out_Multivent::Stop()
 {
-debugSerial << F ("Multivent De-Init") << endl;
+debugSerial << F ("VENT: De-Init") << endl;
 setStatus(CST_UNKNOWN);
 return 1;
 }
@@ -151,7 +151,7 @@ while (i)
 
                                                 if (cmdObj->valueint == CMD_OFF || cmdObj->valueint == -1) 
                                                     { 
-                                                     debugSerial<<"Turning ON"<<endl;
+                                                     debugSerial<<"VENT: Turning ON"<<endl;
                                                      cmdObj->valueint = CMD_ON; 
                                                      cmd.Cmd(CMD_ON);
                                                      //if (isNotRetainingStatus()) item->SendStatusImmediate(itemCmd().Cmd(CMD_ON),FLAG_COMMAND,i->name);
@@ -162,7 +162,7 @@ while (i)
                                            else
                                                 {
                                              if (cmdObj->valueint != CMD_OFF && cmdObj->valueint != -1)  
-                                                    { debugSerial<<"Turning OFF"<<endl; 
+                                                    { debugSerial<<"VENT: Turning OFF"<<endl; 
                                                       cmdObj->valueint = CMD_OFF; 
                                                       cmd.Cmd(CMD_OFF);
                                                       //if (isNotRetainingStatus()) item->SendStatusImmediate(itemCmd().Cmd(CMD_OFF),FLAG_COMMAND,i->name);
@@ -204,10 +204,13 @@ while (i)
 if (!totalV) return 0;
 
 int fanV=activeV/totalV;
-debugSerial << F("Total V:")<<totalV<<F(" active V:")<<activeV/255<< F(" fan%:")<<fanV<< F(" Max request:")<<maxRequestedV/255 <<F(" from ")<<maxV<<F(" m3")<< endl;
+debugSerial << F("VENT: Total V:")<<totalV<<F(" active V:")<<activeV/255<< F(" fan%:")<<fanV<< F(" Max req:")<<maxRequestedV/255 <<F(" from ")<<maxV<<F(" m3")<< endl;
 
-executeCommand(aJson.getObjectItem(gatesObj, ""),-1,itemCmd().Percents255(fanV).Cmd((fanV)?CMD_ON:CMD_OFF));
-
+//executeCommand(aJson.getObjectItem(gatesObj, ""),-1,itemCmd().Percents255(fanV).Cmd((fanV)?CMD_ON:CMD_OFF));
+if (fanV)
+  executeCommand(aJson.getObjectItem(gatesObj, ""),-1,itemCmd().Percents255(fanV).Cmd(CMD_ON));
+else
+  executeCommand(aJson.getObjectItem(gatesObj, ""),-1,itemCmd().Percents255(fanV));
 //Move gates only if fan is actually on
 if (!fanV) return 1;
 
@@ -229,7 +232,7 @@ while (i)
           {
             int requestedV=V*setObj->valueint;
             out = (( long)requestedV*255L)/(( long)V)*( long)maxV/( long)maxRequestedV;
-            debugSerial<<i->name<<(" Req:")<<requestedV/255<<F(" Out:")<<out<<endl;
+            debugSerial<<F("VENT: ")<<i->name<<F(" Req:")<<requestedV/255<<F(" Out:")<<out<<endl;
           } 
 
          
