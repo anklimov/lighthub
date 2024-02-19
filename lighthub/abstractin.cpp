@@ -1,14 +1,17 @@
 
 #include "abstractin.h"
 #include "abstractch.h"
+#if not defined (NOIP)   
 #include <PubSubClient.h>
+extern PubSubClient mqttClient;
+#endif
 #include "utils.h"
 #include <aJSON.h>
 #include "inputs.h"
 #include "main.h"
 
 extern lan_status lanStatus;
-extern PubSubClient mqttClient;
+
 
 int abstractIn::publish(long value, const char* subtopic)
 {

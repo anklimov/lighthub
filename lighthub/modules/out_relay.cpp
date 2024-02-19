@@ -43,7 +43,7 @@ if (item) item->setExt(0);
 //if (item->getCmd()) item->setFlag(FLAG_COMMAND);
 //if (item->itemVal)  item->setFlag(FLAG_PARAMETERS);
 setStatus(CST_INITIALIZED);
-if (item->isActive()>0)  ///????
+if (item && (item->isActive()>0))  ///????
     {
     item->setExt(millisNZ());
     }

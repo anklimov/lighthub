@@ -25,7 +25,11 @@ e-mail    anklimov@gmail.com
 #include "main.h"
 
 #include "item.h"
+#if not defined (NOIP)
 #include <PubSubClient.h>
+extern PubSubClient mqttClient;
+extern int8_t ethernetIdleCount;
+#endif
 #include <HardwareSerial.h>
 #include "templateStr.h"
 
@@ -38,10 +42,6 @@ e-mail    anklimov@gmail.com
 #endif
 
 extern int8_t configLocked;
-extern int8_t ethernetIdleCount;
-extern PubSubClient mqttClient;
-
-
 
 #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 #include <malloc.h>
@@ -742,12 +742,13 @@ switch (cmdType)
 
    
     //strncpy(addrstr,emit->valuestring,sizeof(addrstr));
+    #if not defined (NOIP)
     if (mqttClient.connected() && !ethernetIdleCount)
     {
     if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
     mqttClient.publish(addrstr, emitCommand , true);
     }
-
+    #endif
     } // emit
 
     if (item &&  item->type == aJson_String) {
@@ -827,7 +828,7 @@ serialParamType  str2SerialParam(char * str)
            {
 
            //debugSerial<< i << F(" ") << pgm_read_word_near(&serialModes_P[i].mode)<< endl;
-           if (sizeof(serialModesNum)==4)
+           if (sizeof(serialParamType)==4)
              return pgm_read_dword_near(&serialModes_P[i].mode);
            else 
              return pgm_read_word_near(&serialModes_P[i].mode);

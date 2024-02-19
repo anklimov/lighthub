@@ -125,10 +125,13 @@ switch (cmd.getCmd()){
  switch (cType)
   {
     case CH_PWM:
-          { short k;
+          { short k ;
             if (authorized || !isProtectedPin(iaddr))
+                      {
                       analogWrite(iaddr, k=cmd.getPercents255(inverse));
-            debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
+                      debugSerial<<F("Pin:")<<iaddr<<F("=")<<k<<endl;
+                      }
+                else  errorSerial<<F("Pin:")<<iaddr<<F(" protected")<<endl;     
             return 1;
           }
     case CH_RGB:

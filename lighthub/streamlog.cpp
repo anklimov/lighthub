@@ -28,6 +28,7 @@ Streamlog::Streamlog (SerialPortType * _serialPort, uint8_t _severity,  uint8_t 
 {
       serialPort=_serialPort;
       severity=_severity;
+      ledPattern=_ledPattern;
 }
 #endif
 /*

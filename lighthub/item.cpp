@@ -40,8 +40,9 @@ e-mail    anklimov@gmail.com
 #ifndef MODBUS_DISABLE
 #include <ModbusMaster.h>
 #endif
-
+#if not defined (NOIP)
 #include <PubSubClient.h>
+#endif
 #include "modules/out_spiled.h"
 #include "modules/out_ac.h"
 #include "modules/out_motor.h"
@@ -70,7 +71,9 @@ short modbusBusy = 0;
 //bool isPendedModbusWrites = false;
 
 extern aJsonObject *pollingItem;
+#if not defined (NOIP)
 extern PubSubClient mqttClient;
+#endif
 extern int8_t ethernetIdleCount;
 extern int8_t configLocked;
 extern lan_status lanStatus;
@@ -1470,10 +1473,16 @@ if ((!driver || driver->isAllowed(cmd)) && (!getFlag(FLAG_FREEZED)))
                         {
                         thermostatStore tStore;
                         tStore.asint=getExt();
-                        if (!tStore.timestamp16) mqttClient.publish("/alarmoff/snsr", itemArr->name);
+                        if (!tStore.timestamp16) 
+                                    {
+                                    infoSerial<<F("Cleaning alarm ")<<itemArr->name<<endl;    
+                                    #if not defined (NOIP)
+                                    mqttClient.publish("/alarmoff/snsr", itemArr->name);
+                                    #endif
+                                    }
                         tStore.tempX100=cmd.getFloat()*100.;         //Save measurement
                         tStore.timestamp16=millisNZ(8) & 0xFFFF;    //And timestamp
-                        //debugSerial<<F(" T:")<<tStore.tempX100<<F(" TS:")<<tStore.timestamp16<<endl;
+                        debugSerial<<F("THERM:")<<itemArr->name<<F(" T:")<<tStore.tempX100<<F(" TS:")<<tStore.timestamp16<<endl;
                         setExt(tStore.asint);
                         res=1;
                         }
@@ -1762,7 +1771,7 @@ int Item::SendStatus(int sendFlags) {
       // publish to MQTT - OpenHab Legacy style to 
       // myhome/s_out/item - mix: value and command
     
-
+                      #if not defined (NOIP)
                       if (mqttClient.connected()  && !ethernetIdleCount)
                       {
                         if (!subItem )
@@ -1787,6 +1796,7 @@ int Item::SendStatus(int sendFlags) {
                         }
                         } //!subItem
                       }
+                     #endif //NOIP 
               else
                       {
                       setFlag(sendFlags);
@@ -1835,16 +1845,18 @@ int Item::SendStatus(int sendFlags) {
               
 
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
+              #if not defined (NOIP)
               if (mqttClient.connected()  && !ethernetIdleCount)
                  {
                   mqttClient.publish(addrstr, valstr,true);
                   clearFlag(FLAG_PARAMETERS);
-                 }
+                 }    
               else
                {
                setFlag(sendFlags);
                return 0;
                }
+              #endif   
               }
 
 
@@ -1890,6 +1902,7 @@ int Item::SendStatus(int sendFlags) {
               strncat_P(addrstr, suffix_P[S_CMD], sizeof(addrstr)-1);              
 
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
+              #if not defined (NOIP)
               if (mqttClient.connected()  && !ethernetIdleCount)
                  {
                   mqttClient.publish(addrstr, cmdstr,true);
@@ -1900,6 +1913,7 @@ int Item::SendStatus(int sendFlags) {
                 setFlag(sendFlags);
                 return 0;
                }
+              #endif   
               }
 // Send ctrl
               if (sendFlags & FLAG_FLAGS)
@@ -1928,6 +1942,7 @@ int Item::SendStatus(int sendFlags) {
               strncat_P(addrstr, suffix_P[S_CTRL], sizeof(addrstr)-1);        
 
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
+              #if not defined (NOIP)
               if (mqttClient.connected()  && !ethernetIdleCount)
                  {
                   mqttClient.publish(addrstr, cmdstr,true);
@@ -1938,6 +1953,7 @@ int Item::SendStatus(int sendFlags) {
                 setFlag(sendFlags);
                 return 0;
                }
+              #endif 
               }
         return 1;
     }

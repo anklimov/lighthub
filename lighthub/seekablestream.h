@@ -14,7 +14,7 @@ bool         textMode;
 uint16_t     contentType;
 
 public:
-seekableStream(unsigned int size):Stream(),streamSize(size) {};
+seekableStream(unsigned int size):Stream(),streamSize(size),textMode(false),contentType(0) {};
 virtual bool    checkPermissions(char mode) {return true;};
 unsigned int    getSize() {return streamSize;}
 void            setSize (unsigned int size) {streamSize = size;};

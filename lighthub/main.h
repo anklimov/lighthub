@@ -8,13 +8,17 @@
 
 #if defined(__SAM3X8E__)
 #include <watchdog.h>
-#include <ArduinoHttpClient.h>
+    #if not defined (NOIP)
+    #include <ArduinoHttpClient.h>
+    #endif
 //#include "TimerInterrupt_Generic.h"
 #endif
 
 #if defined(ARDUINO_ARCH_AVR)
-#include "HTTPClient.h"
-//#include <ArduinoHttpClient.h>
+    #if not defined (NOIP)
+    #include "HTTPClient.h"
+    #endif
+
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
 #endif
@@ -35,7 +39,7 @@
 //#define Ethernet WiFi
 #endif
 
-#if defined ARDUINO_ARCH_ESP32
+#if defined (ARDUINO_ARCH_ESP32)
 #include <FS.h>                   //this needs to be first, or it all crashes and burns...
 //#include "SPIFFS.h"
 //#include <EEPROM.h>
@@ -58,7 +62,7 @@
 #include <ArduinoHttpClient.h>
 #endif
 
-#ifdef ARDUINO_ARCH_STM32
+#if defined (ARDUINO_ARCH_STM32) and not defined (NOIP)
 #include "HttpClient.h"
 //#include "UIPEthernet.h"
 //#include <NRFFlashStorage.h>
@@ -156,7 +160,8 @@ extern Streamlog  errorSerial;
         #include <ESP8266mDNS.h>
   #endif
 #define Ethernet WiFi
-#else  //Wired connection
+#else
+#if  not defined (NOIP)  //Wired connection
         #ifdef Wiz5500
         #include <Ethernet2.h>
         #else
@@ -166,6 +171,7 @@ extern Streamlog  errorSerial;
             #include <Ethernet.h>
             #endif
         #endif
+#endif        
 #endif
 
 
@@ -190,7 +196,9 @@ extern Streamlog  errorSerial;
 #include "Arduino.h"
 #include "utils.h"
 #include "textconst.h"
-#include <PubSubClient.h>
+    #if not defined (NOIP)
+    #include <PubSubClient.h>
+    #endif
 #include <SPI.h>
 #include <string.h>
 #include "aJSON.h"
@@ -233,11 +241,16 @@ typedef union {
 
 bool isNotRetainingStatus();
 
+#if not defined (NOIP)
 void mqttCallback(char *topic, byte *payload, unsigned int length);
-
 void printMACAddress();
-
 lan_status lanLoop();
+int loadConfigFromHttp();
+void onInitialStateInitLAN();
+void onMQTTConnect();
+void ip_ready_config_loaded_connecting_to_broker();
+void setupMacAddress();
+#endif
 
 #ifndef OWIRE_DISABLE
 void Changed(int i, DeviceAddress addr, float currentTemp);
@@ -274,7 +287,7 @@ void saveFlash(short n, IPAddress& ip);
 int ipLoadFromFlash(short n, IPAddress &ip);
 */
 
-int loadConfigFromHttp();
+
 
 void preTransmission();
 
@@ -306,8 +319,6 @@ void printConfigSummary();
 
 void setupCmdArduino();
 
-void setupMacAddress();
-
 void printFirmwareVersionAndBuildOptions();
 
 bool IsThermostat(const aJsonObject *item);
@@ -316,13 +327,8 @@ bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLat
 
 void resetHard();
 
-void onInitialStateInitLAN();
-
-void ip_ready_config_loaded_connecting_to_broker();
 
 void printCurentLanConfig();
-
-void onMQTTConnect();
 
 int16_t attachMaturaTimer();
 

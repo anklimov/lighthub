@@ -596,7 +596,7 @@ itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
                               {
                                 long coldPercent = map (colorT,0,100,100,30); 
                                 long hotPercent  = map (colorT,0,100,30,100);
-                                int rgbvLevel;
+                                int rgbvLevel = 0;
 
                                 if (rgbSaturation < 128) { // Using white
                                                 param.w=map((127 - rgbSaturation) * rgbValue *hotPercent, 0, 127*255*100, 0, 255);

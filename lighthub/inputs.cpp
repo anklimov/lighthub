@@ -21,7 +21,9 @@ e-mail    anklimov@gmail.com
 #include "inputs.h"
 #include "item.h"
 #include "utils.h"
+#if not defined (NOIP)   
 #include <PubSubClient.h>
+#endif
 #include "main.h"
 #include "itemCmd.h"
 
@@ -37,8 +39,9 @@ e-mail    anklimov@gmail.com
 #include "Adafruit_MCP23X17.h"
 Adafruit_MCP23X17 mcp;
 #endif
-
+#if not defined (NOIP)   
 extern PubSubClient mqttClient;
+#endif
 extern aJsonObject *root;
 extern int8_t ethernetIdleCount;
 extern int8_t configLocked;
@@ -966,6 +969,7 @@ void Input::onContactChanged(int newValue) {
                           } else
 #endif
 {
+#if not defined (NOIP)    
 char addrstr[MQTT_TOPIC_LENGTH];
 strncpy(addrstr,emit->valuestring,sizeof(addrstr));
 if (mqttClient.connected() && !ethernetIdleCount)
@@ -980,6 +984,7 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
             else if (strlen(rcmd->valuestring))mqttClient.publish(addrstr, rcmd->valuestring, true);
         }
 }
+#endif //NOIP
   }
 } // emit
     if (item && item->type == aJson_String) {
@@ -1011,7 +1016,7 @@ void Input::onAnalogChanged(itemCmd newValue) {
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
 
-
+#if not defined (NOIP)
     if (emit && emit->type == aJson_String) {
 
 //#ifdef WITH_DOMOTICZ
@@ -1029,7 +1034,7 @@ void Input::onAnalogChanged(itemCmd newValue) {
               if (mqttClient.connected() && !ethernetIdleCount)
                   mqttClient.publish(addrstr, strVal, true);
 }
-
+#endif //NOIP
     if (item && item->type == aJson_String) {
         Item it(item->valuestring);
         if (it.isValid())  it.Ctrl(newValue);
@@ -1073,6 +1078,7 @@ readCache::readCache()
 {
    addr=0;
    type=0;
+   cached_data = 0;
 }
 
 uint16_t readCache::analogReadCached (uint8_t _pin)

@@ -76,8 +76,10 @@ WiFiClient ethClient;
     #endif
 
 #else
+#if not defined (NOIP)
 #include <Dhcp.h>
 EthernetClient ethClient;
+#endif //NOIP
 #endif
 
 #if defined(OTA)
@@ -156,7 +158,9 @@ volatile int8_t configLocked = 0;
 ModbusMaster node;
 #endif
 
+#if not defined (NOIP)   
 PubSubClient mqttClient(ethClient);
+#endif
 
 bool wifiInitialized;
 
@@ -401,6 +405,7 @@ int intopic;
   return 0; 
 }    
 
+#if not defined (NOIP)
 void mqttCallback(char *topic, byte *payload, unsigned int length) 
 {
     if (!payload || !length) {debugSerial<<F("\n")<<F("Empty: [")<<topic<<F("]")<<endl;return;}
@@ -489,6 +494,8 @@ void printMACAddress() {
 }
 }
 
+#endif //NOIP
+
 char* getStringFromConfig(aJsonObject * a, int i)
 {
 aJsonObject * element = NULL;
@@ -568,7 +575,7 @@ void setupSyslog()
   #endif
 }
 
-
+#if not defined (NOIP)
 lan_status lanLoop() {
 
     #ifdef NOETHER
@@ -1257,6 +1264,18 @@ if (WiFi.status() == WL_CONNECTED) {
 #endif //Ethernet
 }
 
+void printCurentLanConfig() {
+    infoSerial << F("Current LAN config(ip,dns,gw,subnet):");
+    printIPAddress(Ethernet.localIP());
+    #if not defined(ESP8266) and not defined(ESP32)
+    printIPAddress(Ethernet.dnsServerIP());
+    #endif
+    printIPAddress(Ethernet.gatewayIP());
+    printIPAddress(Ethernet.subnetMask());
+
+}
+
+#endif //NOIP
 
 void resetHard() {
 #ifdef RESET_PIN
@@ -1275,7 +1294,9 @@ void resetHard() {
 int cmdFunctionHelp(int arg_cnt, char **args)
 {
     printFirmwareVersionAndBuildOptions();
+    #if not defined (NOIP)
     printCurentLanConfig();
+    #endif
 //    printFreeRam();
     infoSerial<<F("\nUse these commands: 'help' - this text\n"
                           "'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM\n"
@@ -1296,16 +1317,7 @@ int cmdFunctionHelp(int arg_cnt, char **args)
 return 200;                            
 }
 
-void printCurentLanConfig() {
-    infoSerial << F("Current LAN config(ip,dns,gw,subnet):");
-    printIPAddress(Ethernet.localIP());
-    #if not defined(ESP8266) and not defined(ESP32)
-    printIPAddress(Ethernet.dnsServerIP());
-    #endif
-    printIPAddress(Ethernet.gatewayIP());
-    printIPAddress(Ethernet.subnetMask());
 
-}
 
 int cmdFunctionKill(int arg_cnt, char **args) {
     for (byte i = 1; i < 20; i++) {
@@ -1453,11 +1465,15 @@ setupSyslog();
 
     printConfigSummary();
 configLoaded=true;
+#if not defined (NOIP)   
 if (ethClient.connected()) 
                     {
                     ethClient.stop(); //Refresh MQTT connection
                     lanStatus=IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
                     }
+#else
+lanStatus=IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER; ///change
+#endif                    
 if (lanStatus == OPERATION_NO_MQTT) lanStatus=IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
 
 configLocked--;
@@ -1597,6 +1613,7 @@ infoSerial<<F("Serial debug level:")<<serialDebugLevel<<F("\nSyslog debug level:
 return res;
 }
 
+#if not defined (NOIP)
 int cmdFunctionIp(int arg_cnt, char **args)
 {
     IPAddress ip0(0, 0, 0, 0);
@@ -1648,31 +1665,6 @@ int cmdFunctionIp(int arg_cnt, char **args)
     //}
     infoSerial<<F("Saved\n");
     sysConf.setDHCPfallback(false);
-    return 200;
-}
-
-int cmdFunctionClearEEPROM(int arg_cnt, char **args){
-   #ifdef FS_STORAGE
-   if (SPIFFS.format()) infoSerial<<F("FS Formatted\n");
-   #endif
-   if (sysConf.clear()) infoSerial<<F("EEPROM cleared\n");
-       #if defined(FS_STORAGE)
-
-    sysConfStream.open("/config.json",'r');
-    #else
-    sysConfStream.open(FN_CONFIG_JSON,'r');
-    #endif
-    sysConfStream.putEOF();
-    sysConfStream.close();
-   return 200;
-}
-
-int cmdFunctionPwd(int arg_cnt, char **args)
-{ //char empty[]="";
-    if (arg_cnt)
-         sysConf.setMQTTpwd(args[1]);
-    else sysConf.setMQTTpwd();
-    infoSerial<<F("MQTT Password updated\n");
     return 200;
 }
 
@@ -1742,6 +1734,34 @@ errorSerial<<F("No IP adress")<<endl;
 return 500;
 }
 
+#endif //NOIP
+
+int cmdFunctionClearEEPROM(int arg_cnt, char **args){
+   #ifdef FS_STORAGE
+   if (SPIFFS.format()) infoSerial<<F("FS Formatted\n");
+   #endif
+   if (sysConf.clear()) infoSerial<<F("EEPROM cleared\n");
+       #if defined(FS_STORAGE)
+
+    sysConfStream.open("/config.json",'r');
+    #else
+    sysConfStream.open(FN_CONFIG_JSON,'r');
+    #endif
+    sysConfStream.putEOF();
+    sysConfStream.close();
+   return 200;
+}
+
+int cmdFunctionPwd(int arg_cnt, char **args)
+{ //char empty[]="";
+    if (arg_cnt)
+         sysConf.setMQTTpwd(args[1]);
+    else sysConf.setMQTTpwd();
+    infoSerial<<F("MQTT Password updated\n");
+    return 200;
+}
+
+
 void printBool(bool arg) { (arg) ? infoSerial<<F("+") : infoSerial<<F("-"); }
 
 const char * headerKeys[]={"ETag"};
@@ -1755,6 +1775,8 @@ void headerHandlerProc(String header)
             sysConf.setETAG(header);
         }
 } 
+
+#if not defined(NOIP)
 
 int loadConfigFromHttp()
 {
@@ -2012,6 +2034,8 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
         }
 #endif
 }
+
+#endif //NOIP
 
 void preTransmission() {
 #ifdef CONTROLLINO
@@ -2313,7 +2337,10 @@ while  ((digitalRead(CONFIG_CLEAN_PIN)==LOW) && !needClean)
 #endif
   //  Serial.print("Sig4=");
   //  Serial.println(FLASH_START[0],HEX); 
+
+#if not defined(NOIP)  
      setupMacAddress(); //тут почему-то не считывается из флэш
+#endif     
 
 #ifdef _modbus
         #ifdef CONTROLLINO
@@ -2334,7 +2361,7 @@ while  ((digitalRead(CONFIG_CLEAN_PIN)==LOW) && !needClean)
     //owReady = 0;
 
 
-
+#if not defined (NOIP)
     mqttClient.setCallback(mqttCallback);
 
 //#ifdef _artnet
@@ -2365,7 +2392,8 @@ WiFi.onEvent(WiFiEvent);
         infoSerial<<F("Use W5500 pin: ");
         infoSerial<<QUOTE(W5500_CS_PIN)<<endl;
     #endif
-        
+
+ #endif //NOIP       
         loadConfigFromEEPROM();    
 }
 
@@ -2582,6 +2610,7 @@ void publishStat(){
   char topic[64];
   char intbuf[16];
   uint32_t ut = millis()/1000UL;
+  #if not defined (NOIP)
   if (!mqttClient.connected()  || ethernetIdleCount) return;
     setTopic(topic,sizeof(topic),T_DEV);
     strncat_P(topic, stats_P, sizeof(topic)-1);
@@ -2601,7 +2630,7 @@ void publishStat(){
     strncat_P(topic, state_P, sizeof(topic)-1);
     strncpy_P(intbuf, ready_P, sizeof(intbuf)-1);
     mqttClient.publish(topic,intbuf,true);
-
+#endif //NOIP
 #ifdef CRYPT
     RNG.rand((uint8_t *) &cryptoSalt,sizeof(cryptoSalt));
     setTopic(topic,sizeof(topic),T_DEV);
@@ -2613,6 +2642,7 @@ void publishStat(){
 #endif    
 }
 
+#if not defined (NOIP)
 void setupMacAddress() {  
 //Check MAC, stored in NVRAM
 
@@ -2645,6 +2675,7 @@ if (!sysConf.getMAC()) {
     }
     printMACAddress();
 }
+#endif //NOIP
 
 void setupCmdArduino() {
     //cmdInit(uint32_t(SERIAL_BAUD));
@@ -2653,15 +2684,19 @@ void setupCmdArduino() {
     cmdAdd("help", cmdFunctionHelp);
     cmdAdd("save", cmdFunctionSave);
     cmdAdd("load", cmdFunctionLoad);
+#if not defined (NOIP)    
     cmdAdd("get", cmdFunctionGet);
 #ifndef FLASH_64KB
     cmdAdd("mac", cmdFunctionSetMac);
 #endif
+    cmdAdd("ip", cmdFunctionIp);
+    cmdAdd("otapwd", cmdFunctionOTAPwd);
+#endif //NOIP
     cmdAdd("kill", cmdFunctionKill);
     //cmdAdd("req", cmdFunctionReq);
-    cmdAdd("ip", cmdFunctionIp);
+
     cmdAdd("pwd", cmdFunctionPwd);
-    cmdAdd("otapwd", cmdFunctionOTAPwd);
+    
     cmdAdd("clear",cmdFunctionClearEEPROM);
     cmdAdd("reboot",cmdFunctionReboot);
     cmdAdd("log",cmdFunctionLoglevel);
@@ -2683,6 +2718,8 @@ void loop_main() {
     wdt_res();
     yield();
     cmdPoll();
+
+    #if not defined (NOIP)   
     if (lanLoop() > HAVE_IP_ADDRESS) { 
         mqttClient.loop();
 
@@ -2703,7 +2740,9 @@ void loop_main() {
         MDNS.update();
         #endif
 #endif
-    }
+   }
+#endif //NOIP
+ 
 
 #ifdef _owire
     yield();
@@ -2776,6 +2815,8 @@ inputLoop(CHECK_INPUT);
 if (initializedListeners) ipmodbusLoop();
 #endif
 }
+
+#if not defined (NOIP)   
 void ethernetIdle(void){
 ethernetIdleCount++;
     wdt_res();
@@ -2785,7 +2826,7 @@ ethernetIdleCount++;
     cmdPoll();
 ethernetIdleCount--;
 };
-
+#endif
 
 void modbusIdle(void) {
 
@@ -2796,10 +2837,11 @@ void modbusIdle(void) {
     yield();
     inputLoop(CHECK_INPUT);
 
+ #if not defined (NOIP)
     if (lanLoop() > HAVE_IP_ADDRESS) 
     { // Begin network runners
         yield();
-        mqttClient.loop();
+        mqttClient.loop();      
 #ifdef _artnet
         if (artnet && initializedListeners) artnet->read();
 #endif
@@ -2815,6 +2857,8 @@ void modbusIdle(void) {
         #endif
 #endif        
     } //End network runners
+
+#endif     
 
 #ifdef _dmxin
     DMXCheck();
@@ -3027,14 +3071,18 @@ void thermoLoop(void) {
                         if (isTimeOver(tStore.timestamp16,millisNZ(8) & 0xFFFF,PERIOD_THERMOSTAT_FAILED >> 8,0xFFFF))
                         {
                         errorSerial<<thermoItem->name<<F(" Alarm Expired\n");
+                        #if not defined (NOIP)
                         mqttClient.publish("/alarm/snsr", thermoItem->name);
+                        #endif
                         tStore.timestamp16=0; //Stop termostat
                         thermostat.setExt(tStore.asint);
                         thermoRelay(thermoPin,HEATER_ERROR);
                         }
                          else
                          { // Not expired yet
+                         #if not defined(NOIP)
                             if (curTemp > overHeatTemp) mqttClient.publish("/alarm/ovrht", thermoItem->name); 
+                         #endif   
 
                             if (!active) thermoRelay(thermoPin,HEATER_OFF);//OFF 
                                else if (curTemp < thermoSetting - THERMO_GIST_CELSIUS) thermoRelay(thermoPin,HEATER_HEAT);//ON

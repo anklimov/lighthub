@@ -10,7 +10,7 @@ extern aJsonObject * topics;
 class templateStream : public Stream
 {
 public:
-    templateStream(char *s, short sfx=0) : str(s), pos(0), val(NULL), valpos(0), bucket(0),suffix(sfx) { }
+    templateStream(char *s, short sfx=0) : str(s), pos(0), val(NULL), valpos(0), bucket(0),suffix(sfx) {buffer[0]='\0'; }
 
     // Stream methods
     virtual int available() { return str[pos]; }
