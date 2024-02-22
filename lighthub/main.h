@@ -206,6 +206,9 @@ extern Streamlog  errorSerial;
 #include "stdarg.h"
 #include "item.h"
 #include "inputs.h"
+#ifdef CANDRV
+#include <candriver.h>
+#endif
 
 #ifdef _artnet
 extern Artnet *artnet;
@@ -243,14 +246,16 @@ bool isNotRetainingStatus();
 
 #if not defined (NOIP)
 void mqttCallback(char *topic, byte *payload, unsigned int length);
-void printMACAddress();
 lan_status lanLoop();
 int loadConfigFromHttp();
 void onInitialStateInitLAN();
 void onMQTTConnect();
 void ip_ready_config_loaded_connecting_to_broker();
-void setupMacAddress();
+
 #endif
+
+void setupMacAddress();
+void printMACAddress();
 
 #ifndef OWIRE_DISABLE
 void Changed(int i, DeviceAddress addr, float currentTemp);

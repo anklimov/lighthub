@@ -1,3 +1,4 @@
+#pragma once
 #define SYSCONF_OFFSET 0
 #define EEPROM_offset_NotAlligned SYSCONF_OFFSET+sizeof(systemConfigData)
 #define SYSCONF_SIZE EEPROM_offsetJSON

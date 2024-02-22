@@ -368,6 +368,21 @@ uint32_t ReadUniqueID( uint32_t * pdwUniqueID )
    
     return  *(uint32_t *)(IFLASH1_ADDR + 128); // dont remove: SAM defect workaround - MPU dont leave Unique Identifier mode until read flash out UID of range 
     
+#elif defined(ARDUINO_ARCH_STM32)
+#define UID_BASE 0x1FFFF7E8
+
+uint16_t *idBase0 = (uint16_t*)(UID_BASE);
+uint16_t *idBase1 = (uint16_t*)(UID_BASE + 0x02);
+uint32_t *idBase2 = (uint32_t*)(UID_BASE + 0x04);
+uint32_t *idBase3 = (uint32_t*)(UID_BASE + 0x08);
+
+pdwUniqueID[0] = *idBase0;
+pdwUniqueID[1] = *idBase1;
+pdwUniqueID[2] = *idBase2;
+pdwUniqueID[3] = *idBase3;
+
+return 1;
+
 #else
 return 0;    
 #endif

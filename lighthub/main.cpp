@@ -67,6 +67,11 @@ static char syslogDeviceHostname[16];
 flashStream sysConfStream;
 systemConfig sysConf(&sysConfStream);
 
+
+#ifdef CANDRV
+canDriver LHCAN;
+#endif
+
 extern long  timer0_overflow_count;	 
 #ifdef WIFI_ENABLE
 WiFiClient ethClient;
@@ -104,7 +109,7 @@ const char verval_P[] PROGMEM = QUOTE(PIO_SRC_REV);
 char cryptoKey[] = QUOTE(SHAREDSECRET);
 #endif
 
-#if defined(__SAM3X8E__)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 UID UniqueID;
 #endif
 
@@ -482,7 +487,7 @@ else
  return;// -7;   
 }
 
-
+#endif //NOIP
 
 void printMACAddress() {
     //macAddress * mac = sysConf.getMAC();
@@ -494,7 +499,7 @@ void printMACAddress() {
 }
 }
 
-#endif //NOIP
+
 
 char* getStringFromConfig(aJsonObject * a, int i)
 {
@@ -1677,18 +1682,7 @@ int cmdFunctionOTAPwd(int arg_cnt, char **args)
     return 200;
 }
 
-int cmdFunctionSetMac(int arg_cnt, char **args) {
-    char dummy;
-    uint8_t mac[6];
-    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%c", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5], &dummy) < 6) {
-        errorSerial<<F("could not parse: ")<<args[1];
-        return 400;
-    }
-    sysConf.setMAC(mac);
-    printMACAddress();
-    infoSerial<<F("Updated\n");
-    return 200;
-}
+
 
 int cmdFunctionGet(int arg_cnt, char **args) {
 
@@ -1736,6 +1730,23 @@ return 500;
 
 #endif //NOIP
 
+int cmdFunctionSetMac(int arg_cnt, char **args) {
+    char dummy;
+    uint8_t mac[6];
+    if (sscanf(args[1], "%x:%x:%x:%x:%x:%x%c", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5], &dummy) < 6) {
+        errorSerial<<F("could not parse: ")<<args[1];
+        return 400;
+    }
+    sysConf.setMAC(mac);
+    printMACAddress();
+    
+    #ifdef CANDRV
+    LHCAN.lookupMAC();
+    #endif
+
+    infoSerial<<F("Updated\n");
+    return 200;
+}
 int cmdFunctionClearEEPROM(int arg_cnt, char **args){
    #ifdef FS_STORAGE
    if (SPIFFS.format()) infoSerial<<F("FS Formatted\n");
@@ -2319,7 +2330,7 @@ while  ((digitalRead(CONFIG_CLEAN_PIN)==LOW) && !needClean)
   serialDebugLevel=sysConf.getSerialDebuglevel();
   udpDebugLevel=sysConf.getUdpDebuglevel();
 
-   #if defined(__SAM3X8E__)
+   #if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
   memset(&UniqueID,0,sizeof(UniqueID));
   #endif
 
@@ -2338,9 +2349,10 @@ while  ((digitalRead(CONFIG_CLEAN_PIN)==LOW) && !needClean)
   //  Serial.print("Sig4=");
   //  Serial.println(FLASH_START[0],HEX); 
 
-#if not defined(NOIP)  
+
+//#if not defined(NOIP)  
      setupMacAddress(); //тут почему-то не считывается из флэш
-#endif     
+//#endif     
 
 #ifdef _modbus
         #ifdef CONTROLLINO
@@ -2394,7 +2406,12 @@ WiFi.onEvent(WiFiEvent);
     #endif
 
  #endif //NOIP       
-        loadConfigFromEEPROM();    
+loadConfigFromEEPROM();    
+
+#ifdef CANDRV
+LHCAN.begin();
+LHCAN.lookupMAC();
+#endif
 }
 
 void printFirmwareVersionAndBuildOptions() {
@@ -2584,15 +2601,21 @@ infoSerial<<F("\n(+)MERCURY");
 #else
 infoSerial<<F("\n(-)MERCURY");
 #endif
+
+#ifdef CANDRV
+infoSerial<<F("\n(+)CAN");
+#else
+infoSerial<<F("\n(-)CAN");
+#endif
 //#ifdef IPMODBUS
 //infoSerial<<F("\n(+)IPMODBUS");
 //#endif
 infoSerial<<endl;
 
 //    WDT_Disable( WDT ) ;
-#if defined(__SAM3X8E__)
+#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
 
-    debugSerial<<F("Reading 128 bits unique identifier")<<endl ;
+    debugSerial<<F("Reading unique identifier")<<endl ;
     ReadUniqueID( UniqueID.UID_Long ) ;
 
     infoSerial<< F ("ID: ");
@@ -2611,7 +2634,8 @@ void publishStat(){
   char intbuf[16];
   uint32_t ut = millis()/1000UL;
   #if not defined (NOIP)
-  if (!mqttClient.connected()  || ethernetIdleCount) return;
+  if (mqttClient.connected()  &&  !ethernetIdleCount) 
+  {
     setTopic(topic,sizeof(topic),T_DEV);
     strncat_P(topic, stats_P, sizeof(topic)-1);
     strncat(topic, "/", sizeof(topic));
@@ -2630,19 +2654,34 @@ void publishStat(){
     strncat_P(topic, state_P, sizeof(topic)-1);
     strncpy_P(intbuf, ready_P, sizeof(intbuf)-1);
     mqttClient.publish(topic,intbuf,true);
+  }
 #endif //NOIP
+
 #ifdef CRYPT
     RNG.rand((uint8_t *) &cryptoSalt,sizeof(cryptoSalt));
+    #if not defined (NOIP)
+    if (mqttClient.connected()  &&  !ethernetIdleCount) 
+   {
     setTopic(topic,sizeof(topic),T_DEV);
     //strncat_P(topic, stats_P, sizeof(topic)-1);
     //strncat(topic, "/", sizeof(topic));
     strncat_P(topic, salt_P, sizeof(topic)-1);
     printUlongValueToStr(intbuf, cryptoSalt);
     mqttClient.publish(topic,intbuf,true);
+   }
+    #endif
+
+    #ifdef CANDRV
+    LHCAN.salt(cryptoSalt);
+    #endif
 #endif    
+
+#ifdef CANDRV
+LHCAN.upTime(ut);
+#endif
 }
 
-#if not defined (NOIP)
+//#if not defined (NOIP)
 void setupMacAddress() {  
 //Check MAC, stored in NVRAM
 
@@ -2661,7 +2700,7 @@ if (!sysConf.getMAC()) {
     WiFi.begin();
     WiFi.macAddress(sysConf.mac);
 
-    #elif defined(__SAM3X8E__)
+    #elif defined(__SAM3X8E__) || defined(ARDUINO_ARCH_STM32)
     //Lets make MAC from MPU serial#
     sysConf.mac[0]=0xDE;
 
@@ -2674,8 +2713,12 @@ if (!sysConf.getMAC()) {
     #endif
     }
     printMACAddress();
+
+    #ifdef CANDRV
+   // LHCAN.lookupMAC();
+    #endif
 }
-#endif //NOIP
+//#endif //NOIP
 
 void setupCmdArduino() {
     //cmdInit(uint32_t(SERIAL_BAUD));
@@ -2757,9 +2800,8 @@ void loop_main() {
     if (items) {
         if (isNotRetainingStatus()) pollingLoop();
         yield();
-        thermoLoop();
     }
-
+    thermoLoop(); 
     yield();
     inputLoop(CHECK_INPUT);
 
@@ -2772,6 +2814,10 @@ void loop_main() {
 
 #ifdef IPMODBUS
 if (initializedListeners) ipmodbusLoop();
+#endif
+
+#ifdef CANDRV
+LHCAN.Poll();
 #endif
 
 }
@@ -2814,6 +2860,10 @@ inputLoop(CHECK_INPUT);
 #ifdef IPMODBUS
 if (initializedListeners) ipmodbusLoop();
 #endif
+
+#ifdef CANDRV
+LHCAN.Poll();
+#endif
 }
 
 #if not defined (NOIP)   
@@ -2836,6 +2886,10 @@ void modbusIdle(void) {
     cmdPoll();
     yield();
     inputLoop(CHECK_INPUT);
+
+#ifdef CANDRV
+    LHCAN.Poll();
+#endif   
 
  #if not defined (NOIP)
     if (lanLoop() > HAVE_IP_ADDRESS) 
@@ -3042,8 +3096,17 @@ void thermoLoop(void) {
 
  if (!isTimeOver(timerThermostatCheck,millis(),THERMOSTAT_CHECK_PERIOD))
         return;
+
+timerThermostatCheck = millis();// + THERMOSTAT_CHECK_PERIOD;
+publishStat();
+
+#ifndef DISABLE_FREERAM_PRINT
+    //(thermostatCheckPrinted) ? 
+    debugSerial<<F("RAM=")<<freeRam()<<F(" Locks:")<<configLocked<<F(" Timer:")<<timerCount<<endl;
+#endif
+ 
     if (!items) return;
-    bool thermostatCheckPrinted = false;
+    //bool thermostatCheckPrinted = false;
     configLocked++;
     for (aJsonObject *thermoItem = items->child; thermoItem; thermoItem = thermoItem->next) {
         if ((thermoItem->type == aJson_Array) && (aJson.getArrayItem(thermoItem, I_TYPE)->valueint == CH_THERMO)) 
@@ -3092,17 +3155,11 @@ void thermoLoop(void) {
                          }
                    }
                  else debugSerial<<F(" Expired\n");  
-                    thermostatCheckPrinted = true;  
+                 //   thermostatCheckPrinted = true;  
         } //item is termostat
     } //for
   configLocked--;
-    timerThermostatCheck = millis();// + THERMOSTAT_CHECK_PERIOD;
-publishStat();
-#ifndef DISABLE_FREERAM_PRINT
-    (thermostatCheckPrinted) ? debugSerial<<F("\nRAM=")<<freeRam()<<F(" Locks:")<<configLocked: debugSerial<<F(" ")<<freeRam()<<F(" Locks:")<<configLocked;
-     debugSerial<<F(" Timer:")<<timerCount<<endl;
-#endif
- 
+
 
 }
 
