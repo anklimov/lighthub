@@ -332,6 +332,7 @@ bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLat
 
 void resetHard();
 
+bool cleanConf(bool wait);
 
 void printCurentLanConfig();
 

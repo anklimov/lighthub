@@ -1,3 +1,4 @@
+#
 -DWIFI_ENABLE
 -DDMX_DISABLE
 # - exeption in DMX.update/begin
@@ -12,7 +13,7 @@
 -DARDUINO_OTA_MDNS_DISABLE
 -DMDNS_ENABLE 
 #- ArduinoMDNS didnt working
-
+-D CANDRV
 -DMCP23017
 -DMODBUS_TX_PIN=13
 #-DARTNET_ENABLE - udp rx errors ((

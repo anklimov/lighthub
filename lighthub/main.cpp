@@ -70,6 +70,7 @@ systemConfig sysConf(&sysConfStream);
 
 #ifdef CANDRV
 canDriver LHCAN;
+canStream CANConfStream(&LHCAN); 
 #endif
 
 extern long  timer0_overflow_count;	 
@@ -493,7 +494,7 @@ void printMACAddress() {
     //macAddress * mac = sysConf.getMAC();
     infoSerial<<F("MAC:");
     for (byte i = 0; i < 6; i++)
-{
+{ 
   if (sysConf.mac[i]<16) infoSerial<<"0";
         (i < 5) ?infoSerial<<_HEX(sysConf.mac[i])<<F(":"):infoSerial<<_HEX(sysConf.mac[i])<<endl;
 }
@@ -1571,6 +1572,44 @@ int loadConfigFromEEPROM()
     configLocked--;
     return 0;
 }
+
+
+int loadConfigFromCAN()
+{
+    if (configLocked) return 0;
+    configLocked++;
+
+    infoSerial<<F("Loading Config from CAN")<<endl;
+
+    CANConfStream.open(LHCAN.getControllerID(),payloadType::configFrame,'r');
+
+
+    if (CANConfStream.peek() == '{') {
+        debugSerial<<F("JSON detected")<<endl;
+        aJsonStream as = aJsonStream(&CANConfStream);
+        cleanConf(false);
+        root = aJson.parse(&as);
+        CANConfStream.close();
+        if (!root) {
+            errorSerial<<F("load failed")<<endl;
+            sysConf.setETAG("");
+        //    sysConfStream.close();
+            configLocked--;
+            return 0;
+        }
+        infoSerial<<F("Loaded from CAN")<<endl;
+        configLocked--;
+        applyConfig();
+        sysConf.loadETAG();
+
+        return 1;
+    } 
+    CANConfStream.close();   
+    infoSerial<<F("No stored config")<<endl;
+    configLocked--;
+    return 0;
+}
+
 
 int cmdFunctionSave(int arg_cnt, char **args)
 { 
