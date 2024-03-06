@@ -108,6 +108,7 @@ class Item
 
   Item(char * name);
   Item(aJsonObject * obj);
+  Item(uint16_t num);
   ~Item();
 
   boolean isValid ();

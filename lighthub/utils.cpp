@@ -33,6 +33,11 @@ extern int8_t ethernetIdleCount;
 #include <HardwareSerial.h>
 #include "templateStr.h"
 
+#ifdef CANDRV
+#include <candriver.h>
+extern canDriver LHCAN;
+#endif
+
 #ifdef CRYPT
 #include "SHA256.h"
 #endif
@@ -640,12 +645,13 @@ bool executeCommand(aJsonObject* cmd, int8_t toggle)
   return executeCommand(cmd,toggle,itemCmd());
 }
 
-bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd, aJsonObject* defaultItem, aJsonObject* defaultEmit)
+bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd, aJsonObject* defaultItem, aJsonObject* defaultEmit, aJsonObject* defaultCan)
 //bool executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
 {
 //char * legacyString =NULL;
 aJsonObject *item = NULL;
 aJsonObject *emit = NULL;
+aJsonObject *can = NULL;
 aJsonObject *icmd = NULL;
 aJsonObject *ecmd = NULL;
 char cmdType = 0;
@@ -660,7 +666,7 @@ switch (cmdType)
   aJsonObject * command = cmd->child;
   while (command)
           {
-          executeCommand(command,toggle,_itemCmd,defaultItem,defaultEmit);
+          executeCommand(command,toggle,_itemCmd,defaultItem,defaultEmit,defaultCan);
           command = command->next;
           }
   configLocked--;
@@ -674,8 +680,7 @@ switch (cmdType)
 
         item = aJson.getObjectItem(cmd, "item");
         emit = aJson.getObjectItem(cmd, "emit");
-    
-
+        can = aJson.getObjectItem(cmd, "can");
         switch (toggle)
             {
             case 0:
@@ -699,6 +704,7 @@ switch (cmdType)
     {
     if (!item) item = defaultItem;
     if (!emit) emit = defaultEmit;
+    if (!can) can = defaultCan;
 
     char * itemCommand = NULL;
     char Buffer[16];
@@ -733,7 +739,7 @@ switch (cmdType)
 
 
 
-
+  #if not defined (NOIP)
     if (emit && emitCommand && emit->type == aJson_String) {
 
     templateStream ts(emit->valuestring,suffix);
@@ -757,14 +763,14 @@ switch (cmdType)
 
    
     //strncpy(addrstr,emit->valuestring,sizeof(addrstr));
-    #if not defined (NOIP)
+  
     if (mqttClient.connected() && !ethernetIdleCount)
     {
     if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
     mqttClient.publish(addrstr, emitCommand , true);
     }
-    #endif
-    } // emit
+} // emit  
+    #endif //NOIP
 
     if (item &&  item->type == aJson_String) {
     //debugSerial <<F("Controlled item:")<< item->valuestring <<endl;
@@ -782,6 +788,16 @@ switch (cmdType)
             else it.Ctrl(_itemCmd);
         }
         }
+
+    #ifdef CANDRV
+
+    if (can)
+    {
+    if (itemCommand) LHCAN.sendCommand(can, itemCmd(itemCommand));
+            else LHCAN.sendCommand(can, _itemCmd);
+    } //else debugSerial << "Exec: noCan"<< endl;
+    #endif
+
     return true;
     }
 default:

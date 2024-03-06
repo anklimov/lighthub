@@ -111,8 +111,9 @@ class canDriver
 public:
 canDriver(){ready=false; controllerId=0; responseTimer=0; state=canState::Unknown;};
 uint8_t getMyId();
-bool sendStatus(char * itemName, itemCmd cmd);
-bool sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd);
+bool sendStatus(uint8_t itemNum, itemCmd cmd);
+bool sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool status=false);
+bool sendCommand(aJsonObject * can,itemCmd cmd, bool status = false);
 bool upTime(uint32_t ut);
 bool salt(uint32_t salt);
 bool lookupMAC();

@@ -94,6 +94,23 @@ itemCmd::itemCmd(Item *item)
   loadItem(item);
 }
 
+/*!
+     \brief Constructor with textual definition of command
+     \param cmd - name of cmd 
+todo - extend to values
+*/
+itemCmd::itemCmd(char * _cmd)
+{
+  cmd.aslong=0;
+  param.aslong=0;
+  cmd.itemArgType=ST_VOID;
+int i=0;
+while (_cmd[i]) {_cmd[i]=toupper(_cmd[i]);i++;};
+
+int cmdN = txt2cmd(_cmd);
+if (cmdN == CMD_UNKNOWN) return;
+cmd.cmdCode=cmdN;
+}
 
 itemCmd itemCmd::setChanType(short chanType)
 {
@@ -1196,8 +1213,14 @@ return false;
 
   int replaceTypeToInt(aJsonObject* verb)
   {
-   if (verb && verb->type == aJson_String) 
-    {
+    if (!verb) return -1;
+   switch (verb->type)
+   {
+      case aJson_Int: return verb->valueint;    
+      case aJson_Array: return replaceTypeToInt(verb->child);     
+      case aJson_Object:  return replaceTypeToInt(aJson.getObjectItem(verb, "type"));
+      case  aJson_String: 
+      {
       int type = type2num(verb->valuestring);
       if (type>=0)
           {
@@ -1206,7 +1229,9 @@ return false;
             verb->type=aJson_Int;
             return verb->valueint;
           }   
-    } else if (verb && verb->type == aJson_Int) return verb->valueint;
+      } 
+      break;
+   }          
    return -1; 
   }
 

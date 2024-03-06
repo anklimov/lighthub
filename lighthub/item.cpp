@@ -67,6 +67,11 @@ e-mail    anklimov@gmail.com
 #include "modules/out_humidifier.h"
 #endif
 
+#ifdef CANDRV
+#include <candriver.h>
+extern canDriver LHCAN;
+#endif
+
 short modbusBusy = 0;
 //bool isPendedModbusWrites = false;
 
@@ -315,7 +320,52 @@ Item::Item(char *name) //Constructor
     Parse();
 }
 
+uint8_t getCanNum(aJsonObject* verb)
+  {
+    if (!verb) return 0;
+   switch (verb->type)
+   {
+      case aJson_Array: 
+        {
+        aJsonObject *canNumObj=aJson.getArrayItem(verb,1);  
+        if (canNumObj->type == aJson_Int) return canNumObj->valueint;
+        return 0;   
+        }
+      case aJson_Object:  
+        {
+        aJsonObject *canNumObj=aJson.getObjectItem(verb, "can");  
+        if (canNumObj->type == aJson_Int) return canNumObj->valueint;
+        return 0;   
+        }    
+   }          
+   return 0; 
+  }
 
+ Item::Item(uint16_t num)
+ {
+
+    itemArr = NULL;
+    itemArg = NULL;
+    itemVal = NULL;  
+    itemExt = NULL;
+
+    driver = NULL;
+    defaultSubItem[0] =0;
+    defaultSuffixCode = 0;
+
+    if (!items) return;
+    itemArr = items->child;
+    while (itemArr)
+        {
+            if (getCanNum(itemArr->child) == num)
+                    {
+                        debugSerial<<"Find item: "<< itemArr->name << " addr:" << num << endl;
+                        Parse();
+                        return;
+                    }
+            itemArr = itemArr->next;
+        }
+ }
 uint8_t Item::getCmd() {
     aJsonObject *t = aJson.getArrayItem(itemArr, I_CMD);
     if (t)
@@ -1737,6 +1787,11 @@ int Item::SendStatus(int sendFlags) {
       char cmdstr[9] = "";
     //debugSerial<<"SSI "<<subItem<<endl;  
     st.debugOut();
+
+    #ifdef CANDRV
+    LHCAN.sendStatus(getCanNum(itemArr->child),st);
+    #endif
+
     if (sendFlags & FLAG_COMMAND)
     {
     // Preparing legacy Command payload  //////////////
@@ -1953,7 +2008,7 @@ int Item::SendStatus(int sendFlags) {
                 setFlag(sendFlags);
                 return 0;
                }
-              #endif 
+              #endif //NOIP
               }
         return 1;
     }

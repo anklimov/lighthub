@@ -35,6 +35,11 @@ e-mail    anklimov@gmail.com
 #endif
 #endif
 
+#ifdef CANDRV
+#include <candriver.h>
+extern canDriver LHCAN;
+#endif
+
 #ifdef MCP23017
 #include "Adafruit_MCP23X17.h"
 Adafruit_MCP23X17 mcp;
@@ -626,6 +631,7 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
   
   aJsonObject *defaultItem = aJson.getObjectItem(inputObj, "item");
   aJsonObject *defaultEmit = aJson.getObjectItem(inputObj, "emit");  
+  aJsonObject *defaultCan  = aJson.getObjectItem(inputObj, "can");    
 
   if (!defaultEmit && !defaultItem) defCmd.Cmd(CMD_VOID);
 
@@ -641,7 +647,7 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
   {
     store->state=newState;
     store->delayedState=false;
-    executeCommand(cmd,toggle,defCmd,defaultItem,defaultEmit);
+    executeCommand(cmd,toggle,defCmd,defaultItem,defaultEmit,defaultCan);
     return true;
   }
   else
@@ -954,7 +960,8 @@ void Input::onContactChanged(int newValue) {
 
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
-    if (!item && !emit) return;
+    aJsonObject *can = aJson.getObjectItem(inputObj,  "can"); 
+    if (!item && !emit && !can) return; 
     aJsonObject *scmd = aJson.getObjectItem(inputObj, "scmd");
     aJsonObject *rcmd = aJson.getObjectItem(inputObj, "rcmd");
     debugSerial << F("LEGACY IN:") << (pin) << F("=") << newValue << endl;
@@ -1002,6 +1009,22 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
             }
         }
     }
+
+    #ifdef CANDRV
+               
+            if (can)
+            {
+            if (newValue) {  //send set command
+                if (!scmd || scmd->type != aJson_String) LHCAN.sendCommand(can,itemCmd(ST_VOID,CMD_ON));
+                else if (strlen(scmd->valuestring))  LHCAN.sendCommand(can,itemCmd(scmd->valuestring));
+
+            } else {  //send reset command
+                if (!rcmd || rcmd->type != aJson_String) LHCAN.sendCommand(can,itemCmd(ST_VOID,CMD_OFF));
+                else if (strlen(rcmd->valuestring)) LHCAN.sendCommand(can,itemCmd(rcmd->valuestring));
+     
+            }
+            } 
+    #endif    
 }
 
 
@@ -1015,7 +1038,6 @@ void Input::onAnalogChanged(itemCmd newValue) {
     // Legacy
     aJsonObject *item = aJson.getObjectItem(inputObj, "item");
     aJsonObject *emit = aJson.getObjectItem(inputObj, "emit");
-
 #if not defined (NOIP)
     if (emit && emit->type == aJson_String) {
 
@@ -1039,6 +1061,13 @@ void Input::onAnalogChanged(itemCmd newValue) {
         Item it(item->valuestring);
         if (it.isValid())  it.Ctrl(newValue);
     }
+    
+    #ifdef CANDRV
+    aJsonObject *can  = aJson.getObjectItem(inputObj, "can");  
+    if (can) LHCAN.sendCommand(can, newValue); 
+    #endif
+
+       
 }
 
 

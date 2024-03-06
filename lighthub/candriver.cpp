@@ -348,8 +348,22 @@ if (id.status)
     }
 else //Requests
     {
+        if ((id.payloadType == payloadType::itemCommand) && (len ==8))
+            {
+                Item it(id.itemId);
+                if (it.isValid())
+                    {
+                        itemCmd ic;
+                        ic.cmd = packet->cmd;
+                        ic.param = packet->param;
 
-        if ((id.payloadType == payloadType::lookupMAC) && (len>=6))
+                        debugSerial<<F("CAN: received ");
+                        ic.debugOut();
+                        return it.Ctrl(ic);
+                    }
+               return false;
+            }
+        else if ((id.payloadType == payloadType::lookupMAC) && (len>=6))
             {             
                return sendRemoteID(packet->mac);
                //debugSerial<<"ID requested"<<endl;
@@ -497,13 +511,54 @@ bool canDriver::write(uint32_t msg_id, datagram_t * buf, uint8_t size)
 
 
 
-bool canDriver::sendStatus(char * itemName, itemCmd cmd)
+bool canDriver::sendStatus(uint8_t itemNum, itemCmd cmd)
 {
-
+ if (!itemNum) return false;
+ return sendCommand(controllerId, itemNum, cmd, true);
 }
-bool canDriver::sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd)
-{
 
+bool canDriver::sendCommand(aJsonObject * can,itemCmd cmd, bool status)
+{
+    debugSerial<<"CAN: sendCommand ";
+    cmd.debugOut();
+    
+     if (can && (can->type == aJson_Array))
+       {
+        aJsonObject * dev = aJson.getArrayItem(can,0);
+        aJsonObject * it = aJson.getArrayItem(can,1);
+        debugSerial<<dev->valueint << ":" << it->valueint<<endl;
+        if (dev && it && dev->type == aJson_Int && it->type == aJson_Int)
+            return sendCommand(dev->valueint, it->valueint, cmd, status); 
+       }  
+      return false;  
+}
+
+bool canDriver::sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool status)
+{
+    canid_t id;
+ datagram_t packet;
+ bool       res;
+
+
+ id.reserve=0;
+ id.status=status?1:0;
+ id.payloadType=payloadType::itemCommand;  
+ id.deviceId=devID;
+ id.itemId=itemID;
+ 
+ packet.cmd = cmd.cmd;
+ packet.param = cmd.param;
+ 
+ debugSerial << ((status)?"CAN: Status":"CAN: Command");
+ debugSerial<<F(" for dev:item ")<<devID<<":"<<itemID<<" "; 
+ cmd.debugOut();
+
+  res=write (id.id,&packet,8);
+
+ if (res) debugSerial<<F(" ok")<<endl;
+    else  debugSerial<<F(" fail")<<endl;
+
+ return res;
 }
 
 

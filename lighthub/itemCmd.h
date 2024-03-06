@@ -204,6 +204,7 @@ public:
   itemCmd(uint8_t _type=ST_VOID, uint8_t _code=CMD_VOID);
   itemCmd(float val);
   itemCmd(Item *item);
+  itemCmd(char *cmd);
 
   itemCmd assignFrom(itemCmd from, short chanType=-1);
 
