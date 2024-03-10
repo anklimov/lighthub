@@ -39,7 +39,8 @@ enum payloadType
     OTAFrame=4,
     auth=5,
     metric=6,
-    sysCmd=7
+    sysCmd=7,
+    rawPinCtrl=8
 };
 
 enum metricType

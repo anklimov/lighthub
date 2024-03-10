@@ -338,4 +338,7 @@ void printCurentLanConfig();
 
 int16_t attachMaturaTimer();
 
+void setFirstBroker();
+void setNextBroker();
+
 //void printFreeRam();
