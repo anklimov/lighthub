@@ -141,8 +141,9 @@ int txt2subItem(char *payload) {
 
 //const short defval[4] = {0, 0, 0, 0}; //Type,Arg,Val,Cmd
 
-Item::Item(aJsonObject *obj)//Constructor
+Item::Item(aJsonObject *obj, aJsonObject *_items)//Constructor
 {
+    rootItems=_items;
     itemArr = obj;
     driver = NULL;
     *defaultSubItem = 0;
@@ -291,13 +292,14 @@ Item::~Item()
               }
 }
 
-Item::Item(char *name) //Constructor
+Item::Item(char *name, aJsonObject *_items) //Constructor
 {
     char * pDefaultSubItem = defaultSubItem;
+    rootItems=_items;
     driver = NULL;
     defaultSubItem[0] =0;
     defaultSuffixCode = 0;
-    if (name && items)
+    if (name && rootItems)
     {   char* sub;
         if (sub=strchr(name,'/'))
         {
@@ -306,7 +308,7 @@ Item::Item(char *name) //Constructor
         for(i=0;(name[i] && (name[i]!='/') && (i<MQTT_SUBJECT_LENGTH));i++)
             buf[i]=name[i];
         buf[i]=0;
-        itemArr = aJson.getObjectItem(items, buf);
+        itemArr = aJson.getObjectItem(rootItems, buf);
         sub++;
         strncpy(defaultSubItem,sub,sizeof(defaultSubItem)-1);
         defaultSuffixCode = retrieveCode (&pDefaultSubItem);
@@ -314,7 +316,7 @@ Item::Item(char *name) //Constructor
         //debugSerial<<F("defaultSubItem: ")<<defaultSubItem<<F(" defaultSuffixCode:")<<defaultSuffixCode<<endl;
         }
         else
-        itemArr = aJson.getObjectItem(items, name);
+        itemArr = aJson.getObjectItem(rootItems, name);
     }
     else itemArr = NULL;
     Parse();
@@ -341,20 +343,21 @@ uint8_t getCanNum(aJsonObject* verb)
    return 0; 
   }
 
- Item::Item(uint16_t num)
+ Item::Item(uint16_t num, aJsonObject *_items)
  {
 
     itemArr = NULL;
     itemArg = NULL;
     itemVal = NULL;  
     itemExt = NULL;
+    rootItems=_items;
 
     driver = NULL;
     defaultSubItem[0] =0;
     defaultSuffixCode = 0;
 
-    if (!items) return;
-    itemArr = items->child;
+    if (!rootItems) return;
+    itemArr = rootItems->child;
     while (itemArr)
         {
             if (getCanNum(itemArr->child) == num)
@@ -778,7 +781,7 @@ return 0;
 // Recursive function with small stack consumption
 // if cmd defined - execute Ctrl for any group members recursively
 // else performs Activity check for group members and return true if any member is active 
-bool digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem, bool authorized)
+bool Item::digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem, bool authorized)
 {    if (!itemArr || itemArr->type!=aJson_Array) return false; 
      // Iterate across array of names
       aJsonObject *i = itemArr->child;                                        
@@ -786,7 +789,7 @@ bool digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem, bool authorize
                 while (i) {
                     if (i->type == aJson_String)
                     {   //debugSerial<< i->valuestring<<endl;
-                        aJsonObject *nextItem = aJson.getObjectItem(items, i->valuestring);
+                        aJsonObject *nextItem = aJson.getObjectItem(rootItems, i->valuestring);
                         if (nextItem && nextItem->type == aJson_Array) //nextItem is correct item
                                {    
                                 Item it(nextItem);  
@@ -1789,7 +1792,7 @@ int Item::SendStatus(int sendFlags) {
     st.debugOut();
 
     #ifdef CANDRV
-    LHCAN.sendStatus(getCanNum(itemArr->child),st);
+    if (!(sendFlags & FLAG_NOT_SEND_CAN)) LHCAN.sendStatus(getCanNum(itemArr->child),st);
     #endif
 
     if (sendFlags & FLAG_COMMAND)
@@ -2501,7 +2504,7 @@ int Item::checkModbusDimmer() {
                 nextItem.checkModbusDimmer(data);
                 pollingItem = pollingItem->next;
                 if (!pollingItem)
-                    pollingItem = items->child;
+                    pollingItem = rootItems->child;
             }
     } else
         debugSerial << F("MB: polling ") << itemArr->name<< F(" error=") << _HEX(result) << endl;

@@ -98,17 +98,17 @@ extern aJsonObject *items;
 extern short thermoSetCurTemp(char *name, float t);
 
 int txt2cmd (char * payload);
-bool digGroup (aJsonObject *itemArr, itemCmd *cmd = NULL, char* subItem = NULL, bool authorized = false);
+
 class Item
 {
   public:
-  aJsonObject *itemArr, *itemArg,*itemVal,*itemExt;
+  aJsonObject *rootItems, *itemArr, *itemArg,*itemVal,*itemExt;
   uint8_t itemType;
   abstractOut * driver;
 
-  Item(char * name);
-  Item(aJsonObject * obj);
-  Item(uint16_t num);
+  Item(char * name, aJsonObject *_items = items);
+  Item(aJsonObject * obj, aJsonObject *_items = items);
+  Item(uint16_t num, aJsonObject *_items = items);
   ~Item();
 
   boolean isValid ();
@@ -148,7 +148,9 @@ class Item
   int scheduleOppositeCommand(itemCmd cmd,bool isActiveNow,bool authorized);
   int isScheduled();
 
+
   protected:
+  bool digGroup (aJsonObject *itemArr, itemCmd *cmd = NULL, char* subItem = NULL, bool authorized = false);
   long int limitSetValue();
   int VacomSetFan (itemCmd st);
   int VacomSetHeat(itemCmd st);

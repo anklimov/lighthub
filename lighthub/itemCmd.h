@@ -119,7 +119,7 @@ const ch_type ch_type_P[] PROGMEM =
 #define FLAG_HALTED 0x40000UL
 #define FLAG_XON 0x80000UL
 
-
+#define FLAG_NOT_SEND_CAN 0x2UL
 
 int txt2cmd (char * payload);
 

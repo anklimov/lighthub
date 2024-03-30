@@ -766,7 +766,9 @@ switch (cmdType)
   
     if (mqttClient.connected() && !ethernetIdleCount)
     {
-    if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
+    if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring); ///ChangeMe - if no '/' in addr - template not working
+    
+    debugSerial << F("MQTT: ")<<addrstr<< F(" -> ")<<emitCommand<<endl;  
     mqttClient.publish(addrstr, emitCommand , true);
     }
 } // emit  

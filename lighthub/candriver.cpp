@@ -8,7 +8,7 @@
 
 #if defined(ARDUINO_ARCH_STM32)
 #include <STM32_CAN.h>
-STM32_CAN STMCan( CAN1, ALT, RX_SIZE_64, TX_SIZE_16 );
+STM32_CAN STMCan( CAN1, CAN_PINS::DEF, RX_SIZE_64, TX_SIZE_16 );
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -24,6 +24,7 @@ extern systemConfig sysConf;
 extern canStream CANConfStream; 
 extern aJsonObject * root;
 extern volatile int8_t configLocked;
+extern bool configLoaded;
 
 
 void printFrame(datagram_t * frame, uint8_t len ) {
@@ -163,6 +164,13 @@ bool canDriver::begin()
 
             #if defined(__SAM3X8E__)
             Can0.begin(CAN_BPS_125K);
+
+              int filter;
+            //extended
+            for (filter = 0; filter < 3; filter++) {
+	            Can0.setRXFilter(filter, 0, 0, true);
+	            //Can1.setRXFilter(filter, 0, 0, true);
+            }  
             #endif
 
             debugSerial<<"CAN initialized"<<endl;
@@ -232,11 +240,16 @@ int canDriver::readFrame()
 
                 //DUE
                 #if defined(__SAM3X8E__)
-                CAN_FRAME incoming;
+                CAN_FRAME CAN_RX_msg;
                 if (Can0.available() > 0) {
-                                                Can0.read(incoming); 
-                                                printFrame(incoming);
-                                            }
+                                            
+                                                Can0.read(CAN_RX_msg); 
+                                                if (CAN_RX_msg.length>8) CAN_RX_msg.length=8;
+                                                memcpy(RXpacket.data, CAN_RX_msg.data.bytes,CAN_RX_msg.length);
+                                                RXlen = CAN_RX_msg.length;
+                                                RXid.id  = CAN_RX_msg.id;
+                                                return RXlen;
+                                            } 
 
                 #endif
 
@@ -263,8 +276,10 @@ switch (state)
     break;
 
     case canState::Error:
-        if (isTimeOver(responseTimer,millis(),10000UL)) 
-        lookupMAC();
+        if (configLoaded) state=canState::ConfigLoaded;
+           else 
+                if (isTimeOver(responseTimer,millis(),10000UL)) 
+                     lookupMAC();
     break;
 
     case canState::ReadConfig:
@@ -314,13 +329,51 @@ bool canDriver::processPacket(canid_t id, datagram_t *packet, uint8_t len, bool 
 {
 
 debugSerial.print("CAN Received ");
-debugSerialPort.print(len);
-debugSerialPort.print(" bytes id 0x");
-debugSerialPort.println(id.id,HEX);
+debugSerial.print(len);
+debugSerial.print(" bytes id 0x");
+debugSerial.print(id.id,HEX);
 
 if (len) printFrame(packet,len);
-if (id.status)
+if (id.status){
     //Responces
+    //@ any state
+    switch (id.payloadType)
+    {
+        case payloadType::itemCommand:
+        {
+        if (len!=8) return false;    
+        aJsonObject  *confObj = findConfbyID(id.deviceId);
+        if (confObj)
+            {
+                debugSerial<<F("CAN: status received for dev ")<<id.deviceId<<endl;
+                //char * itemNName = findItemName(id.itemId);
+                aJsonObject  *itemsObj = aJson.getObjectItem(confObj,"items");
+                if (!itemsObj) return false;;
+                Item it(id.itemId, itemsObj);
+                if (it.isValid())
+                    {
+                        itemCmd ic;
+                        uint16_t flags = 0;
+                        ic.cmd = packet->cmd;
+                        ic.param = packet->param;
+
+                        debugSerial<<F("CAN: item ")<<it.itemArr->name;
+                        ic.debugOut();
+                        
+                        if (ic.isCommand()) flags |= FLAG_COMMAND;
+                        if (ic.isValue()) flags |= FLAG_PARAMETERS;
+                        ic.saveItem(&it,flags);
+                        it.SendStatusImmediate(ic,flags | FLAG_NOT_SEND_CAN);
+                        return true;
+                    }
+
+            }
+
+        }    
+        break;
+        
+    }
+
     switch (state)
     {
         case canState::MACLookup:
@@ -346,8 +399,19 @@ if (id.status)
         case canState::Error:
         return false;
     }
+}   
 else //Requests
     {
+        /*
+            switch (id.payloadType)
+    {
+            case payloadType::itemCommand:
+            break;
+
+            case payloadType::sysCmd:
+            break;
+        
+    }*/
         if ((id.payloadType == payloadType::itemCommand) && (len ==8))
             {
                 Item it(id.itemId);
@@ -439,7 +503,7 @@ uint8_t canDriver::getIdByMac(macAddress mac)
    memset(macStr,0,sizeof(macStr));
    for (byte i = 0; i < 6; i++)
 {
-  if (mac[i]<16) macStr[strptr++]='0';
+ // if (mac[i]<16) macStr[strptr++]='0';
 
   SetBytes(&mac[i],1,&macStr[strptr]);
   strptr+=2;
@@ -494,16 +558,16 @@ bool canDriver::write(uint32_t msg_id, datagram_t * buf, uint8_t size)
                 #endif
 
                 #if defined(__SAM3X8E__)
-                CAN_FRAME outGoting;
-	            outgoing.id = 0x400;
-                outgoing.extended = true;
-                outgoing.priority = 4; //0-15 lower is higher priority
-                
-                outgoing.data.s0 = 0xFEED;
-                outgoing.data.byte[2] = 0xDD;
-                outgoing.data.byte[3] = 0x55;
-                outgoing.data.high = 0xDEADBEEF;
-                Can0.sendFrame(outgoing);
+                CAN_FRAME CAN_TX_msg;
+	            CAN_TX_msg.id = msg_id;
+                CAN_TX_msg.extended = true;
+                CAN_TX_msg.length=size;
+                //outgoing.priority = 4; //0-15 lower is higher priority
+                if (buf) for(uint8_t i=0;i<size; i++) CAN_TX_msg.data.bytes[i]=buf->data[i];
+                res=Can0.sendFrame(CAN_TX_msg);
+                if (res) debugSerial<<("CAN Wrote ")<<size<<" bytes, id "<<_HEX(msg_id)<<endl;
+                                                    else debugSerial.println("CAN Write error");
+                return res;
                 #endif
         }
     
@@ -519,8 +583,10 @@ bool canDriver::sendStatus(uint8_t itemNum, itemCmd cmd)
 
 bool canDriver::sendCommand(aJsonObject * can,itemCmd cmd, bool status)
 {
-    debugSerial<<"CAN: sendCommand ";
-    cmd.debugOut();
+// debugSerial<<"CAN: ";
+//    if (status) debugSerial<<F("sendStatus ");
+//        else debugSerial<<F("sendCommand ");
+//    cmd.debugOut();
     
      if (can && (can->type == aJson_Array))
        {
@@ -549,7 +615,7 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool st
  packet.cmd = cmd.cmd;
  packet.param = cmd.param;
  
- debugSerial << ((status)?"CAN: Status":"CAN: Command");
+ debugSerial << ((status)?"CAN: send Status":"CAN: send Command");
  debugSerial<<F(" for dev:item ")<<devID<<":"<<itemID<<" "; 
  cmd.debugOut();
 

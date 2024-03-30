@@ -93,7 +93,7 @@ typedef union {
 
 enum canState
 {
-Unknown,
+stateUnknown,
 MACLookup,
 Idle,
 StreamOpenedWrite,
@@ -110,7 +110,7 @@ Error
 class canDriver 
 {
 public:
-canDriver(){ready=false; controllerId=0; responseTimer=0; state=canState::Unknown;};
+canDriver(){ready=false; controllerId=0; responseTimer=0; state=canState::stateUnknown;};
 uint8_t getMyId();
 bool sendStatus(uint8_t itemNum, itemCmd cmd);
 bool sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool status=false);
@@ -139,6 +139,11 @@ private:
     CAN_message_t CAN_RX_msg;
     CAN_message_t CAN_TX_msg;
     #endif
+
+    #if defined(__SAM3X8E__)
+    //CAN_FRAME CAN_RX_msg;
+    #endif
+
     bool ready;
     
 
@@ -156,7 +161,7 @@ extern aJsonObject * topics;
 class canStream : public Stream
 {
 public:
-    canStream(canDriver * _driver) : readPos(0),writePos(0),devId(0), pType(payloadType::unknown),state(canState::Unknown){driver=_driver; }
+    canStream(canDriver * _driver) : readPos(0),writePos(0),devId(0), pType(payloadType::unknown),state(canState::stateUnknown){driver=_driver; }
     int open(uint8_t controllerID, payloadType _pType, char _mode) 
                 {  
                     if (mode) close();
@@ -171,7 +176,7 @@ public:
                 {
                     if ((mode == 'w') && writePos) flush();
                     mode = '\0';
-                    state=canState::Unknown;
+                    state=canState::stateUnknown;
                     return 1;
                 }
 
