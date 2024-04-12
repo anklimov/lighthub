@@ -98,6 +98,7 @@ extern aJsonObject *items;
 extern short thermoSetCurTemp(char *name, float t);
 
 int txt2cmd (char * payload);
+int txt2subItem(char *payload);
 
 class Item
 {

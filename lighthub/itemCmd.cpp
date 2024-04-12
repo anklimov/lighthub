@@ -101,15 +101,78 @@ todo - extend to values
 */
 itemCmd::itemCmd(char * _cmd)
 {
+  //debugSerial<<"ITEMCMD:" <<_cmd<<endl;
   cmd.aslong=0;
   param.aslong=0;
-  cmd.itemArgType=ST_VOID;
-int i=0;
-while (_cmd[i]) {_cmd[i]=toupper(_cmd[i]);i++;};
 
-int cmdN = txt2cmd(_cmd);
-if (cmdN == CMD_UNKNOWN) return;
-cmd.cmdCode=cmdN;
+  short i=0;
+  int Par[4];
+
+  while (_cmd[i]) {_cmd[i]=toupper(_cmd[i]);i++;};
+
+  int cmdN = txt2cmd(_cmd);
+  if (cmdN>=0) cmd.cmdCode = cmdN;
+
+  bool hsvflag=false;
+
+  switch (cmd.cmdCode) {
+      case CMD_HSV: 
+        hsvflag=true;
+      case CMD_RGB:
+
+        cmd.cmdCode=CMD_VOID;
+        //Parsing integers from payload
+        i = 0;
+
+         while (_cmd && i < 4)
+                Par[i++] = getIntFromStr((char **) &_cmd);
+
+         if (hsvflag)
+         {
+         setSuffix(S_HSV); 
+         cmd.itemArgType=ST_HSV255;
+         switch (i) //Number of params
+                {
+                  case 4:
+                      setColorTemp(Par[3]);
+                  case 3:
+                      param.v=Par[2]; 
+                  case 2:
+                      setH(Par[0]);
+                      setS(Par[1]);
+                } 
+         }
+         else 
+         { 
+         setSuffix(S_RGB); 
+         switch (i) //Number of params
+                  {
+                    case 3: RGB(Par[0],Par[1],Par[2]);
+                    break;
+                    case 4: RGBW(Par[0],Par[1],Par[2],Par[3]);
+                    default:;
+                  }
+         }
+
+      break;
+
+  //    case CMD_UNKNOWN: //Not known command
+  //    case CMD_JSON: //JSON input (not implemented yet
+  //    cmd.cmdCode=CMD_VOID;
+  //    break;
+
+      default: //some known command
+      //case CMD_VOID:
+      //case CMD_UP:
+      //case CMD_DN:    
+     {    
+     itemCmd num =getNumber((char **) &_cmd);  
+     cmd.itemArgType=num.getArgType();
+     param.aslong=num.param.aslong;
+     if (cmd.cmdCode) setSuffix(S_CMD);
+     }
+  } //switch
+  //debugOut();
 }
 
 itemCmd itemCmd::setChanType(short chanType)

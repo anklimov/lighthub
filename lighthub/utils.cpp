@@ -110,7 +110,7 @@ return !err;
 
 // chan is pointer to pointer to string
 // Function return first retrived integer and move pointer to position next after ','
-long getInt(char **chan) {
+long getIntFromStr(char **chan) {
     if (chan && *chan && **chan)
     {
     //Skip non-numeric values

@@ -148,6 +148,7 @@ volatile unsigned long timerCount=0;
 volatile int16_t  timerNumber=-1;
 volatile int8_t   timerHandlerBusy=0;
 volatile uint32_t cryptoSalt=0;
+volatile uint32_t ultrasonicInputCheck=0;
 //uint32_t timerCtr=0;
 
 aJsonObject *pollingItem = NULL;
@@ -778,14 +779,30 @@ lan_status lanLoop() {
            lanStatus=READ_RE_CONFIG;
              break;
 
+       case AWAITING_CONFIG: 
+           if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_REINIT_NOT_CONFIGURED))
+                                                    lanStatus=DO_REINIT;
+             break;             
+
        case READ_RE_CONFIG: // Restore config from FLASH, re-init LAN
-            if (loadConfigFromEEPROM()) lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
-              else 
+            switch (loadConfigFromEEPROM()) 
+            {
+              case 1: lanStatus = IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
+                break;
+
+              case -1: //Temporary busy
                  if (isTimeOver(timerLanCheckTime,millis(),TIMEOUT_RELOAD))
                  {
                     errorSerial<<F("30s EEPROM is not reloaded. Reboot");
                     softRebootFunc();
                  }
+                 break;
+                case 0: 
+                lanStatus = AWAITING_CONFIG;
+                timerLanCheckTime = millis();
+                break;
+
+             }    
             break;
 
         case DO_GET:
@@ -1558,7 +1575,7 @@ lanStatus=DO_READ_RE_CONFIG;
 
 int loadConfigFromEEPROM()
 {
-    if (configLocked) return 0;
+    if (configLocked) return -1;
     configLocked++;
 
     infoSerial<<F("Loading Config from EEPROM")<<endl;
@@ -2957,13 +2974,21 @@ void inputLoop(short cause) {
 inputLoopBusy++;
 
 configLocked++;
+    bool needCheckUltrasonic = false;
     //if (millis() > timerInputCheck) 
     if (isTimeOver(timerInputCheck,millis(),INTERVAL_CHECK_INPUT))
     {
+    if ((cause != CHECK_INTERRUPT) && isTimeOver(ultrasonicInputCheck,millis(),INTERVAL_CHECK_ULTRASONIC)) needCheckUltrasonic=true;
+  
         aJsonObject *input = inputs->child;
 
         while (input) {
             if (input->type == aJson_Object)  {
+                 
+                 Input in(input);
+                 in.Poll(cause);
+                 if (needCheckUltrasonic) in.Poll(CHECK_ULTRASONIC);
+
                 // Check for nested inputs
                 aJsonObject * inputArray = aJson.getObjectItem(input, "act");
                 if  (inputArray && (inputArray->type == aJson_Array))
@@ -2974,6 +2999,7 @@ configLocked++;
                         {
                           Input in(inputObj,input);
                           in.Poll(cause);
+                          if (needCheckUltrasonic) in.Poll(CHECK_ULTRASONIC);
 
                           //yield();
                           inputObj = inputObj->next;
@@ -2982,14 +3008,16 @@ configLocked++;
                     }
                 else
                 {
-                 Input in(input);
-                 in.Poll(cause);
+                 //Input in(input);
+                 //in.Poll(cause);
+                 //if (needCheckUltrasonic) in.Poll(CHECK_ULTRASONIC);
                 }
             }
             //yield();
             input = input->next;
         }
-        if (cause != CHECK_INTERRUPT) timerInputCheck = millis();// + INTERVAL_CHECK_INPUT;
+        if (cause != CHECK_INTERRUPT) timerInputCheck = millis();
+        if (needCheckUltrasonic) {ultrasonicInputCheck = millis(); needCheckUltrasonic=false;}
         inCache.invalidateInputCache();
     }
 configLocked--;

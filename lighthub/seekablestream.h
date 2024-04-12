@@ -22,7 +22,7 @@ virtual unsigned int seek(unsigned int _pos = 0) = 0;
 virtual int     open(String _filename, char mode) = 0; 
 virtual void    close() = 0;
 virtual uint16_t getContentType() {return contentType;};
-virtual void    putEOF() {if (textMode) write (EOFchar);};
+virtual void    putEOF() {if (textMode) {write (EOFchar);textMode=false;}};
 };
 
 #endif

@@ -53,7 +53,7 @@ void PrintBytes(uint8_t* addr, uint8_t count, bool newline);
 void SetBytes(uint8_t* addr, uint8_t count, char * out);
 bool SetAddr(char * in,  uint8_t* addr);
 uint8_t HEX2DEC(char i, bool* err);
-long getInt(char ** chan);
+long getIntFromStr(char **chan);
 itemCmd getNumber(char ** chan);
 unsigned long  freeRam ();
 void parseBytes(const char* str, char separator, byte* bytes, int maxBytes, int base);

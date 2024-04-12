@@ -44,6 +44,14 @@ extern canDriver LHCAN;
 #include "Adafruit_MCP23X17.h"
 Adafruit_MCP23X17 mcp;
 #endif
+
+#ifdef ULTRASONIC
+#define US_TRIG  PA_14   //pin49
+#define US_ECHO  PA_15   //pin50 
+#include "Ultrasonic.h" 
+Ultrasonic ultrasonic(US_TRIG, US_ECHO);
+#endif
+
 #if not defined (NOIP)   
 extern PubSubClient mqttClient;
 #endif
@@ -107,6 +115,7 @@ void Input::Parse(aJsonObject * configObj)
     store = NULL;
     inType = 0;
     pin = 0;
+    pin2 =0;
 
     if (!inputObj || !root) return;
     if (!configObj) configObj = inputObj;
@@ -118,10 +127,25 @@ void Input::Parse(aJsonObject * configObj)
         if (itemBuffer) inType = static_cast<uint8_t>(itemBuffer->valueint);
 
         itemBuffer = aJson.getObjectItem(configObj, "#");
-        if (itemBuffer) pin = static_cast<uint8_t>(itemBuffer->valueint);
-           else pin = static_cast<uint8_t>(atoi(configObj->name));
-        }
+        if (itemBuffer) 
+                switch (itemBuffer->type)
+                    {
+                    case aJson_Int:    
+                    pin = static_cast<uint8_t>(itemBuffer->valueint);
+                    
+                    break;   
+                    case aJson_Array:
+                    if ((itemBuffer->child) && (itemBuffer->child->type == aJson_Int)) 
+                        {
+                            pin = static_cast<uint8_t>(itemBuffer->child->valueint);
+                            if ((itemBuffer->child->child) && (itemBuffer->child->child->type == aJson_Int)) 
+                                pin = static_cast<uint8_t>(itemBuffer->child->child->valueint);
+                        }
 
+                    } //switch
+        else pin = static_cast<uint8_t>(atoi(configObj->name));
+
+        }
         // Persistant storage
         itemBuffer = aJson.getObjectItem(inputObj, "@S");
         if (!itemBuffer) {
@@ -135,8 +159,10 @@ void Input::Parse(aJsonObject * configObj)
 
 void cleanStore(aJsonObject * input)
 {
-if (input->type == aJson_Object)  {
+if (input && (input->type == aJson_Object))  {
     // Check for nested inputs
+     Input in(input);
+     in.store->aslong = 0;
     aJsonObject * inputArray = aJson.getObjectItem(input, "act");
     if  (inputArray && (inputArray->type == aJson_Array))
         {
@@ -153,9 +179,8 @@ if (input->type == aJson_Object)  {
         }
     else
     {
-     Input in(input);
-     in.store->aslong = 0;
-     //in.Poll(CHECK_INPUT);
+  //   Input in(input);
+  //   in.store->aslong = 0;
     }
 }
 }
@@ -266,6 +291,14 @@ switch (cause)  {
       case IN_HDC1080:
       break;
     }
+    break;
+  case CHECK_ULTRASONIC:
+            switch (inType)
+            {
+                case IN_ULTRASONIC:
+                analogPoll(cause);
+                contactPoll(cause);
+            }
     break;
     case CHECK_SENSOR: //Slow polling
     switch (inType)
@@ -528,7 +561,8 @@ debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") <<
 #endif
 
 // TODO Polling via timed interrupt with CHECK_INTERRUPT cause
-bool Input::changeState(uint8_t newState, short cause)
+bool Input::
+changeState(uint8_t newState, short cause)
 {
 if (!inputObj ||  !store) return false;
 
@@ -666,8 +700,11 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
 static volatile uint8_t contactPollBusy = 0;
 
 void Input::contactPoll(short cause) {
-    boolean currentInputState;
+    bool currentInputState;
+
     if (!store /*|| contactPollBusy*/) return;
+    if ((inType == IN_ULTRASONIC) && (cause!=CHECK_ULTRASONIC)) return;
+
     contactPollBusy++;
 
     changeState(IS_REQSTATE,cause); //Check for postponed states transitions
@@ -684,9 +721,9 @@ if (inType & IN_I2C)
     currentInputState = (inCache.I2CReadBit(IN_I2C,0,pin) == inputOnLevel);
 else
 #endif
-    if (isAnalogPin(pin) && (mapObj=aJson.getObjectItem(inputObj, "map")) && mapObj->type == aJson_Array)
+    if ((isAnalogPin(pin) || (inType == IN_ULTRASONIC)) && (mapObj=aJson.getObjectItem(inputObj, "map")) && mapObj->type == aJson_Array)
       {
-       int value = inCache.analogReadCached(pin);
+       int value = inCache.analogReadCached(pin,pin2,inType);
        if (value >= aJson.getArrayItem(mapObj, 0)->valueint && value <= aJson.getArrayItem(mapObj, 1)->valueint)
           currentInputState = true;
         else  currentInputState = false;
@@ -801,7 +838,7 @@ if (cause != CHECK_INTERRUPT) switch (store->state) //Timer based transitions
            //     onContactChanged(currentInputState); //Legacy input - to remove later
 
           bool res = true;
-          if (currentInputState)  //Button pressed state transitions
+          if (currentInputState)  //Button pressed state transitions  
 
                 switch (store->state)
                 {
@@ -896,7 +933,7 @@ void Input::analogPoll(short cause) {
 
     pinMode(pin, inputPinMode);
 */
-    inputVal = inCache.analogReadCached(pin);
+    inputVal = inCache.analogReadCached(pin,pin2,inType);
     // Mapping
     if (inputMap && inputMap->type == aJson_Array)
      {
@@ -1110,8 +1147,18 @@ readCache::readCache()
    cached_data = 0;
 }
 
-uint16_t readCache::analogReadCached (uint8_t _pin)
+uint16_t readCache::analogReadCached (uint8_t _pin, uint8_t trigPin, uint8_t _type )
 {
+#ifdef ULTRASONIC    
+if (_type == IN_ULTRASONIC)
+{
+ if ((_pin==addr) && (IN_ULTRASONIC == type)) return cached_data; 
+  type = IN_ULTRASONIC;
+  cached_data=ultrasonic.read();  
+  //debugSerial<<F("LEN: ")<<cached_data<<endl;
+  return cached_data;
+}
+#endif  
   if ((_pin==addr) && (IN_ANALOG==type)) return cached_data;
   addr = _pin;
   type = IN_ANALOG;

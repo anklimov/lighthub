@@ -232,7 +232,8 @@ enum lan_status {
     DO_NOTHING = -15,
     DO_GET = -16,
     GET = -17,
-    GET_IN_PROGRESS = 18
+    GET_IN_PROGRESS = 18,
+    AWAITING_CONFIG = 19
 };
 
 extern lan_status lanStatus;

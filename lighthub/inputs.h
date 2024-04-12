@@ -33,6 +33,7 @@ e-mail    anklimov@gmail.com
 #define IN_DHT22         4
 #define IN_CCS811        5
 #define IN_HDC1080       6
+#define IN_ULTRASONIC    7
 
 #define IN_COUNTER       8
 #define IN_UPTIME       16
@@ -62,6 +63,7 @@ e-mail    anklimov@gmail.com
 #define CHECK_SENSOR 1
 #define CHECK_INPUT  2
 #define CHECK_INTERRUPT 3
+#define CHECK_ULTRASONIC 4
 
 
 #define T_LONG 1000
@@ -134,6 +136,7 @@ public:
     aJsonObject *inputObj;
     uint8_t inType;
     uint8_t pin;
+    uint8_t pin2;
     inStore *store;
 
     Input(aJsonObject *obj, aJsonObject * configObj = NULL);
@@ -188,11 +191,12 @@ protected:
 class readCache {
 public:
   readCache();
-  uint16_t analogReadCached (uint8_t pin);
+  uint16_t analogReadCached (uint8_t pin, uint8_t trigPin=0, uint8_t _type = IN_ANALOG);
   uint8_t  digitalReadCached(uint8_t pin);
   #ifdef MCP23017
   uint8_t  I2CReadBit(uint8_t type, uint8_t addr, uint8_t pin);
   #endif
+
   void invalidateInputCache();
 protected:
   uint8_t   addr;

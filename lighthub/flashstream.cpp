@@ -237,7 +237,7 @@ NRFFlashStorage EEPROM;
                         {            
                            samBufferPos = 0;
                            EEPROM.write(startPos+pos-sizeof(samBuffer),(byte*)samBuffer,sizeof(samBuffer));     
-                                         
+
                         }
            
                samBuffer[samBufferPos++]=ch;

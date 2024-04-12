@@ -703,7 +703,7 @@ st.setSuffix(suffixCode);
 
           int Par[3];        
           while (payload && k < 3)
-              Par[k++] = getInt((char **) &payload);
+              Par[k++] = getIntFromStr((char **) &payload);
           i=i+k; //i=total # of parameters
           switch(suffixCode)
               {case S_HUE:
@@ -748,7 +748,7 @@ st.setSuffix(suffixCode);
          short i = 0;
          int Par[4];
          while (payload && i < 4)
-             Par[i++] = getInt((char **) &payload);
+             Par[i++] = getIntFromStr((char **) &payload);
 
          switch (i) //Number of params
          {
@@ -770,7 +770,7 @@ st.setSuffix(suffixCode);
           }
       default: //some known command
       {
-      int32_t intParam = getInt((char **) &payload);
+      int32_t intParam = getIntFromStr((char **) &payload);
       if (intParam) st.Int(intParam);
       return Ctrl(st,NULL, true, authorized);
       }

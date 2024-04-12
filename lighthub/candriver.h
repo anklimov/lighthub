@@ -118,7 +118,7 @@ bool sendCommand(aJsonObject * can,itemCmd cmd, bool status = false);
 bool upTime(uint32_t ut);
 bool salt(uint32_t salt);
 bool lookupMAC();
-bool requestFrame(uint8_t devId, payloadType _payloadType );
+bool requestFrame(uint8_t devId, payloadType _payloadType, uint16_t seqNo );
 int  readFrame();
 bool sendRemoteID(macAddress mac);
 bool begin();
@@ -161,13 +161,15 @@ extern aJsonObject * topics;
 class canStream : public Stream
 {
 public:
-    canStream(canDriver * _driver) : readPos(0),writePos(0),devId(0), pType(payloadType::unknown),state(canState::stateUnknown){driver=_driver; }
+    canStream(canDriver * _driver) : readPos(0),writePos(0),devId(0), pType(payloadType::unknown),state(canState::stateUnknown),seqNo(0),failedCount(0){driver=_driver; }
     int open(uint8_t controllerID, payloadType _pType, char _mode) 
                 {  
                     if (mode) close();
                     devId=controllerID; 
                     pType = _pType; 
                     mode = _mode;
+                    seqNo=0xFFFF;
+                    failedCount=0;
                     if (mode == 'w') state=canState::StreamOpenedWrite;
                         else state=canState::StreamOpenedRead;
                     return 1;
@@ -194,7 +196,7 @@ public:
 
 
 private:
-    int send(uint8_t len);
+    int send(uint8_t len, uint16_t _seqNo);
     int checkState();
     canDriver * driver;
     unsigned int readPos;
@@ -203,6 +205,8 @@ private:
     datagram_t writeBuffer;
 
     uint8_t devId;
+    uint16_t seqNo;
+    int8_t failedCount;
     char mode;
     payloadType pType;   
     canState state; 
