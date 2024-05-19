@@ -13,4 +13,4 @@ REM remove blank
 SET COMPORT=%COMX: =%
 
 
-..\tools\win\tool-avrdude\avrdude -C ..\tools\win\tool-avrdude\avrdude.conf -c arduino -P %COMPORT% -b 19200 -p m16u2 -vvv -U flash:w:16u2.hex:i
+..\tools\win\tool-avrdude\avrdude -C ..\tools\win\tool-avrdude\avrdude.conf -c arduino -P %COMPORT% -b 19200 -p m16u2 -vvv -U flash:w:Arduino-usbserial.hex:i

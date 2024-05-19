@@ -373,6 +373,14 @@
 #define PROTECTED_PINS
 #endif
 
+#if not defined DEFAULT_OTA_USERNAME 
+#define DEFAULT_OTA_USERNAME arduino
+#endif
+
+#if not defined DEFAULT_OTA_PASSWORD 
+#define DEFAULT_OTA_PASSWORD password
+#endif
+
 const short protectedPins[]={PROTECTED_PINS};
 #define protectedPinsNum (sizeof(protectedPins)/sizeof(short))
 

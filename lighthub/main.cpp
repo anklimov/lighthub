@@ -528,7 +528,7 @@ if (element && element->type == aJson_String) return element->valuestring;
 }
 
 #ifdef OTA
-    const char defaultPassword[] PROGMEM = "password";
+    const char defaultPassword[] PROGMEM = QUOTE(DEFAULT_OTA_PASSWORD);
     void setupOTA(void)
     {       char passwordBuf[16];
             if (!sysConf.getOTApwd(passwordBuf, sizeof(passwordBuf))) 
@@ -538,7 +538,7 @@ if (element && element->type == aJson_String) return element->valuestring;
                         }
 
             debugSerial<<passwordBuf<<endl;            
-            ArduinoOTA.begin(Ethernet.localIP(), "Lighthub", passwordBuf, InternalStorage, sysConfStream);
+            ArduinoOTA.begin(Ethernet.localIP(), QUOTE(DEFAULT_OTA_USERNAME), passwordBuf, InternalStorage, sysConfStream);
             ArduinoOTA.setCustomHandler(httpHandler);
             infoSerial<<F("OTA initialized\n");
 
@@ -1294,7 +1294,9 @@ if (WiFi.status() == WL_CONNECTED) {
         mdns.removeAllServiceRecords();
 
         char txtRecord[32] = "\x10mac=";
+        memset(txtRecord+5,0,sizeof(txtRecord)-5);
         SetBytes(sysConf.mac,6,txtRecord+5);
+        //txtRecord[17]=0;
        
         strncat(mdnsName,"._http",sizeof(mdnsName));
         if (!mdns.addServiceRecord(mdnsName, OTA_PORT, MDNSServiceTCP, txtRecord))  
