@@ -47,7 +47,7 @@ protected:
     itemCmd  findRegister(uint16_t registerNum, uint16_t posInBuffer, uint8_t regType, uint16_t registerFrom, uint16_t registerTo, bool doExecution = true, bool * submitParam = NULL);
     void pollModbus(aJsonObject * reg, int regType);
     void initLine();
-    int  sendModbus(char * paramName, int32_t value, uint8_t regType);
+    int  sendModbus(char * paramName, aJsonObject * outValue);
     int  sendItemCmd(aJsonObject *templateParamObj, itemCmd cmd);
 };
 #endif

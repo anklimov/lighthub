@@ -171,7 +171,7 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
       if (store->alarmArmed) debugSerial << F(" <ALM>"); 
       debugSerial<<endl;
       
-      if (((abs(store->output-store->prevOut)>OUTPUT_TRESHOLD) || (item->getFlag(FLAG_ACTION_NEEDED))) && !store->alarmArmed)
+      if (( (NOT_FILTER_PID_OUT || (abs(store->output-store->prevOut)>OUTPUT_TRESHOLD))  || (item->getFlag(FLAG_ACTION_NEEDED))) && !store->alarmArmed)
           { 
             aJsonObject * oCmd = aJson.getArrayItem(item->itemArg, 1);
 

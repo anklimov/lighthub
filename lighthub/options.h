@@ -1,6 +1,10 @@
 #pragma once
 #include <Arduino.h>
 
+#ifndef NOT_FILTER_PID_OUT
+#define NOT_FILTER_PID_OUT 1
+#endif
+
 #define DHCP_ATTEMPTS_FALLBACK 3
 #define TENS_FRACT_LEN 2
 #define TENS_BASE 100
@@ -84,10 +88,17 @@
 //#define T_ATTEMPTS 200
 //#define IET_TEMP     0
 //#define IET_ATTEMPTS 1
-
+#ifndef THERMO_GIST_CELSIUS
 #define THERMO_GIST_CELSIUS 1.
+#endif
+
+#ifndef THERMO_OVERHEAT_CELSIUS
 #define THERMO_OVERHEAT_CELSIUS 38.
+#endif
+
+#ifndef FM_OVERHEAT_CELSIUS
 #define FM_OVERHEAT_CELSIUS 40.
+#endif
 
 #ifndef MIN_VOLUME
 #define MIN_VOLUME 20

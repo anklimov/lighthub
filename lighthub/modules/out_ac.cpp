@@ -23,6 +23,8 @@ extern bool disableCMD;
 #define AC_UNKNOWN CST_UNKNOWN
 #define AC_IDLE    CST_INITIALIZED
 #define AC_SENDING CST_USER
+#define AC_AWAITINGCMD CST_USER+1
+#define AC_POLL CST_USER+2
 
 //byte inCheck = 0;
 byte qstn[] = {255,255,10,0,0,0,0,0,1,1,77,1,90}; // Команда опроса
@@ -237,6 +239,7 @@ SubmitParameters("fan",icmd);
   if (!(store->power & 0x01)) {strcpy_P(s_buffer,OFF_P);icmd.Cmd(CMD_OFF);}
   publishTopic(item->itemArr->name, s_buffer,"/cmd");
   SubmitParameters("cmd",icmd);
+
  /* 
   if (store->power & 0x01)
       publishTopic(item->itemArr->name, s_buffer,"/cmd");
@@ -393,16 +396,46 @@ case AC_SENDING:
                                             store->timestamp=millisNZ();
                                             }
       }
+break;      
+case AC_AWAITINGCMD: //Flusing port for 5 sec, poll status
+      
+      if (store->timestamp && isTimeOver(store->timestamp,millis(),5000)) 
+                                            {
+                                            setStatus(AC_POLL);
+                                            store->timestamp=millisNZ();
+                                            store->inCheck=0;
+                                            debugSerial<<F("AC: Unmute")<<endl;
+                                            } 
+     while(ACSerial->available())
+      {
+      delay(2);
+      ACSerial->read();
+      }
+    return true;  
+     
+ case AC_IDLE:
+     if (store->timestamp && isTimeOver(store->timestamp,millis(),INTERVAL_AC_POLLING)) setStatus(AC_POLL);
+     if (cause!=POLLING_SLOW) return false;
+     break;
+
+ case AC_POLL:
+    if (cause!=POLLING_SLOW) return false; 
+    
+    debugSerial.println(F("AC: Polling"));
+    SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
+    store->timestamp=millisNZ();
+    setStatus(AC_IDLE);
+    
 }
 
-if (cause!=POLLING_SLOW) return false;
+/*if (cause!=POLLING_SLOW) return false;
 
   if ((Status() == AC_IDLE) && isTimeOver(store->timestamp,millis(),INTERVAL_AC_POLLING)) 
   {
     debugSerial.println(F("AC: Polling"));
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
-
+*/
   if(ACSerial->available() >= 37){ //was 0
     ACSerial->readBytes(store->data, 37);
     while(ACSerial->available()){
@@ -468,7 +501,10 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute, bool authorized)
 
       case S_CMD:
      // s_mode[0]='\0';
-            store->inCheck=0;
+            
+            store->timestamp=millisNZ(); 
+            setStatus(AC_AWAITINGCMD);
+
             switch (cmd.getCmd())
                 {
                   case CMD_ON:
@@ -476,7 +512,7 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute, bool authorized)
                       store->data[B_POWER] = store->power;
                       store->data[B_POWER] |= 1;
                       SendData(on, sizeof(on)/sizeof(byte));
-                   //   publishTopic(item->itemArr->name,"ON","/cmd");
+                      //publishTopic(item->itemArr->name,"ON","/cmd"); //
                       return 1;
                   break;
                   case CMD_OFF:
@@ -484,7 +520,7 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute, bool authorized)
                       store->data[B_POWER] = store->power;
                       store->data[B_POWER] &= ~1;
                       SendData(off, sizeof(off)/sizeof(byte));
-                   //   publishTopic(item->itemArr->name,"OFF","/cmd");
+                      publishTopic(item->itemArr->name,"OFF","/cmd"); //
                       return 1;
                   break;
                   case CMD_AUTO:
@@ -532,62 +568,63 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute, bool authorized)
 
       case S_FAN:
       s_speed[0]='\0';
-      switch (cmd.getCmd())
-      {
-      case CMD_AUTO:
-      store->data[B_FAN_SPD] = 3;
-      strcpy_P(s_speed,AUTO_P);
-      break;
-      case CMD_HIGH:
-      store->data[B_FAN_SPD] = 0;
-      strcpy_P(s_speed,HIGH_P);
-      break;
-      case CMD_MED:
-      store->data[B_FAN_SPD] = 1;
-      strcpy_P(s_speed,MED_P);
-      break;
-      case CMD_LOW:
-      store->data[B_FAN_SPD] = 2;
-      strcpy_P(s_speed,LOW_P);
-      break;
-      case CMD_OFF:
-                      store->inCheck=0;
-                      store->data[B_POWER] = store->power;
-                      store->data[B_POWER] &= ~1;
-                      SendData(off, sizeof(off)/sizeof(byte));
-      return 1;
-      default:
-      {
-      uint8_t speed = 0;
-      if (cmd.getInt()) speed =  map(cmd.getInt(),1,255,1,3);
-      store->inCheck=0;
-      switch (speed) {
-        case 0:
-                      store->data[B_POWER] = store->power;
-                      store->data[B_POWER] &= ~1;
-                      SendData(off, sizeof(off)/sizeof(byte));
-        return 1;
-        case 1:
-            store->data[B_FAN_SPD] = 2;
-            strcpy_P(s_speed,LOW_P);
-            store->data[B_POWER] = store->power;
-            store->data[B_POWER] |= 1;
-        break;
-        case 2:
-              store->data[B_FAN_SPD] = 1;
-              strcpy_P(s_speed,MED_P);
-              store->data[B_POWER] = store->power;
-              store->data[B_POWER] |= 1;
-        break;
-        case 3:
-              store->data[B_FAN_SPD] = 0;
-              strcpy_P(s_speed,HIGH_P);  
-              store->data[B_POWER] = store->power;
-              store->data[B_POWER] |= 1;    
-      }
-      }
-      //TODO - mapping digits to speed
-      }
+                  switch (cmd.getCmd())
+                  {
+                  case CMD_AUTO:
+                  store->data[B_FAN_SPD] = 3;
+                  strcpy_P(s_speed,AUTO_P);
+                  break;
+                  case CMD_HIGH:
+                  store->data[B_FAN_SPD] = 0;
+                  strcpy_P(s_speed,HIGH_P);
+                  break;
+                  case CMD_MED:
+                  store->data[B_FAN_SPD] = 1;
+                  strcpy_P(s_speed,MED_P);
+                  break;
+                  case CMD_LOW:
+                  store->data[B_FAN_SPD] = 2;
+                  strcpy_P(s_speed,LOW_P);
+                  break;
+                  case CMD_OFF:
+                                  store->inCheck=0;
+                                  store->timestamp=millisNZ(); 
+                                  store->data[B_POWER] = store->power;
+                                  store->data[B_POWER] &= ~1;
+                                  SendData(off, sizeof(off)/sizeof(byte));
+                  return 1;
+                  default:
+                  {
+                  uint8_t speed = 0;
+                  if (cmd.getInt()) speed =  map(cmd.getInt(),1,255,1,3);
+                  store->inCheck=0;
+                  switch (speed) {
+                    case 0:
+                                  store->data[B_POWER] = store->power;
+                                  store->data[B_POWER] &= ~1;
+                                  SendData(off, sizeof(off)/sizeof(byte));
+                    return 1;
+                    case 1:
+                        store->data[B_FAN_SPD] = 2;
+                        strcpy_P(s_speed,LOW_P);
+                        store->data[B_POWER] = store->power;
+                        store->data[B_POWER] |= 1;
+                    break;
+                    case 2:
+                          store->data[B_FAN_SPD] = 1;
+                          strcpy_P(s_speed,MED_P);
+                          store->data[B_POWER] = store->power;
+                          store->data[B_POWER] |= 1;
+                    break;
+                    case 3:
+                          store->data[B_FAN_SPD] = 0;
+                          strcpy_P(s_speed,HIGH_P);  
+                          store->data[B_POWER] = store->power;
+                          store->data[B_POWER] |= 1;    
+                  }
+                  }
+                  //TODO - mapping digits to speed
+                  }
       publishTopic(item->itemArr->name,s_speed,"/fan");
       break;
 

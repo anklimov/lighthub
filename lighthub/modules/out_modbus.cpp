@@ -60,45 +60,6 @@ const reg_t regSize_P[] PROGMEM =
 } ;
 #define regSizeNum sizeof(regSize_P)/sizeof(reg_t)
 
-/*
-const serial_t serialModes_P[] PROGMEM =
-{
-  { "8E1", (serialParamType) SERIAL_8E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
-  { "8N1", (serialParamType) SERIAL_8N1},
-  { "8E2", (serialParamType) SERIAL_8E2},
-  { "8N2", (serialParamType) SERIAL_8N2},
-  { "8O1", (serialParamType) SERIAL_8O1},
-  { "8O2", (serialParamType) SERIAL_8O2},
-//  { "8M1", SERIAL_8M1},
-//  { "8S1", SERIAL_8S1},
-  { "7E1", (serialParamType) SERIAL_7E1},//(uint16_t) US_MR_CHRL_8_BIT | US_MR_NBSTOP_1_BIT | UART_MR_PAR_EVEN },
-  { "7N1", (serialParamType) SERIAL_7N1},
-  { "7E2", (serialParamType) SERIAL_7E2},
-  { "7N2", (serialParamType) SERIAL_7N2},
-  { "7O1", (serialParamType) SERIAL_7O1},
-  { "7O2", (serialParamType) SERIAL_7O2}
-//  { "7M1", SERIAL_7M1},
-//  { "7S1", SERIAL_7S1}
-} ;
-
-#define serialModesNum sizeof(serialModes_P)/sizeof(serial_t)
-
-serialParamType  str2SerialParam(char * str)
-{ debugSerial<<str<<F(" =>");
-  for(uint8_t i=0; i<serialModesNum && str;i++)
-      if (strcmp_P(str, serialModes_P[i].verb) == 0)
-           {
-
-           //debugSerial<< i << F(" ") << pgm_read_word_near(&serialModes_P[i].mode)<< endl;
-           if (sizeof(serialModesNum)==4)
-             return pgm_read_dword_near(&serialModes_P[i].mode);
-           else 
-             return pgm_read_word_near(&serialModes_P[i].mode);
-         }
-  debugSerial<< F("Default serial mode N81 used");
-  return static_cast<serialParamType> (SERIAL_8N1);
-}
-*/
 uint16_t swap (uint16_t x) {return  ((x & 0xff) << 8) | ((x & 0xff00) >> 8);}
 
 int  str2regSize(char * str)
@@ -223,6 +184,7 @@ switch (regType) {
         break;
     default:
         debugSerial<<F("MBUS: Not supported reg type\n");
+        return false;
  }
 mbusSlenceTimer = millisNZ(); 
 if (result != node.ku8MBSuccess) errorSerial<<F("MBUS: Polling error ")<<_HEX(result)<<endl;
@@ -347,7 +309,19 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                       mappedParam = findRegister(defMappingObj->valueint,defMappingObj->valueint-registerFrom,regType,registerFrom,registerTo,false,&submitRecurrentOut);
                                       executeWithoutCheck=true;
                                       }
-                                  else errorSerial<<F("reg# out of range")<<endl;    
+                                  else 
+                                  {
+                                  debugSerial<<F("def reg# ")<<defMappingObj->valueint<<F(" out of range buffer, fetching")<<endl;    
+                                  ////to prevent CORRUPTION if using same buffer
+                                  uint16_t localBuffer;
+                                  node.setResponseBuffer(&localBuffer,1);
+                                  if (readModbus(defMappingObj->valueint,regType,1))
+                                    {
+                                      mappedParam = findRegister(defMappingObj->valueint,0,regType,defMappingObj->valueint,defMappingObj->valueint,false,&submitRecurrentOut);
+                                      executeWithoutCheck=true;
+                                    }
+                                  node.setDefaultResponseBuffer();                                   
+                                  }
 
                                 break;
                                 case aJson_String: // parameter name
@@ -358,8 +332,6 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                       aJsonObject *itemParObj = aJson.getObjectItem(itemParametersObj,defMappingObj->valuestring);
                                       if (itemParObj) 
                                           {
-                                            //aJsonObject * markObj = execObj;
-                                            //if (execObj->type == aJson_Array) markObj = execObj->child;  
                                             //Retrive previous data
                                             aJsonObject *lastMeasured = aJson.getObjectItem(itemParObj,"@S");
                                             if (lastMeasured && lastMeasured->type ==aJson_Int)
@@ -417,37 +389,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                 break;
                                }
                              }                          
-/*
-                          aJsonObject *nextRegObj = NULL;  
-                          int registerType = 0;
-                          
-                          nextRegObj = aJson.getObjectItem(paramObj, "nextreg");
-                          if (nextRegObj) registerType=MODBUS_HOLDING_REG_TYPE;           
-                          else 
-                            {
-                            nextRegObj =  aJson.getObjectItem(paramObj, "nextir");
-                            if (nextRegObj) registerType=MODBUS_INPUT_REG_TYPE;
-                              else 
-                              {
-                              nextRegObj =  aJson.getObjectItem(paramObj, "nextcoil");
-                              if (nextRegObj) registerType=MODBUS_COIL_REG_TYPE;
-                                 else 
-                                  {
-                                  nextRegObj =  aJson.getObjectItem(paramObj, "nextdin");
-                                  if (nextRegObj) registerType=MODBUS_DISCRETE_REG_TYPE;
-                                  }
-                              }      
-                            }
-                                
-                          if (registerType && nextRegObj && (nextRegObj->type) ==aJson_Int && (nextRegObj->valueint>= registerFrom) && (nextRegObj->valueint<=registerTo))  
-                                  { 
-                                  debugSerial<<F("Recurrent searching nextreg")<<endl;   
-                                  mappedParam = findRegister(nextRegObj->valueint,nextRegObj->valueint-registerFrom,registerType,registerFrom,registerTo,false,&submitRecurrentOut);
-                                  executeWithoutCheck=true;
-                                  }
-                          else errorSerial<<F("nextreg out of range")<<endl;    
-       */                   
-                          }  
+             }  
                         else   
                            traceSerial << F("MBUSD: Mapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
                     } //mapping       
@@ -481,6 +423,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                                   else  
                                                         {
                                                         lastMeasured->valueint=param;
+                                                        traceSerial<<"MBUS: Stored "<<param<<" to @S of "<<paramObj->name<<endl;
                                                         lastMeasured->subtype&=~MB_VALUE_OUTDATED;
                                                         }
                                                   }
@@ -495,7 +438,12 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                        if (executeWithoutCheck)
                                             {
                                             
-                                            if (doExecution && (submitRecurrentOut || *submitParam)) executeCommand(execObj, -1, mappedParam); 
+                                            if (doExecution && (submitRecurrentOut || *submitParam)) 
+                                                  {
+                                                  executeCommand(execObj, -1, mappedParam); 
+                                                  *submitParam=true; //if requrrent check has submit smth - report it.  
+                                                  }
+                                                
                                             return mappedParam;  
                                             }
 
@@ -518,6 +466,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                       }
                                       }
                           }
+                    //if (submitRecurrentOut) *submitParam=true; //if requrrent check has submit smth - report it.      
                     return mappedParam;
                     }
             paramObj=paramObj->next;
@@ -582,7 +531,7 @@ void out_Modbus::initLine()
     node.begin(item->getArg(0), modbusSerial);
 }
 
-int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
+int out_Modbus::sendModbus(char * paramName, aJsonObject * outValue)
 {
  if (!store) {errorSerial<<F(" internal send error - no store")<<endl; return -1;}
 
@@ -595,45 +544,118 @@ int out_Modbus::sendModbus(char * paramName, int32_t value, uint8_t regType)
     {  
     regObj = aJson.getObjectItem(templateParamObj, "coil");
     if (!regObj) {errorSerial<<F(" internal send error - no reg/coil")<<endl; return -2;}
-       else regType = PAR_COIL;
+       else outValue->subtype = PAR_COIL;
     } 
+ if (regObj->type != aJson_Int) {errorSerial<<F(" Reg/coil must be int")<<endl; return -2;}   
+
+ aJsonObject * prefetchObj = aJson.getObjectItem(templateParamObj, "prefetch");
+ aJsonObject *lastMeasured =  NULL;
 
  int res = -1;
 
-// int8_t    regType = PAR_I16;
-// aJsonObject * typeObj = aJson.getObjectItem(templateParamObj, "type");
-// if (typeObj && typeObj->type == aJson_String) regType=str2regSize(typeObj->valuestring);
+if (prefetchObj && (prefetchObj->type == aJson_Boolean) && prefetchObj->valuebool) 
+                                      {
+                                                      int modbusRegType =  (outValue->subtype == PAR_COIL) ? MODBUS_COIL_REG_TYPE:MODBUS_HOLDING_REG_TYPE;
+                                                      debugSerial<<F("\nMBUS: prefetching ")<<paramName<<F(" #") <<regObj->valueint << " type:" << modbusRegType << " "; 
 
-                    switch(regType) {
+                                                      /// to prevent CORRUPTIOIN if using same buffer
+                                                      uint16_t localBuffer;
+                                                      node.setResponseBuffer(&localBuffer,1);
+
+                                                      bool successRead = readModbus(regObj->valueint,modbusRegType,1);
+                                                      
+
+                                                      if (successRead)
+                                                        {
+                                                          #ifdef PREFETCH_EXEC_IMMEDIALELLY
+                                                          // option to execute if changed immediatelly
+                                                          bool submited = false;
+                                                          findRegister(regObj->valueint,0,modbusRegType,regObj->valueint,regObj->valueint,true,&submited);
+                                                          node.setDefaultResponseBuffer();
+
+                                                          if (submited)
+                                                                {
+                                                                  debugSerial << F("MBUS:")<<paramName<< (" val changed. Write cancelled")<<endl;
+                                                                  return -3;
+                                                                }
+                                                           else   debugSerial << F("MBUS:")<<paramName<< F(" val not changed. Continue")<<endl;  
+                                                           
+                                                          
+                                                          #else
+                                                          // Option to skip writing if change, let next polling take of change           
+                                                          aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
+                                                          if (itemParametersObj && itemParametersObj->type ==aJson_Object)
+                                                                                    {
+                                                                                    aJsonObject *execObj = aJson.getObjectItem(itemParametersObj,paramName);
+                                                                                    if (execObj) 
+                                                                                                {
+                                                                                                aJsonObject * markObj = execObj;
+                                                                                                if (execObj->type == aJson_Array) markObj = execObj->child;  
+                                                                                                //Retrive previous data
+                                                                                                lastMeasured = aJson.getObjectItem(markObj,"@S");
+                                                                                                if (lastMeasured)
+                                                                                                { 
+                                                                                                          if   (lastMeasured->type == aJson_Int)
+                                                                                                            {
+                                                                                                            traceSerial<<F(" Last:")<<lastMeasured->valueint<< F(" Now:") << localBuffer<<endl;
+
+                                                                                                            if   (lastMeasured->valueint != localBuffer)
+                                                                                                                  {
+                                                                                                                    debugSerial << F("MBUS:")<<paramName<< F(" val changed.")<<endl;
+                                                                                                                    node.setDefaultResponseBuffer();
+                                                                                                                    return -3;
+                                                                                                                  }
+                                                                                                            else  
+                                                                                                                  {
+                                                                                                                  debugSerial << F("MBUS:")<<paramName<< F(" val not changed. Continue")<<endl;  
+                                                                                                                  }
+                                                                                                            }
+                                                                                                }            
+                                                                                                }
+                                                                                    }
+                                                        #endif  
+                                                       }
+                                                       node.setDefaultResponseBuffer();
+                                                      
+
+                                      }
+
+
+                    switch(outValue->subtype) {
                       case PAR_U16:
                       case PAR_I16:  
                       case PAR_TENS:
                       case PAR_100:
-                      res = node.writeSingleRegister(regObj->valueint,value);
+                      res = node.writeSingleRegister(regObj->valueint,outValue->valueint);
                       break;
             
                       break;
                       case PAR_I32:
                       case PAR_U32:
-                      res = node.writeSingleRegister(regObj->valueint,swap(value & 0xFFFF));
-                      res += node.writeSingleRegister(regObj->valueint+1,swap(value >> 16)) ;
+                      res = node.writeSingleRegister(regObj->valueint,swap(outValue->valueint & 0xFFFF));
+                      res += node.writeSingleRegister(regObj->valueint+1,swap(outValue->valueint >> 16)) ;
                       break;
 
                       case PAR_U8L:
                       case PAR_I8L:
-                      res = node.writeSingleRegister(regObj->valueint,value & 0xFF);                 
+                      res = node.writeSingleRegister(regObj->valueint,outValue->valueint & 0xFF);                 
                       break;
 
                       case PAR_U8H:
                       case PAR_I8H:
-                      res = node.writeSingleRegister(regObj->valueint,(value & 0xFFFF)>> 8);
+                      res = node.writeSingleRegister(regObj->valueint,(outValue->valueint & 0xFFFF)>> 8);
                       break;
                       case PAR_COIL:
-                      res = node.writeSingleCoil (regObj->valueint,value);
+                      res = node.writeSingleCoil (regObj->valueint,outValue->valueint);
                       break;
                     }
  mbusSlenceTimer = millisNZ();                   
- debugSerial<<F("MBUS res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<value<<endl;
+ debugSerial<<F("MBUS res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<outValue->valueint<<endl;
+
+//If wrote - suppress action on poll 
+if ((res ==0) && (outValue->type == aJson_Int) && lastMeasured && (lastMeasured->type == aJson_Int)) lastMeasured->valueint = outValue->valueint;
+
+
  return ( res == 0);
 }
 
@@ -674,7 +696,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                   {
                                                   savedValue = outValue->valueint;  
                                                   debugSerial<<"MBUS: SEND "<<item->itemArr->name<<" ";   
-                                                  sendRes = sendModbus(execObj->name,outValue->valueint,outValue->subtype);
+                                                  sendRes = sendModbus(execObj->name,outValue);
                                                   }
                                               while (savedValue != outValue->valueint); //repeat sending if target value changed while we're waited for mbus responce
 
@@ -683,6 +705,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                case 1: //success
                                                  execObj->subtype&=~ MB_NEED_SEND;
                                                  onceSendOk=true;
+                                                 if (outValue->type == aJson_Int) 
                                                  ///return 1; //relax
                                                  
                                                  break;
@@ -692,6 +715,11 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                  if ((execObj->subtype & 3) != MB_SEND_ATTEMPTS) execObj->subtype++;
                                                  errorSerial<<"Attempt: "<< (execObj->subtype & 3) <<endl;
                                                  break;
+                                               case -3:
+                                                 errorSerial<<F("MBUS:  param ")<<execObj->name<<F(" sending cancelled")<<endl;
+                                                 //outValue->valueint=
+                                                 execObj->subtype&=~ MB_NEED_SEND; 
+                                                 break;                                              
                                                default: //param not found
                                                  errorSerial<<F("MBUS:  param ")<<execObj->name<<F(" not found")<<endl;
                                                  execObj->subtype&=~ MB_NEED_SEND;
@@ -778,6 +806,7 @@ int8_t    regType = PAR_I16;
 aJsonObject * typeObj = aJson.getObjectItem(templateParamObj, "type");
 aJsonObject * mapObj = aJson.getObjectItem(templateParamObj, "map");
 
+
                     if (typeObj && typeObj->type == aJson_String) regType=str2regSize(typeObj->valuestring);
                     switch(regType) {
                       case PAR_I16:
@@ -811,19 +840,13 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
             aJsonObject *execObj =  aJson.getObjectItem(itemParametersObj,suffixStr); 
             if (execObj && ((execObj->type == aJson_Object) || (execObj->type == aJson_Array)))
                           {   
-                            /*
-                              aJsonObject *polledValue = aJson.getObjectItem(execObj,"@S");                      
-                                      if (polledValue && polledValue->type == aJson_Int && (polledValue->valueint == Value))
-                                          {    
-                                           debugSerial<<F("Ignored - not changed")<<endl;
-                                          }
 
-                                      else */
-                                      { //Schedule update
+                                      
+                                      aJsonObject * markObj = execObj;
+                                      if (execObj->type == aJson_Array) markObj = execObj->child;
+
+                                       //Schedule update
                                         execObj->subtype |= MB_NEED_SEND;
-
-                                        aJsonObject * markObj = execObj;
-                                        if (execObj->type == aJson_Array) markObj = execObj->child;
 
                                         aJsonObject *outValue = aJson.getObjectItem(markObj,"@V");                      
                                         if (outValue) // Existant. Preserve original @type
@@ -839,15 +862,17 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                               outValue = aJson.getObjectItem(markObj,"@V");  
                                               if (outValue) outValue->subtype =regType & 0xF; 
                                             }
-
+/* Conflict with pre-fetching
                                         aJsonObject *polledValue = aJson.getObjectItem(markObj,"@S"); 
                                         if (polledValue && outValue->type == aJson_Int) 
                                                                 {
+                                                                traceSerial<<"MBUS: not Stored "<<Value<<" to @S of "<<item->itemArr->name<<":"<<templateParamObj->name<<endl;  
                                                                 polledValue->valueint=Value; //to pevent suppressing to change back to previously polled value if this occurs before next polling
                                                                 polledValue->subtype&=~MB_VALUE_OUTDATED;
                                                                 }
+     */                                                           
 
-                                      }          
+                                                
                            }  
            }
 return 1;  
