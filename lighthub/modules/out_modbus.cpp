@@ -705,9 +705,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                case 1: //success
                                                  execObj->subtype&=~ MB_NEED_SEND;
                                                  onceSendOk=true;
-                                                 if (outValue->type == aJson_Int) 
                                                  ///return 1; //relax
-                                                 
                                                  break;
                                                case 0: //fault 
                                                  execObj->subtype |= MB_SEND_ERROR;  
