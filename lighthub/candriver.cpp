@@ -140,10 +140,9 @@ bool canDriver::sendRemoteID(macAddress mac)
  id.payloadType=payloadType::lookupMAC;  
 
  id.subjId=200;   //CRC16 of remote config
- //packet.data[0]=1;
 
  debugSerial<<("CAN: Send remote ID")<<endl;   
- res = write (id.id);//,&packet,8);
+ res = write (id.id,(datagram_t*)mac,6);
  if (res) state=canState::Idle; 
     else  state=canState::Error; 
 //    responseTimer=millisNZ(); ????????
@@ -344,7 +343,7 @@ debugSerial.print(len);
 debugSerial.print(" bytes id:");
 debugSerial.println(id.id,HEX);
 
-if (id.deviceId && (id.deviceId != controllerId) && !id.status) return false;
+//if (id.deviceId && (id.deviceId != controllerId) && !id.status) return false;
 
 debugSerial<<"CAN: " ;
 if (id.status) debugSerial.print("Resp "); else debugSerial.print("Req ");
@@ -354,14 +353,31 @@ switch ((id.payloadType)){
     debugSerial.print("itemCmd");
     debugSerial<<" itemId:"<< id.itemId;
     if (id.subItemId!=NO_SUBITEM) debugSerial << " subItem:"<<id.subItemId;
-    //debugSerial << ") ";
+    
+    if (id.deviceId && (id.deviceId != controllerId) && !id.status) //ignore requests with NON ZERO devId where another CANID
+                        {
+                           debugSerial.println(")");
+                           return false; 
+                        }    
+
     break;
     case payloadType::lookupMAC:
     debugSerial.print("lookupMAC");
+    if (id.status && (memcmp(packet->mac, sysConf.mac,6)))  //Ignore responses for another controller
+                        {
+                           debugSerial.println(")");
+                           return false; 
+                        }
     break;
     case payloadType::configFrame:
     debugSerial.print("configFrame #");
     debugSerial<< id.subjId;
+    if (id.status && (id.deviceId != controllerId)) //Ignore responses on config request not for me
+                        {
+                           debugSerial.println(")");
+                           return false; 
+                        }
+
     break;
     case payloadType::OTAFrame:
     debugSerial.print("OTAFrame #");
@@ -377,9 +393,20 @@ switch ((id.payloadType)){
     break;
     case payloadType::sysCmd:
     debugSerial.print("sysCmd");
+     if (id.deviceId != controllerId) //Ignore commands not for me
+                        {
+                           debugSerial.println(")");
+                           return false; 
+                        }
+
     break;
     case payloadType::rawPinCtrl:
     debugSerial.print("rawPinCtrl");
+     if (id.deviceId != controllerId) //Ignore commands not for me
+                        {
+                           debugSerial.println(")");
+                           return false; 
+                        }    
 }
 debugSerial<< ") ";
 

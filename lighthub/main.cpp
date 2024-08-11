@@ -422,7 +422,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
 
     int fr = freeRam();
 
-    debugSerial<<fr<<F(":[")<<topic<<F("] ");
+    debugSerial<<F("MQTT:")<<fr<<F(":[")<<topic<<F("] ");
 
     if (fr < 250+MQTT_TOPIC_LENGTH) {
         errorSerial<<F("OutOfMemory!")<<endl;

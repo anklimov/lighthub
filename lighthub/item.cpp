@@ -689,7 +689,7 @@ if (!payload) return 0;
 int fr = freeRam();                           
 if (fr < minimalMemory) 
     {
-        errorSerial<<F("CTRL/txt: OutOfMemory: ")<<fr<<endl;
+        errorSerial<<F("MQTT: CTRL/txt: OutOfMemory: ")<<fr<<endl;
         return -1;
     }   
 
