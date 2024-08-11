@@ -21,8 +21,15 @@ typedef union
 {
   uint32_t id;
   struct 
-  {
-      uint16_t itemId; 
+  {   union
+     {
+        struct
+         {
+           uint16_t subItemId:6;
+           uint16_t itemId:10; 
+          };
+      uint16_t subjId;    
+      };
       uint8_t deviceId;
       uint8_t payloadType:4;
       uint8_t status:1; 
@@ -30,6 +37,7 @@ typedef union
 
   };
 } canid_t;
+#define NO_SUBITEM 63
 
 enum payloadType
 {   unknown=0,
@@ -112,8 +120,8 @@ class canDriver
 public:
 canDriver(){ready=false; controllerId=0; responseTimer=0; state=canState::stateUnknown;};
 uint8_t getMyId();
-bool sendStatus(uint8_t itemNum, itemCmd cmd);
-bool sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool status=false);
+bool sendStatus(uint16_t itemNum, itemCmd cmd, int subItem = NO_SUBITEM);
+bool sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool status=false, int subItemID=NO_SUBITEM );
 bool sendCommand(aJsonObject * can,itemCmd cmd, bool status = false);
 bool upTime(uint32_t ut);
 bool salt(uint32_t salt);

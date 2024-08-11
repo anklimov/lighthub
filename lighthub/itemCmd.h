@@ -157,10 +157,9 @@ typedef union
   struct
       {
         uint8_t cmdCode;
-        uint8_t  suffixCode:4;
         uint8_t  itemArgType:4;
-        
-        uint8_t cmdEffect; //Reserve
+        uint8_t  cmdEffect:4; //Reserve    
+        uint8_t suffixCode; 
         uint8_t cmdParam;  //Reserve
       };
 } itemCmdStore;

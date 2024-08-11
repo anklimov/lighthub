@@ -109,7 +109,7 @@ class Item
 
   Item(char * name, aJsonObject *_items = items);
   Item(aJsonObject * obj, aJsonObject *_items = items);
-  Item(uint16_t num, aJsonObject *_items = items);
+  Item(uint16_t num, uint8_t subItem, aJsonObject *_items = items);
   ~Item();
 
   boolean isValid ();
@@ -148,7 +148,8 @@ class Item
   int scheduleCommand(itemCmd cmd, bool authorized);
   int scheduleOppositeCommand(itemCmd cmd,bool isActiveNow,bool authorized);
   int isScheduled();
-
+  char * getSubItemStrById(uint8_t subItem);
+  uint8_t getSubitemId(char * subItem);
 
   protected:
   bool digGroup (aJsonObject *itemArr, itemCmd *cmd = NULL, char* subItem = NULL, bool authorized = false);

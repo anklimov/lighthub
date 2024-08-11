@@ -1231,6 +1231,7 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
                                   break;
                                   default:  
                                   item->setCmd(cmd.cmdCode);
+                                  
                                   }
   if (optionsFlag & FLAG_PARAMETERS) 
                                     switch (cmd.itemArgType)
@@ -1310,7 +1311,7 @@ return false;
    {
     case aJson_Array:
     {
-      debugSerial<<"Array mapping"<<endl; 
+      traceSerial<<"Array mapping"<<endl; 
       aJsonObject *i = cmdMapping->child;
       //if first array element is not array - this is default mapping value
       if (i && i->type==aJson_Int) 

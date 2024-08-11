@@ -1394,6 +1394,10 @@ topics = aJson.getObjectItem(root, "topics");
 inputs = aJson.getObjectItem(root, "in");
 brokersArr = aJson.getObjectItem(root, "mqtt");
 
+#ifdef CANDRV
+LHCAN.begin(); //Applying updated CAN addr
+#endif
+
 if (brokersArr && brokersArr->child && (brokersArr->child->type == aJson_Array))
 {
     infoSerial<<F("Brokers configured:")<<(brokers=aJson.getArraySize(brokersArr))<<endl;

@@ -322,7 +322,7 @@ Item::Item(char *name, aJsonObject *_items) //Constructor
     Parse();
 }
 
-uint8_t getCanNum(aJsonObject* verb)
+uint16_t getCanNum(aJsonObject* verb)
   {
     if (!verb) return 0;
    switch (verb->type)
@@ -343,7 +343,52 @@ uint8_t getCanNum(aJsonObject* verb)
    return 0; 
   }
 
- Item::Item(uint16_t num, aJsonObject *_items)
+char * Item::getSubItemStrById(uint8_t subItem)
+{
+if (subItem == NO_SUBITEM) return NULL;
+if (!itemArg) return NULL;
+aJsonObject * i = itemArg;
+if (i->type == aJson_Array) i=i->child;
+while (i)
+{
+    if (i->type == aJson_Object)
+       {
+        aJsonObject * s = aJson.getArrayItem(i,subItem);
+        if (s && (s->type == aJson_Object)) return s->name;
+        return NULL;
+       }
+    i=i->next;
+}
+return NULL;
+};
+
+ uint8_t Item::getSubitemId(char * subItem)
+{
+if (!subItem) return NO_SUBITEM;
+if (!itemArg) return NO_SUBITEM;
+
+aJsonObject * i = itemArg;
+if (i->type == aJson_Array) i=i->child;
+
+while (i)
+{
+    if (i->type == aJson_Object)
+       {
+          aJsonObject *c = i->child;
+          uint8_t index=0;
+          while (c)
+                        {
+                        if (!strcasecmp(c->name, subItem)) return index;   
+                        c = c->next; index++;
+                        }
+          return NO_SUBITEM;
+       }
+    i=i->next;   
+};
+return NO_SUBITEM;
+}
+
+ Item::Item(uint16_t num, uint8_t subItem, aJsonObject *_items)
  {
 
     itemArr = NULL;
@@ -358,12 +403,15 @@ uint8_t getCanNum(aJsonObject* verb)
 
     if (!rootItems) return;
     itemArr = rootItems->child;
+    if (!num) return;
     while (itemArr)
         {
             if (getCanNum(itemArr->child) == num)
                     {
                         debugSerial<<"Find item: "<< itemArr->name << " addr:" << num << endl;
                         Parse();
+                        char * subItemStr = getSubItemStrById(subItem);
+                        if (subItemStr) strncpy(defaultSubItem,subItemStr,sizeof(defaultSubItem)); 
                         return;
                     }
             itemArr = itemArr->next;
@@ -1778,7 +1826,6 @@ int Item::SendStatus(int sendFlags) {
         itemCmd st(ST_VOID,CMD_VOID);  
         st.loadItem(this, FLAG_COMMAND | FLAG_PARAMETERS);
         sendFlags |= getFlag(FLAG_COMMAND | FLAG_PARAMETERS | FLAG_FLAGS); //if some delayed status is pending
-        //debugSerial<<F("ssi:")<<sendFlags<<endl;
         return SendStatusImmediate(st,sendFlags);
     }
   }
@@ -1788,11 +1835,12 @@ int Item::SendStatus(int sendFlags) {
       char addrstr[64];
       char valstr[20] = "";
       char cmdstr[9] = "";
-    //debugSerial<<"SSI "<<subItem<<endl;  
+
+    debugSerial<<"SENDSTATUS: "<<subItem;  
     st.debugOut();
 
     #ifdef CANDRV
-    if (!(sendFlags & FLAG_NOT_SEND_CAN)) LHCAN.sendStatus(getCanNum(itemArr->child),st);
+    if (!(sendFlags & FLAG_NOT_SEND_CAN)) LHCAN.sendStatus(getCanNum(itemArr->child),st, getSubitemId(subItem));
     #endif
 
     if (sendFlags & FLAG_COMMAND)
@@ -1821,7 +1869,7 @@ int Item::SendStatus(int sendFlags) {
             break;
 
         default:
-            debugSerial<<F("Unknown cmd \n");
+            debugSerial<<F("SENDSTATUS: Unknown cmd \n");
             sendFlags &= ~FLAG_COMMAND;
     }
    }

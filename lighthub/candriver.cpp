@@ -29,7 +29,7 @@ extern bool configLoaded;
 
 void printFrame(datagram_t * frame, uint8_t len ) {
 
-   debugSerial.print(" Data: 0x");
+   debugSerial.print(" Data:");
    for (int count = 0; count < len; count++) {
        debugSerial.print(frame->data[count], HEX);
        debugSerial.print(" ");
@@ -40,7 +40,7 @@ void printFrame(datagram_t * frame, uint8_t len ) {
 
 bool canDriver::upTime(uint32_t ut)
 {
-  //  return 0;
+  if (!controllerId) return false;  
  canid_t id;
  datagram_t packet;
 
@@ -48,7 +48,8 @@ bool canDriver::upTime(uint32_t ut)
  id.status=1;
  id.payloadType=payloadType::metric;  
  id.deviceId=controllerId;
- id.itemId=metricType::UpTime;
+ id.subjId=metricType::UpTime;
+
 
  packet.metric1=ut;
 
@@ -58,6 +59,7 @@ bool canDriver::upTime(uint32_t ut)
 
 bool canDriver::salt(uint32_t salt)
 {
+ if (!controllerId) return false;  
  canid_t id;
  datagram_t packet;
 
@@ -65,7 +67,9 @@ bool canDriver::salt(uint32_t salt)
  id.status=1;
  id.payloadType=payloadType::metric;  
  id.deviceId=controllerId;
- id.itemId=metricType::Salt;
+ id.subjId=metricType::Salt;
+
+
 
  packet.metric1=salt;
 
@@ -84,7 +88,9 @@ bool canDriver::lookupMAC()
  id.status=0;
  id.payloadType=payloadType::lookupMAC;  
  id.deviceId=0;
- id.itemId=0; //CRC?
+ id.subjId=0; //CRC?
+
+
 
  memcpy(packet.mac,sysConf.mac,6);
 
@@ -107,7 +113,9 @@ bool canDriver::requestFrame(uint8_t devId, payloadType _payloadType, uint16_t s
  id.status=0;
  id.payloadType=_payloadType;  
  id.deviceId=devId;
- id.itemId=seqNo; 
+ id.subjId=seqNo; 
+
+
 packet.metric1 =0;
  //memcpy(packet.mac,sysConf.mac,6);
 //delay (100);
@@ -131,7 +139,7 @@ bool canDriver::sendRemoteID(macAddress mac)
  id.status=1; //response
  id.payloadType=payloadType::lookupMAC;  
 
- id.itemId=200;   //CRC16 of remote config
+ id.subjId=200;   //CRC16 of remote config
  //packet.data[0]=1;
 
  debugSerial<<("CAN: Send remote ID")<<endl;   
@@ -145,37 +153,40 @@ return res;
 
 bool canDriver::begin()
             { 
-            ready=false;    
-            //STM32  
-            #if defined(ARDUINO_ARCH_STM32)
-            //Can= new STM32_CAN( CAN1, ALT );
-            //if (!Can) return false;
-            STMCan.begin(); //with retransmission
-            STMCan.setBaudRate(125000);
-            // STMCan.setFilter( 0, 0x153, 0x1FFFFFFF );
-            #endif
+            controllerId = getMyId();    
 
-            //ESP
-            #if defined(ARDUINO_ARCH_ESP32)
-            CAN.setPins(GPIO_NUM_35,GPIO_NUM_5);//(rx, tx); 
-            // start the CAN bus at 500 kbps
-            if (!CAN.begin(125000)) {return false;  }
-            #endif    
+                            if (!ready) // not reInitialization
+                            {
+                            ready=false;    
+                            //STM32  
+                            #if defined(ARDUINO_ARCH_STM32)
+                            //Can= new STM32_CAN( CAN1, ALT );
+                            //if (!Can) return false;
+                            STMCan.begin(); //with retransmission
+                            STMCan.setBaudRate(50000);
+                            // STMCan.setFilter( 0, 0x153, 0x1FFFFFFF );
+                            #endif
 
-            #if defined(__SAM3X8E__)
-            Can0.begin(CAN_BPS_125K);
+                            //ESP
+                            #if defined(ARDUINO_ARCH_ESP32)
+                            CAN.setPins(GPIO_NUM_35,GPIO_NUM_5);//(rx, tx); 
+                            // start the CAN bus at 500 kbps
+                            if (!CAN.begin(50000)) {return false;  }
+                            #endif    
 
-              int filter;
-            //extended
-            for (filter = 0; filter < 3; filter++) {
-	            Can0.setRXFilter(filter, 0, 0, true);
-	            //Can1.setRXFilter(filter, 0, 0, true);
-            }  
-            #endif
+                            #if defined(__SAM3X8E__)
+                            Can0.begin(CAN_BPS_50K);
 
-            debugSerial<<"CAN: initialized"<<endl;
-            controllerId = getMyId();
-            ready=true;
+                            int filter;
+                            //extended
+                            for (filter = 0; filter < 3; filter++) {
+                                Can0.setRXFilter(filter, 0, 0, true);
+                                //Can1.setRXFilter(filter, 0, 0, true);
+                            }  
+                            #endif
+                            ready=true;
+                            }
+            debugSerial<<"CAN: initialized. addr="<<controllerId<<endl;
             return true;
              }
 
@@ -328,10 +339,49 @@ switch (state)
 bool canDriver::processPacket(canid_t id, datagram_t *packet, uint8_t len, bool rtr)
 {
 
-debugSerial.print("CAN: Received ");
+debugSerial.print("CAN: Rcvd ");
 debugSerial.print(len);
-debugSerial.print(" bytes id 0x");
-debugSerial.print(id.id,HEX);
+debugSerial.print(" bytes id:");
+debugSerial.println(id.id,HEX);
+
+if (id.deviceId && (id.deviceId != controllerId) && !id.status) return false;
+
+debugSerial<<"CAN: " ;
+if (id.status) debugSerial.print("Resp "); else debugSerial.print("Req ");
+debugSerial<<"(devId:"<< id.deviceId <<" ";
+switch ((id.payloadType)){
+    case payloadType::itemCommand:
+    debugSerial.print("itemCmd");
+    debugSerial<<" itemId:"<< id.itemId;
+    if (id.subItemId!=NO_SUBITEM) debugSerial << " subItem:"<<id.subItemId;
+    //debugSerial << ") ";
+    break;
+    case payloadType::lookupMAC:
+    debugSerial.print("lookupMAC");
+    break;
+    case payloadType::configFrame:
+    debugSerial.print("configFrame #");
+    debugSerial<< id.subjId;
+    break;
+    case payloadType::OTAFrame:
+    debugSerial.print("OTAFrame #");
+      debugSerial<< id.subjId;
+    break;
+    case payloadType::auth:
+    debugSerial.print("auth #");
+    debugSerial<< id.subjId;
+    break;
+    case payloadType::metric:
+    debugSerial.print("metric #");
+    debugSerial<< id.subjId;
+    break;
+    case payloadType::sysCmd:
+    debugSerial.print("sysCmd");
+    break;
+    case payloadType::rawPinCtrl:
+    debugSerial.print("rawPinCtrl");
+}
+debugSerial<< ") ";
 
 if (len) printFrame(packet,len);
 if (id.status){
@@ -348,8 +398,8 @@ if (id.status){
                 debugSerial<<F("CAN: status received for dev ")<<id.deviceId<<endl;
                 //char * itemNName = findItemName(id.itemId);
                 aJsonObject  *itemsObj = aJson.getObjectItem(confObj,"items");
-                if (!itemsObj) return false;;
-                Item it(id.itemId, itemsObj);
+                if (!itemsObj) return false;
+                Item it(id.itemId, id.subjId, itemsObj);
                 if (it.isValid())
                     {
                         itemCmd ic;
@@ -363,7 +413,7 @@ if (id.status){
                         if (ic.isCommand()) flags |= FLAG_COMMAND;
                         if (ic.isValue()) flags |= FLAG_PARAMETERS;
                         ic.saveItem(&it,flags);
-                        it.SendStatusImmediate(ic,flags | FLAG_NOT_SEND_CAN);
+                        it.SendStatusImmediate(ic,flags | FLAG_NOT_SEND_CAN,it.getSubItemStrById(id.subItemId));
                         return true;
                     }
 
@@ -414,16 +464,15 @@ else //Requests
     }*/
         if ((id.payloadType == payloadType::itemCommand) && (len ==8))
             {
-                Item it(id.itemId);
+                Item it(id.itemId,id.subItemId);
                 if (it.isValid())
                     {
                         itemCmd ic;
                         ic.cmd = packet->cmd;
                         ic.param = packet->param;
-
-                        debugSerial<<F("CAN: received ");
-                        ic.debugOut();
-                        return it.Ctrl(ic);
+                        //debugSerial<<F("CAN: itemCmd: ");
+                        //ic.debugOut();
+                        return it.Ctrl(ic,it.getSubItemStrById(id.subItemId));
                     }
                return false;
             }
@@ -432,7 +481,7 @@ else //Requests
                return sendRemoteID(packet->mac);
                //debugSerial<<"ID requested"<<endl;
             }
-        else if ((id.payloadType == payloadType::configFrame) && (id.itemId == 0xFFFF))
+        else if ((id.payloadType == payloadType::configFrame) && (id.subjId == 0xFFFF))
             {  
                 debugSerial<<F("CAN: Requested conf for dev#")<<id.deviceId<<endl;
                 aJsonObject * remoteConfObj = findConfbyID(id.deviceId);
@@ -575,24 +624,21 @@ bool canDriver::write(uint32_t msg_id, datagram_t * buf, uint8_t size)
 
 
 
-bool canDriver::sendStatus(uint8_t itemNum, itemCmd cmd)
+bool canDriver::sendStatus(uint16_t itemNum, itemCmd cmd, int subItem)
 {
  if (!itemNum) return false;
- return sendCommand(controllerId, itemNum, cmd, true);
+ return sendCommand(controllerId, itemNum, cmd, true, subItem);
 }
 
-bool canDriver::sendCommand(aJsonObject * can,itemCmd cmd, bool status)
-{
-// debugSerial<<"CAN: ";
-//    if (status) debugSerial<<F("sendStatus ");
-//        else debugSerial<<F("sendCommand ");
-//    cmd.debugOut();
-    
+bool canDriver::sendCommand(aJsonObject * can, itemCmd cmd, bool status)
+{    
      if (can && (can->type == aJson_Array))
        {
+        int subItem=NO_SUBITEM;
         aJsonObject * dev = aJson.getArrayItem(can,0);
         aJsonObject * it = aJson.getArrayItem(can,1);
         aJsonObject * sfx = aJson.getArrayItem(can,2);
+        aJsonObject * subItemObj = aJson.getArrayItem(can,3);
         if (sfx)
             switch (sfx->type)
             {
@@ -602,14 +648,15 @@ bool canDriver::sendCommand(aJsonObject * can,itemCmd cmd, bool status)
              int suffix=txt2subItem(sfx->valuestring);
              if (suffix) cmd.setSuffix(suffix);
             }
-        debugSerial<<dev->valueint << ":" << it->valueint<<endl;
+         if (subItemObj && subItemObj->type==aJson_Int && subItemObj->valueint>=0 && subItemObj->valueint<63) subItem=subItemObj->valueint;
+
         if (dev && it && dev->type == aJson_Int && it->type == aJson_Int)
-            return sendCommand(dev->valueint, it->valueint, cmd, status); 
+            return sendCommand(dev->valueint, it->valueint, cmd, status,subItem); 
        }  
       return false;  
 }
 
-bool canDriver::sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool status)
+bool canDriver::sendCommand(uint8_t devID, uint16_t itemID,itemCmd cmd, bool status,int subItemID )
 {
     canid_t id;
  datagram_t packet;
@@ -621,18 +668,20 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool st
  id.payloadType=payloadType::itemCommand;  
  id.deviceId=devID;
  id.itemId=itemID;
+ id.subItemId=subItemID;
  
  packet.cmd = cmd.cmd;
  packet.param = cmd.param;
  
  debugSerial << ((status)?"CAN: send Status":"CAN: send Command");
- debugSerial<<F(" for dev:item ")<<devID<<":"<<itemID<<" "; 
+ debugSerial<<F(" ->[")<<devID<<":"<<itemID<<"] "; 
+ if (subItemID!=NO_SUBITEM)  debugSerial<<F("Subitem:")<<subItemID<<" "; 
  cmd.debugOut();
 
   res=write (id.id,&packet,8);
 
- if (res) debugSerial<<F("CAN: sent ok")<<endl;
-    else  debugSerial<<F("CAN: fail")<<endl;
+ //if (res) debugSerial<<F("CAN: sent ok")<<endl;
+ //   else  debugSerial<<F("CAN: fail")<<endl;
 
  return res;
 }
@@ -652,7 +701,7 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool st
                     id.status=1;
                     id.payloadType=pType;  
                     id.deviceId=devId;
-                    id.itemId=_seqNo; 
+                    id.subjId=_seqNo; 
 
                     res=driver->write (id.id, &writeBuffer, len);
                     writePos=0;
@@ -695,8 +744,8 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool st
                     if ((c=driver->readFrame()>0) && (driver->RXid.deviceId == devId) && (driver ->RXid.payloadType == pType) && driver->RXid.status)   
                            {
                             state = canState::FrameReceived; 
-                            debugSerial<<F("CAN: Payload received ")<< c << "|" <<driver->RXlen<< " "<<driver->RXpacket.payload<<"#"<<driver->RXid.itemId<<endl;
-                            seqNo=driver->RXid.itemId;
+                            debugSerial<<F("CAN: Payload received ")<< c << "|" <<driver->RXlen<< " "<<driver->RXpacket.payload<<"#"<<driver->RXid.subjId<<endl;
+                            seqNo=driver->RXid.subjId;
                             failedCount=0;
                             return driver->RXlen; 
                            }
@@ -729,8 +778,8 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool st
                             (driver->RXid.status == 0)
                            )
                         {   
-                        debugSerial<<F("CAN: frame confirmed #")<<driver->RXid.itemId<<endl;   
-                        if (seqNo == driver->RXid.itemId)
+                        debugSerial<<F("CAN: frame confirmed #")<<driver->RXid.subjId<<endl;   
+                        if (seqNo == driver->RXid.subjId)
                                 {
                                  state = canState::StreamOpenedWrite;
                                  seqNo++;
