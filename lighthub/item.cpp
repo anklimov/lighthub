@@ -26,6 +26,7 @@ e-mail    anklimov@gmail.com
 #include "main.h"
 #include "bright.h"
 #include "itemCmd.h"
+#include "candriver.h"
 //#include "SHA256.h"
 
 #ifdef _dmxout

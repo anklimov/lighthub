@@ -1,4 +1,5 @@
 #pragma once
+#define NO_SUBITEM 63
 #ifdef  CANDRV
 
 #if defined(ARDUINO_ARCH_STM32)
@@ -37,7 +38,7 @@ typedef union
 
   };
 } canid_t;
-#define NO_SUBITEM 63
+
 
 enum payloadType
 {   unknown=0,
