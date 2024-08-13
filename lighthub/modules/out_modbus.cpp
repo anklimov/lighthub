@@ -563,6 +563,7 @@ if (prefetchObj && (prefetchObj->type == aJson_Boolean) && prefetchObj->valueboo
                                                       node.setResponseBuffer(&localBuffer,1);
 
                                                       bool successRead = readModbus(regObj->valueint,modbusRegType,1);
+                                                      mbusSlenceTimer = millisNZ();   
                                                       
 
                                                       if (successRead)
@@ -703,7 +704,8 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                               switch (sendRes) 
                                               {
                                                case 1: //success
-                                                 execObj->subtype&=~ MB_NEED_SEND;
+                                                 //execObj->subtype&=~ MB_NEED_SEND;
+                                                 execObj->subtype = 0;
                                                  onceSendOk=true;
                                                  ///return 1; //relax
                                                  break;
@@ -716,7 +718,8 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                case -3:
                                                  errorSerial<<F("MBUS:  param ")<<execObj->name<<F(" sending cancelled")<<endl;
                                                  //outValue->valueint=
-                                                 execObj->subtype&=~ MB_NEED_SEND; 
+                                                 //execObj->subtype&=~ MB_NEED_SEND; 
+                                                 execObj->subtype = 0;
                                                  break;                                              
                                                default: //param not found
                                                  errorSerial<<F("MBUS:  param ")<<execObj->name<<F(" not found")<<endl;
