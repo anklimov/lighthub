@@ -2700,7 +2700,7 @@ Discarded input sections
  .text._ZN7itemCmd9doMappingEP11aJsonObject
                 0x0000000000000000      0x258 .pio/build/stm32/src/itemCmd.cpp.o
  .text._ZN7itemCmd16doReverseMappingEP11aJsonObject
-                0x0000000000000000      0x2c4 .pio/build/stm32/src/itemCmd.cpp.o
+                0x0000000000000000      0x280 .pio/build/stm32/src/itemCmd.cpp.o
  .text          0x0000000000000000        0x0 .pio/build/stm32/src/lighthub.ino.cpp.o
  .data          0x0000000000000000        0x0 .pio/build/stm32/src/lighthub.ino.cpp.o
  .bss           0x0000000000000000        0x0 .pio/build/stm32/src/lighthub.ino.cpp.o
@@ -8112,7 +8112,7 @@ Linker script and memory map
                 0x000000000801bcad       0x59 .pio/build/stm32/src/itemCmd.cpp.o
  .rodata._ZN7itemCmd11loadItemDefEP4Itemt.str1.1
                 0x000000000801bd06       0x1d .pio/build/stm32/src/itemCmd.cpp.o
- .rodata.CSWTCH.111
+ .rodata.CSWTCH.110
                 0x000000000801bd23       0x12 .pio/build/stm32/src/itemCmd.cpp.o
  .rodata._ZL10commands_P
                 0x000000000801bd35       0xe1 .pio/build/stm32/src/itemCmd.cpp.o
