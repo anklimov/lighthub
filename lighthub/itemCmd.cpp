@@ -1454,7 +1454,8 @@ if (valMapping && valMapping->type == aJson_Array && aJson.getArraySize(valMappi
 
     if (getInt()<aJson.getArrayItem(valMapping,2)->valueint) return itemCmd().Int((uint32_t) 0);  
      int diff = ((b-a)/(d-c))/2;
-     return itemCmd().Int((uint32_t) constrain(map(getInt(),c,d,a,b)+diff,0,255));  
+     //return itemCmd().Int((uint32_t) constrain(map(getInt(),c,d,a,b)+diff,0,255));  
+     return itemCmd().Int((uint32_t) map(getInt(),c,d,a,b)+diff);  
     }
   if (valMapping && valMapping->type == aJson_NULL) return itemCmd();  
   return *this;

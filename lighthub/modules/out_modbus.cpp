@@ -556,7 +556,7 @@ int out_Modbus::sendModbus(char * paramName, aJsonObject * outValue)
 if (prefetchObj && (prefetchObj->type == aJson_Boolean) && prefetchObj->valuebool) 
                                       {
                                                       int modbusRegType =  (outValue->subtype == PAR_COIL) ? MODBUS_COIL_REG_TYPE:MODBUS_HOLDING_REG_TYPE;
-                                                      debugSerial<<F("\nMBUS: prefetching ")<<paramName<<F(" #") <<regObj->valueint << " type:" << modbusRegType << " "; 
+                                                      debugSerial<<F(" prefetch ")<<paramName<<F(" #") <<regObj->valueint << " type:" << modbusRegType << " "; 
 
                                                       /// to prevent CORRUPTIOIN if using same buffer
                                                       uint16_t localBuffer;
@@ -608,6 +608,13 @@ if (prefetchObj && (prefetchObj->type == aJson_Boolean) && prefetchObj->valueboo
                                                                                                                   }
                                                                                                             else  
                                                                                                                   {
+                                                                                                                  if (outValue->valueint == localBuffer)
+                                                                                                                  {
+                                                                                                                    debugSerial << F("MBUS:")<<paramName<< F("=")<<localBuffer<<F(": equal targert.")<<endl;
+                                                                                                                    node.setDefaultResponseBuffer();
+                                                                                                                    return -4;
+                                                                                                                  }
+
                                                                                                                   debugSerial << F("MBUS:")<<paramName<< F(" val not changed. Continue")<<endl;  
                                                                                                                   }
                                                                                                             }
@@ -693,17 +700,21 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
 
                                               int sendRes;
                                               int savedValue;
+                                              bool needResend;
                                               do
                                                   {
                                                   savedValue = outValue->valueint;  
                                                   debugSerial<<"MBUS: SEND "<<item->itemArr->name<<" ";   
                                                   sendRes = sendModbus(execObj->name,outValue);
+                                                  needResend = (savedValue != outValue->valueint);
+                                                  while(needResend && mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),100)) modbusIdle();
                                                   }
-                                              while (savedValue != outValue->valueint); //repeat sending if target value changed while we're waited for mbus responce
+                                              while (needResend); //repeat sending if target value changed while we're waited for mbus responce
 
                                               switch (sendRes) 
                                               {
                                                case 1: //success
+                                               case -4: //equal tatget
                                                  //execObj->subtype&=~ MB_NEED_SEND;
                                                  execObj->subtype = 0;
                                                  onceSendOk=true;
