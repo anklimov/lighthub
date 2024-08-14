@@ -303,11 +303,12 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                               switch (defMappingObj->type)
                                {
                                 case aJson_Int: //register/coil/.. number
-                                  traceSerial<<F("Searching reg#")<<defMappingObj->valueint<<endl; 
+                                  traceSerial<<F("MBUSD: Searching reg#")<<defMappingObj->valueint<<endl; 
                                   if ((defMappingObj->valueint>= registerFrom) && (defMappingObj->valueint<=registerTo))  
                                       {   
                                       mappedParam = findRegister(defMappingObj->valueint,defMappingObj->valueint-registerFrom,regType,registerFrom,registerTo,false,&submitRecurrentOut);
                                       executeWithoutCheck=true;
+                                      debugSerial<<"MBUSD: recurrent check res: "<<"SRO:"<<submitRecurrentOut<<endl;
                                       }
                                   else 
                                   {
@@ -410,36 +411,59 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                           aJsonObject *execObj = aJson.getObjectItem(itemParametersObj,paramObj->name);
                           if (execObj) 
                                       {
-                                      aJsonObject * markObj = execObj;
-                                      if (execObj->type == aJson_Array) markObj = execObj->child;  
-                                      //Retrive previous data
-                                      aJsonObject *lastMeasured = aJson.getObjectItem(markObj,"@S");
-                                      if (lastMeasured)
-                                      { 
-                                                if   (lastMeasured->type == aJson_Int)
-                                                  {
-                                                  if   (lastMeasured->valueint == param)
-                                                        *submitParam=false; //supress repeating execution for same val
-                                                  else  
-                                                        {
-                                                        lastMeasured->valueint=param;
-                                                        traceSerial<<"MBUS: Stored "<<param<<" to @S of "<<paramObj->name<<endl;
-                                                        lastMeasured->subtype&=~MB_VALUE_OUTDATED;
-                                                        }
-                                                  }
-                                      }            
-                                      else //No container to store value yet 
-                                      {
-                                        debugSerial<<F("MBUS: Add @S: ")<<paramObj->name<<endl;
-                                        aJson.addNumberToObject(markObj, "@S", (long) param);
-                                      }  
 
+                                      bool storeLastValue = true;
+                                      if (doExecution)  
+                                      {
+                                      storeLastValue=false;
+                                      // Check - if no action configured for object - not need to store last value - let requrent process do it
+                                      
+                                      aJsonObject * i = execObj->child;  
+                                      while (i && !storeLastValue)
+                                        {
+                                          if (i->name && *i->name && (*i->name != '@')) storeLastValue = true;
+                                          i=i->next;
+                                        }
+                                      }
+
+                                      aJsonObject * markObj = execObj;
+                                      if (execObj->type == aJson_Array) 
+                                            {
+                                            markObj = execObj->child;  
+                                            storeLastValue = true;
+                                            }
+
+                                      if (storeLastValue)
+                                      {      
+                                                    //Retrive previous data
+                                                    aJsonObject *lastMeasured = aJson.getObjectItem(markObj,"@S");
+                                                    if (lastMeasured)
+                                                    { 
+                                                              if   (lastMeasured->type == aJson_Int)
+                                                                {
+                                                                if   (lastMeasured->valueint == param)
+                                                                      *submitParam=false; //supress repeating execution for same val
+                                                                else  
+                                                                      {
+                                                                      lastMeasured->valueint=param;
+                                                                      traceSerial<<"MBUS: Stored "<<param<<" to @S of "<<paramObj->name<<endl;
+                                                                      lastMeasured->subtype&=~MB_VALUE_OUTDATED;
+                                                                      }
+                                                                }
+                                                    }            
+                                                    else //No container to store value yet 
+                                                    {
+                                                      debugSerial<<F("MBUS: Add @S: ")<<paramObj->name<<endl;
+                                                      aJson.addNumberToObject(markObj, "@S", (long) param);
+                                                    }  
+                                      }
 
                                        if (executeWithoutCheck)
                                             {
                                             
                                             if (doExecution && (submitRecurrentOut || *submitParam)) 
                                                   {
+                                                  debugSerial<<F("MBUS: exec ");mappedParam.debugOut();  
                                                   executeCommand(execObj, -1, mappedParam); 
                                                   *submitParam=true; //if requrrent check has submit smth - report it.  
                                                   }
@@ -447,7 +471,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                             return mappedParam;  
                                             }
 
-                                      if (*submitParam)                                       
+                                      if (*submitParam && doExecution)                                       
                                       {   
                                       // Compare with last submitted val (if @V NOT marked as NULL in config)
                                        aJsonObject *settedValue = aJson.getObjectItem(markObj,"@V");                      
@@ -707,7 +731,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                   debugSerial<<"MBUS: SEND "<<item->itemArr->name<<" ";   
                                                   sendRes = sendModbus(execObj->name,outValue);
                                                   needResend = (savedValue != outValue->valueint);
-                                                  while(needResend && mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),100)) modbusIdle();
+                                                  //while(needResend && mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),100)) modbusIdle();
                                                   }
                                               while (needResend); //repeat sending if target value changed while we're waited for mbus responce
 
