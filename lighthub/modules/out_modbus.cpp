@@ -731,7 +731,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                   debugSerial<<"MBUS: SEND "<<item->itemArr->name<<" ";   
                                                   sendRes = sendModbus(execObj->name,outValue);
                                                   needResend = (savedValue != outValue->valueint);
-                                                  //while(needResend && mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),100)) modbusIdle();
+                                                  while(needResend && mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),100)) modbusIdle();
                                                   }
                                               while (needResend); //repeat sending if target value changed while we're waited for mbus responce
 
