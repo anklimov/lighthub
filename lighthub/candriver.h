@@ -119,7 +119,7 @@ Error
 class canDriver 
 {
 public:
-canDriver(){ready=false; controllerId=0; responseTimer=0; state=canState::stateUnknown;};
+canDriver(){ready=false; controllerId=0; responseTimer=0; state=canState::stateUnknown;canConfigObj=NULL;canRemoteConfigObj=NULL;};
 uint8_t getMyId();
 bool sendStatus(uint16_t itemNum, itemCmd cmd, int subItem = NO_SUBITEM);
 bool sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool status=false, int subItemID=NO_SUBITEM );
@@ -133,16 +133,22 @@ bool sendRemoteID(macAddress mac);
 bool begin();
 void Poll();
 bool processPacket(canid_t id, datagram_t *packet, uint8_t len, bool rtr=false);
-bool write(uint32_t msg_id, datagram_t * buf = NULL, uint8_t size=0);      
+bool write(uint32_t msg_id, datagram_t * buf = NULL, uint8_t size=0);    
+aJsonObject * findConfbyName(char* devName, int * devAddr=NULL);
+#if not defined (NOIP)   
+bool subscribeTopics(char * root, size_t buflen);
+#endif
+
 uint8_t getControllerID(){return controllerId;};    
 uint8_t getIdByMac(macAddress mac);
-
+aJsonObject * canConfigObj;
+aJsonObject * canRemoteConfigObj;
     datagram_t RXpacket;
     canid_t RXid;
     uint8_t RXlen;
 
 private:
-   aJsonObject * findConfbyID(uint8_t devId);
+   aJsonObject * getConfbyID(uint8_t devId);
 
     #if defined(ARDUINO_ARCH_STM32)
     CAN_message_t CAN_RX_msg;

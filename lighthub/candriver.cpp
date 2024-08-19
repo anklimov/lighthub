@@ -131,15 +131,19 @@ bool canDriver::sendRemoteID(macAddress mac)
 {
  canid_t id;
  //datagram_t packet;
-  bool       res=false;
+ bool       res=false;
+ id.subjId=0; 
  id.deviceId=getIdByMac(mac); //Retrieved controllerID
  if (!id.deviceId) return false;
+ aJsonObject * config=getConfbyID(id.deviceId);
+ if (config) id.subjId=getCRC(config);   //CRC16 of remote config
 
  id.reserve=0;
  id.status=1; //response
  id.payloadType=payloadType::lookupMAC;  
 
- id.subjId=200;   //CRC16 of remote config
+
+
 
  debugSerial<<("CAN: Send remote ID")<<endl;   
  res = write (id.id,(datagram_t*)mac,6);
@@ -152,6 +156,11 @@ return res;
 
 bool canDriver::begin()
             { 
+            if (!root) return false;    
+            canConfigObj =  aJson.getObjectItem(root, "can");
+            if (!canConfigObj) return false;    
+            canRemoteConfigObj=  aJson.getObjectItem(canConfigObj, "conf");
+
             controllerId = getMyId();    
 
                             if (!ready) // not reInitialization
@@ -419,7 +428,7 @@ if (id.status){
         case payloadType::itemCommand:
         {
         if (len!=8) return false;    
-        aJsonObject  *confObj = findConfbyID(id.deviceId);
+        aJsonObject  *confObj = getConfbyID(id.deviceId);
         if (confObj)
             {
                 debugSerial<<F("CAN: status received for dev ")<<id.deviceId<<endl;
@@ -434,7 +443,7 @@ if (id.status){
                         ic.cmd = packet->cmd;
                         ic.param = packet->param;
 
-                        debugSerial<<F("CAN: item ")<<it.itemArr->name;
+                        debugSerial<<F("CAN: item ")<<it.itemArr->name<<" ";
                         ic.debugOut();
                         
                         if (ic.isCommand()) flags |= FLAG_COMMAND;
@@ -456,9 +465,17 @@ if (id.status){
         case canState::MACLookup:
         if ((id.payloadType == payloadType::lookupMAC))
            {
-                debugSerial<<"\nCAN: Got Controller addr: "<<id.deviceId<<endl;
-                controllerId=id.deviceId;
-                state = canState::ReadConfig;
+                if (canConfigObj && (id.subjId == getCRC(canConfigObj))) ///?
+                    {
+                        infoSerial << (F("Valid config already onboard")) << endl;
+                        state = canState::Idle;
+                    }
+                else 
+                    {
+                        infoSerial<<"\nCAN: Got Controller addr: "<<id.deviceId<<endl;
+                        state = canState::ReadConfig;
+                        controllerId=id.deviceId;
+                    }
            }
         return true; 
 
@@ -511,7 +528,7 @@ else //Requests
         else if ((id.payloadType == payloadType::configFrame) && (id.subjId == 0xFFFF))
             {  
                 debugSerial<<F("CAN: Requested conf for dev#")<<id.deviceId<<endl;
-                aJsonObject * remoteConfObj = findConfbyID(id.deviceId);
+                aJsonObject * remoteConfObj = getConfbyID(id.deviceId);
                 if (remoteConfObj)
                 {
                         infoSerial<<F("CAN: Sending conf for dev#")<<id.deviceId<<endl;
@@ -531,26 +548,17 @@ return false;
 
 uint8_t canDriver::getMyId()
 {
-if (!root) return 0;    
-aJsonObject * canObj =  aJson.getObjectItem(root, "can");
-if (!canObj) return 0;
-
-aJsonObject * addrObj = aJson.getObjectItem(canObj, "addr");
+if (!canConfigObj) return 0;
+aJsonObject * addrObj = aJson.getObjectItem(canConfigObj, "addr");
 if (addrObj && (addrObj->type == aJson_Int)) return addrObj->valueint;
-
 return 0;
 }
 
-aJsonObject * canDriver::findConfbyID(uint8_t devId)
+aJsonObject * canDriver::getConfbyID(uint8_t devId)
 {
-if (!root) return NULL;    
-aJsonObject * canObj =  aJson.getObjectItem(root, "can");
-if (!canObj) return NULL;
-
-aJsonObject * remoteConfObj =  aJson.getObjectItem(canObj, "conf");
-
-if (!remoteConfObj) return NULL;
-remoteConfObj=remoteConfObj->child; 
+if (!canConfigObj) return NULL;
+if (!canRemoteConfigObj) return NULL;
+aJsonObject * remoteConfObj=canRemoteConfigObj->child; 
 while (remoteConfObj)
     {  
         aJsonObject * remoteCanObj =  aJson.getObjectItem(remoteConfObj, "can");
@@ -564,30 +572,77 @@ while (remoteConfObj)
 return NULL;    
 }
 
+aJsonObject * canDriver::findConfbyName(char* devName, int * devAddr)
+{
+if (!canRemoteConfigObj && !devName) return NULL;
+aJsonObject * remoteConfObj=canRemoteConfigObj->child; 
+while (remoteConfObj)
+    {  
+        aJsonObject * remoteCanObj =  aJson.getObjectItem(remoteConfObj, "can");
+        if (remoteCanObj)
+        {
+        aJsonObject * nameObj = aJson.getObjectItem(remoteCanObj, "name");
+        if (nameObj && (nameObj->type == aJson_String) && nameObj->valuestring && (strncasecmp(nameObj->valuestring,devName,strlen(nameObj->valuestring)) == 0)) 
+         {   
+            if (devAddr) 
+            {
+              aJsonObject * addrObj = aJson.getObjectItem(remoteCanObj, "addr");
+              if (addrObj && (addrObj->type == aJson_Int)) *devAddr=addrObj->valueint;
+            }
+            return remoteConfObj;
+         }    
+        }
+        remoteConfObj=remoteConfObj->next;
+    }
+return NULL;    
+}
+
+#if not defined (NOIP)   
+extern PubSubClient mqttClient;
+
+bool canDriver::subscribeTopics(char * root, size_t buflen)
+{
+ if (!root) return false;   
+ if (!canRemoteConfigObj) return false;
+
+ int rootLen = strlen(root);     
+
+aJsonObject * remoteConfObj=canRemoteConfigObj->child; 
+while (remoteConfObj)
+    {  
+        aJsonObject * remoteCanObj =  aJson.getObjectItem(remoteConfObj, "can");
+        if (remoteCanObj)
+        {
+        aJsonObject * addrObj = aJson.getObjectItem(remoteCanObj, "name");
+        if (addrObj && (addrObj->type == aJson_String) && addrObj->valuestring)
+                {
+                    strncpy(root+rootLen, addrObj->valuestring, buflen-rootLen-1);
+                    strncat(root+rootLen, "/", buflen-rootLen-1);
+                    strncat(root+rootLen, "#", buflen-rootLen-1);
+                    debugSerial.println(root);
+                    mqttClient.subscribe(root);                
+                }   
+        }
+        remoteConfObj=remoteConfObj->next;
+    }
+}
+#endif
 
 uint8_t canDriver::getIdByMac(macAddress mac)
 {
-   char macStr[19];
-   uint8_t strptr = 0;
+char macStr[19];
+uint8_t strptr = 0;
 
-   if (!root) return 0;    
-   aJsonObject * canObj =  aJson.getObjectItem(root, "can");
-   if (!canObj) return 0;
-   aJsonObject * confObj =  aJson.getObjectItem(canObj, "conf");
-   if (!confObj) return 0;
-
-   memset(macStr,0,sizeof(macStr));
-   for (byte i = 0; i < 6; i++)
-{
- // if (mac[i]<16) macStr[strptr++]='0';
-
-  SetBytes(&mac[i],1,&macStr[strptr]);
-  strptr+=2;
-
-   if (i < 5) macStr[strptr++]=':';
-}
+if (!canRemoteConfigObj) return 0;
+memset(macStr,0,sizeof(macStr));
+for (byte i = 0; i < 6; i++)
+        {
+        SetBytes(&mac[i],1,&macStr[strptr]);
+        strptr+=2;
+        if (i < 5) macStr[strptr++]=':';
+        }
 debugSerial<<F("CAN: Searching devId for ")<<macStr<<endl;
-aJsonObject * remoteConfObj =  aJson.getObjectItem(confObj, macStr);
+aJsonObject * remoteConfObj =  aJson.getObjectItem(canRemoteConfigObj, macStr);
 
 if (!remoteConfObj) return 0;
 

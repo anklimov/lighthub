@@ -38,6 +38,7 @@ using namespace ios;
 #endif
 
 enum topicType {
+    T_ROOT = 4,
     T_DEV = 1,
     T_BCST= 2,
     T_OUT = 3
@@ -80,4 +81,24 @@ int  str2regSize(char * str);
 bool checkToken(char * token, char * data);
  bool isProtectedPin(short pin);
  bool i2cReset();
+ uint16_t getCRC(aJsonObject * in);
+ 
+#include "util/crc16_.h"
+class CRCStream : public Stream
+{
+public:
+    CRCStream() : CRC16(0xFFFF){}
+    uint16_t CRC16;
+    uint16_t getCRC16() {return CRC16;}
 
+    // Stream methods
+    virtual int available(){return 0;};
+    virtual int read(){return 0;};
+    virtual int peek(){return 0;};
+
+    virtual void flush(){};
+    // Print methods
+    virtual size_t write(uint8_t c) {CRC16 = crc16_update(CRC16, c);};
+    virtual int availableForWrite(){return 1;};
+
+};

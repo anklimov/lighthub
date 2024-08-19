@@ -531,9 +531,12 @@ if (_l2 && _l2->type == aJson_String) strncat(buf,_l2->valuestring,buflen);
     strncat_P(buf,inTopic,buflen); /////
     break;
   }
-strncat(buf,"/",buflen);
-if (suffix) strncat(buf,suffix,buflen);
 
+if (tt!=T_ROOT)
+{
+        strncat(buf,"/",buflen);
+        if (suffix) strncat(buf,suffix,buflen);
+}
 return buf;
 
 }
@@ -975,6 +978,14 @@ return true;
 
 
 
+uint16_t getCRC(aJsonObject * in)
+{
+if (!in)  return 0;
+CRCStream crcStream;
+aJsonStream aJsonCrcStream = aJsonStream(&crcStream);
+aJson.print(in,&aJsonCrcStream);
+return crcStream.getCRC16();
+}
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

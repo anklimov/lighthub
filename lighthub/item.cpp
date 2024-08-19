@@ -649,7 +649,7 @@ if (suffix = strrchr(*psubItem, '/')) //Trying to retrieve right part
     *suffix= 0; //Truncate subItem string
     suffix++;
     suffixCode = txt2subItem(suffix);
-    debugSerial<<F("suffixCode:")<<suffixCode<<endl;
+  //  debugSerial<<F("suffixCode:")<<suffixCode<<endl;
     // myhome/dev/item/sub.....Item/suffix
     }
 else
@@ -684,7 +684,7 @@ long int Item::limitSetValue()
 
 
 // myhome/dev/item/subItem
-int Item::Ctrl(char * payload, char * subItem)
+int Item::Ctrl(char * payload, char * subItem, int remoteID)
 {
 if (!payload) return 0;
 int fr = freeRam();                           
@@ -709,13 +709,16 @@ if (suffixCode == S_RAW)
 {   itemCmd ic;
     ic.Str(payload);
     ic.setSuffix(suffixCode);
+    if (remoteID) return   remoteCtrl(ic,remoteID,subItem);
     return   Ctrl(ic,subItem);
 }
 
 bool authorized = false;
-char * authPos = strchr(payload,'@');
+char * authToken = NULL;
+char * authPos = strchr(payload,'@'); //token@command
 if (authPos)
 {
+ authToken = payload;   
  *authPos=0;   
  authorized = checkToken(payload,authPos+1);
  payload=authPos+1;
@@ -782,7 +785,7 @@ st.setSuffix(suffixCode);
                       default: errorSerial<<F("Wrong paylad")<<endl;
                     }
               }
- 
+          if (remoteID) return   remoteCtrl(st,remoteID,subItem,authToken);
           return   Ctrl(st,subItem,true,authorized);
         } //Void command
           break;
@@ -806,7 +809,7 @@ st.setSuffix(suffixCode);
            case 4: st.RGBW(Par[0],Par[1],Par[2],Par[3]);
            default:;
          }
-         
+         if (remoteID) return   remoteCtrl(st,remoteID,subItem,authToken);
          return   Ctrl(st,subItem,true,authorized);
       }
       case CMD_UP:
@@ -815,16 +818,38 @@ st.setSuffix(suffixCode);
           itemCmd Par0 = getNumber((char **) &payload);
           Par0.Cmd(cmd);
           Par0.setSuffix(suffixCode);
+          if (remoteID) return   remoteCtrl(Par0,remoteID,subItem,authToken);
           return Ctrl(Par0, subItem,true,authorized);
           }
       default: //some known command
       {
       int32_t intParam = getIntFromStr((char **) &payload);
       if (intParam) st.Int(intParam);
+      if (remoteID) return   remoteCtrl(st,remoteID,NULL,authToken);
       return Ctrl(st,NULL, true, authorized);
       }
   } //ctrl
 return 0;
+}
+
+int Item::remoteCtrl(itemCmd cmd, int remoteID, char* subItem, char * authToken)
+{
+  #ifdef CANDRV  
+  // Retrieve remote item id
+  if (!itemArr) return 0;
+  aJsonObject * itemHandler = itemArr->child;
+  if (!itemHandler || itemHandler->type!=aJson_Array) return 0;
+  aJsonObject *  itemIdObj=aJson.getArrayItem(itemHandler,1);
+  if (itemIdObj->type != aJson_Int) return 0;
+  
+  //Retrieve target controller ID
+  if (!remoteID) return 0;
+
+//TODO - translate subItem & auth token
+  short subitemNum = NO_SUBITEM;
+  return LHCAN.sendCommand(remoteID,itemIdObj->valueint,cmd,false,subitemNum);
+  #endif
+  return 0;
 }
 
 // Recursive function with small stack consumption
@@ -1663,7 +1688,7 @@ int Item::isActive() {
     itemCmd st;
     int val = 0;
 
-    debugSerial<<itemArr->name<<F(" ");
+    debugSerial<<F("ACTIVE:")<<itemArr->name<<F(" ");
     if (!isValid())
                       {
                       debugSerial<<F(" invalid")<<endl;
@@ -1841,7 +1866,8 @@ int Item::SendStatus(int sendFlags) {
     st.debugOut();
 
     #ifdef CANDRV
-    if (!(sendFlags & FLAG_NOT_SEND_CAN)) LHCAN.sendStatus(getCanNum(itemArr->child),st, getSubitemId(subItem));
+    if (!(sendFlags & FLAG_NOT_SEND_CAN)) 
+            LHCAN.sendStatus(getCanNum(itemArr->child),(sendFlags & FLAG_SEND_DELAYED)?st.setSuffix(S_DELAYED):st, getSubitemId(subItem));
     #endif
 
     if (sendFlags & FLAG_COMMAND)

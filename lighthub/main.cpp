@@ -434,8 +434,10 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
    
     short pfxlen  = 0;
     char * itemName = NULL;
-    char * subItem = NULL;
     char savedTopic[MQTT_TOPIC_LENGTH] = "";
+    bool forLocal=false;
+    aJsonObject * remoteConfig = NULL;
+    int remoteID=0;
 
 // in Retaining status - trying to restore previous state from retained output topic. Retained input topics are not relevant.
 if  (lanStatus == RETAINING_COLLECTING) 
@@ -455,17 +457,39 @@ if  (lanStatus == RETAINING_COLLECTING)
                 }
             return;     
            } 
+         else forLocal = true;  
  }
 else
 {
         pfxlen=inTopic(topic,T_DEV);
         if (!pfxlen) pfxlen = inTopic(topic,T_BCST);  
            else // Personal device topic
-               strncpy(savedTopic,topic,sizeof(savedTopic)-1);    
+               strncpy(savedTopic,topic,sizeof(savedTopic)-1);   //Save topic to delete after exec
+
+        if (pfxlen) forLocal=true;       
+                
+        #ifdef CANDRV  
+            else  //Nor local or bcst name, try can names
+            {    
+                pfxlen=inTopic(topic,T_ROOT); //check root
+                if (pfxlen)
+                {
+                remoteConfig = LHCAN.findConfbyName(topic+pfxlen,&remoteID);
+                if (remoteConfig)
+                {
+                    while(*(topic+pfxlen) && *(topic+pfxlen)!='/') pfxlen++; //skip controller name
+                    if (*(topic+pfxlen)=='/') pfxlen++;
+                    debugSerial<<F("MQTT: remote command Item:")<<topic+pfxlen<<endl;
+                    strncpy(savedTopic,topic,sizeof(savedTopic)-1); //Save topic to delete after exec
+                }
+                else pfxlen=0;
+                }
+            }
+        #endif        
 }   
     
     if (!pfxlen) {
-        debugSerial<<F("Skipping..")<<endl;
+//        debugSerial<<F("Skipping..")<<endl;
         return;// -3;
     }
 
@@ -473,13 +497,16 @@ else
     // debugSerial<<itemName<<endl;
     if(!strcmp_P(itemName,CMDTOPIC_P) && payload && (strlen((char*) payload)>1)) {
         mqttClient.deleteTopic(topic);
-        cmd_parse((char *)payload);
+        if (forLocal)((char *)payload);
+        //TODO implement for remote
         return;// -4;
     }
   //if (itemName[0]=='$') return;// -6; //Skipping homie stuff
   if (strrchr(topic,'$')) return;
 
-  Item item(itemName);
+
+/*
+  Item item(itemName);    
   if (item.isValid() && (item.Ctrl((char *)payload)>0) && savedTopic[0] && lanStatus != RETAINING_COLLECTING)       
 
   //if  (lanStatus != RETAINING_COLLECTING && (mqttClient.isRetained())) 
@@ -487,7 +514,36 @@ else
            debugSerial<<F("MQTT: Complete. Remove topic ")<<savedTopic<<endl;
            mqttClient.deleteTopic(savedTopic);   
         }
- 
+ */
+
+  bool succeeded = false;
+
+  if (forLocal)
+  {  
+  Item item(itemName);    
+    if (item.isValid()) //Local item
+    {
+          if (item.Ctrl((char *)payload)>0)  succeeded = true;
+    }
+  }
+
+ #ifdef CANDRV
+  if (remoteConfig) 
+   {
+       aJsonObject * remoteItems = aJson.getObjectItem(remoteConfig,"items");
+       if (remoteItems) 
+            {
+            Item remoteItem(itemName,remoteItems);
+            if (remoteItem.Ctrl((char *)payload,NULL,remoteID)>0)   succeeded = true;
+            }
+   }    
+ #endif      
+
+if (succeeded && savedTopic[0] && lanStatus != RETAINING_COLLECTING)   
+{    
+    debugSerial<<F("MQTT: Complete. Remove topic ")<<savedTopic<<endl;
+    mqttClient.deleteTopic(savedTopic);   
+}
  return;// -7;   
 }
 
@@ -713,12 +769,17 @@ lan_status lanLoop() {
                 setTopic(buf,sizeof(buf),T_OUT);
                 strncat(buf, "+/+/#", sizeof(buf)); // Subscribing only on separated command/parameters topics
                 mqttClient.unsubscribe(buf);
+
+                #ifdef CANDRV
+                setTopic(buf,sizeof(buf),T_ROOT);
+                LHCAN.subscribeTopics(buf,sizeof(buf));
+                #endif
                 
                 onMQTTConnect();
 
                 #ifdef CRYPT
-                //setTopic(buf,sizeof(buf),T_OUT);
-                strncpy(buf, "+/+/$salt", sizeof(buf));      // Only on separated cmd/val topics
+                setTopic(buf,sizeof(buf),T_ROOT);
+                strncat(buf, "+/$salt", sizeof(buf));      // Only on separated cmd/val topics
                 mqttClient.subscribe(buf);
                 #endif
 
@@ -2733,7 +2794,6 @@ LHCAN.upTime(ut);
 #endif
 }
 
-//#if not defined (NOIP)
 void setupMacAddress() {  
 //Check MAC, stored in NVRAM
 
@@ -2765,12 +2825,7 @@ if (!sysConf.getMAC()) {
     #endif
     }
     printMACAddress();
-
-    #ifdef CANDRV
-   // LHCAN.lookupMAC();
-    #endif
 }
-//#endif //NOIP
 
 void setupCmdArduino() {
     //cmdInit(uint32_t(SERIAL_BAUD));
