@@ -119,7 +119,7 @@ Error
 class canDriver 
 {
 public:
-canDriver(){ready=false; controllerId=0; responseTimer=0; state=canState::stateUnknown;canConfigObj=NULL;canRemoteConfigObj=NULL;};
+canDriver(){ready=false; controllerId=0; responseTimer=0; state=canState::stateUnknown;canConfigObj=NULL;canRemoteConfigObj=NULL;confCRC=0xFFFF;};
 uint8_t getMyId();
 bool sendStatus(uint16_t itemNum, itemCmd cmd, int subItem = NO_SUBITEM);
 bool sendCommand(uint8_t devID, uint16_t itemID, itemCmd cmd, bool status=false, int subItemID=NO_SUBITEM );
@@ -143,6 +143,7 @@ uint8_t getControllerID(){return controllerId;};
 uint8_t getIdByMac(macAddress mac);
 aJsonObject * canConfigObj;
 aJsonObject * canRemoteConfigObj;
+uint16_t confCRC;
     datagram_t RXpacket;
     canid_t RXid;
     uint8_t RXlen;

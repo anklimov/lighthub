@@ -482,7 +482,11 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                           }  
                                         else 
                                           {
-                                          if (doExecution) executeCommand(execObj, -1, mappedParam);
+                                          if (doExecution) 
+                                                    {
+                                                    debugSerial<<F("MBUS: exec ");mappedParam.debugOut();    
+                                                    executeCommand(execObj, -1, mappedParam);
+                                                    }
                                           // if param updated by device and no new value queued to send - update @V to avoid "Ignored - equal with setted val" 
                                           if (settedValue && !(execObj->subtype & MB_NEED_SEND)) 
                                               settedValue->valueint=param;
@@ -696,7 +700,7 @@ int out_Modbus::Poll(short cause)
 if (cause==POLLING_SLOW) return 0;  
 bool lineInitialized = false;  
 
-if (modbusBusy || (Status() != CST_INITIALIZED) || ( mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),100))) return 0;
+if (modbusBusy || (Status() != CST_INITIALIZED) || ( mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),200))) return 0;
 
 aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
 if (itemParametersObj && itemParametersObj->type ==aJson_Object)
@@ -731,7 +735,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                   debugSerial<<"MBUS: SEND "<<item->itemArr->name<<" ";   
                                                   sendRes = sendModbus(execObj->name,outValue);
                                                   needResend = (savedValue != outValue->valueint);
-                                                  while(needResend && mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),100)) modbusIdle();
+                                                  while(needResend && mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),200)) modbusIdle();
                                                   }
                                               while (needResend); //repeat sending if target value changed while we're waited for mbus responce
 
@@ -768,7 +772,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
            }
   
 
-if (isTimeOver(store->timestamp,millis(),store->pollingInterval) && ( !mbusSlenceTimer || isTimeOver(mbusSlenceTimer,millis(),100)))
+if (isTimeOver(store->timestamp,millis(),store->pollingInterval) && ( !mbusSlenceTimer || isTimeOver(mbusSlenceTimer,millis(),200)))
 {
 
 // Clean_up FLAG_SEND_ERROR flag 

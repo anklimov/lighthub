@@ -287,6 +287,10 @@ NRFFlashStorage EEPROM;
                               putEOF();
                               debugSerial<<F("EOF")<<endl;
                               }
+      #if defined (ARDUINO_ARCH_STM32)
+      eeprom_buffer_flush();
+      #endif                 
+                 
       #if  defined(__SAM3X8E__)
       if (samBufferPos) flush();
       #endif

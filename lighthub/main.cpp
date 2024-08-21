@@ -177,11 +177,11 @@ int8_t mqttErrorRate=0;
 void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init for DUE
 #endif
 
-bool cleanConf(bool wait)
+bool cleanConf(short locksAlowed )
 {
   if (!root) return true;
   bool clean = true;
-if (configLocked)
+if (configLocked>locksAlowed)
                 {
                     errorSerial<<F("Can not clean - locked")<<endl;
                     return false;
@@ -436,6 +436,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
     char * itemName = NULL;
     char savedTopic[MQTT_TOPIC_LENGTH] = "";
     bool forLocal=false;
+    bool forBcast=false;
     aJsonObject * remoteConfig = NULL;
     int remoteID=0;
 
@@ -461,15 +462,29 @@ if  (lanStatus == RETAINING_COLLECTING)
  }
 else
 {
-        pfxlen=inTopic(topic,T_DEV);
+     /*   pfxlen=inTopic(topic,T_DEV);
         if (!pfxlen) pfxlen = inTopic(topic,T_BCST);  
            else // Personal device topic
                strncpy(savedTopic,topic,sizeof(savedTopic)-1);   //Save topic to delete after exec
+*/
+        pfxlen=inTopic(topic,T_DEV);
+        if (pfxlen)
+        {
+            strncpy(savedTopic,topic,sizeof(savedTopic)-1);   //Save topic to delete after exec
+            forLocal=true;  
+        }
+        else
+        {
+            pfxlen = inTopic(topic,T_BCST);  
+            if (pfxlen) forBcast = true;
+        }
 
-        if (pfxlen) forLocal=true;       
+
+       //if (pfxlen) forLocal=true;       
                 
         #ifdef CANDRV  
-            else  //Nor local or bcst name, try can names
+          // else  //Nor local or bcst name, try can names
+            if (!forLocal && !forBcast)
             {    
                 pfxlen=inTopic(topic,T_ROOT); //check root
                 if (pfxlen)
@@ -497,7 +512,7 @@ else
     // debugSerial<<itemName<<endl;
     if(!strcmp_P(itemName,CMDTOPIC_P) && payload && (strlen((char*) payload)>1)) {
         mqttClient.deleteTopic(topic);
-        if (forLocal)((char *)payload);
+        if (forLocal || forBcast)((char *)payload);
         //TODO implement for remote
         return;// -4;
     }
@@ -518,7 +533,7 @@ else
 
   bool succeeded = false;
 
-  if (forLocal)
+  if (forLocal || forBcast)
   {  
   Item item(itemName);    
     if (item.isValid()) //Local item
@@ -536,7 +551,8 @@ else
             Item remoteItem(itemName,remoteItems);
             if (remoteItem.Ctrl((char *)payload,NULL,remoteID)>0)   succeeded = true;
             }
-   }    
+   }   
+ /// TODO bcast - scan CAN   
  #endif      
 
 if (succeeded && savedTopic[0] && lanStatus != RETAINING_COLLECTING)   
@@ -1446,8 +1462,8 @@ return 200;
 }
 #endif
 
-void applyConfig() {
-    if (!root || configLocked) return;
+bool  applyConfig() {
+    if (!root || configLocked) return false;
 configLocked++;
 infoSerial<<F("Applying config")<<endl;
 items = aJson.getObjectItem(root, "items");
@@ -1593,6 +1609,7 @@ lanStatus=IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER; ///change
 if (lanStatus == OPERATION_NO_MQTT) lanStatus=IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER;
 
 configLocked--;
+return configLoaded;
 }
 
 void printConfigSummary() {
@@ -1655,7 +1672,7 @@ int loadConfigFromEEPROM()
     if (sysConfStream.peek() == '{') {
         debugSerial<<F("JSON detected")<<endl;
         aJsonStream as = aJsonStream(&sysConfStream);
-        cleanConf(false);
+        cleanConf(0);  ///WTF!
         root = aJson.parse(&as);
         sysConfStream.close();
         if (!root) {
@@ -1665,7 +1682,8 @@ int loadConfigFromEEPROM()
             configLocked--;
             return 0;
         }
-        infoSerial<<F("Loaded from EEPROM")<<endl;
+        infoSerial<<F("Loaded from EEPROM")<<endl;    
+ //       debugSerial.print(aJson.print(root));
         configLocked--;
         applyConfig();
         sysConf.loadETAG();
@@ -2518,11 +2536,15 @@ WiFi.onEvent(WiFiEvent);
         infoSerial<<QUOTE(W5500_CS_PIN)<<endl;
     #endif
 
- #endif //NOIP       
-loadConfigFromEEPROM();    
+ #endif //NOIP      
 
 #ifdef CANDRV
 LHCAN.begin();
+#endif
+
+loadConfigFromEEPROM();    
+
+#ifdef CANDRV
 LHCAN.lookupMAC();
 #endif
 }

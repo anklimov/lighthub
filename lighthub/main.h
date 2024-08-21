@@ -268,7 +268,7 @@ int cmdFunctionHelp(int arg_cnt, char **args);
 
 int cmdFunctionKill(int arg_cnt, char **args);
 
-void applyConfig();
+bool  applyConfig();
 
 int cmdFunctionLoad(int arg_cnt, char **args);
 
@@ -283,6 +283,8 @@ int cmdFunctionGet(int arg_cnt, char **args);
 int cmdFunctionLoglevel(int arg_cnt, char **args);
 
 void printBool(bool arg);
+
+int cmdFunctionSave(int arg_cnt, char **args);
 /*
 void saveFlash(short n, char *str);
 
@@ -333,7 +335,7 @@ bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLat
 
 void resetHard();
 
-bool cleanConf(bool wait);
+bool cleanConf(short locksAlowed=0);
 
 void printCurentLanConfig();
 

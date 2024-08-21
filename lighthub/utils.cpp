@@ -983,7 +983,10 @@ uint16_t getCRC(aJsonObject * in)
 if (!in)  return 0;
 CRCStream crcStream;
 aJsonStream aJsonCrcStream = aJsonStream(&crcStream);
-aJson.print(in,&aJsonCrcStream);
+debugSerial<<"CRC: in";
+debugSerial.print(aJson.print(in));
+aJson.print(in,&aJsonCrcStream,false);
+debugSerial<<"\nCRC:"<<crcStream.getCRC16();
 return crcStream.getCRC16();
 }
 

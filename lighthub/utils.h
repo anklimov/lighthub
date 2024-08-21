@@ -82,7 +82,7 @@ bool checkToken(char * token, char * data);
  bool isProtectedPin(short pin);
  bool i2cReset();
  uint16_t getCRC(aJsonObject * in);
- 
+
 #include "util/crc16_.h"
 class CRCStream : public Stream
 {
@@ -98,7 +98,7 @@ public:
 
     virtual void flush(){};
     // Print methods
-    virtual size_t write(uint8_t c) {CRC16 = crc16_update(CRC16, c);};
+    virtual size_t write(uint8_t c) {CRC16 = crc16_update(CRC16, c);return 1;};
     virtual int availableForWrite(){return 1;};
 
 };

@@ -159,10 +159,21 @@ void Item::Parse() {
             aJson.addItemToArray(itemArr, aJson.createNull());//( (long int) 0));
                    // int(defval[i]) )); //Enlarge item to 4 elements. VAL=int if no other definition in conf
         //itemType = aJson.getArrayItem(itemArr, I_TYPE)->valueint;
+        /*
         itemType = replaceTypeToInt (aJson.getArrayItem(itemArr, I_TYPE));
         itemArg = aJson.getArrayItem(itemArr, I_ARG);
         itemVal = aJson.getArrayItem(itemArr, I_VAL);
         itemExt = aJson.getArrayItem(itemArr, I_EXT);
+        */
+
+        aJsonObject * itemTypeObj = itemArr->child;
+        if (itemTypeObj) itemArg = itemTypeObj->next;
+        if (itemArg) itemVal = itemArg->next;
+        if (itemVal) itemExt = itemVal->next;
+
+        itemType = replaceTypeToInt (itemTypeObj);
+
+
         switch (itemType)
         {
 #ifndef  PWM_DISABLE            
@@ -861,7 +872,9 @@ bool Item::digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem, bool aut
       aJsonObject *i = itemArr->child;                                        
                 configLocked++;
                 while (i) {
-                    if (i->type == aJson_String)
+                    switch  (i->type)
+                    {
+                    case aJson_String:
                     {   //debugSerial<< i->valuestring<<endl;
                         aJsonObject *nextItem = aJson.getObjectItem(rootItems, i->valuestring);
                         if (nextItem && nextItem->type == aJson_Array) //nextItem is correct item
@@ -869,8 +882,9 @@ bool Item::digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem, bool aut
                                 Item it(nextItem);  
                                 if (cmd && it.isValid()) it.Ctrl(*cmd,subItem,false,authorized); //Execute (non recursive)
                                 //Retrieve itemType    
-                                aJsonObject * itemtype = aJson.getArrayItem(nextItem,0);
-                                if (itemtype && itemtype->type == aJson_Int  && itemtype->valueint == CH_GROUP) 
+                                //aJsonObject * itemtype = aJson.getArrayItem(nextItem,0);
+                                //if (itemtype && itemtype->type == aJson_Int  && itemtype->valueint == CH_GROUP) 
+                                if (it.itemType == CH_GROUP) 
                                     { //is Group
                                     aJsonObject * itemSubArray = aJson.getArrayItem(nextItem,1);
                                     short res = digGroup(itemSubArray,cmd,subItem,authorized);
@@ -888,6 +902,11 @@ bool Item::digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem, bool aut
                                                     }
                                } 
                     }    
+                    break;
+                    case aJson_Object:
+                    case aJson_Array:
+                    executeCommand(i,-1,*cmd);
+                    }//switch
                     i = i->next;
                 } //while
                 configLocked--;

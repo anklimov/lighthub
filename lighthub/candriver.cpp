@@ -156,12 +156,21 @@ return res;
 
 bool canDriver::begin()
             { 
-            if (!root) return false;    
-            canConfigObj =  aJson.getObjectItem(root, "can");
-            if (!canConfigObj) return false;    
-            canRemoteConfigObj=  aJson.getObjectItem(canConfigObj, "conf");
+            if (root)
+            {
+                canConfigObj =  aJson.getObjectItem(root, "can");
+                if (canConfigObj) 
+                    {
+                    canRemoteConfigObj=  aJson.getObjectItem(canConfigObj, "conf");
+                    controllerId = getMyId(); 
+                    }
+            confCRC=getCRC(root);        
+            }
+            
 
-            controllerId = getMyId();    
+                #ifndef NOIP    
+                if (!canConfigObj) return false;    
+                #endif     
 
                             if (!ready) // not reInitialization
                             {
@@ -314,7 +323,7 @@ switch (state)
     if (CANConfStream.peek() == '{') {
                 debugSerial<<F("CAN: JSON detected")<<endl;
                 aJsonStream as = aJsonStream(&CANConfStream);
-                cleanConf(false);
+                cleanConf(1);
                 root = aJson.parse(&as);
                 CANConfStream.close();
                 if (!root) {
@@ -327,7 +336,9 @@ switch (state)
                 }
                 infoSerial<<F("CAN: config Loaded")<<endl;
                 configLocked--;
-                applyConfig();
+                cmdFunctionSave(0,NULL);
+                if (applyConfig()) ;
+      //                  debugSerial.print(aJson.print(root,false));
                 sysConf.loadETAG();
                 state = canState::Idle;
                 return ;
@@ -446,10 +457,12 @@ if (id.status){
                         debugSerial<<F("CAN: item ")<<it.itemArr->name<<" ";
                         ic.debugOut();
                         
-                        if (ic.isCommand()) flags |= FLAG_COMMAND;
                         if (ic.isValue()) flags |= FLAG_PARAMETERS;
+                        if (ic.getSuffix()==S_DELAYED) flags |= FLAG_SEND_DELAYED;
+                           else if (ic.isCommand()) flags |= FLAG_COMMAND;
+
                         ic.saveItem(&it,flags);
-                        it.SendStatusImmediate(ic,flags | FLAG_NOT_SEND_CAN,it.getSubItemStrById(id.subItemId));
+                        it.SendStatusImmediate(ic,flags | FLAG_NOT_SEND_CAN, it.getSubItemStrById(id.subItemId));
                         return true;
                     }
 
@@ -465,7 +478,7 @@ if (id.status){
         case canState::MACLookup:
         if ((id.payloadType == payloadType::lookupMAC))
            {
-                if (canConfigObj && (id.subjId == getCRC(canConfigObj))) ///?
+                if (root && (id.subjId == confCRC)) ///?
                     {
                         infoSerial << (F("Valid config already onboard")) << endl;
                         state = canState::Idle;
@@ -661,8 +674,11 @@ return 0;
 }
 
 bool canDriver::write(uint32_t msg_id, datagram_t * buf, uint8_t size)
-            {   //return 0;
-                if (!ready) errorSerial<<"CAN: not initialized"<<endl;
+            {   //
+                if (!ready) {
+                            errorSerial<<"CAN: not initialized"<<endl;
+                            return false;
+                            }
                 bool res;
                 if (size>8) size = 8;
 
