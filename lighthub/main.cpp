@@ -115,24 +115,24 @@ UID UniqueID;
 #endif
 uint8_t brokers = 0;
 char *deviceName = NULL;
-aJsonObject *topics = NULL;
-aJsonObject *root = NULL;
-aJsonObject *items = NULL;
-aJsonObject *inputs = NULL;
-aJsonObject *brokersArr = NULL;
-aJsonObject *mqttArr = NULL;
+ aJsonObject *topics = NULL;
+ aJsonObject *root = NULL;
+ aJsonObject *items = NULL;
+ aJsonObject *inputs = NULL;
+ aJsonObject *brokersArr = NULL;
+ aJsonObject *mqttArr = NULL;
 #ifdef _modbus
-aJsonObject *modbusObj = NULL;
+ aJsonObject *modbusObj = NULL;
 #endif
 #ifdef _owire
-aJsonObject *owArr = NULL;
+ aJsonObject *owArr = NULL;
 #endif
 #ifdef _dmxout
-aJsonObject *dmxArr = NULL;
+ aJsonObject *dmxArr = NULL;
 #endif
 
 #ifdef SYSLOG_ENABLE
-bool syslogInitialized = false;
+volatile bool syslogInitialized = false;
 #endif
 
 #ifdef WIFI_ENABLE
@@ -153,11 +153,11 @@ volatile uint32_t ultrasonicInputCheck=0;
 
 aJsonObject *pollingItem = NULL;
 
-bool owReady = false;
-bool configOk = false; // At least once connected to MQTT
-bool configLoaded = false;
-bool initializedListeners = false;
-uint8_t DHCP_failures = 0;
+volatile bool owReady = false;
+volatile bool configOk = false; // At least once connected to MQTT
+volatile bool configLoaded = false;
+volatile bool initializedListeners = false;
+volatile uint8_t DHCP_failures = 0;
 volatile int8_t ethernetIdleCount =0;
 volatile int8_t configLocked = 0;
 
@@ -179,43 +179,17 @@ void watchdogSetup(void) {}    //Do not remove - strong re-definition WDT Init f
 
 bool cleanConf(short locksAlowed )
 {
-  if (!root) return true;
-  bool clean = true;
+  if (!root) 
+    {
+    //debugSerial<<F("No root")<<endl;    
+    return true;
+    }
+
 if (configLocked>locksAlowed)
                 {
                     errorSerial<<F("Can not clean - locked")<<endl;
                     return false;
                 }
-/*
-No more unsafe operations  
-if (wait)
-{  
-debugSerial<<F("Unlocking config ...")<<endl;
-uint32_t stamp=millis();
-while (configLocked && !isTimeOver(stamp,millis(),10000))
-{
-          //wdt_res();
-          cmdPoll();
-          #ifdef _owire
-          if (owReady && owArr) owLoop();
-          #endif
-          #ifdef _dmxin
-          DMXCheck();
-          #endif
-          if (isNotRetainingStatus())  pollingLoop();
-          thermoLoop();
-          inputLoop(CHECK_INPUT);
-          yield();
-}
-
-if (configLocked)
-{
-    errorSerial<<F("Not unlocked in 10s - continue ...")<<endl;
-    clean = false;
-}
-} //wait
-*/
-
 debugSerial<<F("Stopping channels ...")<<endl;
 timerHandlerBusy++;
 //Stoping the channels
@@ -265,7 +239,7 @@ debugSerial<<F("Deleting conf. RAM was:")<<freeRam();
      
      configOk=false;
  timerHandlerBusy--;     
- return clean;
+ return true;
 }
 
 bool isNotRetainingStatus() {
@@ -1671,8 +1645,9 @@ int loadConfigFromEEPROM()
 
     if (sysConfStream.peek() == '{') {
         debugSerial<<F("JSON detected")<<endl;
+        cleanConf(1);  
+
         aJsonStream as = aJsonStream(&sysConfStream);
-        cleanConf(0);  ///WTF!
         root = aJson.parse(&as);
         sysConfStream.close();
         if (!root) {
@@ -1974,7 +1949,7 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
             infoSerial<<F("got Config\n"); delay(500);
             aJsonFileStream as = aJsonFileStream(configStream);
             noInterrupts();
-        if (!cleanConf(true))
+        if (!cleanConf(0))
         {
             errorSerial<<F("Get aborted")<<endl;
             hclient.closeStream(configStream); 
@@ -2051,7 +2026,7 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
     if (responseStatusCode == 200) {
         aJsonStream socketStream = aJsonStream(&htclient);
         debugSerial<<F("Free:")<<freeRam()<<endl;
-        if (!cleanConf(true))
+        if (!cleanConf(0))
         {
             errorSerial<<F("Get aborted")<<endl;
             htclient.stop();
@@ -2130,7 +2105,7 @@ if (!sysConf.getServer(configServer,sizeof(configServer)))
             sysConf.setETAG(httpClient.header("ETag"));
             //String response = httpClient.getString();
             //debugSerial<<response;
-        if (!cleanConf(true))
+        if (!cleanConf(0))
         {
             errorSerial<<F("Get aborted")<<endl;
             httpClient.end();

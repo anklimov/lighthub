@@ -322,8 +322,8 @@ switch (state)
 
     if (CANConfStream.peek() == '{') {
                 debugSerial<<F("CAN: JSON detected")<<endl;
-                aJsonStream as = aJsonStream(&CANConfStream);
                 cleanConf(1);
+                aJsonStream as = aJsonStream(&CANConfStream);
                 root = aJson.parse(&as);
                 CANConfStream.close();
                 if (!root) {
