@@ -83,6 +83,7 @@ bool checkToken(char * token, char * data);
  bool i2cReset();
  uint16_t getCRC(aJsonObject * in);
 
+#ifdef CANDRV
 #include "util/crc16_.h"
 class CRCStream : public Stream
 {
@@ -102,3 +103,4 @@ public:
     virtual int availableForWrite(){return 1;};
 
 };
+#endif

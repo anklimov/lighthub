@@ -977,7 +977,7 @@ return true;
 }
 
 
-
+#ifdef CANDRV
 uint16_t getCRC(aJsonObject * in)
 {
 if (!in)  return 0;
@@ -987,8 +987,9 @@ aJsonStream aJsonCrcStream = aJsonStream(&crcStream);
 //debugSerial.print(aJson.print(in));
 aJson.print(in,&aJsonCrcStream,false);
 //debugSerial<<"\nCRC:"<<crcStream.getCRC16();
-return crcStream.getCRC16();
+return crcStream.getCRC16(); 
 }
+#endif
 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

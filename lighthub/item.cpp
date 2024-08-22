@@ -156,23 +156,22 @@ void Item::Parse() {
     if (isValid()) {
         // Todo - avoid static enlarge for every types
         for (int i = aJson.getArraySize(itemArr); i < 4; i++)
-            aJson.addItemToArray(itemArr, aJson.createNull());//( (long int) 0));
-                   // int(defval[i]) )); //Enlarge item to 4 elements. VAL=int if no other definition in conf
-        //itemType = aJson.getArrayItem(itemArr, I_TYPE)->valueint;
-        /*
+            aJson.addItemToArray(itemArr, aJson.createNull());
+                
+     /*
         itemType = replaceTypeToInt (aJson.getArrayItem(itemArr, I_TYPE));
         itemArg = aJson.getArrayItem(itemArr, I_ARG);
         itemVal = aJson.getArrayItem(itemArr, I_VAL);
-        itemExt = aJson.getArrayItem(itemArr, I_EXT);
-        */
-
+        itemExt = aJson.getArrayItem(itemArr, I_EXT); */
+        
+        aJsonObject * cmdObj = NULL;
         aJsonObject * itemTypeObj = itemArr->child;
         if (itemTypeObj) itemArg = itemTypeObj->next;
-        if (itemArg) itemVal = itemArg->next;
-        if (itemVal) itemExt = itemVal->next;
+        if (itemArg) itemVal = itemArg->next;        
+        if (itemVal) cmdObj = itemVal->next;
+        if (cmdObj) itemExt = cmdObj->next;
 
         itemType = replaceTypeToInt (itemTypeObj);
-
 
         switch (itemType)
         {

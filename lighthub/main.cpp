@@ -486,7 +486,7 @@ else
     // debugSerial<<itemName<<endl;
     if(!strcmp_P(itemName,CMDTOPIC_P) && payload && (strlen((char*) payload)>1)) {
         mqttClient.deleteTopic(topic);
-        if (forLocal || forBcast)((char *)payload);
+        if (forLocal || forBcast)  cmd_parse ((char *)payload);
         //TODO implement for remote
         return;// -4;
     }
@@ -1645,7 +1645,7 @@ int loadConfigFromEEPROM()
 
     if (sysConfStream.peek() == '{') {
         debugSerial<<F("JSON detected")<<endl;
-        cleanConf(1);  
+        if (root) cleanConf(1);  
 
         aJsonStream as = aJsonStream(&sysConfStream);
         root = aJson.parse(&as);
