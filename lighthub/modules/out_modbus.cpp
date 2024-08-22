@@ -463,7 +463,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                             
                                             if (doExecution && (submitRecurrentOut || *submitParam)) 
                                                   {
-                                                  debugSerial<<F("MBUS: exec ");mappedParam.debugOut();  
+                                                  //debugSerial<<F("MBUS: exec ");mappedParam.debugOut();  
                                                   executeCommand(execObj, -1, mappedParam); 
                                                   *submitParam=true; //if requrrent check has submit smth - report it.  
                                                   }
@@ -484,7 +484,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                           {
                                           if (doExecution) 
                                                     {
-                                                    debugSerial<<F("MBUS: exec ");mappedParam.debugOut();    
+                                                    //debugSerial<<F("MBUS: exec ");mappedParam.debugOut();    
                                                     executeCommand(execObj, -1, mappedParam);
                                                     }
                                           // if param updated by device and no new value queued to send - update @V to avoid "Ignored - equal with setted val" 
