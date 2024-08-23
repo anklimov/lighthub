@@ -570,7 +570,7 @@ return 0;
 aJsonObject * canDriver::getConfbyID(uint8_t devId)
 {
 if (!canConfigObj) return NULL;
-if (!canRemoteConfigObj) return NULL;
+if (!canRemoteConfigObj || canRemoteConfigObj->type != aJson_Object) return NULL;
 aJsonObject * remoteConfObj=canRemoteConfigObj->child; 
 while (remoteConfObj)
     {  
@@ -587,7 +587,7 @@ return NULL;
 
 aJsonObject * canDriver::findConfbyName(char* devName, int * devAddr)
 {
-if (!canRemoteConfigObj && !devName) return NULL;
+if (!canRemoteConfigObj || canRemoteConfigObj->type != aJson_Object || !devName ) return NULL;
 aJsonObject * remoteConfObj=canRemoteConfigObj->child; 
 while (remoteConfObj)
     {  
@@ -616,7 +616,7 @@ extern PubSubClient mqttClient;
 bool canDriver::subscribeTopics(char * root, size_t buflen)
 {
  if (!root) return false;   
- if (!canRemoteConfigObj) return false;
+ if (!canRemoteConfigObj || canRemoteConfigObj->type != aJson_Object) return false;
 
  int rootLen = strlen(root);     
 

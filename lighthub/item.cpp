@@ -341,13 +341,13 @@ uint16_t getCanNum(aJsonObject* verb)
       case aJson_Array: 
         {
         aJsonObject *canNumObj=aJson.getArrayItem(verb,1);  
-        if (canNumObj->type == aJson_Int) return canNumObj->valueint;
+        if (canNumObj && canNumObj->type == aJson_Int) return canNumObj->valueint;
         return 0;   
         }
       case aJson_Object:  
         {
         aJsonObject *canNumObj=aJson.getObjectItem(verb, "can");  
-        if (canNumObj->type == aJson_Int) return canNumObj->valueint;
+        if (canNumObj && canNumObj->type == aJson_Int) return canNumObj->valueint;
         return 0;   
         }    
    }          

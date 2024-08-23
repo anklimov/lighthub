@@ -2717,6 +2717,18 @@ infoSerial<<F("\n(+)CAN");
 #else
 infoSerial<<F("\n(-)CAN");
 #endif
+
+#ifdef PULSEPIN12
+infoSerial<<F("\n(+)PULSE on PIN12");
+#else
+infoSerial<<F("\n(-)PULSE on PIN12");
+#endif
+
+#ifdef CRYPT
+infoSerial<<F("\n(+)CRYPT");
+#else
+infoSerial<<F("\n(-)CRYPT");
+#endif
 //#ifdef IPMODBUS
 //infoSerial<<F("\n(+)IPMODBUS");
 //#endif
