@@ -358,10 +358,10 @@ switch (state)
 bool canDriver::processPacket(canid_t id, datagram_t *packet, uint8_t len, bool rtr)
 {
 
-debugSerial.print("CAN: Rcvd ");
-debugSerial.print(len);
-debugSerial.print(" bytes id:");
-debugSerial.println(id.id,HEX);
+traceSerial.print("CAN: Rcvd ");
+traceSerial.print(len);
+traceSerial.print(" bytes id:");
+traceSerial.println(id.id,HEX);
 
 //if (id.deviceId && (id.deviceId != controllerId) && !id.status) return false;
 
@@ -638,6 +638,9 @@ while (remoteConfObj)
         }
         remoteConfObj=remoteConfObj->next;
     }
+ //debugSerial<<"Subscribed"<<endl;
+ //delay(100);   
+ return true;   
 }
 #endif
 
@@ -689,7 +692,7 @@ bool canDriver::write(uint32_t msg_id, datagram_t * buf, uint8_t size)
                 CAN_TX_msg.id = msg_id;
                 CAN_TX_msg.flags.extended = 1;  // To enable extended ID
                 CAN_TX_msg.len=size;
-                if (res=STMCan.write(CAN_TX_msg)) debugSerial<<("CAN: Wrote ")<<size<<" bytes, id "<<_HEX(msg_id)<<endl;
+                if (res=STMCan.write(CAN_TX_msg)) {traceSerial<<("CAN: Wrote ")<<size<<" bytes, id "<<_HEX(msg_id)<<endl;}
                     else debugSerial.println("CAN: Write error");
                 return res;    
                 #endif
@@ -699,7 +702,7 @@ bool canDriver::write(uint32_t msg_id, datagram_t * buf, uint8_t size)
                 CAN.beginExtendedPacket(msg_id,size);
                 CAN.write(buf->data,size);
                 //for(uint8_t i=0;i<size; i++) CAN.write(buf[i]);
-                if (res=CAN.endPacket()) debugSerial<< ("CAN: Wrote ")<<size << " bytes, id "<<_HEX(msg_id)<<endl;
+                if (res=CAN.endPacket()) {traceSerial<< ("CAN: Wrote ")<<size << " bytes, id "<<_HEX(msg_id)<<endl;}
                     else debugSerial.println("CAN: Write error");
                 return res;
                 #endif
@@ -712,8 +715,8 @@ bool canDriver::write(uint32_t msg_id, datagram_t * buf, uint8_t size)
                 //outgoing.priority = 4; //0-15 lower is higher priority
                 if (buf) for(uint8_t i=0;i<size; i++) CAN_TX_msg.data.bytes[i]=buf->data[i];
                 res=Can0.sendFrame(CAN_TX_msg);
-                if (res) debugSerial<<("CAN: Wrote ")<<size<<" bytes, id "<<_HEX(msg_id)<<endl;
-                                                    else debugSerial.println("CAN: Write error");
+                if (res) {traceSerial<<F("CAN: Wrote ")<<size<<" bytes, id "<<_HEX(msg_id)<<endl;}
+                                                    else errorSerial.println("CAN: Write error");
                 return res;
                 #endif
         }
@@ -724,7 +727,7 @@ bool canDriver::write(uint32_t msg_id, datagram_t * buf, uint8_t size)
 
 bool canDriver::sendStatus(uint16_t itemNum, itemCmd cmd, int subItem)
 {
- if (!itemNum) return false;
+ if (!itemNum || !controllerId) return false;
  return sendCommand(controllerId, itemNum, cmd, true, subItem);
 }
 
@@ -771,7 +774,7 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID,itemCmd cmd, bool sta
  packet.cmd = cmd.cmd;
  packet.param = cmd.param;
  
- debugSerial << ((status)?"CAN: send Status":"CAN: send Command");
+ debugSerial << ((status)?"CAN: Send Status":"CAN: Send Command");
  debugSerial<<F(" ->[")<<devID<<":"<<itemID<<"] "; 
  if (subItemID!=NO_SUBITEM)  debugSerial<<F("Subitem:")<<subItemID<<" "; 
  cmd.debugOut();

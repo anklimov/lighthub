@@ -6,7 +6,7 @@
 
 #define MAXFLASHSTR 32
 #define PWDFLASHSTR 16
-#define EEPROM_SIGNATURE "LHC2"
+#define EEPROM_SIGNATURE "LHC3"
 #define EEPROM_SIGNATURE_LENGTH 4
 
 //#define EEPROM_offsetJSON IFLASH_PAGE_SIZE
@@ -25,11 +25,13 @@ const char EEPROM_signature[] = EEPROM_SIGNATURE;
                 struct
                       { 
                         uint8_t  serialDebugLevel:4; 
-                        uint8_t  notGetConfigFromHTTP:1;
-                        uint8_t  udpDebugLevel:3;                   
+                        uint8_t  udpDebugLevel:4;   
+
+                        uint8_t  notGetConfigFromHTTP:1;                
                         uint8_t  notSaveSuccedConfig:1;
                         uint8_t  dhcpFallback:1;
-                        uint8_t  spare2:6;
+                        uint8_t  spare2:5;
+
                         uint16_t sysConfigHash;
                       };      
  } systemConfigFlags;

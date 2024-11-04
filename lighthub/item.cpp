@@ -1214,16 +1214,46 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
                 return -1;
             }    
     if (allowRecursion && itemArg->type == aJson_Array && operation) 
-                {
-                chActive=(isActive()>0);    
-                digGroup(itemArg,&cmd,subItem,authorized);   
-
-                if ((suffixCode==S_CMD) &&  cmd.isValue())  
-                                            {
-                                            scheduleOppositeCommand(originalCmd,chActive,authorized);         
-                                            scheduledOppositeCommand = true;
-                                            }   
+                { 
+                if ((suffixCode==S_CMD) && ((cmd.getCmd() == CMD_ENABLE) || (cmd.getCmd() == CMD_DISABLE)))
+                    {
+                    debugSerial<<F("CTRL: command just for ")<<itemArr->name<<endl;
+                    
+                    switch (cmd.getCmd())
+                    {
+                        case CMD_ENABLE:
+                            clearFlag(FLAG_DISABLED);
+                            setCmd(CMD_ENABLE);
+                        break;
+                        case CMD_DISABLE:
+                            if (!authorized) 
+                                    {
+                                        errorSerial<<F("Disarming not authorized")<<endl;
+                                        return -5;
+                                    }
+                            setFlag(FLAG_DISABLED);  
+                            setCmd(CMD_DISABLE);  
+                    }
+                    status2Send = FLAG_FLAGS;
+                    if (operation) SendStatus(status2Send);
+                    return 1;
+                    }
+                else 
+                    {
+                    chActive=(isActive()>0);   
+                    if ((suffixCode!=S_CMD) ||  (cmd.getCmd() != CMD_XON) || !getFlag(FLAG_DISABLED))
+                        {
+                            digGroup(itemArg,&cmd,subItem,authorized);   
+                            if ((suffixCode==S_CMD) &&  cmd.isValue())  
+                                                    {
+                                                    scheduleOppositeCommand(originalCmd,chActive,authorized);         
+                                                    scheduledOppositeCommand = true;
+                                                    }   
+                        if (subItem) status2Send |= FLAG_SEND_IMMEDIATE;                             
+                        }
+                    }
                 }
+                
        res=1;     
 
     
@@ -1458,7 +1488,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
                 {
                         debugSerial<<F("CTRL: ON:Already Active\n");
                         setCmd(CMD_ON);
-                        SendStatus(FLAG_COMMAND | FLAG_SEND_DEFFERED);
+                        SendStatus(FLAG_COMMAND | FLAG_SEND_DEFFERED,subItem);
                         return 3;
                 }
 
@@ -1680,7 +1710,7 @@ if ((!driver || driver->isAllowed(cmd)) && (!getFlag(FLAG_FREEZED)))
 
     //update command for HALT & XON and send MQTT status
     if (command2Set) setCmd(command2Set | FLAG_COMMAND);
-    if (operation) SendStatus(status2Send);
+    if (operation) SendStatus(status2Send,subItem);
 } //alowed cmd
  else 
         {
@@ -1858,7 +1888,7 @@ void Item::sendDelayedStatus()
 }
 
 
-int Item::SendStatus(int sendFlags) {
+int Item::SendStatus(int sendFlags, char * subItem) {
     if (sendFlags & FLAG_SEND_IMMEDIATE) sendFlags &= ~ (FLAG_SEND_IMMEDIATE | FLAG_SEND_DEFFERED);
     if ((sendFlags & FLAG_SEND_DEFFERED) ||  freeRam()<150 || (!isNotRetainingStatus() )) {
         setFlag(sendFlags & (FLAG_COMMAND | FLAG_PARAMETERS | FLAG_FLAGS));
@@ -1870,7 +1900,7 @@ int Item::SendStatus(int sendFlags) {
         itemCmd st(ST_VOID,CMD_VOID);  
         st.loadItem(this, FLAG_COMMAND | FLAG_PARAMETERS);
         sendFlags |= getFlag(FLAG_COMMAND | FLAG_PARAMETERS | FLAG_FLAGS); //if some delayed status is pending
-        return SendStatusImmediate(st,sendFlags);
+        return SendStatusImmediate(st,sendFlags,subItem);
     }
   }
     
