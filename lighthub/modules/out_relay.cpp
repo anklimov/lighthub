@@ -35,8 +35,8 @@ int  out_relay::Setup()
 {
 abstractOut::Setup();    
 
-debugSerial<<F("Relay-Out #")<<pin<<F(" init")<<endl;
-if (isProtectedPin(pin)) {errorSerial<<F("pin disabled")<<endl;return 0;}
+debugSerial<<F("relayCtr: ")<<F("pin#")<<pin<<F(" init")<<endl;
+if (isProtectedPin(pin)) {errorSerial<<F("relayCtr: ")<<F("pin disabled")<<endl;return 0;}
 pinMode(pin, OUTPUT);
 digitalWrite(pin,INACTIVE);
 if (item) item->setExt(0);
@@ -52,7 +52,7 @@ return 1;
 
 int  out_relay::Stop()
 {
-debugSerial<<F("Relay-Out #")<<pin<<F(" stop")<<endl;
+debugSerial<<F("relayCtr: ")<<F("Relay-Out #")<<pin<<F(" stop")<<endl;
 pinMode(pin, INPUT);
 setStatus(CST_UNKNOWN);
 return 1;
@@ -60,39 +60,12 @@ return 1;
 
 void  out_relay::relay(bool state)
 {
-char subtopic[10]="/";
-char val[10];  
 digitalWrite(pin,(state)?ACTIVE:INACTIVE);
 if (period<1000) return;
-debugSerial<<F("Out ")<<pin<<F(" is ")<<(state)<<endl;
+debugSerial<<F("relayCtr: ")<<F("Out ")<<pin<<F(" is ")<<(state)<<endl;
+pubAction(state);
+//debugSerial << F("OUT: ")<<F("pub action ") << F(":")<<item->itemArr->name<<subtopic<<F("=>")<<val<<endl;
 
-strcat_P(subtopic,action_P);
-short cmd=item->getCmd();
-if (state) 
- switch(cmd)
- {
-  case CMD_COOL:
-     strcpy_P(val,cooling_P);
-     break;
-  //case CMD_AUTO:
-  //case CMD_HEAT:
-  //case CMD_ON:
-  //   
-  //   break;
-  case CMD_DRY:
-     strcpy_P(val,drying_P);
-     break;
-  case CMD_FAN:
-      strcpy_P(val,fan_P);
-     break;
-  default:
-     strcpy_P(val,heating_P);
-  }
-   else //turned off
-       if (cmd==CMD_OFF)  strcpy_P(val,off_P);
-          else strcpy_P(val,idle_P);
-
-debugSerial << F("pub action ") << publishTopic(item->itemArr->name,val,subtopic)<<F(":")<<item->itemArr->name<<subtopic<<F("=>")<<val<<endl;
 }
 
 
@@ -197,11 +170,11 @@ case S_CMD:
             return 1;
 
             default:
-            debugSerial<<F("Unknown cmd ")<<cmd.getCmd()<<endl;
+            debugSerial<<F("relayCtr: ")<<F("Unknown cmd ")<<cmd.getCmd()<<endl;
           } //switch cmd
 
     default:
-  debugSerial<<F("Unknown suffix ")<<suffixCode<<endl;
+  debugSerial<<F("relayCtr: ")<<F("Unknown suffix ")<<suffixCode<<endl;
 } //switch suffix
 
 return 0;

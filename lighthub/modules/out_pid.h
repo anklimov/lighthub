@@ -11,9 +11,9 @@
 class pidPersistent : public chPersistent  {
 public:
   PID * pid;
-  double output;
-  double input;
-  double setpoint;
+  iotype output;
+  iotype input;
+  iotype setpoint;
   float  prevOut; 
   uint32_t alarmTimer;
   bool alarmArmed;

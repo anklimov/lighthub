@@ -4,6 +4,7 @@
 #include <abstractout.h>
 #include <item.h>
 #include "itemCmd.h"
+#include <PID_v1.h>
 
 
 //static int8_t motorQuote = 0;
@@ -22,5 +23,6 @@ public:
 protected:
     void getConfig();
     aJsonObject * gatesObj;
+    //float acTemp;
 };
 #endif

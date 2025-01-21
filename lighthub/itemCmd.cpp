@@ -1211,7 +1211,7 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
 
                                   case CMD_ENABLE:
                                   item->clearFlag(FLAG_DISABLED);
-                                  item->clearFlag(FLAG_FREEZED);
+                                  //? item->clearFlag(FLAG_FREEZED); //?
                                   break;
                                   case CMD_FREEZE:
                                   item->setFlag(FLAG_FREEZED);

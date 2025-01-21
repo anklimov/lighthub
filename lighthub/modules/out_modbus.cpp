@@ -70,6 +70,47 @@ int  str2regSize(char * str)
   return (int) PAR_I16;
 }
 
+//TODO irs etc
+char * getParamNameByReg(aJsonObject * parameters, int regnum)
+{
+  if (!parameters) return NULL;
+
+  aJsonObject * i = parameters->child;
+  while (i)
+  {
+  aJsonObject *  regObj = aJson.getObjectItem(i, "reg");
+  if (regObj && regObj->type == aJson_Int && regObj->valueint == regnum) 
+      {
+        debugSerial<<F("MBUS: ")<<i->name<<F(" added by num ")<<regnum<<endl;
+        return i->name;
+      }
+  i=i->next;
+  }
+return NULL;  
+}
+
+bool haveAction(aJsonObject * execObj)
+{
+aJsonObject * j = execObj->child;  
+switch (execObj->type) 
+{
+case aJson_Object:
+      while (j)
+        {
+          if (j->name && *j->name && (*j->name != '@')) return true;
+          j=j->next;
+        }
+      break;
+case aJson_Array:
+      while (j)
+        {
+          if (haveAction(j)) return true;
+          j=j->next;
+        }
+}        
+return false;
+}
+
 bool out_Modbus::getConfig()
 {
   // Retrieve and store template values from global modbus settings
@@ -124,10 +165,111 @@ bool out_Modbus::getConfig()
   else {store->pollingRegisters=NULL;store->pollingInterval = 1000;store->pollingIrs=NULL;}
 
   store->parameters=aJson.getObjectItem(templateObj, "par");
+
+  // initializing @S where needed
+ 
+  if (store->parameters)
+  {
+  // Creating for parameters where prefetch required  
+  debugSerial<<F("Adding prefetch regs:")<<endl;
+  aJsonObject * i = store->parameters->child;
+  while (i)
+  {
+  aJsonObject *  prefetchObj = aJson.getObjectItem(i, "prefetch");
+  if (prefetchObj && prefetchObj->type == aJson_Boolean && prefetchObj->valuebool) 
+      {
+        createLastMeasured(i->name);
+      }
+  i=i->next;
+  }
+
+  debugSerial<<F("Adding referred regs:")<<endl;
+  i = store->parameters->child;
+  // Creating for parameters used in references from another parameters
+  while (i)
+  {
+  aJsonObject *  mapObj = aJson.getObjectItem(i, "map");
+  if (mapObj) 
+      {
+        aJsonObject *  defObj = aJson.getObjectItem(mapObj, "def");
+        if (defObj && defObj->type == aJson_Int)
+          {
+            createLastMeasured(getParamNameByReg(store->parameters,defObj->valueint));
+          }
+
+  if (defObj && defObj->type == aJson_String)
+          {
+            createLastMeasured(defObj->valuestring);
+          }        
+  }
+  i=i->next;
+  }
+ debugSerial<<F("Adding regs with actions:")<<endl;
+  // Check - if  action configured for object and create
+  aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
+  if (itemParametersObj)
+  {
+    i = itemParametersObj->child;
+    while (i)
+    { 
+      if (haveAction(i)) createLastMeasured(i);
+      i=i->next;     
+    }
+  }
+
+  }
+
   return true;
   //store->addr=item->getArg(0);
   }
 
+
+int  out_Modbus::createLastMeasured(char * name)
+{
+if (!name) return false;  
+aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
+return createLastMeasured(aJson.getObjectItem(itemParametersObj,name));          
+}
+
+int  out_Modbus::createLastMeasured(aJsonObject * execObj)
+{
+  if (!execObj) return false; 
+        
+  aJsonObject * markObj = execObj;
+    if (execObj->type == aJson_Array) 
+      {
+      markObj = execObj->child;  
+      //storeLastValue = true;
+      }
+  if (!markObj) return false;
+
+  aJsonObject *lastMeasured = aJson.getObjectItem(markObj,"@S");
+  if (lastMeasured) return false;
+
+  debugSerial<<F("MBUS: Add @S: ")<<execObj->name<<endl;
+  aJson.addNumberToObject(markObj, "@S", (long) 0);
+
+  lastMeasured = aJson.getObjectItem(markObj,"@S");
+  if (!lastMeasured) return false;
+  lastMeasured->subtype |= MB_VALUE_OUTDATED;
+  return true;        
+}
+
+aJsonObject * out_Modbus::getLastMeasured(char * name)
+{
+if (!name) return NULL;  
+aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
+return getLastMeasured (aJson.getObjectItem(itemParametersObj,name));
+}
+
+aJsonObject * out_Modbus::getLastMeasured(aJsonObject * execObj)
+{
+if (!execObj) return NULL;  
+if (execObj->type == aJson_Array) execObj = execObj->child; 
+aJsonObject *lastMeasured = aJson.getObjectItem(execObj,"@S");
+if (lastMeasured && lastMeasured->type == aJson_Int) return lastMeasured;
+return NULL;
+}
 
 int  out_Modbus::Setup()
 {
@@ -330,12 +472,9 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                  if (itemParametersObj && itemParametersObj->type ==aJson_Object) 
                                     {      
                                       //Searching item param for nested mapping 
-                                      aJsonObject *itemParObj = aJson.getObjectItem(itemParametersObj,defMappingObj->valuestring);
-                                      if (itemParObj) 
-                                          {
-                                            //Retrive previous data
-                                            aJsonObject *lastMeasured = aJson.getObjectItem(itemParObj,"@S");
-                                            if (lastMeasured && lastMeasured->type ==aJson_Int)
+                                      //Retrive previous data
+                                            aJsonObject *lastMeasured = getLastMeasured(defMappingObj->valuestring); 
+                                            if (lastMeasured) 
                                             {
                                             traceSerial<<F("LastKnown value: ")<<lastMeasured->valueint<<endl; 
                                             //Searching template param for nested mapping
@@ -384,8 +523,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                                       }
 
                                                  } 
-                                            }
-                                          }
+                                            } //nested have lastMeasured
                                     }
                                 break;
                                }
@@ -411,52 +549,31 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                           aJsonObject *execObj = aJson.getObjectItem(itemParametersObj,paramObj->name);
                           if (execObj) 
                                       {
-
-                                      bool storeLastValue = true;
-                                      if (doExecution)  
-                                      {
-                                      storeLastValue=false;
-                                      // Check - if no action configured for object - not need to store last value - let requrent process do it
-                                      
-                                      aJsonObject * i = execObj->child;  
-                                      while (i && !storeLastValue)
-                                        {
-                                          if (i->name && *i->name && (*i->name != '@')) storeLastValue = true;
-                                          i=i->next;
-                                        }
-                                      }
-
-                                      aJsonObject * markObj = execObj;
-                                      if (execObj->type == aJson_Array) 
-                                            {
-                                            markObj = execObj->child;  
-                                            storeLastValue = true;
-                                            }
-
-                                      if (storeLastValue)
-                                      {      
+                                   //   if (!doExecution || haveAction(execObj)) //if no action in execObj - do not save last value to avoid confuse further recurrent check
+                                   //   {   
                                                     //Retrive previous data
-                                                    aJsonObject *lastMeasured = aJson.getObjectItem(markObj,"@S");
+                                                    aJsonObject *lastMeasured = getLastMeasured(execObj); 
                                                     if (lastMeasured)
                                                     { 
-                                                              if   (lastMeasured->type == aJson_Int)
-                                                                {
                                                                 if   (lastMeasured->valueint == param)
-                                                                      *submitParam=false; //supress repeating execution for same val
+                                                                      {
+                                                                        //if recurrent call but value was readed before
+                                                                       if (!doExecution && !(lastMeasured->subtype & MB_VALUE_OUTDATED)) 
+                                                                                    {
+                                                                                    *submitParam=true; //never used
+                                                                                    lastMeasured->subtype|=MB_VALUE_OUTDATED;
+                                                                                    return mappedParam;
+                                                                                    }
+                                                                        *submitParam=false; //supress repeating execution for same val
+                                                                      }
                                                                 else  
                                                                       {
                                                                       lastMeasured->valueint=param;
                                                                       traceSerial<<"MBUS: Stored "<<param<<" to @S of "<<paramObj->name<<endl;
                                                                       lastMeasured->subtype&=~MB_VALUE_OUTDATED;
                                                                       }
-                                                                }
                                                     }            
-                                                    else //No container to store value yet 
-                                                    {
-                                                      debugSerial<<F("MBUS: Add @S: ")<<paramObj->name<<endl;
-                                                      aJson.addNumberToObject(markObj, "@S", (long) param);
-                                                    }  
-                                      }
+                                  //    }
 
                                        if (executeWithoutCheck)
                                             {
@@ -474,6 +591,12 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                       if (*submitParam && doExecution)                                       
                                       {   
                                       // Compare with last submitted val (if @V NOT marked as NULL in config)
+                                       aJsonObject * markObj = execObj;
+                                       if (execObj->type == aJson_Array) 
+                                            {
+                                            markObj = execObj->child;  
+                                            //storeLastValue = true;
+                                            }
                                        aJsonObject *settedValue = aJson.getObjectItem(markObj,"@V");                      
                                        if (settedValue && settedValue->type==aJson_Int && (settedValue->valueint == param))
                                           {    
@@ -491,14 +614,14 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                           if (settedValue && !(execObj->subtype & MB_NEED_SEND)) 
                                               settedValue->valueint=param;
                                           }
-                                      }
-                                      }
-                          }
-                    //if (submitRecurrentOut) *submitParam=true; //if requrrent check has submit smth - report it.      
+                                      } //to be executed
+                                      } //ExecObj
+                          } //item Parameters
+                     
                     return mappedParam;
-                    }
+                    } //reg == regNum
             paramObj=paramObj->next;
-          }
+          } //while
 return itemCmd();
 }
 
@@ -618,14 +741,14 @@ if (prefetchObj && (prefetchObj->type == aJson_Boolean) && prefetchObj->valueboo
                                                                                     aJsonObject *execObj = aJson.getObjectItem(itemParametersObj,paramName);
                                                                                     if (execObj) 
                                                                                                 {
-                                                                                                aJsonObject * markObj = execObj;
-                                                                                                if (execObj->type == aJson_Array) markObj = execObj->child;  
+                                                                                                //aJsonObject * markObj = execObj;
+                                                                                                //if (execObj->type == aJson_Array) markObj = execObj->child;  
                                                                                                 //Retrive previous data
-                                                                                                lastMeasured = aJson.getObjectItem(markObj,"@S");
+                                                                                                lastMeasured = getLastMeasured(execObj);// aJson.getObjectItem(markObj,"@S");
                                                                                                 if (lastMeasured)
                                                                                                 { 
-                                                                                                          if   (lastMeasured->type == aJson_Int)
-                                                                                                            {
+                                                                                                          //if   (lastMeasured->type == aJson_Int)
+                                                                                                           // {
                                                                                                             traceSerial<<F(" Last:")<<lastMeasured->valueint<< F(" Now:") << localBuffer<<endl;
 
                                                                                                             if   (lastMeasured->valueint != localBuffer)
@@ -645,7 +768,7 @@ if (prefetchObj && (prefetchObj->type == aJson_Boolean) && prefetchObj->valueboo
 
                                                                                                                   debugSerial << F("MBUS:")<<paramName<< F(" val not changed. Continue")<<endl;  
                                                                                                                   }
-                                                                                                            }
+                                                                                                            //}
                                                                                                 }            
                                                                                                 }
                                                                                     }

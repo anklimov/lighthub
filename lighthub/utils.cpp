@@ -991,5 +991,76 @@ return crcStream.getCRC16();
 }
 #endif
 
+
+char* getStringFromJson(aJsonObject * a, int i)
+{
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Array)
+  element = aJson.getArrayItem(a, i);
+// TODO - human readable JSON objects as alias
+
+  if (element && element->type == aJson_String) return element->valuestring;
+  return NULL;
+}
+
+char* getStringFromJson(aJsonObject * a, char * name)
+{
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Object)
+  element = aJson.getObjectItem(a, name);
+if (element && element->type == aJson_String) return element->valuestring;
+  return NULL;
+}
+
+long  getIntFromJson(aJsonObject * a, int i, long def)
+{
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Array)
+  element = aJson.getArrayItem(a, i);
+// TODO - human readable JSON objects as alias
+if (element && element->type == aJson_Int) return element->valueint; 
+if (element && element->type == aJson_Float) return element->valuefloat;
+
+return def;
+}
+
+long getIntFromJson(aJsonObject * a, char * name, long def)
+ {
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Object)
+  element = aJson.getObjectItem(a, name);
+if (element && element->type == aJson_Int) return element->valueint;
+if (element && element->type == aJson_Float) return element->valuefloat;
+return def;
+ }
+
+ float getFloatFromJson(aJsonObject * a, int i, float def)
+{
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Array)
+  element = aJson.getArrayItem(a, i);
+// TODO - human readable JSON objects as alias
+
+if (element && element->type == aJson_Float) return element->valuefloat;
+if (element && element->type == aJson_Int) return element->valueint;
+return def;
+}
+
+ float getFloatFromJson(aJsonObject * a, char * name, float def)
+ {
+aJsonObject * element = NULL;
+if (!a) return NULL;
+if (a->type == aJson_Object)
+  element = aJson.getObjectItem(a, name);
+
+if (element && element->type == aJson_Float) return element->valuefloat;
+//if (element && element->type == aJson_Int) return element->valueint;
+return def;
+ } 
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

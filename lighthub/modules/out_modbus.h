@@ -49,5 +49,9 @@ protected:
     void initLine();
     int  sendModbus(char * paramName, aJsonObject * outValue);
     int  sendItemCmd(aJsonObject *templateParamObj, itemCmd cmd);
+    int  createLastMeasured(char * name);
+    int  createLastMeasured(aJsonObject * execObj);
+    aJsonObject * getLastMeasured(char * name);
+    aJsonObject * getLastMeasured(aJsonObject * execObj);
 };
 #endif

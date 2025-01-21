@@ -953,11 +953,11 @@ int Item::scheduleOppositeCommand(itemCmd cmd,bool isActiveNow,bool authorized)
                     nextCmd.Cmd(CMD_ENABLE);
     break;
     case CMD_FREEZE:  
-                    if (getFlag(FLAG_FREEZED) && !isScheduled()) return 0;
+                    if ((getFlag(FLAG_FREEZED) == FLAG_FREEZED) && !isScheduled()) return 0;
                     nextCmd.Cmd(CMD_UNFREEZE);
     break;
     case CMD_UNFREEZE:  
-                    if (!getFlag(FLAG_FREEZED) && !isScheduled()) return 0;
+                    if (!(getFlag(FLAG_FREEZED) == FLAG_FREEZED) && !isScheduled()) return 0;
                     nextCmd.Cmd(CMD_FREEZE);
     break;
     case CMD_HALT:  
@@ -1014,6 +1014,7 @@ int Item::scheduleCommand(itemCmd cmd,bool authorized)
 // -1 system error
 // -4 invalid argument
 // -5 unauthorized
+// -6 disabled
 int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized)
 {      
        int fr = freeRam();
@@ -1050,6 +1051,31 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
     //debugSerial<<endl; 
     if (subItem && subItem[0] == '$') {debugSerial<<F("Skipped homie stuff")<<endl;return -4; }
     if (!itemArr) return -1;
+
+   if (!suffixCode && cmd.isCommand()) suffixCode=S_CMD;
+    switch (suffixCode)
+    {
+        case S_CMD:
+        case S_CTRL:
+        case S_DELAYED:
+        if (cmd.isCommand() && getFlag(FLAG_LOCKED_CMD) && cmd.getCmd()!=CMD_UNFREEZE) 
+                        {
+                        errorSerial<<F("CTRL: channel frozen")<<endl;    
+                        return -6;
+                        } 
+
+        break;
+
+        case S_VAL:
+        break;
+
+        default:
+        if (cmd.isValue()  && getFlag(FLAG_LOCKED_SET))
+        {
+                        errorSerial<<F("CTRL: channel frozen")<<endl;    
+                        return -6;           
+        }
+    }
     
     /// DELAYED COMMANDS processing
      if (suffixCode == S_DELAYED)
@@ -1062,7 +1088,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
     bool    scale100  = false;
     bool    invalidArgument = false;
     int     res       = -1;
-    uint16_t status2Send = 0;
+    long status2Send = 0;
     uint8_t  command2Set = 0;
     itemCmd  originalCmd = cmd;
 
@@ -1565,7 +1591,14 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
 } // NO GROUP
 if (invalidArgument) return -4;
 
-if ((!driver || driver->isAllowed(cmd)) && (!getFlag(FLAG_FREEZED)))
+if ((!driver || driver->isAllowed(cmd))  
+//  && (
+//    //!getFlag(FLAG_FREEZED)
+//    (suffixCode == S_VAL)
+//    || (cmd.isCommand() && !getFlag(FLAG_LOCKED_CMD))
+//    || (cmd.isValue()  && !getFlag(FLAG_LOCKED_SET))
+//     )
+    )
 {
 
     if (driver) //New style modular code
@@ -1714,7 +1747,7 @@ if ((!driver || driver->isAllowed(cmd)) && (!getFlag(FLAG_FREEZED)))
 } //alowed cmd
  else 
         {
-            errorSerial<<F("CTRL: Command blocked by driver or channel frozen")<<endl;
+            errorSerial<<F("CTRL: Command blocked by driver")<<endl;
              if ((status2Send & FLAG_FLAGS) && operation) 
                                 {
                                 cmd.saveItem(this,FLAG_FLAGS);
@@ -1888,7 +1921,7 @@ void Item::sendDelayedStatus()
 }
 
 
-int Item::SendStatus(int sendFlags, char * subItem) {
+int Item::SendStatus(long sendFlags, char * subItem) {
     if (sendFlags & FLAG_SEND_IMMEDIATE) sendFlags &= ~ (FLAG_SEND_IMMEDIATE | FLAG_SEND_DEFFERED);
     if ((sendFlags & FLAG_SEND_DEFFERED) ||  freeRam()<150 || (!isNotRetainingStatus() )) {
         setFlag(sendFlags & (FLAG_COMMAND | FLAG_PARAMETERS | FLAG_FLAGS));
@@ -1904,13 +1937,13 @@ int Item::SendStatus(int sendFlags, char * subItem) {
     }
   }
     
-    int Item::SendStatusImmediate(itemCmd st, int sendFlags, char * subItem) {
+    int Item::SendStatusImmediate(itemCmd st, long sendFlags, char * subItem) {
     {
       char addrstr[64];
       char valstr[20] = "";
       char cmdstr[9] = "";
 
-    debugSerial<<"SENDSTATUS: "<<subItem;  
+    debugSerial<<"SENDSTATUS: "<<subItem<<" ";  
     st.debugOut();
 
     #ifdef CANDRV
@@ -2007,7 +2040,15 @@ int Item::SendStatus(int sendFlags, char * subItem) {
 
               if (sendFlags & FLAG_SEND_DELAYED)
                      strncat_P(addrstr, suffix_P[S_DELAYED], sizeof(addrstr)-1);
-              else   strncat_P(addrstr, suffix_P[S_SET], sizeof(addrstr)-1); 
+              else   
+                    switch (st.getSuffix())
+                    {
+                    case S_FAN:
+                    strncat_P(addrstr, suffix_P[S_FAN], sizeof(addrstr)-1);   
+                    break;  
+                    default:    
+                    strncat_P(addrstr, suffix_P[S_SET], sizeof(addrstr)-1); 
+                    }
 
 
         // Preparing parameters payload //////////
@@ -2102,7 +2143,7 @@ int Item::SendStatus(int sendFlags, char * subItem) {
               if (getFlag(FLAG_DISABLED))
                    strcpy_P(cmdstr, DISABLE_P);
 
-              else if (getFlag(FLAG_FREEZED))
+              else if (getFlag(FLAG_FREEZED) == FLAG_FREEZED)
                    strcpy_P(cmdstr, FREEZE_P);
 
               else strcpy_P(cmdstr, ENABLE_P);   

@@ -16,7 +16,9 @@ public:
    // virtual int getDefaultStorageType(){return 0;}  /// Remove?? Now getChanType used instead
     virtual int Status() override;
     virtual void setStatus(uint8_t status) override;
-    int Setup()  override;        
+    int Setup()  override;  
 protected:
+    int pubAction(bool state);
+
       Item * item;
 };

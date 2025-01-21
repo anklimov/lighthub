@@ -185,7 +185,7 @@ if (store && store->pid && (Status() == CST_INITIALIZED) && item && (item->getCm
             item->clearFlag(FLAG_ACTION_NEEDED); 
 
             itemCmd value((float) (store->output));
-            value.setSuffix(S_SET);
+            //value.setSuffix(S_SET);
             executeCommand(oCmd,-1,value);
             store->prevOut=store->output;
           }

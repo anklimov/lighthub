@@ -82,7 +82,12 @@ bool checkToken(char * token, char * data);
  bool isProtectedPin(short pin);
  bool i2cReset();
  uint16_t getCRC(aJsonObject * in);
-
+ char* getStringFromJson(aJsonObject * a, int i);
+ char* getStringFromJson(aJsonObject * a, char * name);
+ long  getIntFromJson(aJsonObject * a, int i, long def = 0);
+ long  getIntFromJson(aJsonObject * a, char * name, long def = 0);
+ float getFloatFromJson(aJsonObject * a, int i, float def = 0.0);
+ float getFloatFromJson(aJsonObject * a, char * name, float def = 0.0);
 #ifdef CANDRV
 #include "util/crc16_.h"
 class CRCStream : public Stream

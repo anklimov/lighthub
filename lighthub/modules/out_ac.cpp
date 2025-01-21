@@ -455,12 +455,15 @@ debugSerial<<F("AC: ")<<portNum<<F(" >> ");
              debugSerial.print(store->data[i], HEX);
              }
   }
-
-
-    if (store->data[36] != store->inCheck){
-      store->inCheck = store->data[36];
-      InsertData(store->data, 37);
-      debugSerial<<F("AC: OK");
+    
+    if (store->data[36] == getCRC(store->data,36))
+    {
+      if (store->data[36] != store->inCheck){
+        store->inCheck = store->data[36];
+        InsertData(store->data, 37);
+        debugSerial<<F("AC: OK");
+      }
+    else debugSerial<<F("AC: Bad CRC");
     }
 
  debugSerial.println();   

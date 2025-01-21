@@ -346,6 +346,7 @@ if (!getConfig()) return 0;
           break;
 
           default:
+          store->timestamp = millisNZ();
           setStatus(CST_INITIALIZED);   
 
         }

@@ -551,28 +551,6 @@ void printMACAddress() {
 
 
 
-char* getStringFromConfig(aJsonObject * a, int i)
-{
-aJsonObject * element = NULL;
-if (!a) return NULL;
-if (a->type == aJson_Array)
-  element = aJson.getArrayItem(a, i);
-// TODO - human readable JSON objects as alias
-
-  if (element && element->type == aJson_String) return element->valuestring;
-  return NULL;
-}
-
-char* getStringFromConfig(aJsonObject * a, char * name)
-{
-aJsonObject * element = NULL;
-if (!a) return NULL;
-if (a->type == aJson_Object)
-  element = aJson.getObjectItem(a, name);
-if (element && element->type == aJson_String) return element->valuestring;
-  return NULL;
-}
-
 #ifdef OTA
     const char defaultPassword[] PROGMEM = QUOTE(DEFAULT_OTA_PASSWORD);
     void setupOTA(void)
@@ -608,7 +586,7 @@ void setupSyslog()
 
         udpSyslogArr = aJson.getObjectItem(root, "syslog");
         if (udpSyslogArr && (n = aJson.getArraySize(udpSyslogArr))) {
-        char *syslogServer = getStringFromConfig(udpSyslogArr, 0);
+        char *syslogServer = getStringFromJson(udpSyslogArr, 0);
          
         if (n>1) syslogPort = aJson.getArrayItem(udpSyslogArr, 1)->valueint;
 
@@ -619,7 +597,7 @@ void setupSyslog()
         udpSyslog.server(syslogServer, syslogPort);
         udpSyslog.deviceHostname(syslogDeviceHostname);
 
-        if (mqttArr) deviceName = getStringFromConfig(mqttArr, 0);
+        if (mqttArr) deviceName = getStringFromJson(mqttArr, 0);
         if (deviceName) udpSyslog.appName(deviceName);
             else udpSyslog.appName(lighthub);
         udpSyslog.defaultPriority(LOG_KERN);
@@ -1119,7 +1097,7 @@ void ip_ready_config_loaded_connecting_to_broker() {
         }
 
 
-    deviceName = getStringFromConfig(mqttArr, 0);
+    deviceName = getStringFromJson(mqttArr, 0);
     if (!deviceName) deviceName = (char*) lighthub;
 
     infoSerial<<F("Device Name:")<<deviceName<<endl;
@@ -1132,13 +1110,13 @@ void ip_ready_config_loaded_connecting_to_broker() {
 
 //debugSerial<<F("N:")<<n<<endl;
 
-    char *servername = getStringFromConfig(mqttArr, 1);
+    char *servername = getStringFromJson(mqttArr, 1);
     if (n >= 3) port = aJson.getArrayItem(mqttArr, 2)->valueint;
-    if (n >= 4) user = getStringFromConfig(mqttArr, 3);
+    if (n >= 4) user = getStringFromJson(mqttArr, 3);
     //if (!loadFlash(OFFSET_MQTT_PWD, passwordBuf, sizeof(passwordBuf)) && (n >= 5))
     if (!sysConf.getMQTTpwd(passwordBuf, sizeof(passwordBuf)) && (n >= 5))
         {
-            password = getStringFromConfig(mqttArr, 4);
+            password = getStringFromJson(mqttArr, 4);
             infoSerial<<F("Using MQTT password from config")<<endl;
         }
 
