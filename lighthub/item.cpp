@@ -1052,7 +1052,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
     if (subItem && subItem[0] == '$') {debugSerial<<F("Skipped homie stuff")<<endl;return -4; }
     if (!itemArr) return -1;
 
-   if (!suffixCode && cmd.isCommand()) suffixCode=S_CMD;
+   if (!suffixCode && cmd.isCommand() && cmd.getCmd()!=CMD_UP && cmd.getCmd()!=CMD_DN) suffixCode=S_CMD;
     switch (suffixCode)
     {
         case S_CMD:
@@ -1200,6 +1200,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
                       switch (suffixCode)
                       {
                         case S_NOTFOUND:
+        //                case S_CMD:
                              toExecute=true;
                         case S_SET:
                           {
@@ -1207,6 +1208,8 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
                              //if (limit && suffixCode==S_NOTFOUND) limit = 100;    
                              if (cmd.incrementPercents(step,limit))
                              {  
+                               debugSerial<<"INCREASED: ";
+                               cmd.debugOut(); 
                                status2Send |= FLAG_PARAMETERS | FLAG_SEND_DEFFERED;    
                              } else {cmd=fallbackCmd;invalidArgument=true;}
                           }  
@@ -1605,6 +1608,7 @@ if ((!driver || driver->isAllowed(cmd))
             {
             // UPDATE internal variables 
             if (status2Send) cmd.saveItem(this,status2Send);    
+               else debugSerial<<"NOT SAVED"<<endl;
 
             res = driver->Ctrl(cmd, subItem, toExecute,authorized);   
             if (driver->getChanType() == CH_THERMO) status2Send |= FLAG_SEND_IMMEDIATE;
