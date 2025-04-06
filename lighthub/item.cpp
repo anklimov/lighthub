@@ -1687,13 +1687,13 @@ if ((!driver || driver->isAllowed(cmd))
                         tStore.asint=getExt();
                         if (!tStore.timestamp16) 
                                     {
-                                    infoSerial<<F("Cleaning alarm ")<<itemArr->name<<endl;    
+                                    infoSerial<<F("Cleaning alarm ")<<itemArr->name<<" Ext:"<<tStore.asint<<endl;    
                                     #if not defined (NOIP)
                                     mqttClient.publish("/alarmoff/snsr", itemArr->name);
                                     #endif
                                     }
                         tStore.tempX100=cmd.getFloat()*100.;         //Save measurement
-                        tStore.timestamp16=millisNZ(8) & 0xFFFF;    //And timestamp
+                        tStore.timestamp16=millisNZ(8) & 0xFFFFU;    //And timestamp
                         debugSerial<<F("THERM:")<<itemArr->name<<F(" T:")<<tStore.tempX100<<F(" TS:")<<tStore.timestamp16<<endl;
                         setExt(tStore.asint);
                         res=1;

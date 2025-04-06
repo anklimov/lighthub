@@ -626,7 +626,7 @@ RebootFunc();
 }
 #endif
 
-
+/*
 bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo)
 {
   uint32_t endTime;
@@ -638,7 +638,19 @@ bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t m
   return   ((currTime>endTime) && (currTime <timestamp)) ||
               ((timestamp<endTime) && ((currTime>endTime) || (currTime <timestamp)));
 }
-//millis() - tmr1 >= MY_PERIOD
+*/
+
+bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t modulo)
+{
+  uint32_t elapsed;
+  if (!time) return true;
+
+  if (modulo)  elapsed = ((currTime & modulo) - (timestamp & modulo)) & modulo ;  
+         else  elapsed = currTime - timestamp ;  
+
+  return   elapsed >= time;
+}
+
 
 
 
@@ -819,9 +831,9 @@ itemCmd mapInt(int32_t arg, aJsonObject* map)
 }
 
 //Same as millis() but never return 0 or -1
-unsigned long millisNZ(uint8_t shift)
+uint32_t millisNZ(uint8_t shift)
 {
- unsigned long now = millis()>>shift;
+ uint32_t now = millis()>>shift;
  if (!now || !(now+1)) now=1;
  return now;
 }
@@ -1017,7 +1029,7 @@ if (element && element->type == aJson_String) return element->valuestring;
 long  getIntFromJson(aJsonObject * a, int i, long def)
 {
 aJsonObject * element = NULL;
-if (!a) return NULL;
+if (!a) return def;
 if (a->type == aJson_Array)
   element = aJson.getArrayItem(a, i);
 // TODO - human readable JSON objects as alias
@@ -1030,7 +1042,7 @@ return def;
 long getIntFromJson(aJsonObject * a, char * name, long def)
  {
 aJsonObject * element = NULL;
-if (!a) return NULL;
+if (!a) return def;
 if (a->type == aJson_Object)
   element = aJson.getObjectItem(a, name);
 if (element && element->type == aJson_Int) return element->valueint;
@@ -1041,7 +1053,7 @@ return def;
  float getFloatFromJson(aJsonObject * a, int i, float def)
 {
 aJsonObject * element = NULL;
-if (!a) return NULL;
+if (!a) return def;
 if (a->type == aJson_Array)
   element = aJson.getArrayItem(a, i);
 // TODO - human readable JSON objects as alias
@@ -1054,7 +1066,7 @@ return def;
  float getFloatFromJson(aJsonObject * a, char * name, float def)
  {
 aJsonObject * element = NULL;
-if (!a) return NULL;
+if (!a) return def;
 if (a->type == aJson_Object)
   element = aJson.getObjectItem(a, name);
 

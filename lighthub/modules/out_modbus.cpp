@@ -289,6 +289,7 @@ if (getConfig())
 else
  {  errorSerial<<F("MBUS: config error")<<endl;
     setStatus(CST_FAILED);
+    Stop();
     return 0;
   }
 

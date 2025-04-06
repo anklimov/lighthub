@@ -1367,17 +1367,40 @@ return false;
 
 if (matchedCmd && matchedCmd->type != aJson_NULL)  
           {
+          traceSerial<<F("MAP: cmd mapped to ")<<matchedCmd->valueint<<endl;     
           return itemCmd().Int((uint32_t)matchedCmd->valueint); 
           }
 
 aJsonObject *valMapping = aJson.getObjectItem(mappingData, "val");
-if (isValue() && valMapping && valMapping->type == aJson_Array && aJson.getArraySize(valMapping) == 4)
-    {
-     if (getInt()<aJson.getArrayItem(valMapping,0)->valueint) return itemCmd().Int((uint32_t) 0); 
-     return itemCmd().Int((uint32_t) 
-      map(getInt(),
+if (isValue() && valMapping && valMapping->type == aJson_Array && aJson.getArraySize(valMapping) >= 4)
+    { //ПРЯМОЕ
+      //"val":[0-вход_мин, 1-вход_макс, 2-выход_мин, 3-выход_макс, 4-вход<мин_прямое, 5-вых<мин_обратное, 6-вход>макс_прямое, 7-вых>макс_обратное]   
+     aJsonObject *leftBoundObj = aJson.getArrayItem(valMapping,4);
+     aJsonObject *rightBoundObj = aJson.getArrayItem(valMapping,6);
+ 
+     //if (getInt()<aJson.getArrayItem(valMapping,0)->valueint) return itemCmd().Int((uint32_t) 0); было если меньше левой границы то ноль. Неперь для такого поведения надо пятым элементом явно поставить ноль
+
+     if (getInt()<aJson.getArrayItem(valMapping,0)->valueint) 
+         {
+         traceSerial<<F("MAP: value ")<<getInt()<<F(" is below left bound ")<<aJson.getArrayItem(valMapping,0)->valueint<<endl;
+         if (leftBoundObj && leftBoundObj->type == aJson_Int )
+                  return itemCmd().Int(leftBoundObj->valueint);
+         else     return itemCmd(ST_VOID,CMD_VOID);     
+         }
+
+     if (getInt()>aJson.getArrayItem(valMapping,1)->valueint) 
+         {
+         traceSerial<<F("MAP: value above right bound ")<<endl; 
+         if (rightBoundObj && rightBoundObj->type == aJson_Int )
+                  return itemCmd().Int(rightBoundObj->valueint);
+         else     return itemCmd(ST_VOID,CMD_VOID);     
+         }
+      long res = map(getInt(),
         aJson.getArrayItem(valMapping,0)->valueint,aJson.getArrayItem(valMapping,1)->valueint,
-        aJson.getArrayItem(valMapping,2)->valueint,aJson.getArrayItem(valMapping,3)->valueint));      
+        aJson.getArrayItem(valMapping,2)->valueint,aJson.getArrayItem(valMapping,3)->valueint);
+     traceSerial<<F("MAP: val mapped to  ")<<res<<endl;    
+     return itemCmd().Int((uint32_t) res); 
+
     }
     else if (valMapping && valMapping->type == aJson_NULL)  return itemCmd(ST_VOID,CMD_VOID);
   return *this;
@@ -1445,14 +1468,36 @@ if (isValue() && valMapping && valMapping->type == aJson_Array && aJson.getArray
 if (matchedCmd)  return itemCmd().Cmd(matchedCmd->valueint); 
 
 aJsonObject *valMapping = aJson.getObjectItem(mappingData, "val");
-if (valMapping && valMapping->type == aJson_Array && aJson.getArraySize(valMapping) == 4)
+if (valMapping && valMapping->type == aJson_Array && aJson.getArraySize(valMapping) >= 4)
     {
+//ОБРАТНОЕ      
+//"val":[0-вход_мин, 1-вход_макс, 2-выход_мин, 3-выход_макс, 4-вход<мин_прямое, 5-вых<мин_обратное, 6-вход>макс_прямое, 7-вых>макс_обратное]      
      int a =  aJson.getArrayItem(valMapping,0)->valueint;
      int b =  aJson.getArrayItem(valMapping,1)->valueint;
      int c =  aJson.getArrayItem(valMapping,2)->valueint;
      int d =  aJson.getArrayItem(valMapping,3)->valueint;
 
-    if (getInt()<aJson.getArrayItem(valMapping,2)->valueint) return itemCmd().Int((uint32_t) 0);  
+     aJsonObject *leftBoundObj = aJson.getArrayItem(valMapping,5);
+     aJsonObject *rightBoundObj = aJson.getArrayItem(valMapping,7);
+    // Dev to unified
+    //было если меньше левой границы то ноль. Неперь для такого поведения надо 7m элементом явно поставить ноль
+    //if (getInt()<aJson.getArrayItem(valMapping,2)->valueint) return itemCmd().Int((uint32_t) 0);  
+
+
+     if (getInt()<aJson.getArrayItem(valMapping,2)->valueint) 
+         {
+         if (leftBoundObj && leftBoundObj->type == aJson_Int )
+                  return itemCmd().Int(leftBoundObj->valueint);
+         else     return itemCmd(ST_VOID,CMD_VOID);     
+         }
+
+     if (getInt()>aJson.getArrayItem(valMapping,3)->valueint) 
+         {
+         if (rightBoundObj && rightBoundObj->type == aJson_Int )
+                  return itemCmd().Int(rightBoundObj->valueint);
+         else     return itemCmd(ST_VOID,CMD_VOID);     
+         }
+
      int diff = ((b-a)/(d-c))/2;
      //return itemCmd().Int((uint32_t) constrain(map(getInt(),c,d,a,b)+diff,0,255));  
      return itemCmd().Int((uint32_t) constrain(map(getInt(),c,d,a,b)+diff,0,b));  
