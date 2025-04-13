@@ -1030,7 +1030,7 @@ itemCmd itemCmd::Int(int32_t i)
           return *this;
         }
 
-itemCmd itemCmd::Int(uint32_t i)
+itemCmd itemCmd::uInt(uint32_t i)
         {
           cmd.itemArgType=ST_UINT32;
           param.asUint32=i;
@@ -1163,7 +1163,7 @@ bool itemCmd::loadItem(Item * item, uint16_t optionsFlag)
           {
             case aJson_Int:
 
-            Int((int32_t)item->itemVal->valueint);
+            Int(item->itemVal->valueint);
                //debugSerial<<F("Loaded Int:");
                //debugOut();
             return true;
@@ -1351,13 +1351,13 @@ return false;
         return itemCmd().Int((uint32_t)2);   
         */
         case CMD_OFF:
-        return itemCmd().Int((uint32_t)0);
+        return itemCmd().Int(0);
         case CMD_LOW:
-        return itemCmd().Int((uint32_t)20);
+        return itemCmd().Int(20);
         case CMD_MED:
-        return itemCmd().Int((uint32_t)128);
+        return itemCmd().Int(128);
         case CMD_HIGH:
-        return itemCmd().Int((uint32_t)255);  
+        return itemCmd().Int(255);  
 
         default:
          return *this;     
@@ -1368,7 +1368,7 @@ return false;
 if (matchedCmd && matchedCmd->type != aJson_NULL)  
           {
           traceSerial<<F("MAP: cmd mapped to ")<<matchedCmd->valueint<<endl;     
-          return itemCmd().Int((uint32_t)matchedCmd->valueint); 
+          return itemCmd().Int(matchedCmd->valueint); 
           }
 
 aJsonObject *valMapping = aJson.getObjectItem(mappingData, "val");
@@ -1399,7 +1399,7 @@ if (isValue() && valMapping && valMapping->type == aJson_Array && aJson.getArray
         aJson.getArrayItem(valMapping,0)->valueint,aJson.getArrayItem(valMapping,1)->valueint,
         aJson.getArrayItem(valMapping,2)->valueint,aJson.getArrayItem(valMapping,3)->valueint);
      traceSerial<<F("MAP: val mapped to  ")<<res<<endl;    
-     return itemCmd().Int((uint32_t) res); 
+     return itemCmd().Int(res); 
 
     }
     else if (valMapping && valMapping->type == aJson_NULL)  return itemCmd(ST_VOID,CMD_VOID);

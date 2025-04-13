@@ -1,4 +1,4 @@
-/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2025 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -139,13 +139,15 @@ void Input::Parse(aJsonObject * configObj)
                         {
                             pin = static_cast<uint8_t>(itemBuffer->child->valueint);
                             if ((itemBuffer->child->child) && (itemBuffer->child->child->type == aJson_Int)) 
-                                pin = static_cast<uint8_t>(itemBuffer->child->child->valueint);
+                                    pin2 = static_cast<uint8_t>(itemBuffer->child->child->valueint);
                         }
 
                     } //switch
         else pin = static_cast<uint8_t>(atoi(configObj->name));
 
+        store = (inStore *) &configObj->valueint;
         }
+        /*
         // Persistant storage
         itemBuffer = aJson.getObjectItem(inputObj, "@S");
         if (!itemBuffer) {
@@ -154,7 +156,20 @@ void Input::Parse(aJsonObject * configObj)
             itemBuffer = aJson.getObjectItem(inputObj, "@S");
         }
         if (itemBuffer) store = (inStore *) &itemBuffer->valueint;
+        */
 
+}
+void Input::stop()
+{
+aJsonObject *itemBuffer;
+if (!inputObj || !root || inputObj->type != aJson_Object) return;
+itemBuffer = aJson.getObjectItem(inputObj, "#");
+if (inType == IN_RE && itemBuffer && itemBuffer->valuestring && itemBuffer->type == aJson_Array)
+    {
+    delete (RotaryEncoder *) itemBuffer->valuestring;
+    itemBuffer->valuestring = NULL;
+    debugSerial<<F("RE: deleted")<<endl;
+    }
 }
 
 void cleanStore(aJsonObject * input)
@@ -164,7 +179,7 @@ if (input && (input->type == aJson_Object))  {
      Input in(input);
      in.store->aslong = 0;
     aJsonObject * inputArray = aJson.getObjectItem(input, "act");
-    if  (inputArray && (inputArray->type == aJson_Array))
+    if  (inputArray && (inputArray->type == aJson_Array || inputArray->type == aJson_Object))
         {
           aJsonObject *inputObj = inputArray->child;
 
@@ -185,15 +200,35 @@ if (input && (input->type == aJson_Object))  {
 }
 }
 
+void Input::setupRotaryEncoder()
+{
+aJsonObject *itemBuffer;
+if (!inputObj || !root || inputObj->type != aJson_Object) return;
+itemBuffer = aJson.getObjectItem(inputObj, "#");
+if (itemBuffer && !itemBuffer->valuestring && itemBuffer->type == aJson_Array)
+    {
+     int pin1 = getIntFromJson(itemBuffer,1,-1);
+     int pin2 = getIntFromJson(itemBuffer,2,-1);
+     int mode = getIntFromJson(itemBuffer,3,(int)RotaryEncoder::LatchMode::FOUR3);
+     if (pin1>=0 && pin2>=0)
+            {
+            itemBuffer->valuestring = ( char *) new RotaryEncoder(pin1, pin2, (RotaryEncoder::LatchMode)mode);
+            debugSerial<<F("RE: configured on pins ")<<pin1<<","<<pin2<< F(" Mode:")<<mode <<endl;
+            }
+    }
+}
+
 void Input::setup()
 {
 if (!isValid() || (!root)) return;
 cleanStore(inputObj);
-
+ debugSerial<<F("In: ")<<pin<<F("/")<<inType<<endl;
 store->aslong=0;
 uint8_t inputPinMode = INPUT; //if IN_ACTIVE_HIGH
 switch (inType)
 {
+  case IN_RE:
+  setupRotaryEncoder();
   case IN_PUSH_ON:
   case IN_PUSH_TOGGLE :
   inputPinMode = INPUT_PULLUP;
@@ -201,7 +236,7 @@ switch (inType)
   case IN_PUSH_ON     | IN_ACTIVE_HIGH:
   case IN_PUSH_TOGGLE | IN_ACTIVE_HIGH:
   pinMode(pin, inputPinMode);
-
+  
   store->state=IS_IDLE;
   break;
 
@@ -256,14 +291,14 @@ switch (inType)
 }
 
 int Input::Poll(short cause) {
-
+aJsonObject * itemBuffer;
 if (!isValid()) return -1;
 #ifndef CSSHDC_DISABLE
   in_ccs811  _ccs811(this);
   in_hdc1080 _hdc1080(this);
 #endif
 
-switch (cause)  {
+switch (cause)  { 
   case CHECK_INPUT:  //Fast polling
   case CHECK_INTERRUPT: //Realtime polling
     switch (inType)
@@ -290,6 +325,13 @@ switch (cause)  {
       case IN_CCS811:
       case IN_HDC1080:
       break;
+      case IN_RE:
+      itemBuffer = aJson.getObjectItem(inputObj, "#");
+      if (inputObj && inputObj->type == aJson_Object && itemBuffer && itemBuffer->type == aJson_Array && itemBuffer->valuestring)
+      {
+            ((RotaryEncoder *) itemBuffer->valuestring) ->tick();
+            contactPoll(cause, ((RotaryEncoder *) itemBuffer->valuestring));
+      }
     }
     break;
   case CHECK_ULTRASONIC:
@@ -699,7 +741,7 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
 
 static volatile uint8_t contactPollBusy = 0;
 
-void Input::contactPoll(short cause) {
+void Input::contactPoll(short cause, RotaryEncoder * re) {
     bool currentInputState;
 
     if (!store /*|| contactPollBusy*/) return;
@@ -730,7 +772,9 @@ else
       }
     else currentInputState = (digitalRead(pin) == inputOnLevel);
 
-if (cause != CHECK_INTERRUPT) switch (store->state) //Timer based transitions
+if (cause != CHECK_INTERRUPT) 
+{
+switch (store->state) //Timer based transitions
 {
   case IS_PRESSED:
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
@@ -815,8 +859,24 @@ if (cause != CHECK_INTERRUPT) switch (store->state) //Timer based transitions
 
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_IDLE,0xFFFF)) changeState(IS_IDLE, cause);
       break;
+ } //switch
+
+if (re) 
+{ 
+  aJsonObject * bufferItem;  
+  switch (re->getDirection())
+  {
+    case RotaryEncoder::Direction::CLOCKWISE:
+             if (bufferItem=aJson.getObjectItem(inputObj, "+-")) executeCommand(bufferItem,0);
+             if (bufferItem=aJson.getObjectItem(inputObj, "+")) executeCommand(bufferItem);
+    break;
+    case RotaryEncoder::Direction::COUNTERCLOCKWISE:
+             if (bufferItem=aJson.getObjectItem(inputObj, "+-")) executeCommand(bufferItem,1);
+             if (bufferItem=aJson.getObjectItem(inputObj, "-")) executeCommand(bufferItem);
+  }
 }
 
+} //if not INTERRUPT
     if (currentInputState != store->lastValue) // value changed
     {
         if (store->bounce) store->bounce = store->bounce - 1;

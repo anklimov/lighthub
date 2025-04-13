@@ -231,7 +231,7 @@ public:
   bool saveItem(Item * item, uint16_t optionsFlag=FLAG_PARAMETERS);
 
   itemCmd Int(int32_t i);
-  itemCmd Int(uint32_t i);
+  itemCmd uInt(uint32_t i);
   itemCmd Float(float f);
   itemCmd Tens(int32_t i);
   itemCmd Tens_raw(int32_t i);

@@ -31,58 +31,69 @@ if (gatesObj)
           {
              if (i->name && *i->name)
              {
-             aJsonObject  * fanObj = aJson.getObjectItem(i, "fan");
-             if (!fanObj) {aJson.addNumberToObject(i, "fan", (long int) -1);fanObj = aJson.getObjectItem(i, "fan");}
+            // aJsonObject  * fanObj = aJson.getObjectItem(i, "fan");
+            // if (!fanObj) {aJson.addNumberToObject(i, "fan", (long int) -1);fanObj = aJson.getObjectItem(i, "fan");}
+             aJsonObject  * fanObj = getCreateObject(i,"fan",-1L);
 
-             aJsonObject  * cmdObj  = aJson.getObjectItem(i, "cmd");
-             if (!cmdObj) {aJson.addNumberToObject(i, "cmd", (long int) -1);cmdObj  = aJson.getObjectItem(i, "cmd");}
+            // aJsonObject  * cmdObj  = aJson.getObjectItem(i, "cmd");
+            // if (!cmdObj) {aJson.addNumberToObject(i, "cmd", (long int) -1);cmdObj  = aJson.getObjectItem(i, "cmd");}
+             aJsonObject  * cmdObj = getCreateObject(i,"cmd",(long) CMD_OFF);
 
-             aJsonObject * outObj = aJson.getObjectItem(i, "out");
-             if (!outObj) {aJson.addNumberToObject(i, "out", (long int) -1);outObj = aJson.getObjectItem(i, "out");}
+             //aJsonObject * outObj = aJson.getObjectItem(i, "out");
+             //if (!outObj) {aJson.addNumberToObject(i, "out", (long int) -1);outObj = aJson.getObjectItem(i, "out");}
+             aJsonObject  * outObj = getCreateObject(i,"out",-1L);
 
              aJsonObject * pidObj = aJson.getObjectItem(i, "pid");
              if (pidObj && pidObj->type == aJson_Array && aJson.getArraySize(pidObj)>=3)
              { 
-             aJsonObject * setObj = aJson.getObjectItem(i, "set");
-             if (!setObj) {aJson.addNumberToObject(i, "set", (float) 20.1);setObj = aJson.getObjectItem(i, "set");}
-                else if (setObj->type != aJson_Float) {setObj->valuefloat = 20.0;setObj->type= aJson_Float;}
+             //aJsonObject * setObj = aJson.getObjectItem(i, "set");
+             //if (!setObj) {aJson.addNumberToObject(i, "set", (float) 20.1);setObj = aJson.getObjectItem(i, "set");}
+             //   else if (setObj->type != aJson_Float) {setObj->valuefloat = 20.0;setObj->type= aJson_Float;}
+             aJsonObject  * setObj = getCreateObject(i,"set",(float) 20.0);   
 
-             aJsonObject  * valObj = aJson.getObjectItem(i, "val");
-             if (!valObj) {aJson.addNumberToObject(i, "val", (float) 20.1);valObj = aJson.getObjectItem(i, "val");}
-                else if (valObj->type != aJson_Float) {valObj->valuefloat = 20.0;valObj->type= aJson_Float;}
+             //aJsonObject  * valObj = aJson.getObjectItem(i, "val");
+             //if (!valObj) {aJson.addNumberToObject(i, "val", (float) 20.1);valObj = aJson.getObjectItem(i, "val");}
+             //   else if (valObj->type != aJson_Float) {valObj->valuefloat = 20.0;valObj->type= aJson_Float;}
+             aJsonObject  * valObj = getCreateObject(i,"val",(float) 20.0);      
 
-             aJsonObject  * poObj = aJson.getObjectItem(i, "po");
-             if (!poObj) {aJson.addNumberToObject(i, "po", (float) -1.1);poObj = aJson.getObjectItem(i, "po");}
-                else if (poObj->type != aJson_Float) {poObj->valuefloat = -2.0;valObj->type= aJson_Float;}   
+             //aJsonObject  * poObj = aJson.getObjectItem(i, "po");
+             //if (!poObj) {aJson.addNumberToObject(i, "po", (float) -1.1);poObj = aJson.getObjectItem(i, "po");}
+             //   else if (poObj->type != aJson_Float) {poObj->valuefloat = -2.0;valObj->type= aJson_Float;}   
+             aJsonObject  * poObj = getCreateObject(i,"po", (long) -2);      
     
               float kP = 1.0;
               float kI = 0.0;
               float kD = 0.0;
               
               int direction = DIRECT;
-              aJsonObject *  param = aJson.getArrayItem(pidObj, 0);
-              if (param->type == aJson_Float) kP=param->valuefloat;  
-                   else if (param->type == aJson_Int) kP=param->valueint;
+
+             // aJsonObject *  param = aJson.getArrayItem(pidObj, 0);
+             // if (param->type == aJson_Float) kP=param->valuefloat;  
+             //      else if (param->type == aJson_Int) kP=param->valueint;
+              kP=getFloatFromJson(pidObj,0,1.0);     
               if (kP<0)
                 {
                     kP=-kP;
                     direction=REVERSE;
                 }       
-              param = aJson.getArrayItem(pidObj, 1);
-              if (param->type == aJson_Float) kI=param->valuefloat;
-                  else if (param->type == aJson_Int) kI=param->valueint; 
+              //param = aJson.getArrayItem(pidObj, 1);
+              //if (param->type == aJson_Float) kI=param->valuefloat;
+              //    else if (param->type == aJson_Int) kI=param->valueint; 
+               kI=getFloatFromJson(pidObj,1);     
 
-              param = aJson.getArrayItem(pidObj, 2);
-              if (param->type == aJson_Float) kD=param->valuefloat;
-                  else if (param->type == aJson_Int) kD=param->valueint;  
+              //param = aJson.getArrayItem(pidObj, 2);
+              //if (param->type == aJson_Float) kD=param->valuefloat;
+              //    else if (param->type == aJson_Int) kD=param->valueint;  
+               kD=getFloatFromJson(pidObj,2); 
 
-              float dT=5.0;
-              if (aJson.getArraySize(pidObj)==4)
-              {
-              param = aJson.getArrayItem(pidObj, 3);
-              if (param->type == aJson_Float) dT=param->valuefloat;
-                  else if (param->type == aJson_Int) dT=param->valueint;                  
-              }
+              float dT;
+              //if (aJson.getArraySize(pidObj)==4)
+              //{
+              //param = aJson.getArrayItem(pidObj, 3);
+              //if (param->type == aJson_Float) dT=param->valuefloat;
+              //    else if (param->type == aJson_Int) dT=param->valueint;                  
+              //}
+               dT=getFloatFromJson(pidObj,3,5.0); 
 
               debugSerial << "VENT: X:" << (long int) &valObj->valuefloat << "-" << (long int)&poObj->valuefloat <<"="<< (long int)&setObj->valuefloat<<endl;
               pidObj->valueint = (long int) new PID  (&valObj->valuefloat, &poObj->valuefloat, &setObj->valuefloat, kP, kI, kD, direction); 
@@ -259,7 +270,7 @@ while (i)
   aJsonObject * cmdObj=aJson.getObjectItem(i, "cmd");
   aJsonObject * cascadeObj=aJson.getObjectItem(i, "cas");
 
-  aJsonObject * setObj=aJson.getObjectItem(i, "set");
+  //aJsonObject * setObj=aJson.getObjectItem(i, "set");
   aJsonObject * pidObj=aJson.getObjectItem(i, "pid");
    if (fanObj && cmdObj && fanObj->type==aJson_Int && cmdObj->type==aJson_Int) 
    {
@@ -360,19 +371,21 @@ while (i)
               case S_SET:
                if (cmd.isValue())   
                                           {
-                                           if (!setObj) {aJson.addNumberToObject(i, "set", (float) cmd.getFloat()); setObj = aJson.getObjectItem(i, "set"); }
-                                               else {setObj->valuefloat = cmd.getFloat();setObj->type = aJson_Float;}
-                                          //publishTopic(i->name,setObj->valuefloat,"/set");
-                                          if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,FLAG_PARAMETERS,i->name);
+                                           //if (!setObj) {aJson.addNumberToObject(i, "set", (float) cmd.getFloat()); setObj = aJson.getObjectItem(i, "set"); }
+                                           //    else {setObj->valuefloat = cmd.getFloat();setObj->type = aJson_Float;}  
+                                           setValToJson(i,"set",cmd.getFloat());
+                                           if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,FLAG_PARAMETERS,i->name);
+                                          
                                           }              
                 break;
 
               case S_VAL:
                if (cmd.isValue())   
                                           {
-                                            aJsonObject  * valObj = aJson.getObjectItem(i, "val");
-                                            if (!valObj) {aJson.addNumberToObject(i, "val", (float) cmd.getFloat()); setObj = aJson.getObjectItem(i, "val");}
-                                                else {valObj->valuefloat = cmd.getFloat();valObj->type= aJson_Float;}
+                                            //aJsonObject  * valObj = aJson.getObjectItem(i, "val");
+                                            //if (!valObj) {aJson.addNumberToObject(i, "val", (float) cmd.getFloat()); setObj = aJson.getObjectItem(i, "val");}
+                                            //    else {valObj->valuefloat = cmd.getFloat();valObj->type= aJson_Float;}
+                                            setValToJson(i,"val",cmd.getFloat());      
                                           }
                                           return 1;
                 break;  

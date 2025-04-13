@@ -192,6 +192,7 @@ if (configLocked>locksAlowed)
                 }
 debugSerial<<F("Stopping channels ...")<<endl;
 timerHandlerBusy++;
+inputStop();
 //Stoping the channels
 if (items)
 {
@@ -3039,7 +3040,7 @@ configLocked++;
 
                 // Check for nested inputs
                 aJsonObject * inputArray = aJson.getObjectItem(input, "act");
-                if  (inputArray && (inputArray->type == aJson_Array))
+                if  (inputArray && (inputArray->type == aJson_Array || inputArray->type == aJson_Object))
                     {
                       aJsonObject *inputObj = inputArray->child;
 
@@ -3116,6 +3117,28 @@ configLocked++;
     // Interval in microsecs
     attachTimer(TIMER_CHECK_INPUT * 1000, TimerHandler, "ITimer");  
     attachMaturaTimer();
+
+    #endif     
+configLocked--;
+}
+
+void inputStop(void) {
+infoSerial<<F("Stopping Inputs")<<endl;       
+    if (!inputs) return;
+configLocked++;
+        aJsonObject *input = inputs->child;
+        while (input) {
+            if ((input->type == aJson_Object)) {
+                Input in(input);
+                in.stop();
+            }
+            yield();
+            input = input->next;
+        }
+    #if defined(__SAM3X8E__) && defined (TIMER_INT)  
+    // Interval in microsecs
+    //detachTimer(TIMER_CHECK_INPUT * 1000, TimerHandler, "ITimer");  
+    //detachMaturaTimer();
 
     #endif     
 configLocked--;

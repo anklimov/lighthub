@@ -856,7 +856,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                               do
                                                   {
                                                   savedValue = outValue->valueint;  
-                                                  debugSerial<<"MBUS: SEND "<<item->itemArr->name<<" ";   
+                                                  debugSerial<<"MBUS: SEND "<<item->itemArr->name<<"/"<<execObj->name<<"="<<outValue<<endl;   
                                                   sendRes = sendModbus(execObj->name,outValue);
                                                   needResend = (savedValue != outValue->valueint);
                                                   while(needResend && mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),200)) modbusIdle();
@@ -874,18 +874,18 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                                  break;
                                                case 0: //fault 
                                                  execObj->subtype |= MB_SEND_ERROR;  
-                                                 errorSerial<<F("MBUS:  ")<<execObj->name<<F(" send error. ");
+                                                 errorSerial<<F("MBUS:  ")<<item->itemArr->name<<"/"<<execObj->name<<F(" send error. ");
                                                  if ((execObj->subtype & 3) != MB_SEND_ATTEMPTS) execObj->subtype++;
-                                                 errorSerial<<"Attempt: "<< (execObj->subtype & 3) <<endl;
+                                                 errorSerial<<F("MBUS:  ")<<item->itemArr->name<<"/"<<execObj->name<<" Attempt: "<< (execObj->subtype & 3) <<endl;
                                                  break;
                                                case -3:
-                                                 errorSerial<<F("MBUS:  param ")<<execObj->name<<F(" sending cancelled")<<endl;
+                                                 errorSerial<<F("MBUS:  param ")<<item->itemArr->name<<"/"<<execObj->name<<F(" sending cancelled")<<endl;
                                                  //outValue->valueint=
                                                  //execObj->subtype&=~ MB_NEED_SEND; 
                                                  execObj->subtype = 0;
                                                  break;                                              
                                                default: //param not found
-                                                 errorSerial<<F("MBUS:  param ")<<execObj->name<<F(" not found")<<endl;
+                                                 errorSerial<<F("MBUS:  param ")<<item->itemArr->name<<"/"<<execObj->name<<F(" not found")<<endl;
                                                  execObj->subtype&=~ MB_NEED_SEND;
                                                }    
                                           }

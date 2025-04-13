@@ -21,6 +21,7 @@ e-mail    anklimov@gmail.com
 #include <aJSON.h>
 #include "modules/in_ccs811_hdc1080.h"
 #include "itemCmd.h"
+#include "RotaryEncoder.h"
 
 #define IN_ACTIVE_HIGH   2      // High level = PUSHED/ CLOSED/ ON othervise :Low Level. Use INPUT mode instead of INPUT_PULLUP for digital pin
 #define IN_ANALOG        64     // Analog input
@@ -149,6 +150,7 @@ public:
 
     int Poll(short cause);
     void setup();
+    void stop();
 
     static void inline onCounterChanged(int i);
     static void onCounterChanged0();
@@ -163,7 +165,7 @@ public:
 protected:
     void Parse(aJsonObject * configObj = NULL);
 
-    void contactPoll(short cause);
+    void contactPoll(short cause, RotaryEncoder * re = NULL);
     void analogPoll(short cause);
 
     void dht22Poll();
@@ -183,6 +185,7 @@ protected:
 
     char* getIdxField();
     bool changeState(uint8_t newState, short cause);
+    void setupRotaryEncoder();
     //bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
 };
 

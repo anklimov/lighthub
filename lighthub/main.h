@@ -314,6 +314,7 @@ void inputLoop(short);
 void inputSensorsLoop();
 
 void inputSetup(void);
+void inputStop(void);
 
 void pollingLoop(void);
 

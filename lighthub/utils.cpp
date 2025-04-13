@@ -162,7 +162,7 @@ itemCmd getNumber(char **chan) {
          }
     }
     
-    if (!fractlen) val.Int((int32_t) atol(*chan));
+    if (!fractlen) val.Int(atol(*chan));
     else if (fractlen<=TENS_FRACT_LEN && intlen+TENS_FRACT_LEN<=9)
         {
          long intpart = atol(*chan);   
@@ -1016,7 +1016,7 @@ if (a->type == aJson_Array)
   return NULL;
 }
 
-char* getStringFromJson(aJsonObject * a, char * name)
+char* getStringFromJson(aJsonObject * a, const char * name)
 {
 aJsonObject * element = NULL;
 if (!a) return NULL;
@@ -1039,7 +1039,7 @@ if (element && element->type == aJson_Float) return element->valuefloat;
 return def;
 }
 
-long getIntFromJson(aJsonObject * a, char * name, long def)
+long getIntFromJson(aJsonObject * a, const char * name, long def)
  {
 aJsonObject * element = NULL;
 if (!a) return def;
@@ -1063,7 +1063,7 @@ if (element && element->type == aJson_Int) return element->valueint;
 return def;
 }
 
- float getFloatFromJson(aJsonObject * a, char * name, float def)
+ float getFloatFromJson(aJsonObject * a, const char * name, float def)
  {
 aJsonObject * element = NULL;
 if (!a) return def;
@@ -1071,8 +1071,42 @@ if (a->type == aJson_Object)
   element = aJson.getObjectItem(a, name);
 
 if (element && element->type == aJson_Float) return element->valuefloat;
-//if (element && element->type == aJson_Int) return element->valueint;
+if (element && element->type == aJson_Int) return element->valueint;
 return def;
  } 
+
+aJsonObject * getCreateObject(aJsonObject * a, int n)
+{
+if (!a) return NULL;
+if (a->type == aJson_Array) 
+     {
+      aJsonObject * element = aJson.getArrayItem(a, n);
+      if (!element) 
+            {
+            for (int i = aJson.getArraySize(a); i < n; i++)
+                  aJson.addItemToArray(a, element = aJson.createNull());
+            }
+        return element;    
+       }     
+ return NULL;         
+}
+
+ aJsonObject * getCreateObject(aJsonObject * a, const char * name)
+{
+if (!a) return NULL;
+if (a->type == aJson_Object)
+     {
+      aJsonObject * element = aJson.getObjectItem(a, name);
+      if (!element) 
+            {
+            aJson.addNullToObject(a, name);
+            element = aJson.getObjectItem(a, name);
+            return element;
+            }
+     }       
+return NULL;       
+}
+
+
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

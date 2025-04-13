@@ -83,11 +83,102 @@ bool checkToken(char * token, char * data);
  bool i2cReset();
  uint16_t getCRC(aJsonObject * in);
  char* getStringFromJson(aJsonObject * a, int i);
- char* getStringFromJson(aJsonObject * a, char * name);
+ char* getStringFromJson(aJsonObject * a, const char * name);
  long  getIntFromJson(aJsonObject * a, int i, long def = 0);
- long  getIntFromJson(aJsonObject * a, char * name, long def = 0);
+ long  getIntFromJson(aJsonObject * a, const char * name, long def = 0);
  float getFloatFromJson(aJsonObject * a, int i, float def = 0.0);
- float getFloatFromJson(aJsonObject * a, char * name, float def = 0.0);
+ float getFloatFromJson(aJsonObject * a, const char * name, float def = 0.0);
+
+ 
+
+// Get object from array, create if absent and return pointer to object
+ template<typename Type>
+ aJsonObject * getCreateObject(aJsonObject * a, int n,  Type def); //set num value if created
+ aJsonObject * getCreateObject(aJsonObject * a, int n); //just create null object if not find
+
+// Get object from object by name, create absent find and return pointer to object
+ template<typename Type>
+ aJsonObject * getCreateObject(aJsonObject * a, const char * name, Type def); //set num value if created
+ aJsonObject * getCreateObject(aJsonObject * a, const char * name); //just create null object if not find
+
+ template<typename Type>
+ aJsonObject * setValToJson(aJsonObject * a, int n, Type val);
+ template<typename Type>
+ aJsonObject * setValToJson(aJsonObject * a, const char * name, Type val);
+
+
+
+
+template<typename Type>
+aJsonObject * getCreateObject(aJsonObject * a, int n, Type val)
+{
+if (!a) return NULL;
+if (a->type == aJson_Array) 
+     {
+      aJsonObject * element = aJson.getArrayItem(a, n);
+      if (!element) 
+            for (int i = aJson.getArraySize(a); i < n; i++)
+                  if (i==n-1) 
+                        aJson.addItemToArray(a, element = aJson.createItem(val));
+                  else  aJson.addItemToArray(a, element = aJson.createNull());      
+
+        return element;    
+       }     
+ return NULL;         
+}
+
+
+
+ template<typename Type>
+ aJsonObject * getCreateObject(aJsonObject * a, const char * name, Type def)
+{
+if (!a) return NULL;
+if (a->type == aJson_Object)
+     {
+      aJsonObject * element = aJson.getObjectItem(a, name);
+      if (!element) 
+            {
+            aJson.addNumberToObject(a, name, def);
+            element = aJson.getObjectItem(a, name);
+            return element;
+            }
+     }       
+return NULL;       
+}
+
+
+
+ template<typename Type>
+ aJsonObject * setValToJson(aJsonObject * a, const char * name, Type val)
+{
+aJsonObject * element = getCreateObject(a,name);
+if (element)
+  switch (element->type)
+  { 
+    case aJson_Float:  element->valuefloat = val;
+    break;
+    case aJson_NULL:   element->type = aJson_Int;
+    case aJson_Int:    element->valueint = val;
+  }
+return element;
+}
+
+ template<typename Type>
+ aJsonObject * setValToJson(aJsonObject * a, int n, Type val)
+{
+aJsonObject * element = getCreateObject(a,n);
+
+if (element)
+  switch (element->type)
+  {
+    case aJson_Float:  element->valuefloat = val;
+    break;
+    case aJson_NULL:   element->type = aJson_Int;
+    case aJson_Int:    element->valueint =val;
+  }
+return element;
+}
+
 #ifdef CANDRV
 #include "util/crc16_.h"
 class CRCStream : public Stream
