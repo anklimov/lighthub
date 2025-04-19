@@ -671,6 +671,10 @@ aJsonObject *icmd = NULL;
 aJsonObject *ecmd = NULL;
 char cmdType = 0;
 
+//char * out = aJson.print(cmd);
+//debugSerial<<"Exec:"<<out<<endl;
+//free (out);
+
 if (cmd) cmdType = cmd->type;
    
 switch (cmdType)
@@ -743,7 +747,7 @@ switch (cmdType)
                 else if (_itemCmd.isValue()) suffix = S_SET; 
             }
             }
-
+//debugSerial<<"EC:"<<emitCommand<<endl;
     //debugSerial << F("IN:") << (pin) << F(" : ") <<endl;
     if (item) {
                 if (itemCommand)

@@ -856,7 +856,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                               do
                                                   {
                                                   savedValue = outValue->valueint;  
-                                                  debugSerial<<"MBUS: SEND "<<item->itemArr->name<<"/"<<execObj->name<<"="<<outValue<<endl;   
+                                                  debugSerial<<"MBUS: SEND "<<item->itemArr->name<<"/"<<execObj->name<<"="<<outValue->valueint<<endl;   
                                                   sendRes = sendModbus(execObj->name,outValue);
                                                   needResend = (savedValue != outValue->valueint);
                                                   while(needResend && mbusSlenceTimer && !isTimeOver(mbusSlenceTimer,millis(),200)) modbusIdle();

@@ -145,7 +145,7 @@ void Input::Parse(aJsonObject * configObj)
                     } //switch
         else pin = static_cast<uint8_t>(atoi(configObj->name));
 
-        store = (inStore *) &configObj->valueint;
+        store = (inStore *) &inputObj->valueint;  
         }
         /*
         // Persistant storage
@@ -601,10 +601,68 @@ debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") <<
     setNextPollTime(millis());
 }
 #endif
+// To Be Refactored - move to Execute after class Input inheritation on abstract chan
+    bool Input::checkInstructions(aJsonObject * obj)
+    {
+       aJsonObject *gotoObj = aJson.getObjectItem(obj, "goto");
+       if (gotoObj)
+       switch (gotoObj->type)
+    {
+        case aJson_Int:
+        debugSerial<<F("Activate in ")<< gotoObj->valueint <<endl;
+            return setCurrentInput(gotoObj->valueint);
+        break;
+        case aJson_String:
+        debugSerial<<F("Activate in ")<< gotoObj->valuestring <<endl;
+            return setCurrentInput(gotoObj->valuestring); 
+    }
+    return false;
+    }
+
+
+   aJsonObject * Input::getCurrentInput()
+   {
+    if (!inputObj) return NULL;   
+    aJsonObject *act = aJson.getObjectItem(inputObj, "act");
+    if (act && (act->type == aJson_Array || act->type == aJson_Object) && act->valuestring) return (aJsonObject * ) act->valuestring;
+    return inputObj; 
+    }
+
+    bool Input::setCurrentInput(int n)
+    {
+    if (!inputObj) return false;   
+    aJsonObject * curInput = NULL; 
+    aJsonObject *act = aJson.getObjectItem(inputObj, "act");
+    if (act && act->type == aJson_Array)
+        {
+               if (n)
+                 curInput = aJson.getArrayItem(act,n-1);
+               else curInput = inputObj;  
+        act->valuestring = (char *) curInput;
+        return true;
+        }
+    return false;    
+    }
+
+    bool Input::setCurrentInput(char * name)
+    {
+   if (!inputObj) return false;   
+    aJsonObject * curInput = NULL; 
+    aJsonObject *act = aJson.getObjectItem(inputObj, "act");
+    if (act && act->type == aJson_Object)
+        {
+               if (name && *name)
+                 curInput = aJson.getObjectItem(act,name);
+               else curInput = inputObj;  
+        act->valuestring = (char *) curInput;
+        return true;
+        }
+    return false;    
+    }
 
 // TODO Polling via timed interrupt with CHECK_INTERRUPT cause
 bool Input::
-changeState(uint8_t newState, short cause)
+changeState(uint8_t newState, short cause, aJsonObject * currentInputObject)
 {
 if (!inputObj ||  !store) return false;
 
@@ -635,37 +693,37 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
         switch (store->state)
         {
         case IS_RELEASED:  //click
-        cmd = aJson.getObjectItem(inputObj, "click");
+        cmd = aJson.getObjectItem(currentInputObject, "click");
         toggle=store->toggle1;
         break;
         case IS_RELEASED2: //doubleclick
-        cmd = aJson.getObjectItem(inputObj, "dclick");
+        cmd = aJson.getObjectItem(currentInputObject, "dclick");
         toggle=store->toggle2;
         break;
         case IS_PRESSED3:  //tripple click
-        cmd = aJson.getObjectItem(inputObj, "tclick");
+        cmd = aJson.getObjectItem(currentInputObject, "tclick");
         toggle=store->toggle3;
         break;
         case IS_WAITPRESS: //do nothing
         break;
         default: //rcmd
-        cmd = aJson.getObjectItem(inputObj, "rcmd");
+        cmd = aJson.getObjectItem(currentInputObject, "rcmd");
           ;
         }
         break;
     case IS_PRESSED: //scmd
-        cmd = aJson.getObjectItem(inputObj, "scmd");
+        cmd = aJson.getObjectItem(currentInputObject, "scmd");
         toggle=store->toggle1;
         store->toggle1 = !store->toggle1;
         if (!cmd) defCmd.Cmd(CMD_ON);
         break;
     case IS_PRESSED2: //scmd2
-        cmd = aJson.getObjectItem(inputObj, "scmd2");
+        cmd = aJson.getObjectItem(currentInputObject, "scmd2");
         toggle=store->toggle2;
         store->toggle2 = !store->toggle2;
         break;
     case IS_PRESSED3: //scmd3
-        cmd = aJson.getObjectItem(inputObj, "scmd3");
+        cmd = aJson.getObjectItem(currentInputObject, "scmd3");
         toggle=store->toggle3;
         store->toggle3 = !store->toggle3;
         break;
@@ -673,41 +731,41 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
     case IS_RELEASED: //rcmd
     case IS_WAITPRESS:
     case IS_RELEASED2:
-        cmd = aJson.getObjectItem(inputObj, "rcmd");
+        cmd = aJson.getObjectItem(currentInputObject, "rcmd");
         if (!cmd) defCmd.Cmd(CMD_OFF);
   //      toggle=state->toggle1;
 
         break;
     case IS_LONG: //lcmd
-        cmd = aJson.getObjectItem(inputObj, "lcmd");
+        cmd = aJson.getObjectItem(currentInputObject, "lcmd");
         toggle=store->toggle1;
         break;
     case IS_REPEAT: //rpcmd
-        cmd = aJson.getObjectItem(inputObj, "rpcmd");
+        cmd = aJson.getObjectItem(currentInputObject, "rpcmd");
         toggle=store->toggle1;
         break;
     case IS_LONG2: //lcmd2
-        cmd = aJson.getObjectItem(inputObj, "lcmd2");
+        cmd = aJson.getObjectItem(currentInputObject, "lcmd2");
         toggle=store->toggle2;
         break;
     case IS_REPEAT2: //rpcmd2
-          cmd = aJson.getObjectItem(inputObj, "rpcmd2");
+          cmd = aJson.getObjectItem(currentInputObject, "rpcmd2");
         toggle=store->toggle2;
         break;
     case IS_LONG3: //lcmd3
-        cmd = aJson.getObjectItem(inputObj, "lcmd3");
+        cmd = aJson.getObjectItem(currentInputObject, "lcmd3");
         toggle=store->toggle3;
         break;
     case IS_REPEAT3: //rpcmd3
-        cmd = aJson.getObjectItem(inputObj, "rpcmd3");
+        cmd = aJson.getObjectItem(currentInputObject, "rpcmd3");
         toggle=store->toggle3;
         break;
 
   }
   
-  aJsonObject *defaultItem = aJson.getObjectItem(inputObj, "item");
-  aJsonObject *defaultEmit = aJson.getObjectItem(inputObj, "emit");  
-  aJsonObject *defaultCan  = aJson.getObjectItem(inputObj, "can");    
+  aJsonObject *defaultItem = aJson.getObjectItem(currentInputObject, "item");
+  aJsonObject *defaultEmit = aJson.getObjectItem(currentInputObject, "emit");  
+  aJsonObject *defaultCan  = aJson.getObjectItem(currentInputObject, "can");    
 
   if (!defaultEmit && !defaultItem) defCmd.Cmd(CMD_VOID);
 
@@ -723,6 +781,7 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
   {
     store->state=newState;
     store->delayedState=false;
+    checkInstructions(cmd);
     executeCommand(cmd,toggle,defCmd,defaultItem,defaultEmit,defaultCan);
     return true;
   }
@@ -748,8 +807,8 @@ void Input::contactPoll(short cause, RotaryEncoder * re) {
     if ((inType == IN_ULTRASONIC) && (cause!=CHECK_ULTRASONIC)) return;
 
     contactPollBusy++;
-
-    changeState(IS_REQSTATE,cause); //Check for postponed states transitions
+    aJsonObject * currentInputObject = getCurrentInput();
+    changeState(IS_REQSTATE,cause,currentInputObject); //Check for postponed states transitions
 
 
      uint8_t inputOnLevel;
@@ -779,15 +838,15 @@ switch (store->state) //Timer based transitions
   case IS_PRESSED:
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
       {
-      if (!aJson.getObjectItem(inputObj, "lcmd") && !aJson.getObjectItem(inputObj, "rpcmd")) changeState(IS_WAITRELEASE, cause);
-         else changeState(IS_LONG, cause);
+      if (!aJson.getObjectItem(inputObj, "lcmd") && !aJson.getObjectItem(currentInputObject, "rpcmd")) changeState(IS_WAITRELEASE, cause,currentInputObject);
+         else changeState(IS_LONG, cause,currentInputObject);
        }
       break;
 
   case IS_LONG:
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT,0xFFFF))
                         {
-                        changeState(IS_REPEAT, cause);
+                        changeState(IS_REPEAT, cause,currentInputObject);
                         store->timestamp16 = millis() & 0xFFFF;
                         }
       break;
@@ -795,7 +854,7 @@ switch (store->state) //Timer based transitions
   case IS_REPEAT:
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT_PULSE,0xFFFF))
                         {
-                          changeState(IS_REPEAT, cause);
+                          changeState(IS_REPEAT, cause,currentInputObject);
                           store->timestamp16 = millis() & 0xFFFF;
                         }
           break;
@@ -803,15 +862,15 @@ switch (store->state) //Timer based transitions
   case IS_PRESSED2:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
             {
-              if (!aJson.getObjectItem(inputObj, "lcmd2") && !aJson.getObjectItem(inputObj, "rpcmd2")) changeState(IS_WAITRELEASE, cause);
-              else changeState(IS_LONG2, cause);
+              if (!aJson.getObjectItem(currentInputObject, "lcmd2") && !aJson.getObjectItem(currentInputObject, "rpcmd2")) changeState(IS_WAITRELEASE, cause,currentInputObject);
+              else changeState(IS_LONG2, cause,currentInputObject);
             }
               break;
 
   case IS_LONG2:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT,0xFFFF))
                           {
-                            changeState(IS_REPEAT2, cause);
+                            changeState(IS_REPEAT2, cause,currentInputObject);
                             store->timestamp16 = millis() & 0xFFFF;
                          }
               break;
@@ -819,7 +878,7 @@ switch (store->state) //Timer based transitions
   case IS_REPEAT2:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT_PULSE,0xFFFF))
                           {
-                            changeState(IS_REPEAT2, cause);
+                            changeState(IS_REPEAT2, cause,currentInputObject);
                             store->timestamp16 = millis() & 0xFFFF;
                           }
           break;
@@ -827,19 +886,19 @@ switch (store->state) //Timer based transitions
   case IS_PRESSED3:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
           {
-          if (!aJson.getObjectItem(inputObj, "lcmd3") && !aJson.getObjectItem(inputObj, "rpcmd3")) //No longpress handlers
+          if (!aJson.getObjectItem(currentInputObject, "lcmd3") && !aJson.getObjectItem(currentInputObject, "rpcmd3")) //No longpress handlers
                 {
-                if (aJson.getObjectItem(inputObj, "scmd3")) changeState(IS_WAITRELEASE, cause); //was used
-                   else changeState(IS_PRESSED2, cause); // completely empty trippleClick section - fallback to first click handler
+                if (aJson.getObjectItem(currentInputObject, "scmd3")) changeState(IS_WAITRELEASE, cause,currentInputObject); //was used
+                   else changeState(IS_PRESSED2, cause,currentInputObject); // completely empty trippleClick section - fallback to first click handler
                  }
-          else changeState(IS_LONG3, cause);
+          else changeState(IS_LONG3, cause,currentInputObject);
           }
           break;
 
   case IS_LONG3:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT,0xFFFF))
                             {
-                              changeState(IS_REPEAT3, cause);
+                              changeState(IS_REPEAT3, cause,currentInputObject);
                               store->timestamp16 = millis() & 0xFFFF;
                             }
           break;
@@ -847,7 +906,7 @@ switch (store->state) //Timer based transitions
   case IS_REPEAT3:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT_PULSE,0xFFFF))
                             {
-                                changeState(IS_REPEAT3, cause);
+                                changeState(IS_REPEAT3, cause,currentInputObject);
                                 store->timestamp16 = millis() & 0xFFFF;
                             }
           break;
@@ -857,7 +916,7 @@ switch (store->state) //Timer based transitions
   case IS_WAITPRESS:
 
 
-      if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_IDLE,0xFFFF)) changeState(IS_IDLE, cause);
+      if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_IDLE,0xFFFF)) changeState(IS_IDLE, cause,currentInputObject);
       break;
  } //switch
 
@@ -867,12 +926,12 @@ if (re)
   switch (re->getDirection())
   {
     case RotaryEncoder::Direction::CLOCKWISE:
-             if (bufferItem=aJson.getObjectItem(inputObj, "+-")) executeCommand(bufferItem,0);
-             if (bufferItem=aJson.getObjectItem(inputObj, "+")) executeCommand(bufferItem);
+             if (bufferItem=aJson.getObjectItem(currentInputObject, "+-")) {checkInstructions(bufferItem);executeCommand(bufferItem,0);};
+             if (bufferItem=aJson.getObjectItem(currentInputObject, "+")) {checkInstructions(bufferItem);executeCommand(bufferItem,0);};
     break;
     case RotaryEncoder::Direction::COUNTERCLOCKWISE:
-             if (bufferItem=aJson.getObjectItem(inputObj, "+-")) executeCommand(bufferItem,1);
-             if (bufferItem=aJson.getObjectItem(inputObj, "-")) executeCommand(bufferItem);
+             if (bufferItem=aJson.getObjectItem(currentInputObject, "+-")) {checkInstructions(bufferItem);executeCommand(bufferItem,1);};
+             if (bufferItem=aJson.getObjectItem(currentInputObject, "-")) {checkInstructions(bufferItem);executeCommand(bufferItem,0);};
   }
 }
 
@@ -903,27 +962,27 @@ if (re)
                 switch (store->state)
                 {
                   case IS_IDLE:
-                       res = changeState(IS_PRESSED, cause);
+                       res = changeState(IS_PRESSED, cause,currentInputObject);
 
                        break;
 
                   case IS_RELEASED:
                   case IS_WAITPRESS:
                 if ( //No future
-                    !aJson.getObjectItem(inputObj, "scmd2") && 
-                    !aJson.getObjectItem(inputObj, "lcmd2") && 
-                    !aJson.getObjectItem(inputObj, "rpcmd2") &&
-                    !aJson.getObjectItem(inputObj, "dclick")
+                    !aJson.getObjectItem(currentInputObject, "scmd2") && 
+                    !aJson.getObjectItem(currentInputObject, "lcmd2") && 
+                    !aJson.getObjectItem(currentInputObject, "rpcmd2") &&
+                    !aJson.getObjectItem(currentInputObject, "dclick")
                     )
-                       res = changeState(IS_PRESSED, cause);
+                       res = changeState(IS_PRESSED, cause,currentInputObject);
 
-                  else res = changeState(IS_PRESSED2, cause);
+                  else res = changeState(IS_PRESSED2, cause,currentInputObject);
 
                        break;
 
                   case IS_RELEASED2:
 
-                       res = changeState(IS_PRESSED3, cause);
+                       res = changeState(IS_PRESSED3, cause,currentInputObject);
                        break;
               }
           else
@@ -931,24 +990,24 @@ if (re)
           {
                 case IS_PRESSED:
 
-                res = changeState(IS_RELEASED, cause);
+                res = changeState(IS_RELEASED, cause,currentInputObject);
 
                 break;
 
                 case IS_LONG:
                 case IS_REPEAT:
                 case IS_WAITRELEASE:
-                res = changeState(IS_WAITPRESS, cause);
+                res = changeState(IS_WAITPRESS, cause,currentInputObject);
                 break;
 
                 case IS_PRESSED2:
                  if ( //No future
-                    !aJson.getObjectItem(inputObj, "scmd2") && 
-                    !aJson.getObjectItem(inputObj, "lcmd2") && 
-                    !aJson.getObjectItem(inputObj, "rpcmd2") &&
-                    !aJson.getObjectItem(inputObj, "dclick")
-                    ) res = changeState(IS_IDLE, cause);
-                  else res = changeState(IS_RELEASED2, cause);
+                    !aJson.getObjectItem(currentInputObject, "scmd2") && 
+                    !aJson.getObjectItem(currentInputObject, "lcmd2") && 
+                    !aJson.getObjectItem(currentInputObject, "rpcmd2") &&
+                    !aJson.getObjectItem(currentInputObject, "dclick")
+                    ) res = changeState(IS_IDLE, cause,currentInputObject);
+                  else res = changeState(IS_RELEASED2, cause,currentInputObject);
                 break;
 
                 case IS_LONG2:
@@ -956,7 +1015,7 @@ if (re)
                 case IS_LONG3:
                 case IS_REPEAT3:
                 case IS_PRESSED3:
-                res = changeState(IS_IDLE, cause);
+                res = changeState(IS_IDLE, cause,currentInputObject);
                 break;
         }
        if (res) { //State changed or postponed
@@ -1130,6 +1189,7 @@ void Input::onAnalogChanged(itemCmd newValue) {
 
     // New tyle unified activities
     aJsonObject *act = aJson.getObjectItem(inputObj, "act");
+    //checkInstructions(act);
     executeCommand(act,-1,newValue);
 
     // Legacy

@@ -1,4 +1,4 @@
-/* Copyright © 2017-2018 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2025 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -184,8 +184,14 @@ protected:
     bool publishDataToDomoticz(int , aJsonObject *, const char *format, ...);
 
     char* getIdxField();
-    bool changeState(uint8_t newState, short cause);
+    bool changeState(uint8_t newState, short cause, aJsonObject * currentInputObject);
     void setupRotaryEncoder();
+
+    aJsonObject * getCurrentInput();
+    bool setCurrentInput(int n);
+    bool setCurrentInput(char * name);
+    bool checkInstructions(aJsonObject * obj);
+
     //bool executeCommand(aJsonObject* cmd, int8_t toggle = -1, char* defCmd = NULL);
 };
 
