@@ -31,8 +31,10 @@ public:
 
 class out_Modbus : public abstractOut {
 public:
+    //out_Modbus(Item * _item):abstractOut(_item){store = (mbPersistent *) item->getPersistent();};
+    out_Modbus():store(NULL){};
+    void link(Item * _item){abstractOut::link(_item); if (_item) {store = (mbPersistent *) item->getPersistent(); } else store = NULL;};
 
-    out_Modbus(Item * _item):abstractOut(_item){store = (mbPersistent *) item->getPersistent();};
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;

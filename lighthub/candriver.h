@@ -1,5 +1,6 @@
 #pragma once
 #define NO_SUBITEM 63
+#define SUBITEM_IS_COMMAND 0x20
 #ifdef  CANDRV
 
 #if defined(ARDUINO_ARCH_STM32)

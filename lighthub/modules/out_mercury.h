@@ -42,13 +42,15 @@ public:
 class out_Mercury : public abstractOut {
 public:
 
-    out_Mercury(Item * _item):abstractOut(_item){store = (mercuryPersistent *) item->getPersistent();};
+    //out_Mercury(Item * _item):abstractOut(_item){store = (mercuryPersistent *) item->getPersistent();};
+    out_Mercury():store(NULL){};
+    void link(Item * _item){abstractOut::link(_item); if (_item) {store = (mercuryPersistent *) item->getPersistent();} else store = NULL;};
+   
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;
     int getChanType() override;
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized = false) override;
-    //int getDefaultStorageType(){return ST_INT32;};
 
 
 protected:

@@ -23,7 +23,7 @@ e-mail    anklimov@gmail.com
 #include "flashstream.h"
 #include "config.h"
 
-#if defined(__SAM3X8E__)
+#if defined(TIMER_INT)
 #include "TimerInterrupt_Generic.h"
 #endif
 
@@ -2185,6 +2185,25 @@ int16_t attachTimer(double microseconds, timerCallback callback, const char* Tim
 }
 #endif
 
+#if defined(ARDUINO_ARCH_STM32) && defined (TIMER_INT)
+STM32Timer ITimer0(TIM1);
+
+int16_t attachTimer(double microseconds, timerCallback callback, const char* TimerName)
+{  
+    if (timerNumber!=-1) return timerNumber;
+	// Interval in microsecs
+	if (ITimer0.attachInterruptInterval(microseconds, callback))
+	{
+		debugSerial.print(F("Starting ITimer0 OK"));
+        timerNumber = 0;
+	}
+	else
+		debugSerial.println(F("Can't set ITimer0. Select another freq. or timer"));
+  return timerNumber;
+}
+
+#endif
+
 #if defined(__SAM3X8E__) && defined (PULSEPIN12)
 #define MATURA_PULSE 100
 #define MATURA_PERIOD 2500
@@ -3117,7 +3136,11 @@ configLocked++;
     // Interval in microsecs
     attachTimer(TIMER_CHECK_INPUT * 1000, TimerHandler, "ITimer");  
     attachMaturaTimer();
+    #endif     
 
+    #if defined(ARDUINO_ARCH_STM32) && defined (TIMER_INT)  
+    // Interval in microsecs
+    attachTimer(TIMER_CHECK_INPUT * 1000, TimerHandler, "ITimer");  
     #endif     
 configLocked--;
 }

@@ -35,7 +35,8 @@ public:
 class out_AC : public abstractOut {
 public:
 
-    out_AC(Item * _item):abstractOut(_item){store = (acPersistent *) item->getPersistent(); getConfig();};
+    out_AC():store(NULL){};
+    void link(Item * _item){abstractOut::link(_item); if (_item) {store = (acPersistent *) item->getPersistent(); getConfig();} else store = NULL;};
     void getConfig();
     int Setup() override;
     int Poll(short cause) override;

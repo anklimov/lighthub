@@ -451,7 +451,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                       {   
                                       mappedParam = findRegister(defMappingObj->valueint,defMappingObj->valueint-registerFrom,regType,registerFrom,registerTo,false,&submitRecurrentOut);
                                       executeWithoutCheck=true;
-                                      debugSerial<<"MBUSD: recurrent check res: "<<"SRO:"<<submitRecurrentOut<<endl;
+                                      traceSerial<<"MBUSD: recurrent check res: "<<"SRO:"<<submitRecurrentOut<<endl;
                                       }
                                   else 
                                   {

@@ -261,6 +261,7 @@ public:
   bool incrementPercents(long int, long int limit);
   bool incrementH(long int);
   bool incrementS(long int);
+  bool incrementTemp(long int dif);
 
   long int getInt();
   long int getTens();

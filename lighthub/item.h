@@ -1,4 +1,4 @@
-/* Copyright © 2017-2020 Andrey Klimov. All rights reserved.
+/* Copyright © 2017-2025 Andrey Klimov. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ e-mail    anklimov@gmail.com
 #include "options.h"
 #include "abstractout.h"
 #include "itemCmd.h"
+
 
 #define S_NOTFOUND  0
 #define S_CMD  1
@@ -67,6 +68,7 @@ const suffixstr suffix_P[] PROGMEM =
 #define CH_COUNTER 20
 #define CH_HUMIDIFIER 21
 #define CH_MERCURY 22
+#define CH_MAX 22
 
 #define POLLING_SLOW 1
 #define POLLING_FAST 2
@@ -167,6 +169,18 @@ class Item
   int checkFM();
   char defaultSubItem[16];
   int  defaultSuffixCode;
+};
+
+class driverFactory {
+    public:
+    driverFactory(){memset(drivers,0,sizeof(drivers));};
+    Item * getItem(Item * item);
+    abstractOut * getDriver(Item * item);
+    abstractOut * findDriver(Item * item);
+    void freeDriver(Item * item);
+    abstractOut * newDriver(uint8_t itemType);
+    private:
+    abstractOut * drivers[CH_MAX+1];
 };
 
 typedef union

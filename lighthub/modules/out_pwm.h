@@ -10,7 +10,7 @@
 class out_pwm : public colorChannel {
 public:
 
-    out_pwm(Item * _item):colorChannel(_item){numChannels=0;};
+//    out_pwm():numChannels(0){};
     int Setup() override;
     int Stop() override;
 
@@ -19,7 +19,7 @@ public:
     //int Ctrl(itemCmd cmd, char* subItem=NULL) override;
     int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true, bool authorized = false ) override;
 
-protected:
-    short numChannels;
+//protected:
+//    short numChannels;
 };
 #endif

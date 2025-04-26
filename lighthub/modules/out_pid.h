@@ -25,7 +25,10 @@ public:
 class out_pid : public abstractOut {
 public:
 
-    out_pid(Item * _item):abstractOut(_item){store = (pidPersistent *) item->getPersistent();};
+    //out_pid(Item * _item):abstractOut(_item){store = (pidPersistent *) item->getPersistent();};
+    out_pid():store(NULL){};
+    void link(Item * _item){abstractOut::link(_item); if (_item) {store = (pidPersistent *) item->getPersistent();} else store = NULL;};
+
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;

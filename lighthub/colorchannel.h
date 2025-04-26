@@ -9,11 +9,13 @@
 class colorChannel : public abstractOut {
 public:
 
-    colorChannel(Item * _item):abstractOut(_item) {
+    colorChannel():iaddr(0),numArgs(0) {};
+    void link (Item * _item) {
+                          abstractOut::link(_item); 
                           iaddr = item->getArg();        //Once retrieve and store base address
                           if (iaddr<0) iaddr=-iaddr;
                           numArgs = item->getArgCount(); // and how many addresses is configured
-                        };
+                        };                       
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized=false) override;
     //int getDefaultStorageType()override;
     virtual int PixelCtrl(itemCmd cmd, char* subItem=NULL, bool show=true, bool authorized = false ) =0;

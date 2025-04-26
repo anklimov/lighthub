@@ -429,6 +429,23 @@ bool itemCmd::incrementS(long int dif)
 
 }
 
+bool itemCmd::incrementTemp(long int dif)
+{int par=param.colorTemp;
+  switch (cmd.itemArgType)
+  {
+    case ST_HSV255:
+     par+=dif/TENS_BASE;
+     if (par>100) par=100;
+     if (par<1) par=1;
+    break;
+
+   default: return false;
+  }
+  param.colorTemp=par;
+  return true;
+
+}
+
 
 itemCmd itemCmd::assignFrom(itemCmd from, short chanType)
 {
@@ -1514,7 +1531,7 @@ char * itemCmd::toString(char * Buffer, int bufLen, int sendFlags, bool scale100
        if (!Buffer || !bufLen) return NULL;
        *Buffer=0;
        char * argPtr=Buffer;
-       if (isCommand() && (sendFlags & FLAG_COMMAND))
+       if (isCommand() && (sendFlags & FLAG_COMMAND) && cmd.cmdCode<commandsNum)
                         {
                           int len;
                           strncpy_P(Buffer, commands_P[cmd.cmdCode], bufLen);

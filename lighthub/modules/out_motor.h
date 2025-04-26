@@ -20,7 +20,9 @@ static int8_t motorQuote = MOTOR_QUOTE;
 class out_Motor : public abstractOut {
 public:
 
-    out_Motor(Item * _item):abstractOut(_item){getConfig();};
+    //out_Motor(Item * _item):abstractOut(_item){getConfig();};
+    //out_Motor(){};
+    void link(Item * _item){abstractOut::link(_item);  if (_item) getConfig();};   
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;

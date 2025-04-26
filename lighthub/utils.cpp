@@ -130,7 +130,7 @@ long getIntFromStr(char **chan) {
 // chan is pointer to pointer to string
 // Function return first retrived number and move pointer to position next after ','
 itemCmd getNumber(char **chan) {
-    itemCmd val(ST_TENS,CMD_VOID);
+    itemCmd val(ST_VOID,CMD_VOID); //WAS ST_TENS ?
     if (chan && *chan && **chan)
     {
     //Skip non-numeric values
@@ -161,7 +161,7 @@ itemCmd getNumber(char **chan) {
           if (isDigit(*(fractptr+i))) fractnumbers += constrain(*(fractptr+i)-'0',0,9);  
          }
     }
-    
+    if (!fractlen && !intlen) return val; //VOID
     if (!fractlen) val.Int(atol(*chan));
     else if (fractlen<=TENS_FRACT_LEN && intlen+TENS_FRACT_LEN<=9)
         {
@@ -670,11 +670,15 @@ aJsonObject *can = NULL;
 aJsonObject *icmd = NULL;
 aJsonObject *ecmd = NULL;
 char cmdType = 0;
-
-//char * out = aJson.print(cmd);
-//debugSerial<<"Exec:"<<out<<endl;
-//free (out);
-
+if (serialDebugLevel>=LOG_TRACE || udpDebugLevel>=LOG_TRACE) 
+{
+char*  out = aJson.print(cmd);
+if (out)
+{
+debugSerial<<"Exec:"<<out<<endl;
+free (out);
+}
+}
 if (cmd) cmdType = cmd->type;
    
 switch (cmdType)

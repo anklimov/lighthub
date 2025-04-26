@@ -15,7 +15,9 @@
 class out_SPILed : public colorChannel {
 public:
 
-    out_SPILed(Item * _item):colorChannel(_item){getConfig();};
+    //out_SPILed(Item * _item):colorChannel(_item){getConfig();};
+    //out_SPILed(){};
+    void link(Item * _item){colorChannel::link(_item);if (_item) getConfig();};
     int Setup() override;
     int Stop() override;
     int getChanType() override;

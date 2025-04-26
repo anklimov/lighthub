@@ -83,6 +83,7 @@ extern PubSubClient mqttClient;
 extern int8_t ethernetIdleCount;
 extern int8_t configLocked;
 extern lan_status lanStatus;
+driverFactory df;
 
 int retrieveCode(char **psubItem);
 
@@ -172,7 +173,8 @@ void Item::Parse() {
         if (cmdObj) itemExt = cmdObj->next;
 
         itemType = replaceTypeToInt (itemTypeObj);
-
+        driver=df.getDriver(this);
+/*
         switch (itemType)
         {
 #ifndef  PWM_DISABLE            
@@ -265,14 +267,13 @@ void Item::Parse() {
           break;
 #endif
           default: ;
-        }
+        } */
 //        debugSerial << F(" Item:") << itemArr->name << F(" T:") << itemType << F(" =") << getArg() << endl;
  }
 }
 
 boolean Item::Setup()
 {
-
 if (driver)
        {
         if (driver->Status()) driver->Stop();
@@ -287,7 +288,7 @@ else return false;
 }
 
 void Item::Stop()
-{
+{ 
 if (driver)
        {
         driver->Stop();
@@ -299,7 +300,7 @@ Item::~Item()
 {
   if (driver)
               {
-              delete driver;
+              df.freeDriver (this);
               }
 }
 
@@ -356,7 +357,7 @@ uint16_t getCanNum(aJsonObject* verb)
 
 char * Item::getSubItemStrById(uint8_t subItem)
 {
-if (subItem == NO_SUBITEM) return NULL;
+if (subItem == NO_SUBITEM || (subItem | SUBITEM_IS_COMMAND)) return NULL;
 if (!itemArg) return NULL;
 aJsonObject * i = itemArg;
 if (i->type == aJson_Array) i=i->child;
@@ -421,8 +422,16 @@ return NO_SUBITEM;
                     {
                         debugSerial<<"Find item: "<< itemArr->name << " addr:" << num << endl;
                         Parse();
-                        char * subItemStr = getSubItemStrById(subItem);
-                        if (subItemStr) strncpy(defaultSubItem,subItemStr,sizeof(defaultSubItem)); 
+                        if (subItem | SUBITEM_IS_COMMAND)
+                        {
+                          subItem &=~ SUBITEM_IS_COMMAND;
+                          if (subItem<commandsNum) strncpy_P(defaultSubItem, commands_P[subItem], sizeof(defaultSubItem));
+                        }
+                        else 
+                        {
+                         char * subItemStr = getSubItemStrById(subItem);
+                         if (subItemStr) strncpy(defaultSubItem,subItemStr,sizeof(defaultSubItem)); 
+                        }                    
                         return;
                     }
             itemArr = itemArr->next;
@@ -899,8 +908,8 @@ bool Item::digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem, bool aut
                                                     configLocked--;    
                                                     return true; //Not execution, just activity check. If any channel is active - return true
                                                     }
+                                        }           
                                } 
-                    }    
                     break;
                     case aJson_Object:
                     case aJson_Array:
@@ -1091,6 +1100,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
     long status2Send = 0;
     uint8_t  command2Set = 0;
     itemCmd  originalCmd = cmd;
+    int subitemCmd = subitem2cmd(subItem);
 
     /// Common (GRP & NO GRP) commands
     switch (cmd.getCmd()) 
@@ -1228,6 +1238,13 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
                                status2Send |= FLAG_PARAMETERS | FLAG_SEND_DEFFERED;  
                                cmd.setSuffix(S_SET);  
                              } else {cmd=fallbackCmd;invalidArgument=true; errorSerial << F("Invalid arg")<<endl;}
+                             break;
+                        case S_TEMP:
+                             if (cmd.incrementTemp(step))
+                             {
+                               status2Send |= FLAG_PARAMETERS | FLAG_SEND_DEFFERED;  
+                               cmd.setSuffix(S_SET);  
+                             } else {cmd=fallbackCmd;invalidArgument=true; errorSerial << F("Invalid arg")<<endl;}     
                       } //switch suffix
 
              } //Case UP/DOWN
@@ -1273,18 +1290,19 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
                     if ((suffixCode!=S_CMD) ||  (cmd.getCmd() != CMD_XON) || !getFlag(FLAG_DISABLED))
                         {
                             digGroup(itemArg,&cmd,subItem,authorized);   
+                             
                             if ((suffixCode==S_CMD) &&  cmd.isValue())  
                                                     {
                                                     scheduleOppositeCommand(originalCmd,chActive,authorized);         
                                                     scheduledOppositeCommand = true;
                                                     }   
-                        if (subItem) status2Send |= FLAG_SEND_IMMEDIATE;                             
+                        if (subItem && !subitemCmd) status2Send |= FLAG_SEND_IMMEDIATE;                             
                         }
                     }
                 }
                 
        res=1;     
-
+      if (subitemCmd) subItem = NULL;
     
       // Post-processing of group command - converting HALT,REST,XON,XOFF to conventional ON/OFF for status
       switch (cmd.getCmd()) {
@@ -1383,7 +1401,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
         if (subItem) 
         {
         //Check if subitem is some sort of command    
-        int subitemCmd = subitem2cmd(subItem);
+        
         short prevCmd  = getCmd();
         if (!prevCmd && chActive) prevCmd=CMD_ON;
 
@@ -1657,6 +1675,8 @@ if ((!driver || driver->isAllowed(cmd))
                         case CMD_HALT:
                         case CMD_XOFF:   
                         digitalWrite(iaddr, k = (inverse) ? HIGH : LOW); 
+                     default:
+                       k = -1;   
                     }
 /*
                         if (inverse)
@@ -1780,7 +1800,6 @@ int Item::isActive() {
                       return -1;
                       }
     int cmd = getCmd();
-
     if (driver) {
                 short active =  driver->isActive();
                 if (active >= 0)
@@ -1905,7 +1924,6 @@ switch (cause)
             sendDelayedStatus();
     }
   }
-
   if (driver && driver->Status())
                       {
                       return driver->Poll(cause);
@@ -2186,7 +2204,7 @@ int Item::SendStatus(long sendFlags, char * subItem) {
 }
 
 int Item::getChanType()
-{
+{ 
 if (driver) return driver->getChanType();
 return itemType;
 }
@@ -2218,7 +2236,6 @@ int Item::checkRetry() {
     {   // if last sending attempt of command was failed
       itemCmd val(ST_VOID,CMD_VOID);
       val.loadItem(this, FLAG_COMMAND | FLAG_PARAMETERS);
-      
       if (driver) 
                     {
                     clearFlag(FLAG_SEND_RETRY);     // Clean retry flag    
@@ -2721,5 +2738,158 @@ int Item::checkModbusDimmer(int data) {
     } //if data changed
   return 1;  
 }
-
 #endif
+
+Item * driverFactory::getItem(Item * item)
+{
+abstractOut * driver = findDriver(item);
+if (driver) return driver->getItem();
+return NULL;
+}
+
+abstractOut * driverFactory::findDriver(Item * item)
+{
+if (!item || !item->isValid()) return NULL;
+uint8_t itemType = item->itemType;
+if (itemType>CH_MAX) return NULL;
+
+switch (itemType)
+{
+            case CH_RGBW:
+            case CH_RGB:
+            case CH_RGBWW:
+            itemType = CH_DIMMER;
+}
+return drivers[itemType];
+}
+
+void driverFactory::freeDriver(Item * item)
+{
+if (item && item->driver) 
+        {   
+            abstractOut * driver = findDriver(item);   
+            if (driver)
+              {
+                    if (driver->getItem() == item)
+                                item->driver->link(NULL);
+                    else delete item->driver;            
+              }     
+        }
+}
+
+abstractOut * driverFactory::getDriver(Item * item)
+{
+if (!item || !item->isValid()) return NULL;    
+abstractOut * driver = findDriver(item);
+if (driver) 
+    {
+      if (driver->getItem()) driver = newDriver(item->itemType);
+    }
+
+else 
+    {
+        driver = newDriver(item->itemType);
+        if (driver) drivers[item->itemType]=driver;   
+    }
+
+ 
+if (driver) driver->link(item);         
+return driver;
+}
+ 
+abstractOut * driverFactory::newDriver(uint8_t itemType)
+ {
+ abstractOut * driver = NULL;    
+switch (itemType)
+        {
+#ifndef  PWM_DISABLE            
+          case CH_PWM:
+          driver = new out_pwm ;
+          break;
+#endif          
+
+#ifndef   DMX_DISABLE
+            case CH_DIMMER:
+            driver = new out_dmx ;
+            break;
+#endif
+#ifndef   SPILED_DISABLE
+          case CH_SPILED:
+          driver = new out_SPILed ;
+          break;
+#endif
+
+#ifndef   AC_DISABLE
+          case CH_AC:
+          driver = new out_AC ;
+          break;
+#endif
+
+#ifndef   MOTOR_DISABLE
+          case CH_MOTOR:
+          driver = new out_Motor ;
+          break;
+#endif
+
+#ifndef   MBUS_DISABLE
+          case CH_MBUS:
+          driver = new out_Modbus ;
+          break;
+#endif
+
+#ifndef   PID_DISABLE
+          case CH_PID:
+          driver = new out_pid ;
+          break;
+#endif
+
+
+#ifndef   RELAY_DISABLE
+          case CH_RELAYX:
+          driver = new out_relay ;
+          break;
+#endif
+
+#ifndef   MULTIVENT_DISABLE
+          case CH_MULTIVENT:
+          driver = new out_Multivent ;
+          break;
+#endif
+
+#ifdef   UARTBRIDGE_ENABLE
+          case CH_UARTBRIDGE:
+          driver = new out_UARTbridge ;
+//          debugSerial<<F("AC driver created")<<endl;
+          break;
+#endif
+
+#ifdef ELEVATOR_ENABLE
+          case CH_ELEVATOR:
+          driver = new out_elevator ;
+//          debugSerial<<F("AC driver created")<<endl;
+          break;
+#endif
+
+#ifdef HUMIDIFIER_ENABLE
+          case CH_HUMIDIFIER:
+          driver = new out_humidifier ;
+          break;
+#endif
+
+#ifdef MERCURY_ENABLE
+          case CH_MERCURY:
+          driver = new out_Mercury ;
+          break;
+#endif
+
+#ifndef COUNTER_DISABLE
+          case CH_COUNTER:
+          driver = new out_counter ;
+//          debugSerial<<F("AC driver created")<<endl;
+          break;
+#endif
+          default: ;
+}
+
+return driver;
+}

@@ -12,7 +12,9 @@
 class out_Multivent : public abstractOut {
 public:
 
-    out_Multivent(Item * _item):abstractOut(_item){getConfig();};
+    //out_Multivent(Item * _item):abstractOut(_item){getConfig();};
+    //out_Multivent(){};
+    void link(Item * _item){abstractOut::link(_item);  if (_item) getConfig();};    
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;

@@ -58,7 +58,12 @@ public:
 class out_UARTbridge : public abstractOut {
 public:
 
-    out_UARTbridge(Item * _item):abstractOut(_item){store = (ubPersistent *) item->getPersistent();};
+   // out_UARTbridge(Item * _item):abstractOut(_item){store = (ubPersistent *) item->getPersistent();};
+
+    out_UARTbridge():store(NULL){};
+    void link(Item * _item){abstractOut::link(_item); if (_item) {store = (ubPersistent *) item->getPersistent();} else store = NULL;};
+
+
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;

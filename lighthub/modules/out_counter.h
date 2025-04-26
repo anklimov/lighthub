@@ -8,8 +8,6 @@
 
 class out_counter : public abstractOut {
 public:
-
-    out_counter(Item * _item):abstractOut(_item){};
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;

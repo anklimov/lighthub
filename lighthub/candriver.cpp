@@ -522,16 +522,14 @@ else //Requests
         if ((id.payloadType == payloadType::itemCommand) && (len ==8))
             {
                 Item it(id.itemId,id.subItemId);
-                if (it.isValid())
-                    {
-                        itemCmd ic;
-                        ic.cmd = packet->cmd;
-                        ic.param = packet->param;
-                        //debugSerial<<F("CAN: itemCmd: ");
+                if (!it.isValid()) return false;
+
+                itemCmd ic;
+                ic.cmd = packet->cmd;
+                ic.param = packet->param;   
+                         //debugSerial<<F("CAN: itemCmd: ");
                         //ic.debugOut();
-                        return it.Ctrl(ic,it.getSubItemStrById(id.subItemId));
-                    }
-               return false;
+                return it.Ctrl(ic,it.getSubItemStrById(id.subItemId));
             }
         else if ((id.payloadType == payloadType::lookupMAC) && (len>=6))
             {             
@@ -749,7 +747,17 @@ bool canDriver::sendCommand(aJsonObject * can, itemCmd cmd, bool status)
              int suffix=txt2subItem(sfx->valuestring);
              if (suffix) cmd.setSuffix(suffix);
             }
-         if (subItemObj && subItemObj->type==aJson_Int && subItemObj->valueint>=0 && subItemObj->valueint<63) subItem=subItemObj->valueint;
+
+         if (subItemObj)
+            switch (subItemObj->type)
+            {
+             case  aJson_Int: 
+                   if (subItemObj->valueint>=0 && subItemObj->valueint<SUBITEM_IS_COMMAND) subItem=subItemObj->valueint;
+             break;
+             case  aJson_String:
+             int suffix=txt2cmd(subItemObj->valuestring);
+             if (suffix) subItem = suffix | SUBITEM_IS_COMMAND;
+            }   
 
         if (dev && it && dev->type == aJson_Int && it->type == aJson_Int)
             return sendCommand(dev->valueint, it->valueint, cmd, status,subItem); 

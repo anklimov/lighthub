@@ -8,8 +8,7 @@
 
 class out_relay : public abstractOut {
 public:
-
-    out_relay(Item * _item):abstractOut(_item){ getConfig();};
+    void link(Item * _item){abstractOut::link(_item); if (_item) getConfig();};
     void getConfig();
     void relay(bool state);
     int Setup() override;
