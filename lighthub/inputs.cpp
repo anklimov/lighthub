@@ -147,16 +147,6 @@ void Input::Parse(aJsonObject * configObj)
 
         store = (inStore *) &inputObj->valueint;  
         }
-        /*
-        // Persistant storage
-        itemBuffer = aJson.getObjectItem(inputObj, "@S");
-        if (!itemBuffer) {
-            debugSerial<<F("In: ")<<pin<<F("/")<<inType<<endl;
-            aJson.addNumberToObject(inputObj, "@S", (long int) 0);
-            itemBuffer = aJson.getObjectItem(inputObj, "@S");
-        }
-        if (itemBuffer) store = (inStore *) &itemBuffer->valueint;
-        */
 
 }
 void Input::stop()
@@ -604,17 +594,24 @@ debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") <<
 // To Be Refactored - move to Execute after class Input inheritation on abstract chan
     bool Input::checkInstructions(aJsonObject * obj)
     {
-       aJsonObject *gotoObj = aJson.getObjectItem(obj, "goto");
+       aJsonObject *gotoObj = aJson.getObjectItem(obj, "activate");
        if (gotoObj)
        switch (gotoObj->type)
-    {
-        case aJson_Int:
-        debugSerial<<F("Activate in ")<< gotoObj->valueint <<endl;
-            return setCurrentInput(gotoObj->valueint);
+    {   case aJson_Array:
+        {   
+            char * name = getStringFromJson(gotoObj,0);
+            if (name) 
+                    {   
+                        Input in (name);
+                        debugSerial<<"IN: "<<name<< " is "<<in.isValid()<<endl;
+                        if (in.isValid()) return in.setCurrentInput(aJson.getArrayItem(gotoObj,1));
+                    }
+        }
         break;
+        case aJson_Int:
         case aJson_String:
-        debugSerial<<F("Activate in ")<< gotoObj->valuestring <<endl;
-            return setCurrentInput(gotoObj->valuestring); 
+        return setCurrentInput(gotoObj);
+        break;
     }
     return false;
     }
@@ -628,12 +625,27 @@ debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") <<
     return inputObj; 
     }
 
+    bool Input::setCurrentInput(aJsonObject * obj)
+    {
+        if (!obj) return false; 
+        switch (obj->type)
+        {
+        case aJson_Int:
+        debugSerial<<F("Activate in ")<<pin <<" to "<< obj->valueint <<endl;
+            return setCurrentInput(obj->valueint);
+        break;
+        case aJson_String:
+        debugSerial<<F("Activate in ")<<pin <<" to "<< obj->valuestring <<endl;
+            return setCurrentInput(obj->valuestring); 
+        }
+    }
+
     bool Input::setCurrentInput(int n)
     {
     if (!inputObj) return false;   
     aJsonObject * curInput = NULL; 
     aJsonObject *act = aJson.getObjectItem(inputObj, "act");
-    if (act && act->type == aJson_Array)
+    if (act && (act->type == aJson_Array || act->type ==aJson_Object))
         {
                if (n)
                  curInput = aJson.getArrayItem(act,n-1);

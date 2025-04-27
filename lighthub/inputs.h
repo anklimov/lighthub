@@ -188,6 +188,8 @@ protected:
     void setupRotaryEncoder();
 
     aJsonObject * getCurrentInput();
+
+    bool setCurrentInput(aJsonObject * obj);
     bool setCurrentInput(int n);
     bool setCurrentInput(char * name);
     bool checkInstructions(aJsonObject * obj);
