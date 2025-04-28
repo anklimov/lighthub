@@ -805,7 +805,7 @@ st.setSuffix(suffixCode);
                     }
               }
           if (remoteID) return   remoteCtrl(st,remoteID,subItem,authToken);
-          return   Ctrl(st,subItem,true,authorized);
+          return   Ctrl(st,subItem,0,authorized);
         } //Void command
           break;
 
@@ -838,14 +838,14 @@ st.setSuffix(suffixCode);
           Par0.Cmd(cmd);
           Par0.setSuffix(suffixCode);
           if (remoteID) return   remoteCtrl(Par0,remoteID,subItem,authToken);
-          return Ctrl(Par0, subItem,true,authorized);
+          return Ctrl(Par0, subItem,0,authorized);
           }
       default: //some known command
       {
       int32_t intParam = getIntFromStr((char **) &payload);
       if (intParam) st.Int(intParam);
       if (remoteID) return   remoteCtrl(st,remoteID,NULL,authToken);
-      return Ctrl(st,NULL, true, authorized);
+      return Ctrl(st,NULL, 0, authorized);
       }
   } //ctrl
 return 0;
@@ -874,7 +874,7 @@ int Item::remoteCtrl(itemCmd cmd, int remoteID, char* subItem, char * authToken)
 // Recursive function with small stack consumption
 // if cmd defined - execute Ctrl for any group members recursively
 // else performs Activity check for group members and return true if any member is active 
-bool Item::digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem, bool authorized)
+bool Item::digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem, bool authorized, uint8_t ctrlFlags)
 {    if (!itemArr || itemArr->type!=aJson_Array) return false; 
      // Iterate across array of names
       aJsonObject *i = itemArr->child;                                        
@@ -888,14 +888,12 @@ bool Item::digGroup (aJsonObject *itemArr, itemCmd *cmd, char* subItem, bool aut
                         if (nextItem && nextItem->type == aJson_Array) //nextItem is correct item
                                {    
                                 Item it(nextItem);  
-                                if (cmd && it.isValid()) it.Ctrl(*cmd,subItem,false,authorized); //Execute (non recursive)
+                                if (cmd && it.isValid() ) it.Ctrl(*cmd,subItem,CTRL_DISABLE_RECURSION | ctrlFlags, authorized); //Execute (non recursive)
                                 //Retrieve itemType    
-                                //aJsonObject * itemtype = aJson.getArrayItem(nextItem,0);
-                                //if (itemtype && itemtype->type == aJson_Int  && itemtype->valueint == CH_GROUP) 
                                 if (it.itemType == CH_GROUP) 
                                     { //is Group
                                     aJsonObject * itemSubArray = aJson.getArrayItem(nextItem,1);
-                                    short res = digGroup(itemSubArray,cmd,subItem,authorized);
+                                    short res = digGroup(itemSubArray,cmd,subItem,authorized, ctrlFlags);
                                     if (!cmd && res) 
                                                     {
                                                     configLocked--;    
@@ -932,25 +930,25 @@ aJsonObject *timestampObj = aJson.getArrayItem(itemArr, I_TIMESTAMP);
 return 0;
 }
 
-int Item::scheduleOppositeCommand(itemCmd cmd,bool isActiveNow,bool authorized)
+int Item::scheduleOppositeCommand(itemCmd cmd,short isActiveNow,bool authorized)
 {
     itemCmd nextCmd=cmd;
     
     switch (cmd.getCmd()){
     case CMD_XON:  
-                    if (isActiveNow && !isScheduled()) return 0;
+                    if ((isActiveNow == 1)  && !isScheduled()) return 0;
                     nextCmd.Cmd(CMD_XOFF);
     break;
     case CMD_XOFF:  
-                    if (!isActiveNow && !isScheduled()) return 0;
+                    if ((isActiveNow == 0)  && !isScheduled()) return 0;
                     nextCmd.Cmd(CMD_XON);
     break;
     case CMD_ON:  
-                    if (isActiveNow && !isScheduled()) return 0;
+                    if ((isActiveNow == 1)  && !isScheduled()) return 0;
                     nextCmd.Cmd(CMD_OFF);
     break;
     case CMD_OFF:  
-                    if (!isActiveNow && !isScheduled()) return 0;
+                    if ((isActiveNow == 0) && !isScheduled()) return 0;
                     nextCmd.Cmd(CMD_ON);
     break;
     case CMD_ENABLE:  
@@ -970,11 +968,11 @@ int Item::scheduleOppositeCommand(itemCmd cmd,bool isActiveNow,bool authorized)
                     nextCmd.Cmd(CMD_FREEZE);
     break;
     case CMD_HALT:  
-                    if (!isActiveNow && !isScheduled()) return 0;
+                    if ((isActiveNow == 0) && !isScheduled()) return 0;
                     nextCmd.Cmd(CMD_RESTORE);
     break;
     case CMD_RESTORE:  
-                    if (isActiveNow && !isScheduled()) return 0;
+                    if ((isActiveNow == 1) && !isScheduled()) return 0;
                     nextCmd.Cmd(CMD_HALT);
     break;
     case CMD_TOGGLE:  nextCmd.Cmd(CMD_TOGGLE);
@@ -1003,12 +1001,12 @@ int Item::scheduleCommand(itemCmd cmd,bool authorized)
                         timestampObj->type = (authorized?aJson_Reserved:aJson_Int);
                         timestampObj->subtype=(cmd.getCmd() & 0xF);
                 
-                        debugSerial<<F( "Armed for ")<< cmd.getInt() << F(" ms :")<<timestampObj->valueint<<endl;
+                        debugSerial<<F( "CTRL: Armed ")<<itemArr->name <<F(" for ")<< cmd.getInt() << F(" ms")<<endl;
                     }
                     else
                     {
                         timestampObj->subtype=0;
-                        debugSerial<<F( " Disarmed")<<endl;
+                        debugSerial<<F( "CTRL: ")<<itemArr->name << F( " Disarmed")<<endl;
                     }         
                 return 1;
                 }        
@@ -1024,7 +1022,7 @@ int Item::scheduleCommand(itemCmd cmd,bool authorized)
 // -4 invalid argument
 // -5 unauthorized
 // -6 disabled
-int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized)
+int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
 {      
        int fr = freeRam();
        if (fr < minimalMemory) 
@@ -1092,6 +1090,13 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
             return scheduleCommand(cmd,authorized);
         }
     /// 
+
+    if (((flags & CTRL_SCHEDULED_CALL_RECURSION) == CTRL_SCHEDULED_CALL_RECURSION && itemType != CH_GROUP))
+    {
+        debugSerial<<F("Skipping scheduled group exec")<<endl;
+        return -7;
+    }
+    ///
     int8_t  chActive  = -1;
     bool    toExecute = false;
     bool    scale100  = false;
@@ -1259,7 +1264,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
                 errorSerial<<F("CTRL: Not enough memory for group operation")<<endl;
                 return -1;
             }    
-    if (allowRecursion && itemArg->type == aJson_Array && operation) 
+    if (!(flags & CTRL_DISABLE_RECURSION) && itemArg->type == aJson_Array && operation) 
                 { 
                 if ((suffixCode==S_CMD) && ((cmd.getCmd() == CMD_ENABLE) || (cmd.getCmd() == CMD_DISABLE)))
                     {
@@ -1286,14 +1291,14 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
                     }
                 else 
                     {
-                    chActive=(isActive()>0);   
+                    //chActive=(isActive()>0);   
                     if ((suffixCode!=S_CMD) ||  (cmd.getCmd() != CMD_XON) || !getFlag(FLAG_DISABLED))
                         {
-                            digGroup(itemArg,&cmd,subItem,authorized);   
+                            digGroup(itemArg,&cmd,subItem,authorized,flags);   
                              
                             if ((suffixCode==S_CMD) &&  cmd.isValue())  
                                                     {
-                                                    scheduleOppositeCommand(originalCmd,chActive,authorized);         
+                                                    scheduleOppositeCommand(originalCmd,-1/*chActive*/,authorized);         
                                                     scheduledOppositeCommand = true;
                                                     }   
                         if (subItem && !subitemCmd) status2Send |= FLAG_SEND_IMMEDIATE;                             
@@ -1310,7 +1315,6 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
               case CMD_RESTORE:  // individual for group members
                       switch (t = getCmd()) {
                           case CMD_HALT: //previous command was HALT ?
-                              ///if ((suffixCode==S_CMD) && cmd.isValue() && (!chActive || isScheduled())) scheduleOppositeCommand(cmd,authorized);
                               debugSerial << F("CTRL: Restored from:") << t << endl;
                               cmd.loadItemDef(this);
                               cmd.Cmd(CMD_ON);    //turning on
@@ -1324,7 +1328,6 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
               case CMD_XOFF:    // individual for group members
                       switch (t = getCmd()) {
                           case CMD_XON: //previous command was CMD_XON ?
-                             ///if ((suffixCode==S_CMD) && cmd.isValue() && (chActive || isScheduled())) scheduleOppositeCommand(cmd,authorized);
                               debugSerial << F("CTRL: Turned off from:") << t << endl;
                               cmd.Cmd(CMD_OFF);    //turning Off
                               status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
@@ -1340,10 +1343,6 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
             if (!getFlag(FLAG_DISABLED))
             {
             if (chActive == -1) chActive=(isActive()>0);
-
-            ///if ((suffixCode==S_CMD) && cmd.isValue() && (!chActive || isScheduled())) scheduleOppositeCommand(cmd,authorized);
-   
-
             if (!chActive)  //if channel was'nt active before CMD_XON
                 {
 
@@ -1368,7 +1367,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
             break;
             case CMD_HALT:
             if (chActive == -1) chActive=(isActive()>0);
-            ///if ((suffixCode==S_CMD) && cmd.isValue() && (chActive || isScheduled())) scheduleOppositeCommand(cmd,authorized);
+
             if (chActive)  //if channel was active before CMD_HALT /// HERE bug - if cmd == On but 0 = active
                   {
                     cmd.Cmd(CMD_OFF);  
@@ -1420,7 +1419,10 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
                ///// return 0;
             }
         }
-        bool oppositeCommandToBeSchedulled = (suffixCode==S_CMD) && allowRecursion && cmd.isValue();
+        
+ ///       bool oppositeCommandToBeSchedulled = (suffixCode==S_CMD) && allowRecursion && cmd.isValue();
+
+        bool oppositeCommandToBeSchedulled = (suffixCode==S_CMD) && cmd.isValue();        
         // Commands for NON GROUP
         //threating Restore, XOFF (special conditional commands)/ convert to ON, OFF and SET values
           switch (cmd.getCmd()) {
@@ -1428,9 +1430,6 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
               case CMD_RESTORE:  // individual for group members
                       switch (t = getCmd()) {
                           case CMD_HALT: //previous command was HALT ?
-                             // if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue()) //invoked not as group part, delayed, non Active or re-schedule 
-                             //                                                        scheduleOppositeCommand(cmd,chActive,authorized);
-
                               debugSerial << F("CTRL: Restored from:") << t << endl;
                               cmd.loadItemDef(this);
                               toExecute=true;
@@ -1446,8 +1445,6 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
               case CMD_XOFF:    // individual for group members
                       switch (t = getCmd()) {
                           case CMD_XON: //previous command was CMD_XON ?
-                            //if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue()) //invoked not as group part, delayed, non Active or re-schedule 
-                            //                                                         scheduleOppositeCommand(cmd,chActive,authorized);
                               debugSerial << F("CTRL: Turned off from:") << t << endl;
                               toExecute=true;
                               cmd.Cmd(CMD_OFF);    //turning Off
@@ -1463,9 +1460,6 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
             case CMD_XON:
             if (!getFlag(FLAG_DISABLED))
             {
-                //if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue()) //invoked not as group part, delayed, non Active or re-schedule 
-                //                                                                     scheduleOppositeCommand(cmd,chActive,authorized);
-
                 if (!chActive)  //if channel was'nt active before CMD_XON
                     {
 
@@ -1490,8 +1484,6 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
             break;
 
             case CMD_HALT:
-            //if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue()) //invoked not as group part, delayed, non Active or re-schedule 
-            //                                                                         scheduleOppositeCommand(cmd,chActive,authorized);
             if (chActive)  //if channel was active before CMD_HALT
                   {
                     cmd.Cmd(CMD_OFF);  
@@ -1514,18 +1506,11 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
                 }
 
             if (getCmd() == CMD_HALT) return 3; //Halted, ignore OFF
-            
-            //if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue()) //invoked not as group part, delayed, non Active or re-schedule 
-            //                                                                         scheduleOppositeCommand(cmd,chActive,authorized);
             status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE; 
             toExecute=true;
             break;
 
             case CMD_ON:
-
-            //if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue()) //invoked not as group part, delayed, non Active or re-schedule 
-            //                                                                         scheduleOppositeCommand(cmd,chActive,authorized);
-
                 if (!cmd.isChannelCommand())  //Command for driver, not for whole channel    
                 {
                     toExecute=true;
@@ -1562,30 +1547,16 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
             break;   
 
           case CMD_ENABLE:
+          case CMD_DISABLE:
             //clearFlag(FLAG_DISABLED); //saveItem have this
             status2Send |= FLAG_FLAGS;
             toExecute=true;
-            //debugSerial<<F("Disable Flag is:")<<getFlag(FLAG_DISABLED)<<endl;
-            //if (allowRecursion && cmd.isValue()) //invoked not as group part, delayed, non Active or re-schedule 
-            //                                                                         scheduleOppositeCommand(cmd,chActive,authorized);
-          break;
-
-          case CMD_DISABLE:
-            //setFlag(FLAG_DISABLED); //saveItem have this
-            status2Send |= FLAG_FLAGS;
-            toExecute=true;
-            //debugSerial<<F("Disable Flag is:")<<getFlag(FLAG_DISABLED)<<endl;
-            //if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue()) //invoked not as group part, delayed, non Active or re-schedule 
-            //                                                                         scheduleOppositeCommand(cmd,chActive,authorized);
           break;
 
           case CMD_UNFREEZE:
             //clearFlag(FLAG_DISABLED); //saveItem have this
             status2Send = FLAG_FLAGS;
             toExecute=true;
-            //debugSerial<<F("Disable Flag is:")<<getFlag(FLAG_DISABLED)<<endl;
-            //if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue()) //invoked not as group part, delayed, non Active or re-schedule 
-            //                                                                         scheduleOppositeCommand(cmd,chActive,authorized);
           break;
 
           case CMD_FREEZE:
@@ -1593,9 +1564,6 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, bool allowRecursion, bool authorized
             status2Send = FLAG_FLAGS;
             command2Set = 0;
             toExecute=true;
-            //debugSerial<<F("Disable Flag is:")<<getFlag(FLAG_DISABLED)<<endl;
-            //if ((suffixCode==S_CMD) && allowRecursion && cmd.isValue()) //invoked not as group part, delayed, non Active or re-schedule 
-            //                                                                         scheduleOppositeCommand(cmd,chActive,authorized);
           break;
 
           default:
@@ -1675,6 +1643,7 @@ if ((!driver || driver->isAllowed(cmd))
                         case CMD_HALT:
                         case CMD_XOFF:   
                         digitalWrite(iaddr, k = (inverse) ? HIGH : LOW); 
+                     break;   
                      default:
                        k = -1;   
                     }
@@ -1897,7 +1866,7 @@ if (timestampObj)
                     return -1;
                     } 
                 timestampObj->subtype=0;
-                Ctrl(itemCmd(ST_VOID,cmd),NULL,true,authorized);
+                Ctrl(itemCmd(ST_VOID,cmd),NULL,CTRL_DISABLE_NON_GRP,authorized);
                 //timestampObj->subtype=0; ////
                 }
               }  

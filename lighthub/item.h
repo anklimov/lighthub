@@ -75,6 +75,10 @@ const suffixstr suffix_P[] PROGMEM =
 #define POLLING_INT  3
 #define POLLING_1S   4
 
+//CTRL Execution flags
+#define CTRL_DISABLE_RECURSION 1
+#define CTRL_DISABLE_NON_GRP  2
+#define CTRL_SCHEDULED_CALL_RECURSION (CTRL_DISABLE_RECURSION | CTRL_DISABLE_NON_GRP)
 
 #define I_TYPE 0 //Type of item
 #define I_ARG  1 //Chanel-type depended argument or array of arguments (pin, address etc)
@@ -118,7 +122,7 @@ class Item
   boolean Setup();
   void Stop();
   //int Ctrl(short cmd, short n=0, int * Parameters=NULL, int suffixCode=0, char* subItem=NULL);
-  int Ctrl(itemCmd cmd, char* subItem=NULL, bool allowRecursion = true, bool authorized=false);
+  int Ctrl(itemCmd cmd, char* subItem=NULL, uint8_t flags = 0, bool authorized=false);
   int Ctrl(char * payload,  char * subItem=NULL, int remoteID = 0);
   int remoteCtrl(itemCmd cmd, int remoteID, char* subItem=NULL, char * authToken=NULL);
   int getArg(short n=0);
@@ -148,13 +152,13 @@ class Item
   inline int Off(){return Ctrl(itemCmd(ST_VOID,CMD_OFF));};
   inline int Toggle(){return Ctrl(itemCmd(ST_VOID,CMD_TOGGLE));};
   int scheduleCommand(itemCmd cmd, bool authorized);
-  int scheduleOppositeCommand(itemCmd cmd,bool isActiveNow,bool authorized);
+  int scheduleOppositeCommand(itemCmd cmd,short isActiveNow,bool authorized);
   int isScheduled();
   char * getSubItemStrById(uint8_t subItem);
   uint8_t getSubitemId(char * subItem);
 
   protected:
-  bool digGroup (aJsonObject *itemArr, itemCmd *cmd = NULL, char* subItem = NULL, bool authorized = false);
+  bool digGroup (aJsonObject *itemArr, itemCmd *cmd = NULL, char* subItem = NULL, bool authorized = false, uint8_t ctrlFlags = 0);
   long int limitSetValue();
   int VacomSetFan (itemCmd st);
   int VacomSetHeat(itemCmd st);
