@@ -638,6 +638,7 @@ debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") <<
         debugSerial<<F("Activate in ")<<pin <<" to "<< obj->valuestring <<endl;
             return setCurrentInput(obj->valuestring); 
         }
+        return false;
     }
 
     bool Input::setCurrentInput(int n)
