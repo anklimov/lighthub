@@ -47,3 +47,4 @@
 
 # WAK for HDC1080 (pin D3 on wemos is IO0)
 -D WAK_PIN=D3
+-D ROTARYENCODER

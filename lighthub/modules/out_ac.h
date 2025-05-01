@@ -35,7 +35,7 @@ public:
 class out_AC : public abstractOut {
 public:
 
-    out_AC():store(NULL){};
+    out_AC():store(NULL),portNum(0),ACSerial(NULL){};
     void link(Item * _item){abstractOut::link(_item); if (_item) {store = (acPersistent *) item->getPersistent(); getConfig();} else store = NULL;};
     void getConfig();
     int Setup() override;

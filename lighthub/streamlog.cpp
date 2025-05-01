@@ -1,10 +1,12 @@
 #include "streamlog.h"
 #include <Arduino.h>
 #include "statusled.h"
+#include "utils.h"
 
 #ifdef SYSLOG_ENABLE
  char logBuffer[LOGBUFFER_SIZE];
  int  logBufferPos=0;
+ uint32_t silentTS=0;
 #endif
 
 uint8_t serialDebugLevel = 7;
@@ -22,6 +24,7 @@ Streamlog::Streamlog (SerialPortType * _serialPort, uint8_t _severity , Syslog *
       severity=_severity;
       syslog=_syslog;
       ledPattern=_ledPattern;
+
 }
 #else
 Streamlog::Streamlog (SerialPortType * _serialPort, uint8_t _severity,  uint8_t _ledPattern)
@@ -76,7 +79,30 @@ if (syslogInitialized && (udpDebugLevel>=severity))
   if (ch=='\n')
               {
                 logBuffer[logBufferPos]=0;
-                if (syslog) syslog->log(severity,(char *)logBuffer);
+                if (syslog && (!silentTS || isTimeOver(silentTS,millis(),30000UL))) 
+                            
+                            {
+                            uint32_t ts = millis();  
+                            syslog->log(severity,(char *)logBuffer);
+                            if (millis() - ts > 100UL)
+                                {
+                                    #if !defined(noSerial)
+                                    if (serialPort) serialPort->println(F("Syslog suspended"));
+                                    #endif
+                                    silentTS = millisNZ();
+                                } 
+                             else 
+                             {
+                                   if (silentTS)
+                                   {
+                                   #if !defined(noSerial)
+                                   if (serialPort) serialPort->println(F("Syslog resumed"));
+                                   #endif
+                                   silentTS = 0;  
+                                   syslog->log(severity,F("Syslog resumed"));
+                                   } 
+                             }
+                            }
                 logBufferPos=0;
               }
       else
