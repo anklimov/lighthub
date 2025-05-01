@@ -151,8 +151,9 @@ void Input::Parse(aJsonObject * configObj)
 }
 void Input::stop()
 {
+    if (!inputObj || !root || inputObj->type != aJson_Object) return;
+#ifdef ROTARYENCODER
 aJsonObject *itemBuffer;
-if (!inputObj || !root || inputObj->type != aJson_Object) return;
 itemBuffer = aJson.getObjectItem(inputObj, "#");
 if (inType == IN_RE && itemBuffer && itemBuffer->valuestring && itemBuffer->type == aJson_Array)
     {
@@ -160,6 +161,7 @@ if (inType == IN_RE && itemBuffer && itemBuffer->valuestring && itemBuffer->type
     itemBuffer->valuestring = NULL;
     debugSerial<<F("RE: deleted")<<endl;
     }
+#endif    
 }
 
 void cleanStore(aJsonObject * input)
@@ -192,6 +194,7 @@ if (input && (input->type == aJson_Object))  {
 
 void Input::setupRotaryEncoder()
 {
+#ifdef ROTARYENCODER    
 aJsonObject *itemBuffer;
 if (!inputObj || !root || inputObj->type != aJson_Object) return;
 itemBuffer = aJson.getObjectItem(inputObj, "#");
@@ -206,6 +209,7 @@ if (itemBuffer && !itemBuffer->valuestring && itemBuffer->type == aJson_Array)
             debugSerial<<F("RE: configured on pins ")<<pin1<<","<<pin2<< F(" Mode:")<<mode <<endl;
             }
     }
+#endif    
 }
 
 void Input::setup()
@@ -315,6 +319,7 @@ switch (cause)  {
       case IN_CCS811:
       case IN_HDC1080:
       break;
+#ifdef ROTARYENCODER      
       case IN_RE:
       itemBuffer = aJson.getObjectItem(inputObj, "#");
       if (inputObj && inputObj->type == aJson_Object && itemBuffer && itemBuffer->type == aJson_Array && itemBuffer->valuestring)
@@ -322,16 +327,19 @@ switch (cause)  {
             ((RotaryEncoder *) itemBuffer->valuestring) ->tick();
             contactPoll(cause, ((RotaryEncoder *) itemBuffer->valuestring));
       }
+#endif       
     }
     break;
+#ifdef ULTRASONIC   
   case CHECK_ULTRASONIC:
             switch (inType)
             {
                 case IN_ULTRASONIC:
                 analogPoll(cause);
                 contactPoll(cause);
-            }
-    break;
+            }         
+    break;   
+ #endif    
     case CHECK_SENSOR: //Slow polling
     switch (inType)
     {
@@ -811,8 +819,14 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
 }
 
 static volatile uint8_t contactPollBusy = 0;
+#ifdef ROTARYENCODER
+void Input::contactPoll(short cause, RotaryEncoder * re) 
+#else
+void Input::contactPoll(short cause) 
+#endif
 
-void Input::contactPoll(short cause, RotaryEncoder * re) {
+
+{
     bool currentInputState;
 
     if (!store /*|| contactPollBusy*/) return;
@@ -931,7 +945,7 @@ switch (store->state) //Timer based transitions
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_IDLE,0xFFFF)) changeState(IS_IDLE, cause,currentInputObject);
       break;
  } //switch
-
+#ifdef ROTARYENCODER
 if (re) 
 { 
   aJsonObject * bufferItem;  
@@ -946,7 +960,7 @@ if (re)
              if (bufferItem=aJson.getObjectItem(currentInputObject, "-")) {checkInstructions(bufferItem);executeCommand(bufferItem,0);};
   }
 }
-
+#endif
 } //if not INTERRUPT
     if (currentInputState != store->lastValue) // value changed
     {
