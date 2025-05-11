@@ -91,6 +91,7 @@ case S_CMD:
           case CMD_AUTO:
           case CMD_FAN:
           case CMD_DRY:
+          case CMD_HEATCOOL:
              if (!item->getExt())  
                                       {
                                       item->setExt(millisNZ());

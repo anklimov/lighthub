@@ -106,6 +106,7 @@ int subitem2cmd(char *payload) {
     else if (strcmp_P(payload, AUTO_P) == 0) cmd = CMD_AUTO;
     else if (strcmp_P(payload, FAN_ONLY_P) == 0) cmd = CMD_FAN;
     else if (strcmp_P(payload, DRY_P) == 0) cmd = CMD_DRY;
+    else if (strcmp_P(payload, HEATCOOL_P) == 0) cmd = CMD_HEATCOOL;
     //else if (strcmp_P(payload, HIGH_P) == 0) cmd = CMD_HIGH;
     //else if (strcmp_P(payload, MED_P) == 0) cmd = CMD_MED;
     //else if (strcmp_P(payload, LOW_P) == 0) cmd = CMD_LOW;
@@ -1121,7 +1122,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
                                      toExecute=true;
                                      scale100=true;  //openHab topic format
                                      chActive=(isActive()>0);
-                                        debugSerial<<chActive<<" "<<cmd.getInt()<<endl;
+                                       // debugSerial<<chActive<<" "<<cmd.getInt()<<endl;
                                      if (chActive>0 && !cmd.getInt()) {cmd.Cmd(CMD_OFF);status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE;}
                                      if (chActive==0 && cmd.getInt()) {cmd.Cmd(CMD_ON);status2Send |= FLAG_COMMAND | FLAG_SEND_IMMEDIATE;}
             
@@ -1137,6 +1138,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
                                      
                                       //Convert value to most approptiate type for channel
                                      stored.assignFrom(cmd,getChanType());
+                                     //stored.cmd.cmdCode=0; ///////
                                      stored.debugOut();
 
                                      if ((scale100 || SCALE_VOLUME_100) && (cmd.getArgType()==ST_HSV255 || cmd.getArgType()==ST_PERCENTS255 || cmd.getArgType()==ST_INT32 || cmd.getArgType()==ST_UINT32)) 
@@ -1530,6 +1532,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
             case CMD_HEAT:
             case CMD_FAN:
             case CMD_DRY:
+            case CMD_HEATCOOL:
             if (!cmd.isChannelCommand())  //Command for driver, not for whole channel    
                 {
                     toExecute=true;
@@ -1632,6 +1635,7 @@ if ((!driver || driver->isAllowed(cmd))
 
                     switch (icmd){
                         case CMD_AUTO:
+                        case CMD_HEATCOOL:
                         case CMD_COOL:
                         case CMD_ON:
                         case CMD_DRY:
@@ -1785,6 +1789,8 @@ int Item::isActive() {
             case CMD_ON:
             case CMD_XON:
             case CMD_AUTO:
+            case CMD_HEATCOOL:
+            case CMD_DRY:
             case CMD_HEAT:
             case CMD_COOL:
                  printActiveStatus(true);
@@ -1949,6 +1955,7 @@ int Item::SendStatus(long sendFlags, char * subItem) {
         case CMD_ON:
         case CMD_XON:
         case CMD_AUTO:
+        case CMD_HEATCOOL:
         case CMD_HEAT:
         case CMD_COOL:
         case CMD_DRY:
@@ -2080,6 +2087,9 @@ int Item::SendStatus(long sendFlags, char * subItem) {
                     case CMD_AUTO:
                           strcpy_P(cmdstr, AUTO_P);
                         break;
+                    case CMD_HEATCOOL:
+                        strcpy_P(cmdstr, HEATCOOL_P);
+                        break;                      
                     case CMD_HEAT:
                           strcpy_P(cmdstr, HEAT_P);
                         break;

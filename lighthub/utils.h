@@ -117,11 +117,12 @@ if (a->type == aJson_Array)
      {
       aJsonObject * element = aJson.getArrayItem(a, n);
       if (!element) 
+            {
             for (int i = aJson.getArraySize(a); i < n; i++)
                   if (i==n-1) 
                         aJson.addItemToArray(a, element = aJson.createItem(val));
-                  else  aJson.addItemToArray(a, element = aJson.createNull());      
-
+                  else  aJson.addItemToArray(a, element = aJson.createNull());    
+            }        
         return element;    
        }     
  return NULL;         
@@ -139,9 +140,9 @@ if (a->type == aJson_Object)
       if (!element) 
             {
             aJson.addNumberToObject(a, name, def);
-            element = aJson.getObjectItem(a, name);
-            return element;
+            element = aJson.getObjectItem(a, name);    
             }
+      return element;      
      }       
 return NULL;       
 }
@@ -159,7 +160,7 @@ if (element)
     break;
     case aJson_NULL:   element->type = aJson_Int;
     case aJson_Int:    element->valueint = val;
-  }
+  } 
 return element;
 }
 

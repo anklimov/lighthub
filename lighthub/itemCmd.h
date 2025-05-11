@@ -21,15 +21,15 @@ e-mail    anklimov@gmail.com
 #include "Arduino.h"
 #include "aJSON.h"
 
-typedef  char cmdstr[9];
+typedef  char cmdstr[10];
 
 const cmdstr commands_P[] PROGMEM =
 {
 "","ON","OFF","REST","TOGGLE","HALT","XON","XOFF","INCREASE","DECREASE",
 "ENABLE","DISABLE","UNFREEZE","FREEZE",
 "AUTO","FAN_ONLY",
-"HIGH","MEDIUM","LOW",
-"HEAT","COOL","DRY","STOP","RGB","HSV"
+"HIGH","MEDIUM","LOW","HEAT_COOL",
+"HEAT","COOL","DRY","RGB","HSV"
 };
 
 #define commandsNum sizeof(commands_P)/sizeof(cmdstr)
@@ -87,10 +87,10 @@ const ch_type ch_type_P[] PROGMEM =
 #define CMD_MED 0x11    /// AC/Vent fan level MEDIUM
 #define CMD_LOW 0x12    /// AC/Vent fan level LOW
 
-#define CMD_HEAT 0x13    /// Thermostat/AC set to HEATing mode 
-#define CMD_COOL 0x14    /// Thermostat/AC set to COOLing mode 
-#define CMD_DRY 0x15     /// AC set to Dry mode
-#define CMD_STOP 0x16    /// stop dimming (for further use)
+#define CMD_HEATCOOL 0x13  /// 
+#define CMD_HEAT 0x14    /// Thermostat/AC set to HEATing mode 
+#define CMD_COOL 0x15    /// Thermostat/AC set to COOLing mode 
+#define CMD_DRY 0x16     /// AC set to Dry mode
 
 #define CMD_RGB  0x17 
 #define CMD_HSV  0x18

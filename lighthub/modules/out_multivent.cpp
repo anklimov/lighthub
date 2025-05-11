@@ -9,13 +9,23 @@
 #include "main.h"
 #include "utils.h"
 
+void convert2float(aJsonObject * o)
+{
+  if (!o) return;  
+  switch (o->type)
+  {
+    case aJson_Int:
+    o->valuefloat = o->valueint;
+    o->type = aJson_Float;
+    break;
+  }
+}
 
 void out_Multivent::getConfig()
 {
  gatesObj = NULL;
   if (!item || !item->itemArg || item->itemArg->type != aJson_Object) return;
  gatesObj = item->itemArg;
- //acTemp=(float) item->getExt();
   }
 
 int  out_Multivent::Setup()
@@ -31,78 +41,37 @@ if (gatesObj)
           {
              if (i->name && *i->name)
              {
-            // aJsonObject  * fanObj = aJson.getObjectItem(i, "fan");
-            // if (!fanObj) {aJson.addNumberToObject(i, "fan", (long int) -1);fanObj = aJson.getObjectItem(i, "fan");}
-             aJsonObject  * fanObj = getCreateObject(i,"fan",-1L);
-
-            // aJsonObject  * cmdObj  = aJson.getObjectItem(i, "cmd");
-            // if (!cmdObj) {aJson.addNumberToObject(i, "cmd", (long int) -1);cmdObj  = aJson.getObjectItem(i, "cmd");}
-             aJsonObject  * cmdObj = getCreateObject(i,"cmd",(long) CMD_OFF);
-
-             //aJsonObject * outObj = aJson.getObjectItem(i, "out");
-             //if (!outObj) {aJson.addNumberToObject(i, "out", (long int) -1);outObj = aJson.getObjectItem(i, "out");}
-             aJsonObject  * outObj = getCreateObject(i,"out",-1L);
+             getCreateObject(i,"fan",-1L);
+             getCreateObject(i,"cmd",(long) CMD_OFF);
+             getCreateObject(i,"out",-1L);
+             //getCreateObject(i,"@C",(long) CMD_OFF);
 
              aJsonObject * pidObj = aJson.getObjectItem(i, "pid");
              if (pidObj && pidObj->type == aJson_Array && aJson.getArraySize(pidObj)>=3)
              { 
-             //aJsonObject * setObj = aJson.getObjectItem(i, "set");
-             //if (!setObj) {aJson.addNumberToObject(i, "set", (float) 20.1);setObj = aJson.getObjectItem(i, "set");}
-             //   else if (setObj->type != aJson_Float) {setObj->valuefloat = 20.0;setObj->type= aJson_Float;}
-             aJsonObject  * setObj = getCreateObject(i,"set",(float) 20.0);   
-
-             //aJsonObject  * valObj = aJson.getObjectItem(i, "val");
-             //if (!valObj) {aJson.addNumberToObject(i, "val", (float) 20.1);valObj = aJson.getObjectItem(i, "val");}
-             //   else if (valObj->type != aJson_Float) {valObj->valuefloat = 20.0;valObj->type= aJson_Float;}
-             aJsonObject  * valObj = getCreateObject(i,"val",(float) 20.0);      
-
-             //aJsonObject  * poObj = aJson.getObjectItem(i, "po");
-             //if (!poObj) {aJson.addNumberToObject(i, "po", (float) -1.1);poObj = aJson.getObjectItem(i, "po");}
-             //   else if (poObj->type != aJson_Float) {poObj->valuefloat = -2.0;valObj->type= aJson_Float;}   
-             aJsonObject  * poObj = getCreateObject(i,"po", (long) -2);      
-    
-              float kP = 1.0;
-              float kI = 0.0;
-              float kD = 0.0;
+              aJsonObject  * setObj = getCreateObject(i,"set",(float) 20.0);   
+              convert2float(setObj);
+              aJsonObject  * valObj = getCreateObject(i,"val",(float) 20.0);      
+              convert2float(valObj);
+              aJsonObject  * poObj = getCreateObject(i,"po", (float) -2.0);    
+              convert2float(poObj);
               
               int direction = DIRECT;
-
-             // aJsonObject *  param = aJson.getArrayItem(pidObj, 0);
-             // if (param->type == aJson_Float) kP=param->valuefloat;  
-             //      else if (param->type == aJson_Int) kP=param->valueint;
-              kP=getFloatFromJson(pidObj,0,1.0);     
+              float kP=getFloatFromJson(pidObj,0,1.0);     
               if (kP<0)
                 {
                     kP=-kP;
                     direction=REVERSE;
                 }       
-              //param = aJson.getArrayItem(pidObj, 1);
-              //if (param->type == aJson_Float) kI=param->valuefloat;
-              //    else if (param->type == aJson_Int) kI=param->valueint; 
-               kI=getFloatFromJson(pidObj,1);     
+              float kI=getFloatFromJson(pidObj,1);     
+              float kD=getFloatFromJson(pidObj,2); 
+              float dT=getFloatFromJson(pidObj,3,5.0); 
 
-              //param = aJson.getArrayItem(pidObj, 2);
-              //if (param->type == aJson_Float) kD=param->valuefloat;
-              //    else if (param->type == aJson_Int) kD=param->valueint;  
-               kD=getFloatFromJson(pidObj,2); 
-
-              float dT;
-              //if (aJson.getArraySize(pidObj)==4)
-              //{
-              //param = aJson.getArrayItem(pidObj, 3);
-              //if (param->type == aJson_Float) dT=param->valuefloat;
-              //    else if (param->type == aJson_Int) dT=param->valueint;                  
-              //}
-               dT=getFloatFromJson(pidObj,3,5.0); 
-
-              debugSerial << "VENT: X:" << (long int) &valObj->valuefloat << "-" << (long int)&poObj->valuefloat <<"="<< (long int)&setObj->valuefloat<<endl;
               pidObj->valueint = (long int) new PID  (&valObj->valuefloat, &poObj->valuefloat, &setObj->valuefloat, kP, kI, kD, direction); 
-              debugSerial << "VENT: Y:" << (long int)((PID*) pidObj->valueint)->myInput << "-" << (long int)((PID*) pidObj->valueint)->myOutput <<"="<< (long int)((PID*) pidObj->valueint)->mySetpoint<<endl;
 
               ((PID*) pidObj->valueint)->SetMode (AUTOMATIC);
               ((PID*) pidObj->valueint)->SetSampleTime(dT*1000.0); 
               debugSerial << F ("VENT: PID P=")<<kP<<" I="<<kI<<" D="<<kD<< endl;
-
              } 
              } 
              i=i->next; 
@@ -148,47 +117,103 @@ int out_Multivent::Poll(short cause)
   if (cause == POLLING_SLOW && item->getExt() && isTimeOver(item->getExt(),millisNZ(),60000L))
   {
    item->setExt(0);
-   item->setCmd((isActive())?CMD_ON:CMD_OFF); // if AC temp unknown - change state to ON or OFF instead HEAT|COOL|FAN
+   //item->setCmd((isActive())?CMD_ON:CMD_OFF); // if AC temp unknown - change state to ON or OFF instead HEAT|COOL|FAN
+   aJsonObject * a = aJson.getObjectItem(aJson.getObjectItem(gatesObj, ""),"val");
+   if (a ) a->type = aJson_NULL;
   }
+
 
   if (gatesObj)
       {
-      aJsonObject * i = gatesObj->child;            
+      // metrics, collected from AC  
+      float acTemp = getFloatFromJson(aJson.getObjectItem(gatesObj, ""),"val",NAN);               
+      int actualCmd = item->getCmd();
+      int actualMode = CMD_FAN;
+      if (acTemp>30.0) actualMode = CMD_HEAT;
+          else if (acTemp<15.0) actualMode = CMD_COOL;
+
+
+      aJsonObject * i = gatesObj->child;  
+      int balance = 0;    
+      bool ventRequested = false; //At least 1 ch requested FAN mode 
       while (i)
           {
              if (i->name && *i->name)
              {
+             int   cmd = getIntFromJson(i,"cmd");
+             float set = getIntFromJson(i,"set");
+             float val = getIntFromJson(i,"val");  
+
+             int execCmd = 0;      
+             switch (cmd)
+                    {
+                    case CMD_HEATCOOL:
+                    {
+                    if (set>val) execCmd = CMD_HEAT;
+                    if (set<val) execCmd = CMD_COOL;
+                    }
+                    break;
+                    case CMD_FAN:
+                    ventRequested = true;
+                    case CMD_AUTO: //Passive regulation mode
+                    case CMD_COOL:
+                    case CMD_HEAT:                     
+                    case CMD_OFF:
+                    //setValToJson(i,"@C",cmd);
+                    execCmd = cmd;
+                    break;
+
+                    }    
+
              aJsonObject * pidObj = aJson.getObjectItem(i, "pid");
              if (pidObj && pidObj->valueint)
                         {
                         PID * p = (PID *) pidObj->valueint;  
                         if (p->Compute())
                              { 
-                              aJsonObject * outObj = aJson.getObjectItem(i,"po");
-                              if (outObj && outObj->type == aJson_Float)
+                              aJsonObject * poObj = aJson.getObjectItem(i,"po");
+                              if (poObj && poObj->type == aJson_Float)
                                 {
                                   debugSerial<<F("VENT: ")
                                           <<item->itemArr->name<<"/"<<i->name
                                           <<F(" in:")<<p->GetIn()<<F(" set:")<<p->GetSet()<<F(" out:")<<p->GetOut() 
-                                       //   <<F(" in:")<<getFloatFromJson(i,"val")<<(" set:")<<getFloatFromJson(i,"set")<<F(" out:")<<outObj->valuefloat
-                                          <<" P:"<<p->GetKp()<<" I:"<<p->GetKi()<<" D:"<<p->GetKd()<<((p->GetDirection())?" Rev ":" Dir ")<<((p->GetMode())?" A":" M");
+                                          <<" P:"<<p->GetKp()<<" I:"<<p->GetKi()<<" D:"<<p->GetKd()<<((p->GetDirection())?" Rev ":" Dir ")<<((p->GetMode())?"A":"M");
                                   debugSerial<<endl;
                                   
 
-                                  switch (item->getCmd())
+                                  switch (execCmd)
                                   {
+                                    case CMD_AUTO: //Passive
+                                          switch (actualMode)
+                                          {
+                                            case CMD_HEAT:
+                                              ((PID *) pidObj->valueint)->SetControllerDirection(DIRECT);
+                                              debugSerial<<F("VENT: PASS PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" set DIRECT mode")<<endl;
+                                              Ctrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name);
+                                            break;
+                                            case CMD_COOL:
+                                              ((PID *) pidObj->valueint)->SetControllerDirection(REVERSE);
+                                              debugSerial<<F("VENT: PASS PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" set REVERSE mode")<<endl;
+                                              Ctrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name);
+                                          }
+                                    break;
                                     case CMD_HEAT:
                                     ((PID *) pidObj->valueint)->SetControllerDirection(DIRECT);
                                     debugSerial<<F("VENT: PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" set DIRECT mode")<<endl;
                                
-                                    Ctrl(itemCmd().Percents255(outObj->valuefloat).setSuffix(S_FAN),i->name);
+                                     if (actualCmd==CMD_HEAT) Ctrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name);
+                                     //else?
+
+                                    balance+=poObj->valuefloat;
                                     break;
                                     case CMD_COOL:
                                     //case CMD_FAN: // if PIB using for vent 
                                     //case CMD_ON: // AC temp unknown - assuming that PID used for vent
                                     ((PID *) pidObj->valueint)->SetControllerDirection(REVERSE);
                                     debugSerial<<F("VENT: PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" set REVERSE mode")<<endl;
-                                    Ctrl(itemCmd().Percents255(outObj->valuefloat).setSuffix(S_FAN),i->name);
+                                    if (actualCmd==CMD_COOL) (itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name);
+                                    //else ?
+                                    balance-=poObj->valuefloat;
                                     break;
                                     // if FAN_ONLY (AC report room temp regularry) - not use internal PID - let be on external control via /fan
                                   }
@@ -199,10 +224,31 @@ int out_Multivent::Poll(short cause)
         
              } 
              i=i->next; 
-          }
+          }//while
+          if (balance) debugSerial<<F("VENT: Chan balance=")<<balance<<endl;
+          if (balance>0) sendACcmd (CMD_HEAT);
+             else  if (balance<0) sendACcmd (CMD_COOL); 
+                else if (ventRequested) sendACcmd(CMD_FAN);
+                  // else sendACcmd (CMD_OFF);
       }
 return 1;
 };
+
+int out_Multivent::sendACcmd (int cmd)
+{
+   aJsonObject * a = aJson.getObjectItem(gatesObj, "");
+   if (!a) return 0;
+   int lastCmd = getIntFromJson(a,"@lastCmd");
+   if (lastCmd && (item->getCmd() != lastCmd)) {
+                          //debugSerial<<"VENT: AC MODE changed manually to "<<item->getCmd()<<endl; 
+                          return 0;}
+   if (cmd == lastCmd) {
+                          //debugSerial<<"VENT: AC MODE already same"<<endl; 
+                          return 0;}
+   executeCommand(a,-1,itemCmd().Cmd(cmd).setSuffix(S_CMD));
+   setValToJson(a,"@lastCmd",cmd);
+   return 1;
+}
 
 int out_Multivent::getChanType()
 {
@@ -217,24 +263,49 @@ if (cmd.getCmd()==CMD_DISABLE || cmd.getCmd()==CMD_ENABLE) return 0;
 int suffixCode = cmd.getSuffix();
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
-if (suffixCode == S_VAL && !subItem && cmd.isValue()) 
-      {
-        //item->setExt((long)cmd.getFloat());
-        debugSerial << F("VENT:")<<F("AC air temp: ")<< cmd.getFloat()<<endl;
-        item->setExt(millisNZ());
-        int mode = CMD_FAN;
-        int temp = cmd.getInt();
-        if (temp>30) mode = CMD_HEAT;
-           else if (temp<17) mode = CMD_COOL;
 
-        if (item->getCmd() != mode)
-          {
-            item->setCmd(mode);
-            pubAction(item->isActive());
-          }   
+if (!subItem)  // feedback from shared AC
+{
+switch (suffixCode)
+    {
+    case S_VAL:
+            if (cmd.isValue())
+            {
+            debugSerial << F("VENT:")<<F("AC air temp: ")<< cmd.getFloat()<<endl;
+            item->setExt(millisNZ());
+            setValToJson(aJson.getObjectItem(gatesObj, ""),"val",cmd.getFloat());
+            /*
+            int mode = CMD_FAN;
+            int temp = cmd.getInt();
+            if (temp>30) mode = CMD_HEAT;
+              else if (temp<17) mode = CMD_COOL;
 
-        return 1;
-      }
+            if (item->getCmd() != mode)
+              {
+                item->setCmd(mode);
+                pubAction(item->isActive());
+              }   
+              */
+            } 
+    return 1;
+
+    case S_FAN:
+    return 1;
+
+    case S_SET:
+    return 1;
+    
+    case S_MODE:
+    case S_CMD:
+    return 1;
+
+    case S_TEMP:
+            debugSerial << F("VENT:")<<F("AC air roomtemp: ")<< cmd.getFloat()<<endl;
+            setValToJson(aJson.getObjectItem(gatesObj, ""),"roomtemp",cmd.getFloat());
+    return 1;
+    } 
+}
+
 aJsonObject * i = NULL;
 
 if (cmd.isCommand() && cmd.getSuffix()==S_FAN)
@@ -347,6 +418,7 @@ while (i)
                                             sendFlags |= FLAG_FLAGS;
                                             break;
                                             case CMD_AUTO:
+                                            case CMD_HEATCOOL:
                                             case CMD_COOL:
                                             case CMD_HEAT:
                                             case CMD_FAN:
@@ -371,8 +443,6 @@ while (i)
               case S_SET:
                if (cmd.isValue())   
                                           {
-                                           //if (!setObj) {aJson.addNumberToObject(i, "set", (float) cmd.getFloat()); setObj = aJson.getObjectItem(i, "set"); }
-                                           //    else {setObj->valuefloat = cmd.getFloat();setObj->type = aJson_Float;}  
                                            setValToJson(i,"set",cmd.getFloat());
                                            if (isNotRetainingStatus()) item->SendStatusImmediate(cmd,FLAG_PARAMETERS,i->name);
                                           
@@ -382,9 +452,7 @@ while (i)
               case S_VAL:
                if (cmd.isValue())   
                                           {
-                                            //aJsonObject  * valObj = aJson.getObjectItem(i, "val");
-                                            //if (!valObj) {aJson.addNumberToObject(i, "val", (float) cmd.getFloat()); setObj = aJson.getObjectItem(i, "val");}
-                                            //    else {valObj->valuefloat = cmd.getFloat();valObj->type= aJson_Float;}
+                                            debugSerial<<F("VENT: value ")<<cmd.getFloat()<<endl;
                                             setValToJson(i,"val",cmd.getFloat());      
                                           }
                                           return 1;

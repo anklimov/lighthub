@@ -24,6 +24,7 @@ public:
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized = false) override;
 protected:
     void getConfig();
+    int  sendACcmd (int cmd);
     aJsonObject * gatesObj;
     //float acTemp;
 };

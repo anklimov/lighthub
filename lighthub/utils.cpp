@@ -1109,9 +1109,9 @@ if (a->type == aJson_Object)
             {
             aJson.addNullToObject(a, name);
             element = aJson.getObjectItem(a, name);
-            return element;
             }
-     }       
+      return element;      
+     }    
 return NULL;       
 }
 

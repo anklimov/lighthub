@@ -344,6 +344,7 @@ case S_CTRL:
           case CMD_AUTO:
           case CMD_FAN:
           case CMD_DRY:
+          case CMD_HEATCOOL:
           executeCommand(oCmd,-1,itemCmd().Cmd((item->getFlag(FLAG_DISABLED))?CMD_DISABLE:CMD_ENABLE));
           executeCommand(oCmd,-1,value); 
           item->SendStatus(FLAG_FLAGS);

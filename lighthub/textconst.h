@@ -92,6 +92,7 @@ const char on_P[] PROGMEM = "on";
 #define HEAT_P commands_P[CMD_HEAT]
 #define COOL_P commands_P[CMD_COOL]
 #define AUTO_P commands_P[CMD_AUTO]
+#define HEATCOOL_P commands_P[CMD_HEATCOOL]
 #define FAN_ONLY_P commands_P[CMD_FAN]
 #define DRY_P commands_P[CMD_DRY]
 #define HIGH_P commands_P[CMD_HIGH]
