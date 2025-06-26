@@ -289,7 +289,7 @@ if (Status() == AC_SENDING)
   ACSerial->write(getCRC(req, size-1));
   //ACSerial->flush();
   store->timestamp=millisNZ();
-  debugSerial<<F("AC: ")<<portNum<<F(" <<");
+  debugSerial<<F("AC:")<<portNum<<F(" << ");
   for (int i=0; i < size-1; i++)
   {
      if (req[i] < 10){
@@ -436,35 +436,37 @@ case AC_AWAITINGCMD: //Flusing port for 5 sec, poll status
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
   }
 */
+  byte tmpdata[sizeof(store->data)];
   if(ACSerial->available() >= 37){ //was 0
-    ACSerial->readBytes(store->data, 37);
+    ACSerial->readBytes(tmpdata, 37);
     while(ACSerial->available()){
       delay(2);
       ACSerial->read();
     }
 
-debugSerial<<F("AC: ")<<portNum<<F(" >> ");
+debugSerial<<F("AC:")<<portNum<<F(" >> ");
   for (int i=0; i < 37-1; i++)
   {
-     if (store->data[i] < 10){
+     if (tmpdata[i] < 10){
        debugSerial.print("0");
-       debugSerial.print(store->data[i], HEX);
+       debugSerial.print(tmpdata[i], HEX);
      }
         else
              {
-             debugSerial.print(store->data[i], HEX);
+             debugSerial.print(tmpdata[i], HEX);
              }
   }
   debugSerial.println('.');  
 
-  uint8_t crc=getCRC(store->data,36);
+  uint8_t crc=getCRC(tmpdata,36);
 
-    if (store->data[36] == crc)
+    if (tmpdata[36] == crc)
     {
       debugSerial<<F("AC: OK")<<endl;
-      if (store->data[36] != store->inCheck)
+      if (tmpdata[36] != store->inCheck)
       { //Updated
-        store->inCheck = store->data[36];
+        store->inCheck = tmpdata[36];
+        memcpy(store->data,tmpdata,sizeof(store->data));
         InsertData(store->data, 37); 
       }   
     }

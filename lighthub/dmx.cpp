@@ -272,10 +272,11 @@ for (short rgbwChan=0; rgbwChan < RGBWChannels; rgbwChan++)
        }
     }   
 
-//#ifdef _dmxout
-//for (int i=1; i<17; i++) {debugSerial.print(dmxin.read(i));debugSerial.print(";");}
-//debugSerial.println();
-//#endif
+#ifdef _dmxout
+debugSerial.print(F("DMXIN:"));
+for (int i=1; i<17; i++) {debugSerial.print(dmxin.read(i));debugSerial.print(";");}
+debugSerial.println();
+#endif
 
 #endif
 }
@@ -302,6 +303,7 @@ void DMXinSetup(int channels)
    if (channels>(32*4)) channels = 32*4;
    DMXin = new uint8_t [channels];
    DMXINChannels=channels;
+ //  debugSerial<<F("DMXIN: init chans:")<<channels<<endl;
 #if defined(ARDUINO_ARCH_AVR)
    DMXSerial.init(DMXReceiver,0,channels);
     if (DMXSerial.getBuffer()) {debugSerial.print(F("Init in ch:"));debugSerial.println(channels);} else debugSerial.println(F("DMXin Buffer alloc err"));

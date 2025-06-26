@@ -9,7 +9,7 @@
 #endif
 
 #ifndef LOGBUFFER_SIZE
-#define LOGBUFFER_SIZE 80
+#define LOGBUFFER_SIZE 85
 #endif
 
 #ifdef SYSLOG_ENABLE

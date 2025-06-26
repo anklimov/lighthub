@@ -56,6 +56,7 @@ e-mail    anklimov@gmail.com
 #define IS_REPEAT3 12u
 #define IS_WAITRELEASE 13u
 #define IS_REQSTATE 0xFF
+#define IS_NOP 0xF
 
 
 
@@ -73,6 +74,7 @@ e-mail    anklimov@gmail.com
 #define T_IDLE 600
 #define T_RPT 300
 #define T_RPT_PULSE 150
+#define T_REPEAT 30000
 
 
 
@@ -191,7 +193,7 @@ protected:
     bool publishDataToDomoticz(int , aJsonObject *, const char *format, ...);
 
     char* getIdxField();
-    bool changeState(uint8_t newState, short cause, aJsonObject * currentInputObject);
+    bool changeState(uint8_t newState, short cause, aJsonObject * currentInputObject, bool contactState);
     void setupRotaryEncoder();
 
     aJsonObject * getCurrentInput();

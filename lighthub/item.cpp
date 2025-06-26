@@ -358,7 +358,7 @@ uint16_t getCanNum(aJsonObject* verb)
 
 char * Item::getSubItemStrById(uint8_t subItem)
 {
-if (subItem == NO_SUBITEM || (subItem | SUBITEM_IS_COMMAND)) return NULL;
+if (subItem == NO_SUBITEM || (subItem & SUBITEM_IS_COMMAND)) return NULL;
 if (!itemArg) return NULL;
 aJsonObject * i = itemArg;
 if (i->type == aJson_Array) i=i->child;
@@ -421,18 +421,20 @@ return NO_SUBITEM;
         {
             if (getCanNum(itemArr->child) == num)
                     {
-                        debugSerial<<"Find item: "<< itemArr->name << " addr:" << num << endl;
+                        debugSerial<<"CAN: Find item: "<< itemArr->name << " id:" << num << "sub:" << subItem;
                         Parse();
-                        if (subItem | SUBITEM_IS_COMMAND)
+                        if (subItem & SUBITEM_IS_COMMAND)
                         {
                           subItem &=~ SUBITEM_IS_COMMAND;
                           if (subItem<commandsNum) strncpy_P(defaultSubItem, commands_P[subItem], sizeof(defaultSubItem));
+                            debugSerial<<" subcmd:"<<defaultSubItem<<endl;
                         }
                         else 
                         {
                          char * subItemStr = getSubItemStrById(subItem);
                          if (subItemStr) strncpy(defaultSubItem,subItemStr,sizeof(defaultSubItem)); 
-                        }                    
+                         debugSerial<<" subname:"<<defaultSubItem<<endl;
+                        }   
                         return;
                     }
             itemArr = itemArr->next;
@@ -1107,7 +1109,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
     uint8_t  command2Set = 0;
     itemCmd  originalCmd = cmd;
     int subitemCmd = subitem2cmd(subItem);
-
+    bool oppositeCommandToBeSchedulled = (suffixCode==S_CMD) && cmd.isValue();   
     /// Common (GRP & NO GRP) commands
     switch (cmd.getCmd()) 
     {
@@ -1293,14 +1295,14 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
                     }
                 else 
                     {
-                    //chActive=(isActive()>0);   
+                    if (chActive == -1) chActive=(isActive()>0);   //need! because activities status will be changed
                     if ((suffixCode!=S_CMD) ||  (cmd.getCmd() != CMD_XON) || !getFlag(FLAG_DISABLED))
                         {
                             digGroup(itemArg,&cmd,subItem,authorized,flags);   
                              
-                            if ((suffixCode==S_CMD) &&  cmd.isValue())  
+                            if (oppositeCommandToBeSchedulled)//((suffixCode==S_CMD) &&  cmd.isValue())  
                                                     {
-                                                    scheduleOppositeCommand(originalCmd,-1/*chActive*/,authorized);         
+                                                    scheduleOppositeCommand(originalCmd,-1,authorized);         
                                                     scheduledOppositeCommand = true;
                                                     }   
                         if (subItem && !subitemCmd) status2Send |= FLAG_SEND_IMMEDIATE;                             
@@ -1347,8 +1349,6 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
             if (chActive == -1) chActive=(isActive()>0);
             if (!chActive)  //if channel was'nt active before CMD_XON
                 {
-
-
                     cmd.loadItemDef(this);
                     cmd.Cmd(CMD_ON);
                     command2Set=CMD_XON;
@@ -1424,7 +1424,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
         
  ///       bool oppositeCommandToBeSchedulled = (suffixCode==S_CMD) && allowRecursion && cmd.isValue();
 
-        bool oppositeCommandToBeSchedulled = (suffixCode==S_CMD) && cmd.isValue();        
+ //       bool oppositeCommandToBeSchedulled = (suffixCode==S_CMD) && cmd.isValue();        
         // Commands for NON GROUP
         //threating Restore, XOFF (special conditional commands)/ convert to ON, OFF and SET values
           switch (cmd.getCmd()) {
@@ -1740,7 +1740,14 @@ if ((!driver || driver->isAllowed(cmd))
 
     //update command for HALT & XON and send MQTT status
     if (command2Set) setCmd(command2Set | FLAG_COMMAND);
-    if (operation) SendStatus(status2Send,subItem);
+    if (operation) {
+                        SendStatus(status2Send);//,subItem);
+                        if (oppositeCommandToBeSchedulled && subItem) 
+                                {
+                                debugSerial<<F("CTRL: momentary event")<<endl;    
+                                SendStatusImmediate(originalCmd,status2Send,subItem,false); //XON -> OFF scheduled 
+                                }
+                    }               
 } //alowed cmd
  else 
         {
@@ -1934,11 +1941,11 @@ int Item::SendStatus(long sendFlags, char * subItem) {
     }
   }
     
-    int Item::SendStatusImmediate(itemCmd st, long sendFlags, char * subItem) {
+    int Item::SendStatusImmediate(itemCmd st, long sendFlags, char * subItem, bool retain) {
     {
       char addrstr[64];
       char valstr[20] = "";
-      char cmdstr[9] = "";
+      char cmdstr[16] = "";
 
     debugSerial<<"SENDSTATUS: "<<subItem<<" ";  
     st.debugOut();
@@ -1997,12 +2004,12 @@ int Item::SendStatus(long sendFlags, char * subItem) {
                           (st.getArgType() == ST_PERCENTS255 || st.getArgType() == ST_HSV255 || st.getArgType() == ST_FLOAT_CELSIUS))
                         {
                             st.toString(valstr, sizeof(valstr), FLAG_PARAMETERS,true); 
-                            mqttClient.publish(addrstr, valstr, true);
+                            mqttClient.publish(addrstr, valstr, retain);
                             debugSerial<<F("Pub: ")<<addrstr<<F("->")<<valstr<<endl;
                         }
                       else if ((sendFlags & FLAG_COMMAND) && (strlen(cmdstr)))
                         {
-                            mqttClient.publish(addrstr, cmdstr, true);
+                            mqttClient.publish(addrstr, cmdstr, retain);
                             debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
 
                         }
@@ -2068,7 +2075,7 @@ int Item::SendStatus(long sendFlags, char * subItem) {
               #if not defined (NOIP)
               if (mqttClient.connected()  && !ethernetIdleCount)
                  {
-                  mqttClient.publish(addrstr, valstr,true);
+                  mqttClient.publish(addrstr, valstr,retain);
                   clearFlag(FLAG_PARAMETERS);
                  }    
               else
@@ -2082,6 +2089,7 @@ int Item::SendStatus(long sendFlags, char * subItem) {
 
               if (sendFlags & FLAG_COMMAND)
               {
+              if (!subItem)  
               // Some additional preparing for extended set of commands:
                 switch (st.getCmd()) {
                     case CMD_AUTO:
@@ -2112,6 +2120,8 @@ int Item::SendStatus(long sendFlags, char * subItem) {
                     case CMD_XON:
                           if (itemType == CH_THERMO) strcpy_P(cmdstr, AUTO_P);
                    }
+                   else //for subItems - transpatent print
+                   st.toString(cmdstr,sizeof(cmdstr),FLAG_COMMAND | FLAG_PARAMETERS);
 
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
@@ -2128,7 +2138,7 @@ int Item::SendStatus(long sendFlags, char * subItem) {
               #if not defined (NOIP)
               if (mqttClient.connected()  && !ethernetIdleCount)
                  {
-                  mqttClient.publish(addrstr, cmdstr,true);
+                  mqttClient.publish(addrstr, cmdstr,retain);
                   clearFlag(FLAG_COMMAND);
                  }
               else
@@ -2168,7 +2178,7 @@ int Item::SendStatus(long sendFlags, char * subItem) {
               #if not defined (NOIP)
               if (mqttClient.connected()  && !ethernetIdleCount)
                  {
-                  mqttClient.publish(addrstr, cmdstr,true);
+                  mqttClient.publish(addrstr, cmdstr,retain);
                   clearFlag(FLAG_FLAGS);
                  }
               else

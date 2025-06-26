@@ -126,8 +126,9 @@ int out_Multivent::Poll(short cause)
   if (gatesObj)
       {
       // metrics, collected from AC  
-      float acTemp = getFloatFromJson(aJson.getObjectItem(gatesObj, ""),"val",NAN);               
-      int actualCmd = item->getCmd();
+      aJsonObject * a = aJson.getObjectItem(gatesObj, "");
+      float acTemp   = getFloatFromJson(a,"val",NAN);               
+      int actualCmd  = getIntFromJson  (a,"mode");
       int actualMode = CMD_FAN;
       if (acTemp>30.0) actualMode = CMD_HEAT;
           else if (acTemp<15.0) actualMode = CMD_COOL;
@@ -189,12 +190,12 @@ int out_Multivent::Poll(short cause)
                                             case CMD_HEAT:
                                               ((PID *) pidObj->valueint)->SetControllerDirection(DIRECT);
                                               debugSerial<<F("VENT: PASS PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" set DIRECT mode")<<endl;
-                                              Ctrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name);
+                                               if (actualCmd!=CMD_OFF) Ctrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name);
                                             break;
                                             case CMD_COOL:
                                               ((PID *) pidObj->valueint)->SetControllerDirection(REVERSE);
                                               debugSerial<<F("VENT: PASS PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" set REVERSE mode")<<endl;
-                                              Ctrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name);
+                                               if (actualCmd!=CMD_OFF) Ctrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name);
                                           }
                                     break;
                                     case CMD_HEAT:
@@ -239,7 +240,8 @@ int out_Multivent::sendACcmd (int cmd)
    aJsonObject * a = aJson.getObjectItem(gatesObj, "");
    if (!a) return 0;
    int lastCmd = getIntFromJson(a,"@lastCmd");
-   if (lastCmd && (item->getCmd() != lastCmd)) {
+   int acCmd = getIntFromJson(a,"mode");
+   if (lastCmd && (acCmd != lastCmd)) {
                           //debugSerial<<"VENT: AC MODE changed manually to "<<item->getCmd()<<endl; 
                           return 0;}
    if (cmd == lastCmd) {
@@ -252,7 +254,7 @@ int out_Multivent::sendACcmd (int cmd)
 
 int out_Multivent::getChanType()
 {
-   return CH_PWM;
+   return CH_THERMO; /////PWM
 }
 
 
@@ -274,18 +276,6 @@ switch (suffixCode)
             debugSerial << F("VENT:")<<F("AC air temp: ")<< cmd.getFloat()<<endl;
             item->setExt(millisNZ());
             setValToJson(aJson.getObjectItem(gatesObj, ""),"val",cmd.getFloat());
-            /*
-            int mode = CMD_FAN;
-            int temp = cmd.getInt();
-            if (temp>30) mode = CMD_HEAT;
-              else if (temp<17) mode = CMD_COOL;
-
-            if (item->getCmd() != mode)
-              {
-                item->setCmd(mode);
-                pubAction(item->isActive());
-              }   
-              */
             } 
     return 1;
 
@@ -296,6 +286,10 @@ switch (suffixCode)
     return 1;
     
     case S_MODE:
+            debugSerial << F("VENT:")<<F("AC mode: ")<< cmd.getCmd()<<endl;
+            setValToJson(aJson.getObjectItem(gatesObj, ""),"mode",cmd.getCmd()); 
+    return 1;   
+
     case S_CMD:
     return 1;
 

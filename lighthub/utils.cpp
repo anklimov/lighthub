@@ -663,7 +663,7 @@ bool executeCommand(aJsonObject* cmd, int8_t toggle)
 bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd, aJsonObject* defaultItem, aJsonObject* defaultEmit, aJsonObject* defaultCan)
 //bool executeCommand(aJsonObject* cmd, int8_t toggle, char* defCmd)
 {
-//char * legacyString =NULL;
+if (!cmd) return false;
 aJsonObject *item = NULL;
 aJsonObject *emit = NULL;
 aJsonObject *can = NULL;
@@ -679,7 +679,7 @@ debugSerial<<"Exec:"<<out<<endl;
 free (out);
 }
 }
-if (cmd) cmdType = cmd->type;
+cmdType = cmd->type;
    
 switch (cmdType)
 {
@@ -1043,6 +1043,7 @@ if (a->type == aJson_Array)
 // TODO - human readable JSON objects as alias
 if (element && element->type == aJson_Int) return element->valueint; 
 if (element && element->type == aJson_Float) return element->valuefloat;
+if (element && element->type == aJson_Boolean) return element->valuebool;
 
 return def;
 }
@@ -1055,6 +1056,8 @@ if (a->type == aJson_Object)
   element = aJson.getObjectItem(a, name);
 if (element && element->type == aJson_Int) return element->valueint;
 if (element && element->type == aJson_Float) return element->valuefloat;
+if (element && element->type == aJson_Boolean) return element->valuebool;
+
 return def;
  }
 

@@ -630,6 +630,7 @@ while (remoteConfObj)
                     strncpy(root+rootLen, addrObj->valuestring, buflen-rootLen-1);
                     strncat(root+rootLen, "/", buflen-rootLen-1);
                     strncat(root+rootLen, "#", buflen-rootLen-1);
+                    debugSerial.print("CAN: subscribe ");
                     debugSerial.println(root);
                     mqttClient.subscribe(root);                
                 }   
