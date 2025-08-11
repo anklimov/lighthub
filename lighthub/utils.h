@@ -73,7 +73,7 @@ bool isTimeOver(uint32_t timestamp, uint32_t currTime, uint32_t time, uint32_t m
 bool executeCommand(aJsonObject* cmd, int8_t toggle = -1);
 bool executeCommand(aJsonObject* cmd, int8_t toggle, itemCmd _itemCmd, aJsonObject* defaultItem=NULL, aJsonObject* defaultEmit=NULL, aJsonObject* defaultCan = NULL);
 itemCmd mapInt(int32_t arg, aJsonObject* map);
-uint32_t millisNZ(uint8_t shift=0);
+uint32_t millisNZ(uint8_t shift=0, uint32_t mask=0xFFFFFFFFUL);
 serialParamType  str2SerialParam(char * str);
 String toString(const IPAddress& address);
 bool getPinVal(uint8_t pin);

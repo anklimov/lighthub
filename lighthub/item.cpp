@@ -1094,7 +1094,8 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
         }
     /// 
 
-    if (((flags & CTRL_SCHEDULED_CALL_RECURSION) == CTRL_SCHEDULED_CALL_RECURSION && itemType != CH_GROUP))
+    if (((flags & CTRL_SCHEDULED_CALL_RECURSION) == CTRL_SCHEDULED_CALL_RECURSION && itemType == CH_GROUP))
+    //   if (((flags & CTRL_SCHEDULED_CALL_RECURSION) == CTRL_SCHEDULED_CALL_RECURSION && itemType != CH_GROUP))
     {
         debugSerial<<F("Skipping scheduled group exec")<<endl;
         return -7;
@@ -1686,7 +1687,7 @@ if ((!driver || driver->isAllowed(cmd))
                                     #endif
                                     }
                         tStore.tempX100=cmd.getFloat()*100.;         //Save measurement
-                        tStore.timestamp16=millisNZ(8) & 0xFFFFU;    //And timestamp
+                        tStore.timestamp16=millisNZ(8,0xFFFFU);    //And timestamp
                         debugSerial<<F("THERM:")<<itemArr->name<<F(" T:")<<tStore.tempX100<<F(" TS:")<<tStore.timestamp16<<endl;
                         setExt(tStore.asint);
                         res=1;

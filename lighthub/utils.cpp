@@ -839,9 +839,9 @@ itemCmd mapInt(int32_t arg, aJsonObject* map)
 }
 
 //Same as millis() but never return 0 or -1
-uint32_t millisNZ(uint8_t shift)
+uint32_t millisNZ(uint8_t shift, uint32_t mask)
 {
- uint32_t now = millis()>>shift;
+ uint32_t now = (millis()>>shift) & mask;
  if (!now || !(now+1)) now=1;
  return now;
 }

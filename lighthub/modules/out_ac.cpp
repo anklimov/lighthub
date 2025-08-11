@@ -326,6 +326,9 @@ if (!store)
                 return 0;}
 
 memset(store->data,0,sizeof(acPersistent::data));
+store->data[0]=255;
+store->data[1]=255;
+store->data[2]=0x22;
 store->mode=0;
 store->power=0;
 store->inCheck=0;
