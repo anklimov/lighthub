@@ -60,8 +60,18 @@ const reg_t regSize_P[] PROGMEM =
 } ;
 #define regSizeNum sizeof(regSize_P)/sizeof(reg_t)
 
+/**
+ * @brief Меняет порядок байтов в 16-битном числе.
+ * @param x Входное число.
+ * @return Число с изменённым порядком байтов.
+ */
 uint16_t swap (uint16_t x) {return  ((x & 0xff) << 8) | ((x & 0xff00) >> 8);}
 
+/**
+ * @brief Преобразует строку в тип регистра.
+ * @param str Строка с типом регистра.
+ * @return Код типа регистра.
+ */
 int  str2regSize(char * str)
 {
   for(uint8_t i=0; i<regSizeNum && str;i++)
@@ -71,6 +81,12 @@ int  str2regSize(char * str)
 }
 
 //TODO irs etc
+/**
+ * @brief Получает имя параметра по номеру регистра.
+ * @param parameters JSON-объект с параметрами.
+ * @param regnum Номер регистра.
+ * @return Имя параметра или NULL.
+ */
 char * getParamNameByReg(aJsonObject * parameters, int regnum)
 {
   if (!parameters) return NULL;
@@ -89,6 +105,11 @@ char * getParamNameByReg(aJsonObject * parameters, int regnum)
 return NULL;  
 }
 
+/**
+ * @brief Проверяет наличие действия в JSON-объекте.
+ * @param execObj JSON-объект.
+ * @return true, если действие найдено, иначе false.
+ */
 bool haveAction(aJsonObject * execObj)
 {
 aJsonObject * j = execObj->child;  
@@ -111,6 +132,10 @@ case aJson_Array:
 return false;
 }
 
+/**
+ * @brief Загружает и применяет конфигурацию Modbus.
+ * @return true, если конфигурация успешно загружена, иначе false.
+ */
 bool out_Modbus::getConfig()
 {
   // Retrieve and store template values from global modbus settings
@@ -224,6 +249,11 @@ bool out_Modbus::getConfig()
   }
 
 
+/**
+ * @brief Создаёт поле для хранения последнего измеренного значения по имени параметра.
+ * @param name Имя параметра.
+ * @return true, если успешно, иначе false.
+ */
 int  out_Modbus::createLastMeasured(char * name)
 {
 if (!name) return false;  
@@ -231,6 +261,11 @@ aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
 return createLastMeasured(aJson.getObjectItem(itemParametersObj,name));          
 }
 
+/**
+ * @brief Создаёт поле для хранения последнего измеренного значения по JSON-объекту.
+ * @param execObj JSON-объект параметра.
+ * @return true, если успешно, иначе false.
+ */
 int  out_Modbus::createLastMeasured(aJsonObject * execObj)
 {
   if (!execObj) return false; 
@@ -255,6 +290,11 @@ int  out_Modbus::createLastMeasured(aJsonObject * execObj)
   return true;        
 }
 
+/**
+ * @brief Получает объект последнего измеренного значения по имени параметра.
+ * @param name Имя параметра.
+ * @return JSON-объект или NULL.
+ */
 aJsonObject * out_Modbus::getLastMeasured(char * name)
 {
 if (!name) return NULL;  
@@ -262,6 +302,11 @@ aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
 return getLastMeasured (aJson.getObjectItem(itemParametersObj,name));
 }
 
+/**
+ * @brief Получает объект последнего измеренного значения по JSON-объекту.
+ * @param execObj JSON-объект параметра.
+ * @return JSON-объект или NULL.
+ */
 aJsonObject * out_Modbus::getLastMeasured(aJsonObject * execObj)
 {
 if (!execObj) return NULL;  
@@ -271,6 +316,10 @@ if (lastMeasured && lastMeasured->type == aJson_Int) return lastMeasured;
 return NULL;
 }
 
+/**
+ * @brief Инициализирует канал Modbus и загружает конфигурацию.
+ * @return 1 при успехе, 0 при ошибке.
+ */
 int  out_Modbus::Setup()
 {
 abstractOut::Setup();    
@@ -295,6 +344,10 @@ else
 
 }
 
+/**
+ * @brief Останавливает работу канала Modbus и освобождает ресурсы.
+ * @return 1 при успехе.
+ */
 int  out_Modbus::Stop()
 {
 debugSerial.print("MBUS: De-Init ");
@@ -309,6 +362,13 @@ return 1;
 
 
 
+/**
+ * @brief Читает данные из Modbus-устройства.
+ * @param reg Номер регистра.
+ * @param regType Тип регистра.
+ * @param count Количество регистров.
+ * @return true, если чтение успешно, иначе false.
+ */
 bool readModbus(uint16_t reg, int regType, int count)
 {
 uint8_t result;
@@ -336,6 +396,17 @@ return (result == node.ku8MBSuccess);
 
 
 
+/**
+ * @brief Находит и обрабатывает регистр Modbus, выполняет сопоставление и действия.
+ * @param registerNum Номер регистра.
+ * @param posInBuffer Позиция в буфере ответа.
+ * @param regType Тип регистра.
+ * @param registerFrom Начальный регистр диапазона.
+ * @param registerTo Конечный регистр диапазона.
+ * @param doExecution Выполнять ли действие.
+ * @param submitParam Флаг для подавления повторных действий.
+ * @return Команда itemCmd с результатом.
+ */
 itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uint8_t regType, uint16_t registerFrom, uint16_t registerTo, bool doExecution, bool * submitParam)
 {
   aJsonObject * paramObj = store->parameters->child;
@@ -627,7 +698,12 @@ return itemCmd();
 }
 
 
-    void out_Modbus::pollModbus(aJsonObject * reg, int regType)
+/**
+ * @brief Опрос Modbus-устройства по списку регистров.
+ * @param reg JSON-объект с регистрами.
+ * @param regType Тип регистра.
+ */
+void out_Modbus::pollModbus(aJsonObject * reg, int regType)
     {
     if (!reg) return;
     reg=reg->child;  
@@ -665,6 +741,9 @@ return itemCmd();
             }
     }
 
+/**
+ * @brief Инициализирует линию связи Modbus.
+ */
 void out_Modbus::initLine()
 {
 //store->serialParam=(USARTClass::USARTModes) SERIAL_8N1;
@@ -683,6 +762,12 @@ void out_Modbus::initLine()
     node.begin(item->getArg(0), modbusSerial);
 }
 
+/**
+ * @brief Отправляет значение в Modbus-устройство.
+ * @param paramName Имя параметра.
+ * @param outValue JSON-объект с отправляемым значением.
+ * @return 0 при успехе, отрицательное значение при ошибке.
+ */
 int out_Modbus::sendModbus(char * paramName, aJsonObject * outValue)
 {
  if (!store) {errorSerial<<F(" internal send error - no store")<<endl; return -1;}
@@ -819,6 +904,11 @@ if ((res ==0) && (outValue->type == aJson_Int) && lastMeasured && (lastMeasured-
  return ( res == 0);
 }
 
+/**
+ * @brief Осуществляет опрос и отправку команд Modbus.
+ * @param cause Причина вызова (например, медленный опрос).
+ * @return Интервал следующего опроса.
+ */
 int out_Modbus::Poll(short cause)
 {
 if (cause==POLLING_SLOW) return 0;  
@@ -949,11 +1039,21 @@ if (store->pollingRegisters || store->pollingIrs || store->pollingCoils || store
 return store->pollingInterval;
 };
 
+/**
+ * @brief Возвращает тип канала.
+ * @return CH_MBUS.
+ */
 int out_Modbus::getChanType()
 {
    return CH_MBUS;
 }
 
+/**
+ * @brief Отправляет команду itemCmd в Modbus по шаблону параметра.
+ * @param templateParamObj JSON-объект шаблона параметра.
+ * @param cmd Команда itemCmd.
+ * @return 1 при успехе, 0 при ошибке.
+ */
 int out_Modbus::sendItemCmd(aJsonObject *templateParamObj, itemCmd cmd)
 {
 if (templateParamObj)
@@ -1050,6 +1150,14 @@ else return 0;
 // 2. custom textual subItem
 // 3. non-standard numeric  suffix Code equal param id
 
+/**
+ * @brief Унифицированное управление Modbus-каналом.
+ * @param cmd Команда itemCmd.
+ * @param subItem Имя подэлемента.
+ * @param toExecute Выполнять ли команду.
+ * @param authorized Авторизовано ли выполнение.
+ * @return Результат выполнения.
+ */
 int out_Modbus::Ctrl(itemCmd cmd,   char* subItem, bool toExecute,bool authorized)
 {
 if (!store) return -1;

@@ -193,7 +193,7 @@ protected:
     bool publishDataToDomoticz(int , aJsonObject *, const char *format, ...);
 
     char* getIdxField();
-    bool changeState(uint8_t newState, short cause, aJsonObject * currentInputObject, bool contactState);
+    bool changeState(uint8_t newState, short cause, aJsonObject * currentInputObject, bool contactState, bool calledOnTimer = false);
     void setupRotaryEncoder();
 
     aJsonObject * getCurrentInput();

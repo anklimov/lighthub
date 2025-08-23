@@ -27,6 +27,12 @@ extern volatile int8_t configLocked;
 extern bool configLoaded;
 
 
+/**
+ * @brief Prints the data contained in a CAN frame.
+ * 
+ * @param frame Pointer to the datagram_t structure containing the CAN frame.
+ * @param len Length of the data to print.
+ */
 void printFrame(datagram_t * frame, uint8_t len ) {
 
    debugSerial.print(" Data:");
@@ -38,6 +44,12 @@ void printFrame(datagram_t * frame, uint8_t len ) {
 }
 
 
+/**
+ * @brief Sends the uptime metric to the CAN bus.
+ * 
+ * @param ut Uptime value to send.
+ * @return true if the message was sent successfully, false otherwise.
+ */
 bool canDriver::upTime(uint32_t ut)
 {
   if (!controllerId) return false;  
@@ -57,6 +69,12 @@ bool canDriver::upTime(uint32_t ut)
  return write (id.id, &packet, 4);
 }
 
+/**
+ * @brief Sends the salt metric to the CAN bus.
+ * 
+ * @param salt Salt value to send.
+ * @return true if the message was sent successfully, false otherwise.
+ */
 bool canDriver::salt(uint32_t salt)
 {
  if (!controllerId) return false;  
@@ -77,6 +95,11 @@ bool canDriver::salt(uint32_t salt)
  return write (id.id, &packet, 4);
 }
 
+/**
+ * @brief Looks up the MAC address and sends it over the CAN bus.
+ * 
+ * @return true if the MAC address was sent successfully, false otherwise.
+ */
 bool canDriver::lookupMAC()
 {
    // return 0;
@@ -102,6 +125,14 @@ bool canDriver::lookupMAC()
  return res;
 }
 
+/**
+ * @brief Requests a frame from the specified device on the CAN bus.
+ * 
+ * @param devId Device ID to request the frame from.
+ * @param _payloadType Type of payload to request.
+ * @param seqNo Sequence number for the request.
+ * @return true if the request was successful, false otherwise.
+ */
 bool canDriver::requestFrame(uint8_t devId, payloadType _payloadType, uint16_t seqNo )
 {
     canid_t id;
@@ -127,6 +158,12 @@ packet.metric1 =0;
  return res;
 }
 
+/**
+ * @brief Sends the remote ID of a device identified by its MAC address.
+ * 
+ * @param mac MAC address of the device.
+ * @return true if the remote ID was sent successfully, false otherwise.
+ */
 bool canDriver::sendRemoteID(macAddress mac)
 {
  canid_t id;
@@ -154,6 +191,11 @@ return res;
 }
 
 
+/**
+ * @brief Initializes the CAN driver and sets up the CAN bus.
+ * 
+ * @return true if initialization was successful, false otherwise.
+ */
 bool canDriver::begin()
             { 
             if (root)
@@ -207,6 +249,11 @@ bool canDriver::begin()
             return true;
              }
 
+/**
+ * @brief Reads a frame from the CAN bus.
+ * 
+ * @return Length of the received frame, or -1 if no frame was received.
+ */
 int canDriver::readFrame()
 {
  if (!ready) return -1;
@@ -284,6 +331,9 @@ int canDriver::readFrame()
         return -1;
 }
 
+/**
+ * @brief Polls the CAN bus for incoming frames and processes them.
+ */
 void canDriver::Poll()
             {  
 
@@ -355,6 +405,15 @@ switch (state)
 }
 }
 
+/**
+ * @brief Processes a received CAN packet.
+ * 
+ * @param id Identifier of the CAN packet.
+ * @param packet Pointer to the received datagram_t structure.
+ * @param len Length of the received packet.
+ * @param rtr Indicates if the packet is a remote transmission request.
+ * @return true if the packet was processed successfully, false otherwise.
+ */
 bool canDriver::processPacket(canid_t id, datagram_t *packet, uint8_t len, bool rtr)
 {
 
@@ -557,6 +616,11 @@ else //Requests
 return false;
 }
 
+/**
+ * @brief Retrieves the device ID of this CAN driver.
+ * 
+ * @return The device ID, or 0 if not set.
+ */
 uint8_t canDriver::getMyId()
 {
 if (!canConfigObj) return 0;
@@ -565,6 +629,12 @@ if (addrObj && (addrObj->type == aJson_Int)) return addrObj->valueint;
 return 0;
 }
 
+/**
+ * @brief Retrieves the configuration object for a device by its ID.
+ * 
+ * @param devId Device ID to look up.
+ * @return Pointer to the configuration object, or NULL if not found.
+ */
 aJsonObject * canDriver::getConfbyID(uint8_t devId)
 {
 if (!canConfigObj) return NULL;
@@ -583,6 +653,13 @@ while (remoteConfObj)
 return NULL;    
 }
 
+/**
+ * @brief Finds a configuration object by device name.
+ * 
+ * @param devName Name of the device to look for.
+ * @param devAddr Pointer to store the device address if found.
+ * @return Pointer to the configuration object, or NULL if not found.
+ */
 aJsonObject * canDriver::findConfbyName(char* devName, int * devAddr)
 {
 if (!canRemoteConfigObj || canRemoteConfigObj->type != aJson_Object || !devName ) return NULL;
@@ -611,6 +688,13 @@ return NULL;
 #if not defined (NOIP)   
 extern PubSubClient mqttClient;
 
+/**
+ * @brief Subscribes to MQTT topics based on the CAN configuration.
+ * 
+ * @param root Pointer to the root topic string.
+ * @param buflen Length of the buffer for the topic string.
+ * @return true if subscription was successful, false otherwise.
+ */
 bool canDriver::subscribeTopics(char * root, size_t buflen)
 {
  if (!root) return false;   
@@ -643,6 +727,12 @@ while (remoteConfObj)
 }
 #endif
 
+/**
+ * @brief Retrieves the device ID associated with a given MAC address.
+ * 
+ * @param mac MAC address to look up.
+ * @return The device ID, or 0 if not found.
+ */
 uint8_t canDriver::getIdByMac(macAddress mac)
 {
 char macStr[19];
@@ -675,6 +765,14 @@ if (addrObj && (addrObj->type == aJson_Int))
 return 0;
 }
 
+/**
+ * @brief Sends a message over the CAN bus.
+ * 
+ * @param msg_id Identifier for the message.
+ * @param buf Pointer to the datagram_t structure containing the message data.
+ * @param size Size of the message data.
+ * @return true if the message was sent successfully, false otherwise.
+ */
 bool canDriver::write(uint32_t msg_id, datagram_t * buf, uint8_t size)
             {   //
                 if (!ready) {
@@ -724,12 +822,28 @@ bool canDriver::write(uint32_t msg_id, datagram_t * buf, uint8_t size)
 
 
 
+/**
+ * @brief Sends the status of a specified item.
+ * 
+ * @param itemNum Item number to send the status for.
+ * @param cmd Command structure containing the status information.
+ * @param subItem Sub-item identifier.
+ * @return true if the status was sent successfully, false otherwise.
+ */
 bool canDriver::sendStatus(uint16_t itemNum, itemCmd cmd, int subItem)
 {
  if (!itemNum || !controllerId) return false;
  return sendCommand(controllerId, itemNum, cmd, true, subItem);
 }
 
+/**
+ * @brief Sends a command to a specified CAN device.
+ * 
+ * @param can Pointer to the configuration object for the device.
+ * @param cmd Command structure containing the command information.
+ * @param status Indicates if the command is a status update.
+ * @return true if the command was sent successfully, false otherwise.
+ */
 bool canDriver::sendCommand(aJsonObject * can, itemCmd cmd, bool status)
 {    
      if (can && (can->type == aJson_Array))
@@ -766,6 +880,16 @@ bool canDriver::sendCommand(aJsonObject * can, itemCmd cmd, bool status)
       return false;  
 }
 
+/**
+ * @brief Sends a command to a specified device by ID.
+ * 
+ * @param devID Device ID to send the command to.
+ * @param itemID Item ID to send the command for.
+ * @param cmd Command structure containing the command information.
+ * @param status Indicates if the command is a status update.
+ * @param subItemID Sub-item identifier.
+ * @return true if the command was sent successfully, false otherwise.
+ */
 bool canDriver::sendCommand(uint8_t devID, uint16_t itemID,itemCmd cmd, bool status,int subItemID )
 {
     canid_t id;
@@ -801,6 +925,13 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID,itemCmd cmd, bool sta
 ////////////////////////////// Steream //////////////////////////
 
 
+    /**
+     * @brief Sends data over the CAN stream.
+     * 
+     * @param len Length of the data to send.
+     * @param _seqNo Sequence number for the data.
+     * @return 1 if the data was sent successfully, 0 otherwise.
+     */
     int canStream::send(uint8_t len, uint16_t _seqNo)
     {  
                     canid_t id;
@@ -823,6 +954,11 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID,itemCmd cmd, bool sta
                        else return 0; 
     }               
 
+    /**
+     * @brief Checks the state of the CAN stream and processes any incoming data.
+     * 
+     * @return -1 on error, or the number of bytes available for reading.
+     */
      int canStream::checkState() 
      {
       bool res = false;  
@@ -918,6 +1054,11 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID,itemCmd cmd, bool sta
 
 
     // Stream methods
+    /**
+     * @brief Checks how many bytes are available for reading from the CAN stream.
+     * 
+     * @return Number of bytes available, or -1 on error.
+     */
      int canStream::available() 
      {
         if (!driver) return -1;
@@ -925,6 +1066,11 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID,itemCmd cmd, bool sta
         return avail;      
      };
 
+    /**
+     * @brief Reads a byte from the CAN stream.
+     * 
+     * @return The byte read, or -1 on error.
+     */
      int canStream::read() 
      {  
         if (!driver) return -1;
@@ -939,6 +1085,11 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID,itemCmd cmd, bool sta
            else return -1;
      };
 
+    /**
+     * @brief Peeks at the next byte in the CAN stream without removing it.
+     * 
+     * @return The next byte, or -1 on error.
+     */
      int canStream::peek() 
      {
         if (!driver) return -1;
@@ -954,6 +1105,12 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID,itemCmd cmd, bool sta
 
 
 
+    /**
+     * @brief Writes a byte to the CAN stream.
+     * 
+     * @param c The byte to write.
+     * @return The number of bytes written, or -1 on error.
+     */
       size_t canStream::write(uint8_t c) 
     { 
         //if ((state != canState::StreamOpenedWrite) || (state != canState::waitingConfirm)) return -1;
@@ -984,12 +1141,20 @@ bool canDriver::sendCommand(uint8_t devID, uint16_t itemID,itemCmd cmd, bool sta
             }
          return 1; };
 
+        /**
+         * @brief Flushes the CAN stream, sending any buffered data.
+         */
            void canStream::flush() 
              { 
                 send(writePos,seqNo);
              };
 
 
+/**
+ * @brief Checks if the CAN stream is available for writing.
+ * 
+ * @return 1 if available, 0 if waiting for confirmation.
+ */
  int canStream::availableForWrite()
 {
  switch (state)

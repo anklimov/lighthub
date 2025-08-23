@@ -681,9 +681,9 @@ debugSerial << F("IN:") << pin << F(" DHT22 type. T=") << temp << F("°C H=") <<
     return false;    
     }
 
-// TODO Polling via timed interrupt with CHECK_INTERRUPT cause
+
 bool Input::
-changeState(uint8_t newState, short cause, aJsonObject * currentInputObject, bool contactState)
+changeState(uint8_t newState, short cause, aJsonObject * currentInputObject, bool contactState, bool calledOnTimer)
 {
 if (!inputObj ||  !store) return false;
 
@@ -782,22 +782,30 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
         cmd = aJson.getObjectItem(currentInputObject, "rpcmd3");
         toggle=store->toggle3;
         break;
-
+    case  IS_NOP:
+       if (!calledOnTimer) break;
+       if (contactState)
+              cmd = aJson.getObjectItem(currentInputObject, "scmd");
+       else   cmd = aJson.getObjectItem(currentInputObject, "rcmd"); 
+       break;  
   }
   
-  if (cause != CHECK_INTERRUPT) 
+  if (!calledOnTimer || newState == IS_NOP)
   {
-    onContactChanged(contactState);
-    store->delayedState=false;
-  }
-  else
-  {
-    store->delayedState=true;
-    store->lastValue = contactState;
-    store->reqState=newState;
+        if (cause != CHECK_INTERRUPT) 
+        {
+            onContactChanged(contactState);
+            store->delayedState=false;
+        }
+        else
+        {
+            store->delayedState=true;
+            store->lastValue = contactState;
+            store->reqState=newState;
+        }
   }
 
-  if (newState == IS_NOP) return true;
+  if ((newState == IS_NOP) && !calledOnTimer) return true;
 
   aJsonObject *defaultItem = aJson.getObjectItem(currentInputObject, "item");
   aJsonObject *defaultEmit = aJson.getObjectItem(currentInputObject, "emit");  
@@ -807,7 +815,7 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
 
   if (!cmd && !defCmd.isCommand())
   {
-  store->state=newState;
+  if (newState !=IS_NOP) store->state=newState;
   store->delayedState=false;
   return true; //nothing to do
   }
@@ -815,7 +823,7 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
 
   if (cause != CHECK_INTERRUPT)
   {
-    store->state=newState;
+    if (newState !=IS_NOP) store->state=newState;
     store->delayedState=false;
     checkInstructions(cmd);
     executeCommand(cmd,toggle,defCmd,defaultItem,defaultEmit,defaultCan);
@@ -824,7 +832,7 @@ if (newState!=store->state && cause!=CHECK_INTERRUPT) debugSerial<<F("#")<<pin<<
   else
   {
     //Postpone actual execution
-    if (newState != store->state)
+    if ((newState != store->state) && (newState !=IS_NOP))
             {
             store->reqState=newState;
             store->delayedState=true;
@@ -880,15 +888,15 @@ switch (store->state) //Timer based transitions
   case IS_PRESSED:
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
       {
-      if (!aJson.getObjectItem(inputObj, "lcmd") && !aJson.getObjectItem(currentInputObject, "rpcmd")) changeState(IS_WAITRELEASE, cause,currentInputObject,currentInputState);
-         else changeState(IS_LONG, cause,currentInputObject,currentInputState);
+      if (!aJson.getObjectItem(inputObj, "lcmd") && !aJson.getObjectItem(currentInputObject, "rpcmd")) changeState(IS_WAITRELEASE, cause,currentInputObject,currentInputState,true);
+         else changeState(IS_LONG, cause,currentInputObject,currentInputState,true);
        }
       break;
 
   case IS_LONG:
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT,0xFFFF))
                         {
-                        changeState(IS_REPEAT, cause,currentInputObject,currentInputState);
+                        changeState(IS_REPEAT, cause,currentInputObject,currentInputState,true);
                         store->timestamp16 = millis() & 0xFFFF;
                         }
       break;
@@ -896,7 +904,7 @@ switch (store->state) //Timer based transitions
   case IS_REPEAT:
       if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT_PULSE,0xFFFF))
                         {
-                          changeState(IS_REPEAT, cause,currentInputObject,currentInputState);
+                          changeState(IS_REPEAT, cause,currentInputObject,currentInputState,true);
                           store->timestamp16 = millis() & 0xFFFF;
                         }
           break;
@@ -904,15 +912,15 @@ switch (store->state) //Timer based transitions
   case IS_PRESSED2:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_LONG,0xFFFF))
             {
-              if (!aJson.getObjectItem(currentInputObject, "lcmd2") && !aJson.getObjectItem(currentInputObject, "rpcmd2")) changeState(IS_WAITRELEASE, cause,currentInputObject,currentInputState);
-              else changeState(IS_LONG2, cause,currentInputObject,currentInputState);
+              if (!aJson.getObjectItem(currentInputObject, "lcmd2") && !aJson.getObjectItem(currentInputObject, "rpcmd2")) changeState(IS_WAITRELEASE, cause,currentInputObject,currentInputState,true);
+              else changeState(IS_LONG2, cause,currentInputObject,currentInputState,true);
             }
               break;
 
   case IS_LONG2:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT,0xFFFF))
                           {
-                            changeState(IS_REPEAT2, cause,currentInputObject,currentInputState);
+                            changeState(IS_REPEAT2, cause,currentInputObject,currentInputState,true);
                             store->timestamp16 = millis() & 0xFFFF;
                          }
               break;
@@ -920,7 +928,7 @@ switch (store->state) //Timer based transitions
   case IS_REPEAT2:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT_PULSE,0xFFFF))
                           {
-                            changeState(IS_REPEAT2, cause,currentInputObject,currentInputState);
+                            changeState(IS_REPEAT2, cause,currentInputObject,currentInputState,true);
                             store->timestamp16 = millis() & 0xFFFF;
                           }
           break;
@@ -930,17 +938,17 @@ switch (store->state) //Timer based transitions
           {
           if (!aJson.getObjectItem(currentInputObject, "lcmd3") && !aJson.getObjectItem(currentInputObject, "rpcmd3")) //No longpress handlers
                 {
-                if (aJson.getObjectItem(currentInputObject, "scmd3")) changeState(IS_WAITRELEASE, cause,currentInputObject,currentInputState); //was used
-                   else changeState(IS_PRESSED2, cause,currentInputObject,currentInputState); // completely empty trippleClick section - fallback to first click handler
+                if (aJson.getObjectItem(currentInputObject, "scmd3")) changeState(IS_WAITRELEASE, cause,currentInputObject,currentInputState,true); //was used
+                   else changeState(IS_PRESSED2, cause,currentInputObject,currentInputState,true); // completely empty trippleClick section - fallback to first click handler
                  }
-          else changeState(IS_LONG3, cause,currentInputObject,currentInputState);
+          else changeState(IS_LONG3, cause,currentInputObject,currentInputState,true);
           }
           break;
 
   case IS_LONG3:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT,0xFFFF))
                             {
-                              changeState(IS_REPEAT3, cause,currentInputObject,currentInputState);
+                              changeState(IS_REPEAT3, cause,currentInputObject,currentInputState,true);
                               store->timestamp16 = millis() & 0xFFFF;
                             }
           break;
@@ -948,7 +956,7 @@ switch (store->state) //Timer based transitions
   case IS_REPEAT3:
           if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_RPT_PULSE,0xFFFF))
                             {
-                                changeState(IS_REPEAT3, cause,currentInputObject,currentInputState);
+                                changeState(IS_REPEAT3, cause,currentInputObject,currentInputState,true);
                                 store->timestamp16 = millis() & 0xFFFF;
                             }
           break;
@@ -958,7 +966,7 @@ switch (store->state) //Timer based transitions
   case IS_WAITPRESS:
 
 
-      if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_IDLE,0xFFFF)) changeState(IS_IDLE, cause,currentInputObject,currentInputState);
+      if (isTimeOver(store->timestamp16,millis() & 0xFFFF,T_IDLE,0xFFFF)) changeState(IS_IDLE, cause,currentInputObject,currentInputState,true);
       break;
  } //switch
 #ifdef ROTARYENCODER
@@ -1028,7 +1036,7 @@ if (re)
                        res = changeState(IS_PRESSED3, cause,currentInputObject,currentInputState);
                        break;
                   default:
-                       res = changeState(IS_NOP, cause,currentInputObject,currentInputState);
+                       res = changeState(IS_NOP, cause,currentInputObject,currentInputState,(currentInputState == store->lastValue));
 
               }
           else
@@ -1064,7 +1072,7 @@ if (re)
                 res = changeState(IS_IDLE, cause,currentInputObject,currentInputState);
                 break;
                 default:
-                res = changeState(IS_NOP, cause,currentInputObject,currentInputState);               
+                res = changeState(IS_NOP, cause,currentInputObject,currentInputState, (currentInputState == store->lastValue));               
         }
        if (res) { //State changed or postponed
                 //  store->logicState = currentInputState;
@@ -1186,13 +1194,14 @@ strncpy(addrstr,emit->valuestring,sizeof(addrstr));
 if (mqttClient.connected() && !ethernetIdleCount)
 {
 if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestring);
+
         if (newValue) {  //send set command
-            if (!scmd || scmd->type != aJson_String) mqttClient.publish(addrstr, "ON", true);
-            else if (strlen(scmd->valuestring))
-                mqttClient.publish(addrstr, scmd->valuestring, true);
+            if (!scmd) {mqttClient.publish(addrstr, "ON", true); debugSerial<<F("Emit:")<<addrstr<< F("->") << "ON"<<endl;}
+            else if ((scmd->type == aJson_String) && strlen(scmd->valuestring))
+                {mqttClient.publish(addrstr, scmd->valuestring, true);debugSerial<<F("Emit:")<<addrstr<< F("->") << scmd->valuestring<<endl;}
         } else {  //send reset command
-            if (!rcmd || rcmd->type != aJson_String) mqttClient.publish(addrstr, "OFF", true);
-            else if (strlen(rcmd->valuestring))mqttClient.publish(addrstr, rcmd->valuestring, true);
+            if (!rcmd) {mqttClient.publish(addrstr, "OFF", true);debugSerial<<F("Emit:")<<addrstr<< F("->") << "OFF"<<endl;}
+            else if ((rcmd->type == aJson_String) && strlen(rcmd->valuestring)) {mqttClient.publish(addrstr, rcmd->valuestring, true);debugSerial<<F("Emit:")<<addrstr<< F("->") << rcmd->valuestring<<endl;}
         }
 }
 #endif //NOIP
@@ -1203,12 +1212,12 @@ if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,emit->valuestri
         Item it(item->valuestring);
         if (it.isValid()) {
             if (newValue) {  //send set command
-                if (!scmd || scmd->type != aJson_String) it.Ctrl(itemCmd(ST_VOID,CMD_ON));
-                else if (strlen(scmd->valuestring))
+                if (!scmd ) it.Ctrl(itemCmd(ST_VOID,CMD_ON));
+                else if ((scmd->type == aJson_String) && strlen(scmd->valuestring))
                     it.Ctrl(scmd->valuestring);
             } else {  //send reset command
-                if (!rcmd || rcmd->type != aJson_String) it.Ctrl(itemCmd(ST_VOID,CMD_OFF));
-                else if (strlen(rcmd->valuestring))
+                if (!rcmd ) it.Ctrl(itemCmd(ST_VOID,CMD_OFF));
+                else if ((rcmd->type == aJson_String) && strlen(rcmd->valuestring))
                     it.Ctrl(rcmd->valuestring);
             }
         }
