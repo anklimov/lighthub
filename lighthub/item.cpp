@@ -1062,7 +1062,9 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
     if (subItem && subItem[0] == '$') {debugSerial<<F("Skipped homie stuff")<<endl;return -4; }
     if (!itemArr) return -1;
 
+   bool oppositeCommandToBeSchedulled = (suffixCode==S_CMD) && cmd.isValue();  
    if (!suffixCode && cmd.isCommand() && cmd.getCmd()!=CMD_UP && cmd.getCmd()!=CMD_DN) suffixCode=S_CMD;
+   
     switch (suffixCode)
     {
         case S_CMD:
@@ -1110,7 +1112,7 @@ int Item::Ctrl(itemCmd cmd,  char* subItem, uint8_t flags, bool authorized)
     uint8_t  command2Set = 0;
     itemCmd  originalCmd = cmd;
     int subitemCmd = subitem2cmd(subItem);
-    bool oppositeCommandToBeSchedulled = (suffixCode==S_CMD) && cmd.isValue();   
+    //bool oppositeCommandToBeSchedulled = (suffixCode==S_CMD) && cmd.isValue();   
     /// Common (GRP & NO GRP) commands
     switch (cmd.getCmd()) 
     {
