@@ -276,6 +276,7 @@ byte getCRC(byte req[], size_t size){
 
 void out_AC::SendData(byte req[], size_t size){
 if (!store || !item) return;  
+if (!store->data[0]) return; //Sending disabled until first poll
 if (Status() == AC_SENDING)
      {
       while (store->timestamp && !isTimeOver(store->timestamp,millis(),150)) yield();
@@ -326,8 +327,8 @@ if (!store)
                 return 0;}
 
 memset(store->data,0,sizeof(acPersistent::data));
-store->data[0]=255;
-store->data[1]=255;
+//store->data[0]=255;
+//store->data[1]=255;
 store->data[2]=0x22;
 store->mode=0;
 store->power=0;
@@ -428,6 +429,10 @@ case AC_AWAITINGCMD: //Flusing port for 5 sec, poll status
     SendData(qstn, sizeof(qstn)/sizeof(byte)); //Опрос кондиционера
     store->timestamp=millisNZ();
     setStatus(AC_IDLE);
+
+    //Enable sending
+    store->data[0]=255;
+    store->data[1]=255;
     
 }
 

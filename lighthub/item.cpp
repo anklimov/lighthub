@@ -307,7 +307,7 @@ Item::~Item()
 
 Item::Item(char *name, aJsonObject *_items) //Constructor
 {
-    char * pDefaultSubItem = defaultSubItem;
+   // char * pDefaultSubItem = defaultSubItem;
     rootItems=_items;
     driver = NULL;
     defaultSubItem[0] =0;
@@ -323,10 +323,20 @@ Item::Item(char *name, aJsonObject *_items) //Constructor
         buf[i]=0;
         itemArr = aJson.getObjectItem(rootItems, buf);
         sub++;
+
+        for(i=0;(sub[i] && (sub[i]!='/') && (i<sizeof(defaultSubItem)-1));i++)
+            defaultSubItem[i]=sub[i];
+        defaultSubItem[i]=0;
+        
+        if (sub[i]=='/') defaultSuffixCode = txt2subItem(sub+i+1);
+           else if (defaultSuffixCode = txt2subItem(defaultSubItem)) 
+                defaultSubItem[0]=0;
+     /*          
         strncpy(defaultSubItem,sub,sizeof(defaultSubItem)-1);
-        defaultSuffixCode = retrieveCode (&pDefaultSubItem);
+        defaultSuffixCode = retrieveCode (&pDefaultSubItem);     
         if (!pDefaultSubItem) defaultSubItem[0] =0; //Zero string
         //debugSerial<<F("defaultSubItem: ")<<defaultSubItem<<F(" defaultSuffixCode:")<<defaultSuffixCode<<endl;
+     */
         }
         else
         itemArr = aJson.getObjectItem(rootItems, name);
@@ -421,7 +431,7 @@ return NO_SUBITEM;
         {
             if (getCanNum(itemArr->child) == num)
                     {
-                        debugSerial<<"CAN: Find item: "<< itemArr->name << " id:" << num << "sub:" << subItem;
+                        debugSerial<<"CAN: Find item: "<< itemArr->name << " id:" << num << " sub:" << subItem;
                         Parse();
                         if (subItem & SUBITEM_IS_COMMAND)
                         {
@@ -1600,7 +1610,7 @@ if ((!driver || driver->isAllowed(cmd))
             {
             // UPDATE internal variables 
             if (status2Send) cmd.saveItem(this,status2Send);    
-               else debugSerial<<"NOT SAVED"<<endl;
+            //   else debugSerial<<"NOT SAVED"<<endl;
 
             res = driver->Ctrl(cmd, subItem, toExecute,authorized);   
             if (driver->getChanType() == CH_THERMO) status2Send |= FLAG_SEND_IMMEDIATE;
