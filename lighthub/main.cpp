@@ -88,7 +88,7 @@ EthernetClient ethClient;
 #endif //NOIP
 #endif
 
-#if defined(OTA)
+#if defined(OTA_ENABLE)
 #include <ArduinoOTA.h>
 #endif
 
@@ -258,7 +258,7 @@ bool isNotRetainingStatus() {
 
 uint16_t httpHandler(Client& client, String request, uint8_t method, long contentLength, bool authorized, String& response )
 {
-  #ifdef OTA  
+  #ifdef OTA_ENABLE  
     //String response = "";
     debugSerial<<method<<F(" ")<<request<<endl;
     if (method == HTTP_GET && request == (F("/"))) 
@@ -268,7 +268,7 @@ uint16_t httpHandler(Client& client, String request, uint8_t method, long conten
          client.println(
 #ifdef REDIRECTION_URL
 //Redirect to cloud PWA application               
-             String(F("Location: " REDIRECTION_URL))
+             String(F("Location: http://")) + F(QUOTE(REDIRECTION_URL))
 #else
              String(F("Location: /index.html"))
 #endif   
@@ -552,7 +552,7 @@ void printMACAddress() {
 
 
 
-#ifdef OTA
+#ifdef OTA_ENABLE
     const char defaultPassword[] PROGMEM = QUOTE(DEFAULT_OTA_PASSWORD);
     void setupOTA(void)
     {       char passwordBuf[16];
@@ -2638,7 +2638,7 @@ infoSerial<<F("\nFirmware MAC Address " QUOTE(CUSTOM_FIRMWARE_MAC));
     infoSerial<<F("\n(-)SPI LED");
 #endif
 
-#ifdef OTA
+#ifdef OTA_ENABLE
     infoSerial<<F("\n(+)OTA");
 #else
     infoSerial<<F("\n(-)OTA");

@@ -8,5 +8,5 @@
 
 -DRESTART_LAN_ON_MQTT_ERRORS
 -D CORS=\"*\"
--D REDIRECTION_URL=\"http://lazyhome.ru/pwa\"
+-DREDIRECTION_URL=\"http://lazyhome.ru/pwa\"
 -DOTA_PORT=80
