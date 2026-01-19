@@ -104,7 +104,7 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 * PID_DISABLE // Disable PID regulator
 * STATUSLED // Enable RGB status led on pins 50,51,52 (DUE only)
 * DMX_SMOOTH //Smooth transition on DMX channels (DUE only)
-* OTA // Enable Other The Air firmware upload
+* OTA_ENABLE (updated) // Enable Other The Air firmware upload
 * W5500_CS_PIN=53 //Defines CS pin for Ethernet adapter (10-th by default)
 * WIFI_ENABLE //Enable WiFi for ESP (Wiznet by default)
 * SPILED_DISABLE //Disable SPI LED library
