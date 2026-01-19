@@ -240,7 +240,10 @@
     #define AC_Serial Serial2
     #endif
 #else
-#define modbusSerial Serial2
+    #ifndef modbusSerial
+    #define modbusSerial Serial2
+    #endif
+
     #ifndef AC_Serial
     #define AC_Serial Serial3
     #endif
@@ -298,6 +301,10 @@
 
 #ifndef AC_Serial
 #define AC_Serial Serial2
+#endif
+
+#ifdef ARDUINO_USB_CDC_ON_BOOT
+#define debugSerialPort Serial
 #endif
 
 #endif

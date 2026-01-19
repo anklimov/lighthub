@@ -13,3 +13,4 @@ cp ../.pio/build/esp8266-wifi/firmware.bin esp8266-wifi
 cp ../.pio/build/lighthub21/firmware.bin lighthub21
 cp ../.pio/build/mega2560/firmware.hex mega2560
 cp ../.pio/build/stm32/firmware.* stm32
+cp ../.pio/build/esp32c3-wifi/firmware.bin esp32c3-wifi

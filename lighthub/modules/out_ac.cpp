@@ -39,22 +39,29 @@ const char QUIET_P[]  PROGMEM = "queit";
 const char SWING_P[]  PROGMEM = "swing";
 const char RAW_P[]    PROGMEM = "raw";
 
+#if defined (ARDUINO_USB_CDC_ON_BOOT)
+#define defaultACSerial AC_Serial
+#else
+#define defaultACSerial Serial
+#endif
+
 void out_AC::getConfig(){
  
   ACSerial=&AC_Serial;
+
   if (!item) return;
 
   if (item->getArgCount())
 
     switch(portNum=item->getArg(0)){
-      case 0: ACSerial=&Serial;
+      case 0: ACSerial=&defaultACSerial;
       
       break;
       #if not defined (AVR) || defined (DMX_DISABLE)
       case 1: ACSerial=&Serial1;
       break;
       #endif
-      #if defined (HAVE_HWSERIAL2) || defined (__SAM3X8E__) || defined (ESP32)
+      #if defined (HAVE_HWSERIAL2) || defined (__SAM3X8E__) // || defined (ESP32)
       case 2: ACSerial=&Serial2;
       break;
       #endif
@@ -346,7 +353,11 @@ if (!portNum)// && (g_APinDescription[0].ulPinType == PIO_PA8A_URXD))
       disableCMD=true;
       #endif
     }
+#if defined (AC_RX_PIN) && defined (AC_TX_PIN) 
+ACSerial->begin(9600,AC_RX_PIN,AC_TX_PIN); //, SERIAL_8N1, acRXpin, acTXpin
+#else 
 ACSerial->begin(9600);
+#endif 
 setStatus (AC_IDLE);
 
 

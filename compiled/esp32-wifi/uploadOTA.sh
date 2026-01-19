@@ -1,1 +1,1 @@
-../tools/mac/arduinoOTA -v -address 192.168.11.207 -port 80 -username arduino -password password -sketch firmware.bin  -upload /sketch -b
+../tools/arduinoOTA -address 192.168.11.162 -t 120  -port 80 -username arduino -password password -b -upload /sketch -sketch firmware.bin

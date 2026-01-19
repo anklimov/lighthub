@@ -2138,7 +2138,7 @@ void preTransmission() {
     // set DE and RE on HIGH
     PORTJ |= B01100000;
 #else
-    digitalWrite(TXEnablePin, 1);
+    if (TXEnablePin>0) digitalWrite(TXEnablePin, 1);
 #endif
 }
 
@@ -2147,7 +2147,7 @@ void postTransmission() {
     // set DE and RE on LOW
 		PORTJ &= B10011111;
     #else
-    digitalWrite(TXEnablePin, 0);
+    if (TXEnablePin>0) digitalWrite(TXEnablePin, 0);
     #endif
 }
 
@@ -2465,9 +2465,16 @@ while  ((digitalRead(CONFIG_CLEAN_PIN)==LOW) && !needClean)
         //set RE,DE on LOW
         PORTJ &= B10011111;
         #else
-        pinMode(TXEnablePin, OUTPUT);
+        if (TXEnablePin>0) pinMode(TXEnablePin, OUTPUT);
         #endif
+
+    #if defined (ARDUINO_ARCH_ESP32)
+    modbusSerial.begin(MODBUS_SERIAL_BAUD,MODBUS_SERIAL_PARAM,MODBUS_UART_RX_PIN,MODBUS_UART_TX_PIN);
+    #else
     modbusSerial.begin(MODBUS_SERIAL_BAUD,MODBUS_SERIAL_PARAM);
+    #endif
+
+
     node.idle(&modbusIdle);
     node.preTransmission(preTransmission);
     node.postTransmission(postTransmission);
@@ -2880,7 +2887,7 @@ void loop_main() {
     if (lanLoop() > HAVE_IP_ADDRESS) { 
         mqttClient.loop();
 
-        #if defined(OTA)
+        #if defined(OTA_ENABLE)
         yield();
         if (initializedListeners) ArduinoOTA.poll();
         #endif
@@ -3013,7 +3020,7 @@ void modbusIdle(void) {
 #ifdef _artnet
         if (artnet && initializedListeners) artnet->read();
 #endif
-#if defined(OTA)
+#if defined(OTA_ENABLE)
         yield();
         ArduinoOTA.poll();
 #endif

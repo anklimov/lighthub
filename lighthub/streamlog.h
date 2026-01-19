@@ -1,5 +1,6 @@
 #pragma once
 #include <Print.h>
+#include <Stream.h>
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <inttypes.h>
@@ -21,7 +22,7 @@ extern uint8_t udpDebugLevel;
 
 
 #ifndef SerialPortType
-#define SerialPortType HardwareSerial
+#define SerialPortType Stream
 #endif
 
 #define LOG_TRACE 9
