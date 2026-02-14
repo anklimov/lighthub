@@ -2134,7 +2134,7 @@ int Item::SendStatus(long sendFlags, char * subItem) {
                           if (itemType == CH_THERMO) strcpy_P(cmdstr, AUTO_P);
                    }
                    else //for subItems - transpatent print
-                   st.toString(cmdstr,sizeof(cmdstr),FLAG_COMMAND | FLAG_PARAMETERS);
+                   st.toString(cmdstr,sizeof(cmdstr),sendFlags);//FLAG_COMMAND | FLAG_PARAMETERS); 14/02/26
 
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);

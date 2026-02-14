@@ -394,13 +394,13 @@ while (i)
                                             case CMD_ON:
                                             cmd.Percents255(fanObj->valueint);
                                             cmd.setSuffix(S_FAN);
-                                            sendFlags |= FLAG_COMMAND | FLAG_PARAMETERS;
+                                            sendFlags |= FLAG_COMMAND;// | FLAG_PARAMETERS;  14/02/26
                                             cmdObj->valueint = cmd.getCmd();
                                             break;
                                             case CMD_OFF:
                                             cmd.Percents255(0);
                                             cmd.setSuffix(S_FAN);
-                                            sendFlags |= FLAG_COMMAND | FLAG_PARAMETERS;
+                                            sendFlags |= FLAG_COMMAND;// | FLAG_PARAMETERS;  14/02/26
                                             cmdObj->valueint = cmd.getCmd();
                                             break;
                                             case CMD_ENABLE:
