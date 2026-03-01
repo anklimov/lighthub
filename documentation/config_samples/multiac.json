@@ -1,0 +1,74 @@
+{
+  "mqtt":["ac","192.168.1.4"],  
+  "syslog":["192.168.1.4"],
+  "topics":{"root":"home"},
+    "ow":{      
+        "283A3F81E3503CC8":{"emit": "t_ac2","item":"vac"},
+        "286C3381E3823CBC":{"emit": "t_zal","item":"vac/zal"},
+        "28B41581E3563CDE":{"emit": "t_bedr21","item":"vac/bedr21"},
+        "28C1A581E3563C2D":{"emit": "t_bedr22","item":"vac/bedr22"}
+    },
+  "modbus":
+  {
+    "haier":{"baud":9600,"serial":"8N1",
+             "poll":{"regs":[[0,3]],"irs":[[0,1]],"coils":[0],"delay":10000},
+             "par":{
+                            "pwr":{"coil":0,"map":{"cmd":[1,["OFF",0]],"val":null, "def":"acmode"},"id":1},
+                            "fanoff":{"coil":0,"id":7,"map":{"cmd":[["OFF",0]],"val":[0,0,0,0,null,null,1,1]}},
+                            "acmode":{"reg":1,"map":{"cmd":[["FAN_ONLY",4],["HEAT",2],["COOL",1],["DRY",3],["AUTO",5]],"val":null},"id":1},
+                            "$temp":{"ir":0},
+                            "$fault":{"ir":1},
+                            "set":{"reg":0,"id":2},
+                            "fan":{"reg":2,"id":7,"map":{"cmd":[["LOW",1],["HIGH",3],["MEDIUM",2],["AUTO",4]],"val":[1,255,1,3]}},
+                            "lock":{"reg":3,"map":{"cmd":[["OFF",1],["ON",4]]}}
+                            
+                    }       
+       }
+  
+  },    
+
+  "items": { 
+
+  "ac_2":[14,[128,
+                  "haier",
+                  {
+                  "pwr":{"emit":"edem/s_out/ac_2/cmd","item":"vac/mode","@V":null},
+                  "$temp":{"emit":"edem/s_out/ac_2/$temp","item":"vac/temp","@S":null},
+                  "$fault":{"emit":"edem/s_out/ac_2/$fault"},
+                  "set":{"emit":"edem/s_out/ac_2/set","item":"vac/set"},
+                  "acmode":{"emit":"edem/s_out/ac_2/$mode","@V":null},
+                  "fan":{"emit":"edem/s_out/ac_2/fan","@V":null},
+                  "lock":{"emit":"edem/s_out/ac_2/lock","@V":null},
+                  "fanoff":{}
+                  }
+                  ]
+              ], 
+              
+    "vac":[[18,5],
+                              {
+                              "":{"item":"ac_2"},  
+                              "zal":{"pid":[490, 100, 9879,40],"set":21.0,"fan":0,"cmd":14,"item":"acgzal/set"},
+                              "bedr2m":{"pid":[490, 100, 9879,40],"set":21.0,"fan":0,"cmd":14,"item":"acgbedr2m/set"},
+                              "bedr21":{"pid":[490, 100, 9879,40],"set":21.0,"fan":0,"cmd":14,"item":"acgbedr21/set"},
+                              "bedr22":{"pid":[490, 100, 9879,40],"set":21.0,"fan":0,"cmd":14,"item":"acgbedr22/set"}
+                              }             
+                        ],
+          
+    
+    "acgzal":[7,["ig2","og1"]],
+    "acgbedr22":[7,["ig1","og2"]],
+    "acgbedr21":[7,["ig4","og3"]],
+    "acgbedr2m":[7,["ig3","og4"]],
+    
+    "og1":[12,[4,33,58,629,289,5000]],
+    "og2":[12,[5,32,59,631,296,5000]],
+    "og3":[12,[6,31,60,627,289,5000]],
+    "og4":[12,[9,28,61,637,293,5000]],
+    
+    "ig1":[12,[8,29,62,623,286,5000]],    
+    "ig2":[12,[7,30,63,634,296,5000]],   
+    "ig3":[12,[10,26,64,646,298,5000]],
+    "ig4":[12,[11,27,65,620,289,5000]],          
+    "airgates":[7,["agzal2","agbedr2m","agbedr21","agbedr22"]]
+  }
+}

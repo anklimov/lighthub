@@ -1,0 +1,22 @@
+{
+  "items": {
+
+  "pumpctr":[20,[0.02,1.2]],
+  "gasctr":[20,0],
+  "waterctr":[20,0],
+  "fillctr":[20,0],
+  "osmoctr":[20,0],
+  		
+  "merc":[22,[67,9600,"8N1",2,[2,2,2,2,2,2],10000,
+    {}
+    ]]
+    
+},
+
+"in":
+      [   {"#":41,"item":"waterctr/set","scmd":"%0.01","rcmd":""},
+      	  {"#":39,"item":"gasctr/set","scmd":"%0.1","rcmd":""},
+      	  {"#":37,"item":"fillctr/set","scmd":"%0.01","rcmd":""},
+      	  {"#":35,"item":"osmoctr/set","scmd":"%0.01","rcmd":""}
+      	]
+}

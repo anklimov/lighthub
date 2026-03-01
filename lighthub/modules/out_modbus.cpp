@@ -1069,6 +1069,7 @@ long Value = 0;
 int8_t    regType = PAR_I16;
 aJsonObject * typeObj = aJson.getObjectItem(templateParamObj, "type");
 aJsonObject * mapObj = aJson.getObjectItem(templateParamObj, "map");
+aJsonObject * sendchangesObj = aJson.getObjectItem(templateParamObj, "sendchanges");
 
 
                     if (typeObj && typeObj->type == aJson_String) regType=str2regSize(typeObj->valuestring);
@@ -1108,11 +1109,32 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                       
                                       aJsonObject * markObj = execObj;
                                       if (execObj->type == aJson_Array) markObj = execObj->child;
+                                       aJsonObject *outValue = aJson.getObjectItem(markObj,"@V");  
+                                       aJsonObject *lastMeasured = getLastMeasured(markObj);
+                                       //Todo - check if already good value
+                                       if (outValue && sendchangesObj && sendchangesObj->type == aJson_Boolean && sendchangesObj->valuebool)
+                                       {
+                                        if (lastMeasured)
+                                           {
+                                           if (lastMeasured->valueint == Value &&  !(lastMeasured->subtype & MB_VALUE_OUTDATED))
+                                            {
+                                              debugSerial<<"MBUS: Value2send equal retrieved"<<endl;
+                                              return 1; 
+                                            }
+                                           }
+                                        else if ((outValue->valueint == Value) && (outValue->subtype == (regType & 0xF)))
+                                            {
+                                              debugSerial<<"MBUS: Value2send equal prev sent"<<endl;
+                                              return 1;
+                                            }
+
+                                       }
+
 
                                        //Schedule update
                                         execObj->subtype |= MB_NEED_SEND;
 
-                                        aJsonObject *outValue = aJson.getObjectItem(markObj,"@V");                      
+                                                            
                                         if (outValue) // Existant. Preserve original @type
                                             {    
                                             outValue->valueint=Value;

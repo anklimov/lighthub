@@ -306,7 +306,7 @@ if (store->alarmArmed)
 return 1;
 //break;
 
-case S_NOTFOUND:
+//case S_NOTFOUND:
 case S_SET:
 
 // Setpoint for PID

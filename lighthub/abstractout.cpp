@@ -3,10 +3,12 @@
 #include "itemCmd.h"
 #include "Arduino.h"
 #include "textconst.h"
+#include "main.h"
 
 int  abstractOut::isActive()
  
  {itemCmd st;  
+     debugSerial<<"abstractOut:active: ";
     switch (item->getCmd())
         { 
             case CMD_OFF:

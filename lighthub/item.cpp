@@ -1795,7 +1795,7 @@ int Item::isActive() {
     int cmd = getCmd();
     if (driver) {
                 short active =  driver->isActive();
-                if (active >= 0)
+                if (active >= 0) 
                    { 
                     printActiveStatus(active);
                     return active;
@@ -2145,7 +2145,9 @@ int Item::SendStatus(long sendFlags, char * subItem) {
                             }
               strncat(addrstr, "/", sizeof(addrstr)-1);
 //              strncat_P(addrstr, CMD_P, sizeof(addrstr)-1);
-              strncat_P(addrstr, suffix_P[S_CMD], sizeof(addrstr)-1);              
+              if (st.getSuffix() == S_FAN)
+                    strncat_P(addrstr, suffix_P[S_FAN], sizeof(addrstr)-1);   
+              else  strncat_P(addrstr, suffix_P[S_CMD], sizeof(addrstr)-1);              
 
               debugSerial<<F("Pub: ")<<addrstr<<F("->")<<cmdstr<<endl;
               #if not defined (NOIP)
