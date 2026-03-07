@@ -377,7 +377,11 @@ case S_CTRL:
             executeCommand(oCmd,-1,value);
             return 1;
           } */
-
+           case CMD_RESET:
+           store->pid->Initialize();
+           debugSerial<<F("PID: reset")<<endl;
+           return 1;
+           break;     
             default:
             debugSerial<<F("PID: Unknown cmd ")<<cmd.getCmd()<<endl;
           } //switch cmd

@@ -70,7 +70,7 @@ if (gatesObj)
 
               pidObj->valueint = (long int) new PID  (&valObj->valuefloat, &poObj->valuefloat, &setObj->valuefloat, kP, kI, kD, direction); 
 
-              ((PID*) pidObj->valueint)->SetMode (AUTOMATIC);
+              //((PID*) pidObj->valueint)->SetMode (AUTOMATIC);
               ((PID*) pidObj->valueint)->SetSampleTime(dT*1000.0); 
               debugSerial << F ("VENT: PID P=")<<kP<<" I="<<kI<<" D="<<kD<< endl;
              } 
@@ -103,8 +103,7 @@ if (gatesObj)
                         {
                         delete ((PID *) pidObj->valueint);
                         pidObj->valueint = 0;//NULL;
-                        }
-        
+                        }     
              } 
              i=i->next; 
           }
@@ -146,7 +145,6 @@ int out_Multivent::isActive()
                     //case CMD_OFF:
                     return 1;  
                     break;
-
                     }    
                   }    
        i=i->next; 
@@ -157,7 +155,6 @@ int out_Multivent::isActive()
 
 int out_Multivent::Poll(short cause)
 {
-  
   if (!acObj || !gatesObj) return 0;
 
   if (cause == POLLING_SLOW && item->getExt() && isTimeOver(item->getExt(),millisNZ(),60000L))
@@ -182,13 +179,15 @@ int out_Multivent::Poll(short cause)
       int balance = 0;    
       bool ventRequested = false; //At least 1 ch requested FAN mode 
       bool autoRequested = false; //At least 1 ch requested AUTO mode 
+      bool pidActive     = false; 
+      bool pidComputed   = false;
       while (i)
           {
              if (i->name && *i->name)
              {
              int   cmd = getIntFromJson(i,"cmd");
-             float set = getIntFromJson(i,"set");
-             float val = getIntFromJson(i,"val");  
+             int   set = getIntFromJson(i,"set");
+             int   val = getIntFromJson(i,"val");  
 
              int execCmd = 0;      
              switch (cmd)
@@ -213,7 +212,6 @@ int out_Multivent::Poll(short cause)
                     //setValToJson(i,"@C",cmd);
                     execCmd = cmd;
                     break;
-
                     }   
              bool passiveMode =   getIntFromJson(i,"@pasv",0);       
 
@@ -221,8 +219,25 @@ int out_Multivent::Poll(short cause)
              if (pidObj && pidObj->valueint)
                         {
                         PID * p = (PID *) pidObj->valueint;  
+                                    if ((execCmd == CMD_HEAT || execCmd == CMD_COOL) && p->GetMode() == AUTOMATIC) pidActive = true;
+
+                                    switch (actualMode)   
+                                          { //if air hot or cold - uses temp PID and block control by /fan
+                                            case CMD_HEAT:
+                                             p->SetMode(AUTOMATIC);
+                                             p->SetControllerDirection(DIRECT); 
+                                             break;
+                                            case CMD_COOL:
+                                             p->SetMode(AUTOMATIC);
+                                             p->SetControllerDirection(REVERSE); 
+                                            break;
+                                            default:
+                                              if (passiveMode || execCmd == CMD_AUTO || execCmd ==CMD_OFF) p->SetMode(MANUAL);
+                                          } 
+
                         if (p->Compute())
                              { 
+                              
                               aJsonObject * poObj = aJson.getObjectItem(i,"po");
                               if (poObj && poObj->type == aJson_Float)
                                 {
@@ -232,59 +247,46 @@ int out_Multivent::Poll(short cause)
                                           <<" P:"<<p->GetKp()<<" I:"<<p->GetKi()<<" D:"<<p->GetKd()<<((p->GetDirection())?" Rev ":" Dir ")<<((p->GetMode())?"A":"M");
                                   debugSerial<<endl;
                                   
-                                  if (passiveMode || execCmd == CMD_AUTO)
+
+                                  switch (execCmd)
                                   {
+                                    case CMD_HEAT:
+                               
+                                     if (actualCmd==CMD_COOL)  //close
+                                          fanCtrl(itemCmd().Percents255(0).setSuffix(S_FAN),i->name,true,true);
+                                     else     
+                                          fanCtrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name,true,true);
+
+                                    balance+=poObj->valuefloat;
+                                    pidComputed = true;
+
+                                    break;
+                                    case CMD_COOL:
+                                    if (actualCmd==CMD_HEAT) //close
+                                          fanCtrl(itemCmd().Percents255(0).setSuffix(S_FAN),i->name,true,true);
+                                    else   
+                                          fanCtrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name,true,true);
+
+                                    balance-=poObj->valuefloat;
+                                    pidComputed = true;
+                                    break;
+
+                                  default:
                                     switch (actualMode)
                                           {
                                             case CMD_HEAT:
-                                              ((PID *) pidObj->valueint)->SetControllerDirection(DIRECT);
-                                              debugSerial<<F("VENT: HEAT PASS PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" out:")<< poObj->valuefloat <<F(" set DIRECT mode")<<endl;
-                                               if (actualCmd!=CMD_OFF) fanCtrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name,true);
-                                               if (poObj->valuefloat == 0.0 && autoRequested) {autoRequested = false; debugSerial<<"Vent: no more heat needed for "<<i->name<<endl;}
+                                              debugSerial<<F("VENT: HEAT PASS PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" out:")<< poObj->valuefloat <<endl;
+                                              
+                                               if (actualCmd!=CMD_OFF || passiveMode) fanCtrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name,true,true);
                                             break;
                                             case CMD_COOL:
-                                              ((PID *) pidObj->valueint)->SetControllerDirection(REVERSE);
-                                              debugSerial<<F("VENT: COOL PASS PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" out:")<< poObj->valuefloat << F(" set REVERSE mode")<<endl;
-                                               if (actualCmd!=CMD_OFF) fanCtrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name,true);
-                                               if (poObj->valuefloat == 0.0 && autoRequested) {autoRequested = false; debugSerial<<"Vent: no more cool needed for "<<i->name<<endl;}
+                                              debugSerial<<F("VENT: COOL PASS PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" out:")<< poObj->valuefloat <<endl;
+
+                                               if (actualCmd!=CMD_OFF || passiveMode) fanCtrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name,true,true);
                                             break;
-                                            //case CMD_FAN: //no more hot or cold air
-                                            //if (autoRequested) debugSerial<<"VENT: Cancel automode request"<<endl; //
-                                            //autoRequested = false;
-                                            //todo - delete auto request if AC is idle - stuck and not move to vent job
-                                                 
+                                            case CMD_FAN: //no more hot or cold air
+                                            ((PID *) pidObj->valueint)->SetMode(MANUAL);
                                           }  
-                                  }
-
-                                  else switch (execCmd)
-                                  {
-                                    case CMD_HEAT:
-                                    ((PID *) pidObj->valueint)->SetControllerDirection(DIRECT);
-                                    debugSerial<<F("VENT: PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" set DIRECT mode")<<endl;
-                               
-                                     if (actualCmd==CMD_HEAT) Ctrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name);
-                                     //else?
-
-                                    balance+=poObj->valuefloat;
-                                    break;
-                                    case CMD_COOL:
-                                    //case CMD_FAN: // if PIB using for vent 
-                                    //case CMD_ON: // AC temp unknown - assuming that PID used for vent
-                                    ((PID *) pidObj->valueint)->SetControllerDirection(REVERSE);
-                                    debugSerial<<F("VENT: PID: ")<<item->itemArr->name<<"/"<<i->name<<F(" set REVERSE mode")<<endl;
-                                    if (actualCmd==CMD_COOL) Ctrl(itemCmd().Percents255(poObj->valuefloat).setSuffix(S_FAN),i->name);
-                                    //else ?
-                                    balance-=poObj->valuefloat;
-                                    break;
-                                    // if FAN_ONLY (AC report room temp regularry) - not use internal PID - let be on external control via /fan
-                                    case CMD_FAN:
-                                    // vent requested but air temp hot or cold 
-                                    if (actualCmd == CMD_HEAT || actualCmd == CMD_COOL)
-                                                {
-                                                Ctrl(itemCmd().Percents255(0).setSuffix(S_FAN),i->name);
-                                                Ctrl(itemCmd().Cmd(CMD_FREEZE),i->name);
-                                                }
-                                    else  Ctrl(itemCmd().Cmd(CMD_UNFREEZE),i->name);           
                                   }
 
                                 }  
@@ -294,31 +296,30 @@ int out_Multivent::Poll(short cause)
              } 
              i=i->next; 
           }//while
-          if (balance) debugSerial<<F("VENT: Chan balance=")<<balance<<F(" treshold:")<<boostTreshold<<endl;
+          if (pidComputed)
+          {
+                debugSerial<<F("VENT: Chan balance=")<<balance<<F(" treshold:")<<boostTreshold<<endl;
 
-          if (balance>boostTreshold) sendACcmd (CMD_HEAT);
-             else  if (-balance>boostTreshold) sendACcmd (CMD_COOL); 
-                else if (autoRequested) sendACcmd(CMD_AUTO);
-                     else if (ventRequested) sendACcmd(CMD_FAN);
-                  // else sendACcmd (CMD_OFF);
+                if (balance>boostTreshold)  setBoost(itemCmd().Cmd(CMD_HEAT).Int(30).setSuffix(S_SET));                              
+                  else  if (-balance>boostTreshold)  setBoost(itemCmd().Cmd(CMD_COOL).Int(18).setSuffix(S_SET));
+                          else
+                          { 
+                            pidActive = false;
+                          }
+                  }       
+
+           if (!pidActive)
+           
+                          { 
+                            resetBoost();      
+                            if (autoRequested) sendACcmd(itemCmd().Cmd(CMD_AUTO));
+                          else if (ventRequested) sendACcmd(itemCmd().Cmd(CMD_FAN));
+                          }
+             
 return 1;
 };
 
-int out_Multivent::sendACcmd (int cmd)
-{
-   if (!acObj) return 0;
-   int lastCmd = getIntFromJson(acObj,"@lastCmd");
-   int acCmd = getIntFromJson(acObj,"mode");
-   if (lastCmd && (acCmd != lastCmd)) {
-                          //debugSerial<<"VENT: AC MODE changed manually to "<<item->getCmd()<<endl; 
-                          return 0;}
-   if (cmd == lastCmd) {
-                          //debugSerial<<"VENT: AC MODE already same"<<endl; 
-                          return 0;}
-   executeCommand(acObj,-1,itemCmd().Cmd(cmd).setSuffix(S_CMD));
-   setValToJson(acObj,"@lastCmd",cmd);
-   return 1;
-}
+
 
 int out_Multivent::getChanType()
 {
@@ -436,47 +437,67 @@ switch (suffixCode)
     return 1;
 
     case S_FAN:
+            if (cmd.isValue())
+            {
+            debugSerial << F("VENT:")<<F("AC fan: ")<< cmd.getCmd()<<endl;
+            setValToJson(acObj,"fan",cmd.getInt());    
+            } 
     return 1;
 
     case S_SET:
+            if (cmd.isValue())
+            {
+            debugSerial << F("VENT:")<<F("AC set: ")<< cmd.getCmd()<<endl;
+            setValToJson(acObj,"set",cmd.getFloat()); 
+            }
     return 1;
     
     case S_MODE:
+            if (cmd.isCommand())
+            {
             debugSerial << F("VENT:")<<F("AC mode: ")<< cmd.getCmd()<<endl;
             setValToJson(acObj,"mode",cmd.getCmd()); 
+            }
     return 1;   
 
     case S_CMD:
             debugSerial<<"VENT: Todo - handle cmd/HALT. cmd="<<cmd.getCmd()<<endl; 
     return 1;
 
-    case S_TEMP:
-            debugSerial << F("VENT:")<<F("AC air roomtemp: ")<< cmd.getFloat()<<endl;
-            setValToJson(acObj,"roomtemp",cmd.getFloat());
-    return 1;
+    //case S_TEMP: - temp corrupted by core
+    //        debugSerial << F("VENT:")<<F("AC air roomtemp: ")<< cmd.getFloat()<<endl;
+    //        setValToJson(acObj,"roomtemp",cmd.getFloat());
+    //return 1;
     } 
 }
 
 aJsonObject * i = NULL;
 
-if (cmd.isCommand() && cmd.getSuffix()==S_FAN)
+if (cmd.getSuffix()==S_FAN)
+{
       switch (cmd.getCmd())
           {
           case CMD_HIGH:
           cmd.Percents255(255);
+          cmd.Cmd(0);
           break;
 
           case CMD_MED:
           cmd.Percents255(128);
+          cmd.Cmd(0);
           break;
 
           case CMD_LOW:
           cmd.Percents255(10);
+          cmd.Cmd(0);
           break;
 
-
+          case CMD_OFF:
+          cmd.Percents255(0);
+          cmd.Cmd(0);
+          break;
 } //switch cmd
-
+}
 
 if (gatesObj) i = gatesObj->child; // Pass 1 - calculate summ air value, max value etc
 
@@ -511,7 +532,20 @@ while (i)
               case S_FAN:
                if (getFlag(i,FLAG_FREEZED)) {debugSerial<<F("VENT: zone frozen")<<endl; return -1;}
                if (cmd.isValue())   
-                                          {                                     
+                                          {   
+                                          
+                                            if (!force && pidEnabled(pidObj))
+                                                {
+                                                  debugSerial<<F("VENT: FAN control disabled by PID")<<endl;
+                                                  return 1;
+                                                }
+                                                   // on boost something requested - remove  
+                                            //if (!force && getFlag(acObj,FLAG_ACTION_NEEDED))
+                                            //    {
+                                            //      debugSerial<<F("VENT: FAN control disabled in boost mode")<<endl;
+                                            //      return 1;
+                                            //    }    
+                                    
                                           if (cmd.getInt())
                                                 {
                                                 if (cmdObj->valueint == CMD_OFF && turnbyfan)
@@ -550,9 +584,9 @@ while (i)
              case S_CMD:
               if (cmd.isCommand()) 
                                           {
-                                          switch (cmd.getCmd())
+
+                                          if (cmd.getCmd() == CMD_ON)
                                           {
-                                            case CMD_ON:
                                             if (getFlag(i,FLAG_FREEZED)) {debugSerial<<F("VENT: zone frozen")<<endl; return -1;}
                                             if (cmdObj->valueint != CMD_OFF && cmdObj->valueint != CMD_HALT) break;
                                             cmd.Percents255(fanObj->valueint);
@@ -563,6 +597,11 @@ while (i)
                                             debugSerial<<"VENT: Turning ON. cmd:"<<cmdObj->valueint<<endl;
                                             cmd.Cmd(cmdObj->valueint);
                                             setPassiveMode(i,false);
+                                          }
+                                          
+                                          switch (cmd.getCmd())
+                                          {
+                                            case CMD_ON:
                                             break;
                                             case CMD_OFF:
                                             if (getFlag(i,FLAG_FREEZED)) {debugSerial<<F("VENT: zone frozen")<<endl; return -1;}
@@ -573,7 +612,9 @@ while (i)
                                             //if (!passiveMode) sendFlags |= FLAG_PARAMETERS; 
                                             //else cmd.Cmd(CMD_AUTO);
                                             cmdObj->valueint = CMD_OFF;
+                                            enablePid(pidObj,false);
                                             break;
+                                            /*
                                             case CMD_ENABLE:
                                             if (pidObj && pidObj->valueint) ((PID *) pidObj->valueint)->SetMode(AUTOMATIC);
                                             sendFlags |= FLAG_FLAGS;
@@ -585,6 +626,7 @@ while (i)
                                             sendFlags |= FLAG_FLAGS;
                                             setPassiveMode(i,false);
                                             break;
+                                            */
 
                                             case CMD_FREEZE:
                                             setFlag(i,FLAG_FREEZED);
@@ -594,12 +636,27 @@ while (i)
                                             clearFlag(i,FLAG_FREEZED);
                                             return 1;
 
-                                            case CMD_AUTO:
-                                            case CMD_HEATCOOL:
                                             case CMD_COOL:
-                                            case CMD_HEAT:
-                                            case CMD_FAN:
                                             case CMD_DRY:
+                                            enablePid(pidObj,true,REVERSE);
+                                            sendFlags |= FLAG_COMMAND;
+                                            cmdObj->valueint = cmd.getCmd();
+                                            setPassiveMode(i,false);
+                                            break;
+
+                                            case CMD_HEAT:
+                                            enablePid(pidObj,true,DIRECT);
+                                            case CMD_HEATCOOL:
+                                            enablePid(pidObj,true);
+
+                                            sendFlags |= FLAG_COMMAND;
+                                            cmdObj->valueint = cmd.getCmd();
+                                            setPassiveMode(i,false);
+                                            break;
+
+                                            case CMD_FAN:
+                                            case CMD_AUTO:
+                                            enablePid(pidObj,false);
                                             sendFlags |= FLAG_COMMAND;
                                             cmdObj->valueint = cmd.getCmd();
                                             setPassiveMode(i,false);
@@ -614,8 +671,6 @@ while (i)
                                                                   }
                                           }
                 break;
-
-
               case S_SET:
                if (cmd.isValue())   
                                           {
@@ -638,14 +693,14 @@ while (i)
               }  //switch
               if (isNotRetainingStatus())   //Send status separately for cmd, param, flags
                                             { 
-                                            if (sendFlags & FLAG_COMMAND) item->SendStatusImmediate(cmd.setSuffix(S_CMD),FLAG_COMMAND,i->name);   
+                                            if (sendFlags & FLAG_COMMAND) item->SendStatusImmediate(itemCmd().Cmd(cmd).setSuffix(S_CMD),FLAG_COMMAND,i->name);   
                                             if (sendFlags & FLAG_PARAMETERS ) item->SendStatusImmediate(cmd,FLAG_PARAMETERS,i->name);
                                             if (sendFlags & FLAG_FLAGS) item->SendStatusImmediate(cmd,FLAG_FLAGS,i->name);  
                                             }
               if (cascadeObj) 
                                {
 
-                                    if (sendFlags & FLAG_COMMAND) SubmitParameters(cascadeObj,"cmd",cmd.setSuffix(S_CMD).setArgType(0),true);
+                                    if (sendFlags & FLAG_COMMAND) SubmitParameters(cascadeObj,"cmd",itemCmd().Cmd(cmd).setSuffix(S_CMD).setArgType(0),true);
                                     if (sendFlags & FLAG_PARAMETERS) 
                                     switch (cmd.getSuffix())
                                     {
@@ -730,6 +785,89 @@ while (i)
 }
 
 return 1;
+}
+
+void out_Multivent::enablePid(aJsonObject* pidObj, int enable, int direction )
+ {
+ if (pidObj && pidObj->valueint) 
+      {
+      ((PID *) pidObj->valueint)->SetMode(enable);
+      if (direction != -1) ((PID *) pidObj->valueint)->SetControllerDirection(direction);
+   }
+ }
+
+
+bool out_Multivent::pidEnabled(aJsonObject* pidObj)
+ {
+ return  ((pidObj && pidObj->valueint) && (((PID *) pidObj->valueint)->GetMode() ==AUTOMATIC));
+ } 
+
+ int out_Multivent::sendACcmd (itemCmd cmd)
+{
+   if (!acObj) return 0;
+   int lastCmd = getIntFromJson(acObj,"@lastCmd");
+   int acCmd = getIntFromJson(acObj,"mode");
+
+   //if (lastCmd && (acCmd != lastCmd)) {
+   //                       //debugSerial<<"VENT: AC MODE changed manually to "<<item->getCmd()<<endl; 
+   //                       return 0;}
+   
+   if (cmd.isCommand())
+   {
+          if (cmd.getCmd() == lastCmd ) {
+                                  //debugSerial<<"VENT: AC MODE already "<<lastCmd<<endl; 
+                                  }
+          else 
+          {                        
+          executeCommand(acObj,-1,itemCmd().Cmd(cmd).setSuffix(S_CMD).setArgType(0));
+          setValToJson(acObj,"@lastCmd",cmd.getCmd());
+          }
+   }
+  if (cmd.isValue())
+  {
+    executeCommand(acObj,-1,cmd.Cmd(0));
+
+    switch (cmd.getSuffix())
+    {
+    case S_FAN:
+    setValToJson(acObj,"@lastFan",cmd.getCmd());
+
+    break;
+    case S_SET:
+    setValToJson(acObj,"@lastSet",cmd.getCmd());
+    }
+  }
+   return 1;
+}
+
+void out_Multivent::setBoost(itemCmd cmd)
+  {
+   if (!acObj || getFlag(acObj,FLAG_ACTION_NEEDED)) return;
+   debugSerial<<"VENT: boost on"<<endl;
+   int acTemp = getIntFromJson(acObj,"set",21);  
+   setValToJson(acObj,"@preset",acTemp);
+   //executeCommand(acObj,-1,cmd.setArgType(0).setSuffix(S_CMD));
+   sendACcmd(cmd);
+   //executeCommand(acObj,-1,cmd.Cmd(0).setSuffix(S_SET));
+   setFlag(acObj,FLAG_ACTION_NEEDED);
+  }
+
+void out_Multivent::resetBoost()
+  {
+  if (!acObj || !getFlag(acObj,FLAG_ACTION_NEEDED)) return;  
+  debugSerial<<"VENT: boost off"<<endl;
+  int preTemp = getIntFromJson(acObj,"@preset",21); 
+  if (preTemp<17) preTemp = 21;
+  sendACcmd(itemCmd().Cmd(0).Int(preTemp).setSuffix(S_SET));
+  //executeCommand(acObj,-1,itemCmd().Cmd(0).Int(preTemp).setSuffix(S_SET));
+  clearFlag(acObj,FLAG_ACTION_NEEDED);
+  }
+
+void  out_Multivent::notifyState(itemCmd state)
+{
+char val[16];  
+state.toString(val,sizeof(val),FLAG_COMMAND);
+publishTopic(item->itemArr->name,val,"/$state");
 }
 
 #endif

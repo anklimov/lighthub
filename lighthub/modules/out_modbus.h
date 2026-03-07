@@ -23,10 +23,14 @@ public:
   aJsonObject * parameters;
 };
 
+//execObj subtype
 #define MB_NEED_SEND  8
 #define MB_SEND_ERROR 4
 #define MB_SEND_ATTEMPTS 3
-#define MB_VALUE_OUTDATED 1
+
+//lastMeasusement subtype
+#define LM_VALUE_OUTDATED 1
+#define LM_VALUE_EMPTY 2
 
 
 class out_Modbus : public abstractOut {
@@ -55,5 +59,6 @@ protected:
     int  createLastMeasured(aJsonObject * execObj);
     aJsonObject * getLastMeasured(char * name);
     aJsonObject * getLastMeasured(aJsonObject * execObj);
+    void setLastMeasured(aJsonObject * execObj, int val);
 };
 #endif

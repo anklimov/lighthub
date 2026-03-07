@@ -29,7 +29,7 @@ const cmdstr commands_P[] PROGMEM =
 "ENABLE","DISABLE","UNFREEZE","FREEZE",
 "AUTO","FAN_ONLY",
 "HIGH","MEDIUM","LOW","HEAT_COOL",
-"HEAT","COOL","DRY","RGB","HSV"
+"HEAT","COOL","DRY","RGB","HSV","RESET"
 };
 
 #define commandsNum sizeof(commands_P)/sizeof(cmdstr)
@@ -94,6 +94,7 @@ const ch_type ch_type_P[] PROGMEM =
 
 #define CMD_RGB  0x17 
 #define CMD_HSV  0x18
+#define CMD_RESET  0x19
 
 #define CMD_MASK 0xffUL
 #define FLAG_MASK 0x00ffff00UL
@@ -236,6 +237,7 @@ public:
   itemCmd Tens(int32_t i);
   itemCmd Tens_raw(int32_t i);
   itemCmd Cmd(uint8_t i);
+  itemCmd Cmd(itemCmd i);
   itemCmd HSV(uint16_t h, uint8_t s, uint8_t v);
   itemCmd HSV255(uint16_t h, uint8_t s, uint8_t v);
   itemCmd HS(uint16_t h, uint8_t s);

@@ -25,11 +25,18 @@ public:
     int fanCtrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool force = false);
 protected:
     void getConfig();
-    int  sendACcmd (int cmd);
+    int  sendACcmd (itemCmd cmd);
     void setPassiveMode(aJsonObject* zone, bool mode);
     uint32_t getFlag   (aJsonObject* zone, uint32_t flag);
     void setFlag   (aJsonObject* zone, uint32_t flag);
     void clearFlag (aJsonObject* zone, uint32_t flag);
+    void enablePid(aJsonObject* zone, int enable, int direction = -1);
+    bool pidEnabled(aJsonObject* pidObj);
+    void setBoost(itemCmd);
+    void resetBoost();
+    void notifyState(itemCmd state);
+
+
     aJsonObject * gatesObj;
     aJsonObject * acObj;
     //float acTemp;

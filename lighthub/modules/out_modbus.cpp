@@ -196,7 +196,7 @@ bool out_Modbus::getConfig()
   if (store->parameters)
   {
   // Creating for parameters where prefetch required  
-  debugSerial<<F("Adding prefetch regs:")<<endl;
+  debugSerial<<F("MBUS:")<<F("Adding prefetch regs:")<<endl;
   aJsonObject * i = store->parameters->child;
   while (i)
   {
@@ -208,7 +208,7 @@ bool out_Modbus::getConfig()
   i=i->next;
   }
 
-  debugSerial<<F("Adding referred regs:")<<endl;
+  debugSerial<<F("MBUS:")<<F("Adding referred regs:")<<endl;
   i = store->parameters->child;
   // Creating for parameters used in references from another parameters
   while (i)
@@ -229,7 +229,7 @@ bool out_Modbus::getConfig()
   }
   i=i->next;
   }
- debugSerial<<F("Adding regs with actions:")<<endl;
+ debugSerial<<F("MBUS:")<<F("Adding regs with actions:")<<endl;
   // Check - if  action configured for object and create
   aJsonObject * itemParametersObj = aJson.getArrayItem(item->itemArg, 2);
   if (itemParametersObj)
@@ -286,7 +286,7 @@ int  out_Modbus::createLastMeasured(aJsonObject * execObj)
 
   lastMeasured = aJson.getObjectItem(markObj,"@S");
   if (!lastMeasured) return false;
-  lastMeasured->subtype |= MB_VALUE_OUTDATED;
+  lastMeasured->subtype |= LM_VALUE_EMPTY;
   return true;        
 }
 
@@ -314,6 +314,20 @@ if (execObj->type == aJson_Array) execObj = execObj->child;
 aJsonObject *lastMeasured = aJson.getObjectItem(execObj,"@S");
 if (lastMeasured && lastMeasured->type == aJson_Int) return lastMeasured;
 return NULL;
+}
+
+void out_Modbus::setLastMeasured(aJsonObject * lastMeasured, int val)
+{
+ //aJsonObject *lastMeasured = getLastMeasured (execObj);
+ if (lastMeasured)
+      {
+        lastMeasured->valueint = val;
+        //lastMeasured->subtype&=~LM_VALUE_OUTDATED;
+        //lastMeasured->subtype&=~LM_VALUE_EMPTY;
+        lastMeasured->subtype = 0;
+
+      }
+
 }
 
 /**
@@ -503,7 +517,7 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                       mappedParam.Int((uint32_t)param);
                     }
                        
-                    traceSerial << F("MBUSD:  got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from type ")<<parType<<F(":")<<paramObj->name<<endl;             
+                    traceSerial << F("MBUSD: got ")<<mappedParam.toString(buf,sizeof(buf))<< F(" from type ")<<parType<<F(":")<<paramObj->name<<endl;             
 
                   if (mapObj && (mapObj->type==aJson_Array || mapObj->type==aJson_Object))
                     {
@@ -587,11 +601,11 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                                   if (nestedMapObj && (nestedMapObj->type==aJson_Array || nestedMapObj->type==aJson_Object)) mappedParam=mappedParam.doReverseMapping(nestedMapObj);
                                                   traceSerial << F("MBUSD: NestedMapped:")<<mappedParam.toString(buf,sizeof(buf))<<endl; 
 
-                                                  if (!(lastMeasured->subtype & MB_VALUE_OUTDATED))
+                                                  if (!(lastMeasured->subtype & LM_VALUE_OUTDATED))
                                                       {
                                                           executeWithoutCheck=true;
                                                           submitRecurrentOut=true;
-                                                          lastMeasured->subtype|= MB_VALUE_OUTDATED;
+                                                          lastMeasured->subtype|= LM_VALUE_OUTDATED;
                                                       }
 
                                                  } 
@@ -627,22 +641,21 @@ itemCmd out_Modbus::findRegister(uint16_t registerNum, uint16_t posInBuffer, uin
                                                     aJsonObject *lastMeasured = getLastMeasured(execObj); 
                                                     if (lastMeasured)
                                                     { 
-                                                                if   (lastMeasured->valueint == param)
+                                                                if   (lastMeasured->valueint == param && !(lastMeasured->subtype & LM_VALUE_EMPTY))
                                                                       {
                                                                         //if recurrent call but value was readed before
-                                                                       if (!doExecution && !(lastMeasured->subtype & MB_VALUE_OUTDATED)) 
+                                                                       if (!doExecution && !(lastMeasured->subtype & LM_VALUE_OUTDATED)) 
                                                                                     {
                                                                                     *submitParam=true; //never used
-                                                                                    lastMeasured->subtype|=MB_VALUE_OUTDATED;
+                                                                                    lastMeasured->subtype|=LM_VALUE_OUTDATED;
                                                                                     return mappedParam;
                                                                                     }
                                                                         *submitParam=false; //supress repeating execution for same val
                                                                       }
                                                                 else  
                                                                       {
-                                                                      lastMeasured->valueint=param;
                                                                       traceSerial<<"MBUS: Stored "<<param<<" to @S of "<<paramObj->name<<endl;
-                                                                      lastMeasured->subtype&=~MB_VALUE_OUTDATED;
+                                                                      setLastMeasured(lastMeasured,param);
                                                                       }
                                                     }            
                                   //    }
@@ -898,7 +911,7 @@ if (prefetchObj && (prefetchObj->type == aJson_Boolean) && prefetchObj->valueboo
  debugSerial<<F("MBUS res: ")<<res<<F(" ")<<paramName<<" reg:"<<regObj->valueint<<F(" val:")<<outValue->valueint<<endl;
 
 //If wrote - suppress action on poll 
-if ((res ==0) && (outValue->type == aJson_Int) && lastMeasured && (lastMeasured->type == aJson_Int)) lastMeasured->valueint = outValue->valueint;
+if ((res ==0) && (outValue->type == aJson_Int) && lastMeasured && (lastMeasured->type == aJson_Int)) setLastMeasured(lastMeasured,outValue->valueint);
 
 
  return ( res == 0);
@@ -1116,7 +1129,7 @@ if (itemParametersObj && itemParametersObj->type ==aJson_Object)
                                        {
                                         if (lastMeasured)
                                            {
-                                           if (lastMeasured->valueint == Value &&  !(lastMeasured->subtype & MB_VALUE_OUTDATED))
+                                           if (lastMeasured->valueint == Value &&  !(lastMeasured->subtype))
                                             {
                                               debugSerial<<"MBUS: Value2send equal retrieved"<<endl;
                                               return 1; 

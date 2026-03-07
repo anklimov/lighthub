@@ -1141,6 +1141,11 @@ itemCmd itemCmd::Cmd(uint8_t i)
           return *this;
     }
 
+itemCmd itemCmd::Cmd(itemCmd i)
+    {
+          cmd.cmdCode=i.cmd.cmdCode;
+          return *this;
+    }
 
 uint8_t itemCmd::getSuffix()
 {
