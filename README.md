@@ -1,5 +1,5 @@
 # LightHub
-is Flexible, Arduino-Mega/Arduino DUE/ESP8266/ESP32 open-software and open-hardware SmartHome controller. 
+LightHub is a Flexible open-software and open-hardware Smart Home controller for Arduino-Mega, Arduino Due, ESP8266, and ESP32. 
 Useful links:
 
   * [Article/RU](https://geektimes.ru/post/295109/) 
@@ -8,7 +8,7 @@ Useful links:
 
   * [WIKI/RU](https://www.lazyhome.ru/dokuwiki/doku.php?id=start)
 
-  * [Doxigen autodocumentation for developers](https://anklimov.github.io/lighthub/docs/html/index.html) (litle bit outdated)
+  * [Doxygen autodocumentation for developers](https://anklimov.github.io/lighthub/docs/html/index.html) (litle bit outdated)
 
 It may operate both: 
 * On [especially designed hardware board](http://www.lazyhome.ru/index.php/featurerequest) with 16 optocoupled digital inputs, 16 ESD protected digital/analog Inputs/outputs, 8 open-collector outputs (up to 0.5A/50V), DMX IN/OUT, MODBUS RTU and hardware 1-wire support circuit.
