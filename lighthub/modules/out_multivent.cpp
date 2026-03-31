@@ -421,7 +421,7 @@ debugSerial << " VENT: CTRL " << subItem << " "; cmd.debugOut();
 
 if (cmd.isCommand() && !suffixCode) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it
 
-bool turnbyfan = getIntFromJson(acObj,"turnbyfan",0);   
+int turnbyfan = getIntFromJson(acObj,"turnbyfan",0);   
 
 if (!subItem)  // feedback from shared AC
 {
@@ -492,10 +492,12 @@ if (cmd.getSuffix()==S_FAN)
           cmd.Cmd(0);
           break;
 
-          case CMD_OFF:
-          cmd.Percents255(0);
-          cmd.Cmd(0);
-          break;
+//          case CMD_OFF:
+//          cmd.Percents255(0);
+//          cmd.Cmd(0);
+//          break;
+  default: 
+  if (cmd.isValue()) cmd.Percents255(cmd.getInt()); // convert to integer       
 } //switch cmd
 }
 
@@ -550,8 +552,8 @@ while (i)
                                                 {
                                                 if (cmdObj->valueint == CMD_OFF && turnbyfan)
                                                     { 
-                                                     cmd.Cmd(CMD_ON);
-                                                     debugSerial<<"VENT: generating ON by fan"<<endl;
+                                                     cmd.Cmd(turnbyfan);
+                                                     debugSerial<<"VENT: generating cmd by fan: "<<turnbyfan<<endl;
                                                         }                                              
                                                 //fanObj->valueint = cmd.getInt();
                                                 //sendFlags |= FLAG_PARAMETERS;
@@ -579,8 +581,9 @@ while (i)
                   cmd.Cmd(CMD_OFF);
                   cmd.setSuffix(S_CMD);
                  }
-                                         
+                   
              if (!cmd.isCommand()) break; // if have command in FAN suffix - continue processing
+             debugSerial<<"VENT: cmd in FAN suffix, process as command. cmd="<<cmd.getCmd()<<endl;
              case S_CMD:
               if (cmd.isCommand()) 
                                           {
@@ -608,7 +611,9 @@ while (i)
                                             if (cmdObj->valueint != CMD_OFF) setValToJson(i,"@precmd",cmdObj->valueint); //saving previous mode  
                                             cmd.Percents255(0);
                                             cmd.setSuffix(S_FAN);
+                                            debugSerial<<"VENT: Turning OFF. saving cmd:"<<cmdObj->valueint<<endl;
                                             sendFlags |= FLAG_COMMAND; 
+                                            //sendFlags |= FLAG_PARAMETERS; //experimental 30/03/26
                                             //if (!passiveMode) sendFlags |= FLAG_PARAMETERS; 
                                             //else cmd.Cmd(CMD_AUTO);
                                             cmdObj->valueint = CMD_OFF;
@@ -655,6 +660,10 @@ while (i)
                                             break;
 
                                             case CMD_FAN:
+                                            sendFlags |= FLAG_PARAMETERS; //experimental 30/03/26
+                                            cmd.Percents255(fanObj->valueint);
+                                            cmd.setSuffix(S_FAN);
+                                            // continue
                                             case CMD_AUTO:
                                             enablePid(pidObj,false);
                                             sendFlags |= FLAG_COMMAND;
@@ -700,17 +709,17 @@ while (i)
               if (cascadeObj) 
                                {
 
-                                    if (sendFlags & FLAG_COMMAND) SubmitParameters(cascadeObj,"cmd",itemCmd().Cmd(cmd).setSuffix(S_CMD).setArgType(0),true);
+                                    if (sendFlags & FLAG_COMMAND) SubmitParameters(cascadeObj,"cmd",itemCmd().Cmd(cmd).setSuffix(S_CMD).setArgType(0),true);  
                                     if (sendFlags & FLAG_PARAMETERS) 
                                     switch (cmd.getSuffix())
-                                    {
-                                    case S_SET:  
-                                    SubmitParameters(cascadeObj,"set",cmd,true);
-                                    break;
-                                    case S_FAN:
-                                    SubmitParameters(cascadeObj,"fan",cmd,true);
-                                    break;
-                                    }
+                                      {
+                                      case S_SET:  
+                                      SubmitParameters(cascadeObj,"set",cmd,true);
+                                      break;
+                                      case S_FAN:
+                                      SubmitParameters(cascadeObj,"fan",cmd,true);
+                                      break;
+                                      }
                                }                        
               } // subitem
 
@@ -807,6 +816,8 @@ bool out_Multivent::pidEnabled(aJsonObject* pidObj)
    if (!acObj) return 0;
    int lastCmd = getIntFromJson(acObj,"@lastCmd");
    int acCmd = getIntFromJson(acObj,"mode");
+   int overrideCmd = getIntFromJson(acObj,"overridecmd");
+   if (overrideCmd && cmd.getCmd() != CMD_OFF) cmd.Cmd(overrideCmd); //if override cmd exist - use it instead of requested. But allow to turn off by original cmd
 
    //if (lastCmd && (acCmd != lastCmd)) {
    //                       //debugSerial<<"VENT: AC MODE changed manually to "<<item->getCmd()<<endl; 
