@@ -17,7 +17,8 @@
 
 -DRESTART_LAN_ON_MQTT_ERRORS
 -D CORS=\"*\"
--D REDIRECTION_URL=\"http://lazyhome.ru/pwa\"
+#-D REDIRECTION_URL=\"http://lazyhome.ru/pwa\"
+-D REDIRECTION_URL=lazyhome.ru/pwa
 -DOTA_PORT=80
 
 #oct22 - violation in Publish/OnMQTTConnect while publish homie info

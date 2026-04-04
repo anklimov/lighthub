@@ -189,7 +189,8 @@ int out_Multivent::Poll(short cause)
              int   set = getIntFromJson(i,"set");
              int   val = getIntFromJson(i,"val");  
 
-             int execCmd = 0;      
+             int execCmd = 0;   
+             bool weakMode=false;   // kind of modes when we activating PID only if AC in active  mode
              switch (cmd)
                     {
                     case CMD_HEATCOOL:
@@ -200,10 +201,12 @@ int out_Multivent::Poll(short cause)
                     break;
                     case CMD_FAN:
                     ventRequested = true;
+                    weakMode = true;
                     execCmd = cmd;
                     break;
                     case CMD_AUTO: 
                     autoRequested = true;
+                    weakMode = true;
                     execCmd = cmd;
                     break;
                     case CMD_COOL:
@@ -216,30 +219,32 @@ int out_Multivent::Poll(short cause)
              bool passiveMode =   getIntFromJson(i,"@pasv",0);       
 
              aJsonObject * pidObj = aJson.getObjectItem(i, "pid");
-             if (pidObj && pidObj->valueint)
+             aJsonObject * poObj = aJson.getObjectItem(i,"po");
+
+             if (pidObj && pidObj->valueint && poObj && poObj->type == aJson_Float)
                         {
                         PID * p = (PID *) pidObj->valueint;  
                                     if ((execCmd == CMD_HEAT || execCmd == CMD_COOL) && p->GetMode() == AUTOMATIC) pidActive = true;
-
-                                    switch (actualMode)   
+                                      switch (actualMode)   
                                           { //if air hot or cold - uses temp PID and block control by /fan
                                             case CMD_HEAT:
-                                             p->SetMode(AUTOMATIC);
+                                             if (weakMode || passiveMode)  p->SetMode(AUTOMATIC);
                                              p->SetControllerDirection(DIRECT); 
                                              break;
                                             case CMD_COOL:
-                                             p->SetMode(AUTOMATIC);
+                                             if (weakMode || passiveMode)  p->SetMode(AUTOMATIC);
                                              p->SetControllerDirection(REVERSE); 
                                             break;
                                             default:
-                                              if (passiveMode || execCmd == CMD_AUTO || execCmd ==CMD_OFF) p->SetMode(MANUAL);
-                                          } 
-
+                                              if ((passiveMode || weakMode || execCmd ==CMD_OFF) && p->GetMode() == AUTOMATIC)
+                                                                {
+                                                                    p->SetMode(MANUAL);
+                                                                    debugSerial<<F("VENT: PID set to MANUAL due no HEAT/COOL. zone:")<<i->name<<endl;
+                                                                    fanCtrl(itemCmd().Percents255(0).setSuffix(S_FAN),i->name,true,true);   
+                                                                }
+                                          }                          
                         if (p->Compute())
                              { 
-                              
-                              aJsonObject * poObj = aJson.getObjectItem(i,"po");
-                              if (poObj && poObj->type == aJson_Float)
                                 {
                                   debugSerial<<F("VENT: ")
                                           <<item->itemArr->name<<"/"<<i->name
@@ -288,9 +293,16 @@ int out_Multivent::Poll(short cause)
                                             ((PID *) pidObj->valueint)->SetMode(MANUAL);
                                           }  
                                   }
-
                                 }  
-                             }              
+                             }  
+                            else //PID not computed - maybe not in time, but we can use PID output as indicator of balance and boost if needed
+                            { 
+                              if (p->GetMode() == AUTOMATIC)
+                                {
+                                  if (execCmd == CMD_HEAT) balance+=poObj->valuefloat;
+                                  else if (execCmd == CMD_COOL) balance-=poObj->valuefloat;
+                                }
+                            }                 
                         }
         
              } 
@@ -578,9 +590,15 @@ while (i)
                 else if (cmd.getCmd() == CMD_AUTO) 
                  {
                   setPassiveMode(i,true); //Setup flag
+                  passiveMode = true;
                   cmd.Cmd(CMD_OFF);
                   cmd.setSuffix(S_CMD);
                  }
+                 else if (cmd.getCmd() == CMD_OFF) 
+                 {
+                  setPassiveMode(i,false);
+                  passiveMode = false;
+                 }    
                    
              if (!cmd.isCommand()) break; // if have command in FAN suffix - continue processing
              debugSerial<<"VENT: cmd in FAN suffix, process as command. cmd="<<cmd.getCmd()<<endl;
@@ -614,8 +632,10 @@ while (i)
                                             debugSerial<<"VENT: Turning OFF. saving cmd:"<<cmdObj->valueint<<endl;
                                             sendFlags |= FLAG_COMMAND; 
                                             //sendFlags |= FLAG_PARAMETERS; //experimental 30/03/26
-                                            //if (!passiveMode) sendFlags |= FLAG_PARAMETERS; 
-                                            //else cmd.Cmd(CMD_AUTO);
+                                            //
+                                            if (!passiveMode) sendFlags |= FLAG_PARAMETERS; 
+                                            //   else cmd.Cmd(CMD_AUTO);
+
                                             cmdObj->valueint = CMD_OFF;
                                             enablePid(pidObj,false);
                                             break;
