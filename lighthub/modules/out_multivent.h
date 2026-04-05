@@ -6,8 +6,16 @@
 #include "itemCmd.h"
 #include <PID_v1.h>
 
+#define AC_BOOST_HIGH_TEMP 30
+#define AC_PRESET_TEMP 21
+#define AC_BOOST_LOW_TEMP 17
+#define AC_BOOST_TRESHOLD 230
+#define AC_BOOST_DEADBAND 10
 
-//static int8_t motorQuote = 0;
+#define AC_SUPPRESS_FAN 1
+#define AC_SUPPRESS_SET 2
+#define AC_SUPPRESS_CMD 4
+
 
 class out_Multivent : public abstractOut {
 public:
@@ -26,6 +34,9 @@ public:
 protected:
     void getConfig();
     int  sendACcmd (itemCmd cmd);
+    void checkACcmd (int acCmd);
+    void checkACfan (int acFan);
+    void checkACset (int acSet);
     void setPassiveMode(aJsonObject* zone, bool mode);
     uint32_t getFlag   (aJsonObject* zone, uint32_t flag);
     void setFlag   (aJsonObject* zone, uint32_t flag);
