@@ -5,8 +5,20 @@
 #include <item.h>
 #include <PID_v1.h>
 #include "itemCmd.h"
+#include "aJson.h"
 
 #define OUTPUT_TRESHOLD 1.0
+
+class pidJson {
+    public:
+    pidJson(aJsonObject * _obj){obj=_obj;};
+
+    aJsonObject * getValObj(){return NULL;};
+    aJsonObject * getSetObj(){return NULL;};
+    aJsonObject * getPoObj(){return NULL;};
+    PID * getPID(){return (obj) ? (PID*) obj->valueint: NULL;};
+    aJsonObject * obj;
+};
 
 class pidPersistent : public chPersistent  {
 public:

@@ -1061,6 +1061,14 @@ if (element && element->type == aJson_Boolean) return element->valuebool;
 return def;
  }
 
+ long getIntFromJson(aJsonObject * a, const char * name, int i,long def)
+ {
+if (!a) return def;
+if (a->type == aJson_Object) return getIntFromJson(a,name,def);
+else if (a->type == aJson_Array) return getIntFromJson(a,i,def);
+else return def;  
+ }
+
  float getFloatFromJson(aJsonObject * a, int i, float def)
 {
 aJsonObject * element = NULL;
@@ -1085,6 +1093,15 @@ if (element && element->type == aJson_Float) return element->valuefloat;
 if (element && element->type == aJson_Int) return element->valueint;
 return def;
  } 
+
+ float getFloatFromJson(aJsonObject * a, const char * name, int i, float def)
+{
+aJsonObject * element = NULL;
+if (!a) return def;
+if (a->type == aJson_Object) return getFloatFromJson(a,name,def);
+else if (a->type == aJson_Array) return getFloatFromJson(a,i,def);
+else return def;
+}
 
 aJsonObject * getCreateObject(aJsonObject * a, int n)
 {

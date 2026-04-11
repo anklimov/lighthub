@@ -11,10 +11,12 @@
 #define AC_BOOST_LOW_TEMP 17
 #define AC_BOOST_TRESHOLD 230
 #define AC_BOOST_DEADBAND 10
+#define AC_HEATCOOL_DEADBAND 1.0
 
 #define AC_SUPPRESS_FAN 1
 #define AC_SUPPRESS_SET 2
 #define AC_SUPPRESS_CMD 4
+#define AC_SUPPRESS_ALL 7
 
 
 class out_Multivent : public abstractOut {
@@ -30,7 +32,7 @@ public:
     int getChanType() override;
     //int getDefaultStorageType(){return ST_PERCENTS255;};
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized = false) override;
-    int fanCtrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool force = false);
+    int fanCtrl(itemCmd cmd, char* subItem=NULL, bool force = false);
 protected:
     void getConfig();
     int  sendACcmd (itemCmd cmd);

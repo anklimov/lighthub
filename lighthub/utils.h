@@ -88,6 +88,8 @@ bool checkToken(char * token, char * data);
  long  getIntFromJson(aJsonObject * a, const char * name, long def = 0);
  float getFloatFromJson(aJsonObject * a, int i, float def = 0.0);
  float getFloatFromJson(aJsonObject * a, const char * name, float def = 0.0);
+ long getIntFromJson(aJsonObject * a, const char * name, int i,long def);
+float getFloatFromJson(aJsonObject * a, const char * name, int i, float def);
 
  
 
@@ -147,7 +149,14 @@ if (a->type == aJson_Object)
 return NULL;       
 }
 
-
+ template<typename Type>
+ aJsonObject * getCreateObject(aJsonObject * a, const char * name, int n, Type def)
+{
+if (!a) return NULL;
+if (a->type == aJson_Object) return getCreateObject(a,name,def);
+else if (a->type == aJson_Array) return getCreateObject(a,n,def);
+else return NULL;
+}
 
  template<typename Type>
  aJsonObject * setValToJson(aJsonObject * a, const char * name, Type val)
