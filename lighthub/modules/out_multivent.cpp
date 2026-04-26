@@ -154,6 +154,54 @@ int out_Multivent::isActive()
    return 0;             
 }
 
+
+    void out_Multivent::stopAllzones(){
+  if (!gatesObj) return;
+  debugSerial << F("VENT: Stop all zones. ")<<endl;
+        aJsonObject * i = gatesObj->child;  
+      while (i)
+          {
+             if (i->name && *i->name)
+             {
+             int   cmd = getIntFromJson(i,"cmd");
+             switch (cmd)
+                    {
+                    case CMD_ON:  
+                    case CMD_HEATCOOL:
+                    case CMD_FAN:
+                    case CMD_AUTO: 
+                    case CMD_COOL:
+                    case CMD_HEAT:   
+                    case CMD_DRY:                  
+                    //case CMD_OFF:
+                     setValToJson(i,"@preHaltcmd",cmd);
+                    // setPassiveMode(i, true); 
+                     fanCtrl(itemCmd().Cmd(CMD_OFF).setSuffix(S_CMD),i->name,true);
+                    break;
+                    }    
+                  }    
+       i=i->next; 
+      }//while 
+    }
+
+
+    void out_Multivent::restoreAllzones(){
+  if (!gatesObj) return;
+  debugSerial << F("VENT: Restore all zones. ")<<endl;
+        aJsonObject * i = gatesObj->child;  
+      while (i)
+          {
+             if (i->name && *i->name)
+             {
+             int   preHaltcmd = getIntFromJson(i,"@preHaltcmd",CMD_OFF);
+             if (preHaltcmd) //setPassiveMode(i, false); 
+                 fanCtrl(itemCmd().Cmd(preHaltcmd).setSuffix(S_CMD),i->name,true);
+              setValToJson(i,"@preHaltcmd",0); //reset preHaltcmd in any case
+             }    
+       i=i->next; 
+      }//while    
+    };
+
 #define assign_if_positive(var, source) {int x=source; if (x>=0) {var=x;}} 
 
 int out_Multivent::Poll(short cause)
@@ -193,6 +241,7 @@ int out_Multivent::Poll(short cause)
              int     cmd = getIntFromJson  (i,"cmd");
              float   set = getFloatFromJson(i,"set");
              float   val = getFloatFromJson(i,"val");  
+             int     fan = getIntFromJson(i,"fan");
 
              int execCmd = 0;   
              bool weakMode=false;   // kind of modes when we activating PID only if AC in active  mode
@@ -217,12 +266,12 @@ int out_Multivent::Poll(short cause)
                       }
                     break;
                     case CMD_FAN:
-                    ventRequested = true;
+                    if (fan>0) ventRequested = true;
                     weakMode = true;
                     execCmd = cmd;
                     break;
                     case CMD_AUTO: 
-                    autoRequested = true;
+                    if (fan>0) autoRequested = true;
                     weakMode = true;
                     execCmd = cmd;
                     break;
@@ -402,6 +451,7 @@ void out_Multivent::setPassiveMode(aJsonObject* zone, bool mode)
                         item->SendStatusImmediate(itemCmd().Cmd(CMD_AUTO).setSuffix(S_FAN),FLAG_COMMAND,zone->name); //Send /fan->AUTO
                         
                   SubmitParameters(cascadeObj,"fan",itemCmd().Cmd(CMD_AUTO).setSuffix(S_FAN),false);
+                  setValToJson(zone,"fan",0); //reset fan level on passive mode ON
                   }
                   else 
                   {
@@ -550,8 +600,22 @@ switch (suffixCode)
     return -1;   
 
     case S_CMD:
-            debugSerial<<"VENT: Todo - handle cmd/HALT. cmd="<<cmd.getCmd()<<endl; 
-    return -2;
+ 
+            switch (cmd.getCmd())
+             {
+              case CMD_OFF:
+              stopAllzones();
+              break;
+              case CMD_ON:
+              case CMD_HEAT:
+              case CMD_COOL:   
+              case CMD_HEATCOOL:
+              case CMD_DRY:
+              case CMD_FAN:
+              case CMD_AUTO: 
+              restoreAllzones();
+             }
+    return -1;
 
     //case S_TEMP: - temp corrupted by core
     //        debugSerial << F("VENT:")<<F("AC air roomtemp: ")<< cmd.getFloat()<<endl;
@@ -895,10 +959,19 @@ bool out_Multivent::pidEnabled(aJsonObject* pidObj)
   if (lastCmd && (acCmd != lastCmd) ) { 
                           
                 if (!(acCmd == CMD_OFF && lastFan == 0)) 
-                    {
+                  {
                      debugSerial<<"VENT: AC MODE changed manually from "<<lastCmd<<" to "<<acCmd<<endl; 
                      //TODO! 
-                    }
+                    switch (acCmd)
+                    {
+                      case CMD_OFF:
+                      stopAllzones();
+                      break;  
+                      default:
+                      restoreAllzones();
+                      break;
+                    }  
+                }
                           setValToJson(acObj,"@lastCmd",acCmd);
                           setValToJson(acObj,"@lastFan",-1);
                           return;}
@@ -986,7 +1059,7 @@ bool out_Multivent::pidEnabled(aJsonObject* pidObj)
 
     if (cmd.getInt() == 0) 
         {
-          setValToJson(acObj,"@lastCmd",CMD_OFF);
+          /////setValToJson(acObj,"@lastCmd",CMD_OFF);
           if (isActiveNow) setValToJson(acObj,"@preCmd",prevACcmd);
         }
      else if (cmd.getInt() > 0 && !isActiveNow) 

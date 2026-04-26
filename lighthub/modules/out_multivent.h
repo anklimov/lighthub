@@ -48,6 +48,8 @@ protected:
     void setBoost(itemCmd);
     void resetBoost();
     void notifyState(itemCmd state);
+    void stopAllzones();
+    void restoreAllzones();
 
 
     aJsonObject * gatesObj;
