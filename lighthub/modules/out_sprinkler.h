@@ -6,8 +6,15 @@
 #include <abstractout.h>
 #include <item.h>
 
-#define DRENAGE_TIME 10000
+#define DRENAGE_ON_TIME 10000
+#define VIN_MAX_TIME 1200000UL
 
+#define LASTWCTRLSTATE 1
+#define LASTWCTRLSTATE_ALL 2
+#define LASTWMAXSTATE 4
+#define LASTWMINSTATE 8
+#define LASTFBDRENSTATE 16
+#define LASTFBPUMPSTATE 32
 
 enum sprinklerState {
     SP_UNKNOWN = 0,
@@ -26,12 +33,11 @@ public:
 
     //out_sprinkler(){ /*NO getConfig() here due Poll() optimization*/ };
     bool getConfig();
-   
+    void link(Item * _item){abstractOut::link(_item);  if (_item) getConfig();};   
     int Setup() override;
     int Poll(short cause) override;
     int Stop() override;
-    int Status() override;
-    
+    //int Status() override;  
     int getChanType() override;
     int Ctrl(itemCmd cmd, char* subItem=NULL, bool toExecute=true, bool authorized = false) override;
 
@@ -39,7 +45,7 @@ protected:
     aJsonObject * gatesObj;
     short vinPin, drenPin, pumpPin;
     short wMaxPin, wMinPin, fbDrenPin, fbPumpPin, wCtrPin;
-    bool lastWctrState;
+
 
     void pump(bool state);
     void setOutput(short pin, bool value);
@@ -50,10 +56,12 @@ protected:
     aJsonObject * findNextZone();
     void setZoneActive(aJsonObject * zone, bool active);
     void updateZoneValue(aJsonObject * zone, long value);
-    void publishBooleanState(const char * subItem, bool state);
+    bool publishBooleanState(const char * subItem, bool state);
     void publishNumericState(const char * subItem, long value);
+    void publishBooleanStateIfChanged(const char * subItem, bool state, uint32_t flag, uint32_t & lastState);
     bool isFreeze();
     void notifyState(short state); 
     int  shutdown(sprinklerState nextState);
+     void         updateCounterValue();     
 };
 #endif

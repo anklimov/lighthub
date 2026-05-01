@@ -59,7 +59,8 @@ const ch_type ch_type_P[] PROGMEM =
 "ELEVATOR", //  19  //
 "COUNTER",  //  20  //Generic counter
 "HUM",      //  21  //Humidifier
-"MERCURY"   //  22  //Mercury energy meter/RS485 interface
+"MERCURY",   //  22  //Mercury energy meter/RS485 interface
+"SPRINKLR"  //  23  //Sprinkler controller
 };
 
 #define ch_typeNum sizeof(ch_type_P)/sizeof(ch_type)

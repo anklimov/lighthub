@@ -14,7 +14,6 @@ bool out_sprinkler::getConfig()
   gatesObj = NULL;
   vinPin = drenPin = pumpPin = -1;
   wMaxPin = wMinPin = fbDrenPin = fbPumpPin = wCtrPin = -1;
-  lastWctrState = false;
 
   if (!item || !item->itemArg) return false;
 
@@ -49,6 +48,13 @@ bool out_sprinkler::getConfig()
 static bool isValidControlPin(short pin)
 {
   return (pin >= 0 && pin < PINS_COUNT && !isProtectedPin(pin));
+}
+
+void out_sprinkler::publishBooleanStateIfChanged(const char * subItem, bool state, uint32_t flag, uint32_t & lastState)
+{
+  if (state == (bool) (lastState & flag)) return;
+  if (state) lastState |= flag ; else lastState &= ~flag;
+  publishBooleanState(subItem, state);
 }
 
 void out_sprinkler::setOutput(short pin, bool value)
@@ -89,17 +95,34 @@ int out_sprinkler::Setup()
   getCreateObject(gatesObj, "@state", (long)SP_UNKNOWN);
   getCreateObject(gatesObj, "@timer", (long)0);
   getCreateObject(gatesObj, "@flowTimer", (long)0);
-  getCreateObject(gatesObj, "@wCtrLast", (long)0);
 
-  if (wCtrPin >= 0 && wCtrPin < PINS_COUNT) pinMode(wCtrPin, INPUT);
-  if (wMaxPin >= 0 && wMaxPin < PINS_COUNT) pinMode(wMaxPin, INPUT);
-  if (wMinPin >= 0 && wMinPin < PINS_COUNT) pinMode(wMinPin, INPUT);
-  if (fbDrenPin >= 0 && fbDrenPin < PINS_COUNT) pinMode(fbDrenPin, INPUT);
-  if (fbPumpPin >= 0 && fbPumpPin < PINS_COUNT) pinMode(fbPumpPin, INPUT);
+  uint16_t lastVals = 0;
+  if (wCtrPin >= 0 && wCtrPin < PINS_COUNT) 
+      {      
+        pinMode(wCtrPin, INPUT);
+        lastVals |= (getPinVal(wCtrPin) ? LASTWCTRLSTATE : 0);
+        lastVals |= (getPinVal(wCtrPin) ? LASTWCTRLSTATE_ALL : 0);
+      }
+  if (wMaxPin >= 0 && wMaxPin < PINS_COUNT) {
+    pinMode(wMaxPin, INPUT);
+    lastVals |= (publishBooleanState("$wMax", getPinVal(wMaxPin)) ? LASTWMAXSTATE : 0);
+  }
+  if (wMinPin >= 0 && wMinPin < PINS_COUNT) {
+    pinMode(wMinPin, INPUT);
+    lastVals |= (publishBooleanState("$wMin", getPinVal(wMinPin)) ? LASTWMINSTATE : 0);
+  }
+  if (fbDrenPin >= 0 && fbDrenPin < PINS_COUNT) {
+    pinMode(fbDrenPin, INPUT);
+    lastVals |= (publishBooleanState("$fbDren", getPinVal(fbDrenPin)) ? LASTFBDRENSTATE : 0);
+  }
+  if (fbPumpPin >= 0 && fbPumpPin < PINS_COUNT) {
+    pinMode(fbPumpPin, INPUT);
+    lastVals |= (publishBooleanState("$fbPump", getPinVal(fbPumpPin)) ? LASTFBPUMPSTATE : 0);
+  }
 
-  lastWctrState = (wCtrPin >= 0) ? getPinVal(wCtrPin) : false;
+  setValToJson(gatesObj, "@lastVals", (long)lastVals);
 
-  item->setExt(millisNZ());
+  //item->setExt(millisNZ());
   setStatus(CST_INITIALIZED);
   notifyState(SP_UNKNOWN);
   return 1;
@@ -117,6 +140,7 @@ int out_sprinkler::Stop()
   return 1;
 }
 
+/*
 int out_sprinkler::Status()
 {
   if (!item || !gatesObj) return 0;
@@ -126,16 +150,17 @@ int out_sprinkler::Status()
   bool fbDren = (fbDrenPin >= 0) ? getPinVal(fbDrenPin) : false;
   bool fbPump = (fbPumpPin >= 0) ? getPinVal(fbPumpPin) : false;
 
-  publishBooleanState("$wMax", wMax);
-  publishBooleanState("$wMin", wMin);
-  publishBooleanState("$fbDren", fbDren);
-  publishBooleanState("$fbPump", fbPump);
+  publishBooleanStateIfChanged("$wMax", wMax, lastWMaxState);
+  publishBooleanStateIfChanged("$wMin", wMin, lastWMinState);
+  publishBooleanStateIfChanged("$fbDren", fbDren, lastFbDrenState);
+  publishBooleanStateIfChanged("$fbPump", fbPump, lastFbPumpState);
 
   int state = getIntFromJson(gatesObj, "@state", SP_UNKNOWN);
   publishNumericState("$state", state);
 
   return 1;
 }
+*/
 
 bool out_sprinkler::isFreeze()
 {
@@ -203,8 +228,7 @@ void out_sprinkler::turnOffValves()
 void out_sprinkler::notifyState(short state)
 {
   if (!gatesObj) return;
-  aJsonObject * stateObj = getCreateObject(gatesObj, "@state", (long)state);
-  if (stateObj) stateObj->valueint = state;
+  setValToJson(gatesObj, "@state", (long)state);
   publishNumericState("$state", state);
 }
 
@@ -306,10 +330,22 @@ void out_sprinkler::updateZoneValue(aJsonObject * zone, long value)
   item->SendStatusImmediate(itemCmd().Int(current).setSuffix(S_VAL), FLAG_PARAMETERS, zone->name);
 }
 
-void out_sprinkler::publishBooleanState(const char * subItem, bool state)
+void out_sprinkler::updateCounterValue()
 {
-  if (!item) return;
+  int value = 1;
+  if (!gatesObj) return;
+  long current = getIntFromJson(gatesObj, "@wCtr", 0);
+  current += value;
+  setValToJson(gatesObj, "wCtr", current);
+  item->SendStatusImmediate(itemCmd().Int(current).setSuffix(S_SET), FLAG_PARAMETERS);
+}
+
+
+bool out_sprinkler::publishBooleanState(const char * subItem, bool state)
+{
+  if (!item) return state;
   item->SendStatusImmediate(itemCmd().Cmd(state ? CMD_ON : CMD_OFF).setSuffix(S_CMD), FLAG_COMMAND, (char *)subItem);
+  return state;
 }
 
 void out_sprinkler::publishNumericState(const char * subItem, long value)
@@ -322,20 +358,36 @@ int out_sprinkler::Poll(short cause)
 {
   if (!item || !gatesObj) return 0;
 
+
   bool freeze = isFreeze();
   bool wMax   = (wMaxPin >= 0) ? getPinVal(wMaxPin) : false;
   bool wMin   = (wMinPin >= 0) ? getPinVal(wMinPin) : false;
   bool fbDren = (fbDrenPin >= 0) ? getPinVal(fbDrenPin) : false;
   bool fbPump = (fbPumpPin >= 0) ? getPinVal(fbPumpPin) : false;
 
-  publishBooleanState("$wMax", wMax);
-  publishBooleanState("$wMin", wMin);
-  publishBooleanState("$fbDren", fbDren);
-  publishBooleanState("$fbPump", fbPump);
+  uint32_t lastVals = getIntFromJson(gatesObj, "@lastVals", 0);
+
+  publishBooleanStateIfChanged("$wMax", wMax, LASTWMAXSTATE, lastVals);
+  publishBooleanStateIfChanged("$wMin", wMin, LASTWMINSTATE, lastVals);
+  publishBooleanStateIfChanged("$fbDren", fbDren, LASTFBDRENSTATE, lastVals);
+  publishBooleanStateIfChanged("$fbPump", fbPump, LASTFBPUMPSTATE, lastVals);
 
   uint32_t now = millisNZ();
   int state = getIntFromJson(gatesObj, "@state", SP_UNKNOWN);
   uint32_t timer = (uint32_t)getIntFromJson(gatesObj, "@timer", 0);
+  bool lastWctrlState = lastVals & LASTWCTRLSTATE;
+  bool lastWctrlStateAll = lastVals & LASTWCTRLSTATE_ALL;
+
+  if (wCtrPin >= 0)
+      {
+        bool curr = getPinVal(wCtrPin);
+        if (curr && !lastWctrlStateAll)
+        {
+          updateCounterValue();         
+        }
+        if (curr) lastVals |= LASTWCTRLSTATE_ALL; else lastVals &= ~LASTWCTRLSTATE_ALL;
+      }
+  setValToJson(gatesObj, "@lastVals", (long)lastVals);
 
   if (freeze)
   {
@@ -352,14 +404,14 @@ int out_sprinkler::Poll(short cause)
       if (wMax)
       {
         state = SP_FULL;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@state", (long)state);
         notifyState(state);
       }
       else
       {
         state = SP_DREN_ON;
-        getCreateObject(gatesObj, "@timer", (long)now)->valueint = now;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@timer", (long)now);
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_DREN_ON);
       }
       break;
@@ -368,14 +420,14 @@ int out_sprinkler::Poll(short cause)
       if (fbDren)
       {
         state = SP_DREN_OPERATE;
-        getCreateObject(gatesObj, "@timer", (long)now)->valueint = now;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@timer", (long)now);
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_DREN_OPERATE);
       }
-      else if (isTimeOver(timer, now, DRENAGE_TIME))
+      else if (isTimeOver(timer, now, DRENAGE_ON_TIME))
       {
         state = SP_DREN_EMPTY;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_DREN_EMPTY);
       }
       break;
@@ -384,19 +436,19 @@ int out_sprinkler::Poll(short cause)
       if (!fbDren)
       {
         state = SP_DREN_EMPTY;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_DREN_EMPTY);
       }
       else if (wMax)
       {
         state = SP_FULL;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_FULL);
       }
       else if (isTimeOver(timer, now, 1200000UL))
       {
         state = SP_FAULT_DREN;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_FAULT_DREN);
       }
       break;
@@ -405,14 +457,14 @@ int out_sprinkler::Poll(short cause)
       if (wMax)
       {
         state = SP_FULL;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_FULL);
       }
       else if (item->getCmd() == CMD_ON)
       {
         state = SP_VIN;
-        getCreateObject(gatesObj, "@timer", (long)now)->valueint = now;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@timer", (long)now);
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_VIN);
       }
       break;
@@ -421,20 +473,20 @@ int out_sprinkler::Poll(short cause)
       if (fbDren)
       {
         state = SP_DREN_OPERATE;
-        getCreateObject(gatesObj, "@timer", (long)now)->valueint = now;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@timer", (long)now);
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_DREN_OPERATE);
       }
       else if (wMax)
       {
         state = SP_FULL;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_FULL);
       }
-      else if (isTimeOver(timer, now, 1200000UL))
+      else if (isTimeOver(timer, now, VIN_MAX_TIME))
       {
         state = SP_FAULT_VIN;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_FAULT_VIN);
       }
       break;
@@ -443,8 +495,8 @@ int out_sprinkler::Poll(short cause)
       if (!wMax)
       {
         state = SP_DREN_ON;
-        getCreateObject(gatesObj, "@timer", (long)now)->valueint = now;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@timer", (long)now);
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_DREN_ON);
       }
       break;
@@ -453,7 +505,7 @@ int out_sprinkler::Poll(short cause)
       if (wMax)
       {
         state = SP_FULL;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_FULL);
       }
       break;
@@ -462,7 +514,7 @@ int out_sprinkler::Poll(short cause)
       if (wMax)
       {
         state = SP_FULL;
-        getCreateObject(gatesObj, "@state", (long)state)->valueint = state;
+        setValToJson(gatesObj, "@state", (long)state);
         shutdown(SP_FULL);
       }
       break;
@@ -493,17 +545,18 @@ int out_sprinkler::Poll(short cause)
         setZoneActive(currentZone, true);
         short zonePin = getIntFromJson(currentZone, "pin", -1);
         setOutput(zonePin, true);
-        getCreateObject(gatesObj, "@flowTimer", (long)now)->valueint = now;
+        setValToJson(gatesObj, "@flowTimer", (long)now);
       }
 
       if (wCtrPin >= 0)
       {
         bool curr = getPinVal(wCtrPin);
-        if (curr && !lastWctrState)
+        if (curr && !lastWctrlState)
         {
           updateZoneValue(currentZone, 1);
         }
-        lastWctrState = curr;
+        if (curr) lastVals |= LASTWCTRLSTATE; else lastVals &= ~LASTWCTRLSTATE;
+        setValToJson(gatesObj, "@lastVals", (long)lastVals);
       }
       else
       {
@@ -511,17 +564,16 @@ int out_sprinkler::Poll(short cause)
         if (isTimeOver(flowTimer, now, 1000UL))
         {
           updateZoneValue(currentZone, 1);
-          getCreateObject(gatesObj, "@flowTimer", (long)now)->valueint = now;
+          setValToJson(gatesObj, "@flowTimer", (long)now);
         }
       }
 
-      long setVal2 = getIntFromJson(currentZone, "set", 0);
-      long valVal2 = getIntFromJson(currentZone, "val", 0);
-      if (setVal2 > 0 && valVal2 >= setVal2)
+
+      if (setVal > 0 && valVal >= setVal)
       {
         setOutput(getIntFromJson(currentZone, "pin", -1), false);
         setZoneActive(currentZone, false);
-        setValToJson(currentZone, "cmd", (long)CMD_OFF);
+        //////setValToJson(currentZone, "cmd", (long)CMD_OFF);
         item->SendStatusImmediate(itemCmd().Cmd(CMD_OFF).setSuffix(S_CMD), FLAG_COMMAND, currentZone->name);
         currentZone = findNextZone();
       }
@@ -657,16 +709,7 @@ int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authori
       if (toExecute)
       {
         long value = cmd.getInt();
-        if (value < 0)
-        {
-          item->setFlag(FLAG_FREEZED);
-          item->SendStatus(FLAG_FLAGS);
-        }
-        else if (isFreeze())
-        {
-          item->clearFlag(FLAG_FREEZED);
-          item->SendStatus(FLAG_FLAGS);
-        }
+        setValToJson(gatesObj, "@wCtr", value);
       }
       return 1;
 
@@ -690,7 +733,6 @@ int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authori
     default:
       break;
   }
-
   return 0;
 }
 
