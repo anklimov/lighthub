@@ -2717,6 +2717,12 @@ infoSerial<<F("\n(+)MERCURY");
 infoSerial<<F("\n(-)MERCURY");
 #endif
 
+#ifdef SPRINKLER_ENABLE
+infoSerial<<F("\n(+)SPRINKLER");
+#else
+infoSerial<<F("\n(-)SPRINKLER");
+#endif
+
 #ifdef CANDRV
 infoSerial<<F("\n(+)CAN");
 #else

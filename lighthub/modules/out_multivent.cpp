@@ -398,8 +398,8 @@ int out_Multivent::Poll(short cause)
            
                           { 
                             resetBoost();      
-                            if (autoRequested) sendACcmd(itemCmd().Cmd(CMD_AUTO));
-                            else if (ventRequested) sendACcmd(itemCmd().Cmd(CMD_FAN));
+                            if (autoRequested && lastACfan>0) sendACcmd(itemCmd().Cmd(CMD_AUTO));
+                            else if (ventRequested && lastACfan>0) sendACcmd(itemCmd().Cmd(CMD_FAN));
                                   else noFurtherModes = true; //No AUTO or FAN mode requested - so we can skip sending command to AC at all and save some energy on it
                           }
 

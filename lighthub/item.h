@@ -68,7 +68,8 @@ const suffixstr suffix_P[] PROGMEM =
 #define CH_COUNTER 20
 #define CH_HUMIDIFIER 21
 #define CH_MERCURY 22
-#define CH_MAX 22
+#define CH_SPRINKLER 23
+#define CH_MAX 23
 
 #define POLLING_SLOW 1
 #define POLLING_FAST 2

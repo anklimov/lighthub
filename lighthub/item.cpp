@@ -68,6 +68,8 @@ e-mail    anklimov@gmail.com
 #include "modules/out_humidifier.h"
 #endif
 
+#include "modules/out_sprinkler.h"
+
 #ifdef CANDRV
 #include <candriver.h>
 extern canDriver LHCAN;
@@ -2883,6 +2885,12 @@ switch (itemType)
 #ifdef MERCURY_ENABLE
           case CH_MERCURY:
           driver = new out_Mercury ;
+          break;
+#endif
+
+#ifdef SPRINKLER_ENABLE
+          case CH_SPRINKLER:
+          driver = new out_sprinkler ;
           break;
 #endif
 
