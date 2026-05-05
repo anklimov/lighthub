@@ -21,6 +21,6 @@ public:
 protected:
 int publishTopic(const char* topic, long value, const char* subtopic = NULL);
 int publishTopic(const char* topic, float value, const char* subtopic = NULL );
-int publishTopic(const char* topic, const char * value, const char* subtopic = NULL);
+int publishTopic(const char* topic, const char * value, const char* subtopic = NULL, const char* suffix = NULL);
 
 };

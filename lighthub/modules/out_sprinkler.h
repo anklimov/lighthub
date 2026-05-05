@@ -15,6 +15,8 @@
 #define LASTWMINSTATE 8
 #define LASTFBDRENSTATE 16
 #define LASTFBPUMPSTATE 32
+#define LASTPUMPSTATE 64
+#define LASTDRENSTATE 128
 
 enum sprinklerState {
     SP_UNKNOWN = 0,
@@ -48,6 +50,7 @@ protected:
 
 
     void pump(bool state);
+    void dren(bool state);
     void setOutput(short pin, bool value);
     bool isNeedPump(bool steelNeed=false);
     void turnOffValves(); 

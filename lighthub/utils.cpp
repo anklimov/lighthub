@@ -1136,5 +1136,54 @@ return NULL;
 }
 
 
+
+void setupInPin(short pin)
+{
+  if (abs(pin)>=PINS_COUNT)
+  {
+    debugSerial<<F("Attempt to setup non existing pin: ")<<pin<<endl;
+    return;    
+  }  
+  //debugSerial<<F("Setup pin: ")<<pin<<endl;
+  if (pin<0)  
+    pinMode(-pin, INPUT_PULLUP);
+  else
+    pinMode(pin, INPUT);
+}
+
+bool readInPin(short pin)
+{
+  if (abs(pin)>=PINS_COUNT)
+  {
+    debugSerial<<F("Attempt to read non existing pin: ")<<pin<<endl;
+    return false;    
+  }
+
+  if (pin<0)  
+    return (digitalRead(-pin)==LOW);
+  else
+    return (digitalRead(pin)==HIGH);
+}
+
+void writeOutPin(short pin, bool val)
+{
+  if(isProtectedPin(abs(pin)))
+  {
+    debugSerial<<F("Attempt to write protected pin: ")<<pin<<endl;
+    return;
+  } 
+  
+  if (abs(pin)>=PINS_COUNT)
+  {
+    debugSerial<<F("Attempt to write non existing pin: ")<<pin<<endl;
+    return;    
+  }
+
+  if (pin<0)  
+    digitalWrite(-pin, val?LOW:HIGH);
+  else
+    digitalWrite(pin, val?HIGH:LOW);
+}
+
 #pragma message(VAR_NAME_VALUE(debugSerial))
 #pragma message(VAR_NAME_VALUE(SERIAL_BAUD))

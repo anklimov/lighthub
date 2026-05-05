@@ -194,7 +194,7 @@ int out_Multivent::isActive()
              if (i->name && *i->name)
              {
              int   preHaltcmd = getIntFromJson(i,"@preHaltcmd",CMD_OFF);
-             if (preHaltcmd) //setPassiveMode(i, false); 
+             if (preHaltcmd && (preHaltcmd != CMD_OFF)) //setPassiveMode(i, false); 
                  fanCtrl(itemCmd().Cmd(preHaltcmd).setSuffix(S_CMD),i->name,true);
               setValToJson(i,"@preHaltcmd",0); //reset preHaltcmd in any case
              }    
@@ -711,7 +711,7 @@ while (i)
              case S_CMD:
               if (cmd.isCommand()) 
                                           {
-
+                                          bool checkMinFanLevel = false;
                                           if (cmd.getCmd() == CMD_ON)
                                           {
                                             if (getFlag(i,FLAG_FREEZED)) {debugSerial<<F("VENT: zone frozen")<<endl; return -2;}
@@ -729,6 +729,7 @@ while (i)
                                           switch (cmd.getCmd())
                                           {
                                             case CMD_ON:
+                                            checkMinFanLevel = true;
                                             break;
                                             case CMD_OFF:
                                             if (getFlag(i,FLAG_FREEZED)) {debugSerial<<F("VENT: zone frozen")<<endl; return -2;}
@@ -773,6 +774,7 @@ while (i)
                                             sendFlags |= FLAG_COMMAND;
                                             cmdObj->valueint = cmd.getCmd();
                                             setPassiveMode(i,false);
+                                            checkMinFanLevel = true;
                                             break;
 
                                             case CMD_HEAT:
@@ -783,6 +785,7 @@ while (i)
                                             sendFlags |= FLAG_COMMAND;
                                             cmdObj->valueint = cmd.getCmd();
                                             setPassiveMode(i,false);
+                                            checkMinFanLevel = true;
                                             break;
 
                                             case CMD_FAN:
@@ -795,10 +798,11 @@ while (i)
                                             sendFlags |= FLAG_COMMAND;
                                             cmdObj->valueint = cmd.getCmd();
                                             setPassiveMode(i,false);
+                                            checkMinFanLevel = true;
                                             break; 
                                             //todo - halt-rest-xon-xoff                                       
                                           }
-                                          if (isNotRetainingStatus() && (cmdObj->valueint == CMD_ON) && (fanObj->valueint<20))
+                                          if (isNotRetainingStatus() && checkMinFanLevel  && (fanObj->valueint<20))
                                                                   {
                                                                     fanObj->valueint=30;
                                                                     cmd.Percents255(30);
@@ -961,7 +965,7 @@ bool out_Multivent::pidEnabled(aJsonObject* pidObj)
                 if (!(acCmd == CMD_OFF && lastFan == 0)) 
                   {
                      debugSerial<<"VENT: AC MODE changed manually from "<<lastCmd<<" to "<<acCmd<<endl; 
-                     //TODO! 
+
                     switch (acCmd)
                     {
                       case CMD_OFF:
@@ -970,7 +974,13 @@ bool out_Multivent::pidEnabled(aJsonObject* pidObj)
                       default:
                       restoreAllzones();
                       break;
-                    }  
+                    } 
+
+                    aJsonObject * execObj = aJson.getObjectItem(acObj, "onextcmd");
+                     if (execObj) 
+                    {
+                    executeCommand(execObj,-1,itemCmd().Cmd(acCmd).setSuffix(S_CMD).setArgType(0).doReverseMapping(aJson.getObjectItem(execObj, "map")));
+                    }                     
                 }
                           setValToJson(acObj,"@lastCmd",acCmd);
                           setValToJson(acObj,"@lastFan",-1);
@@ -1004,6 +1014,11 @@ bool out_Multivent::pidEnabled(aJsonObject* pidObj)
 
   if (lastSet && (acSet != lastSet)) {
                           debugSerial<<"VENT: AC SET changed manually from "<<lastSet<<" to "<<acSet<<endl; 
+                          aJsonObject * execObj = aJson.getObjectItem(acObj, "onextcmd");
+                            if (execObj) 
+                            {
+                            executeCommand(execObj,-1,itemCmd().Int(acSet).setSuffix(S_SET).doReverseMapping(aJson.getObjectItem(execObj, "map")));
+                            }  
                           setValToJson(acObj,"@lastSet",acSet);
                           return;}
 

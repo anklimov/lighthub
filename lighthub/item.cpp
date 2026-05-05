@@ -2066,6 +2066,9 @@ int Item::SendStatus(long sendFlags, char * subItem) {
                     case S_FAN:
                     strncat_P(addrstr, suffix_P[S_FAN], sizeof(addrstr)-1);   
                     break;  
+                    case S_VAL:
+                    strncat_P(addrstr, suffix_P[S_VAL], sizeof(addrstr)-1);   
+                    break;                      
                     default:    
                     strncat_P(addrstr, suffix_P[S_SET], sizeof(addrstr)-1); 
                     }

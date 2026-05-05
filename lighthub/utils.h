@@ -91,7 +91,9 @@ bool checkToken(char * token, char * data);
  long getIntFromJson(aJsonObject * a, const char * name, int i,long def);
 float getFloatFromJson(aJsonObject * a, const char * name, int i, float def);
 
- 
+void setupInPin(short pin);
+bool readInPin(short pin);
+void writeOutPin(short pin, bool val);
 
 // Get object from array, create if absent and return pointer to object
  template<typename Type>

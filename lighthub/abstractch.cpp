@@ -28,7 +28,7 @@ int abstractCh::publishTopic(const char* topic, float value, const char* subtopi
   return publishTopic(topic, valstr,subtopic);
 };
 
-int abstractCh::publishTopic(const char* topic, const char * value, const char* subtopic)
+int abstractCh::publishTopic(const char* topic, const char * value, const char* subtopic, const char* suffix)
 {
   #if not defined (NOIP)
   char addrstr[MQTT_TOPIC_LENGTH];
@@ -38,6 +38,10 @@ int abstractCh::publishTopic(const char* topic, const char * value, const char* 
        strncpy(addrstr,topic,sizeof(addrstr));
        if (!strchr(addrstr,'/')) setTopic(addrstr,sizeof(addrstr),T_OUT,topic);
        strncat(addrstr,subtopic,sizeof(addrstr)-1);
+       if (suffix)
+       {
+         strncat(addrstr,suffix,sizeof(addrstr)-1);
+       }
        if (mqttClient.connected() && lanStatus == OPERATION  && !ethernetIdleCount)
                        {
                         mqttClient.publish(addrstr, value, true);
