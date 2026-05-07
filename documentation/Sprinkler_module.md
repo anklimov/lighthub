@@ -1,4 +1,5 @@
-# Данный модуль реализует многозональную систему полива
+# LightHub: Модуль многоканальной системы полива (out_sprinkler)
+Данный модуль реализует многозональную систему полива
 
 ## Система состоит из следующих компонент:
 
@@ -44,23 +45,22 @@ DREN\_OPERATE|таймаут 1200 сек	|FAULT_DREN||
 
 "items":
 {
-"sprinkler":[23,
-   
+         "sprinkler":[23,
    {
    "":{
-			"vIn:7,
-			"wMax":15,
-			"wMin:17,
-			"rDren":6,
-			"fbDren":12,
-			"rPump":5,	
-			"fbPump":11,
-			"wCtr":19	
+			"vIn":3,
+			"wMax":44,
+			"wMin":46,
+			"rDren":23,
+			"fbDren":63,
+			"rPump":24,	
+			"fbPump":62,
+			"wCtr":49	
    		},
-   "garden":{"pin":13,"set":60,"val":15,"cmd":2},
-   "backyard":{"pin":14,"set":60,"val":15,"cmd":2},
-   "trees":{"pin":15,"set":60,"val":15,"cmd":2} 
-	
+   "nord":{"pin":6,"set":60,"cmd":1},
+   "south":{"pin":7,"set":100,"cmd":1},
+   "trees":{"pin":10,"set":60,"cmd":2} 
+
 	}]
 }
 
