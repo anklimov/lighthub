@@ -99,7 +99,7 @@ int out_sprinkler::Setup()
   
   debugSerial << F("SPRINKLER: ") << " wMax=" << wMaxPin << " wMin=" << wMinPin << " fbDren=" << fbDrenPin << " fbPump=" << fbPumpPin << " wCtr=" << wCtrPin << endl;
   uint16_t lastVals = 0;
-  if (wCtrPin != PINS_COUNT) 
+  if (abs(wCtrPin) < PINS_COUNT) 
       {      
         setupInPin(wCtrPin);
         lastVals |= (readInPin(wCtrPin) ? LASTWCTRLSTATE : 0);
@@ -165,7 +165,7 @@ bool out_sprinkler::isNeedPump(bool steelNeed)
       {
         long setVal = getIntFromJson(zone, "set", 0);
         long valVal = getIntFromJson(zone, "val", 0);
-        if (valVal < setVal) return true;
+        if (!setVal || (valVal < setVal)) return true;
       }
     }
     zone = zone->next;
@@ -199,6 +199,20 @@ void out_sprinkler::dren(bool state)
   }
 }
 
+
+void out_sprinkler::vin(bool state)
+{
+  if (!isValidControlPin(vinPin)) return;
+  uint32_t lastVals = getIntFromJson (gatesObj, "@lastVals", 0);
+  setOutput(vinPin, state);
+  if (state != (bool)(lastVals & LASTVINSTATE))
+  {
+    if(state) lastVals |= LASTVINSTATE; else lastVals &= ~LASTVINSTATE;
+    setValToJson(gatesObj, "@lastVals", (long)lastVals);
+    publishBooleanState("/$rVIN", state);
+  }
+}
+
 void out_sprinkler::turnOffAllZones()
 {
   if (!gatesObj) return;
@@ -208,7 +222,7 @@ void out_sprinkler::turnOffAllZones()
     if (zone->name && *zone->name && zone->type == aJson_Object)
     {
       short pin = getIntFromJson(zone, "pin", PINS_COUNT);
-      setOutput(pin, false);
+      if (isValidControlPin(pin)) setOutput(pin, false);
       if (getIntFromJson(zone, "@active", 0))
       {
         setZoneActive(zone, false);
@@ -241,8 +255,9 @@ long fault = 0;
 
   if (!gatesObj) return;
   setValToJson(gatesObj, "@state", (long)state);
-
-aJsonObject *faultObj = aJson.getArrayItem(item->itemArg, 3);
+aJsonObject * rootCfg = aJson.getObjectItem(gatesObj, "");
+if (!rootCfg) rootCfg = gatesObj;
+aJsonObject * faultObj = aJson.getObjectItem(rootCfg, "onFault");
 switch (state) {
 
     case SP_OFF:
@@ -298,7 +313,7 @@ publishTopic(item->itemArr->name,val,"/$state");
 
 
 
-int out_sprinkler::shutdown(sprinklerState nextState)
+int out_sprinkler::moveToState(sprinklerState nextState)
 {
   if (!gatesObj) return 0;
 
@@ -306,36 +321,36 @@ int out_sprinkler::shutdown(sprinklerState nextState)
   {
     case SP_OFF:
     case SP_FULL:
-      setOutput(drenPin, false);
-      setOutput(vinPin, false);
+      dren(false);
+      vin(false);
       break;
     case SP_DREN_ON:
     case SP_DREN_OPERATE:
-      setOutput(drenPin, true);
-      setOutput(vinPin, false);
+      dren(true);
+      vin(false); 
       break;
     case SP_VIN:
-      setOutput(vinPin, true);
-      setOutput(drenPin, false);
+      vin(true);
+      //setOutput(drenPin, false);
       break;
     case SP_DREN_EMPTY:
-      setOutput(drenPin, false);
-      setOutput(vinPin, false);
+      //setOutput(drenPin, false);
+      vin(false);
       break;
     case SP_FAULT_VIN:
-      setOutput(vinPin, false);
+      vin(false);
       break;
     case SP_FAULT_DREN:
-      setOutput(drenPin, false);
+      dren(false);
       break;
     case SP_UNKNOWN:
-      setOutput(drenPin, false);
-      setOutput(vinPin, false);
+      dren(false);
+      vin(false);
       break;
   }
 
-  publishBooleanState("/$rDren", nextState == SP_DREN_ON || nextState == SP_DREN_OPERATE);
-  publishBooleanState("/$vIN", nextState == SP_VIN);
+  //publishBooleanState("/$rDren", nextState == SP_DREN_ON || nextState == SP_DREN_OPERATE);
+  //publishBooleanState("/$vIN", nextState == SP_VIN);
   notifyState(nextState);
   return 1;
 }
@@ -370,7 +385,7 @@ inline aJsonObject * out_sprinkler::findNextZone()
       int cmd = getIntFromJson(zone, "cmd", CMD_OFF);
       long setVal = getIntFromJson(zone, "set", 0);
       long valVal = getIntFromJson(zone, "val", 0);
-      if (cmd == CMD_ON && valVal < setVal) return zone;
+      if (cmd == CMD_ON && (!setVal  || valVal < setVal)) return zone;
     }
     zone = zone->next;
   }
@@ -443,7 +458,7 @@ int out_sprinkler::Poll(short cause)
   bool lastWctrlState = lastVals & LASTWCTRLSTATE;
   bool lastWctrlStateAll = lastVals & LASTWCTRLSTATE_ALL;
 
-  if (wCtrPin != PINS_COUNT)
+  if (abs(wCtrPin) < PINS_COUNT)
       {
         bool curr = readInPin(wCtrPin);
         if (curr && !lastWctrlStateAll)
@@ -456,7 +471,7 @@ int out_sprinkler::Poll(short cause)
 
   if (freeze)
   {
-    shutdown(SP_OFF);
+    moveToState(SP_OFF);
     turnOffValves();
     pump(false);
     return 0;
@@ -477,7 +492,7 @@ int out_sprinkler::Poll(short cause)
         state = SP_DREN_ON;
         setValToJson(gatesObj, "@timer", (long)now);
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_DREN_ON);
+        moveToState(SP_DREN_ON);
       }
       break;
 
@@ -487,13 +502,13 @@ int out_sprinkler::Poll(short cause)
         state = SP_DREN_OPERATE;
         setValToJson(gatesObj, "@timer", (long)now);
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_DREN_OPERATE);
+        moveToState(SP_DREN_OPERATE);
       }
       else if (isTimeOver(timer, now, DRENAGE_ON_TIME))
       {
         state = SP_DREN_EMPTY;
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_DREN_EMPTY);
+        moveToState(SP_DREN_EMPTY);
       }
       break;
 
@@ -502,19 +517,19 @@ int out_sprinkler::Poll(short cause)
       {
         state = SP_DREN_EMPTY;
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_DREN_EMPTY);
+        moveToState(SP_DREN_EMPTY);
       }
       else if (wMax)
       {
         state = SP_FULL;
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_FULL);
+        moveToState(SP_FULL);
       }
-      else if (isTimeOver(timer, now, 1200000UL))
+      else if (isTimeOver(timer, now, DRENAGE_MAX_TIME))
       {
         state = SP_FAULT_DREN;
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_FAULT_DREN);
+        moveToState(SP_FAULT_DREN);
       }
       break;
 
@@ -523,14 +538,14 @@ int out_sprinkler::Poll(short cause)
       {
         state = SP_FULL;
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_FULL);
+        moveToState(SP_FULL);
       }
       else if (item->getCmd() == CMD_ON)
       {
         state = SP_VIN;
         setValToJson(gatesObj, "@timer", (long)now);
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_VIN);
+        moveToState(SP_VIN);
       }
       break;
 
@@ -540,19 +555,19 @@ int out_sprinkler::Poll(short cause)
         state = SP_DREN_OPERATE;
         setValToJson(gatesObj, "@timer", (long)now);
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_DREN_OPERATE);
+        moveToState(SP_DREN_OPERATE);
       }
       else if (wMax)
       {
         state = SP_FULL;
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_FULL);
+        moveToState(SP_FULL);
       }
       else if (isTimeOver(timer, now, VIN_MAX_TIME))
       {
         state = SP_FAULT_VIN;
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_FAULT_VIN);
+        moveToState(SP_FAULT_VIN);
       }
       break;
 
@@ -562,7 +577,7 @@ int out_sprinkler::Poll(short cause)
         state = SP_DREN_ON;
         setValToJson(gatesObj, "@timer", (long)now);
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_DREN_ON);
+        moveToState(SP_DREN_ON);
       }
       break;
 
@@ -571,7 +586,7 @@ int out_sprinkler::Poll(short cause)
       {
         state = SP_FULL;
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_FULL);
+        moveToState(SP_FULL);
       }
       break;
 
@@ -580,7 +595,7 @@ int out_sprinkler::Poll(short cause)
       {
         state = SP_FULL;
         setValToJson(gatesObj, "@state", (long)state);
-        shutdown(SP_FULL);
+        moveToState(SP_FULL);
       }
       break;
   }
@@ -609,11 +624,11 @@ int out_sprinkler::Poll(short cause)
         turnOffAllZones();
         setZoneActive(currentZone, true);
         short zonePin = getIntFromJson(currentZone, "pin", PINS_COUNT);
-        setOutput(zonePin, true);
+        if (isValidControlPin(zonePin)) setOutput(zonePin, true);
         setValToJson(gatesObj, "@flowTimer", (long)now);
       }
 
-      if (wCtrPin != PINS_COUNT)
+      if (abs(wCtrPin) < PINS_COUNT)
       {
         bool curr = readInPin(wCtrPin);
         if (curr && !lastWctrlState)
@@ -636,7 +651,9 @@ int out_sprinkler::Poll(short cause)
 
       if (setVal > 0 && valVal >= setVal)
       {
-        setOutput(getIntFromJson(currentZone, "pin", PINS_COUNT), false);
+        short zonePin = getIntFromJson(currentZone, "pin", PINS_COUNT);
+        if (isValidControlPin(zonePin)) setOutput(zonePin, false);
+        
         setZoneActive(currentZone, false);
         //////setValToJson(currentZone, "cmd", (long)CMD_OFF);
         //item->SendStatusImmediate(itemCmd().Cmd(CMD_OFF).setSuffix(S_CMD), FLAG_COMMAND, currentZone->name);
@@ -775,6 +792,9 @@ int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authori
               }
               zone = zone->next;
             }
+                      turnOffAllZones();
+            pump(false); 
+            item->Off();  
           }
           return 1;
 

@@ -8,6 +8,7 @@
 
 #define DRENAGE_ON_TIME 10000
 #define VIN_MAX_TIME 1200000UL
+#define DRENAGE_MAX_TIME 2000000UL
 
 #define LASTWCTRLSTATE 1
 #define LASTWCTRLSTATE_ALL 2
@@ -17,6 +18,7 @@
 #define LASTFBPUMPSTATE 32
 #define LASTPUMPSTATE 64
 #define LASTDRENSTATE 128
+#define LASTVINSTATE 256
 
 enum sprinklerState {
     SP_UNKNOWN = 0,
@@ -51,6 +53,7 @@ protected:
 
     void pump(bool state);
     void dren(bool state);
+    void vin(bool state);
     void setOutput(short pin, bool value);
     bool isNeedPump(bool steelNeed=false);
     void turnOffValves(); 
@@ -64,7 +67,7 @@ protected:
     void publishBooleanStateIfChanged(const char * subItem, bool state, uint32_t flag, uint32_t & lastState);
     bool isFreeze();
     void notifyState(short state); 
-    int  shutdown(sprinklerState nextState);
+    int  moveToState(sprinklerState nextState);
      void         updateCounterValue();     
 };
 #endif
