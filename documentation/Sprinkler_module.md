@@ -222,7 +222,19 @@ sensor:
     state_topic:  "root/s_out/sprinkler/nord/val"   
 
   - name: "Полив капельный выполнено"
-    state_topic:  "root/s_out/sprinkler/trees/val"   
+    state_topic:  "edem/s_out/sprinkler/trees/val"   
+   
+  - name: "Поливаем юг"
+    state_topic:  "edem/s_out/sprinkler/south/$state"   
+
+  - name: "Поливаем север"
+    state_topic:  "edem/s_out/sprinkler/nord/$state"   
+
+  - name: "Поливаем капельно"
+    state_topic:  "edem/s_out/sprinkler/trees/$state"   
+   
+  - name: "Полив розетка статус"
+    state_topic:  "edem/s_out/sprinkler/outlets/$state"   
    
   - name: "Полив блокировки"
     state_topic:  "root/s_out/sprinkler/ctrl"   

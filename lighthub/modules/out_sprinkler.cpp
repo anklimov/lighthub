@@ -372,7 +372,8 @@ inline aJsonObject * out_sprinkler::findNextZone()
   {
     if (zone->name && *zone->name && zone->type == aJson_Object)
     {
-      if (getIntFromJson(zone, "@active", 0)) return zone;
+      long setVal = getIntFromJson(zone, "set", 0);
+      if (getIntFromJson(zone, "@active", 0) && setVal) return zone;
     }
     zone = zone->next;
   }
@@ -385,10 +386,23 @@ inline aJsonObject * out_sprinkler::findNextZone()
       int cmd = getIntFromJson(zone, "cmd", CMD_OFF);
       long setVal = getIntFromJson(zone, "set", 0);
       long valVal = getIntFromJson(zone, "val", 0);
-      if (cmd == CMD_ON && (!setVal  || valVal < setVal)) return zone;
+      if (cmd == CMD_ON && (setVal  && valVal < setVal)) return zone;
     }
     zone = zone->next;
   }
+
+  zone = gatesObj->child;
+  while (zone)
+  {
+    if (zone->name && *zone->name && zone->type == aJson_Object)
+    {
+      int cmd = getIntFromJson(zone, "cmd", CMD_OFF);
+      long setVal = getIntFromJson(zone, "set", 0);
+      if (cmd == CMD_ON && (!setVal )) return zone;
+    }
+    zone = zone->next;
+  }
+
   return NULL;
 }
 
