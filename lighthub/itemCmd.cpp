@@ -1250,6 +1250,7 @@ bool itemCmd::saveItem(Item * item, uint16_t optionsFlag)
                                   case CMD_ENABLE:
                                   case CMD_FREEZE:
                                   case CMD_UNFREEZE:
+                                  case CMD_RESET:
                                   break;
                                   default:  
                                   item->setCmd(cmd.cmdCode);
