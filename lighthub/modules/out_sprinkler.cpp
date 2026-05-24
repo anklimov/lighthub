@@ -779,7 +779,7 @@ int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authori
             return 1;
 
           case CMD_RESET:
-            if (item->getFlag(FLAG_FREEZED || FLAG_DISABLED)) return -1;
+            if (item->getFlag(FLAG_FREEZED | FLAG_DISABLED)) return -1;
             setValToJson(zone, "val", (long)0);
             if (sendStatus)
             {
@@ -814,7 +814,7 @@ int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authori
 
         case CMD_RESET:
           {
-            if (item->getFlag(FLAG_FREEZED || FLAG_DISABLED)) return -1;
+            if (item->getFlag(FLAG_FREEZED | FLAG_DISABLED)) return -1;
 
             aJsonObject * zone = gatesObj->child;
             while (zone)
