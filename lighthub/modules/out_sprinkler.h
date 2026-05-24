@@ -28,6 +28,7 @@ enum sprinklerState {
     SP_DREN_EMPTY = 4,
     SP_VIN  = 5,
     SP_FULL = 6,
+    SP_DRYING = 7,
     SP_FAULT_VIN = -1,
     SP_FAULT_DREN = -2  
 };

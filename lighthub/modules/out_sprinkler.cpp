@@ -284,6 +284,10 @@ switch (state) {
         strcpy(val,"FULL");
         break;
 
+    case SP_DRYING:
+        strcpy(val,"DRYING");
+        break;     
+
     case SP_FAULT_VIN:
         strcpy(val,"FAULT_VIN");
         fault = 1;
@@ -347,6 +351,11 @@ int out_sprinkler::moveToState(sprinklerState nextState)
       dren(false);
       vin(false);
       break;
+    case SP_DRYING:
+      dren(false);
+      vin(false);
+      pump(true);
+      break;    
   }
 
   //publishBooleanState("/$rDren", nextState == SP_DREN_ON || nextState == SP_DREN_OPERATE);
@@ -624,66 +633,71 @@ int out_sprinkler::Poll(short cause)
     pump(false);
     return 0;
   }
-
+  bool isActiveZone = false;
   if (item->getCmd() == CMD_ON && tankReady)
   {
     currentZone = findNextZone();
     if (currentZone)
-    {
-      long setVal = getIntFromJson(currentZone, "set", 0);
-      long valVal = getIntFromJson(currentZone, "val", 0);
+              {
+                long setVal = getIntFromJson(currentZone, "set", 0);
+                long valVal = getIntFromJson(currentZone, "val", 0);
+                // if not active - activate 
+                if (!getIntFromJson(currentZone, "@active", 0))
+                {
+                  turnOffAllZones();
+                  if (!item->getFlag(FLAG_DISABLED) || !setVal)
+                      {
+                      setZoneActive(currentZone, true);
+                      short zonePin = getIntFromJson(currentZone, "pin", PINS_COUNT);
+                      if (isValidControlPin(zonePin)) setOutput(zonePin, true);
+                      setValToJson(gatesObj, "@flowTimer", (long)now);
+                      isActiveZone = true;
+                      }
+                } 
+                else isActiveZone = true;
 
-      if (!getIntFromJson(currentZone, "@active", 0))
-      {
-        turnOffAllZones();
-        setZoneActive(currentZone, true);
-        short zonePin = getIntFromJson(currentZone, "pin", PINS_COUNT);
-        if (isValidControlPin(zonePin)) setOutput(zonePin, true);
-        setValToJson(gatesObj, "@flowTimer", (long)now);
-      }
+                if (isActiveZone)
+                    {
+                        if (abs(wCtrPin) < PINS_COUNT)
+                        {
+                          bool curr = readInPin(wCtrPin);
+                          if (curr && !lastWctrlState)
+                          {
+                            updateZoneValue(currentZone, 1);
+                          }
+                          if (curr) lastVals |= LASTWCTRLSTATE; else lastVals &= ~LASTWCTRLSTATE;
+                          setValToJson(gatesObj, "@lastVals", (long)lastVals);
+                        }
+                        else
+                        {
+                          uint32_t flowTimer = (uint32_t)getIntFromJson(gatesObj, "@flowTimer", now);
+                          if (isTimeOver(flowTimer, now, 1000UL))
+                          {
+                            updateZoneValue(currentZone, 1);
+                            setValToJson(gatesObj, "@flowTimer", (long)now);
+                          }
+                        }
+                    }
 
-      if (abs(wCtrPin) < PINS_COUNT)
-      {
-        bool curr = readInPin(wCtrPin);
-        if (curr && !lastWctrlState)
-        {
-          updateZoneValue(currentZone, 1);
-        }
-        if (curr) lastVals |= LASTWCTRLSTATE; else lastVals &= ~LASTWCTRLSTATE;
-        setValToJson(gatesObj, "@lastVals", (long)lastVals);
-      }
-      else
-      {
-        uint32_t flowTimer = (uint32_t)getIntFromJson(gatesObj, "@flowTimer", now);
-        if (isTimeOver(flowTimer, now, 1000UL))
-        {
-          updateZoneValue(currentZone, 1);
-          setValToJson(gatesObj, "@flowTimer", (long)now);
-        }
-      }
+                if (setVal > 0 && (valVal >= setVal || item->getFlag(FLAG_DISABLED)))
+                {
+                  short zonePin = getIntFromJson(currentZone, "pin", PINS_COUNT);
+                  if (isValidControlPin(zonePin)) setOutput(zonePin, false); 
+                  setZoneActive(currentZone, false);
+                  currentZone = findNextZone();
+                }
 
-
-      if (setVal > 0 && valVal >= setVal)
-      {
-        short zonePin = getIntFromJson(currentZone, "pin", PINS_COUNT);
-        if (isValidControlPin(zonePin)) setOutput(zonePin, false);
-        
-        setZoneActive(currentZone, false);
-        //////setValToJson(currentZone, "cmd", (long)CMD_OFF);
-        //item->SendStatusImmediate(itemCmd().Cmd(CMD_OFF).setSuffix(S_CMD), FLAG_COMMAND, currentZone->name);
-        currentZone = findNextZone();
-      }
-
-      if (currentZone)
-      {
-        needPump = true;
-      }
+                if (currentZone)
+                {
+                  needPump = true;
+                }
     }
   }
 
   if (!needPump)
   {
     pump(false);
+ /* 
     if (item->getCmd() == CMD_ON)
     {
       aJsonObject * resultZone = findNextZone();
@@ -693,6 +707,7 @@ int out_sprinkler::Poll(short cause)
         item->SendStatus(FLAG_COMMAND);
       }
     }
+    */
   }
   else
   {
@@ -764,6 +779,7 @@ int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authori
             return 1;
 
           case CMD_RESET:
+            if (item->getFlag(FLAG_FREEZED || FLAG_DISABLED)) return -1;
             setValToJson(zone, "val", (long)0);
             if (sendStatus)
             {
@@ -788,11 +804,18 @@ int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authori
         case CMD_OFF:
           turnOffAllZones();
           pump(false);
-          //dren(false);
           return 1;
+
+        case CMD_DRY:
+          setValToJson(gatesObj, "@state", (long)SP_DRYING);
+          moveToState(SP_DRYING);
+          notifyState(SP_DRYING);
+          return 1;  
 
         case CMD_RESET:
           {
+            if (item->getFlag(FLAG_FREEZED || FLAG_DISABLED)) return -1;
+
             aJsonObject * zone = gatesObj->child;
             while (zone)
             {
@@ -806,9 +829,10 @@ int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authori
               }
               zone = zone->next;
             }
-                      turnOffAllZones();
-            pump(false); 
-            item->Off();  
+            
+    //        turnOffAllZones();
+    //        pump(false); 
+    //        item->Off();  
           }
           return 1;
 
