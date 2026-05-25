@@ -323,7 +323,15 @@ button:
 
  - name: "Полив запретить"
    command_topic: "root/air/sprinkler/cmd"
-   payload_press: "DISABLE"      
+   payload_press: "DISABLE"  
+
+ - name: "Полив осушение бака"
+   command_topic: "root/air/sprinkler/cmd"
+   payload_press: "DRY"
+#Такую проверку можно добавить везде, при ее наличии обьекты станут недоступными если контроллер оффлайн   
+   availability_topic: "root/air/$state"
+   payload_available: "ready"
+   payload_not_available: "disconnected"       
 
 number:
 
