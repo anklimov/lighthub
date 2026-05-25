@@ -204,7 +204,7 @@ root/s_out/sprinkler/$wMin - ON/OFF достигнут минимум воды �
 root/s_out/sprinkler/$rDren - ON/OFF включено реле дренажного насоса
 root/s_out/sprinkler/$rPump - ON/OFF включено реле основного насоса
 root/s_out/sprinkler/set - значение счетчика воды (восстанавливается при перезагрузке из данного топика)
-root/s_out/sprinkler/$vIN - ON/OFF - признак открытия клапана налива бака из водопровода
+root/s_out/sprinkler/$rVIN - ON/OFF - признак открытия клапана налива бака из водопровода
 
 root/s_out/sprinkler/garden/set - требуемый обьем (или время) полива зоны
 root/s_out/sprinkler/garden/cmd - ON или OFF - признак включения полива зоны 
@@ -223,7 +223,7 @@ sensor:
     state_topic:  "root/s_out/sprinkler/$wMin"    
     
   - name: "Полив водопровод"
-    state_topic:  "root/s_out/sprinkler/$vIN"    
+    state_topic:  "root/s_out/sprinkler/$rVIN"    
     
   - name: "Полив дренаж вкл"
     state_topic:  "root/s_out/sprinkler/$rDren"    

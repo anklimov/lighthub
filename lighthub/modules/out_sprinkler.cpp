@@ -672,7 +672,7 @@ int out_sprinkler::Poll(short cause)
                         else
                         {
                           uint32_t flowTimer = (uint32_t)getIntFromJson(gatesObj, "@flowTimer", now);
-                          if (isTimeOver(flowTimer, now, 1000UL))
+                          if (isTimeOver(flowTimer, now, 1000UL) && setVal > 0)
                           {
                             updateZoneValue(currentZone, 1);
                             setValToJson(gatesObj, "@flowTimer", (long)now);

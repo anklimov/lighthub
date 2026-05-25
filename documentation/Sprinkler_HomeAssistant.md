@@ -207,7 +207,7 @@ mqtt:
       payload_not_available: "disconnected"
 
     - name: "Полив водопровод"
-      state_topic:  "edem/s_out/sprinkler/$vIN"
+      state_topic:  "edem/s_out/sprinkler/$rVIN"
       availability_topic: "edem/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
