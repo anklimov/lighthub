@@ -355,6 +355,7 @@ int out_sprinkler::moveToState(sprinklerState nextState)
       dren(false);
       vin(false);
       pump(true);
+      item->On();
       break;    
   }
 

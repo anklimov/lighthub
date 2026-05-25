@@ -2171,18 +2171,11 @@ int Item::SendStatus(long sendFlags, char * subItem) {
 // Send ctrl
               if (sendFlags & FLAG_FLAGS)
             {
-              if (getFlag(FLAG_DISABLED))
-                   strcpy_P(cmdstr, DISABLE_P);
-
-              else if (getFlag(FLAG_FREEZED) == FLAG_FREEZED)
-                   strcpy_P(cmdstr, FREEZE_P);
-
+              if (getFlag(FLAG_FREEZED)) strcpy_P(cmdstr, FREEZE_P);
+              else if (getFlag(FLAG_DISABLED)) strcpy_P(cmdstr, DISABLE_P);
               else strcpy_P(cmdstr, ENABLE_P);   
-
-
               //else strcpy_P(cmdstr, UNFREEZE_P); 
 
-    
               setTopic(addrstr,sizeof(addrstr),T_OUT);
               strncat(addrstr, itemArr->name, sizeof(addrstr)-1);
               if (subItem) 
