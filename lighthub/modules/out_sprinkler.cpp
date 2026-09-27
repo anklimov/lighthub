@@ -52,7 +52,7 @@ static bool isValidControlPin(short pin)
 
 bool out_sprinkler::publishBooleanStateIfChanged(const char * subItem, bool state, uint32_t flag, uint32_t & lastState, bool forcePublish)
 {
-  if (!&lastState) return false;
+  //if (!&lastState) return false;
   if ((state == (bool) (lastState & flag)) && !forcePublish) return true;
   if (state) lastState |= flag ; else lastState &= ~flag;
   return publishBooleanState(subItem, state);
@@ -481,6 +481,7 @@ int out_sprinkler::Poll(short cause)
     publishState = publishState && publishBooleanState("/$rPump", lastVals & LASTPUMPSTATE);
     publishState = publishState && publishBooleanState("/$rDren", lastVals & LASTDRENSTATE);
     publishState = publishState && publishBooleanState("/$rVIN", lastVals & LASTVINSTATE);
+    getAndNotifyStatus();
   }
 
   if (publishState) statePublished = true;
@@ -728,6 +729,29 @@ int out_sprinkler::Poll(short cause)
   return 0;
 }
 
+void out_sprinkler::getAndNotifyStatus()
+{
+  if (!item || !gatesObj) return;
+/*
+  aJsonObject * zone = gatesObj->child;
+  while (zone)
+  {
+    if (zone->name && *zone->name && zone->type == aJson_Object)
+    {
+      long setVal = getIntFromJson(zone, "set", 0);
+      long valVal = getIntFromJson(zone, "val", 0);
+      item->SendStatusImmediate(itemCmd().Int(setVal).setSuffix(S_SET), FLAG_PARAMETERS, zone->name);
+      item->SendStatusImmediate(itemCmd().Int(valVal).setSuffix(S_VAL), FLAG_PARAMETERS, zone->name);
+    }
+    zone = zone->next;
+  }
+
+  long wCtrVal = getIntFromJson(gatesObj, "@wCtr", 0);
+  item->SendStatusImmediate(itemCmd().Int(wCtrVal).setSuffix(S_SET), FLAG_PARAMETERS);
+*/
+  int state = getIntFromJson(gatesObj, "@state", SP_UNKNOWN);
+  notifyState((sprinklerState)state);
+}
 int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authorized)
 {
   if (!item || !gatesObj) return 0;
@@ -810,11 +834,13 @@ int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authori
       switch (cmd.getCmd())
       {
         case CMD_ON:
+          getAndNotifyStatus();
           return 1;
 
         case CMD_OFF:
           turnOffAllZones();
           pump(false);
+          getAndNotifyStatus();
           return 1;
 
         case CMD_DRY:

@@ -72,6 +72,7 @@ protected:
     bool isFreeze();
     void notifyState(short state); 
     int  moveToState(sprinklerState nextState);
-     void         updateCounterValue();     
+     void         updateCounterValue();   
+     void getAndNotifyStatus();  
 };
 #endif
