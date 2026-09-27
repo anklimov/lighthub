@@ -44,8 +44,7 @@ int abstractCh::publishTopic(const char* topic, const char * value, const char* 
        }
        if (mqttClient.connected() && lanStatus == OPERATION  && !ethernetIdleCount)
                        {
-                        mqttClient.publish(addrstr, value, true);
-                        return 1;
+                        return mqttClient.publish(addrstr, value, true);
                       }
      }
  #endif    

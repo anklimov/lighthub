@@ -55,7 +55,7 @@ public:
 
 protected:
     mercuryPersistent * store;
-    uint16_t pollingInterval;
+    uint32_t pollingInterval;
     bool getConfig();
     void initLine(bool full = false);
     short connectMercury();

@@ -65,9 +65,10 @@ myhome/in/led_strip/10-20/set        (установить значение пи
 ```
 
 **Пример для состояния (условное выполнение)**:
+
 ```
-myhome/in/floor/AUTO/set             (команда для теплых полов в режиме AUTO)
-myhome/in/floor/OFF/set              (команда для теплых полов в режиме OFF)
+myhome/in/floor/AUTO/set             (применится для теплых полов в режиме AUTO)
+myhome/in/floor/OFF/set              (применится для теплых полов в режиме OFF)
 ```
 
 #### 5. **suffix** (суффикс) — параметр объекта
@@ -80,20 +81,20 @@ myhome/in/floor/OFF/set              (команда для теплых пол�
 
 | Суффикс | Тип | Назначение | Применимость |
 |---------|-----|-----------|--------------|
-| **`/cmd`** | Command | Основная команда управления (ON, OFF, TOGGLE и др.) | Все типы |
-| **`/set`** | Parameter | Установка параметра (яркость, температура и др.) | Диммеры, регуляторы, термостаты |
-| **`/val`** | Status | Текущее значение (в статусных топиках) | Все типы |
-| **`/hue`** | Color | Оттенок (0-365°, HSV формат) | RGB/RGBW/RGBWW |
-| **`/sat`** | Color | Насыщенность (0-100%, HSV формат) | RGB/RGBW/RGBWW |
-| **`/hsv`** | Color | Полный цвет (hue,saturation,volume) | RGB/RGBW/RGBWW |
-| **`/rgb`** | Color | Цвет в RGB/RGBW нотации | RGB/RGBW/RGBWW |
-| **`/fan`** | Control | Скорость вентилятора (HIGH, MEDIUM, LOW) | AC, Multivent |
-| **`/mode`** | Control | Режим работы (HEAT, COOL, DRY, FAN, AUTO) | AC, Thermostat, Multivent |
-| **`/lock`** | Control | Блокировка (ON, OFF) | AC |
-| **`/swing`** | Control | Направление воздушного потока (ON, OFF) | AC |
-| **`/quiet`** | Control | Тихий режим (ON, OFF) | AC |
-| **`/ctrl`** | Control | Управление состоянием (FREEZE, UNFREEZE, ENABLE, DISABLE) | Специальное |
-| **`/del`** | Delayed | Команда с задержкой | Все команды |
+| **`/cmd`** | Command, Status | Основная команда управления (ON, OFF, TOGGLE и др.) | Все типы |
+| **`/set`** | Command, Status | Установка параметра (яркость, температура и др.) | Диммеры, регуляторы, термостаты |
+| **`/val`** | Command | Текущее значение регулируемого параметра направляется с сенсора сюда | PID, MULTIVENT, THERMOSTAT, SPRINKLER|
+| **`/hue`** | Command | Оттенок (0-365°, HSV формат) | RGB/RGBW/RGBWW |
+| **`/sat`** | Command | Насыщенность (0-100%, HSV формат) | RGB/RGBW/RGBWW |
+| **`/hsv`** | Command | Полный цвет (hue,saturation,volume) | RGB/RGBW/RGBWW |
+| **`/rgb`** | Command | Цвет в RGB/RGBW нотации | RGB/RGBW/RGBWW |
+| **`/fan`** | Command, Status | Скорость вентилятора 0-255 или (HIGH, MEDIUM, LOW, OFF) | AC, Multivent |
+| **`/mode`** | Command, Status | Режим работы (HEAT, COOL, DRY, FAN, AUTO) | AC, Thermostat, Multivent |
+| **`/lock`** | Command, Status | Блокировка (ON, OFF) | AC |
+| **`/swing`** | Command, Status | Направление воздушного потока (ON, OFF) | AC |
+| **`/quiet`** | Command, Status | Тихий режим (ON, OFF) | AC |
+| **`/ctrl`** | Command, Status | Управление состоянием (FREEZE, UNFREEZE, ENABLE, DISABLE) | Специальное |
+| **`/del`** | Command, Status | Команда с задержкой | Все команды |
 
 ---
 
@@ -237,13 +238,13 @@ myhome/s_out/<item>/<суффикс>
 
 | Формат | Описание | Пример |
 |--------|---------|--------|
-| `<0..100>` | Яркость (OpenHab стиль) | `myhome/in/lamp/set → 50` |
-| `<0..255>` | Яркость/PWM (новый стиль) | `myhome/in/lamp/set → 128` |
-| `<H>,<S>,<V>` | HSV формат | `myhome/in/rgb/hsv → 240,100,200` |
-| `<H>,<S>` | HSV без изменения яркости | `myhome/in/rgb/hsv → 240,100` |
-| `#RRGGBB` | RGB hex (Home Remote) | `myhome/in/rgb/cmd → #FF0000` |
-| `<R>,<G>,<B>` | RGB формат | `myhome/in/rgb/rgb → 255,0,0` |
-| `<R>,<G>,<B>,<W>` | RGBW формат | `myhome/in/rgb/rgb → 255,0,0,100` |
+| `<0..100>` | Яркость (OpenHab стиль) | `myhome/in/lamp → 50` |
+| `<0..255>` | Яркость/PWM/температура/значение счетчика/... (новый стиль) | `myhome/in/lamp/set → 128` |
+| `<H>,<S>,<V>` | HSV формат | `myhome/in/led/hsv → 240,100,200` |
+| `<H>,<S>` | HSV без изменения яркости | `myhome/in/led/hsv → 240,100` |
+| `#RRGGBB` | RGB hex (Home Remote) | `myhome/in/led/rgb → #FF0000` |
+| `<R>,<G>,<B>` | RGB формат | `myhome/in/led/rgb → 255,0,0` |
+| `<R>,<G>,<B>,<W>` | RGBW формат | `myhome/in/led/rgb → 255,0,0,100` |
 
 ### Расширенные команды
 
@@ -264,12 +265,12 @@ myhome/s_out/<item>/<суффикс>
 
 | Команда | Описание | Применимость |
 |---------|---------|--------------|
-| `AUTO` | Автоматический режим | AC, Thermostat |
-| `HEAT` | Нагрев | AC, Thermostat |
-| `COOL` | Охлаждение | AC |
-| `DRY` | Осушение | AC |
-| `FAN_ONLY` | Только вентилятор | AC |
-| `HIGH`, `MED`, `LOW` | Скорость вентилятора | AC |
+| `AUTO` | Автоматический режим | AC, Thermostat, Multivent |
+| `HEAT` | Нагрев | AC, Thermostat, Multivent  |
+| `COOL` | Охлаждение | AC, Multivent  |
+| `DRY` | Осушение | AC, Multivent, IRRIGATOR  |
+| `FAN_ONLY` | Только вентилятор | AC, Multivent  |
+| `HIGH`, `MED`, `LOW` | Скорость вентилятора | AC, MULTIVENT |
 
 ### Команды с задержкой
 
@@ -294,6 +295,7 @@ myhome/in/light/cmd → "ON 3000"
 ```
 
 **Взаимно-обратные команды**:
+
 - `ON` ↔ `OFF`
 - `TOGGLE` ↔ `TOGGLE`
 - `REST` ↔ `HALT`
@@ -319,20 +321,19 @@ myhome/in/light/cmd → "ON 3000"
 **Пример**:
 - Получена команда: `ON` на RGB канал
 - Контроллер восстанавливает последний цвет (HSV из памяти)
-- Публикует в статусный топик: `hue=240, sat=100, val=200` (вместо просто `ON`)
+- Публикует в статусный топик: `240,100,200` (вместо просто `ON`)
 
-### Различие /set и /cmd (с версии 3.0.0)
-
-| Что | /cmd | /set |
+### Различие нового подхода (/set и /cmd) и старого (общий топик, совместимо с шиной OpenHab)
+| Что | новый | openHab |
 |-----|:----:|:----:|
-| Команда управления | ✓ | - |
-| Диапазон значений | 0-255 | 0-255 (новый) или 0-100 (старый) |
-| Для OpenHab совместимости | Используется конец топика | 0-100 |
-| Для новых систем | - | 0-255 |
+| Команда управления | в /cmd| в общем топике |
+| Команда установки значения | в /set| в общем топике |
+| Диапазон значений | 0-255 | 0-100 |
+
 
 **Практика**:
-- `/set` используется для установки **значения** (яркость 0-255)
-- `/cmd` используется для **команд** (ON, OFF, TOGGLE)
+- `/set` используется для установки **значения** (например, яркость 0-255)
+- `/cmd` используется для **команд** (ON, OFF, TOGGLE ...)
 
 ---
 
@@ -355,22 +356,22 @@ http://<controller_ip>/item/<item_name>[/subitem][/suffix]
 
 ```bash
 # Включить лампу
-curl -X POST http://192.168.1.10/item/lamp1/cmd -d "ON"
+curl  --user arduino:password -X POST http://192.168.1.10/item/lamp1/cmd -d "ON" 
 
 # Установить яркость
-curl -X POST http://192.168.1.10/item/lamp1/set -d "150"
+curl  --user arduino:password -X POST http://192.168.1.10/item/lamp1/set -d "150"
 
 # Установить цвет RGB
-curl -X POST http://192.168.1.10/item/rgb_light/rgb -d "255,0,0"
+curl  --user arduino:password -X POST http://192.168.1.10/item/rgb_light/rgb -d "255,0,0"
 
 # Получить текущий статус
-curl -X GET http://192.168.1.10/item/lamp1/val
+curl  --user arduino:password -X GET http://192.168.1.10/item/lamp1
 
 # Многозональная вентиляция - установить T в спальне
-curl -X POST http://192.168.1.10/item/multivent/bedroom/set -d "22"
+curl  --user arduino:password -X POST http://192.168.1.10/item/multivent/bedroom/set -d "22"
 
 # Кондиционер - установить режим
-curl -X POST http://192.168.1.10/item/ac_main/mode -d "HEAT"
+curl  --user arduino:password -X POST http://192.168.1.10/item/ac_main/mode -d "HEAT"
 ```
 
 ### Дополнительные endpoints
@@ -380,7 +381,7 @@ curl -X POST http://192.168.1.10/item/ac_main/mode -d "HEAT"
 | `/config.json` | GET, POST | Загрузить/сохранить конфигурацию |
 | `/config.bin` | GET, POST | Системная конфигурация |
 | `/sketch` | POST | Загрузить прошивку (OTA) |
-| `/command/<cmd>` | POST | Выполнить CLI команду |
+| `/$command/<cmd>` | POST | Выполнить CLI команду |
 | `/` | GET | Переадресация на PWA приложение |
 
 ---
@@ -421,26 +422,28 @@ curl -X POST http://192.168.1.10/item/ac_main/mode -d "HEAT"
 ```
 # Включить лампу
 → myhome/in/lamp_bedroom/cmd: ON
-← myhome/s_out/lamp_bedroom/val: 100 (восстановленная яркость)
+← myhome/s_out/lamp_bedroom/set: 100 (восстановленная яркость)
 ← myhome/s_out/lamp_bedroom/cmd: ON
 
 # Установить яркость RGB
 → myhome/in/rgb_light/set: 200
-← myhome/s_out/rgb_light/val: 200
+← myhome/s_out/rgb_light/set: 0,0,200,500 (в статусный топик запишется полный набор параметров канала)
 
 # Установить цвет
 → myhome/in/rgb_light/hue: 240
-← myhome/s_out/rgb_light/hue: 240
+← myhome/s_out/rgb_light/set:  240,100,200,500 (в статусный топик запишется полный набор параметров канала)
+
+# Установить насыщенность 
+→ myhome/in/rgb_light/sat: 50
+← myhome/s_out/rgb_light/set:  240,50,200,500 (в статусный топик запишется полный набор параметров канала)
 
 # Включить кондиционер в режим HEAT
-→ myhome/in/ac_main/cmd: ON
-← myhome/s_out/ac_main/cmd: ON
-→ myhome/in/ac_main/mode: HEAT
-← myhome/s_out/ac_main/mode: HEAT
+→ myhome/in/ac_main/cmd: HEAT
+← myhome/s_out/ac_main/cmd: HEAT (запишется в статусный топик)
 
 # Установить температуру
 → myhome/in/ac_main/set: 22
-← myhome/s_out/ac_main/set: 22
+← myhome/s_out/ac_main/set: 22 (запишется в статусный топик)
 ```
 
 ---
@@ -466,5 +469,5 @@ mosquitto_sub -h 192.168.1.100 -t "myhome/s_out/#" -v
 
 ---
 
-**Версия документа**: 2.0 (актуально для работа_с_mqtt из wiki.lazyhome.ru)  
+**Версия документа**: 2.1 (актуально для работа_с_mqtt из wiki.lazyhome.ru)  
 **Источники**: [MQTT wiki](https://www.lazyhome.ru/dokuwiki/doku.php?id=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0_%D1%81_mqtt), [API wiki](https://www.lazyhome.ru/dokuwiki/doku.php?id=api)

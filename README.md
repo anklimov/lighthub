@@ -8,7 +8,7 @@ Useful links:
 
   * [WIKI/RU](https://www.lazyhome.ru/dokuwiki/doku.php?id=start)
 
-  * [Doxygen autodocumentation for developers](https://anklimov.github.io/lighthub/docs/html/index.html) (litle bit outdated)
+  * [Doxygen autodocumentation for developers](https://anklimov.github.io/lighthub/doxygen-docs/html/index.html) (litle bit outdated)
 
 It may operate both: 
 * On [especially designed hardware board](http://www.lazyhome.ru/index.php/featurerequest) with 16 optocoupled digital inputs, 16 ESD protected digital/analog Inputs/outputs, 8 open-collector outputs (up to 0.5A/50V), DMX IN/OUT, MODBUS RTU and hardware 1-wire support circuit.
@@ -30,7 +30,7 @@ Lighthub allows connecting together:
 ![alt text](LightHub.png "LightHub application diagram")
 
 
-![alt text](docs/LightHubAppDiagram.png "LightHub application diagram")
+![alt text](documentation/LightHubAppDiagram.png "LightHub application diagram")
 
 Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from MQTT enabled software and between controllers. At the moment, LightHub tested and perfectly working with following set of complementary free software:
 * [HomeAssistant](https://www.home-assistant.io) - the best choice of HomeAutomation system
@@ -49,7 +49,7 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 * [Browser Plugin for searching and configure controllers](https://github.com/anklimov/zeroconf-lighthub) 
 * [Channel commands](https://github.com/anklimov/lighthub/wiki/Channel-commands)
 * [OpenHab integration](https://github.com/anklimov/lighthub/wiki/OpenHab--integration)
-* [Doxygen developers documentation](https://anklimov.github.io/lighthub/docs/html/index.html)
+* [Doxygen developers documentation](https://anklimov.github.io/lighthub/doxygen-docs/html/index.html)
 * [Latest Release notes](https://github.com/anklimov/lighthub/releases/tag/v3.0.0)
 
 # Platforms specific details:

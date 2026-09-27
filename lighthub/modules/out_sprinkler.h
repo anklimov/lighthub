@@ -8,7 +8,7 @@
 
 #define DRENAGE_ON_TIME 10000
 #define VIN_MAX_TIME 1200000UL
-#define DRENAGE_MAX_TIME 2000000UL
+#define DRENAGE_MAX_TIME 4000000UL
 
 #define LASTWCTRLSTATE 1
 #define LASTWCTRLSTATE_ALL 2
@@ -19,6 +19,9 @@
 #define LASTPUMPSTATE 64
 #define LASTDRENSTATE 128
 #define LASTVINSTATE 256
+#define LASTFAULTSTATE 512
+#define LASTSTATE_MASK 0x3FF
+#define LASTSTATE_INVALID 1024 
 
 enum sprinklerState {
     SP_UNKNOWN = 0,
@@ -65,7 +68,7 @@ protected:
     void updateZoneValue(aJsonObject * zone, long value);
     bool publishBooleanState(const char * subItem, bool state);
     void publishNumericState(const char * subItem, long value);
-    void publishBooleanStateIfChanged(const char * subItem, bool state, uint32_t flag, uint32_t & lastState);
+    bool publishBooleanStateIfChanged(const char * subItem, bool state, uint32_t flag, uint32_t & lastState, bool forcePublish=false);
     bool isFreeze();
     void notifyState(short state); 
     int  moveToState(sprinklerState nextState);

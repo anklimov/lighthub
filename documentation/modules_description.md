@@ -20,6 +20,7 @@
    - [out_Counter](#out_counter---счётчик-импульсов)
    - [out_SPILed](#out_spiled---управление-светодиодами)
    - [out_Mercury](#out_mercury---счётчик-меркурий)
+   - [out_Sprinkler](#out_sprinkler---система-полива)
    - [out_UARTBridge](#out_uartbridge---uart-мост)
 
 2. [Входные модули (In)](#входные-модули)
@@ -628,6 +629,182 @@ home/meter/night_power     - Ночное потребление
 
 ---
 
+---
+
+## out_Sprinkler — Система полива
+
+### Описание
+
+Модуль управления многозональной системой автоматического полива с независимым управлением каждой зоной, таймерами и мониторингом.
+
+**Основные функции:**
+- Управление несколькими зонами полива независимо
+- Установка длительности полива для каждой зоны
+- Таймеры и расписания для автоматизации
+- Мониторинг прогресса выполнения
+- Поддержка ручного управления и автоматических режимов
+- Контроль состояния клапанов и электромагнитных выключателей
+
+### Тип в JSON
+```
+[23, ["device_name", {zones_configuration}]]
+```
+
+### Формат конфигурации
+
+```json
+"irrigation_system": [
+  23,
+  [
+    "main_sprinkler",
+    {
+      "": {
+        "cmd": {"emit": "sprinkler/cmd"},
+        "val": {"emit": "sprinkler/state"}
+      },
+      "north_zone": {
+        "enabled": {"emit": "sprinkler/north/enabled"},
+        "time": {"emit": "sprinkler/north/time"},
+        "progress": {"emit": "sprinkler/north/progress"},
+        "cycle": {"emit": "sprinkler/north/cycle"}
+      },
+      "south_zone": {
+        "enabled": {"emit": "sprinkler/south/enabled"},
+        "time": {"emit": "sprinkler/south/time"},
+        "progress": {"emit": "sprinkler/south/progress"},
+        "cycle": {"emit": "sprinkler/south/cycle"}
+      },
+      "drip_zone": {
+        "enabled": {"emit": "sprinkler/drip/enabled"},
+        "time": {"emit": "sprinkler/drip/time"},
+        "progress": {"emit": "sprinkler/drip/progress"},
+        "cycle": {"emit": "sprinkler/drip/cycle"}
+      }
+    }
+  ]
+]
+```
+
+### Компоненты системы
+
+| Компонент | Выход/Вход | Назначение |
+|-----------|-----------|-----------|
+| **Бак полива** | wMax, wMin | Поплавки макс/мин уровня воды |
+| **Основной насос** | rPump, fbPump | Реле включения, датчик тока |
+| **Клапаны зон** | pin (для каждой зоны) | Оптореле открытия клапана |
+| **Клапан налива** | vIn | Оптореле подачи воды из водопровода |
+| **Дренажный насос** | rDren, fbDren | Реле включения, датчик тока |
+| **Водосчётчик** | wCtr (опционально) | Счётчик объёма воды |
+
+### Параметры конфигурации
+
+| Параметр | Тип | Описание |
+|----------|-----|---------|
+| `vIn` | int | GPIO клапана налива из водопровода |
+| `wMax` | int | GPIO поплавка максимума в баке |
+| `wMin` | int | GPIO поплавка минимума в баке |
+| `rDren` | int | GPIO реле дренажного насоса |
+| `fbDren` | int | GPIO датчика дренажного насоса |
+| `rPump` | int | GPIO реле основного насоса полива |
+| `fbPump` | int | GPIO датчика основного насоса |
+| `wCtr` | int | GPIO счётчика воды (опционально) |
+
+### Параметры зоны полива
+
+| Параметр | Тип | Описание |
+|----------|-----|---------|
+| `pin` | int | GPIO клапана зоны |
+| `set` | int | Требуемый объём полива или время (сек). 0 = неограниченно |
+| `cmd` | int | Начальное состояние (0=OFF, 1=ON, 2=другое) |
+
+### Состояния системы налива
+
+| Состояние | Описание |
+|-----------|---------|
+| `SP_UNKNOWN` | Неизвестное состояние |
+| `SP_OFF` | Система выключена |
+| `SP_DREN_ON` | Дренажный насос включен |
+| `SP_DREN_OPERATE` | Дренажный насос работает |
+| `SP_DREN_EMPTY` | Дренажный колодец пуст |
+| `SP_VIN` | Наполнение из водопровода |
+| `SP_FULL` | Бак наполнен |
+| `SP_FAULT_VIN` | Ошибка: бак не наполнился из водопровода |
+| `SP_FAULT_DREN` | Ошибка: бак не наполнился из дренажа |
+
+### MQTT топики управления
+
+#### Управление циклом полива (команды)
+```
+root/name/sprinkler/cmd ← ON          # Запустить цикл полива
+root/name/sprinkler/cmd ← OFF         # Остановить цикл полива
+root/name/sprinkler/cmd ← XON         # Включить (может быть заблокировано DISABLE)
+root/name/sprinkler/cmd ← XOFF        # Выключить
+root/name/sprinkler/cmd ← RESET       # Сбросить счётчики всех зон
+root/name/sprinkler/cmd ← FREEZE      # Блокировка на зиму
+root/name/sprinkler/cmd ← UNFREEZE    # Разблокировка
+root/name/sprinkler/cmd ← DRY         # Режим осушения системы
+```
+
+#### Управление конкретной зоной (например, "north")
+```
+root/name/sprinkler/north/cmd ← ON    # Включить полив зоны
+root/name/sprinkler/north/cmd ← OFF   # Выключить полив зоны
+root/name/sprinkler/north/set ← 60    # Требуемый объём/время полива (секунды или единицы счётчика)
+```
+
+#### Режимы системы (установка в /ctrl)
+```
+root/name/sprinkler/ctrl ← ENABLE     # Разрешить полив
+root/name/sprinkler/ctrl ← DISABLE    # Запретить полив (например, после дождя)
+root/name/sprinkler/ctrl ← FREEZE     # Полная блокировка на зиму
+root/name/sprinkler/ctrl ← UNFREEZE   # Снять блокировку зимы
+```
+
+#### Автоматическая блокировка по температуре
+```
+root/name/sprinkler/val ← -1          # При температуре < 0 система автоматически переходит в FREEZE
+```
+
+### MQTT топики мониторинга (статус)
+
+```
+root/s_out/sprinkler/$state          # Состояние системы налива воды (SP_*)
+root/s_out/sprinkler/$fault          # Код ошибки (если есть)
+root/s_out/sprinkler/$wMax           # ON/OFF - бак полный (поплавок макс)
+root/s_out/sprinkler/$wMin           # ON/OFF - бак пуст (поплавок мин)
+root/s_out/sprinkler/$rPump          # ON/OFF - реле основного насоса включено
+root/s_out/sprinkler/$fbPump         # ON/OFF - основной насос работает (датчик тока)
+root/s_out/sprinkler/$rDren          # ON/OFF - реле дренажного насоса включено
+root/s_out/sprinkler/$fbDren         # ON/OFF - дренажный насос работает (датчик тока)
+root/s_out/sprinkler/$rVIN           # ON/OFF - клапан налива из водопровода открыт
+root/s_out/sprinkler/set             # Текущее значение счётчика воды
+
+root/s_out/sprinkler/north/$state    # ON/OFF - зона поливается в настоящее время
+root/s_out/sprinkler/north/cmd       # ON/OFF - состояние команды включения зоны
+root/s_out/sprinkler/north/set       # Требуемый объём/время полива
+root/s_out/sprinkler/north/val       # Текущий выполненный объём/время полива зоны
+
+root/s_out/sprinkler/south/$state    # ON/OFF - зона поливается
+root/s_out/sprinkler/south/cmd       # ON/OFF - состояние команды
+root/s_out/sprinkler/south/set       # Требуемый объём/время
+root/s_out/sprinkler/south/val       # Выполненный объём/время
+
+# Аналогично для остальных зон (например, "trees", "outlets" и т.д.)
+```
+
+### Особенности
+
+| Особенность | Описание |
+|-----------|---------|
+| **Динамическое управление** | Все параметры можно изменять через MQTT в реальном времени |
+| **Восстановление состояния** | Значения `set` и `val` восстанавливаются из топиков `s_out` при перезагрузке |
+| **Водяная розетка** | Зона с `set=0` работает неограниченно (используется для розеток с шлангом) |
+| **Приоритет дренажа** | Система сначала пытается наполнить бак из дренажного колодца, затем из водопровода |
+| **Автозащита от мороза** | Значение `/val < 0` автоматически активирует режим FREEZE |
+| **Двухступенчатая блокировка** | DISABLE блокирует команды, FREEZE полностью заморозит систему |
+
+---
+
 ## out_UARTBridge — UART мост
 
 ### Описание
@@ -791,6 +968,7 @@ home/meter/night_power     - Ночное потребление
 | out_Counter | 6 | Счётчик импульсов | GPIO-счёт |
 | out_SPILed | 10 | Адресуемые светодиоды | SPI/GPIO |
 | out_Mercury | 45 | Электросчётчик | Modbus RTU |
+| out_Sprinkler | 23 | Система полива | GPIO + MQTT |
 | out_UARTBridge | 55 | UART-мост | UART↔UART |
 | in_CCS811_HDC1080 | 100 | Качество воздуха | I2C |
 

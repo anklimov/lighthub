@@ -1,7 +1,7 @@
 # LightHub: Справочник типов каналов (Items)
 
 > **Инженерный справочник** соответствия цифровых кодов типов каналов к текстовым обозначениям и функциональности.
-> Актуально для версии ядра с типами DIMMER (0) до MERCURY (22).
+> Актуально для версии ядра с типами DIMMER (0) до SPRINKLER (23).
 > Источник: [lighthub/item.h](../lighthub/item.h)
 
 ---
@@ -33,6 +33,7 @@
 | **20** | `COUNTER` | Generic Counter | Счётчик импульсов (электроэнергия, газ, вода) | `[инкремент_на_один_отсчет, период_для_автоинкремента_режим_ON]` |
 | **21** | `HUM` | Humidifier | Управление увлажнителем воздуха | Конфигурация по типу увлажнителя |
 | **22** | `MERCURY` | Mercury Energy Meter | Счётчик энергии Mercury по RS485/Modbus | `[адрес, baudrate, формат, сдвиг, [флаги], timeout]` |
+| **23** | `SPRINKLER` | Irrigation System | Система автоматического полива с многозональным управлением | `[имя_устройства, конфигурация_зон]` |
 
 ---
 
@@ -230,6 +231,38 @@
 // Timeout: 10000 мс
 ```
 
+### CH_SPRINKLER (23) - Система полива
+
+```json
+"irrigation_system": [23, [
+  "main_sprinkler",
+  {
+    "": {
+      "cmd": {"emit": "sprinkler/cmd"},
+      "val": {"emit": "sprinkler/state"}
+    },
+    "north_zone": {
+      "enabled": {"emit": "sprinkler/north/enabled"},
+      "time": {"emit": "sprinkler/north/time"},
+      "progress": {"emit": "sprinkler/north/progress"},
+      "cycle": {"emit": "sprinkler/north/cycle"}
+    },
+    "south_zone": {
+      "enabled": {"emit": "sprinkler/south/enabled"},
+      "time": {"emit": "sprinkler/south/time"},
+      "progress": {"emit": "sprinkler/south/progress"},
+      "cycle": {"emit": "sprinkler/south/cycle"}
+    },
+    "drip_zone": {
+      "enabled": {"emit": "sprinkler/drip/enabled"},
+      "time": {"emit": "sprinkler/drip/time"},
+      "progress": {"emit": "sprinkler/drip/progress"},
+      "cycle": {"emit": "sprinkler/drip/cycle"}
+    }
+  }
+]]
+```
+
 ---
 
 ## Заметки по конфигурации
@@ -284,6 +317,7 @@ ITEMS (каналы)
 ├── Каналы с множеством подканалов
 │   ├── CH_SPILED     "SPILED"(11)
 │   ├── CH_MULTIVENT  "VENTS"(18)
+│   ├── CH_SPRINKLER  "SPRINKLER"(23)
 │   └── CH_HUMIDIFIER "HUM"(21)
 │
 ├── Modbus/RS485 Slaves/UART

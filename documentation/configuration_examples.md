@@ -1,4 +1,4 @@
-# LightHub: Примеры конфигурации для всех типов каналов (0-22)
+# LightHub: Примеры конфигурации для всех типов каналов (0-23)
 
 > **Практический справочник** с готовыми примерами JSON конфигурации для каждого типа канала.
 > Каждый пример показывает полный синтаксис, включая MQTT топики и все параметры.
@@ -30,6 +30,7 @@
 - [CH_COUNTER (20)](#ch_counter-20---счётчик-импульсов)
 - [CH_HUMIDIFIER (21)](#ch_humidifier-21---управление-увлажнителем)
 - [CH_MERCURY (22)](#ch_mercury-22---счётчик-энергии-mercury)
+- [CH_SPRINKLER (23)](#ch_sprinkler-23---система-полива)
 
 ---
 
@@ -61,7 +62,6 @@
 ```
 myhome/dev/lamp_bedroom/cmd     ← ON, OFF, TOGGLE, SET
 myhome/dev/lamp_bedroom/set     ← 150 (яркость 0-255)
-myhome/dev/lamp_bedroom/val     ← текущая яркость
 myhome/s_out/lamp_bedroom/val   → опубликованная яркость
 ```
 
@@ -96,7 +96,7 @@ myhome/s_out/lamp_bedroom/val   → опубликованная яркость
 myhome/dev/rgb_light/hue        ← 240 (0-359°)
 myhome/dev/rgb_light/sat        ← 100 (0-100%)
 myhome/dev/rgb_light/val        ← 200 (0-255)
-myhome/dev/rgb_light/temp       ← 6500 (температура цвета, K)
+myhome/dev/rgb_light/temp       ← 6500 (температура цвета, Mirids)
 myhome/dev/rgb_light/RGB        ← 255,0,0 (красный)
 myhome/dev/rgb_light/RGB        ← 255,0,0,100 (RGB+White)
 ```
@@ -152,7 +152,7 @@ myhome/dev/mood_light/HSV       ← 120,100,100 (зелёный в HSV)
 
 ```
 myhome/dev/pwm_dim/set          ← 128
-myhome/dev/pwm_dim/val          ← текущее значение
+myhome/dev/pwm_dim/cmd          ← ON
 ```
 
 ---
@@ -211,7 +211,7 @@ myhome/dev/pwm_dim/val          ← текущее значение
 
 ```
 myhome/dev/thermo_bath/set      ← 35 (установить целевую T)
-myhome/dev/thermo_bath/val      ← 1 (нагревается) или 0
+myhome/dev/thermo_bath/val      ← передать измерянную температуру с удаленного сенсора
 myhome/dev/thermo_bath/cmd      ← ON, OFF
 ```
 
@@ -219,7 +219,7 @@ myhome/dev/thermo_bath/cmd      ← ON, OFF
 
 ## CH_RELAY (6) - GPIO Реле
 
-**Назначение**: Простое электромагнитное реле ON/OFF
+**Назначение**: Простое электромагнитное реле ON/OFF или иное дискретное устройство
 
 ### Синтаксис
 
@@ -244,7 +244,6 @@ myhome/dev/thermo_bath/cmd      ← ON, OFF
 
 ```
 myhome/dev/relay_water/cmd      ← ON, OFF, TOGGLE
-myhome/dev/relay_water/val      ← 1 (включено) или 0 (выключено)
 ```
 
 ---
@@ -304,13 +303,7 @@ myhome/dev/lights_all/cmd       ← SET 100 (установит яркость �
 
 ```json
 {
-  "modbus": {
-    "vacom_10": {
-      "baud": 9600,
-      "serial": "8N1",
-      "poll": {"regs": [[0, 50]], "delay": 1000}
-    }
-  },
+
   "items": {
     "fan_heat": [8, [96, 0]],        // Vacom адрес 96, экземпляр 0
     "fan_cool": [8, [96, 1]]         // Vacom адрес 96, экземпляр 1
@@ -329,10 +322,7 @@ myhome/dev/lights_all/cmd       ← SET 100 (установит яркость �
 ```json
 {
   "items": {
-    "vent_motor": [9, [96, {
-      "mode": {"emit": "vent/mode"},
-      "speed": {"emit": "vent/speed"}
-    }]]
+    "vent_motor": [9, [96, ??]]
   }
 }
 ```
@@ -779,6 +769,271 @@ myhome/dev/energy_mercury/val   ← текущие показания энерг
 
 ---
 
+## CH_SPRINKLER (23) - Система полива
+
+**Назначение**: Многозональная система автоматического полива с контролем воды и насосов
+
+### Синтаксис
+
+```json
+"sprinkler_name": [23, [{параметры_системы}, {зоны_полива}]]
+```
+
+### Полный пример конфигурации
+
+```json
+{
+  "items": {
+    "sprinkler": [23, {
+      "": {
+        "vIn": 3,
+        "wMax": 44,
+        "wMin": 46,
+        "rDren": 23,
+        "fbDren": 63,
+        "rPump": 24,
+        "fbPump": 62,
+        "wCtr": 49
+      },
+      "nord": {
+        "pin": 6,
+        "set": 60,
+        "cmd": 1
+      },
+      "south": {
+        "pin": 7,
+        "set": 100,
+        "cmd": 1
+      },
+      "trees": {
+        "pin": 10,
+        "set": 60,
+        "cmd": 2
+      },
+      "outlets": {}
+    }]
+  }
+}
+```
+
+### MQTT Команды управления
+
+#### Запуск/остановка цикла полива
+```
+root/name/sprinkler/cmd        ← ON     # Запустить цикл полива всех зон
+root/name/sprinkler/cmd        ← OFF    # Остановить полив
+root/name/sprinkler/cmd        ← RESET  # Сбросить счётчики - инициирует старт полива
+
+root/name/sprinkler/cmd        ← FREEZE    # Полная блокировка на зиму
+root/name/sprinkler/cmd        ← UNFREEZE  # Разблокировка
+root/name/sprinkler/cmd        ← DRY       # Режим осушения системы перед зимой
+root/name/sprinkler/cmd        ← ENABLE    # Разрешить полив
+root/name/sprinkler/cmd        ← DISABLE   # Запретить полив (например, после дождя)
+```
+
+#### Управление конкретной зоной
+```
+root/name/sprinkler/nord/cmd   ← ON        # Включить полив северной зоны
+root/name/sprinkler/nord/cmd   ← OFF       # Выключить полив
+root/name/sprinkler/nord/set   ← 60        # Требуемый объём полива
+root/name/sprinkler/nord/set   ← 0         # Без лимита (для розеток)
+
+root/name/sprinkler/south/cmd  ← ON        # Включить южную зону
+root/name/sprinkler/south/set  ← 100       # Требуемый объём
+
+root/name/sprinkler/trees/cmd  ← ON        # Включить капельное орошение
+root/name/sprinkler/trees/set  ← 60        # Требуемый объём
+```
+
+#### Специальные команды
+```
+root/name/sprinkler/val        ← -1        # Температура < 0 → автоматический FREEZE
+root/name/sprinkler/ctrl       ← FREEZE    # Установить режим FREEZE
+root/name/sprinkler/ctrl       ← UNFREEZE  # Снять режим FREEZE
+```
+
+### MQTT Статусные топики (выходные)
+
+#### Состояние системы
+```
+root/s_out/sprinkler/$state      → SP_UNKNOWN, SP_OFF, SP_DREN_ON, SP_DREN_OPERATE, 
+                                    SP_DREN_EMPTY, SP_VIN, SP_FULL, SP_FAULT_VIN, SP_FAULT_DREN
+root/s_out/sprinkler/$fault      → код ошибки (если есть)
+root/s_out/sprinkler/$wMax       → ON/OFF - бак полный (поплавок макс)
+root/s_out/sprinkler/$wMin       → ON/OFF - бак пуст (поплавок мин)
+```
+
+#### Состояние насосов и клапанов
+```
+root/s_out/sprinkler/$rPump      → ON/OFF - реле основного насоса включено
+root/s_out/sprinkler/$fbPump     → ON/OFF - основной насос работает (датчик)
+root/s_out/sprinkler/$rDren      → ON/OFF - реле дренажного насоса включено
+root/s_out/sprinkler/$fbDren     → ON/OFF - дренажный насос работает (датчик)
+root/s_out/sprinkler/$rVIN       → ON/OFF - клапан налива из водопровода открыт
+root/s_out/sprinkler/set         → текущее значение счётчика воды
+```
+
+#### Состояние зон полива
+```
+root/s_out/sprinkler/nord/$state → ON/OFF - зона в данный момент поливается
+root/s_out/sprinkler/nord/cmd    → ON/OFF - состояние команды включения
+root/s_out/sprinkler/nord/set    → требуемый объём полива
+root/s_out/sprinkler/nord/val    → выполненный объём полива (накапливается)
+
+root/s_out/sprinkler/south/$state → ON/OFF - южная зона поливается
+root/s_out/sprinkler/south/cmd    → ON/OFF
+root/s_out/sprinkler/south/set    → требуемый объём
+root/s_out/sprinkler/south/val    → выполненный объём
+
+root/s_out/sprinkler/trees/$state → ON/OFF - капельная зона поливается
+root/s_out/sprinkler/trees/cmd    → ON/OFF
+root/s_out/sprinkler/trees/set    → требуемый объём
+root/s_out/sprinkler/trees/val    → выполненный объём
+
+root/s_out/sprinkler/outlets/$state → ON/OFF - розетка активна
+```
+
+### Примеры использования
+
+#### Запуск полива с установкой объёмов
+```bash
+# Установить объёмы для каждой зоны
+mosquitto_pub -t root/name/sprinkler/nord/set -m 60
+mosquitto_pub -t root/name/sprinkler/south/set -m 100
+mosquitto_pub -t root/name/sprinkler/trees/set -m 60
+
+# Запустить цикл полива
+mosquitto_pub -t root/name/sprinkler/cmd -m ON
+```
+
+#### Запрет полива после дождя и восстановление
+```bash
+# Запретить полив
+mosquitto_pub -t root/name/sprinkler/cmd -m DISABLE
+
+# Разрешить полив
+mosquitto_pub -t root/name/sprinkler/cmd -m ENABLE
+```
+
+#### Подготовка к зиме (блокировка + осушение)
+```bash
+# 1. Перейти в режим DRY для осушения
+mosquitto_pub -t root/name/sprinkler/cmd -m DRY
+
+# 2. Открыть розетки для слива
+mosquitto_pub -t root/name/sprinkler/outlets/cmd -m ON
+
+# 3. После полного слива - заморозить систему
+mosquitto_pub -t root/name/sprinkler/cmd -m FREEZE
+```
+
+#### Сброс счётчиков (инициирует новый цикл полива)
+```bash
+mosquitto_pub -t root/name/sprinkler/cmd -m RESET
+```
+
+### Интеграция с Home Assistant
+
+```yaml
+sensor:
+  - name: "Полив бак Макс"
+    state_topic:  "root/s_out/sprinkler/$wMax"
+    
+  - name: "Полив бак Мин"
+    state_topic:  "root/s_out/sprinkler/$wMin"    
+    
+  - name: "Полив состояние"
+    state_topic:  "root/s_out/sprinkler/$state"
+    
+  - name: "Полив ошибка"
+    state_topic:  "root/s_out/sprinkler/$fault"
+    
+  - name: "Полив север выполнено"
+    state_topic:  "root/s_out/sprinkler/nord/val"   
+
+  - name: "Полив юг выполнено"
+    state_topic:  "root/s_out/sprinkler/south/val"   
+
+  - name: "Полив капельный выполнено"
+    state_topic:  "root/s_out/sprinkler/trees/val"   
+
+switch:
+  - name: "Полив"
+    state_topic:  "root/s_out/sprinkler/cmd"
+    command_topic: "root/air/sprinkler/cmd"
+    availability_topic: "root/air/$state"
+    payload_available: "ready"
+    payload_not_available: "disconnected" 
+
+  - name: "Полив север"
+    state_topic:  "root/s_out/sprinkler/nord/cmd"
+    command_topic: "root/air/sprinkler/nord/cmd"
+
+  - name: "Полив юг"
+    state_topic:  "root/s_out/sprinkler/south/cmd"
+    command_topic: "root/air/sprinkler/south/cmd"
+
+  - name: "Полив капельный"
+    state_topic:  "root/s_out/sprinkler/trees/cmd"
+    command_topic: "root/air/sprinkler/trees/cmd"
+
+button:
+  - name: "Полив сброс"
+    command_topic: "root/air/sprinkler/cmd"
+    payload_press: "RESET"
+    
+  - name: "Полив блокировка (FREEZE)"
+    command_topic: "root/air/sprinkler/cmd"
+    payload_press: "FREEZE"
+
+  - name: "Полив разблокировка"
+    command_topic: "root/air/sprinkler/cmd"
+    payload_press: "UNFREEZE"   
+    
+  - name: "Полив запретить (дождь)"
+    command_topic: "root/air/sprinkler/cmd"
+    payload_press: "DISABLE"
+
+  - name: "Полив разрешить"
+    command_topic: "root/air/sprinkler/cmd"
+    payload_press: "ENABLE"
+
+  - name: "Полив осушение (DRY)"
+    command_topic: "root/air/sprinkler/cmd"
+    payload_press: "DRY"
+
+number:
+  - name: "Полив север объём"
+    state_topic:  "root/s_out/sprinkler/nord/set"   
+    command_topic: "root/air/sprinkler/nord/set"   
+    min: 0
+    max: 6000
+    
+  - name: "Полив юг объём"
+    state_topic:  "root/s_out/sprinkler/south/set"   
+    command_topic: "root/air/sprinkler/south/set"   
+    min: 0
+    max: 6000   
+    
+  - name: "Полив капельный объём"
+    state_topic:  "root/s_out/sprinkler/trees/set"   
+    command_topic: "root/air/sprinkler/trees/set"   
+    min: 0
+    max: 6000
+```
+
+### Особенности и советы
+
+| Особенность | Описание |
+|-----------|---------|
+| **Водяная розетка** | Настройте зону с `set: 0` — она будет работать неограниченно и всегда под давлением |
+| **Счётчик воды** | Если `wCtr` не установлен, система отсчитывает время в секундах вместо объёма |
+| **Приоритет дренажа** | Система сначала наполняет бак из дренажного колодца, потом из водопровода |
+| **Автозащита от мороза** | Отправьте `/val ← -1` или `FREEZE` при угрозе мороза |
+| **DISABLE vs FREEZE** | DISABLE блокирует только запуск, FREEZE полностью замораживает систему |
+| **Режим DRY** | Используйте перед зимой: включает насос без наполнения, зоны можно открыть вручную |
+| **RESET** | Сбрасывает счётчики всех зон в 0 и инициирует новый цикл полива |
+
 ## Полная реальная конфигурация (интеграция всех типов)
 
 ```json
@@ -845,12 +1100,12 @@ myhome/dev/energy_mercury/val   ← текущие показания энерг
 
 ## Полезные ссылки
 
-- [Справочник типов каналов](channel_types_reference.md) — типы 0-22
+- [Справочник типов каналов](channel_types_reference.md) — типы 0-23
 - [Справочник суффиксов](suffixes_reference.md) — /cmd, /val, /set, /hue, /sat, /temp
 - [Полное описание конфигурации](light_hub_полное_инженерное_описание_json_конфигурации_v2.md)
 - [Исходный код item.h](../lighthub/item.h)
 
 ---
 
-**Версия документа**: 1.0  
-**Дата обновления**: 2025-01-24
+**Версия документа**: 1.2  
+**Дата обновления**: 2025-06-17
