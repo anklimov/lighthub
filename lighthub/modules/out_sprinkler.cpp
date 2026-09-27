@@ -834,6 +834,11 @@ int out_sprinkler::Ctrl(itemCmd cmd, char* subItem, bool toExecute, bool authori
       switch (cmd.getCmd())
       {
         case CMD_ON:
+          if (getIntFromJson(gatesObj, "@state", SP_UNKNOWN) == SP_DRYING)
+          {
+            item->setCmd(CMD_DRY);            //TODO- Test  
+            //item->SendStatusImmediate(itemCmd().Cmd(CMD_DRY).setSuffix(S_CMD), FLAG_COMMAND);
+          }
           getAndNotifyStatus();
           return 1;
 
