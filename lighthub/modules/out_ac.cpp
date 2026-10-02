@@ -35,7 +35,8 @@ byte lock[] = {255,255,10,0,0,0,0,0,1,3,0,0,14};  // Блокировка пул
 
 //Extended subItem set
 const char LOCK_P[]   PROGMEM = "lock";
-const char QUIET_P[]  PROGMEM = "queit";
+const char QUIET_P[]  PROGMEM = "quiet";
+const char QUIET_LEGACY_P[] PROGMEM = "queit"; // legacy typo, kept for backward compatibility
 const char SWING_P[]  PROGMEM = "swing";
 const char RAW_P[]    PROGMEM = "raw";
 
@@ -503,7 +504,7 @@ int out_AC::Ctrl(itemCmd cmd,  char* subItem , bool toExecute, bool authorized)
  // Some additional Subitems
        if (strcmp_P(subItem, LOCK_P) == 0) suffixCode = S_LOCK;
   else if (strcmp_P(subItem, SWING_P) == 0) suffixCode = S_SWING;
-  else if (strcmp_P(subItem, QUIET_P) == 0) suffixCode = S_QUIET;
+   else if (strcmp_P(subItem, QUIET_P) == 0 || strcmp_P(subItem, QUIET_LEGACY_P) == 0) suffixCode = S_QUIET;
   else if (strcmp_P(subItem, RAW_P) == 0) suffixCode = S_RAW;
 
   if (cmd.isCommand() && !suffixCode && !subItem) suffixCode=S_CMD; //if some known command find, but w/o correct suffix - got it

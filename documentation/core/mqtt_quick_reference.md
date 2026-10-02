@@ -129,8 +129,8 @@ mosquitto_pub -h 192.168.1.100 -t "myhome/in/ac_main/fan" -m "HIGH"
 # Направление воздуха (ON, OFF)
 mosquitto_pub -h 192.168.1.100 -t "myhome/in/ac_main/swing" -m "ON"
 
-# Тихий режим (входной subitem «queit» — опечатка в прошивке; статус — /quiet)
-mosquitto_pub -h 192.168.1.100 -t "myhome/in/ac_main/queit" -m "ON"
+# Тихий режим (legacy «queit» также принимается; статус — /quiet)
+mosquitto_pub -h 192.168.1.100 -t "myhome/in/ac_main/quiet" -m "ON"
 
 # Блокировка ПДУ
 mosquitto_pub -h 192.168.1.100 -t "myhome/in/ac_main/lock" -m "ON"

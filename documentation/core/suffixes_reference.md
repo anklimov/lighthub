@@ -77,7 +77,7 @@ myhome/in/rgb_light → 240,100,200
 | `/fan` | ✅ | ✅ | Скорость вентилятора | LOW, MEDIUM, HIGH, OFF или число |
 | `/lock` | ✅ | ✅ | Блокировка ПДУ | ON, OFF |
 | `/swing` | ✅ | ✅ | Направление воздушного потока | ON, OFF |
-| `/quiet` | ✅ | ✅ | Режим "тихой работы". Входной subitem — «queit» (опечатка в прошивке); статус публикуется в `/quiet` | ON, OFF |
+| `/quiet` | ✅ | ✅ | Режим "тихой работы". Входной subitem — `/quiet` (legacy «queit» принимается); статус публикуется в `/quiet` | ON, OFF |
 
 **Примеры**:
 ```
@@ -93,8 +93,8 @@ myhome/in/ac_main/set → 22
 # Максимальная скорость вентилятора
 myhome/in/ac_main/fan → HIGH
 
-# Включить тихий режим (входной subitem «queit» — опечатка в прошивке)
-myhome/in/ac_main/queit → ON
+# Включить тихий режим (legacy «queit» также принимается)
+myhome/in/ac_main/quiet → ON
 ```
 
 **Логика срабатывания AC**:
@@ -237,7 +237,7 @@ myhome/in/ac/HEAT/set → 25
 | 7 | CH_GROUP | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV` | Группа каналов |
 | 8 | CH_VCTEMP | — | Регулятор Vacon (PID) |
 | 9 | CH_VC | — | Привод Vacon (Modbus) |
-| 10 | CH_AC (Haier) | `/cmd`, `/set` (16-40), `/mode` (0-4), `/fan`, `/lock`, `/swing`, `/queit` (статус `/quiet`), `/temp`, `/raw` | Кондиционер |
+| 10 | CH_AC (Haier) | `/cmd`, `/set` (16-40), `/mode` (0-4), `/fan`, `/lock`, `/swing`, `/quiet` (legacy `queit`), `/temp`, `/raw` | Кондиционер |
 | 11 | CH_SPILED | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV` + subitem-пиксели 10-20 | Адресуемая LED лента |
 | 12 | CH_MOTOR | `/cmd`, `/set` | Сервопривод |
 | 13 | CH_PID | `/cmd`, `/set`, `/val` (вход сенсора), `/ctrl` | PID регулятор, теплые полы |
@@ -430,7 +430,7 @@ myhome/s_out/rgb_lamp/cmd → ON
 /fan → HIGH                Максимальная скорость вентилятора
 /lock → ON                 Заблокировать ПДУ (только кондиционер)
 /swing → ON                Включить направление воздуха
-/queit → ON                Тихий режим (опечатка в прошивке; статус — /quiet)
+/quiet → ON              Тихий режим (legacy «queit» принимается; статус — /quiet)
 ```
 
 ---

@@ -129,7 +129,7 @@
 ```json
 "ac_main": [10, 1]             // номер порта serial (0-3)
 // подканалы: fan (LOW/MEDIUM/HIGH), set (16-40), temp, cmd
-// также доступны подканалы lock/swing/queit/raw (/mode — число, текстовые режимы — в /cmd)
+// также доступны подканалы lock/swing/quiet/raw (/mode — число, текстовые режимы — в /cmd)
 ```
 
 ### CH_SPILED (11) - SPI LED лента
