@@ -21,6 +21,30 @@ e-mail    anklimov@gmail.com
 #include "Arduino.h"
 #include "aJSON.h"
 
+/**
+ * Textual names of item commands; array indexes match the CMD_* codes
+ * (CMD_ON=1 ... CMD_RESET=0x19).
+ *
+ * - "ON" (1) - turn channel ON
+ * - "OFF" (2) - turn channel OFF
+ * - "REST" (3) - restore: turn ON only if previously halted (CMD_HALT)
+ * - "TOGGLE" (4) - toggle ON/OFF
+ * - "HALT" (5) - turn OFF, stays locked until REST
+ * - "XON" (6) - momentary ON, stays on until XOFF
+ * - "XOFF" (7) - release a channel turned on by XON
+ * - "INCREASE" (8) / "DECREASE" (9) - step the value up / down
+ * - "ENABLE" (0xA) - enable channel (for PID - enable regulation; for XON/XOFF - lift limitation)
+ * - "DISABLE" (0xB) - disable channel
+ * - "UNFREEZE" (0xC) / "FREEZE" (0xD) - unlock / lock commands and values
+ * - "AUTO" (0xE) - thermostat/AC auto mode
+ * - "FAN_ONLY" (0xF) - AC fan-only mode
+ * - "HIGH" (0x10) / "MEDIUM" (0x11) / "LOW" (0x12) - AC/vent fan levels
+ * - "HEAT_COOL" (0x13) - AC auto heat/cool mode
+ * - "HEAT" (0x14) / "COOL" (0x15) / "DRY" (0x16) - thermostat/AC modes
+ * - "RGB" (0x17) - set color in RGB notation
+ * - "HSV" (0x18) - set color in HSV notation
+ * - "RESET" (0x19) - reset device to defaults
+ */
 typedef  char cmdstr[10];
 
 const cmdstr commands_P[] PROGMEM =
@@ -34,6 +58,10 @@ const cmdstr commands_P[] PROGMEM =
 
 #define commandsNum sizeof(commands_P)/sizeof(cmdstr)
 
+/**
+ * Short textual names of channel types (CH_*); array indexes match
+ * CH_DIMMER(0)..CH_SPRINKLER(23). Used to resolve "type":"DMX" etc. in config.
+ */
 typedef  char ch_type[9];
 const ch_type ch_type_P[] PROGMEM =
 {
@@ -56,7 +84,7 @@ const ch_type ch_type_P[] PROGMEM =
 "RELAYPWM", //  16  //Slow PWM relay to control objects with inertia
 "DMXRGBWW", //  17  //DMX RGBWW channel (warm&cold white)
 "VENTS",    //  18  //Multichannel ventilation 
-"ELEVATOR", //  19  //
+"ELEVATOR", //  19  //Elevator controller
 "COUNTER",  //  20  //Generic counter
 "HUM",      //  21  //Humidifier
 "MERCURY",   //  22  //Mercury energy meter/RS485 interface
@@ -66,6 +94,13 @@ const ch_type ch_type_P[] PROGMEM =
 #define ch_typeNum sizeof(ch_type_P)/sizeof(ch_type)
 
 /// Definition of Commands
+/**
+ * Command codes (indexes of commands_P). Codes 1..9 are decimal,
+ * 0xA..0x19 are hex. Commands up to CMD_FAN (0xF) are "channel commands"
+ * that affect the whole channel state; the rest are device-specific
+ * (AC modes, color, reset). CMD_VOID/CMD_UNKNOWN/CMD_JSON are special
+ * non-wired codes used internally.
+ */
 #define CMD_ON  1       /// Turn channel ON 
 #define CMD_OFF 2       /// Turn channel OFF
 #define CMD_RESTORE 3   /// Turn ON only if was previously turned off by CMD_HALT
@@ -97,7 +132,9 @@ const ch_type ch_type_P[] PROGMEM =
 #define CMD_HSV  0x18
 #define CMD_RESET  0x19
 
+/// Low byte of the packed I_CMD int - command code
 #define CMD_MASK 0xffUL
+/// High two bytes of the packed I_CMD int - state flags (FLAG_*)
 #define FLAG_MASK 0x00ffff00UL
 //#define STATE_MASK 0xff0000
 
@@ -106,6 +143,23 @@ const ch_type ch_type_P[] PROGMEM =
 #define CMD_JSON -2
 
 //FLAGS
+/**
+ * State flags packed with the command in the I_CMD item element (FLAG_MASK bits):
+ * - FLAG_DISABLED - channel disabled (needs ENABLE to unlock)
+ * - FLAG_LOCKED_CMD / FLAG_LOCKED_SET - frozen: commands / values are blocked
+ * - FLAG_FREEZED - both locked
+ * - FLAG_SEND_DEFFERED - status publish is pending (no network / low RAM)
+ * - FLAG_COMMAND / FLAG_PARAMETERS / FLAG_FLAGS - what to include in the next status
+ * - FLAG_SEND_RETRY - retry the failed Modbus transaction
+ * - FLAG_ACTION_NEEDED / FLAG_ACTION_IN_PROCESS - driver action state machine
+ * - FLAG_HALTED - turned off by CMD_HALT (CMD_RESTORE to return)
+ * - FLAG_XON - turned on by CMD_XON (CMD_XOFF to release)
+ * - FLAG_SEND_DELAYED - publish remaining time of a delayed command
+ *
+ * SendStatus options:
+ * - FLAG_SEND_IMMEDIATE - do not defer the publish
+ * - FLAG_NOT_SEND_CAN   - skip publishing to CAN
+ */
 
 //#define FLAG_COMMAND 0x100UL
 //#define FLAG_PARAMETERS 0x200UL
@@ -142,9 +196,18 @@ const ch_type ch_type_P[] PROGMEM =
 #define FLAG_SEND_IMMEDIATE 0x1UL
 #define FLAG_NOT_SEND_CAN 0x2UL
 
+/**
+ * Translate a text payload to a command code.
+ * @param payload - text command word, number or color ("ON", "-5", "#FF0000")
+ * @return CMD_* code; CMD_VOID for plain numbers, CMD_UNKNOWN if unrecognized
+ */
 int txt2cmd (char * payload);
 
 
+/**
+ * Storage type codes (ST_*) - how the 4-byte itemCmd parameter word
+ * is interpreted (value representation of a channel).
+ */
 ///Definition of all possible types of argument, contained in class
 #define ST_VOID         0      /// Not defined
 #define ST_PERCENTS255  1      /// Percent value 0..255
@@ -165,11 +228,19 @@ int txt2cmd (char * payload);
 #define ST_STRING       12     /// pointer to string (for further use)
 //#define ST_TIMESTAMP    13     /// Timestamp for delayed cmd execution
 
+/// Mapping options for doMapping()/doReverseMapping()
 #define MAP_SCALE       1
 #define MAP_VAL_CMD     2
 
 #pragma pack(push, 1)
 
+/**
+ * @brief Packed 32-bit command word of #itemCmd.
+ *
+ * cmdCode - command code (CMD_*), itemArgType - storage type of the
+ * parameter (ST_*), suffixCode - topic suffix (S_*), cmdEffect/cmdParam
+ * are reserved.
+ */
 typedef union
 {
   long int aslong;
@@ -185,6 +256,13 @@ typedef union
       };
 } itemCmdStore;
 
+/**
+ * @brief 32-bit parameter storage of #itemCmd.
+ *
+ * Holds a signed/unsigned number, float or string pointer; a HSV255 color
+ * (h:9, s, v, colorTemp:7) and the same with signed fields; or a
+ * NeoPixel-packed BGWR color (b, g, r, w) compatible layout.
+ */
 typedef union
 {
   long int aslong;
@@ -215,85 +293,162 @@ typedef union
 } itemArgStore;
 
 class Item;
+/**
+ * @brief Command + value container passed between items, drivers and MQTT.
+ *
+ * itemCmd packs a command code (CMD_*), a typed value (ST_* storage) and a
+ * topic suffix (S_*) into two 32-bit words (#itemCmdStore + #itemArgStore).
+ * It is the universal currency of the control core: parsed from text or
+ * JSON, converted to the channel's storage type, executed by the driver
+ * and serialized back to text for status publishing.
+ */
 class itemCmd
 {
 public:
+  /// Packed command word: code, storage type, suffix
   itemCmdStore      cmd;
+  /// Packed parameter: number / float / string / color
   itemArgStore      param;
 
+  /** Create a command of the given code with an empty parameter of the given storage type. */
   itemCmd(uint8_t _type=ST_VOID, uint8_t _code=CMD_VOID);
+  /** Create a value with ST_FLOAT storage. */
   itemCmd(float val);
+  /** Create a copy of the currently stored command/value of the item. */
   itemCmd(Item *item);
+  /** Parse a text command/value ("ON", "50", "-1.5", "#FF0000", "HSV:100,50,255"). */
   itemCmd(char *cmd);
 
+  /** Convert the value of `from` to the storage type appropriate for chanType and copy it to *this. */
   itemCmd assignFrom(itemCmd from, short chanType=-1);
 
+  /** Load the stored command/value of the item into *this according to optionsFlag. */
   bool loadItem(Item * item, uint16_t optionsFlag=FLAG_PARAMETERS);
+  /** Like loadItem(), but falls back to channel defaults for a never-controlled item. */
   bool loadItemDef(Item * item, uint16_t optionsFlag=FLAG_PARAMETERS );
+  /** Write *this back to the item storage (command, value, flags) according to optionsFlag. */
   bool saveItem(Item * item, uint16_t optionsFlag=FLAG_PARAMETERS);
 
+  /** Set the parameter to a signed 32-bit int (ST_INT32). */
   itemCmd Int(int32_t i);
+  /** Set the parameter to an unsigned 32-bit int (ST_UINT32). */
   itemCmd uInt(uint32_t i);
+  /** Set the parameter to a float (ST_FLOAT). */
   itemCmd Float(float f);
+  /** Set the parameter to a fixed-point value in tens (ST_TENS, scaled by TENS_BASE). */
   itemCmd Tens(int32_t i);
+  /** Set the parameter to a raw fixed-point value in tens (ST_TENS, pre-scaled). */
   itemCmd Tens_raw(int32_t i);
+  /** Set the command code (and S_CMD suffix). */
   itemCmd Cmd(uint8_t i);
+  /** Copy the command code and parameter from another itemCmd. */
   itemCmd Cmd(itemCmd i);
+  /** Set an HSV255 color (hue 0..365, sat 0..100, value 0..255). */
   itemCmd HSV(uint16_t h, uint8_t s, uint8_t v);
+  /** Set an HSV255 color (ST_HSV255 storage). */
   itemCmd HSV255(uint16_t h, uint8_t s, uint8_t v);
+  /** Set hue and saturation only (ST_HS). */
   itemCmd HS(uint16_t h, uint8_t s);
+  /** Set an RGB color (ST_RGB). */
   itemCmd RGB(uint8_t r, uint8_t g, uint8_t b);
+  /** Set an RGBW color (ST_RGBW). */
   itemCmd RGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w);
+  /** Set the parameter to a string pointer (ST_STRING). */
   itemCmd Str(char * str);
+  /** Set the hue component (0..365). @return true on success. */
   bool setH(uint16_t);
+  /** Set the saturation component (0..100). @return true on success. */
   bool setS(uint8_t);
+  /** Set the color temperature in mireds (153..500). @return true on success. */
   bool setColorTemp(int);
+  /** @return stored color temperature in mireds (153..500), -1 if none. */
   int getColorTemp();
+  /** @return stored hue (0..365). */
   uint16_t getH();
+  /** @return stored saturation (0..100). */
   uint16_t getS();
+  /** Change the parameter storage type (ST_*). */
   itemCmd setArgType(uint8_t);
+  /** Convert the stored value to the given storage type (ST_*). */
   itemCmd convertTo(uint8_t);
+  /** @return the default storage type (ST_*) for the given channel type. */
   uint8_t getStoragetypeByChanType(short chanType);
 
+  /** Set the parameter to a percent value 0..100 (ST_PERCENTS255 storage). */
   itemCmd Percents(int i);
+  /** Set the parameter to a percent value 0..255 (ST_PERCENTS255 storage). */
   itemCmd Percents255(int i);
 
+  /** @return the topic suffix code (S_*) of this command. */
   uint8_t getSuffix();
+  /** Set the topic suffix code (S_*). */
   itemCmd setSuffix(uint8_t suffix);
 
+  /** Increase/decrease a percent/int/float value by `step`, clamped to [0, limit]. */
   bool incrementPercents(long int, long int limit);
+  /** Increase/decrease the hue by `step` (with wrap-around). */
   bool incrementH(long int);
+  /** Increase/decrease the saturation by `step`. */
   bool incrementS(long int);
+  /** Increase/decrease the temperature by `step`. */
   bool incrementTemp(long int dif);
 
+  /** @return the parameter as a signed 32-bit int. */
   long int getInt();
+  /** @return the parameter as a fixed-point value in tens. */
   long int getTens();
+  /** @return the raw fixed-point parameter (no scaling). */
   long int getTens_raw();
+  /** @return the parameter as a float. */
   float    getFloat();
+  /** @return the parameter as a string (ST_STRING). */
   char *   getString();
+  /** @return the parameter as a single int (first byte of a color, etc). */
   long int getSingleInt();
+  /** @return the value as percent 0..100 (inverse flips low/high). */
   short    getPercents(bool inverse=false);
+  /** @return the value as percent 0..255. */
   short    getPercents255(bool inverse=false);
+  /** Set the value from a percent 0..100. @return true on success. */
   bool     setPercents(int percents);
+  /** @return the command code (CMD_*). */
   uint8_t    getCmd();
+  /** @return the parameter storage type (ST_*). */
   uint8_t    getArgType();
+  /** @return the reserved cmdParam field. */
   uint8_t    getCmdParam();
+  /**
+   * Serialize the command and/or value to a text payload for MQTT.
+   * @param sendFlags - FLAG_COMMAND and/or FLAG_PARAMETERS select what to print
+   * @param scale100 - scale 0..255 values to 0..100
+   */
   char   * toString(char * Buffer, int bufLen, int sendFlags = FLAG_COMMAND | FLAG_PARAMETERS, bool scale100 = false);
 
+  /** @return true if this is a command (not just a value). */
   bool isCommand();
+  /** @return true if this is a whole-channel command (not a subcommand). */
   bool isChannelCommand();
+  /** @return true if this carries a value. */
   bool isValue();
+  /** @return true if this carries a color (HSV/RGB/RGBW). */
   bool isColor();
 
+  /** Set the value to the channel default for the current storage type. */
   itemCmd setDefault();
+  /** Set the storage type appropriate for the given channel type. */
   itemCmd setChanType(short chanType);
+  /** Dump the command to the debug serial. */
   void debugOut();
 
+  /** Map the unified command/value to a device-specific value via `mappingData`. */
   itemCmd doMapping(aJsonObject *mappingData);
+  /** Map a device-specific value back to the unified representation. */
   itemCmd doReverseMapping (aJsonObject *mappingData);
+  /** Scale a 0..255 value to 0..100 in place. @return true on success. */
   bool scale100();
 
   };
 
+/** @return the channel type code (CH_*) for a config "type" verb (string or int). */
 int replaceTypeToInt(aJsonObject* verb);
 #pragma pack(pop)

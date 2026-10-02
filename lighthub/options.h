@@ -1,15 +1,17 @@
 #pragma once
 #include <Arduino.h>
 
+// PID: do not filter (scale/clamp) the regulator output
 #ifndef NOT_FILTER_PID_OUT
 #define NOT_FILTER_PID_OUT 1
 #endif
 
-#define DHCP_ATTEMPTS_FALLBACK 3
-#define TENS_FRACT_LEN 2
-#define TENS_BASE 100
+#define DHCP_ATTEMPTS_FALLBACK 3 // DHCP attempts before falling back to static IP
+#define TENS_FRACT_LEN 2  // fraction digits of "tens" fixed-point values
+#define TENS_BASE 100     // scale factor of "tens" fixed-point values
 
-#define DEFAULT_FILESIZE_LIMIT 65535
+#define DEFAULT_FILESIZE_LIMIT 65535 // max download size in bytes
+// Max JSON config size, per platform
 #ifndef MAX_JSON_CONF_SIZE
 
 #if defined(__SAM3X8E__)
@@ -34,11 +36,11 @@
 #define SYSLOG_LOCAL_SOCKET 514
 
 #ifndef MODBUS_UART_RX_PIN
-#define MODBUS_UART_RX_PIN -1
+#define MODBUS_UART_RX_PIN -1 // UART RX pin for the Modbus RS485 bus
 #endif
 
 #ifndef MODBUS_UART_TX_PIN
-#define MODBUS_UART_TX_PIN -1
+#define MODBUS_UART_TX_PIN -1 // UART TX pin for the Modbus RS485 bus
 #endif
 
 #ifndef FASTLED
@@ -49,7 +51,7 @@
 // If not defined ADAFRUIT_LED - FastLED library will be used instead
 // And strip type, pin, order must defined on compilation time
 #ifndef CONTROLLER
-#define CONTROLLER TM1809
+#define CONTROLLER TM1809 // Default LED strip controller type
 #endif
 
 #ifndef SCALE_VOLUME_100
@@ -57,13 +59,14 @@
 #endif
 
 #ifndef DATA_PIN
-#define DATA_PIN 4
+#define DATA_PIN 4 // LED strip data (DIN) pin
 #endif
 
 #ifndef ORDER
-#define ORDER BRG
+#define ORDER BRG // LED strip color order
 #endif
 
+// RS485 transceiver direction (DE/RE) control pin
 #ifndef MODBUS_TX_PIN
 #define TXEnablePin 13
 #else
@@ -73,39 +76,39 @@
 //#define ESP_EEPROM_SIZE 2048
 
 #ifndef AVR_DMXOUT_PIN
-#define AVR_DMXOUT_PIN 18
+#define AVR_DMXOUT_PIN 18 // Software DMX output pin on AVR
 #endif
 
-#define WIFI_TIMEOUT 60000UL
-#define TIMEOUT_RECONNECT 10000UL
-#define TIMEOUT_REINIT 5000UL
-#define TIMEOUT_RELOAD 30000UL
-#define TIMEOUT_RETAIN 8000UL
-#define TIMEOUT_REINIT_NOT_CONFIGURED 120000UL
-#define INTERVAL_1W 5000UL
+#define WIFI_TIMEOUT 60000UL            // Max time waiting for a WiFi connection
+#define TIMEOUT_RECONNECT 10000UL       // Delay before retrying an MQTT reconnect
+#define TIMEOUT_REINIT 5000UL           // Delay before re-initializing the LAN
+#define TIMEOUT_RELOAD 30000UL          // Delay before reloading the config
+#define TIMEOUT_RETAIN 8000UL           // Delay while publishing retained states
+#define TIMEOUT_REINIT_NOT_CONFIGURED 120000UL // Longer re-init when not yet configured
+#define INTERVAL_1W 5000UL              // 1-Wire temperature poll interval (ms)
 #define PERIOD_THERMOSTAT_FAILED (600 * 1000UL) //16000 sec (4h) max
 
 //#define T_ATTEMPTS 200
 //#define IET_TEMP     0
 //#define IET_ATTEMPTS 1
 #ifndef THERMO_GIST_CELSIUS
-#define THERMO_GIST_CELSIUS 1.
+#define THERMO_GIST_CELSIUS 1. // Thermostat hysteresis / dead-band (deg C)
 #endif
 
 #ifndef THERMO_OVERHEAT_CELSIUS
-#define THERMO_OVERHEAT_CELSIUS 38.
+#define THERMO_OVERHEAT_CELSIUS 38. // Thermostat overheat alarm threshold
 #endif
 
 #ifndef FM_OVERHEAT_CELSIUS
-#define FM_OVERHEAT_CELSIUS 40.
+#define FM_OVERHEAT_CELSIUS 40. // Fan/AC overheat alarm threshold
 #endif
 
 #ifndef MIN_VOLUME
-#define MIN_VOLUME 20
+#define MIN_VOLUME 20 // Minimum LED strip brightness
 #endif
 
 #ifndef INIT_VOLUME
-#define INIT_VOLUME 30
+#define INIT_VOLUME 30 // Initial LED strip brightness on power-up
 #endif
 
 /*
@@ -129,34 +132,34 @@
 */
 
 #ifndef INTERVAL_CHECK_INPUT
-#define INTERVAL_CHECK_INPUT  11
+#define INTERVAL_CHECK_INPUT  11 // ms between digital input scans
 #endif
 
-#define INTERVAL_CHECK_ULTRASONIC 100
+#define INTERVAL_CHECK_ULTRASONIC 100 // ms between ultrasonic sensor reads
 
 #ifndef TIMER_CHECK_INPUT
-#define TIMER_CHECK_INPUT  15
+#define TIMER_CHECK_INPUT  15 // ms between timer (pulse-count) input scans
 #endif
 #ifndef INTERVAL_CHECK_SENSOR
-#define INTERVAL_CHECK_SENSOR  5000
+#define INTERVAL_CHECK_SENSOR  5000 // ms between periodic sensor polls
 #endif
 
-#define INTERVAL_SLOW_POLLING 1000
+#define INTERVAL_SLOW_POLLING 1000 // ms between slow item polls
 //#define INTERVAL_POLLING      100
 #ifndef THERMOSTAT_CHECK_PERIOD
-#define THERMOSTAT_CHECK_PERIOD 30000
+#define THERMOSTAT_CHECK_PERIOD 30000 // ms between thermostat control checks
 #endif
 
 #ifndef OW_UPDATE_INTERVAL
-#define OW_UPDATE_INTERVAL 5000
+#define OW_UPDATE_INTERVAL 5000 // ms between 1-Wire update cycles
 #endif
 
 #ifndef MODBUS_SERIAL_BAUD
-#define MODBUS_SERIAL_BAUD 9600
+#define MODBUS_SERIAL_BAUD 9600 // Modbus RS485 baud rate
 #endif
 
 #ifndef MODBUS_SERIAL_PARAM
-#define MODBUS_SERIAL_PARAM SERIAL_8N1
+#define MODBUS_SERIAL_PARAM SERIAL_8N1 // Modbus RS485 framing
 #endif
 
 /*
@@ -169,17 +172,19 @@
 #endif
 */
 
-#define MODBUS_FM_BAUD 9600
-#define MODBUS_FM_PARAM  SERIAL_8N1
+#define MODBUS_FM_BAUD 9600      // VACOM/FM Modbus device baud rate
+#define MODBUS_FM_PARAM  SERIAL_8N1 // VACOM/FM Modbus device framing
 
 #ifndef SERIAL_BAUD
-#define SERIAL_BAUD 115200
+#define SERIAL_BAUD 115200 // Debug serial baud rate
 #endif
 
+// Default MAC used when the chip provides no unique ID
 #ifndef CUSTOM_FIRMWARE_MAC
 #define DEFAULT_FIRMWARE_MAC {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xFF}
 #endif
 
+// Remote configuration server (MY_CONFIG_SERVER overrides the default)
 #ifndef MY_CONFIG_SERVER
 #define CONFIG_SERVER "lazyhome.ru"
 #else
@@ -187,7 +192,7 @@
 #endif
 
 #ifndef HOMETOPIC
-#define HOMETOPIC  "myhome"
+#define HOMETOPIC  "myhome" // Root of all MQTT topics
 #endif
 
 //Default output topic
@@ -205,9 +210,10 @@
 #define INTOPIC  "in"
 #endif
 
-#define MQTT_SUBJECT_LENGTH 20
-#define MQTT_TOPIC_LENGTH 64
+#define MQTT_SUBJECT_LENGTH 20 // Max length of an MQTT subject name
+#define MQTT_TOPIC_LENGTH 64   // Max length of a full MQTT topic
 
+// Feature enable/disable toggles
 #ifndef DMX_DISABLE
 #define _dmxin
 #define _dmxout
@@ -226,10 +232,10 @@
 #endif
 
 #ifndef LAN_INIT_DELAY
-#define LAN_INIT_DELAY 500
+#define LAN_INIT_DELAY 500 // ms to wait before starting LAN init
 #endif
 
-#define DEFAULT_INC_STEP 5
+#define DEFAULT_INC_STEP 5 // Default step for INCREASE/DECREASE commands
 
 
 #if defined(ARDUINO_ARCH_AVR)
@@ -323,15 +329,15 @@
 #endif
 #endif
 
-#define DHT_POLL_DELAY_DEFAULT 15000
-#define UPTIME_POLL_DELAY_DEFAULT 30000
+#define DHT_POLL_DELAY_DEFAULT 15000       // Default DHT sensor poll interval (ms)
+#define UPTIME_POLL_DELAY_DEFAULT 30000    // Default uptime stats publish interval (ms)
 
 #ifdef ARDUINO_ARCH_STM32F1
 #define strncpy_P strncpy
 #endif
 
 #ifndef DMX_SMOOTH_DELAY
-#define DMX_SMOOTH_DELAY 10
+#define DMX_SMOOTH_DELAY 10 // ms between DMX output smoothing steps
 #endif
 
 //#ifdef M5STACK
@@ -381,28 +387,31 @@
 #define isAnalogPin(p)  ((p >= 14) && (p<=21))
 #endif
 
+// Minimum free RAM (bytes) required before a heavy operation
 #ifdef AVR
 #define minimalMemory 200
 #else
 #define minimalMemory 1200
 #endif
 
+// Comma-separated list of GPIO pins protected from raw control
 #if not defined PROTECTED_PINS 
 #define PROTECTED_PINS
 #endif
 
 #if not defined DEFAULT_OTA_USERNAME 
-#define DEFAULT_OTA_USERNAME arduino
+#define DEFAULT_OTA_USERNAME arduino // Default OTA update login
 #endif
 
 #if not defined DEFAULT_OTA_PASSWORD 
-#define DEFAULT_OTA_PASSWORD password
+#define DEFAULT_OTA_PASSWORD password // Default OTA update password
 #endif
 
 const short protectedPins[]={PROTECTED_PINS};
 #define protectedPinsNum (sizeof(protectedPins)/sizeof(short))
 
 #ifdef CRYPT
+// Shared secret used for config encryption
 #if not defined SHAREDSECRET
 #define SHAREDSECRET "12345678"
 #endif

@@ -1,3 +1,10 @@
+/**
+ * @file textconst.h
+ * @brief Topic/suffix string constants.
+ *
+ * PROGMEM string constants for MQTT topics, Homie metadata, command
+ * names and item subtopic suffixes used across the controller.
+ */
 #pragma once
 
 const char state_P[] PROGMEM = "$state";

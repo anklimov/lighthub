@@ -19,6 +19,15 @@ e-mail    anklimov@gmail.com
 */
 
 //define APU_OFF
+/**
+ * @file owTerm.h
+ * @brief 1-Wire temperature sensing for thermostats.
+ *
+ * Reads DS18S20/DS18B20 digital thermometers (device type 0x28) through
+ * a DS2482-100 I2C-to-1-Wire bridge (or a software 1-Wire driver on a
+ * dedicated pin). Each configured sensor is polled periodically and its
+ * temperature is published to the item's /val subtopic.
+ */
 #pragma once
 
 #define SW_AUX0 0x40
@@ -61,6 +70,7 @@ e-mail    anklimov@gmail.com
 #include <DallasTemperature.h>
 #include "aJSON.h"
 
+/** @brief 1-Wire sensor configuration array from the JSON config. */
 extern aJsonObject *owArr;
 
 //typedef   void (*owChangedType) (int , DeviceAddress, float) ;
@@ -78,13 +88,35 @@ extern aJsonObject *owArr;
 #endif
 
 
+/** @brief 1-Wire bus handle (DS2482 bridge or software pin driver). */
 extern OneWire *oneWire;
+/** @brief DallasTemperature manager on top of the 1-Wire bus. */
 extern DallasTemperature *sensors;
 
+/**
+ * @brief Scans the 1-Wire bus and logs the devices it finds.
+ * @return true on success.
+ */
 int  owUpdate();
+/**
+ * @brief Initializes the 1-Wire bus and the temperature sensors, and
+ * applies the configured resolution.
+ * @return true on success.
+ */
 int  owSetup();
+/**
+ * @brief Periodic poll: reads each configured sensor and publishes its
+ * temperature to the item's /val subtopic.
+ */
 void owLoop();
+/**
+ * @brief Registers an idle callback invoked between 1-Wire operations.
+ * @param ptr Function to call while the bus is idle.
+ */
 void setupOwIdle(void (*)()) ;
+/**
+ * @brief Triggers a 1-Wire device search/update.
+ */
 void owSearch();
 
 #endif

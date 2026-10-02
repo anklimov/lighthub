@@ -1,3 +1,13 @@
+/**
+ * @file ipmodbus.h
+ * @brief IP<->UART Modbus gateway (Modbus TCP/UDP over RS485).
+ *
+ * Bridges Modbus TCP/UDP clients (port 502) to a Modbus RTU device on a
+ * UART (RS485). Incoming TCP/UDP requests are queued, sent serially with
+ * inter-frame delays, and the RTU responses are matched back to the
+ * originating client by MBAP transaction/unit ID. Based on the
+ * arduino-modbus-rtu-tcp-gateway design.
+ */
 #ifdef IPMODBUS
 #pragma once
 #include <CircularBuffer.h>     // CircularBuffer https://github.com/rlogiacco/CircularBuffer
@@ -26,6 +36,10 @@ const int serialTimeout = 800;
 const int tcpPort = 502;
 const int udpPort = 502;
 
+/**
+ * @brief Metadata for one queued Modbus request, so the RTU response
+ * can be routed back to the correct client.
+ */
 typedef struct {
   byte tid[2];            // MBAP Transaction ID
   byte uid;               // MBAP Unit ID (address)
@@ -75,6 +89,7 @@ const int modbusSize = 256;          // size of a MODBUS RTU frame (determines s
 
 
 
+/** @brief States of the serial (RTU) transmission sub-state machine. */
 enum state : byte
 {
   MBIDLE, SENDING, DELAY, WAITING
@@ -82,10 +97,39 @@ enum state : byte
 
 
 
+/**
+ * @brief Main gateway loop: receives TCP/UDP requests, processes the
+ * queue and drives the serial RTU transmission.
+ */
 void ipmodbusLoop();
+/**
+ * @brief Initializes the Ethernet server/UDP and the Modbus UART.
+ */
 void setupIpmodbus();
+/**
+ * @brief Validates an incoming Modbus TCP/UDP request (MBAP header, and
+ * RTU CRC when RTU-over-TCP is used).
+ * @param buffer Received frame.
+ * @param bufferSize Frame length.
+ * @return 0 if the request is valid, otherwise an error code.
+ */
 byte checkRequest(byte buffer[], unsigned int bufferSize);
+/**
+ * @brief Updates the running Modbus RTU CRC with one byte.
+ * @param b Byte to add to the CRC.
+ */
 void calculateCRC(byte b);
+/**
+ * @brief Checks whether a Modbus slave (by address) is currently responding.
+ * @param index Slave address.
+ * @return true if the slave is marked as responding.
+ */
 bool getSlaveResponding(const uint8_t index);
+/**
+ * @brief Verifies the trailing Modbus RTU CRC of a frame.
+ * @param buf Frame including the CRC bytes.
+ * @param len Frame length.
+ * @return true if the CRC is valid.
+ */
 bool checkCRC(byte buf[], int len);
 #endif

@@ -1,3 +1,16 @@
+/**
+ * @file main.h
+ * @brief Main controller interface of LightHub.
+ *
+ * Declares the application entry points (setup_main/loop_main), the
+ * LAN/MQTT state machine (lan_status, lanLoop) and its initialization
+ * routines (onInitialStateInitLAN, onMQTTConnect,
+ * ip_ready_config_loaded_connecting_to_broker), remote config handling
+ * (loadConfigFromHttp, loadConfigFromEEPROM, applyConfig), the serial CLI
+ * command handlers (cmdFunction*) and the periodic polling loops
+ * (pollingLoop, thermoLoop, inputLoop) that drive items, thermostats
+ * and inputs.
+ */
 #pragma once
 
 #include "options.h"
@@ -214,6 +227,13 @@ extern Streamlog  errorSerial;
 extern Artnet *artnet;
 #endif
 
+/**
+ * @brief LAN/MQTT boot-up and runtime state machine states.
+ *
+ * Positive values are boot/operation states; negative and high values
+ * are transient actions requested by loop_main (reinit, reconnect,
+ * config re-read, get).
+ */
 enum lan_status {
     INITIAL_STATE = 0,
     AWAITING_ADDRESS = 1,
@@ -236,52 +256,159 @@ enum lan_status {
     AWAITING_CONFIG = 19
 };
 
+/** @brief Current state of the LAN/MQTT state machine. */
 extern lan_status lanStatus;
 
+/** @brief Chip unique ID (20 bytes), viewable as 5 longs or 20 bytes. */
 typedef union {
     uint32_t  UID_Long[5];
     uint8_t   UID_Byte[20];
 } UID;
 
+/**
+ * @brief Checks whether the controller is not in the retain/collecting phase.
+ * @return true if lanStatus is not RETAINING_COLLECTING.
+ */
 bool isNotRetainingStatus();
 
 #if not defined (NOIP)
+/**
+ * @brief MQTT receive callback: dispatches incoming messages to item
+ * command processing or config handling.
+ * @param topic MQTT topic of the received message.
+ * @param payload Message payload (not necessarily null-terminated).
+ * @param length Payload length in bytes.
+ */
 void mqttCallback(char *topic, byte *payload, unsigned int length);
+/**
+ * @brief One iteration of the LAN/MQTT state machine; advances the
+ * ethernet/WiFi/MQTT boot sequence and returns the new state.
+ * @return Next lan_status for the main loop.
+ */
 lan_status lanLoop();
+/**
+ * @brief Downloads the device JSON config from the config server
+ * (HTTP GET with If-None-Match ETag), parses and applies it.
+ * @return HTTP status code (200 on success, 304 if unchanged, negative on error).
+ */
 int loadConfigFromHttp();
+/**
+ * @brief Initial LAN setup: initializes ethernet/WiFi and starts the
+ * address acquisition sequence.
+ */
 void onInitialStateInitLAN();
+/**
+ * @brief Called on (re)connect to the MQTT broker: sets up topics,
+ * subscribes and publishes retained states.
+ */
 void onMQTTConnect();
+/**
+ * @brief State handler for IP_READY_CONFIG_LOADED_CONNECTING_TO_BROKER:
+ * connects to the configured MQTT broker(s).
+ */
 void ip_ready_config_loaded_connecting_to_broker();
 
 #endif
 
+/**
+ * @brief Resolves the controller MAC address (from flash or chip UID)
+ * and stores it in the system config.
+ */
 void setupMacAddress();
+/**
+ * @brief Prints the current MAC address to the info log.
+ */
 void printMACAddress();
 
 #ifndef OWIRE_DISABLE
+/**
+ * @brief 1-Wire temperature change callback.
+ * @param i Sensor index.
+ * @param addr DeviceAddress of the sensor.
+ * @param currentTemp Newly read temperature in Celsius.
+ */
 void Changed(int i, DeviceAddress addr, float currentTemp);
 #endif
 
+/**
+ * @brief Idle hook invoked by the Modbus code between serial operations
+ * to let the main system breathe.
+ */
 void modbusIdle(void);
 
+/**
+ * @brief CLI command "help": lists available CLI commands.
+ * @param arg_cnt Number of arguments.
+ * @param args Argument strings.
+ * @return Command result code.
+ */
 int cmdFunctionHelp(int arg_cnt, char **args);
 
+/**
+ * @brief CLI command "kill": aborts the current long operation.
+ * @param arg_cnt Number of arguments.
+ * @param args Argument strings.
+ * @return Command result code.
+ */
 int cmdFunctionKill(int arg_cnt, char **args);
 
+/**
+ * @brief Applies the loaded JSON config tree to the running system
+ * (items, inputs, topics, drivers).
+ * @return true if the config was applied successfully.
+ */
 bool  applyConfig();
 
+/**
+ * @brief CLI command "load": loads the config from the portal or flash.
+ * @param arg_cnt Number of arguments.
+ * @param args Argument strings.
+ * @return Command result code.
+ */
 int cmdFunctionLoad(int arg_cnt, char **args);
 
+/**
+ * @brief Loads the last saved config from flash into the config tree.
+ * @return 0 on success, nonzero on error.
+ */
 int loadConfigFromEEPROM();
 
+/**
+ * @brief CLI command "save": persists the current config tree to flash.
+ * @param arg_cnt Number of arguments.
+ * @param args Argument strings.
+ * @return Command result code.
+ */
 int cmdFunctionSave(int arg_cnt, char **args);
 
+/**
+ * @brief CLI command "mac": changes the controller MAC address.
+ * @param arg_cnt Number of arguments.
+ * @param args Argument strings (new MAC).
+ * @return Command result code.
+ */
 int cmdFunctionSetMac(int arg_cnt, char **args);
 
+/**
+ * @brief CLI command "get": re-downloads the config from the portal.
+ * @param arg_cnt Number of arguments.
+ * @param args Argument strings.
+ * @return Command result code.
+ */
 int cmdFunctionGet(int arg_cnt, char **args);
 
+/**
+ * @brief CLI command "log": changes serial/UDP log levels.
+ * @param arg_cnt Number of arguments.
+ * @param args Argument strings (levels).
+ * @return Command result code.
+ */
 int cmdFunctionLoglevel(int arg_cnt, char **args);
 
+/**
+ * @brief Prints a bool as "+" or "-" to the info log.
+ * @param arg Value to print.
+ */
 void printBool(bool arg);
 
 int cmdFunctionSave(int arg_cnt, char **args);
@@ -297,52 +424,140 @@ int ipLoadFromFlash(short n, IPAddress &ip);
 
 
 
+/**
+ * @brief Marks that an Ethernet transmission is about to happen;
+ * disables time-sensitive drivers as needed.
+ */
 void preTransmission();
 
+/**
+ * @brief Marks that an Ethernet transmission has finished;
+ * re-enables drivers and handles lost-time compensation.
+ */
 void postTransmission();
 
+/**
+ * @brief Application setup: init serial, flash config, MAC, LAN,
+ * HTTP/CLI listeners and all drivers (runs once at boot).
+ */
 void setup_main();
 
+/**
+ * @brief Application main loop: runs the LAN/MQTT state machine, CLI
+ * poller, item polling, thermostat, input, DMX and CAN iterations.
+ */
 void loop_main();
 
+/**
+ * @brief Idle hook invoked by the 1-Wire/DS2482 code between operations.
+ */
 void owIdle(void);
 
 void modbusIdle(void);
 
+/**
+ * @brief Polls digital/analog inputs and processes their events.
+ * @param cause Why the loop is running (e.g. CHECK_INPUT).
+ */
 void inputLoop(short);
 
+/**
+ * @brief Polls periodic sensors (DHT, ultrasonic, ...) connected to inputs.
+ */
 void inputSensorsLoop();
 
+/**
+ * @brief Sets up input channels from the loaded config.
+ */
 void inputSetup(void);
+/**
+ * @brief Stops and releases all input channels.
+ */
 void inputStop(void);
 
+/**
+ * @brief Periodic item polling: refreshes states and publishes changes.
+ */
 void pollingLoop(void);
 
+/**
+ * @brief Thermostat control loop: checks temperature readings and
+ * drives heater relays (on/off/error bypass) with overheat alarms.
+ */
 void thermoLoop(void);
 
+/**
+ * @brief Updates the current-temperature store of a thermostat by name.
+ * @param name Name of the thermostat item.
+ * @param t New temperature in Celsius.
+ * @return 0 on success, nonzero if the item was not found.
+ */
 short thermoSetCurTemp(char *name, float t);
 
 void modbusIdle(void);
 
+/**
+ * @brief Prints a summary of the current network/system config.
+ */
 void printConfigSummary();
 
+/**
+ * @brief Registers the serial CLI commands (help, save, load, get,
+ * mac, ip, kill, reboot, log, ...) with the Cmd library.
+ */
 void setupCmdArduino();
 
+/**
+ * @brief Prints firmware version, revision and build options at boot.
+ */
 void printFirmwareVersionAndBuildOptions();
 
+/**
+ * @brief Checks whether a config array entry is a thermostat item.
+ * @param item aJsonObject config array to check.
+ * @return true if the entry is a CH_THERMO item.
+ */
 bool IsThermostat(const aJsonObject *item);
 
+/**
+ * @brief Checks whether a thermostat must be stopped (disabled or its
+ * temperature sensor disconnected for too long).
+ * @param thermoExtensionArray Thermostat extension array from config.
+ * @param thermoLatestCommand Last received thermostat command.
+ * @return true if the thermostat should be disabled.
+ */
 bool disabledDisconnected(const aJsonObject *thermoExtensionArray, int thermoLatestCommand);
 
+/**
+ * @brief Hard-resets the board (watchdog or MCU reset).
+ */
 void resetHard();
 
+/**
+ * @brief Frees the current config tree and its driver resources.
+ * @param locksAlowed Number of config locks that may be active.
+ * @return true if the config was successfully released.
+ */
 bool cleanConf(short locksAlowed=0);
 
+/**
+ * @brief Prints the current LAN configuration to the serial port.
+ */
 void printCurentLanConfig();
 
+/**
+ * @brief Attaches the Matura timer (interrupt-based timing helper).
+ * @return Attached timer number, or negative on error.
+ */
 int16_t attachMaturaTimer();
 
+/**
+ * @brief Selects the first configured MQTT broker for connection.
+ */
 void setFirstBroker();
+/**
+ * @brief Moves to the next configured MQTT broker (failover).
+ */
 void setNextBroker();
 
 //void printFreeRam();

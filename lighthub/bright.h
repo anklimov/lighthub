@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+/// Default brightness curve: linear mapping of percent to 8-bit value.
 #define BRIGHT_LINEAR
 
 
@@ -103,4 +104,14 @@ const  uint8_t stepvar[] PROGMEM =
          0xF6, 0xF9, 0xFC, 0xFF};
 #endif
 
+/**
+ * @brief Convert a 0..255 brightness percentage to an 8-bit output value.
+ *
+ * Uses the active brightness curve: a straight passthrough when
+ * BRIGHT_LINEAR is set, otherwise a perceptual (log/step) lookup table
+ * so low brightness steps feel smoother to the eye.
+ *
+ * @param percent255 Brightness percentage in 0..255.
+ * @return The 8-bit brightness value to apply to the output.
+ */
 uint8_t getBright255(uint8_t percent255);

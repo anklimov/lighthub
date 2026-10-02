@@ -12,6 +12,7 @@
 //#endif
 
 //#define CCS811_ADDR 0x5B //Default I2C Address
+/// Fixed I2C address of the CCS811 sensor (alternate address).
 #define CCS811_ADDR 0x5A //Alternate I2C Address
 
 #if defined (ARDUINO_ARCH_ESP8266) 
@@ -50,6 +51,20 @@
 
 
 class Input;
+/**
+ * @brief CCS811 eCO2 / eTVOC air-quality sensor input (IN_CCS811 = 5).
+ *
+ * Reads the MOX air-quality sensor over I2C at the fixed address
+ * CCS811_ADDR (0x5A). Polls the sensor when new data is available,
+ * suppresses spontaneous calculation errors (CO2 >= 10000 ppm) and
+ * publishes the readings on the input "in" section:
+ * - /CO2   - estimated CO2 concentration (ppm);
+ * - /TVOC  - estimated total volatile organic compounds (ppb);
+ * - /base  - sensor baseline value.
+ *
+ * The humidity/temperature measured by the companion HDC1080 input are
+ * forwarded here via setEnvironmentalData() to improve accuracy.
+ */
 class in_ccs811 : public abstractIn {
 public:
     //CCS811 ccs811(CCS811_ADDR);
@@ -63,6 +78,19 @@ protected:
    void printSensorError();
 };
 
+/**
+ * @brief HDC1080 temperature / humidity sensor input (IN_HDC1080 = 6).
+ *
+ * Reads the humidity/temperature sensor over I2C at the fixed address
+ * 0x40. Polls on the slow polling cycle, resets the I2C bus on a read
+ * glitch, publishes the readings on the input "in" section and routes
+ * the humidity value to the "hum" key of the input object:
+ * - /T - temperature (Celsius);
+ * - /H - relative humidity (percent).
+ *
+ * The measured humidity/temperature are also forwarded to the CCS811
+ * sensor (when present) via setEnvironmentalData().
+ */
 class in_hdc1080 : public abstractIn {
 public:
     //ClosedCube_HDC1080 hdc1080;
