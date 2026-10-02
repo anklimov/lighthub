@@ -1,0 +1,206 @@
+==== Основные разделы конфигурационного файла ====
+Конфигурационный файл позволяет настроить контроллер lighthub конкретно для выполнения Вашей задачи. Может быть загружен в контроллер разными способами - портал lazyhome.ru/portal, веб-интерфейс контроллера, http API, плагин браузера. 
+
+Подробности тут [[как_lighthub_работает_с_файлом_конфигурации]]
+
+Конфигурационный файл имеет формат JSON. На первом уровне файла конфигурации задаются следующие объекты:
+
+
+^имя ^ назначений ^ параметры ^ пример ^
+|mqtt| настройка параметров MQTT|[имя_контроллера,ip_брокера,логин,пароль] см [[работа_с_mqtt]] NB: пароль, также, может быть определен через [[CLI интерфейс]], чтобы не компрометировать в открытом файле конфигурации|"mqtt":["lighthub-07","m2m.eclipse.org"]|
+|ow| настройка сенсоров 1-wire|в качестве параметра - JSON объект, содержащий в качестве ключа адрес термометра а в качестве значения - execObj (см ниже), определяющий куда передать показания термометра| [[конфигурирование#настройка_температурных_датчиков_1-wire]]|
+|syslog|Настройка логгирования контроллера через UDP syslog на сторонний сервер|первый элемент массива - ip адрес сервера логгирования, второй (опционально) порт|"syslog":["192.168.88.2"]|
+|dmx|Настройка DMX выхода|[кол-во каналов], для mega2560 возможна такая настройка: [выходной_pin_DMX, кл-во-каналов]|"dmx":[80],|
+|dmxin|настройка входа DMX|масссив названий каналов типа DMXRGBW|"dmxin":["led5","led6","led7","led8"]|
+|artnet|Настройка Artnet шлюза|[начальный DMX канал (соответствует 1-му каналу artnet),конечный DMX канал|"artnet":[48,67]|
+|topics|задает настройки топиков MQTT.|root: корневой топик (myhome по умолчанию), bcst: броадкаст топик (in по-умолчанию) | "topics":{"root":"flat2"} см [[работа_с_mqtt#пример_настройки_mqtt_в_json_конфигурации]]|
+|modbus|Задает справочник обьектов modbus|описание тут|[[настройка_modbus]]|
+|in|задает настройку входов контроллера|описание тут|[[аналоговые_входы]] [[несколько_кнопок_на_одном_входе]]|
+|items|Основной раздел конфигурации. Задает список обьектов, их настройку и взаимосвязь||описание ниже|
+|can|настройка CAN|addr:адрес контроллера name: имя контроллера conf:набор конфигураций для подчиненных NO-IP устройств||
+
+
+====Что такое {execObj}====
+Прежде чем далее описывать структуру файла настройки, необходимо определить такое понятие как {execObj}, которое довольно часто будет использоваться далее.
+Это JSON объект, или массив JSON обьектов, который может принимать на вход какое-либо значение или команду в унифицированном формате контроллера, а далее, предпринимать с этой информацией какие то действия. А именно:
+  * Выдавать в MQTT на один или несколько топиков
+  * Передавать на вход другим объектам контроллера
+  * Передавать по шине CAN 
+
+параметры:
+
+  * emit - MQTT топик в который отправить значение из параметра ecmd (если в параметре отсутствует / он будет дополнен слева префиксом статусного топика)
+  * item - имя локального устройства из items (может содержать суффикс для указания того, какое именно свойство объекта надо изменить. Например: «lamp/hue» или «lamp/sat»)
+  * can - передать команду другому контроллеру, подключенному по шине CAN. Должен быть указан массив, первое значение которого - CAN ID контроллера назначения (или 0 для передачи всем); второе значение - ItemID управляемого обьекта на контроллере назначения, третий (опциональный) - суффикс (например "set", "cmd", "fan"; четвертый (опциональный) - порядковый номер subItem для тех обьектов, которые управляют массивом устройств, например MULTIVENT или HUM
+
+Примеры:
+<code>
+{"emit":"edem/edem3/p_zal3/mode"}
+[{"emit":"t_bath3","item":"tbath3"},{"item":"p_bedr3/floor_temp","can":[0,206,"val"]]
+</code>
+
+====Настройка температурных датчиков 1-wire====
+формат: "device#":{execObj}
+
+Ниже пример конфигурации (в реальном файле конфигурации комментарии не допускаются)
+<code>
+{
+  "mqtt":["mqtt_id","host",port,"user","pass"], //ip address/name and client id of mqtt broker. Port, user, pass - are optional 
+
+// 1-Wire configuration chapter. "device#":{"emit":"mqtt topic suffix to report temp. measurements", "item":"local ite$
+  "ow":{
+                 "284811170400005B":{"emit":"t_entr"},  //reports temp to mqtt /myhome/s_out/t_entr
+                 "28FFF95533160459":{"emit":"t_bath1","item":"h_bath1"},
+        },
+
+</code>
+В данном примере определены два термодатчика. Температура первого будет передаваться в статусный топик myhome/s_out/t_entr, а второго - в топик myhome/s_out/t_bath1 и, кроме того, на внутренний обьект h_bath (по-умолчанию, в суффикс val)
+
+====Настройка объектов (items)====
+Каждый объект lightHub описывается в разделе items конфигурационного файла в виде JSON массива
+
+<code>
+"itemname":[<#type>,<itemConfig>,<set>,<cmd>]
+</code>
+
+Только первые два элемента массива -  тип и конфигурация, являются обязательными
+
+^номер элемента массива ^назначение^
+|1|тип обьекта. Это может быть как число из таблицы ниже так и строка, содержащая аббревиатуру типа| 
+|2|конфигурация объекта. В зависимости от его типа это может быть как число так и массив параметров (pins, address etc)|
+|3|текущая уставка (int or array of presets)|
+|4|текущая команда|
+ 
+
+^# типа ^ аббревиатура типа ^ описание ^ конфигурация объекта ^
+|0| DMX|DMX out 1-5 ch|стартовый номер DMX канала или массив каналов|
+|1| DMXRGBW  |DMX out 4 ch|стартовый номер DMX канала|
+|2| DMXRGB   |DMX out 3 ch||
+|3| PWM   |PWM output 1-5 каналов|номер пина или массив пинов|
+|4| MBUSDIM|Modbus AC Dimmer (legacy)||
+|5| THERMO|Simple ON/OFF thermostat|номер пина|
+|6| RELAY |ON_OFF relay output|номер пина|
+|7| GROUP |Group pseudochannel|массив строк с названиями каналов в группе|
+|8| VCTEMP|Vacom PID thermo - regulator (Ventilation set)|"fm_t":[8,"fm"]|
+|9| MBUSVC    |Vacom modbus motor regulator(legacy)|"fm":[9,[10,"a_ext"]]|
+|10|ACHAIER|Air Conditioner Haier|"ac_3":[10,[<port#>,{"mode":{"emit":"mode"},"speed":{"emit":"speed"},"temp":{"emit":"set"}}]]}|
+|11|SPILED | SPI LED strip||
+|12|MOTOR |Motorized air gateway with feedback resistor|"airgate":[12,[<pwm_pin>,<pin>,<pin_feedback>,<feedbackOffVal>,<feedbackOnVal>,<maxMotorTimeMs>]],|
+|13|PID   |PID regulator|[ [P,I,D,dT,alarmTO, alarmVal, outMin, outMax],{Output execObj},{Cascade execObj}]|
+|14|MBUS  |Universal Modbus channel|"t_balk3":[14,[<addr>,<"template">,{<"param1">:{execObj},...}]]|
+|15|UARTBRDG |Bridge between 2 UARTS with reporting PDUs to Wireshark via UDP||
+|16|RELAYPWM   |Slow PWM relay to control objects with inertia| "rbedr21": [16, [<pin>,<cycleSec>], 255, 1]|
+|17|DMXRGBWW  |DMX RGBWW channel (warm&cold white)||
+|18|VENTS |Multiroom ventilation set||
+|19|ELEVATOR |Reserved||
+|20|COUNTER   |Generic counter| "pumpctr":[20,[0.02,1.2]],"gasctr":[20,0]|
+|21|HUM  |Humidifier (reserved)||
+|22|MERCURY|Mercury energy meter/RS485 interface|"merc":[22,[<addr>,9600,"8N1",2,[2,2,2,2,2,2],10000]]|
+
+
+ 
+Address is channel depended. Pin# for relay, DMX address for DMX-512 channel, array for Modbus channel.
+In case of DMX item note that addressees are continuous numbering between decoders and start address of each decoders configurable by jumpers. E.g. if you have two 24-ch decoders and want to control all 48 channels then you must set address "1" on the first decoder and "25" on the second.
+
+<code> 
+"items":{
+// Example of array
+        "all":[7,["h_entr","h_bath1","h_bath2","h_balk1","h_balk2","h_boil1","h_boil2","h_polotenc","spots_en"]]
+
+// Examples of Thermostate items  [type,pin,temperatureC]
+        "h_bath1":[5,24,33],
+        "h_bath2":[5,34,32],
+        "h_entr" :[5,35,32],
+        "h_balk1":[5,25,28],
+        "h_balk2":["THERMO",27,28],
+// Examples of relay items [type, pin, preset, default command]
+        "h_boil1":[6,23],             // simple relay on pin 23
+        "h_boil2":["RELAY",28,1,1],         // relay, turned on by default (after reboot)
+        "h_polotenc":[6,26,1,1],
+        "spots_en":[6,22,1,1],
+        "light_en":[6,29,1,1],
+        "water":[6,36,1,1]
+         },
+</code>
+
+===== конфигурирование входов =====
+
+<code>
+// "in" syntax
+// "pin": { "T":type, "emit":"out_emit", item:"out_item", "scmd": "ON,OFF,TOGGLE,INCREASE,DECREASE", "rcmd": "ON,OFF,TO$
+
+//
+//Switch/Restore all
+//"pin": { "T":1, "emit":"/myhome/in/all", item:"local_all", "scmd": "OFF", "rcmd": "RESTORE"}
+
+//
+//Normal (not button) Switch (toggled mode)
+//"pin": { "T":1, "emit":"/light1", item:"light1", "scmd": "TOGGLE", "rcmd": "TOGGLE"} //not deployed yet
+
+//Normal (not button) Switch
+//"pin": { "T":0, "emit":"/light1", item:"light1", "scmd": "ON", "rcmd": "OFF"}
+// or
+// "pin": { "T":0, "emit":"/light1", item:"light1"}
+//or
+// "pin": { "emit":"/light1", item:"light1"}
+
+//1-Button dimmer //not deployed yet
+//"pin": { "T":1, "emit":"/light1", item:"light1", "scmd": "ON", srcmd:"INCREASE",rrcmd:"DECREASE",  "rcmd": "OFF"}
+
+//2-Buttons dimmer
+//"pin1": { "T":0, "emit":"/light1", item:"light1", "scmd": "ON", repcmd:"INCREASE"}
+//"pin2": { "T":0, "emit":"/light1", item:"light1", "scmd": "OFF", repcmd:"INCREASE"}
+
+"in":{
+          "41":{"T":0,"emit":"/myhome/in/all","scmd":"HALT","rcmd":"REST"}, //Emits HALT on close contact, REST on open
+          "37":{"item":"spots_en","scmd":"TOGGLE","rcmd":"TOGGLE"}, //Toggle on/off local spots every changing state of PIN
+          "38":{"emit":"/myhome/in/light","scmd":"TOGGLE","rcmd":"TOGGLE"}, //Toggle remote light on local switch
+          "40":{"T":1,"emit":"/myhome/out/all","scmd":"HALT","rcmd":"REST"}, ////not deployed yet
+          "39":{"emit":"/myhome/s_out/water_leak"}
+         }
+}
+</code>
+
+==== Modbus channel v1 ====
+
+
+данный тип канала устарел, драйвер modbus v2 дает существенно бОльшую гибкость, см [[настройка_modbus]] 
+Тем не. менее, этот тип канала может использоваться для простых применений, когда надо сделать простой проброс канала в регистр устройства Modbus с линейным пересчетом значения.
+
+===настройка канала типа №4 - Modbus Dimmer===
+
+If you just need to write some Modbus register on MQTT command & poll it back with simple scaling  - you can use item type #4 (Modbus dimmer)
+
+Config example (refer https://github.com/anklimov/lighthub/wiki/Configuring):   
+<code>
+{
+  "items": {
+    "bth1":[4,[96,0,0,255]] 
+    },
+  "mqtt":["lighthub-07","m2m.eclipse.org"]
+  }
+</code>
+
+Note: this config example available at URL http://lazyhome.ru/de-ad-be-ef-fe-07.config.json - so just set mac address of device by command “mac de:ad:be:ef:fe:07” for test.
+
+
+Item notation: 
+  * 4 - Modbus dimmer item type
+  * Param1: = 96 - Decimal address of modbus device
+  * Param2: = 0 - Modbus register to write (and read while polling)
+  * Param3: = 0 - mask (optional. Default value “-1”  - see below for explanations)
+  * Param4:= 255 - Maximum Value for scaling MQTT input value = 100  to register value  (Optional. Default MaxValue 0x3f. It is equivalent of “100" on input.  If value == 0 - no scaling)
+
+Mask:
+if mask == 1 - Value comes to most significant byte of 16 bit register word, another byte = 0xff
+if mask == 0 - Value comes to least significant byte of 16 bit register word, another byte = 0xff
+any other mask - put Value as 16 bit word without any modification
+if mask == -1 (or parameter omitted) - no register polling 
+  
+Note: Serial line parameters for itemtype 4 is 9600:8N1 (look for “dimPar" and “MODBUS_SERIAL_BAUD” definitions  in  compilation options if you need to change it) 
+
+=== Vacom 10 frequency driver===
+См. также два устаревших типа Modbus каналов:
+
+Vacom 10 frequency driver (from Danfos) via Modbus RTU and allows control frequency (item type = 9)  and  Vacom internal PID controller  (item type = 8 - used for Temperature control)
+Additionally, performing polling parameters from Vacom and publishing in JSON format to status MQTT Topic

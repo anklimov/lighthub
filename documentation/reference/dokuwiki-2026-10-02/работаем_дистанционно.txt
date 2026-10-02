@@ -1,0 +1,41 @@
+**ОТА прошивка**
+
+для Windows из папки C:\Program Files (x86)\Arduino\hardware\tools\avr\bin копируем arduinoOTA.exe
+в папку с прошивкой (firmware.bin).
+
+Создаем командный файл и указываем адрес вашего контроллера
+
+<code>
+arduinoOTA.exe -address 192.168.XXX.XXX -port 80 -username arduino -password password -sketch firmware.bin -b -upload /sketch
+
+</code>
+Запускаем!
+
+
+для Mac
+<code>
+arduinoOTA -address 192.168.XXX.XXX -port 80 -username arduino -password password -sketch firmware.bin -b -upload /sketch
+</code>
+
+
+password -  значение по-умолчанию. Его можно заменить при помощи CLI команды otapwd
+
+**Работа с SYSLOG**
+
+Для Windows устанавливаем Visual Syslog Сервер для Windows [[https://github.com/MaxBelkov/visualsyslog/blob/master/readme_rus.md]]
+
+В корне конфигурационного файлa Lighthub указываем:
+
+<code>
+"syslog":["IP"]
+</code>
+
+где "IP" - адрес сервера Syslog
+
+**Выполнение CLI команд через MQTT
+**
+
+Достаточно в топик myhome/имя_контроллера/$command послать нужную команду [[cli_интерфейс]]
+
+Также, можно воспользоваться http [[api]]
+

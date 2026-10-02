@@ -1,0 +1,106 @@
+====Расположение опций====
+При сборке проекта опции задаются в файлах, лежащих в директориях build-flags и custom-build-flags
+
+В первой директории лежат рекомендованные настройки, входящие в состав дистрибутива, во вторую же пользователь может положить приватные настройки, которые не коммитятся на Github (например, можно жестко задать свой пароль wifi для ESP и отключить 
+
+В директории используются файлы вида build_flags_<env>, где <env> - архитектура для которой производится компиляция (due|lighthub21|esp32-wifi|и т.д)
+
+Строка, начинающаяся с # игнорируется
+
+Чтобы задать опцию, используется строка:
+
+-D ИМЯ_ОПЦИИ
+
+или
+
+-D ИМЯ_ОПЦИИ=ЗНАЧЕНИЕ
+
+====Перечень возможных опций====
+  * MY_CONFIG_SERVER=192.168.1.1 | address of external JSON-config http://192.168.1.1/de-ad-be-ef-fe-00.config.json
+  * WATCH_DOG_TICKER_DISABLE | disable wdt feature
+  * USE_1W_PIN=49 | use direct connection to 1W devices on 49 pin, no I2C bridge DS2482-100
+  * SD_CARD_INSERTED | enable sd-card support (unused)
+  * SERIAL_BAUD=115200 | set baud rate for console on Serial0
+  * Wiz5500 |Use Wiznet 5500 library instead universal Wiznet driver
+  * Wiz5100 |Use Wiznet 5500 library instead universal Wiznet driver
+  * DISABLE_FREERAM_PRINT | disable printing free Ram in bytes to debugSerial port
+  * CUSTOM_FIRMWARE_MAC=de:ad:be:ef:fe:00 |set firmware macaddress
+  * DMX_DISABLE |disable DMX support
+  * MODBUS_DISABLE | disable old Modbus driver 
+  * MBUS_DISABLE  | disable new Modbus driver 
+  * MODBUS_TX_PIN=13 |Transmit enable Pin
+  * MODBUS_SERIAL_PARAM=SERIAL_8E1 - задать параметры MODBUS v1 и MODBUS IP
+  * MODBUS_SERIAL_BAUD=9600
+  * OWIRE_DISABLE | disable OneWire support
+  * OW_DEVICES_LIMIT
+  * ARTNET_ENABLE |Enable Artnet protocol support
+  * AVR_DMXOUT_PIN=18 | Set Pin for DMXOUT on megaatmega2560
+  * CONTROLLINO |Change Modbus port, direction pins and Wiznet SS pins to be working on [Controllino](http://controllino.biz/)
+  * LAN_INIT_DELAY=2000 | set lan init delay for Wiznet ethernet shield
+  * ESP_WIFI_AP=MYAP | esp wifi access point name (used if WiFi manager disabled)
+  * ESP_WIFI_PWD=MYPWD | esp wifi access point password
+  * WIFI_MANAGER_DISABLE |Disable wifi manager for esp8266 & ESP32
+  * COUNTER_DISABLE |disable Counter, Uptime input support (for RAM savings on mega2560)
+  * DHT_DISABLE |disable DHT input support (for RAM savings on mega2560)
+  * PID_DISABLE | Disable PID regulator
+  * STATUSLED | Enable RGB status led on pins 50,51,52 (DUE only)
+  * DMX_SMOOTH |Smooth transition on DMX channels (DUE only)
+  * OTA | Enable Other The Air firmware upload/HTTP API
+  * OTA_PORT
+  * DEFAULT_OTA_USERNAME - по умолчанию arduino
+  * DEFAULT_OTA_PASSWORD - по умолчанию password
+  * W5500_CS_PIN=53 |Defines CS pin for Ethernet adapter (10-th by default, 53 on LightHub shield)
+  * WIFI_ENABLE |Enable WiFi for ESP (Wiznet by default)
+  * SPILED_DISABLE |Disable SPI LED library
+  * AC_DISABLE |Disable UART Hayer Air condition driver
+  * M5STACK |Logging to M5Stack OLED screen
+  * NO_HOMIE |Disable HOMIE discovery topics
+  * BRIGHT_STEP |Scale DMX bright - Table1
+  * BRIGHT_LOG |Scale DMX bright - Table2
+  * MCP23017 allow I2C input port extender on MCP23017 chip
+  * RESTART_LAN_ON_MQTT_ERRORS |reinit LAN if many mqtt errors occured
+  * DEVICE_NAME short handy device name which is used instead of mac for download config http:/ /{MY_CONFIG_SERVER}/{DEVICE_NAME}_config.json
+  * SYSLOG_ENABLE |enable UDP SYSLOG support feature(under DEVELOPMENT) that must be configured through config file
+  * WITH_PRINTEX_LIB use PrintEx library (develop experimental feature)
+  * CSSHDC_DISABLE |Disable CS811 and HDC1080 sensors support
+  * FASTLED - using FASTLED library instead default ADAFRUIT_LED
+  * SCALE_VOLUME_100 using 0..100 scaling in /set topics instead 0.255 (default)
+  * CORS=\"http://lazyhome.ru\"
+  * TIMER_INT | использовать прерывание таймера для критичных ко времени исполнения операций дополнительно к кооперативной многозадачности (DUE)
+  * MODBUS_DEBUG - Выдавать весь Modbus обмен в отладочный порт в HEX виде
+  * FS_STORAGE | ESP32 - использовать  файловую систему для хранения настроек (пока не работает)
+  * FS_PREPARE | ESP32 - отформатировать файловую систему если она не отформатирована
+  * MERCURY_ENABLE - активация драйвера счетчика Меркурий
+  * IPMODBUS - см [[режим_шлюза_ip_modbus]]
+  * REDIRECTION_URL=\"http://lazyhome.ru/pwa\"
+  * MDNS_ENABLE
+  * CONFIG_CLEAN_PIN=2 - при включении данной опции и подключенной кнопке между  pin2 (пример) и общим проводом, если контроллер стартует при нажатой кнопке и кнопка удерживается в течение 10 сек - очищается конфигурация из энергонезависимой памяти
+  * CRYPT - см [[криптоподпись_команды]]
+  * SHAREDSECRET - см [[криптоподпись_команды]]
+  * PROTECTED_PINS - см [[криптоподпись_команды]]
+  * PULSEPIN12 - для интеграции с замком Motura X-Nova при включении данной опции, на pin12 каждые 2,5 сек выдается импульс 100ms для пробуждения замка и постоянного считывания статуса с его выходов (импульсы выдаются аппаратным таймером DUE и их длина/период гарантированы, вне зависимости от режима работы контроллера)
+  * I2C_CLOCK - частота шины I2C (используется в библиотеке HDC1080, CCS811)
+
+ 
+===Возможность переопределить RX-TX пины для ESP32 ===
+  * MODBUS_UART_RX_PIN=15
+  * MODBUS_UART_TX_PIN=2
+
+===Опции для перехватчика UART трафика===
+  * UARTBRIDGE_ENABLE
+  * MODULE_UATRBRIDGE_UARTA=Serial1
+  * MODULE_UATRBRIDGE_UARTA_RX_PIN=15
+  * MODULE_UATRBRIDGE_UARTA_TX_PIN=2
+  * MODULE_UATRBRIDGE_UARTB=Serial2
+  * MODULE_UATRBRIDGE_UARTB_RX_PIN=-1 
+  * MODULE_UATRBRIDGE_UARTB_TX_PIN=-1 
+
+===Default SerialDebug settings===
+  * SERIAL_BAUD=115200
+  * debugSerialPort=Serial
+
+===Назначить в качестве отладочного и CLI порта Native USB Port DUE===
+  * debugSerialPort=SerialUSB
+  * SerialPortType=Serial_
+  * SERIAL_BAUD=0
+

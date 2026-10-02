@@ -1,0 +1,68 @@
+=====Command Line Interface=====
+Иначе, интерфейс командной строки.
+
+Служит для настройки системных параметров контроллера (при необходимости)
+Команды можно подать как подключившись к контроллеру на отладочный последовательный порт, так и при помощи MQTT (см [[работа_с_mqtt#служебные_топики]]) или HTTP [[api]]
+ 
+===Перечень команд===
+  * 'help' - this text
+  * 'mac de:ad:be:ef:fe:00' set and store MAC-address in EEPROM
+  * 'ip [ip[,dns[,gw[,subnet]]]]' - set static IP
+  * 'save' - save current config in NVRAM; ON|OFF - enable/disable autosave
+  * 'get' [config addr]' - get config from pre-configured URL and store addr, ON|OFF - enable/disable download on startup
+  * 'load' - load config from NVRAM
+  * 'pwd' - define and store MQTT password
+  * 'otapwd' - define and store HTTP API password
+  * 'log [serial_loglevel] [udp_loglevel]' - define log level (0..7)
+  * 'kill' - test watchdog - в норме, приводит к перезапуску
+  * 'clear' - clear EEPROM
+  * 'search' - search devices on 1-wire bus
+  * 'reboot' - reboot controller
+
+===== Подключение по USB =====
+
+==== MAC ====
+Подключаем контроллер USB кабелем к ноутбуку. Открываем эмулятор терминала (например для Макбука использую minicom, который устанавливается через homebrew).
+Для улучшения читаемости ответов контроллера в minicom нажимаем комбинацию Esc+U
+
+
+''$ minicom -D /dev/tty.usbmodem14201''
+
+==== Windows ====
+Для windows можно использовать putty, терминал, входящий в среду разработки PlatformIO, Arduino IDE
+
+Параметры подключения - 115200 бод, N-8-1
+
+
+CLI commands must be send via serial port with 115200 baud rate / 8N1 params: 8 data bits, no parity bit, 1 stop bit.
+
+==== Пример исполненения команды при помощи Unix shell: ====
+
+<code>
+> stty -f /dev/cu.usbmodem146101 ispeed 115200 ospeed 115200 -parenb cs8 cstopb
+> echo "ip" > /dev/cu.usbmodem146101
+> cat /dev/cu.usbmodem146101
+</code>
+
+==== также, можно использовать Arduino IDE ====
+
+(serial monitor). Serial port must be configured (MacOSX config file ~/Library/Arduino15/preferences.txt)
+<code>
+serial.databits=8
+serial.stopbits=1
+serial.parity=N
+serial.debug_rate=115200
+serial.line_ending=1
+</code>
+
+===== Подключение по MQTT =====
+
+
+Если контроллер уже успешно подключен к MQTT брокеру, то команду CLI можно направить в топик $command. 
+см [[работа_с_mqtt#служебные_топики]]
+
+
+===== Подключение по HTTP API =====
+
+
+Если контроллер уже успешно подключен к локальной сети, то команду CLI можно направить с помощью http [[api]]
