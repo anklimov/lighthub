@@ -1,5 +1,5 @@
 # LightHub
-LightHub is a Flexible open-software and open-hardware Smart Home controller for Arduino-Mega, Arduino Due, ESP8266, and ESP32. 
+LightHub is a Flexible open-software and open-hardware Smart Home controller for Arduino-Mega, Arduino Due, ESP8266, ESP32, ESP32-C3, STM32, NRF52840 and M5Stack.
 Useful links:
 
   * [Article/RU](https://geektimes.ru/post/295109/) 
@@ -8,7 +8,17 @@ Useful links:
 
   * [WIKI/RU](https://www.lazyhome.ru/dokuwiki/doku.php?id=start)
 
-  * [Doxygen autodocumentation for developers](https://anklimov.github.io/lighthub/doxygen-docs/html/index.html) (litle bit outdated)
+  * [Doxygen autodocumentation for developers](https://lighthub.github.io/doxygen/)
+
+  * [In-repo documentation (RU)](documentation/README.md)
+
+  * [Latest release notes](https://github.com/anklimov/lighthub/releases)
+
+Highlights of the current release line (v4.4.0+):
+* Full-featured CAN driver released — controller-to-controller communication over 2-wire CAN bus, "lightspot" non-IP peripheral controllers ([CAN docs](documentation/integrations/can_lightspot.md))
+* Sprinkler controller module (CH 23) released — autonomous water-tank watering system ([docs](documentation/modules/Sprinkler_module.md))
+* Multivent module (CH 18) — multi-zone ventilation/HVAC control ([docs](documentation/modules/multivent_module_description.md))
+* Rotary encoder input (T:32) with profiles ([docs](documentation/core/rotary_encoder.md))
 
 It may operate both: 
 * On [especially designed hardware board](http://www.lazyhome.ru/index.php/featurerequest) with 16 optocoupled digital inputs, 16 ESD protected digital/analog Inputs/outputs, 8 open-collector outputs (up to 0.5A/50V), DMX IN/OUT, MODBUS RTU and hardware 1-wire support circuit.
@@ -27,10 +37,7 @@ Lighthub allows connecting together:
 
 [List of non-expensive compatible components from AliExpress here](http://ppv.alipromo.com/custom/promo.php?hash=pjagwaovaero6vkeabjpkpvy4gznbgkc&landing_id=39661)
 
-![alt text](LightHub.png "LightHub application diagram")
-
-
-![alt text](documentation/LightHubAppDiagram.png "LightHub application diagram")
+![LightHub application diagram](documentation/reference/images/LightHubAppDiagram.png "LightHub application diagram")
 
 Where is possible both, to configure local control/mapping between inputs and outputs (light, floor heating thermostats) and remote control from MQTT enabled software and between controllers. At the moment, LightHub tested and perfectly working with following set of complementary free software:
 * [HomeAssistant](https://www.home-assistant.io) - the best choice of HomeAutomation system
@@ -42,15 +49,12 @@ Home Remote mobile applicatios for IoS and Android requires just MQTT broker to 
 
 Scalability of Lighthub is virtually unlimited: Setup so many controllers you needed in most convenient places of your house - MQTT broker will allow controllers communicate each other and with Openhab/NodeRed/HomeRemote and propagate commands across network.
 
-# [Please refer to our Wiki for insructions.](https://github.com/anklimov/lighthub/wiki/Configuring)
+# Documentation
+* [In-repo documentation index](documentation/README.md) (RU): JSON configuration, channel types, MQTT API, CLI, integrations (CAN, Modbus, 1-Wire, HA/OpenHAB), hardware
 * [Russian-language Wiki](https://www.lazyhome.ru/dokuwiki/doku.php)
-* [Compiling and flashing](https://github.com/anklimov/lighthub/wiki/Compiling-and-flashing)
-* [Configuring](https://github.com/anklimov/lighthub/wiki/Configuring)
+* [Developer documentation site](https://lighthub.github.io/) (Doxygen + developer notes)
 * [Browser Plugin for searching and configure controllers](https://github.com/anklimov/zeroconf-lighthub) 
-* [Channel commands](https://github.com/anklimov/lighthub/wiki/Channel-commands)
-* [OpenHab integration](https://github.com/anklimov/lighthub/wiki/OpenHab--integration)
-* [Doxygen developers documentation](https://anklimov.github.io/lighthub/doxygen-docs/html/index.html)
-* [Latest Release notes](https://github.com/anklimov/lighthub/releases/tag/v3.0.0)
+* [Release notes](https://github.com/anklimov/lighthub/releases)
 
 # Platforms specific details:
 
@@ -68,13 +72,22 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 * WIZNET 5100 and 5500 Ethernets are supported
 * Modbus on USART2
 
-**ESP8266, ESP32**: (Tested)
+**ESP8266, ESP32, ESP32-C3**: (Tested)
 * DMX-OUT on USART1 TX
 * DMX-IN - disabled - not possible to deploy in ESP8266
 * Modbus - disabled on ESP8266, Might be configured  on USART0 instead CLI/DEBUG, on ESP32 binded with UART2
 * Uses Wifi interface instead wired connection
+* ESP32 supports CAN bus (GPIO 35 RX / GPIO 5 TX)
 
-**NRF52840** : Still early development stage
+**STM32**: (Tested)
+* Ethernet via ENC28J60 (stm32-enc2860), CAN bus, no-IP build (stm32-noip) for lightspot over CAN
+
+**NRF52840**: (Tested)
+* WiFi + Ethernet (Wiznet)
+
+**LightHub21**: DUE-based board with CAN (lightspot gateway)
+
+**M5Stack / Controllino**: early development stage
 
 # Custom build flags
 
