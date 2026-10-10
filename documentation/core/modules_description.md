@@ -8,29 +8,29 @@
 ## Содержание
 
 1. [Выходные модули (Out)](#выходные-модули)
-   - [out_Multivent](#out_multivent---многоканальный-кондиционер-вентиляция)
-   - [out_AC](#out_ac---управление-кондиционером)
-   - [out_PID](#out_pid---пид-регулятор)
-   - [out_Relay](#out_relay---электромагнитное-реле)
-   - [out_PWM](#out_pwm---широтно-импульсная-модуляция)
-   - [out_DMX](#out_dmx---dmx512-управление-светом)
-   - [out_Motor](#out_motor---управление-двигателем)
-   - [out_Elevator](#out_elevator---управление-лифтом)
-   - [out_Humidifier](#out_humidifier---управление-увлажнителем)
-   - [out_Counter](#out_counter---автосуммирующий-счётчик)
-   - [out_SPILed](#out_spiled---управление-светодиодами)
-   - [out_Mercury](#out_mercury---счётчик-меркурий)
-   - [out_Sprinkler](#out_sprinkler---система-полива)
-   - [out_UARTBridge](#out_uartbridge---uart-мост)
+   - [out\_Multivent](#out_multivent---многоканальный-кондиционер-вентиляция)
+   - [out\_AC](#out_ac---управление-кондиционером)
+   - [out\_PID](#out_pid---пид-регулятор)
+   - [out\_Relay](#out_relay---электромагнитное-реле)
+   - [out\_PWM](#out_pwm---широтно-импульсная-модуляция)
+   - [out\_DMX](#out_dmx---dmx512-управление-светом)
+   - [out\_Motor](#out_motor---управление-двигателем)
+   - [out\_Elevator](#out_elevator---управление-лифтом)
+   - [out\_Humidifier](#out_humidifier---управление-увлажнителем)
+   - [out\_Counter](#out_counter---автосуммирующий-счётчик)
+   - [out\_SPILed](#out_spiled---управление-светодиодами)
+   - [out\_Mercury](#out_mercury---счётчик-меркурий)
+   - [out\_Sprinkler](#out_sprinkler---система-полива)
+   - [out\_UARTBridge](#out_uartbridge---uart-мост)
 
 2. [Входные модули (In)](#входные-модули)
-   - [in_CCS811_HDC1080](#in_ccs811_hdc1080---датчик-качества-воздуха)
+   - [in\_CCS811\_HDC1080](#in_ccs811_hdc1080---датчик-качества-воздуха)
 
 ---
 
 # Выходные модули
 
-## out_Multivent — Многоканальный кондиционер/вентиляция
+## out\_Multivent — Многоканальный кондиционер/вентиляция
 
 ### Описание
 
@@ -100,7 +100,7 @@
 | XON | 6 |
 | XOFF | 7 |
 | AUTO | 0xE (14) |
-| FAN_ONLY | 0xF (15) |
+| FAN\_ONLY | 0xF (15) |
 | HIGH | 0x10 (16) |
 | MEDIUM | 0x11 (17) |
 | LOW | 0x12 (18) |
@@ -110,18 +110,18 @@
 
 ### Примеры
 
-Полное описание с примерами: [multivent_module_description.md](../modules/multivent_module_description.md)
+Полное описание с примерами: [multivent\_module\_description.md](../modules/multivent_module_description.md)
 
 ---
 
-## out_AC — Управление кондиционером
+## out\_AC — Управление кондиционером
 
 ### Описание
 
 Управление одиночным кондиционером через проприетарный UART-протокол Haier (9600, кадры 13 байт — команда / 37 байт — ответ). НЕ Modbus.
 
 **Основные функции:**
-- Управление режимом (HEAT, COOL, FAN_ONLY, DRY, AUTO)
+- Управление режимом (HEAT, COOL, FAN\_ONLY, DRY, AUTO)
 - Управление скоростью вентилятора (LOW, MEDIUM, HIGH, OFF или число)
 - Управление температурой
 - Поддержка качания жалюзей (SWING)
@@ -158,8 +158,8 @@
 | `portNum` | 0-3 | Номер UART-порта (0 = основной Serial) |
 | `/set` | 16-40 | Установка температуры |
 | `/fan` | LOW/MEDIUM/HIGH/OFF или число | Скорость вентилятора |
-| `/cmd` | AUTO/HEAT/COOL/FAN_ONLY/DRY | Текстовые режимы (payload команды) |
-| `/mode` | число (B_MODE) | Режим |
+| `/cmd` | AUTO/HEAT/COOL/FAN\_ONLY/DRY | Текстовые режимы (payload команды) |
+| `/mode` | число (B\_MODE) | Режим |
 | `/lock` | ON/OFF | Блокировка пульта |
 | `/swing` | ON/OFF | Качание жалюзей |
 | `/quiet` | ON/OFF | Тихий режим (legacy «queit» принимается; статус публикуется в `/quiet`) |
@@ -167,7 +167,7 @@
 
 ---
 
-## out_PID — PID-регулятор
+## out\_PID — PID-регулятор
 
 ### Описание
 
@@ -215,7 +215,7 @@
 
 ---
 
-## out_Relay — Электромагнитное реле
+## out\_Relay — Электромагнитное реле
 
 ### Описание
 
@@ -254,7 +254,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 
 ---
 
-## out_PWM — Широтно-импульсная модуляция
+## out\_PWM — Широтно-импульсная модуляция
 
 ### Описание
 
@@ -263,7 +263,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 **Основные функции:**
 - Регулирование от 0% до 100%
 - Поддержка RGB-управления (в base-классе colorChannel)
-- Число пинов (1-5) определяет режим: CH_PWM / RGB / RGBW / RGBWW
+- Число пинов (1-5) определяет режим: CH\_PWM / RGB / RGBW / RGBWW
 
 ### Тип в JSON
 ```
@@ -289,7 +289,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 
 ---
 
-## out_DMX — DMX512 управление светом
+## out\_DMX — DMX512 управление светом
 
 ### Описание
 
@@ -324,7 +324,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 
 ---
 
-## out_Motor — Управление двигателем
+## out\_Motor — Управление двигателем
 
 ### Описание
 
@@ -374,7 +374,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 
 ---
 
-## out_Elevator — Управление лифтом
+## out\_Elevator — Управление лифтом
 
 ### Описание
 
@@ -390,7 +390,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 ```
 [19, {"serial": "8N1", "baud": 19200, "log": ...}]
 ```
-Реализован (компилируется с ELEVATOR_ENABLE). itemArg — объект. Порты фиксированные (MODULE_UATRBRIDGE_UARTA/B).
+Реализован (компилируется с ELEVATOR\_ENABLE). itemArg — объект. Порты фиксированные (MODULE\_UATRBRIDGE\_UARTA/B).
 
 ### Формат конфигурации
 
@@ -415,7 +415,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 
 ---
 
-## out_Humidifier — Управление увлажнителем
+## out\_Humidifier — Управление увлажнителем
 
 ### Описание
 
@@ -453,25 +453,25 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 
 | Состояние | Код | Описание |
 |-----------|-----|---------|
-| H_UNKNOWN | 0 | Неизвестное |
-| H_READY | 1 | Готов к работе |
-| H_PREPARE_FOR_START | 2 | Подготовка к пуску |
-| H_PREPARE_VALVES | 3 | Подготовка клапанов |
-| H_MOTOR_ON | 4 | Мотор работает |
-| H_OPERATE | 5 | В режиме увлажнения |
-| H_MOTOR_PAUSE | 6 | Пауза мотора |
-| H_MOTOR_OFF | 7 | Мотор выключен |
-| H_FLUSH | 8 | Промывка системы |
-| H_IDLE | 9 | Ожидание |
-| H_MOTOR_OFF_OK | 10 | Мотор выключен (окончательно) |
-| H_FAULT_PRESSURE | -1 | Ошибка давления |
-| H_FAULT_PRESSURE_KEEP | -2 | Давление не удерживается |
-| H_FAULT_OVERPRESSURE | -3 | Перепад давления |
-| H_FAULT_MOTOR_OFF | -4 | Ошибка: мотор не выключился |
+| H\_UNKNOWN | 0 | Неизвестное |
+| H\_READY | 1 | Готов к работе |
+| H\_PREPARE\_FOR\_START | 2 | Подготовка к пуску |
+| H\_PREPARE\_VALVES | 3 | Подготовка клапанов |
+| H\_MOTOR\_ON | 4 | Мотор работает |
+| H\_OPERATE | 5 | В режиме увлажнения |
+| H\_MOTOR\_PAUSE | 6 | Пауза мотора |
+| H\_MOTOR\_OFF | 7 | Мотор выключен |
+| H\_FLUSH | 8 | Промывка системы |
+| H\_IDLE | 9 | Ожидание |
+| H\_MOTOR\_OFF\_OK | 10 | Мотор выключен (окончательно) |
+| H\_FAULT\_PRESSURE | -1 | Ошибка давления |
+| H\_FAULT\_PRESSURE\_KEEP | -2 | Давление не удерживается |
+| H\_FAULT\_OVERPRESSURE | -3 | Перепад давления |
+| H\_FAULT\_MOTOR\_OFF | -4 | Ошибка: мотор не выключился |
 
 ---
 
-## out_Counter — Автосуммирующий счётчик
+## out\_Counter — Автосуммирующий счётчик
 
 ### Описание
 
@@ -504,7 +504,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 
 ---
 
-## out_SPILed — Управление светодиодами
+## out\_SPILed — Управление светодиодами
 
 ### Описание
 
@@ -539,7 +539,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 |----------|-----|---------|
 | `data_pin` | int | GPIO пин (данные) |
 | `numLeds` | int | Количество светодиодов, деф 43 |
-| `ledsType` | int | Код NeoPixel (NEO_BRG+NEO_KHZ800 и т.п.) |
+| `ledsType` | int | Код NeoPixel (NEO\_BRG+NEO\_KHZ800 и т.п.) |
 
 ### Управление
 
@@ -553,7 +553,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 
 ---
 
-## out_Mercury — Счётчик Меркурий
+## out\_Mercury — Счётчик Меркурий
 
 ### Описание
 
@@ -562,7 +562,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 **Основные функции:**
 - Чтение энергопотребления (активная/реактивная)
 - Контроль связи и состояния счётчика
-- Тарифные (пиковое/полупиковое/ночное) данные НЕ читаются — только M_NOW
+- Тарифные (пиковое/полупиковое/ночное) данные НЕ читаются — только M\_NOW
 
 ### Тип в JSON
 ```
@@ -612,7 +612,7 @@ RELAYX: [16, [pin, period_сек], val, cmd]
 
 ---
 
-## out_Sprinkler — Система полива
+## out\_Sprinkler — Система полива
 
 ### Описание
 
@@ -782,7 +782,7 @@ root/s_out/sprinkler/south/val       # Выполненный объём/вре�
 
 ---
 
-## out_UARTBridge — UART мост
+## out\_UARTBridge — UART мост
 
 ### Описание
 
@@ -790,7 +790,7 @@ root/s_out/sprinkler/south/val       # Выполненный объём/вре�
 
 **Основные функции:**
 - Прозрачная маршрутизация UART↔UART
-- Буферизация пакетов (MAX_PDU = 64 байт)
+- Буферизация пакетов (MAX\_PDU = 64 байт)
 - Логирование трафика
 - Одна скорость на оба порта. Порты фиксированные: Serial1/Serial2
 
@@ -827,7 +827,7 @@ root/s_out/sprinkler/south/val       # Выполненный объём/вре�
 
 # Входные модули
 
-## in_CCS811_HDC1080 — Датчик качества воздуха
+## in\_CCS811\_HDC1080 — Датчик качества воздуха
 
 ### Описание
 
@@ -916,21 +916,21 @@ root/s_out/sprinkler/south/val       # Выполненный объём/вре�
 
 | Модуль | Тип | Назначение | Управление |
 |--------|-----|-----------|-----------|
-| out_Multivent | 18 | Многоканальный кондиционер | PID + MQTT |
-| out_AC | 10 | Одиночный кондиционер | Проприетарный UART (Haier) |
-| out_PID | 13 | PID-регулятор | MQTT |
-| out_Relay | 6 | Электромагнитное реле | GPIO |
-| out_PWM | 3 | ШИМ-управление | GPIO-PWM |
-| out_DMX | 0 | DMX512 освещение | DMX512 |
-| out_Motor | 12 | Управление двигателем | GPIO-пары |
-| out_Elevator | 19 | Управление лифтом | UART |
-| out_Humidifier | 21 | Управление увлажнителем | GPIO + датчики |
-| out_Counter | 20 | Автосуммирующий счётчик | MQTT |
-| out_SPILed | 11 | Адресуемые светодиоды | SPI/GPIO |
-| out_Mercury | 22 | Электросчётчик | Modbus RTU |
-| out_Sprinkler | 23 | Система полива | GPIO + MQTT |
-| out_UARTBridge | 15 | UART-мост | UART↔UART |
-| in_CCS811_HDC1080 | входы T=5 (CCS811) / T=6 (HDC1080) | Качество воздуха | I2C |
+| out\_Multivent | 18 | Многоканальный кондиционер | PID + MQTT |
+| out\_AC | 10 | Одиночный кондиционер | Проприетарный UART (Haier) |
+| out\_PID | 13 | PID-регулятор | MQTT |
+| out\_Relay | 6 | Электромагнитное реле | GPIO |
+| out\_PWM | 3 | ШИМ-управление | GPIO-PWM |
+| out\_DMX | 0 | DMX512 освещение | DMX512 |
+| out\_Motor | 12 | Управление двигателем | GPIO-пары |
+| out\_Elevator | 19 | Управление лифтом | UART |
+| out\_Humidifier | 21 | Управление увлажнителем | GPIO + датчики |
+| out\_Counter | 20 | Автосуммирующий счётчик | MQTT |
+| out\_SPILed | 11 | Адресуемые светодиоды | SPI/GPIO |
+| out\_Mercury | 22 | Электросчётчик | Modbus RTU |
+| out\_Sprinkler | 23 | Система полива | GPIO + MQTT |
+| out\_UARTBridge | 15 | UART-мост | UART↔UART |
+| in\_CCS811\_HDC1080 | входы T=5 (CCS811) / T=6 (HDC1080) | Качество воздуха | I2C |
 
 ---
 

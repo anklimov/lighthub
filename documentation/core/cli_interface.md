@@ -1,6 +1,6 @@
 # Command Line Interface
 
-> Источник: Wiki LightHub (lazyhome.ru), страница «cli_интерфейс». Снапшот от 2026-10-02.
+> Источник: Wiki LightHub (lazyhome.ru), страница «cli\_интерфейс». Снапшот от 2026-10-02.
 
 Иначе, интерфейс командной строки.
 

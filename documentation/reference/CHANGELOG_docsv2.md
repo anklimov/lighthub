@@ -6,7 +6,7 @@
 
 ## 🆕 Новые документы
 
-### 1. **mqtt_api_reference.md** (900+ строк)
+### 1. **mqtt\_api\_reference.md** (900+ строк)
 Полный справочник MQTT API и структуры топиков LightHub
 
 **Содержание:**
@@ -26,7 +26,7 @@
 - Объяснение механизма восстановления состояния
 - Полная документация HTTP API
 
-### 2. **suffixes_reference_v2.md** (800+ строк)
+### 2. **suffixes\_reference\_v2.md** (800+ строк)
 Исправленный справочник суффиксов MQTT согласно официальной wiki
 
 **Содержание:**
@@ -48,7 +48,7 @@
 - Правильные диапазоны значений
 - Примеры на реальных сценариях
 
-### 3. **mqtt_quick_reference.md** (350+ строк)
+### 3. **mqtt\_quick\_reference.md** (350+ строк)
 Быстрая шпаргалка часто используемых MQTT команд
 
 **Содержание:**
@@ -81,19 +81,19 @@
 - ✅ Добавлены MQTT примеры в быстрый старт
 - ✅ Указано на правильность согласно wiki.lazyhome.ru
 
-### 2. **START_HERE.md** — Стартовая точка
+### 2. **START\_HERE.md** — Стартовая точка
 **Изменения:**
 - ✅ Новые документы поднялись в начало списка
-- ✅ Добавлена шпаргалка mqtt_quick_reference.md
-- ✅ Подчеркнута новизна mqtt_api_reference.md
-- ✅ Указано на исправления в suffixes_reference_v2.md
+- ✅ Добавлена шпаргалка mqtt\_quick\_reference.md
+- ✅ Подчеркнута новизна mqtt\_api\_reference.md
+- ✅ Указано на исправления в suffixes\_reference\_v2.md
 
 ---
 
 ## ❌ Устаревшие документы
 
-### suffixes_reference.md (архив)
-- Заменен на: **suffixes_reference_v2.md**
+### suffixes\_reference.md (архив)
+- Заменен на: **suffixes\_reference\_v2.md**
 - Причина: Неправильная структура суффиксов (не согласовывалась с wiki)
 - Оставлен для истории
 
@@ -165,38 +165,38 @@
 ## 📚 Как использовать обновленную документацию
 
 ### Для новых пользователей:
-1. Начните с [mqtt_quick_reference.md](mqtt_quick_reference.md) (шпаргалка)
-2. Затем изучите [mqtt_api_reference.md](mqtt_api_reference.md) (полный справочник)
-3. Используйте примеры из [configuration_examples.md](configuration_examples.md)
+1. Начните с [mqtt\_quick\_reference.md](mqtt_quick_reference.md) (шпаргалка)
+2. Затем изучите [mqtt\_api\_reference.md](mqtt_api_reference.md) (полный справочник)
+3. Используйте примеры из [configuration\_examples.md](configuration_examples.md)
 
 ### Для опытных пользователей:
-1. Обновите топики согласно [mqtt_api_reference.md](mqtt_api_reference.md)
-2. Изучите новые суффиксы в [suffixes_reference_v2.md](suffixes_reference_v2.md)
+1. Обновите топики согласно [mqtt\_api\_reference.md](mqtt_api_reference.md)
+2. Изучите новые суффиксы в [suffixes\_reference\_v2.md](suffixes_reference_v2.md)
 3. Используйте HTTP API для альтернативного управления
 
 ### Для интеграций (Home Assistant, Node-Red, etc.):
 1. Изучите структуру топиков: `root/[id или bcst или out]/item/[subitem]/suffix`
-2. Используйте примеры из [mqtt_api_reference.md](mqtt_api_reference.md)
-3. Используйте [mqtt_quick_reference.md](mqtt_quick_reference.md) как шпаргалку
+2. Используйте примеры из [mqtt\_api\_reference.md](mqtt_api_reference.md)
+3. Используйте [mqtt\_quick\_reference.md](mqtt_quick_reference.md) как шпаргалку
 
 ---
 
 ## ✅ Валидация
 
 Все документы проверены согласно официальной wiki:
-- ✅ https://www.lazyhome.ru/dokuwiki/doku.php?id=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0_%D1%81_mqtt
+- ✅ https://www.lazyhome.ru/dokuwiki/doku.php?id=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0\_%D1%81\_mqtt
 - ✅ https://www.lazyhome.ru/dokuwiki/doku.php?id=api
 
 ---
 
 ## 🔗 Навигация
 
-- **Быстрый старт**: [START_HERE.md](START_HERE.md)
+- **Быстрый старт**: [START\_HERE.md](START_HERE.md)
 - **Полный индекс**: [README.md](README.md)
-- **Шпаргалка**: [mqtt_quick_reference.md](mqtt_quick_reference.md)
-- **MQTT справочник**: [mqtt_api_reference.md](mqtt_api_reference.md)
-- **Суффиксы**: [suffixes_reference_v2.md](suffixes_reference_v2.md)
-- **Конфигурация**: [light_hub_полное_инженерное_описание_json_конфигурации_v2.md](light_hub_полное_инженерное_описание_json_конфигурации_v2.md)
+- **Шпаргалка**: [mqtt\_quick\_reference.md](mqtt_quick_reference.md)
+- **MQTT справочник**: [mqtt\_api\_reference.md](mqtt_api_reference.md)
+- **Суффиксы**: [suffixes\_reference\_v2.md](suffixes_reference_v2.md)
+- **Конфигурация**: [light\_hub\_полное\_инженерное\_описание\_json\_конфигурации\_v2.md](light_hub_полное_инженерное_описание_json_конфигурации_v2.md)
 
 ---
 

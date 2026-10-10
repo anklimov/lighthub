@@ -18,7 +18,7 @@
 | **5** | `THERMO` | Simple Thermostat | ON/OFF термостат с гистерезисом | `[GPIO_pin, целевая_температура_°C]` |
 | **6** | `RELAY` | Relay Output | Электромагнитное реле ON/OFF | GPIO пин |
 | **7** | `GROUP` | Group Channel | Логическая группа каналов для синхронного управления | Массив строк с именами каналов |
-| **8** | `VCTEMP` | Vacom PID Thermo | Температура из VC-канала Vacom (ссылка на item типа CH_VC) | `[имя_канала_VC]` (строка) |
+| **8** | `VCTEMP` | Vacom PID Thermo | Температура из VC-канала Vacom (ссылка на item типа CH\_VC) | `[имя_канала_VC]` (строка) |
 | **9** | `MBUSVC` | Vacom Modbus Motor | Управление мотор-регулятором вентилятора Vacom через Modbus | `[modbus_адрес, "имя_объекта"]` |
 | **10** | `ACHAIER` | Air Conditioner Haier | Управление кондиционером Haier по проприетарному UART-протоколу (9600) | `[порт_serial(0-3)]` |
 | **11** | `SPILED` | SPI LED Strip | Управление NeoPixel LED лентой (WS2812B и совместимые, один data-пин) | `[data_pin, numLeds(дефолт 43), ledsType]` |
@@ -29,7 +29,7 @@
 | **16** | `RELAYPWM` | Relay PWM | Медленный PWM через реле для инертных систем | `[GPIO_pin, период_цикла_сек(дефолт 5)]` |
 | **17** | `DMXRGBWW` | DMX RGBWW | DMX 512 выход RGB + теплый белый + холодный белый (5 каналов) | Номер стартового DMX канала |
 | **18** | `VENTS` | Multiroom Ventilation | Многозональная вентиляция с каскадным управлением | `[объект_зон]` (без Modbus-адреса) |
-| **19** | `ELEVATOR` | Elevator Control | Управление лифтом | `{"serial":"8N1","baud":19200,"log":...}` (компилируется с ELEVATOR_ENABLE) |
+| **19** | `ELEVATOR` | Elevator Control | Управление лифтом | `{"serial":"8N1","baud":19200,"log":...}` (компилируется с ELEVATOR\_ENABLE) |
 | **20** | `COUNTER` | Generic Counter | Счётчик импульсов (электроэнергия, газ, вода) | `[коэффициент_импульса, период_автосуммирования_сек]` |
 | **21** | `HUM` | Humidifier | Управление увлажнителем воздуха (только один в системе) | `[[pumpPin, flushPin, pressurePin, maxPumpTime, idleTime, capacity, minLevel, startLevel], {зоны_краны}, motorExec, faultExec]` |
 | **22** | `MERCURY` | Mercury Energy Meter | Счётчик энергии Mercury по RS485/Modbus | `[адрес, baud, "8N1", уровень_доступа, пароль, pollingInterval_ms(дефолт 10000)]` |
@@ -53,33 +53,33 @@
 
 ## Примеры конфигурации по типам
 
-### CH_DIMMER (0) - DMX выход с регулировкой
+### CH\_DIMMER (0) - DMX выход с регулировкой
 
 ```json
 "dimmer1": [0, 5],           // DMX канал 5
 "dimmer2": [0, [1, 2, 3, 4]] // 4-канальный (RGBW), DMX 1-4
 ```
 
-### CH_RGBW (1) - DMX RGB+White
+### CH\_RGBW (1) - DMX RGB+White
 
 ```json
 "rgb_light": [1, 10]         // RGB+W на DMX 10-13
 ```
 
-### CH_RGB (2) - DMX RGB
+### CH\_RGB (2) - DMX RGB
 
 ```json
 "rgb_light": [2, 15]         // RGB начиная с 15-го (на DMX 15-17)
 ```
 
-### CH_PWM (3) - GPIO PWM
+### CH\_PWM (3) - GPIO PWM
 
 ```json
 "pwm1": [3, 9],              // PWM на GPIO pin 9
 "pwm_4ch": [3, [11, 12, 13, 14]] // 4-х канальный PWM
 ```
 
-### CH_MODBUS (4) - AC Dimmer (Legacy)
+### CH\_MODBUS (4) - AC Dimmer (Legacy)
 
 ```json
 "mbus_dim": [4, [96, 0, 0, 255]]
@@ -89,20 +89,20 @@
 // Макс значение: 255
 ```
 
-### CH_THERMO (5) - Термостат
+### CH\_THERMO (5) - Термостат
 
 ```json
 "thermo_bath": [5, 24, 33]   // GPIO 24, уставка 33°C
 ```
 
-### CH_RELAY (6) - Реле
+### CH\_RELAY (6) - Реле
 
 ```json
 "relay1": [6, 23],           // Реле на GPIO 23
 "relay2": ["RELAY", 28, 1, 1] // Реле, по умолчанию ON
 ```
 
-### CH_GROUP (7) - Группа каналов
+### CH\_GROUP (7) - Группа каналов
 
 ```json
 "lights_all": [7, [
@@ -112,19 +112,19 @@
 "lights_bedroom": [7, ["lamp1", "rgb1"]]
 ```
 
-### CH_VCTEMP (8) - Vacom PID терморегулятор
+### CH\_VCTEMP (8) - Vacom PID терморегулятор
 
 ```json
 "fm_t": [8, "fm"]            // строка-имя item типа CH_VC (9)
 ```
 
-### CH_VC (9) - Vacom мотор регулятор
+### CH\_VC (9) - Vacom мотор регулятор
 
 ```json
 "fan_speed": [9, [96, "a_ext"]]   // Modbus адрес 96, "имя_объекта" (строка)
 ```
 
-### CH_AC (10) - Кондиционер Haier
+### CH\_AC (10) - Кондиционер Haier
 
 ```json
 "ac_main": [10, 1]             // номер порта serial (0-3)
@@ -132,13 +132,13 @@
 // также доступны подканалы lock/swing/quiet/raw (/mode — число, текстовые режимы — в /cmd)
 ```
 
-### CH_SPILED (11) - SPI LED лента
+### CH\_SPILED (11) - SPI LED лента
 
 ```json
 "led_strip": [11, [7, 8]]    // data-пин GPIO7, 8 светодиодов
 ```
 
-### CH_MOTOR (12) - Моторная задвижка с обратной связью
+### CH\_MOTOR (12) - Моторная задвижка с обратной связью
 
 ```json
 "gate_motor": [12, [9, 10, 11, 0, 255, 30000]]
@@ -146,7 +146,7 @@
 // fbOpen: 0, fbClosed: 255, maxOnTime_ms: 30000
 ```
 
-### CH_PID (13) - PID регулятор
+### CH\_PID (13) - PID регулятор
 
 ```json
 "pid_temp": [13, [
@@ -159,7 +159,7 @@
 // min_out=0, max_out=255
 ```
 
-### CH_MBUS (14) - Универсальный Modbus
+### CH\_MBUS (14) - Универсальный Modbus
 
 ```json
 "mbus_generic": [14, [96, "temperature_sensor", {
@@ -168,7 +168,7 @@
 }]]
 ```
 
-### CH_UARTBRIDGE (15) - UART мост
+### CH\_UARTBRIDGE (15) - UART мост
 
 ```json
 "uart_debug": [15, {
@@ -180,19 +180,19 @@
 }]
 ```
 
-### CH_RELAYX (16) - Медленный PWM через реле
+### CH\_RELAYX (16) - Медленный PWM через реле
 
 ```json
 "relay_pwm": [16, [22, 60]]  // GPIO 22, период цикла 60 сек
 ```
 
-### CH_RGBWW (17) - DMX RGBWW
+### CH\_RGBWW (17) - DMX RGBWW
 
 ```json
 "led_warm_cold": [17, 30]    // DMX 30-34 (RGBWW, 5 каналов)
 ```
 
-### CH_MULTIVENT (18) - Многозональная вентиляция
+### CH\_MULTIVENT (18) - Многозональная вентиляция
 
 ```json
 "multivent_system": [18, {
@@ -206,14 +206,14 @@
 }]
 ```
 
-### CH_COUNTER (20) - Счётчик по импульсам/времени
+### CH\_COUNTER (20) - Счётчик по импульсам/времени
 
 ```json
 "energy_meter": [20, [0.02, 1.2]] // коэфф 0.02, период автосуммирования 1.2 с
 "gas_counter": [20, 0]             // без калибровки
 ```
 
-### CH_HUMIDIFIER (21) - Увлажнитель
+### CH\_HUMIDIFIER (21) - Увлажнитель
 
 ```json
 "humidifier1": [21, [13, 14, 15, 120, 15, 50, 5, 25]]
@@ -221,7 +221,7 @@
 // (только один humidifier в системе; компилируется с HUMIDIFIER_ENABLE)
 ```
 
-### CH_MERCURY (22) - Счётчик энергии Mercury
+### CH\_MERCURY (22) - Счётчик энергии Mercury
 
 ```json
 "mercury_meter": [22, [1, 9600, "8N1", 2, "123456", 10000]]
@@ -233,7 +233,7 @@
 // Интервал опроса: 10000 мс (дефолт)
 ```
 
-### CH_SPRINKLR (23) - Система полива
+### CH\_SPRINKLR (23) - Система полива
 
 ```json
 "irrigation_system": [23, {
@@ -281,7 +281,7 @@
 - `HIGH` / `MEDIUM` / `LOW` — скорость вентилятора
 - `RGB` / `HSV` / `RESET` — цветовые команды (для RGB каналов) и сброс
 
-Полный список команд: ON OFF REST TOGGLE HALT XON XOFF INCREASE DECREASE ENABLE DISABLE UNFREEZE FREEZE AUTO FAN_ONLY HIGH MEDIUM LOW HEAT_COOL HEAT COOL DRY RGB HSV RESET.
+Полный список команд: ON OFF REST TOGGLE HALT XON XOFF INCREASE DECREASE ENABLE DISABLE UNFREEZE FREEZE AUTO FAN\_ONLY HIGH MEDIUM LOW HEAT\_COOL HEAT COOL DRY RGB HSV RESET.
 
 ---
 

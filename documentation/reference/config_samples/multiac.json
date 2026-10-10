@@ -32,13 +32,13 @@
   "ac_2":[14,[128,
                   "haier",
                   {
-                  "pwr":{"emit":"edem/s_out/ac_2/cmd","item":"vac/mode","@V":null},
-                  "$temp":{"emit":"edem/s_out/ac_2/$temp","item":"vac/temp","@S":null},
-                  "$fault":{"emit":"edem/s_out/ac_2/$fault"},
-                  "set":{"emit":"edem/s_out/ac_2/set","item":"vac/set"},
-                  "acmode":{"emit":"edem/s_out/ac_2/$mode","@V":null},
-                  "fan":{"emit":"edem/s_out/ac_2/fan","@V":null},
-                  "lock":{"emit":"edem/s_out/ac_2/lock","@V":null},
+                  "pwr":{"emit":"house/s_out/ac_2/cmd","item":"vac/mode","@V":null},
+                  "$temp":{"emit":"house/s_out/ac_2/$temp","item":"vac/temp","@S":null},
+                  "$fault":{"emit":"house/s_out/ac_2/$fault"},
+                  "set":{"emit":"house/s_out/ac_2/set","item":"vac/set"},
+                  "acmode":{"emit":"house/s_out/ac_2/$mode","@V":null},
+                  "fan":{"emit":"house/s_out/ac_2/fan","@V":null},
+                  "lock":{"emit":"house/s_out/ac_2/lock","@V":null},
                   "fanoff":{}
                   }
                   ]

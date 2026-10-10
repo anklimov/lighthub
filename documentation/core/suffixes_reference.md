@@ -29,7 +29,7 @@ myhome/in/lamp_bedroom/set
 | `/set` | ✅ | ✅ | Установка численного значения | 0-255 (шкала 0-100 — только в общем топике без суффикса) |
 | `/val` | ✅ | ❌ | Вход сенсора (THERMO, PID, MULTIVENT, SPRINKLER) | Число (T / значение) |
 | `/raw` | ✅ | ✅ | «Сырые» данные, передаваемые драйверу без интерпретации | Текст / число |
-| `/del` | ✅ | ❌ | Команда с задержкой. Только команды ON…FAN_ONLY (код ≤ 0x0F); HIGH/MEDIUM/LOW/HEAT_COOL/HEAT/COOL/DRY запланировать нельзя | Текст (команда + время) |
+| `/del` | ✅ | ❌ | Команда с задержкой. Только команды ON…FAN\_ONLY (код ≤ 0x0F); HIGH/MEDIUM/LOW/HEAT\_COOL/HEAT/COOL/DRY запланировать нельзя | Текст (команда + время) |
 
 > **Полный список команд** (payload `/cmd`): `ON`, `OFF`, `REST`, `TOGGLE`, `HALT`, `XON`, `XOFF`, `INCREASE`, `DECREASE`, `ENABLE`, `DISABLE`, `UNFREEZE`, `FREEZE`, `AUTO`, `FAN_ONLY`, `HIGH`, `MEDIUM`, `LOW`, `HEAT_COOL`, `HEAT`, `COOL`, `DRY`, `RGB`, `HSV`, `RESET`.
 > `TOGGLE` в `/ctrl` не включает/выключает, а **инвертирует флаг DISABLE**.
@@ -41,7 +41,7 @@ myhome/in/lamp_bedroom/set
 | `/hue` | ✅ | ✅ | Оттенок (HSV) | 0-365° |
 | `/sat` | ✅ | ✅ | Насыщенность (HSV) | 0-100% |
 | `/HSV` | ✅ | ✅ | Полный цвет (hue,sat,val). Суффикс ЗАГЛАВНЫЙ, строчный `/hsv` игнорируется | `H,S,V` |
-| `/rgb` | ❌ | ❌ | **Не поддерживается** в текущей сборке (S_RGB нигде не обрабатывается) | — |
+| `/rgb` | ❌ | ❌ | **Не поддерживается** в текущей сборке (S\_RGB нигде не обрабатывается) | — |
 | `/temp` | ✅ | ✅ | Цветовая температура 153-500 mireds (RGBWW); у AC — текущая T | 153-500 |
 
 **Примеры**:
@@ -108,7 +108,7 @@ myhome/in/ac_main/quiet → ON
 | `/cmd` | ✅ | ✅ | Включить/выключить | ON, OFF, TOGGLE |
 | `/set` | ✅ | ✅ | Установленная температура | Текущее значение |
 | `/fan` | ✅ | ✅ | Скорость вентилятора (HIGH/MEDIUM/LOW → 255/128/64) | HIGH, MEDIUM, LOW |
-| `/mode` | ✅ | ❌ | Только у основного item (обратная связь от AC). У зон S_MODE не обрабатывается — режим зоны задаётся командой в `zone/cmd` | — |
+| `/mode` | ✅ | ❌ | Только у основного item (обратная связь от AC). У зон S\_MODE не обрабатывается — режим зоны задаётся командой в `zone/cmd` | — |
 
 **Структура многозональной вентиляции**:
 
@@ -227,30 +227,30 @@ myhome/in/ac/HEAT/set → 25
 
 | Номер | Тип канала | Суффиксы | Примеры |
 |:-----:|-----------|----------|---------|
-| 0 | CH_DIMMER (DMX 1-4 ch) | `/cmd`, `/set` (subitem-адресация игнорируется) | Лампа, светодиод |
-| 1 | CH_RGBW (DMX 4 ch) | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV`, `/temp` | RGBW люстра |
-| 2 | CH_RGB (DMX 3 ch) | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV` | RGB лента, LED |
-| 3 | CH_PWM | `/cmd`, `/set` | PWM вывод |
-| 4 | CH_MODBUS | `/cmd`, `/set` | Modbus диммер |
-| 5 | CH_THERMO | `/cmd`, `/set`, `/val` (вход сенсора), `/ctrl` | Термостат |
-| 6 | CH_RELAY | `/cmd`, `/set`, `/del` | Реле, розетка |
-| 7 | CH_GROUP | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV` | Группа каналов |
-| 8 | CH_VCTEMP | — | Регулятор Vacon (PID) |
-| 9 | CH_VC | — | Привод Vacon (Modbus) |
-| 10 | CH_AC (Haier) | `/cmd`, `/set` (16-40), `/mode` (0-4), `/fan`, `/lock`, `/swing`, `/quiet` (legacy `queit`), `/temp`, `/raw` | Кондиционер |
-| 11 | CH_SPILED | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV` + subitem-пиксели 10-20 | Адресуемая LED лента |
-| 12 | CH_MOTOR | `/cmd`, `/set` | Сервопривод |
-| 13 | CH_PID | `/cmd`, `/set`, `/val` (вход сенсора), `/ctrl` | PID регулятор, теплые полы |
-| 14 | CH_MBUS | `/cmd`, `/set` | Modbus устройство |
-| 15 | CH_UARTBRIDGE | `/cmd`, `/set` | UART-мост |
-| 16 | CH_RELAYX | `/cmd`, `/set`, `/del` | Реле + ШИМ |
-| 17 | CH_RGBWW (DMXRGBWW) | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV`, `/temp` | Теплый+холодный белый |
-| 18 | CH_MULTIVENT | `/cmd`, `/set`, `/fan` + zone-subitem-ы (`set`, `fan`, `cmd`) | Многозональная вентиляция |
-| 19 | CH_ELEVATOR | `/cmd`, `/set`, `/raw` | Лифт |
-| 20 | CH_COUNTER | `/cmd`, `/set` | Счетчик |
-| 21 | CH_HUMIDIFIER | `/cmd` | Увлажнитель |
-| 22 | CH_MERCURY | — | Счетчик электроэнергии |
-| 23 | CH_SPRINKLER | `/cmd`, `/set`, `/val` | Полив (ирригатор) |
+| 0 | CH\_DIMMER (DMX 1-4 ch) | `/cmd`, `/set` (subitem-адресация игнорируется) | Лампа, светодиод |
+| 1 | CH\_RGBW (DMX 4 ch) | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV`, `/temp` | RGBW люстра |
+| 2 | CH\_RGB (DMX 3 ch) | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV` | RGB лента, LED |
+| 3 | CH\_PWM | `/cmd`, `/set` | PWM вывод |
+| 4 | CH\_MODBUS | `/cmd`, `/set` | Modbus диммер |
+| 5 | CH\_THERMO | `/cmd`, `/set`, `/val` (вход сенсора), `/ctrl` | Термостат |
+| 6 | CH\_RELAY | `/cmd`, `/set`, `/del` | Реле, розетка |
+| 7 | CH\_GROUP | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV` | Группа каналов |
+| 8 | CH\_VCTEMP | — | Регулятор Vacon (PID) |
+| 9 | CH\_VC | — | Привод Vacon (Modbus) |
+| 10 | CH\_AC (Haier) | `/cmd`, `/set` (16-40), `/mode` (0-4), `/fan`, `/lock`, `/swing`, `/quiet` (legacy `queit`), `/temp`, `/raw` | Кондиционер |
+| 11 | CH\_SPILED | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV` + subitem-пиксели 10-20 | Адресуемая LED лента |
+| 12 | CH\_MOTOR | `/cmd`, `/set` | Сервопривод |
+| 13 | CH\_PID | `/cmd`, `/set`, `/val` (вход сенсора), `/ctrl` | PID регулятор, теплые полы |
+| 14 | CH\_MBUS | `/cmd`, `/set` | Modbus устройство |
+| 15 | CH\_UARTBRIDGE | `/cmd`, `/set` | UART-мост |
+| 16 | CH\_RELAYX | `/cmd`, `/set`, `/del` | Реле + ШИМ |
+| 17 | CH\_RGBWW (DMXRGBWW) | `/cmd`, `/set`, `/hue`, `/sat`, `/HSV`, `/temp` | Теплый+холодный белый |
+| 18 | CH\_MULTIVENT | `/cmd`, `/set`, `/fan` + zone-subitem-ы (`set`, `fan`, `cmd`) | Многозональная вентиляция |
+| 19 | CH\_ELEVATOR | `/cmd`, `/set`, `/raw` | Лифт |
+| 20 | CH\_COUNTER | `/cmd`, `/set` | Счетчик |
+| 21 | CH\_HUMIDIFIER | `/cmd` | Увлажнитель |
+| 22 | CH\_MERCURY | — | Счетчик электроэнергии |
+| 23 | CH\_SPRINKLER | `/cmd`, `/set`, `/val` | Полив (ирригатор) |
 
 ---
 
@@ -319,7 +319,7 @@ myhome/s_out/ac_hallway/fan → HIGH
   ], 22]
 }
 ```
-(13 — CH_PID; 2-й аргумент — массив `[kP,kI,kD,dT,…], {выходной execObj}, {каскад}]`; 3-й — стартовый setpoint 22°C)
+(13 — CH\_PID; 2-й аргумент — массив `[kP,kI,kD,dT,…], {выходной execObj}, {каскад}]`; 3-й — стартовый setpoint 22°C)
 
 **Команды**:
 ```
@@ -472,4 +472,4 @@ light:
 
 **Версия документа**: 2.0 (обновлено для соответствия wiki.lazyhome.ru)  
 **Последнее обновление**: 2024  
-**Источник**: https://www.lazyhome.ru/dokuwiki/doku.php?id=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0_%D1%81_mqtt
+**Источник**: https://www.lazyhome.ru/dokuwiki/doku.php?id=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0\_%D1%81\_mqtt

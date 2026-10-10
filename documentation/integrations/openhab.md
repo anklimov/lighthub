@@ -62,7 +62,7 @@ And appropriate configuration of LightHub items
 Note:
 There is not necessary to set-up persistent topics in Openhab nor configure persistent storage in OpenHab.
 
-LightHub using persistent MQTT publishing for Status topic /myhome/s_out. After "cold start" and establishing MQTT connection with broker, Lighthub subscribing on Status topic for 5 seconds interval to capture and retrieve previous status from persistent MQTT topic /myhome/s_out
+LightHub using persistent MQTT publishing for Status topic /myhome/s\_out. After "cold start" and establishing MQTT connection with broker, Lighthub subscribing on Status topic for 5 seconds interval to capture and retrieve previous status from persistent MQTT topic /myhome/s\_out
 
 ## Сверка с кодом (2026-10-02)
 

@@ -7,34 +7,34 @@
 
 ## Содержание
 
-- [CH_DIMMER (0)](#ch_dimmer-0---dmx-диммер)
-- [CH_RGBW (1)](#ch_rgbw-1---dmx-rgbwhite)
-- [CH_RGB (2)](#ch_rgb-2---dmx-rgb)
-- [CH_PWM (3)](#ch_pwm-3---gpio-pwm)
-- [CH_MODBUS (4)](#ch_modbus-4---modbus-ac-dimmer-legacy)
-- [CH_THERMO (5)](#ch_thermo-5---onoff-термостат)
-- [CH_RELAY (6)](#ch_relay-6---gpio-реле)
-- [CH_GROUP (7)](#ch_group-7---группа-каналов)
-- [CH_VCTEMP (8)](#ch_vctemp-8---vacom-pid-терморегулятор)
-- [CH_VC (9)](#ch_vc-9---vacom-мотор-регулятор)
-- [CH_AC (10)](#ch_ac-10---кондиционер-haier)
-- [CH_SPILED (11)](#ch_spiled-11---spi-led-лента)
-- [CH_MOTOR (12)](#ch_motor-12---шаговый-двигатель)
-- [CH_PID (13)](#ch_pid-13---pid-регулятор)
-- [CH_MBUS (14)](#ch_mbus-14---universal-modbus)
-- [CH_UARTBRIDGE (15)](#ch_uartbridge-15---uart-мост)
-- [CH_RELAYX (16)](#ch_relayx-16---медленный-pwm-через-реле)
-- [CH_RGBWW (17)](#ch_rgbww-17---dmx-rgbww)
-- [CH_MULTIVENT (18)](#ch_multivent-18---многозональная-вентиляция)
-- [CH_ELEVATOR (19)](#ch_elevator-19---управление-лифтом)
-- [CH_COUNTER (20)](#ch_counter-20---счётчик-импульсов)
-- [CH_HUMIDIFIER (21)](#ch_humidifier-21---управление-увлажнителем)
-- [CH_MERCURY (22)](#ch_mercury-22---счётчик-энергии-mercury)
-- [CH_SPRINKLER (23)](#ch_sprinkler-23---система-полива)
+- [CH\_DIMMER (0)](#ch_dimmer-0---dmx-диммер)
+- [CH\_RGBW (1)](#ch_rgbw-1---dmx-rgbwhite)
+- [CH\_RGB (2)](#ch_rgb-2---dmx-rgb)
+- [CH\_PWM (3)](#ch_pwm-3---gpio-pwm)
+- [CH\_MODBUS (4)](#ch_modbus-4---modbus-ac-dimmer-legacy)
+- [CH\_THERMO (5)](#ch_thermo-5---onoff-термостат)
+- [CH\_RELAY (6)](#ch_relay-6---gpio-реле)
+- [CH\_GROUP (7)](#ch_group-7---группа-каналов)
+- [CH\_VCTEMP (8)](#ch_vctemp-8---vacom-pid-терморегулятор)
+- [CH\_VC (9)](#ch_vc-9---vacom-мотор-регулятор)
+- [CH\_AC (10)](#ch_ac-10---кондиционер-haier)
+- [CH\_SPILED (11)](#ch_spiled-11---spi-led-лента)
+- [CH\_MOTOR (12)](#ch_motor-12---шаговый-двигатель)
+- [CH\_PID (13)](#ch_pid-13---pid-регулятор)
+- [CH\_MBUS (14)](#ch_mbus-14---universal-modbus)
+- [CH\_UARTBRIDGE (15)](#ch_uartbridge-15---uart-мост)
+- [CH\_RELAYX (16)](#ch_relayx-16---медленный-pwm-через-реле)
+- [CH\_RGBWW (17)](#ch_rgbww-17---dmx-rgbww)
+- [CH\_MULTIVENT (18)](#ch_multivent-18---многозональная-вентиляция)
+- [CH\_ELEVATOR (19)](#ch_elevator-19---управление-лифтом)
+- [CH\_COUNTER (20)](#ch_counter-20---счётчик-импульсов)
+- [CH\_HUMIDIFIER (21)](#ch_humidifier-21---управление-увлажнителем)
+- [CH\_MERCURY (22)](#ch_mercury-22---счётчик-энергии-mercury)
+- [CH\_SPRINKLER (23)](#ch_sprinkler-23---система-полива)
 
 ---
 
-## CH_DIMMER (0) - DMX диммер
+## CH\_DIMMER (0) - DMX диммер
 
 **Назначение**: Регулировка яркости одного или нескольких DMX каналов
 
@@ -69,7 +69,7 @@ myhome/s_out/lamp_bedroom/val   → опубликованная яркость
 
 ---
 
-## CH_RGBW (1) - DMX RGBW
+## CH\_RGBW (1) - DMX RGBW
 
 **Назначение**: Управление RGB + White каналом через DMX (4 канала DMX)
 
@@ -105,7 +105,7 @@ myhome/dev/rgb_light/RGB        ← 255,0,0,100 (RGB+White)
 
 ---
 
-## CH_RGB (2) - DMX RGB
+## CH\_RGB (2) - DMX RGB
 
 **Назначение**: Управление RGB каналом через DMX (3 канала DMX)
 
@@ -128,7 +128,7 @@ myhome/dev/mood_light/HSV       ← 120,100,100 (зелёный в HSV)
 
 ---
 
-## CH_PWM (3) - GPIO PWM
+## CH\_PWM (3) - GPIO PWM
 
 **Назначение**: PWM выход через GPIO пины (для плат Arduino, ESP)
 
@@ -159,9 +159,9 @@ myhome/dev/pwm_dim/cmd          ← ON
 
 ---
 
-## CH_MODBUS (4) - Modbus AC Dimmer (Legacy)
+## CH\_MODBUS (4) - Modbus AC Dimmer (Legacy)
 
-**Назначение**: Управление AC-диммером через Modbus RTU (устаревший тип, использовать CH_MBUS (14))
+**Назначение**: Управление AC-диммером через Modbus RTU (устаревший тип, использовать CH\_MBUS (14))
 
 ### Синтаксис
 
@@ -183,11 +183,11 @@ myhome/dev/pwm_dim/cmd          ← ON
 }
 ```
 
-⚠️ **Примечание**: Для новых проектов используйте CH_MBUS (14) вместо этого
+⚠️ **Примечание**: Для новых проектов используйте CH\_MBUS (14) вместо этого
 
 ---
 
-## CH_THERMO (5) - ON/OFF Термостат
+## CH\_THERMO (5) - ON/OFF Термостат
 
 **Назначение**: Простой ON/OFF термостат с гистерезисом
 
@@ -219,7 +219,7 @@ myhome/dev/thermo_bath/cmd      ← ON, OFF
 
 ---
 
-## CH_RELAY (6) - GPIO Реле
+## CH\_RELAY (6) - GPIO Реле
 
 **Назначение**: Простое электромагнитное реле ON/OFF или иное дискретное устройство
 
@@ -250,7 +250,7 @@ myhome/dev/relay_water/cmd      ← ON, OFF, TOGGLE
 
 ---
 
-## CH_GROUP (7) - Группа каналов
+## CH\_GROUP (7) - Группа каналов
 
 **Назначение**: Логическая группа для синхронного управления несколькими каналами
 
@@ -291,7 +291,7 @@ myhome/dev/lights_all/cmd       ← SET 100 (установит яркость �
 
 ---
 
-## CH_VCTEMP (8) - Vacom PID Терморегулятор
+## CH\_VCTEMP (8) - Vacom PID Терморегулятор
 
 **Назначение**: PID регулятор температуры для систем вентиляции Vacom
 
@@ -317,7 +317,7 @@ myhome/dev/lights_all/cmd       ← SET 100 (установит яркость �
 
 ---
 
-## CH_VC (9) - Vacom Мотор-регулятор
+## CH\_VC (9) - Vacom Мотор-регулятор
 
 **Назначение**: Управление мотор-регулятором вентилятора Vacom
 
@@ -333,7 +333,7 @@ myhome/dev/lights_all/cmd       ← SET 100 (установит яркость �
 
 ---
 
-## CH_AC (10) - Кондиционер Haier
+## CH\_AC (10) - Кондиционер Haier
 
 **Назначение**: Управление кондиционером Haier по UART (проприетарный протокол Haier, 9600 baud, не Modbus)
 
@@ -374,7 +374,7 @@ myhome/dev/ac_hall/fan          ← 0, 1, 2, 3 (скорость)
 
 ---
 
-## CH_SPILED (11) - SPI LED Лента
+## CH\_SPILED (11) - SPI LED Лента
 
 **Назначение**: Управление адресуемой SPI LED лентой (WS2812B, APA102)
 
@@ -399,7 +399,7 @@ myhome/dev/ac_hall/fan          ← 0, 1, 2, 3 (скорость)
 
 ---
 
-## CH_MOTOR (12) - Шаговый двигатель
+## CH\_MOTOR (12) - Шаговый двигатель
 
 **Назначение**: Управление шаговым двигателем с обратной связью (для задвижек, жалюзи)
 
@@ -436,7 +436,7 @@ myhome/dev/gate_motor/val       ← текущая позиция обратно
 
 ---
 
-## CH_PID (13) - PID Регулятор
+## CH\_PID (13) - PID Регулятор
 
 **Назначение**: Универсальный PID контроллер для процессов
 
@@ -484,7 +484,7 @@ myhome/dev/gate_motor/val       ← текущая позиция обратно
 
 ---
 
-## CH_MBUS (14) - Universal Modbus
+## CH\_MBUS (14) - Universal Modbus
 
 **Назначение**: Универсальный Modbus канал с полной поддержкой шаблонизации
 
@@ -532,7 +532,7 @@ myhome/dev/gate_motor/val       ← текущая позиция обратно
 
 ---
 
-## CH_UARTBRIDGE (15) - UART Мост
+## CH\_UARTBRIDGE (15) - UART Мост
 
 **Назначение**: Мост между двумя UART портами с отладкой через UDP
 
@@ -558,7 +558,7 @@ myhome/dev/gate_motor/val       ← текущая позиция обратно
 
 ---
 
-## CH_RELAYX (16) - Медленный PWM через реле
+## CH\_RELAYX (16) - Медленный PWM через реле
 
 **Назначение**: Медленный PWM через реле для инертных систем (тепловые системы, комплексы)
 
@@ -591,7 +591,7 @@ myhome/dev/floor_heating/val    ← текущий PWM
 
 ---
 
-## CH_RGBWW (17) - DMX RGBWW
+## CH\_RGBWW (17) - DMX RGBWW
 
 **Назначение**: DMX управление RGB + тёплый белый + холодный белый (5 каналов)
 
@@ -615,7 +615,7 @@ myhome/dev/led_tunable_white/RGB  ← 255,128,0,200,50
 
 ---
 
-## CH_MULTIVENT (18) - Многозональная вентиляция
+## CH\_MULTIVENT (18) - Многозональная вентиляция
 
 **Назначение**: Каскадная система вентиляции с независимым регулированием по зонам
 
@@ -670,7 +670,7 @@ myhome/dev/multivent_main/bedroom/mode  ← HEAT, COOL, FAN
 
 ---
 
-## CH_ELEVATOR (19) - Управление лифтом
+## CH\_ELEVATOR (19) - Управление лифтом
 
 **Назначение**: Управление лифтом (зарезервировано для будущего использования)
 
@@ -678,7 +678,7 @@ myhome/dev/multivent_main/bedroom/mode  ← HEAT, COOL, FAN
 
 ---
 
-## CH_COUNTER (20) - Счётчик импульсов
+## CH\_COUNTER (20) - Счётчик импульсов
 
 **Назначение**: Счётчик импульсов (электроэнергия, газ, вода)
 
@@ -710,7 +710,7 @@ myhome/dev/gas_meter/val        ← текущее значение (м³)
 
 ---
 
-## CH_HUMIDIFIER (21) - Управление увлажнителем
+## CH\_HUMIDIFIER (21) - Управление увлажнителем
 
 **Назначение**: Управление форсуночным увлажнителем воздуха
 
@@ -743,7 +743,7 @@ myhome/dev/humidifier_room/cmd      ← ON, OFF
 
 ---
 
-## CH_MERCURY (22) - Счётчик энергии Mercury
+## CH\_MERCURY (22) - Счётчик энергии Mercury
 
 **Назначение**: Счётчик энергии Mercury по RS485/Modbus
 
@@ -777,7 +777,7 @@ myhome/dev/energy_mercury/val   ← текущие показания энерг
 
 ---
 
-## CH_SPRINKLER (23) - Система полива
+## CH\_SPRINKLER (23) - Система полива
 
 **Назначение**: Многозональная система автоматического полива с контролем воды и насосов
 

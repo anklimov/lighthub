@@ -327,18 +327,18 @@ NB. Не надо именовать данные параметры имена�
  items:{
     "p_zal3":[14,[2,"panel",
               {
-                "fan" :{"emit":"edem/air/vents/zal3/fan"},
-                "mode":{"emit":"edem/air/vents/zal3/mode"},
-                "pwr" :{"emit":"edem/air/vents/zal3/pwr"},
+                "fan" :{"emit":"house/air/vents/zal3/fan"},
+                "mode":{"emit":"house/air/vents/zal3/mode"},
+                "pwr" :{"emit":"house/air/vents/zal3/pwr"},
                 
-                "sethum":{"emit":"edem/air/humzal3/set"},
-                "hum"   :{"emit":"edem/air/humzal3/val","@S":null},
+                "sethum":{"emit":"house/air/humzal3/set"},
+                "hum"   :{"emit":"house/air/humzal3/val","@S":null},
                 
-                "setvoc":{"emit":"edem/air/voczal3/set"},
-                "voc"   :{"emit":"edem/air/voczal3/val"},
+                "setvoc":{"emit":"house/air/voczal3/set"},
+                "voc"   :{"emit":"house/air/voczal3/val"},
                 
                 "settemp"   :{"item":"tzal3/set"},
-                "roomtemp"  :{"emit":"edem/fl2/term_bedr/1/val"},
+                "roomtemp"  :{"emit":"house/fl2/term_bedr/1/val"},
                 "ch_temp":{},
                 "ch_hum":{},
                 "ext_temp":{},
@@ -358,7 +358,7 @@ NB. Не надо именовать данные параметры имена�
 Данную фильтрацию можно отменить, если в настройке параметра добавить переменную @V типа, отличного от целого.
 Например так:
 <code>
-"fan" :{"emit":"edem/air/vents/zal3/fan","@V":null},
+"fan" :{"emit":"house/air/vents/zal3/fan","@V":null},
 </code>
 В этом случае, после того, как мы что-то записали в регистр, при следующем же опросе устройства, это будет обнаружено (если значение изменилось) и будут предприняты настроенные действия (например, значение будет отправлено по MQTT и отобразится в мобильном приложении Home Assistant)
 
@@ -432,12 +432,12 @@ RAW 14
   "vent":[14,[247,"airset",
     
     {
-      "tset":{"emit":"edem/s_out/vent/tset/set","@V":null},
-      "pmode":{"emit":"edem/s_out/vent/pmode/set","@V":null},
-      "fanspeed":{"emit":"edem/s_out/vent/fanspeed/set","@V":null},
-      "on":{"emit":"edem/s_out/vent/on/set","@V":null},
+      "tset":{"emit":"house/s_out/vent/tset/set","@V":null},
+      "pmode":{"emit":"house/s_out/vent/pmode/set","@V":null},
+      "fanspeed":{"emit":"house/s_out/vent/fanspeed/set","@V":null},
+      "on":{"emit":"house/s_out/vent/on/set","@V":null},
       
-      "rtemp":{"emit":"edem/s_out/vent/rtemp"},
+      "rtemp":{"emit":"house/s_out/vent/rtemp"},
       
       "fanmin":{},
       "fanmax":{}
@@ -519,20 +519,20 @@ RAW 14
   "vent":[14,[247,"airset",
     
     {
-      "tset":{"emit":"edem/s_out/vent/set","@V":null},
-      "pmode":{"emit":"edem/s_out/vent/cmd","@V":null},
-      "fanspeed":{"emit":"edem/s_out/vent/fan","@V":null},
-      "on":{"emit":"edem/s_out/vent/oncmd","@V":null},
+      "tset":{"emit":"house/s_out/vent/set","@V":null},
+      "pmode":{"emit":"house/s_out/vent/cmd","@V":null},
+      "fanspeed":{"emit":"house/s_out/vent/fan","@V":null},
+      "on":{"emit":"house/s_out/vent/oncmd","@V":null},
       
-      "ruheat":{"emit":"edem/s_out/vent/ruheat"},
-      "ruslow":{"emit":"edem/s_out/vent/rupump"},
-      "ramode":{"emit":"edem/s_out/vent/ramode"},
-      "rfanspd":{"emit":"edem/s_out/vent/rfanspd"},
-      "rfanlvl":{"emit":"edem/s_out/vent/rfanlvl"},
-      "rpumpon":{"emit":"edem/s_out/vent/rpumpon"},
-      "rtemp":{"emit":"edem/s_out/vent/rtemp"},
-      "rtempset":{"emit":"edem/s_out/vent/rtempset"},
-      "fault":{"emit":"edem/s_out/vent/fault"},
+      "ruheat":{"emit":"house/s_out/vent/ruheat"},
+      "ruslow":{"emit":"house/s_out/vent/rupump"},
+      "ramode":{"emit":"house/s_out/vent/ramode"},
+      "rfanspd":{"emit":"house/s_out/vent/rfanspd"},
+      "rfanlvl":{"emit":"house/s_out/vent/rfanlvl"},
+      "rpumpon":{"emit":"house/s_out/vent/rpumpon"},
+      "rtemp":{"emit":"house/s_out/vent/rtemp"},
+      "rtempset":{"emit":"house/s_out/vent/rtempset"},
+      "fault":{"emit":"house/s_out/vent/fault"},
       
       "tautoheat":{},
       "tautocool":{},
@@ -546,7 +546,7 @@ RAW 14
       "twaterstart":{},
       "twatershut":{},
       "twateridle":{},
-      "fanauto":{"emit":"edem/s_out/vent/fanauto/set","@V":null},
+      "fanauto":{"emit":"house/s_out/vent/fanauto/set","@V":null},
       "numspeed":{},
       "offbyfan":{}
     }

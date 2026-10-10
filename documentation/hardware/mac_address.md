@@ -1,6 +1,6 @@
 # MAC-адрес контроллера
 
-> Источник: Wiki LightHub (lazyhome.ru), страница «mac_адрес». Снапшот от 2026-10-02.
+> Источник: Wiki LightHub (lazyhome.ru), страница «mac\_адрес». Снапшот от 2026-10-02.
 
 Важно, чтобы у вашего контроллера был уникальный MAC адрес.
 Это важно не только потому, что в пределах одной локальной сети два контроллера с одинаковыми MAC не могут работать но еще и потому, что при старте, контроллер загружает с сервера конфигураций или с других контроллеров по шине CAN свою настройку, используя MAC как свой уникальный ключ.
@@ -38,7 +38,7 @@
 
 | Платформа | Механизм в коде | Строки | Соответствие wiki |
 |---|---|---|---|
-| (все) `CUSTOM_FIRMWARE_MAC` | MAC разбирается из build-flag (`parseBytes(macStr, ':', ...)`), затем принудительно: `mac[0] &= 0xFE; mac[0] \|= 2;` (locally-administered, не multicast) | main.cpp:2823-2828 | ✅ «опция CUSTOM_FIRMWARE_MAC» |
+| (все) `CUSTOM_FIRMWARE_MAC` | MAC разбирается из build-flag (`parseBytes(macStr, ':', ...)`), затем принудительно: `mac[0] &= 0xFE; mac[0] \|= 2;` (locally-administered, не multicast) | main.cpp:2823-2828 | ✅ «опция CUSTOM\_FIRMWARE\_MAC» |
 | ESP8266/ESP32 (`WIFI_ENABLE`) | Используется штатный MAC чипа: `WiFi.macAddress(sysConf.mac)` | main.cpp:2830-2833 | ✅ «ESP и так имеют уникальные адреса» |
 | DUE (`__SAM3X8E__`) / STM32 (`ARDUINO_ARCH_STM32`) | MAC генерируется из серийного номера чипа: `mac[0]=0xDE;` остальные байты = сумма байтов `UniqueID.UID_Byte[]` | main.cpp:2835-2840 | ✅ «DUE и STM имеют уникальный ID чипа» |
 | fallback `DEFAULT_FIRMWARE_MAC` | Хардкод `{0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xFF}` | options.h:180 | (доп. fallback, в wiki не описан) |

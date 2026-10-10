@@ -35,7 +35,7 @@
 
 Примеры:
 <code>
-{"emit":"edem/edem3/p_zal3/mode"}
+{"emit":"house/house3/p_zal3/mode"}
 [{"emit":"t_bath3","item":"tbath3"},{"item":"p_bedr3/floor_temp","can":[0,206,"val"]]
 </code>
 

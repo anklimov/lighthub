@@ -1,6 +1,6 @@
 # Интеграция с Home Assistant
 
-> Источник: Wiki LightHub (lazyhome.ru), страница «интеграция_с_homeassistant». Снапшот от 2026-10-02.
+> Источник: Wiki LightHub (lazyhome.ru), страница «интеграция\_с\_homeassistant». Снапшот от 2026-10-02.
 
 Контроллер LightHub прекрасно интегрируется в систему Home Assistant с использованием MQTT
 

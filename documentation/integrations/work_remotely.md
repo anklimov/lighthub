@@ -1,6 +1,6 @@
 # Работаем дистанционно
 
-> Источник: Wiki LightHub (lazyhome.ru), страница «работаем_дистанционно». Снапшот от 2026-10-02.
+> Источник: Wiki LightHub (lazyhome.ru), страница «работаем\_дистанционно». Снапшот от 2026-10-02.
 
 ## ОТА прошивка
 
@@ -25,7 +25,7 @@ password - значение по-умолчанию. Его можно заме�
 
 ## Работа с SYSLOG
 
-Для Windows устанавливаем Visual Syslog Сервер для Windows [https://github.com/MaxBelkov/visualsyslog/blob/master/readme_rus.md](https://github.com/MaxBelkov/visualsyslog/blob/master/readme_rus.md)
+Для Windows устанавливаем Visual Syslog Сервер для Windows [https://github.com/MaxBelkov/visualsyslog/blob/master/readme\_rus.md](https://github.com/MaxBelkov/visualsyslog/blob/master/readme_rus.md)
 
 В корне конфигурационного файлa Lighthub указываем:
 
@@ -37,7 +37,7 @@ password - значение по-умолчанию. Его можно заме�
 
 ## Выполнение CLI команд через MQTT
 
-Достаточно в топик myhome/имя_контроллера/$command послать нужную команду [CLI интерфейс](../core/cli_interface.md)
+Достаточно в топик myhome/имя\_контроллера/$command послать нужную команду [CLI интерфейс](../core/cli_interface.md)
 
 Также, можно воспользоваться http [API](https://www.lazyhome.ru/dokuwiki/doku.php?id=api)
 

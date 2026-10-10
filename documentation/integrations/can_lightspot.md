@@ -79,7 +79,7 @@ CAN-шины очень широко используются в промышл�
 | 7 | `sysCmd` | Системные команды (см. commandType) |
 | 8 | `rawPinCtrl` | Прямое управление пинами |
 
-### Формат данных (datagram_t)
+### Формат данных (datagram\_t)
 
 ```c
 enum metricType { MAC=1, IP=2, NetMask=3, GW=4, DNS=5, UpTime=6, Salt=7 };

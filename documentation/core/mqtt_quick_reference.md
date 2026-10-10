@@ -92,7 +92,7 @@ mosquitto_pub -h 192.168.1.100 -t "myhome/in/rgb/HSV" -m "240,100,200"
 
 ### Цвет по RGB (не поддерживается)
 
-> Суффикс `/rgb` **не поддерживается** в текущей сборке (S_RGB не обрабатывается).
+> Суффикс `/rgb` **не поддерживается** в текущей сборке (S\_RGB не обрабатывается).
 > Цвет задаётся через `/HSV` или строкой «h,s,v[,ct]» в общем топике без суффикса.
 
 ```bash
@@ -288,7 +288,7 @@ curl http://192.168.1.10/ram/lamp1
 | `/hue` | Оттенок RGB | 0-365° |
 | `/sat` | Насыщенность RGB | 0-100% |
 | `/HSV` | Полный HSV (ЗАГЛАВНЫЙ) | hue,sat,value |
-| `/rgb` | **Не поддерживается** (S_RGB не обрабатывается) | — |
+| `/rgb` | **Не поддерживается** (S\_RGB не обрабатывается) | — |
 | `/fan` | Вентилятор | LOW, MEDIUM, HIGH, OFF или число|
 | `/mode` | Режим работы — число 0-4 (AC); текстовые режимы — через /cmd | 0-4 |
 | `/ctrl` | Управление | ENABLE, DISABLE, FREEZE, UNFREEZE |
@@ -297,6 +297,6 @@ curl http://192.168.1.10/ram/lamp1
 ---
 
 **Дополнительно**:
-- Полный справочник: [mqtt_api_reference.md](mqtt_api_reference.md)
-- Справочник суффиксов: [suffixes_reference.md](suffixes_reference.md)
-- Примеры конфигураций: [configuration_examples.md](configuration_examples.md)
+- Полный справочник: [mqtt\_api\_reference.md](mqtt_api_reference.md)
+- Справочник суффиксов: [suffixes\_reference.md](suffixes_reference.md)
+- Примеры конфигураций: [configuration\_examples.md](configuration_examples.md)

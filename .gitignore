@@ -26,8 +26,13 @@ lighthub/modules/out_humidifier.h
 spare_files/*
 spare_files/ArduinoOTA/*
 lib/*
+# site tools: WP session state (cookies, nonce, password) — never commit
+tools/wp/state/
+
 # doxygen generated output (published to lighthub.github.io, not to repo)
 doxygen-docs/html/
 doxygen-docs/latex/
 doxygen-docs/rtf/
 doxygen-docs/doxygen-warnings.log
+privateconf/*
+tools/*

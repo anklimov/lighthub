@@ -34,7 +34,7 @@ root/[id-устройства или bcst или out]/имя_item/[subitem/]suff
 - `out` — контроллер публикует статус в эти топики
 - **Пример**: `myhome/s_out/lamp1/set` (где `s_out` — значение `out`)
 
-#### 3. **item_name** — имя объекта (канала)
+#### 3. **item\_name** — имя объекта (канала)
 
 Определяется в разделе `items` конфигурации.
 
@@ -59,7 +59,7 @@ myhome/in/multivent/bedroom/set      (установить T в спальне)
 myhome/in/multivent/kitchen/fan      (управление вентилятором кухни)
 ```
 
-**Пример для LED ленты (пиксели 10-20; работает ТОЛЬКО для CH_SPILED, тип 11 — DMX-драйвер subitem игнорирует)**:
+**Пример для LED ленты (пиксели 10-20; работает ТОЛЬКО для CH\_SPILED, тип 11 — DMX-драйвер subitem игнорирует)**:
 ```
 myhome/in/led_strip/10-20/set        (установить значение пиксели 10-20)
 ```
@@ -87,16 +87,16 @@ myhome/in/floor/OFF/set              (применится для теплых �
 | **`/hue`** | Command | Оттенок (0-365°, HSV формат) | RGB/RGBW/RGBWW |
 | **`/sat`** | Command | Насыщенность (0-100%, HSV формат) | RGB/RGBW/RGBWW |
 | **`/HSV`** | Command | Полный цвет (hue,saturation,volume). Суффикс ЗАГЛАВНЫЙ, строчный `/hsv` игнорируется | RGB/RGBW/RGBWW |
-| **`/rgb`** | Command | **Не обрабатывается** в текущей сборке (S_RGB) | — |
+| **`/rgb`** | Command | **Не обрабатывается** в текущей сборке (S\_RGB) | — |
 | **`/temp`** | Command | Цветовая температура 153-500 mireds (RGBWW); у AC — текущая T | RGBWW, AC |
 | **`/raw`** | Command | «Сырые» данные, передаваемые драйверу без интерпретации | AC, ELEVATOR |
 | **`/fan`** | Command, Status | Скорость вентилятора 0-255 или (HIGH, MEDIUM, LOW, OFF) | AC, Multivent |
-| **`/mode`** | Command, Status | Режим работы — число 0-4 (AC). Команды FAN нет — есть FAN_ONLY. Текстовые режимы (HEAT, COOL, DRY, AUTO) — payload в /cmd | AC, Multivent |
+| **`/mode`** | Command, Status | Режим работы — число 0-4 (AC). Команды FAN нет — есть FAN\_ONLY. Текстовые режимы (HEAT, COOL, DRY, AUTO) — payload в /cmd | AC, Multivent |
 | **`/lock`** | Command, Status | Блокировка (ON, OFF) | AC |
 | **`/swing`** | Command, Status | Направление воздушного потока (ON, OFF) | AC |
 | **`/quiet`** | Command, Status | Тихий режим (ON, OFF) | AC |
 | **`/ctrl`** | Command, Status | Управление состоянием (FREEZE, UNFREEZE, ENABLE, DISABLE) | Специальное |
-| **`/del`** | Command | Команда с задержкой — только команды ON…FAN_ONLY (код ≤ 0x0F); HIGH/MEDIUM/LOW/HEAT_COOL/HEAT/COOL/DRY запланировать нельзя | ON…FAN_ONLY |
+| **`/del`** | Command | Команда с задержкой — только команды ON…FAN\_ONLY (код ≤ 0x0F); HIGH/MEDIUM/LOW/HEAT\_COOL/HEAT/COOL/DRY запланировать нельзя | ON…FAN\_ONLY |
 
 ---
 
@@ -138,7 +138,7 @@ myhome/lighthub01/lamp1/set  ← 150
 root/out/item[/subitem]/suffix
 ```
 
-**Примеры** (при out="s_out"):
+**Примеры** (при out="s\_out"):
 ```
 myhome/s_out/lamp1/set          → 255 (текущая яркость, 0-255; общий топик s_out/lamp1 — 0-100)
 myhome/s_out/lamp1/cmd          → ON (последняя команда)
@@ -311,7 +311,7 @@ myhome/in/light/cmd → "ON 3000"
 
 ### Восстановление состояния при старте
 
-1. Контроллер подписывается на **статусные топики** на **8 секунд** после старта (TIMEOUT_RETAIN = 8000 мс)
+1. Контроллер подписывается на **статусные топики** на **8 секунд** после старта (TIMEOUT\_RETAIN = 8000 мс)
 2. Брокер отправляет **последний актуальный статус**
 3. Контроллер восстанавливает все значения: яркость, цвет, температуру и т.д.
 
@@ -394,7 +394,7 @@ curl  --user arduino:password -X POST http://192.168.1.10/item/ac_main/mode -d "
 
 1. **Командные широковещательные**: `root/bcst/#`
 2. **Командные индивидуальные**: `root/id-устройства/#`
-3. **Статусные** (только при старте, на 8 сек, TIMEOUT_RETAIN = 8000 мс): `root/out/+/+/#`
+3. **Статусные** (только при старте, на 8 сек, TIMEOUT\_RETAIN = 8000 мс): `root/out/+/+/#`
 4. **Служебные**: `$command` ловится общей подпиской `root/id-устройства/#` (отдельной подписки нет)
 
 ---
@@ -471,5 +471,5 @@ mosquitto_sub -h 192.168.1.100 -t "myhome/s_out/#" -v
 
 ---
 
-**Версия документа**: 2.1 (актуально для работа_с_mqtt из wiki.lazyhome.ru)  
+**Версия документа**: 2.1 (актуально для работа\_с\_mqtt из wiki.lazyhome.ru)  
 **Источники**: [MQTT wiki](https://www.lazyhome.ru/dokuwiki/doku.php?id=%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D0%B0_%D1%81_mqtt), [API wiki](https://www.lazyhome.ru/dokuwiki/doku.php?id=api)

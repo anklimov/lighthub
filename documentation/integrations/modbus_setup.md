@@ -1,6 +1,6 @@
 # Настройка Modbus
 
-> Источник: Wiki LightHub (lazyhome.ru), страницы «настройка_modbus» и «режим_шлюза_ip_modbus». Снапшот от 2026-10-02.
+> Источник: Wiki LightHub (lazyhome.ru), страницы «настройка\_modbus» и «режим\_шлюза\_ip\_modbus». Снапшот от 2026-10-02.
 
 ## Функциональность драйвера Modbus v2
 
@@ -25,7 +25,7 @@ LightHub можно настроить на работу в качестве ш�
 
 В примере выше:
 
-- "t_heat" - имя параметра устройства.
+- "t\_heat" - имя параметра устройства.
 - "reg" - регистр (или стартовый HOLDING REGISTER) параметра
 - "ir" - INPUT REGISTER или "reg"- HOLDING REGISTER или "coil": COIL или "din" - DISCRETE INPUT
 - "map" - правила преобразования (TBD)
@@ -162,10 +162,10 @@ LightHub можно настроить на работу в качестве ш�
 Устройство опрашивается согласно настройкам в библиотеке. А вот результаты опроса используются согласно настройкам в items.
 В данном примере,
 
-- "ch1" передается в MQTT топик "myhome/s_out/aaa1" плюс локальному устройству "localdimmer1"
+- "ch1" передается в MQTT топик "myhome/s\_out/aaa1" плюс локальному устройству "localdimmer1"
 - "ch2" передается в MQTT топик "abc/aaa2" (если в названии топика есть / - он не дополняется слева статусным префиксом)
 - "ch3" передается локальному устройству "localdimmer3"
-- "ch4" передается в MQTT топик "myhome/s_out/aaa4" и "myhome/s_out/aaa44", локальному устройству "localdimmer4" и "localdimmer44" (использован массив из двух JSON объектов)
+- "ch4" передается в MQTT топик "myhome/s\_out/aaa4" и "myhome/s\_out/aaa44", локальному устройству "localdimmer4" и "localdimmer44" (использован массив из двух JSON объектов)
 
 Строки ch1 - ch4 в данном примере, определенные в третем параметре массива конфигурации, далее будем называть "именованными параметрами modbus item"
 
@@ -328,18 +328,18 @@ NB. Не надо именовать данные параметры имена�
  items:{
     "p_zal3":[14,[2,"panel",
               {
-                "fan" :{"emit":"edem/air/vents/zal3/fan"},
-                "mode":{"emit":"edem/air/vents/zal3/mode"},
-                "pwr" :{"emit":"edem/air/vents/zal3/pwr"},
+                "fan" :{"emit":"house/air/vents/zal3/fan"},
+                "mode":{"emit":"house/air/vents/zal3/mode"},
+                "pwr" :{"emit":"house/air/vents/zal3/pwr"},
 
-                "sethum":{"emit":"edem/air/humzal3/set"},
-                "hum"   :{"emit":"edem/air/humzal3/val","@S":null},
+                "sethum":{"emit":"house/air/humzal3/set"},
+                "hum"   :{"emit":"house/air/humzal3/val","@S":null},
 
-                "setvoc":{"emit":"edem/air/voczal3/set"},
-                "voc"   :{"emit":"edem/air/voczal3/val"},
+                "setvoc":{"emit":"house/air/voczal3/set"},
+                "voc"   :{"emit":"house/air/voczal3/val"},
 
                 "settemp"   :{"item":"tzal3/set"},
-                "roomtemp"  :{"emit":"edem/fl2/term_bedr/1/val"},
+                "roomtemp"  :{"emit":"house/fl2/term_bedr/1/val"},
                 "ch_temp":{},
                 "ch_hum":{},
                 "ext_temp":{},
@@ -359,7 +359,7 @@ NB. Не надо именовать данные параметры имена�
 Например так:
 
 ```json
-"fan" :{"emit":"edem/air/vents/zal3/fan","@V":null},
+"fan" :{"emit":"house/air/vents/zal3/fan","@V":null},
 ```
 
 В этом случае, после того, как мы что-то записали в регистр, при следующем же опросе устройства, это будет обнаружено (если значение изменилось) и будут предприняты настроенные действия (например, значение будет отправлено по MQTT и отобразится в мобильном приложении Home Assistant)
@@ -433,12 +433,12 @@ RAW 14
   "vent":[14,[247,"airset",
 
     {
-      "tset":{"emit":"edem/s_out/vent/tset/set","@V":null},
-      "pmode":{"emit":"edem/s_out/vent/pmode/set","@V":null},
-      "fanspeed":{"emit":"edem/s_out/vent/fanspeed/set","@V":null},
-      "on":{"emit":"edem/s_out/vent/on/set","@V":null},
+      "tset":{"emit":"house/s_out/vent/tset/set","@V":null},
+      "pmode":{"emit":"house/s_out/vent/pmode/set","@V":null},
+      "fanspeed":{"emit":"house/s_out/vent/fanspeed/set","@V":null},
+      "on":{"emit":"house/s_out/vent/on/set","@V":null},
 
-      "rtemp":{"emit":"edem/s_out/vent/rtemp"},
+      "rtemp":{"emit":"house/s_out/vent/rtemp"},
 
       "fanmin":{},
       "fanmax":{}
@@ -460,7 +460,7 @@ RAW 14
 - AUTO
 - ON
 - HEAT
-- FAN_ONLY
+- FAN\_ONLY
 Для команды OFF записываем 0
 
 Это реализуется строкой
@@ -527,20 +527,20 @@ RAW 14
   "vent":[14,[247,"airset",
 
     {
-      "tset":{"emit":"edem/s_out/vent/set","@V":null},
-      "pmode":{"emit":"edem/s_out/vent/cmd","@V":null},
-      "fanspeed":{"emit":"edem/s_out/vent/fan","@V":null},
-      "on":{"emit":"edem/s_out/vent/oncmd","@V":null},
+      "tset":{"emit":"house/s_out/vent/set","@V":null},
+      "pmode":{"emit":"house/s_out/vent/cmd","@V":null},
+      "fanspeed":{"emit":"house/s_out/vent/fan","@V":null},
+      "on":{"emit":"house/s_out/vent/oncmd","@V":null},
 
-      "ruheat":{"emit":"edem/s_out/vent/ruheat"},
-      "ruslow":{"emit":"edem/s_out/vent/rupump"},
-      "ramode":{"emit":"edem/s_out/vent/ramode"},
-      "rfanspd":{"emit":"edem/s_out/vent/rfanspd"},
-      "rfanlvl":{"emit":"edem/s_out/vent/rfanlvl"},
-      "rpumpon":{"emit":"edem/s_out/vent/rpumpon"},
-      "rtemp":{"emit":"edem/s_out/vent/rtemp"},
-      "rtempset":{"emit":"edem/s_out/vent/rtempset"},
-      "fault":{"emit":"edem/s_out/vent/fault"},
+      "ruheat":{"emit":"house/s_out/vent/ruheat"},
+      "ruslow":{"emit":"house/s_out/vent/rupump"},
+      "ramode":{"emit":"house/s_out/vent/ramode"},
+      "rfanspd":{"emit":"house/s_out/vent/rfanspd"},
+      "rfanlvl":{"emit":"house/s_out/vent/rfanlvl"},
+      "rpumpon":{"emit":"house/s_out/vent/rpumpon"},
+      "rtemp":{"emit":"house/s_out/vent/rtemp"},
+      "rtempset":{"emit":"house/s_out/vent/rtempset"},
+      "fault":{"emit":"house/s_out/vent/fault"},
 
       "tautoheat":{},
       "tautocool":{},
@@ -554,7 +554,7 @@ RAW 14
       "twaterstart":{},
       "twatershut":{},
       "twateridle":{},
-      "fanauto":{"emit":"edem/s_out/vent/fanauto/set","@V":null},
+      "fanauto":{"emit":"house/s_out/vent/fanauto/set","@V":null},
       "numspeed":{},
       "offbyfan":{}
     }
@@ -587,13 +587,13 @@ RAW 14
 
 Сверено с `lighthub/modules/out_modbus.cpp`, `lighthub/modules/out_modbus.h`, `lighthub/ipmodbus.cpp`, `lighthub/ipmodbus.h`, `lighthub/options.h`, `lighthub/item.h`.
 
-- Ключи шаблона устройства, подтвержденные в коде (`out_Modbus::getConfig`, out_modbus.cpp:139-249): `baud` (по умолчанию 9600), `serial` (по умолчанию `SERIAL_8N1`), `poll` с подклавишами `regs`, `irs`, `coils`, `dins` и `delay` (по умолчанию 1000 мс — в wiki значение по умолчанию не указано), `par`.
-- Ключи параметра в `par` (out_modbus.cpp:433-467, 1084-1085, 203-204): `reg`, `ir`, `coil`, `din`, `type`, `map`, `id`, `prefetch` (boolean). Ключ `prefetch` поддерживается кодом (при записи предварительно опрашивается регистр), но в wiki не описан.
-- Поддерживаемые типы (таблица `regSize_P`, out_modbus.cpp:47-60): `i16`, `i32`, `u16`, `u32`, `i8h`, `i8l`, `u8h`, `u8l`, `x10`, `100` — только эти типы. Список в wiki неполный: отсутствуют `u8h` и `u8l`.
+- Ключи шаблона устройства, подтвержденные в коде (`out_Modbus::getConfig`, out\_modbus.cpp:139-249): `baud` (по умолчанию 9600), `serial` (по умолчанию `SERIAL_8N1`), `poll` с подклавишами `regs`, `irs`, `coils`, `dins` и `delay` (по умолчанию 1000 мс — в wiki значение по умолчанию не указано), `par`.
+- Ключи параметра в `par` (out\_modbus.cpp:433-467, 1084-1085, 203-204): `reg`, `ir`, `coil`, `din`, `type`, `map`, `id`, `prefetch` (boolean). Ключ `prefetch` поддерживается кодом (при записи предварительно опрашивается регистр), но в wiki не описан.
+- Поддерживаемые типы (таблица `regSize_P`, out\_modbus.cpp:47-60): `i16`, `i32`, `u16`, `u32`, `i8h`, `i8l`, `u8h`, `u8l`, `x10`, `100` — только эти типы. Список в wiki неполный: отсутствуют `u8h` и `u8l`.
 - Ключ `mapcmd` (пример панели Zentec, раздел «Подавление повторных значений») в коде не найден — поддерживается только `map`; вероятно, опечатка/устаревшее имя.
-- Ключ `"mode":"r"` в примере параметра `rtemp` в out_modbus.cpp не обрабатывается — вероятно, унаследован от драйвера Modbus v1.
-- В коде есть ключ `sendchanges` (out_modbus.cpp:1085), не упомянутый в wiki.
+- Ключ `"mode":"r"` в примере параметра `rtemp` в out\_modbus.cpp не обрабатывается — вероятно, унаследован от драйвера Modbus v1.
+- В коде есть ключ `sendchanges` (out\_modbus.cpp:1085), не упомянутый в wiki.
 - Перечень числовых идентификаторов суффиксов в wiki (HUE 9, SAT 10, TEMP 11, VAL 12, DELAYED 13, RAW 14) **не совпадает** с текущим кодом (item.h:27-39): `CMD 1, SET 2, VAL 3, DELAYED 4, HSV 5, RGB 6, FAN 7, MODE 8, CTRL 9, HUE 10, SAT 11, TEMP 12, RAW 13`. Примеры с `id` 11-18 (Zentec, вентустановка) соответствуют старой нумерации; при использовании на актуальной прошивке значения `id` нужно пересматривать.
-- Описание типа `i8h`/`i8l` («при записи другие 8 бит будут заполнены 0xFF») не подтверждается кодом: запись идет целиком в 16-битный регистр смещенным байтом (`writeSingleRegister`, out_modbus.cpp:897-905), остальные биты обнуляются.
-- Механика `@S`/`@V` (подавление повторных значений и «записали сами — не обрабатываем») подтверждена: `createLastMeasured`/`getLastMeasured`, сравнение с `@V` («Ignored - equal with setted val», out_modbus.cpp:676-701).
+- Описание типа `i8h`/`i8l` («при записи другие 8 бит будут заполнены 0xFF») не подтверждается кодом: запись идет целиком в 16-битный регистр смещенным байтом (`writeSingleRegister`, out\_modbus.cpp:897-905), остальные биты обнуляются.
+- Механика `@S`/`@V` (подавление повторных значений и «записали сами — не обрабатываем») подтверждена: `createLastMeasured`/`getLastMeasured`, сравнение с `@V` («Ignored - equal with setted val», out\_modbus.cpp:676-701).
 - Шлюз IP-Modbus: компиляционная опция `IPMODBUS` (ipmodbus.h:1), порты TCP и UDP — оба 502 (ipmodbus.h:26-27), значения по умолчанию `MODBUS_SERIAL_BAUD 9600` и `MODBUS_SERIAL_PARAM SERIAL_8N1` (options.h:154-159) — совпадает с wiki.

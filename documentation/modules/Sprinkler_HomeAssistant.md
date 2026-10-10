@@ -52,229 +52,229 @@
 mqtt:
   switch:
     - name: "Полив"
-      state_topic:  "edem/s_out/sprinkler/cmd"
-      command_topic: "edem/air/sprinkler/cmd"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/cmd"
+      command_topic: "house/air/sprinkler/cmd"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив север"
-      state_topic:  "edem/s_out/sprinkler/nord/cmd"
-      command_topic: "edem/air/sprinkler/nord/cmd"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/nord/cmd"
+      command_topic: "house/air/sprinkler/nord/cmd"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив юг"
-      state_topic:  "edem/s_out/sprinkler/south/cmd"
-      command_topic: "edem/air/sprinkler/south/cmd"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/south/cmd"
+      command_topic: "house/air/sprinkler/south/cmd"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив капельный"
-      state_topic:  "edem/s_out/sprinkler/trees/cmd"
-      command_topic: "edem/air/sprinkler/trees/cmd"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/trees/cmd"
+      command_topic: "house/air/sprinkler/trees/cmd"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив розетки"
-      state_topic:  "edem/s_out/sprinkler/outlets/cmd"
-      command_topic: "edem/air/sprinkler/outlets/cmd"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/outlets/cmd"
+      command_topic: "house/air/sprinkler/outlets/cmd"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
   button:
     - name: "Полив сброс"
-      command_topic: "edem/air/sprinkler/cmd"
+      command_topic: "house/air/sprinkler/cmd"
       payload_press: "RESET"
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив блокировка"
-      command_topic: "edem/air/sprinkler/cmd"
+      command_topic: "house/air/sprinkler/cmd"
       payload_press: "FREEZE"
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив разблокировка"
-      command_topic: "edem/air/sprinkler/cmd"
+      command_topic: "house/air/sprinkler/cmd"
       payload_press: "UNFREEZE"
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив разрешить"
-      command_topic: "edem/air/sprinkler/cmd"
+      command_topic: "house/air/sprinkler/cmd"
       payload_press: "ENABLE"
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив запретить"
-      command_topic: "edem/air/sprinkler/cmd"
+      command_topic: "house/air/sprinkler/cmd"
       payload_press: "DISABLE"
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив осушение бака"
-      command_topic: "edem/air/sprinkler/cmd"
+      command_topic: "house/air/sprinkler/cmd"
       payload_press: "DRY"
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
   number:
     - name: "Полив юг"
-      state_topic:  "edem/s_out/sprinkler/south/set"
-      command_topic: "edem/air/sprinkler/south/set"
+      state_topic:  "house/s_out/sprinkler/south/set"
+      command_topic: "house/air/sprinkler/south/set"
       min: 0
       max: 6000
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив север"
-      state_topic:  "edem/s_out/sprinkler/nord/set"
-      command_topic: "edem/air/sprinkler/nord/set"
+      state_topic:  "house/s_out/sprinkler/nord/set"
+      command_topic: "house/air/sprinkler/nord/set"
       min: 0
       max: 6000
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив капельный"
-      state_topic:  "edem/s_out/sprinkler/trees/set"
-      command_topic: "edem/air/sprinkler/trees/set"
+      state_topic:  "house/s_out/sprinkler/trees/set"
+      command_topic: "house/air/sprinkler/trees/set"
       min: 0
       max: 6000
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив юг выполнено"
-      state_topic:  "edem/s_out/sprinkler/south/val"
-      command_topic: "edem/air/sprinkler/south/val"
+      state_topic:  "house/s_out/sprinkler/south/val"
+      command_topic: "house/air/sprinkler/south/val"
       min: 0
       max: 60000
       mode: slider
       icon: "mdi:timer-sand"
       unit_of_measurement: 'sec'
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив север выполнено"
-      state_topic:  "edem/s_out/sprinkler/nord/val"
-      command_topic: "edem/air/sprinkler/nord/val"
+      state_topic:  "house/s_out/sprinkler/nord/val"
+      command_topic: "house/air/sprinkler/nord/val"
       min: 0
       max: 60000
       mode: slider
       icon: "mdi:timer-sand"
       unit_of_measurement: 'sec'
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив капельный выполнено"
-      state_topic:  "edem/s_out/sprinkler/trees/val"
-      command_topic: "edem/air/sprinkler/trees/val"
+      state_topic:  "house/s_out/sprinkler/trees/val"
+      command_topic: "house/air/sprinkler/trees/val"
       min: 0
       max: 60000
       mode: slider
       icon: "mdi:timer-sand"
       unit_of_measurement: 'sec'
-      availability_topic: "edem/air/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
   sensor:
     - name: "Полив бак Макс"
-      state_topic:  "edem/s_out/sprinkler/$wMax"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/$wMax"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив бак Мin"
-      state_topic:  "edem/s_out/sprinkler/$wMin"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/$wMin"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив водопровод"
-      state_topic:  "edem/s_out/sprinkler/$rVIN"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/$rVIN"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив дренаж вкл"
-      state_topic:  "edem/s_out/sprinkler/$rDren"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/$rDren"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив дренаж качает"
-      state_topic:  "edem/s_out/sprinkler/$fbDren"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/$fbDren"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив насос вкл"
-      state_topic:  "edem/s_out/sprinkler/$rPump"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/$rPump"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив насос качает"
-      state_topic:  "edem/s_out/sprinkler/$fbPump"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/$fbPump"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив состояние"
-      state_topic:  "edem/s_out/sprinkler/$state"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив ошибка"
-      state_topic:  "edem/s_out/sprinkler/$fault"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/$fault"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Поливаем юг"
-      state_topic:  "edem/s_out/sprinkler/south/$state"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/south/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Поливаем север"
-      state_topic:  "edem/s_out/sprinkler/nord/$state"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/nord/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Поливаем капельно"
-      state_topic:  "edem/s_out/sprinkler/trees/$state"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/trees/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив розетка статус"
-      state_topic:  "edem/s_out/sprinkler/outlets/$state"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/outlets/$state"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 
     - name: "Полив блокировки"
-      state_topic:  "edem/s_out/sprinkler/ctrl"
-      availability_topic: "edem/air/$state"
+      state_topic:  "house/s_out/sprinkler/ctrl"
+      availability_topic: "house/air/$state"
       payload_available: "ready"
       payload_not_available: "disconnected"
 ```
@@ -850,8 +850,8 @@ views:
 
 ## 6. Как пользоваться панелью
 
-![sprinkler_1.jpeg](../reference/images/sprinkler_1.jpeg)
-![sprinkler_2.jpeg](../reference/images/sprinkler_2.jpeg)
+![sprinkler\_1.jpeg](../reference/images/sprinkler_1.jpeg)
+![sprinkler\_2.jpeg](../reference/images/sprinkler_2.jpeg)
 - **Общее состояние:** Отображает статус системы и режим (заморозка/разрешено/запрещено). Ошибка не показывается, но иконка станет красной при неисправности.
 - **Бак:** Иконка батарейки меняет цвет и текст в зависимости от уровня воды (пусто/наполовину/полный). Нажатие открывает историю уровня.
 - **Водопровод и насосы:** Показывают текущий статус (Выкл/Вкл/Качает) с цветовой индикацией. Клик – история соответствующего датчика.

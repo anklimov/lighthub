@@ -1,6 +1,6 @@
 # LightHub: Полное инженерное описание JSON‑конфигурации контроллера
 
-> **Документ актуален для ядра LightHub с типами каналов CH_DIMMER (0) - CH_SPRINKLER (23)**
+> **Документ актуален для ядра LightHub с типами каналов CH\_DIMMER (0) - CH\_SPRINKLER (23)**
 > 
 > Предназначен для инженеров автоматизации, интеграторов и разработчиков.
 > Основан **строго** на официальной документации LazyHome / LightHub и исходном коде.
@@ -188,7 +188,7 @@ myhome/s_out/lamp1/hue       # текущий оттенок RGB лампы
 
 | Параметр | Описание |
 |--|--|
-| GPIO pin | Не используется: пин фиксирован (AVR_DMXOUT_PIN) |
+| GPIO pin | Не используется: пин фиксирован (AVR\_DMXOUT\_PIN) |
 | Кол-во каналов | Число DMX каналов (обычно 512) — берётся только последний элемент массива |
 
 ---
@@ -400,7 +400,7 @@ myhome/s_out/lamp1/hue       # текущий оттенок RGB лампы
 
 ### Типы каналов (0-23)
 
-**Полный справочник типов каналов см. в [channel_types_reference.md](channel_types_reference.md)**
+**Полный справочник типов каналов см. в [channel\_types\_reference.md](channel_types_reference.md)**
 
 | Код | Тип | Описание | Конфигурация |
 |--|--|--|--|
@@ -423,15 +423,15 @@ myhome/s_out/lamp1/hue       # текущий оттенок RGB лампы
 | **16** | `RELAYX` | Медленный PWM | `[GPIO_pin, период_сек]` |
 | **17** | `DMXRGBWW` | DMX RGBWW | Стартовый DMX канал |
 | **18** | `VENTS` | Многозональная вентиляция | `{зоны}` (объект; рабочая форма `[[18,5], {зоны}]`) |
-| **19** | `ELEVATOR` | Лифт (ELEVATOR_ENABLE) | `{serial, baud, log}` |
+| **19** | `ELEVATOR` | Лифт (ELEVATOR\_ENABLE) | `{serial, baud, log}` |
 | **20** | `COUNTER` | Автосуммирующий счётчик | `[коэффициент_импульса, период_автосуммирования_сек]` |
-| **21** | `HUM` | Увлажнитель (HUMIDIFIER_ENABLE) | `[[пины...], {зоны}, motorExecObj, faultExecObj]` |
+| **21** | `HUM` | Увлажнитель (HUMIDIFIER\_ENABLE) | `[[пины...], {зоны}, motorExecObj, faultExecObj]` |
 | **22** | `MERCURY` | Счётчик энергии Mercury | `[адрес, baudrate, ...]` |
 | **23** | `SPRINKLR` | Система полива | `{конфиг}` (корневой объект `""` + зоны с `pin`) |
 
 ### Примеры конфигурации items
 
-#### CH_RELAY (6) — Простое реле
+#### CH\_RELAY (6) — Простое реле
 
 ```json
 "relay1": [6, 23],              // Реле на GPIO 23
@@ -439,7 +439,7 @@ myhome/s_out/lamp1/hue       # текущий оттенок RGB лампы
 "relay3": [6, 28, 1, 1]         // С начальным значением и командой
 ```
 
-#### CH_DMX (0) — DMX выход
+#### CH\_DMX (0) — DMX выход
 
 ```json
 "lamp1": [0, 5],                // DMX канал 5
@@ -447,20 +447,20 @@ myhome/s_out/lamp1/hue       # текущий оттенок RGB лампы
 "dmx_4ch": ["DMX", [1, 2, 3, 4]]  // 4-х канальный диммер
 ```
 
-#### CH_RGBW (1) — RGB+White
+#### CH\_RGBW (1) — RGB+White
 
 ```json
 "rgb_light": [1, 10]            // RGB+W на DMX 10-13
 ```
 
-#### CH_PWM (3) — GPIO PWM
+#### CH\_PWM (3) — GPIO PWM
 
 ```json
 "pwm1": [3, 9],                 // PWM на GPIO 9
 "pwm_4ch": [3, [11, 12, 13, 14]] // 4-х канальный PWM
 ```
 
-#### CH_GROUP (7) — Группа каналов
+#### CH\_GROUP (7) — Группа каналов
 
 ```json
 "lights_all": [7, [
@@ -470,13 +470,13 @@ myhome/s_out/lamp1/hue       # текущий оттенок RGB лампы
 "lights_bedroom": [7, ["lamp1", "rgb1", "relay1"]]
 ```
 
-#### CH_THERMO (5) — Термостат
+#### CH\_THERMO (5) — Термостат
 
 ```json
 "thermo_bath": [5, 24, 33]      // GPIO 24, уставка 33°C
 ```
 
-#### CH_ACHAIER (10) — Кондиционер Haier
+#### CH\_ACHAIER (10) — Кондиционер Haier
 
 Проприетарный UART-протокол (НЕ Modbus):
 
@@ -484,14 +484,14 @@ myhome/s_out/lamp1/hue       # текущий оттенок RGB лампы
 "ac_haier": [10, 0]              // portNum 0-3
 ```
 
-#### CH_COUNTER (20) — Счётчик энергии
+#### CH\_COUNTER (20) — Счётчик энергии
 
 ```json
 "energy": [20, [0.02, 60]],      // импульс, период автосуммирования (сек)
 "gas": [20, 0]                   // без калибровки
 ```
 
-#### CH_MULTIVENT (18) — Многозональная вентиляция
+#### CH\_MULTIVENT (18) — Многозональная вентиляция
 
 ```json
 "multivent": [[18, 5], {
@@ -684,5 +684,5 @@ LightHub использует **жёстко структурированную,
 
 **Версия документа**: 2.0  
 **Дата обновления**: 2025-01-24  
-**Актуально для**: LightHub с CH_DIMMER (0) - CH_SPRINKLER (23)  
+**Актуально для**: LightHub с CH\_DIMMER (0) - CH\_SPRINKLER (23)  
 **Источник**: [item.h](../../lighthub/item.h), [item.cpp](../../lighthub/item.cpp)
