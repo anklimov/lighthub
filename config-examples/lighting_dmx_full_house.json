@@ -11,7 +11,7 @@
                           "lampcab31",
                           "lampcab32",
                           "lampsauna3",
-                          "lampbath33",
+                          "lampbath3",
                           "lampktc3",
                           "lampwc3",
                           "lamp4",
@@ -27,14 +27,9 @@
                           "bra32"]],
           "gr_hall3":[7,["lamphall3","lampstw3"]],
           "gr_gost3":[7,["lampgst3","lampktc3"]],
-          "relays":[7,["pout0","thermostat","pout2","pout3","pout4","pout5","pout6"]],
+          "relays":[7,["pout0","thermostat","pout2","pout4","pout5","pout6"]],
               "uouts":[7,["unprot0","unprot1","unprot2","unprot3","unprot4","unprot5","unprot6","unprot7"]],
-      
-              "mb1":[44,[1,0,3,100]],
-          "mb2":[44,[1,1,3,100]],
-          "mb3":[44,[1,2,3,100]],
-          "mb4":[44,[1,3,3,100]],
-          "mba":[44,[96,0,0]],
+
           
           "lampbedr3":[0,1],
           "lampcab31":[0,2],

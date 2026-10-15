@@ -1,0 +1,8 @@
+{
+  "mqtt": ["ac-demo", "192.168.88.2"],
+  "topics": { "root": "house" },
+  "items": {
+    "ac_living": [10, 1],
+    "ac_bedroom": [10, 2]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "mqtt": [
+    "floor-demo",
+    "192.168.88.2"
+  ],
+  "topics": {
+    "root": "house"
+  },
+  "ow": {
+    "28FFC68116208A08": [
+      {
+        "emit": "house/t_bath",
+        "item": "tbath"
+      }
+    ],
+    "28AA5C343E1401DC": [
+      {
+        "emit": "house/t_kitchen",
+        "item": "tkitchen"
+      }
+    ]
+  },
+  "items": {
+    "tbath": [
+      13,
+      [
+        [
+          320,
+          100,
+          6912,
+          50,
+          200,
+          100
+        ],
+        {
+          "item": "rbath/set"
+        }
+      ],
+      26,
+      526
+    ],
+    "rbath": [
+      16,
+      [
+        -29,
+        1800
+      ],
+      100,
+      513
+    ],
+    "tkitchen": [
+      13,
+      [
+        [
+          400,
+          0,
+          17280,
+          50,
+          200,
+          100
+        ],
+        {
+          "item": "rkitchen/set"
+        }
+      ],
+      21,
+      526
+    ],
+    "rkitchen": [
+      16,
+      [
+        -30,
+        1800
+      ],
+      100,
+      513
+    ]
+  },
+  "in": {
+    "2": {
+      "T": 0,
+      "click": {
+        "item": "tbath/cmd",
+        "icmd": "TOGGLE"
+      },
+      "lcmd": {
+        "item": "tbath/cmd",
+        "icmd": "OFF"
+      }
+    }
+  }
+}

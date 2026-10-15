@@ -1,0 +1,14 @@
+{
+  "mqtt": ["relay-demo", "192.168.88.2"],
+  "items": {
+    "pump_relay": [6, 23],
+    "boiler_relay": [6, 24, 0, 0],
+    "fan_relay": [6, 25, 1, 1]
+  },
+  "in": {
+    "0": {
+      "click": { "item": "pump_relay", "icmd": "TOGGLE" },
+      "dclick": { "item": "fan_relay", "icmd": "TOGGLE" }
+    }
+  }
+}

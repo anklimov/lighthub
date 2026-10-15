@@ -1,0 +1,81 @@
+{
+  "mqtt": [
+    "heating-demo",
+    "192.168.88.2"
+  ],
+  "topics": {
+    "root": "house"
+  },
+  "ow": {
+    "28FF163116208AC7": [
+      {
+        "emit": "house/t_living",
+        "item": "tliving"
+      }
+    ],
+    "28FF403E16208A54": [
+      {
+        "emit": "house/t_cabinet",
+        "item": "tcabinet"
+      }
+    ]
+  },
+  "items": {
+    "tliving": [
+      13,
+      [
+        [
+          500,
+          100,
+          10800,
+          50,
+          200,
+          200,
+          30
+        ],
+        {
+          "item": "rliving/set"
+        }
+      ],
+      22,
+      526
+    ],
+    "rliving": [
+      16,
+      [
+        -27,
+        1800
+      ],
+      200,
+      513
+    ],
+    "tcabinet": [
+      13,
+      [
+        [
+          500,
+          100,
+          10800,
+          50,
+          200,
+          200,
+          30
+        ],
+        {
+          "item": "rcabinet/set"
+        }
+      ],
+      21,
+      526
+    ],
+    "rcabinet": [
+      16,
+      [
+        -33,
+        1800
+      ],
+      200,
+      513
+    ]
+  }
+}

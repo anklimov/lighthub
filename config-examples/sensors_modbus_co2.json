@@ -1,0 +1,122 @@
+{
+  "mqtt": [
+    "sensors-demo",
+    "192.168.88.2"
+  ],
+  "topics": {
+    "root": "house",
+    "s8": "house/snsr/s8",
+    "snsr": "house/snsr/"
+  },
+  "modbus": {
+    "s8": {
+      "poll": {
+        "irs": [
+          [
+            0,
+            3
+          ]
+        ],
+        "regs": [
+          [
+            0,
+            1
+          ],
+          31
+        ],
+        "delay": 11000
+      },
+      "par": {
+        "co2": {
+          "ir": 3
+        },
+        "$meterStat": {
+          "ir": 0
+        },
+        "$alarmStat": {
+          "ir": 1
+        },
+        "hr1": {
+          "reg": 0
+        },
+        "hr2": {
+          "reg": 1
+        },
+        "hr32": {
+          "reg": 31
+        }
+      }
+    },
+    "term": {
+      "poll": {
+        "regs": [
+          0
+        ],
+        "delay": 12000
+      },
+      "par": {
+        "t": {
+          "reg": 0,
+          "type": "x10"
+        }
+      }
+    }
+  },
+  "items": {
+    "s8living": [
+      14,
+      [
+        51,
+        "s8",
+        {
+          "co2": {
+            "emit": "${s8}living/val",
+            "item": "co2living_pid/val",
+            "@S": null
+          },
+          "$meterStat": {
+            "emit": "${s8}living/meterStat",
+            "@S": null
+          },
+          "$alarmStat": {
+            "emit": "${s8}living/alarmStat",
+            "@S": null
+          },
+          "hr1": {},
+          "hr2": {}
+        }
+      ]
+    ],
+    "t_duct": [
+      14,
+      [
+        52,
+        "term",
+        {
+          "t": {
+            "emit": "house/snsr/t_duct/val",
+            "@S": null
+          }
+        }
+      ]
+    ],
+    "co2living_pid": [
+      13,
+      [
+        [
+          -0.5,
+          1,
+          0,
+          300,
+          250,
+          0
+        ],
+        {
+          "emit": "house/climate/living/air_request"
+        }
+      ],
+      600,
+      20
+    ]
+  }
+}

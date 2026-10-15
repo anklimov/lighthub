@@ -1,0 +1,29 @@
+{
+  "mqtt": ["buttons-demo", "192.168.88.2"],
+  "topics": { "root": "house" },
+  "items": {
+    "lamp_living": [0, 5],
+    "led_living": [1, 10],
+    "lights_all": [7, ["lamp_living", "led_living"]]
+  },
+  "in": {
+    "0": {
+      "T": 0,
+      "click":  { "item": "lamp_living/cmd", "icmd": "TOGGLE" },
+      "dclick": { "item": "led_living/cmd", "icmd": "TOGGLE" },
+      "tclick": { "item": "lights_all/cmd", "icmd": "TOGGLE" },
+      "lcmd":   { "item": "lights_all/cmd", "icmd": "HALT" },
+      "rpcmd":  { "item": "lamp_living/set", "icmd": "%+4" }
+    },
+    "2": {
+      "T": 0,
+      "scmd": { "item": "lights_all/cmd", "icmd": "OFF" },
+      "rcmd": { "item": "lights_all/cmd", "icmd": "REST" }
+    },
+    "4": {
+      "T": 32, "#": [14, 6, 7],
+      "+-":  { "item": "led_living/set", "icmd": "%+1", "irev": "%-1" },
+      "click": { "item": "led_living/cmd", "icmd": "TOGGLE" }
+    }
+  }
+}

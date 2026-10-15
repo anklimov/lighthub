@@ -8,7 +8,7 @@ Useful links:
 
   * [WIKI/RU](https://www.lazyhome.ru/dokuwiki/doku.php?id=start)
 
-  * [Doxygen autodocumentation for developers](https://lighthub.github.io/doxygen/)
+  * [Doxygen autodocumentation for developers](https://anklimov.github.io/doxygen/)
 
   * [In-repo documentation (RU)](documentation/README.md)
 
@@ -52,7 +52,7 @@ Scalability of Lighthub is virtually unlimited: Setup so many controllers you ne
 # Documentation
 * [In-repo documentation index](documentation/README.md) (RU): JSON configuration, channel types, MQTT API, CLI, integrations (CAN, Modbus, 1-Wire, HA/OpenHAB), hardware
 * [Russian-language Wiki](https://www.lazyhome.ru/dokuwiki/doku.php)
-* [Developer documentation site](https://lighthub.github.io/) (Doxygen + developer notes)
+* [Developer documentation site](https://anklimov.github.io/) (Doxygen + developer notes)
 * [Browser Plugin for searching and configure controllers](https://github.com/anklimov/zeroconf-lighthub) 
 * [Release notes](https://github.com/anklimov/lighthub/releases)
 

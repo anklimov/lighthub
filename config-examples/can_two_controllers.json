@@ -1,0 +1,183 @@
+{
+  "mqtt": [
+    "house-climate",
+    "192.168.88.2"
+  ],
+  "topics": {
+    "root": "house",
+    "snsr": "house/snsr/"
+  },
+  "can": {
+    "addr": 13
+  },
+  "ow": {
+    "28FFC68116208A08": [
+      {
+        "emit": "t_bath",
+        "item": "tbath"
+      },
+      {
+        "item": "p_bedr/floor_temp"
+      }
+    ],
+    "28FFE45716208A7B": [
+      {
+        "emit": "t_bedr",
+        "item": "tbedr"
+      },
+      {
+        "item": "p_bedr/ch_temp"
+      }
+    ]
+  },
+  "items": {
+    "p_bedr": [
+      14,
+      [
+        33,
+        "panel",
+        {
+          "settemp": {
+            "item": "tbedr/set",
+            "can": [
+              15,
+              6,
+              "set"
+            ],
+            "@S": 0
+          },
+          "sethum": {
+            "can": [
+              15,
+              433,
+              "set"
+            ],
+            "@S": 0
+          },
+          "hum": {
+            "emit": "${snsr}humbedr/val",
+            "@S": null,
+            "can": [
+              15,
+              433,
+              "val"
+            ]
+          },
+          "setfloor": {
+            "item": "tbath/set",
+            "@S": 0
+          },
+          "acon": {
+            "can": [
+              15,
+              6,
+              "cmd"
+            ],
+            "@S": 0
+          },
+          "fanspeed": {
+            "can": [
+              15,
+              3,
+              "fan",
+              9
+            ],
+            "@S": 0
+          },
+          "humpwr": {
+            "can": [
+              15,
+              433,
+              "cmd"
+            ],
+            "@S": 0
+          },
+          "roomtemp": {
+            "emit": "house/t_bedr_panel",
+            "@S": 0
+          },
+          "floor_temp": {},
+          "actemp": {},
+          "alm01": {},
+          "alm17": {}
+        }
+      ]
+    ],
+    "tbedr": [
+      13,
+      [
+        [
+          450,
+          100,
+          9720,
+          50,
+          200,
+          255
+        ],
+        {
+          "item": "rbedr/set"
+        },
+        {
+          "item": "p_bedr/settemp"
+        }
+      ],
+      23,
+      526
+    ],
+    "rbedr": [
+      16,
+      [
+        -28,
+        1800
+      ],
+      255,
+      513
+    ],
+    "tbath": [
+      13,
+      [
+        [
+          320,
+          100,
+          6912,
+          50,
+          200,
+          100
+        ],
+        {
+          "item": "rbath/set"
+        },
+        {
+          "item": "p_bedr/setfloor"
+        }
+      ],
+      26,
+      526
+    ],
+    "rbath": [
+      16,
+      [
+        -29,
+        1800
+      ],
+      100,
+      513
+    ]
+  },
+  "in": {
+    "0": {
+      "click": {
+        "item": "tbedr",
+        "icmd": "TOGGLE"
+      },
+      "dclick": {
+        "can": [
+          15,
+          433,
+          "cmd"
+        ],
+        "icmd": "TOGGLE"
+      }
+    }
+  }
+}

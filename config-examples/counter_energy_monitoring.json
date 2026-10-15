@@ -1,0 +1,8 @@
+{
+  "mqtt": ["counter-demo", "192.168.88.2"],
+  "items": {
+    "energy_ticks": [20, [0.02, 3600]],
+    "load_relay": [6, 30],
+    "load_pwm": [3, 11]
+  }
+}

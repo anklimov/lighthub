@@ -1,0 +1,9 @@
+{
+  "mqtt": ["damper-demo", "192.168.88.2"],
+  "topics": { "root": "house" },
+  "items": {
+    "damper_living": [12, [4, 33, 58, 629, 289, 5000]],
+    "damper_bedroom": [12, [5, 32, 59, 631, 296, 5000]],
+    "dampers": [7, ["damper_living", "damper_bedroom"]]
+  }
+}

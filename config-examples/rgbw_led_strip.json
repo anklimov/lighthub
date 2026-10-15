@@ -1,0 +1,7 @@
+{
+  "mqtt": ["rgb-demo", "192.168.88.2"],
+  "items": {
+    "rgbw_strip": [1, 10],
+    "rgbw_strip_backup": [1, 20, 255, 0]
+  }
+}

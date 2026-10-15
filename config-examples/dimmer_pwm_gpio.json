@@ -1,0 +1,8 @@
+{
+  "mqtt": ["pwm-demo", "192.168.88.2"],
+  "items": {
+    "light_dim": [3, 9],
+    "vent_speed": [3, 10],
+    "led_group": [7, ["light_dim", "vent_speed"]]
+  }
+}

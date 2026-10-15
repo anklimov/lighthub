@@ -1,0 +1,429 @@
+{
+  "mqtt": [
+    "climate-demo",
+    "192.168.88.2"
+  ],
+  "topics": {
+    "root": "house",
+    "snsr": "house/snsr/"
+  },
+  "modbus": {
+    "panel": {
+      "serial": "8E1",
+      "poll": {
+        "regs": [
+          [
+            39993,
+            40008
+          ],
+          [
+            30000,
+            30001
+          ]
+        ],
+        "delay": 5000
+      },
+      "par": {
+        "fanspeed": {
+          "reg": 40000,
+          "prefetch": true,
+          "map": {
+            "val": [
+              1,
+              255,
+              1,
+              5
+            ],
+            "cmd": [
+              [
+                "OFF",
+                0
+              ]
+            ]
+          },
+          "id": 7
+        },
+        "settemp": {
+          "reg": 40002,
+          "prefetch": true,
+          "id": 12
+        },
+        "alm01": {
+          "reg": 40004,
+          "id": 13
+        },
+        "alm17": {
+          "reg": 40005,
+          "id": 14
+        },
+        "sethum": {
+          "reg": 40007,
+          "prefetch": true,
+          "id": 16
+        },
+        "setvoc": {
+          "reg": 40008,
+          "prefetch": true,
+          "map": {
+            "val": [
+              400,
+              2000,
+              0,
+              100
+            ]
+          },
+          "id": 17
+        },
+        "roomtemp": {
+          "reg": 30000,
+          "type": "x10"
+        },
+        "hum": {
+          "reg": 30001
+        },
+        "ch_temp": {
+          "reg": 40009,
+          "type": "x10",
+          "id": 3
+        },
+        "ext_temp": {
+          "reg": 40010,
+          "type": "x10",
+          "id": 18
+        },
+        "floor_temp": {
+          "reg": 40012,
+          "type": "x10",
+          "id": 20
+        },
+        "extvoc": {
+          "reg": 40015,
+          "map": {
+            "val": [
+              400,
+              2000,
+              0,
+              100
+            ]
+          },
+          "id": 27
+        },
+        "actemp": {
+          "reg": 40016,
+          "type": "x10",
+          "id": 25
+        },
+        "fanlvl": {
+          "reg": 40017,
+          "id": 21
+        },
+        "floormode": {
+          "reg": 39995,
+          "prefetch": true,
+          "id": 22
+        },
+        "setfloor": {
+          "reg": 39996,
+          "prefetch": true,
+          "id": 23
+        },
+        "humpwr": {
+          "reg": 39998,
+          "prefetch": true,
+          "map": {
+            "cmd": [
+              null,
+              [
+                "ON",
+                1
+              ],
+              [
+                "OFF",
+                0
+              ]
+            ],
+            "val": null
+          },
+          "id": 24
+        },
+        "fanauto": {
+          "reg": 39999,
+          "prefetch": true,
+          "map": {
+            "cmd": [
+              [
+                "ENABLE",
+                1
+              ],
+              [
+                "DISABLE",
+                0
+              ],
+              [
+                "AUTO",
+                1
+              ]
+            ],
+            "val": null
+          },
+          "id": 7
+        },
+        "acsettemp": {
+          "reg": 39994,
+          "prefetch": true,
+          "id": 26
+        },
+        "acon": {
+          "reg": 40003,
+          "prefetch": true,
+          "map": {
+            "cmd": [
+              1,
+              [
+                "OFF",
+                0
+              ]
+            ],
+            "val": null,
+            "def": 40001
+          },
+          "id": 8
+        },
+        "acmode": {
+          "reg": 40001,
+          "prefetch": true,
+          "map": {
+            "cmd": [
+              [
+                "FAN_ONLY",
+                1
+              ],
+              [
+                "HEAT",
+                4
+              ],
+              [
+                "COOL",
+                2
+              ],
+              [
+                "AUTO",
+                8
+              ]
+            ]
+          },
+          "id": 8
+        },
+        "acfanauto": {
+          "reg": 39993,
+          "prefetch": true,
+          "map": {
+            "cmd": [
+              0,
+              [
+                "AUTO",
+                1
+              ]
+            ],
+            "val": null,
+            "def": 39997
+          },
+          "id": 2
+        },
+        "acfan": {
+          "reg": 39997,
+          "prefetch": true,
+          "map": {
+            "cmd": [
+              [
+                "OFF",
+                0
+              ],
+              [
+                "LOW",
+                1
+              ],
+              [
+                "HIGH",
+                3
+              ],
+              [
+                "MEDIUM",
+                2
+              ]
+            ]
+          },
+          "id": 2
+        }
+      }
+    }
+  },
+  "items": {
+    "panels": [
+      [
+        7,
+        210
+      ],
+      [
+        "p_living"
+      ],
+      null
+    ],
+    "p_living": [
+      14,
+      [
+        31,
+        "panel",
+        {
+          "fanspeed": {
+            "emit": "house/climate/living/fan",
+            "@S": 0
+          },
+          "settemp": [
+            {
+              "item": "t_living/set",
+              "@S": 0
+            },
+            {
+              "item": "ac_living/set"
+            }
+          ],
+          "sethum": {
+            "item": "hum_living/set",
+            "@S": 0
+          },
+          "hum": {
+            "emit": "${snsr}humliving/val",
+            "@S": null
+          },
+          "roomtemp": {
+            "emit": "house/t_living_panel",
+            "@S": 0
+          },
+          "setfloor": {
+            "item": "floor_living/set",
+            "@S": 0
+          },
+          "acon": {
+            "item": "ac_living/cmd",
+            "@S": 0
+          },
+          "acfanauto": {
+            "item": "ac_living/fan",
+            "@S": 0
+          },
+          "acsettemp": {
+            "item": "ac_living/set",
+            "@S": 0
+          },
+          "acmode": {
+            "@S": 0
+          },
+          "acfan": {
+            "@S": 0
+          },
+          "humpwr": {
+            "item": "hum_living/cmd",
+            "@S": 0
+          },
+          "fanauto": {
+            "emit": "house/climate/living/fanauto",
+            "@S": 0
+          },
+          "floor_temp": {},
+          "actemp": {},
+          "ext_temp": {},
+          "alm01": {},
+          "alm17": {},
+          "fanlvl": {}
+        }
+      ]
+    ],
+    "t_living": [
+      13,
+      [
+        [
+          500,
+          100,
+          10800,
+          50,
+          200,
+          200,
+          30
+        ],
+        {
+          "item": "r_living/set"
+        },
+        {
+          "item": "p_living/settemp"
+        }
+      ],
+      21,
+      526
+    ],
+    "r_living": [
+      16,
+      [
+        -33,
+        1800
+      ],
+      200,
+      513
+    ],
+    "floor_living": [
+      13,
+      [
+        [
+          400,
+          0,
+          6480,
+          50,
+          200,
+          255
+        ],
+        {
+          "item": "r_floor/set"
+        },
+        {
+          "item": "p_living/setfloor"
+        }
+      ],
+      31,
+      526
+    ],
+    "r_floor": [
+      16,
+      [
+        -32,
+        1800
+      ],
+      255,
+      513
+    ],
+    "ac_living": [
+      10,
+      0
+    ],
+    "hum_living": [
+      13,
+      [
+        [
+          10,
+          0,
+          0,
+          50,
+          250,
+          40
+        ],
+        {
+          "emit": "house/humidifier/living/set"
+        },
+        {
+          "emit": "house/climate/living/humset"
+        }
+      ],
+      30,
+      2
+    ]
+  }
+}

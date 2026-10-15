@@ -1,0 +1,16 @@
+{
+  "mqtt": ["spiled-demo", "192.168.88.2"],
+  "topics": { "root": "house" },
+  "items": {
+    "led_ambilight": [11, [7, 60]],
+    "led_cabinet": [11, [8, 30]]
+  },
+  "in": {
+    "0": {
+      "T": 0,
+      "click": { "item": "led_ambilight/cmd", "icmd": "TOGGLE" },
+      "rpcmd": { "item": "led_ambilight/set", "icmd": "%+4" },
+      "dclick": { "item": "led_ambilight/10-20/cmd", "icmd": "TOGGLE" }
+    }
+  }
+}

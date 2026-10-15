@@ -1,0 +1,15 @@
+{
+  "mqtt": ["thermo-demo", "192.168.88.2"],
+  "items": {
+    "heater_tank": [5, 24, 33],
+    "heater_floor": [5, 25, 28],
+    "cooling_fan": [6, 26]
+  },
+  "in": {
+    "5": {
+      "T": 4,
+      "emit": "/myhome/s_out/t_room",
+      "item": "heater_tank"
+    }
+  }
+}

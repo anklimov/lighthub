@@ -8,6 +8,7 @@
 
 | Файл | Я | Описание |
 |--|--|--|
+| [core\_concepts.md](core/core_concepts.md) | RU | **Основные принципы**: базовые сущности — item (канал), itemCmd (унифицированная команда), execObj (объект действия) |
 | [light\_hub\_полное\_инженерное\_описание\_json\_конфигурации\_v2.md](core/light_hub_полное_инженерное_описание_json_конфигурации_v2.md) | RU | Полное описание JSON-конфигурации: секции, 24 типа каналов (0-23), примеры |
 | [channel\_types\_reference.md](core/channel_types_reference.md) | RU | Справочник типов каналов: коды, форматы настройки, команды, доступность по целям |
 | [technical\_channel\_types\_table.md](core/technical_channel_types_table.md) | RU | Техническая таблица типов каналов (формат item.h, суффиксы, матрица) |

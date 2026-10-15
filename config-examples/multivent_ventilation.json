@@ -1,0 +1,100 @@
+{
+  "mqtt": [
+    "lh1",
+    "192.168.1.10"
+  ],
+  "topics": {
+    "root": "house"
+  },
+  "items": {
+    "ac_multizone": [
+      [
+        18,
+        5
+      ],
+      {
+        "bedroom": {
+          "V": 40,
+          "pid": [
+            1.0,
+            0.05,
+            0.02,
+            5.0
+          ],
+          "set": 21.0,
+          "cmd": 15,
+          "fan": -1,
+          "out": -1,
+          "item": "damper_bedroom/set",
+          "cas": {
+            "fan": {
+              "emit": "house/climate/bedroom/fan"
+            }
+          }
+        },
+        "living_room": {
+          "V": 80,
+          "pid": [
+            1.0,
+            0.05,
+            0.02,
+            5.0
+          ],
+          "set": 22.0,
+          "cmd": 15,
+          "fan": -1,
+          "out": -1,
+          "item": "damper_living/set",
+          "cas": {
+            "fan": {
+              "emit": "house/climate/living/fan"
+            }
+          }
+        },
+        "": {
+          "item": "vent",
+          "turnbyfan": 15,
+          "val": -1,
+          "mode": 2
+        }
+      }
+    ],
+    "damper_bedroom": [
+      3,
+      5
+    ],
+    "damper_living": [
+      3,
+      6
+    ],
+    "vent": [
+      14,
+      [
+        4,
+        "airset",
+        {
+          "tset": {
+            "emit": "house/vent/set",
+            "@V": null
+          },
+          "pmode": {
+            "emit": "house/vent/cmd",
+            "@V": null
+          },
+          "fanspeed": {
+            "emit": "house/vent/fan",
+            "@V": null
+          },
+          "on": {
+            "emit": "house/vent/oncmd",
+            "@V": null
+          },
+          "$temp": {
+            "item": "ac_multizone/val",
+            "@S": null
+          }
+        }
+      ]
+    ]
+  }
+}

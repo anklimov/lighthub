@@ -1,0 +1,31 @@
+{
+  "mqtt": ["sprinkler-demo", "192.168.88.2"],
+  "topics": { "root": "garden" },
+  "items": {
+    "sprinkler": [
+      23,
+      {
+        "": {
+          "vIn": 35,
+          "wMax": 44,
+          "wMin": 46,
+          "rDren": 34,
+          "fbDren": 63,
+          "rPump": 33,
+          "fbPump": 62,
+          "wCtr": 49
+        },
+        "north": { "pin": 36, "set": 60, "cmd": 1 },
+        "south": { "pin": 37, "set": 100, "cmd": 1 },
+        "trees": { "pin": 38, "set": 60, "cmd": 2 },
+        "outlets": { "set": 0, "cmd": 2 }
+      }
+    ]
+  },
+  "in": {
+    "44": { "emit": "garden/s_out/sprinkler/$wMax" },
+    "46": { "emit": "garden/s_out/sprinkler/$wMin" },
+    "62": { "emit": "garden/s_out/sprinkler/$fbPump" },
+    "63": { "emit": "garden/s_out/sprinkler/$fbDren" }
+  }
+}

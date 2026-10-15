@@ -370,7 +370,7 @@ PWM-каналами. Запросы воздуха в зоны приходят
       "fanspeed": {"emit": "house/vent/fan",   "@V": null},
       "on":       {"emit": "house/vent/oncmd", "@V": null},
       "$temp":    {"item": "ac_multizone/val", "@S": null}
-    }], null, 8192, 0]
+    }], null]
   }
 }
 ```

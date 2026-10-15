@@ -1,0 +1,11 @@
+{
+  "mqtt": ["scene-demo", "192.168.88.2"],
+  "items": {
+    "lamp_hall_1": [6, 22],
+    "lamp_hall_2": [6, 23],
+    "lamp_hall_3": [6, 24],
+    "hall_lights": [7, ["lamp_hall_1", "lamp_hall_2", "lamp_hall_3"]],
+    "entry_light": [6, 27],
+    "corridor_group": [7, ["lamp_hall_1", "entry_light"]]
+  }
+}
